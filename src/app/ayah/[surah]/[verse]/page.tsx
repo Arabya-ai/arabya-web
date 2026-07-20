@@ -89,9 +89,6 @@ export default async function AyahIrabPage({ params }: Props) {
             .map((w) => normalizeForHafsFont(w.text))
             .join(" ")}
         </p>
-        <p className="layer-source">
-          المصدر: المدونة القرآنية العربية (QAC) — إعراب نثري مولَّد من الصرف المفتوح
-        </p>
       </header>
 
       <ol className="ayah-irab-list">
