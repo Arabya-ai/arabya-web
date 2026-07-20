@@ -21,8 +21,10 @@ type SearchHit = {
 
 export function SurahIndex({
   surahs,
+  mushafFirstPage,
 }: {
   surahs: SurahMeta[];
+  mushafFirstPage: Record<string, number>;
 }) {
   const [query, setQuery] = useState("");
   const [ayahHits, setAyahHits] = useState<SearchHit[]>([]);
@@ -131,7 +133,7 @@ export function SurahIndex({
           {filtered.map((s) => (
             <Link
               key={s.id}
-              href={`/surah/${s.id}/read`}
+              href={getMushafPageHref(mushafFirstPage[String(s.id)] ?? 1)}
               className="surah-chip"
               aria-label={`سورة ${s.nameArabic}، ${s.revelationLabel}، ${s.versesCount} آية، ${s.juzLabel}`}
             >

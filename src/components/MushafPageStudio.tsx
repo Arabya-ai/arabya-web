@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   IrabSurah,
@@ -513,6 +514,8 @@ export function MushafPageStudio({
   const canShrink = fontScale > FONT_SCALE_MIN + 0.001;
   const canGrow = fontScale < FONT_SCALE_MAX - 0.001;
   const fontPercent = Math.round(fontScale * 100);
+  const studySurahId =
+    activeWord?.surahId ?? page.blocks[0]?.surahId ?? null;
 
   const commitFontDraft = () => {
     const normalized = String(fontDraft)
@@ -592,6 +595,15 @@ export function MushafPageStudio({
             أ+
           </button>
         </div>
+        {studySurahId ? (
+          <Link
+            href={`/surah/${studySurahId}/read`}
+            className="tool-btn"
+            title="قراءة السورة مع خيارات الإعراب والدراسة"
+          >
+            دراسة
+          </Link>
+        ) : null}
         {selected ? (
           <>
             <label className="reciter-pick">
