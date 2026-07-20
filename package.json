@@ -7,6 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
     "fetch-data": "node scripts/fetch-quran-data.mjs",
     "apply-qpc-text": "node scripts/apply-qpc-hafs-text.mjs",
     "build-irab": "node scripts/build-irab.mjs",
@@ -33,6 +34,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.20",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }
