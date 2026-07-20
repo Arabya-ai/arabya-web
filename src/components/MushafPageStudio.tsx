@@ -443,7 +443,7 @@ export function MushafPageStudio({
           selected.verseNumber,
           word.position,
         );
-        await new Promise<void>((resolve, reject) => {
+        await new Promise<void>((resolve) => {
           const onEnded = () => {
             cleanup();
             resolve();
@@ -777,6 +777,12 @@ export function MushafPageStudio({
                 ))}
               </div>
               <p>{wordMeaning(selected.word, meaningLang) || "—"}</p>
+              {meaningLang === "ar" ? (
+                <p className="meaning-ar-note">
+                  معنى دراسي من الصرف (مادة + نوع + إعراب)، وليس ترجمة دلالية
+                  كلمة بكلمة.
+                </p>
+              ) : null}
             </article>
           </div>
 

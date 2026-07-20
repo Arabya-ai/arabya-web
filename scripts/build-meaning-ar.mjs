@@ -1,6 +1,6 @@
 /**
  * Builds approximate Arabic word-by-word study glosses from morphology
- * (lemma + POS labels). Not a licensed semantic translation — clearly
+ * (lemma + POS + case/tense/root). Not a licensed semantic translation —
  * labeled in the UI until an open Arabic WBW source is available.
  */
 import { readdir, readFile, writeFile } from "node:fs/promises";
@@ -26,35 +26,145 @@ const CONTENT_POS = [
   "INTG",
 ];
 
+function featureSet(morph) {
+  return new Set([...(morph.pos ?? []), ...(morph.features ?? [])]);
+}
+
 /**
  * Pick the most meaningful Arabic POS label for a word.
- * Prefer content categories over DET/preposition prefixes.
+ * Prefer content categories and particles like NEG over bare "P".
+ */
+function isRealPrep(morph) {
+  const feats = featureSet(morph);
+  const pos = morph.pos ?? [];
+  // Corpus sometimes tags conjunction و/ف as P — those are not prepositions
+  if (feats.has("CONJ") || feats.has("NEG") || feats.has("VOC")) return false;
+  return feats.has("P") || pos.includes("P");
+}
+
+/** True when the word has a content stem (noun/verb/PN), not bare jar+pronoun. */
+function hasContentStem(morph) {
+  const pos = morph.pos ?? [];
+  const feats = featureSet(morph);
+  if (feats.has("PN") || pos.includes("PN")) return true;
+  if (pos.includes("V") || feats.has("V")) return true;
+  if (feats.has("REL") || feats.has("DEM")) return true;
+  if (morph.root) return true;
+  if ((pos.includes("PRON") || feats.has("PRON")) && !isRealPrep(morph)) {
+    return true;
+  }
+  if ((pos.includes("N") || feats.has("N")) && !feats.has("PRON")) return true;
+  return false;
+}
+
+/**
+ * Pick the most meaningful Arabic POS label for a word.
+ * Prefer content categories; treat jar+majroor by the content stem.
  */
 function pickPosLabel(morph, terms) {
+  const feats = featureSet(morph);
   const pos = morph.pos ?? [];
-  const features = morph.features ?? [];
-  const hasDet = pos.includes("DET") || features.includes("DET");
-  const hasPn = pos.includes("PN") || features.includes("PN");
-  const isRealPrep = features.includes("P") && !hasDet;
 
-  if (hasPn) return terms.types?.PN;
+  if (feats.has("PN")) return terms.types?.PN;
+  if (feats.has("NEG")) return terms.particles?.NEG;
+  if (feats.has("VOC")) return terms.particles?.VOC;
+  if (feats.has("REL")) return terms.types?.REL;
+  if (feats.has("DEM")) return terms.types?.DEM;
+
+  // Bare preposition (possibly + pronoun suffix)
+  if (isRealPrep(morph) && !hasContentStem(morph)) {
+    return terms.particles?.P;
+  }
+
+  if (feats.has("PRON") || pos.includes("PRON")) return terms.types?.PRON;
+  if (feats.has("CONJ") && !CONTENT_POS.some((c) => pos.includes(c))) {
+    return terms.particles?.CONJ;
+  }
 
   for (const code of CONTENT_POS) {
     if (code === "PN") continue;
     if (pos.includes(code) && terms.types?.[code]) return terms.types[code];
   }
 
-  if (hasDet && !isRealPrep) return terms.particles?.DET;
-
-  if (isRealPrep || (pos.includes("P") && features.includes("P"))) {
-    return terms.particles?.P;
-  }
+  if (isRealPrep(morph)) return terms.particles?.P;
+  if (feats.has("DET")) return terms.particles?.DET;
 
   for (const p of pos) {
     if (terms.types?.[p]) return terms.types[p];
     if (terms.particles?.[p]) return terms.particles[p];
   }
+
+  for (const f of morph.features ?? []) {
+    if (terms.particles?.[f]) return terms.particles[f];
+  }
   return null;
+}
+
+function pickVerbDetail(morph, terms) {
+  const feats = featureSet(morph);
+  if (!feats.has("V") && !(morph.pos ?? []).includes("V")) return null;
+
+  const tense =
+    (feats.has("PERF") && terms.verb_tenses?.PERF) ||
+    (feats.has("IMPF") && terms.verb_tenses?.IMPF) ||
+    (feats.has("IMPV") && terms.verb_tenses?.IMPV) ||
+    null;
+
+  const voice = feats.has("PASS") ? terms.attrs?.PASS : null;
+  const parts = ["فعل", tense, voice].filter(Boolean);
+  return parts.join(" ");
+}
+
+function pickNounDetail(morph, terms) {
+  const feats = featureSet(morph);
+  const isVerb = feats.has("V") || (morph.pos ?? []).includes("V");
+  if (isVerb) return null;
+
+  const form =
+    (feats.has("ACT_PCPL") && terms.noun_forms?.ACT_PCPL) ||
+    (feats.has("PASS_PCPL") && terms.noun_forms?.PASS_PCPL) ||
+    (feats.has("VN") && terms.noun_forms?.VN) ||
+    null;
+
+  const grammar =
+    (feats.has("NOM") && terms.noun_grammar?.NOM) ||
+    (feats.has("ACC") && terms.noun_grammar?.ACC) ||
+    (feats.has("GEN") && terms.noun_grammar?.GEN) ||
+    null;
+
+  const adj = feats.has("ADJ") ? terms.attrs?.ADJ : null;
+  return [form, grammar, adj].filter(Boolean).join(" · ") || null;
+}
+
+function buildGloss(morph, terms) {
+  const bits = [];
+  if (morph.lemma) bits.push(morph.lemma);
+  else if (morph.root) bits.push(`جذر ${morph.root}`);
+
+  const verbDetail = pickVerbDetail(morph, terms);
+  if (verbDetail) {
+    bits.push(verbDetail);
+  } else {
+    const posLabel = pickPosLabel(morph, terms);
+    if (posLabel && !bits.includes(posLabel)) bits.push(posLabel);
+    const nounDetail = pickNounDetail(morph, terms);
+    if (nounDetail) {
+      for (const part of nounDetail.split(" · ")) {
+        if (part && !bits.includes(part)) bits.push(part);
+      }
+    }
+  }
+
+  // Root as trailing study hint when lemma differs and root exists
+  if (morph.root && morph.lemma && !bits.some((b) => b.includes(morph.root))) {
+    const hasContent =
+      (morph.pos ?? []).some((p) => ["V", "N", "PN"].includes(p)) ||
+      featureSet(morph).has("ACT_PCPL") ||
+      featureSet(morph).has("PASS_PCPL");
+    if (hasContent) bits.push(`جذر ${morph.root}`);
+  }
+
+  return bits.length ? bits.join(" · ") : "";
 }
 
 async function main() {
@@ -93,14 +203,7 @@ async function main() {
         const morph = irabMap.get(`${verse.verseNumber}:${word.position}`);
         if (!morph) continue;
 
-        const bits = [];
-        if (morph.lemma) bits.push(morph.lemma);
-        else if (morph.root) bits.push(`جذر ${morph.root}`);
-
-        const posLabel = pickPosLabel(morph, terms);
-        if (posLabel && !bits.includes(posLabel)) bits.push(posLabel);
-
-        word.meaningAr = bits.length ? bits.join(" · ") : word.meaningAr || "";
+        word.meaningAr = buildGloss(morph, terms) || word.meaningAr || "";
         patched += 1;
       }
     }

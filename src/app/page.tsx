@@ -1,5 +1,6 @@
 import { SurahIndex } from "@/components/SurahIndex";
 import { ContinueReading } from "@/components/ContinueReading";
+import { StudyAssistant } from "@/components/StudyAssistant";
 import { getMushafIndex } from "@/lib/mushaf";
 import { getSurahs } from "@/lib/quran";
 
@@ -16,6 +17,7 @@ export default async function HomePage() {
         <p>اختر سورة لقراءة المصحف ودراسة كلماتها</p>
         <ContinueReading />
       </header>
+      <StudyAssistant />
       <SurahIndex surahs={surahs} mushafFirstPage={mushafIndex.surahFirstPage} />
     </div>
   );

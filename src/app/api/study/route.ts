@@ -54,7 +54,7 @@ export async function GET(req: Request) {
     {
       query: q,
       mode: "local-retrieval",
-      note: "Retrieval only — attach an LLM later for full RAG answers.",
+      note: "استرجاع محلي من بيانات عربْية — بدون نموذج لغوي بعد.",
       hits: enriched,
     },
     {
