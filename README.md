@@ -29,7 +29,7 @@
 | [Quranic Arabic Corpus](http://corpus.quran.com) | إعراب/صرف لكل كلمة (GPL — مع ذكر المصدر) |
 | EveryAyah | تلاوة الآية |
 
-معنى عربي كلمة بكلمة: يُشتق حاليًا من **المادة الصرفية (lemma) + نوع الكلمة** كمعنى دراسي تقريبي (لا يوجد مصدر عربي WBW مفتوح ومرخّص لإعادة التوزيع عبر Quran.com). التلاوة كلمة بكلمة من Quran CDN.
+معنى عربي كلمة بكلمة: **معجم مواد عربْية** (`lemma-sense-ar.json`) — معاني دلالية قصيرة مرتبطة بمواد Quranic Arabic Corpus، مع احتياطي صرفي. ليس WBW عربيًا من طرف ثالث. التلاوة كلمة بكلمة من Quran CDN. دراسة سريعة: `/api/study` يُرجع ملخصًا محليًا (معنى + صرف + الميسّر).
 
 ## التشغيل محليًا
 
@@ -39,7 +39,7 @@ npm run fetch-data           # كلمات السور (QPC Hafs + EN WBW)
 npm run apply-qpc-text       # إعادة تطبيق ترميز QPC إن لزم
 npm run build-mushaf-index   # فهرس صفحات المصحف (604)
 npm run build-irab           # إعراب منظم + فهرس الجذور
-npm run build-meaning-ar     # معنى عربي تقريبي من الصرف
+npm run build-meaning-ar     # معجم مواد + معنى عربي للكلمات
 npm run fetch-tafsirs        # تحميل التفاسير العربية
 npm run fetch-translations   # WBW ID/UR + ترجمات الآيات
 npm run build-search-index   # فهرس بحث الآيات
@@ -91,5 +91,6 @@ npm run dev
 | 2 — مواصفات معرفة + Canonical IDs + جذور | مكتمل |
 | 3 — صوت (EveryAyah) | مكتمل للتلاوة |
 | 3ب — حسابات D1 | مواصفات فقط — مؤجّل |
-| 3ج — دراسة سريعة (استرجاع محلي) | مكتمل على الصفحة الرئيسية `/api/study` |
+| 3ج — دراسة سريعة (استرجاع + ملخص محلي) | مكتمل — `/api/study` + الميسّر |
+| 3د — معجم مواد عربي دلالي | مكتمل — `lemma-sense-ar.json` |
 | 4 — Knowledge Universe (Ontology/Graph) | مؤجّل — `docs/knowledge-universe/` |

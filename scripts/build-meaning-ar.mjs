@@ -1,7 +1,9 @@
 /**
- * Builds approximate Arabic word-by-word study glosses from morphology
- * (lemma + POS + case/tense/root). Not a licensed semantic translation —
- * labeled in the UI until an open Arabic WBW source is available.
+ * Builds Arabic word-by-word study glosses:
+ * 1) Semantic sense from Arabya lemma dictionary (preferred)
+ * 2) Morphology fallback (lemma + POS) when no sense
+ *
+ * Not a licensed third-party Arabic WBW dump — see lemma-sense-ar.json license note.
  */
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -30,19 +32,13 @@ function featureSet(morph) {
   return new Set([...(morph.pos ?? []), ...(morph.features ?? [])]);
 }
 
-/**
- * Pick the most meaningful Arabic POS label for a word.
- * Prefer content categories and particles like NEG over bare "P".
- */
 function isRealPrep(morph) {
   const feats = featureSet(morph);
   const pos = morph.pos ?? [];
-  // Corpus sometimes tags conjunction و/ف as P — those are not prepositions
   if (feats.has("CONJ") || feats.has("NEG") || feats.has("VOC")) return false;
   return feats.has("P") || pos.includes("P");
 }
 
-/** True when the word has a content stem (noun/verb/PN), not bare jar+pronoun. */
 function hasContentStem(morph) {
   const pos = morph.pos ?? [];
   const feats = featureSet(morph);
@@ -57,10 +53,6 @@ function hasContentStem(morph) {
   return false;
 }
 
-/**
- * Pick the most meaningful Arabic POS label for a word.
- * Prefer content categories; treat jar+majroor by the content stem.
- */
 function pickPosLabel(morph, terms) {
   const feats = featureSet(morph);
   const pos = morph.pos ?? [];
@@ -71,7 +63,6 @@ function pickPosLabel(morph, terms) {
   if (feats.has("REL")) return terms.types?.REL;
   if (feats.has("DEM")) return terms.types?.DEM;
 
-  // Bare preposition (possibly + pronoun suffix)
   if (isRealPrep(morph) && !hasContentStem(morph)) {
     return terms.particles?.P;
   }
@@ -136,7 +127,7 @@ function pickNounDetail(morph, terms) {
   return [form, grammar, adj].filter(Boolean).join(" · ") || null;
 }
 
-function buildGloss(morph, terms) {
+function buildMorphGloss(morph, terms) {
   const bits = [];
   if (morph.lemma) bits.push(morph.lemma);
   else if (morph.root) bits.push(`جذر ${morph.root}`);
@@ -155,7 +146,6 @@ function buildGloss(morph, terms) {
     }
   }
 
-  // Root as trailing study hint when lemma differs and root exists
   if (morph.root && morph.lemma && !bits.some((b) => b.includes(morph.root))) {
     const hasContent =
       (morph.pos ?? []).some((p) => ["V", "N", "PN"].includes(p)) ||
@@ -167,6 +157,23 @@ function buildGloss(morph, terms) {
   return bits.length ? bits.join(" · ") : "";
 }
 
+function buildGloss(morph, terms, senseMap) {
+  const lemma = morph.lemma ? String(morph.lemma).trim() : "";
+  const entry = lemma ? senseMap[lemma] : null;
+  const sense = entry?.sense ? String(entry.sense).trim() : "";
+
+  if (sense) {
+    // Keep a light morph hint for verbs / content words when sense is short
+    const verbDetail = pickVerbDetail(morph, terms);
+    if (verbDetail && !sense.includes("فعل")) {
+      return `${sense} · ${verbDetail}`;
+    }
+    return sense;
+  }
+
+  return buildMorphGloss(morph, terms);
+}
+
 async function main() {
   const terms = JSON.parse(
     await readFile(
@@ -175,8 +182,24 @@ async function main() {
     ),
   );
 
+  let senseMap = {};
+  try {
+    const senseFile = JSON.parse(
+      await readFile(
+        path.join(root, "data", "sources", "lemma-sense-ar.json"),
+        "utf8",
+      ),
+    );
+    senseMap = senseFile.senses ?? {};
+  } catch {
+    console.warn(
+      "lemma-sense-ar.json missing — run npm run build-lemma-sense-ar first",
+    );
+  }
+
   const files = (await readdir(surahDir)).filter((f) => f.endsWith(".json"));
   let patched = 0;
+  let withSense = 0;
 
   for (const file of files) {
     const id = Number(file.replace(".json", ""));
@@ -203,7 +226,9 @@ async function main() {
         const morph = irabMap.get(`${verse.verseNumber}:${word.position}`);
         if (!morph) continue;
 
-        word.meaningAr = buildGloss(morph, terms) || word.meaningAr || "";
+        const gloss = buildGloss(morph, terms, senseMap) || word.meaningAr || "";
+        if (morph.lemma && senseMap[String(morph.lemma).trim()]) withSense += 1;
+        word.meaningAr = gloss;
         patched += 1;
       }
     }
@@ -212,10 +237,8 @@ async function main() {
     process.stdout.write(`meaning-ar ${id}\n`);
   }
 
-  console.log("Patched Arabic morphology glosses on", patched, "words");
-  console.log(
-    "Note: meaningAr is morphology-based study gloss, not semantic WBW translation.",
-  );
+  console.log("Patched Arabic glosses on", patched, "words");
+  console.log("With semantic lemma sense:", withSense);
 }
 
 main().catch((err) => {

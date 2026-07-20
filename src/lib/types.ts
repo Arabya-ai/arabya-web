@@ -14,7 +14,7 @@ export type QuranWord = {
   text: string;
   /** English word-by-word (Quran.com) */
   meaning: string;
-  /** Morphology-based Arabic study gloss (not semantic WBW) */
+  /** Morphology-based / Arabya lemma-sense Arabic study gloss */
   meaningAr?: string;
   /** Indonesian word-by-word */
   meaningId?: string;

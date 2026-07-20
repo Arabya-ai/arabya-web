@@ -4,6 +4,14 @@ import Link from "next/link";
 import { useState } from "react";
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
 
+type StudyWord = {
+  text: string;
+  meaningAr?: string | null;
+  lemma?: string | null;
+  irab?: string | null;
+  matched?: boolean;
+};
+
 type StudyHit = {
   key: string;
   surahId: number;
@@ -11,20 +19,23 @@ type StudyHit = {
   page: number;
   text: string;
   nameAr: string;
-  context?: string;
-  words?: {
-    text: string;
-    meaningAr?: string | null;
-    meaning?: string;
-    root?: string | null;
-    lemma?: string | null;
-    irab?: string | null;
-  }[];
+  explain?: string;
+  tafsirSnippet?: string | null;
+  matchedWords?: StudyWord[];
+  words?: StudyWord[];
+};
+
+type StudyResponse = {
+  hits?: StudyHit[];
+  brief?: string;
+  note?: string;
+  error?: string;
 };
 
 export function StudyAssistant() {
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<StudyHit[]>([]);
+  const [brief, setBrief] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
@@ -33,7 +44,7 @@ export function StudyAssistant() {
     e?.preventDefault();
     const q = query.trim();
     if (q.length < 2) {
-      setError("أدخل كلمتين على الأقل للبحث الدراسي");
+      setError("أدخل حرفين على الأقل للبحث الدراسي");
       return;
     }
     setLoading(true);
@@ -41,15 +52,18 @@ export function StudyAssistant() {
     setSearched(true);
     try {
       const res = await fetch(`/api/study?q=${encodeURIComponent(q)}`);
-      const data = (await res.json()) as { hits?: StudyHit[]; error?: string };
+      const data = (await res.json()) as StudyResponse;
       if (!res.ok) {
         setHits([]);
+        setBrief(null);
         setError(data.error || "تعذّر البحث");
         return;
       }
       setHits(data.hits ?? []);
+      setBrief(data.brief ?? null);
     } catch {
       setHits([]);
+      setBrief(null);
       setError("تعذّر الاتصال بخدمة الدراسة");
     } finally {
       setLoading(false);
@@ -60,8 +74,8 @@ export function StudyAssistant() {
     <section className="study-assistant" aria-labelledby="study-h">
       <h2 id="study-h">دراسة سريعة</h2>
       <p className="study-assistant-lead">
-        ابحث في الآيات مع إعراب ومعاني الكلمات من البيانات المحلية — استرجاع
-        دراسي سريع دون نموذج لغوي.
+        ابحث عن كلمة أو عبارة — نعرض شرحاً موجزاً من المعنى العربي والإعراب
+        والتفسير الميسّر، ثم الآيات المرتبطة.
       </p>
       <form className="study-assistant-form" onSubmit={runStudy}>
         <input
@@ -77,6 +91,13 @@ export function StudyAssistant() {
       </form>
 
       {error ? <p className="study-assistant-error">{error}</p> : null}
+
+      {brief && !error ? (
+        <div className="study-brief" role="status">
+          <h3>ملخص دراسي</h3>
+          <p>{brief}</p>
+        </div>
+      ) : null}
 
       {searched && !loading && !error && hits.length === 0 ? (
         <p className="empty-state">لا توجد نتائج مطابقة.</p>
@@ -94,7 +115,18 @@ export function StudyAssistant() {
                   {h.nameAr} {toArabicNumerals(h.verse)}
                 </span>
                 <span className="study-hit-text">{h.text}</span>
-                {h.words?.slice(0, 4).some((w) => w.irab || w.meaningAr) ? (
+                {h.explain ? (
+                  <span className="study-hit-explain">{h.explain}</span>
+                ) : null}
+                {h.matchedWords && h.matchedWords.length > 0 ? (
+                  <span className="study-hit-meta">
+                    {h.matchedWords
+                      .slice(0, 4)
+                      .map((w) => w.meaningAr || w.lemma || w.text)
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
+                ) : h.words?.slice(0, 4).some((w) => w.irab || w.meaningAr) ? (
                   <span className="study-hit-meta">
                     {h.words
                       .slice(0, 3)

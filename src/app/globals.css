@@ -1758,6 +1758,26 @@ html[data-theme="dark"] ::selection {
   font-size: 0.88rem;
 }
 
+.study-brief {
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border-inline-start: 3px solid var(--accent, #0f766e);
+  background: color-mix(in srgb, var(--accent, #0f766e) 10%, transparent);
+}
+
+.study-brief h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.study-brief p {
+  margin: 0;
+  line-height: 1.7;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
 .study-assistant-list {
   list-style: none;
   margin: 0.25rem 0 0;
@@ -1794,6 +1814,14 @@ html[data-theme="dark"] ::selection {
   font-size: 1.12rem;
   line-height: 1.75;
   color: var(--ink);
+}
+
+.study-hit-explain {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.86rem;
+  line-height: 1.65;
+  color: var(--muted);
 }
 
 .study-hit-meta {

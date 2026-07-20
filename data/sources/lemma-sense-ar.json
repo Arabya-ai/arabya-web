@@ -1,0 +1,1716 @@
+{
+  "version": 1,
+  "license": "Arabya original Arabic study senses. Lemma keys from Quranic Arabic Corpus (GPL). Not a third-party Arabic WBW redistribution.",
+  "attribution": {
+    "morphology": "http://corpus.quran.com",
+    "senses": "Arabya"
+  },
+  "lemmaCount": 341,
+  "senses": {
+    "اسْم": {
+      "sense": "اسم",
+      "source": "arabya-curated",
+      "count": 39
+    },
+    "اللَّه": {
+      "sense": "الله — الإله الحق",
+      "source": "arabya-curated",
+      "count": 2699
+    },
+    "رَحْمٰن": {
+      "sense": "الرحمن — ذو الرحمة الواسعة",
+      "source": "arabya-curated",
+      "count": 57
+    },
+    "رَحِيم": {
+      "sense": "الرحيم — ذو الرحمة بالمؤمنين",
+      "source": "arabya-curated",
+      "count": 116
+    },
+    "حَمْد": {
+      "sense": "الحمد / الثناء",
+      "source": "arabya-curated",
+      "count": 43
+    },
+    "رَبّ": {
+      "sense": "الربّ / المالك المدبّر",
+      "source": "arabya-curated",
+      "count": 975
+    },
+    "عالَم": {
+      "sense": "عالم / العوالم",
+      "source": "arabya-curated",
+      "count": 73
+    },
+    "مالِك": {
+      "sense": "مالك",
+      "source": "arabya-curated",
+      "count": 4
+    },
+    "يَوْم": {
+      "sense": "يوم",
+      "source": "arabya-curated",
+      "count": 475
+    },
+    "دِين": {
+      "sense": "دين / جزاء",
+      "source": "arabya-curated",
+      "count": 92
+    },
+    "إِيّا": {
+      "sense": "إيّا (ضمير نصب منفصل)",
+      "source": "arabya-curated",
+      "count": 24
+    },
+    "عَبَدَ": {
+      "sense": "عبد / يعبد",
+      "source": "arabya-curated",
+      "count": 122
+    },
+    "اسْتَعِينُ": {
+      "sense": "استعان / طلب العون",
+      "source": "arabya-curated",
+      "count": 4
+    },
+    "هَدَى": {
+      "sense": "هدى / أرشد",
+      "source": "arabya-curated",
+      "count": 144
+    },
+    "صِراط": {
+      "sense": "صراط / طريق",
+      "source": "arabya-curated",
+      "count": 45
+    },
+    "مُسْتَقِيم": {
+      "sense": "مستقيم",
+      "source": "arabya-curated",
+      "count": 37
+    },
+    "الَّذِي": {
+      "sense": "الذي (اسم موصول)",
+      "source": "arabya-curated",
+      "count": 1468
+    },
+    "أَنْعَمَ": {
+      "sense": "أنعم",
+      "source": "arabya-curated",
+      "count": 17
+    },
+    "عَلَى": {
+      "sense": "على",
+      "source": "arabya-curated",
+      "count": 1383
+    },
+    "غَيْر": {
+      "sense": "غير",
+      "source": "arabya-curated",
+      "count": 147
+    },
+    "مَغْضُوب": {
+      "sense": "مغضوب عليه",
+      "source": "arabya-curated",
+      "count": 1
+    },
+    "لا": {
+      "sense": "لا (نفي أو نهي)",
+      "source": "arabya-curated",
+      "count": 1697
+    },
+    "ضالّ": {
+      "sense": "ضالّ",
+      "source": "arabya-curated",
+      "count": 14
+    },
+    "ذا": {
+      "sense": "ذا / هذا (إشارة)",
+      "source": "arabya-curated",
+      "count": 1058
+    },
+    "آيَة": {
+      "sense": "آية / علامة",
+      "source": "arabya-curated",
+      "count": 382
+    },
+    "كِتاب": {
+      "sense": "كتاب",
+      "source": "arabya-curated",
+      "count": 260
+    },
+    "حَكِيم": {
+      "sense": "حكيم",
+      "source": "arabya-en-paraphrase",
+      "count": 97
+    },
+    "كانَ": {
+      "sense": "كان / صار / ثبت",
+      "source": "arabya-curated",
+      "count": 1358
+    },
+    "ناس": {
+      "sense": "الناس",
+      "source": "arabya-curated",
+      "count": 241
+    },
+    "أَن": {
+      "sense": "أن (مصدرية / تفسيرية)",
+      "source": "arabya-curated",
+      "count": 616
+    },
+    "إِلَى": {
+      "sense": "إلى",
+      "source": "arabya-curated",
+      "count": 681
+    },
+    "مِن": {
+      "sense": "من / ابتداء غاية",
+      "source": "arabya-curated",
+      "count": 2870
+    },
+    "آمَنَ": {
+      "sense": "آمن / صدّق",
+      "source": "arabya-curated",
+      "count": 537
+    },
+    "أَنّ": {
+      "sense": "أنّ (توكيد)",
+      "source": "arabya-curated",
+      "count": 220
+    },
+    "ل": {
+      "sense": "لام (جر / توكيد / تعليل بحسب السياق)",
+      "source": "arabya-curated",
+      "count": 1390
+    },
+    "صِدْق": {
+      "sense": "صدق",
+      "source": "arabya-curated",
+      "count": 14
+    },
+    "عِند": {
+      "sense": "عند",
+      "source": "arabya-curated",
+      "count": 197
+    },
+    "قالَ": {
+      "sense": "قال / تكلّم",
+      "source": "arabya-curated",
+      "count": 1618
+    },
+    "كافِر": {
+      "sense": "كافر",
+      "source": "arabya-curated",
+      "count": 156
+    },
+    "إِنّ": {
+      "sense": "إنّ (توكيد)",
+      "source": "arabya-curated",
+      "count": 1215
+    },
+    "مُبِين": {
+      "sense": "مبين / بيّن",
+      "source": "arabya-en-paraphrase",
+      "count": 119
+    },
+    "خَلَقَ": {
+      "sense": "خلق",
+      "source": "arabya-curated",
+      "count": 184
+    },
+    "سَماء": {
+      "sense": "سماء",
+      "source": "arabya-curated",
+      "count": 310
+    },
+    "أَرْض": {
+      "sense": "الأرض",
+      "source": "arabya-curated",
+      "count": 461
+    },
+    "فِي": {
+      "sense": "في",
+      "source": "arabya-curated",
+      "count": 1602
+    },
+    "ثُمّ": {
+      "sense": "ثمّ",
+      "source": "arabya-curated",
+      "count": 338
+    },
+    "عَرْش": {
+      "sense": "عرش",
+      "source": "arabya-curated",
+      "count": 29
+    },
+    "أَمْر": {
+      "sense": "أمر",
+      "source": "arabya-curated",
+      "count": 166
+    },
+    "ما": {
+      "sense": "ما (موصول / نفي / استفهام بحسب السياق)",
+      "source": "arabya-curated",
+      "count": 2550
+    },
+    "إِلّا": {
+      "sense": "إلا (استثناء)",
+      "source": "arabya-curated",
+      "count": 659
+    },
+    "بَعْد": {
+      "sense": "بعد",
+      "source": "arabya-curated",
+      "count": 199
+    },
+    "جَمِيع": {
+      "sense": "كلّ / جميعاً",
+      "source": "arabya-en-paraphrase",
+      "count": 53
+    },
+    "حَقّ": {
+      "sense": "حق",
+      "source": "arabya-curated",
+      "count": 247
+    },
+    "عَمِلَ": {
+      "sense": "عمل",
+      "source": "arabya-curated",
+      "count": 276
+    },
+    "كَفَرَ": {
+      "sense": "كفر / جحد",
+      "source": "arabya-curated",
+      "count": 289
+    },
+    "شَراب": {
+      "sense": "شراب",
+      "source": "arabya-curated",
+      "count": 11
+    },
+    "عَذاب": {
+      "sense": "عذاب",
+      "source": "arabya-curated",
+      "count": 322
+    },
+    "أَلِيم": {
+      "sense": "أليم",
+      "source": "arabya-en-paraphrase",
+      "count": 72
+    },
+    "جَعَلَ": {
+      "sense": "جعل / صيّر",
+      "source": "arabya-curated",
+      "count": 340
+    },
+    "شَمْس": {
+      "sense": "شمس",
+      "source": "arabya-curated",
+      "count": 33
+    },
+    "قَمَر": {
+      "sense": "قمر",
+      "source": "arabya-curated",
+      "count": 27
+    },
+    "نُور": {
+      "sense": "نور",
+      "source": "arabya-curated",
+      "count": 43
+    },
+    "عَلِمَ": {
+      "sense": "علم / عرف",
+      "source": "arabya-curated",
+      "count": 382
+    },
+    "حِساب": {
+      "sense": "حساب",
+      "source": "arabya-curated",
+      "count": 39
+    },
+    "قَوْم": {
+      "sense": "قوم / جماعة",
+      "source": "arabya-curated",
+      "count": 383
+    },
+    "لَيْل": {
+      "sense": "ليل",
+      "source": "arabya-curated",
+      "count": 84
+    },
+    "نَهار": {
+      "sense": "نهار",
+      "source": "arabya-curated",
+      "count": 57
+    },
+    "اتَّقَى": {
+      "sense": "اتقى",
+      "source": "arabya-curated",
+      "count": 166
+    },
+    "حَياة": {
+      "sense": "حياة",
+      "source": "arabya-curated",
+      "count": 76
+    },
+    "دُنْيا": {
+      "sense": "دنيا",
+      "source": "arabya-curated",
+      "count": 115
+    },
+    "ب": {
+      "sense": "باء الجر",
+      "source": "arabya-curated",
+      "count": 560
+    },
+    "عَن": {
+      "sense": "عن",
+      "source": "arabya-curated",
+      "count": 412
+    },
+    "نار": {
+      "sense": "نار",
+      "source": "arabya-curated",
+      "count": 145
+    },
+    "إِيمان": {
+      "sense": "إيمان",
+      "source": "arabya-curated",
+      "count": 45
+    },
+    "جَنَّة": {
+      "sense": "جنة",
+      "source": "arabya-curated",
+      "count": 147
+    },
+    "سَلام": {
+      "sense": "سلام",
+      "source": "arabya-curated",
+      "count": 42
+    },
+    "آخِر": {
+      "sense": "آخر",
+      "source": "arabya-curated",
+      "count": 155
+    },
+    "و": {
+      "sense": "واو العطف",
+      "source": "arabya-curated",
+      "count": 1448
+    },
+    "خَيْر": {
+      "sense": "خير",
+      "source": "arabya-curated",
+      "count": 178
+    },
+    "أَجَل": {
+      "sense": "أجل",
+      "source": "arabya-curated",
+      "count": 52
+    },
+    "إِذا": {
+      "sense": "إذا (ظرف / شرط)",
+      "source": "arabya-curated",
+      "count": 423
+    },
+    "إِنسان": {
+      "sense": "إنسان / رجل",
+      "source": "arabya-en-paraphrase",
+      "count": 71
+    },
+    "دَعا": {
+      "sense": "دعا",
+      "source": "arabya-curated",
+      "count": 170
+    },
+    "أَو": {
+      "sense": "أو",
+      "source": "arabya-curated",
+      "count": 280
+    },
+    "لَمّا": {
+      "sense": "لمّا",
+      "source": "arabya-curated",
+      "count": 165
+    },
+    "لَم": {
+      "sense": "لم (نفي المضارع)",
+      "source": "arabya-curated",
+      "count": 348
+    },
+    "قَد": {
+      "sense": "قد (تحقيق / تقريب)",
+      "source": "arabya-curated",
+      "count": 406
+    },
+    "قَبْل": {
+      "sense": "قبل",
+      "source": "arabya-curated",
+      "count": 242
+    },
+    "ظَلَمَ": {
+      "sense": "ظلم",
+      "source": "arabya-curated",
+      "count": 110
+    },
+    "جاءَ": {
+      "sense": "جاء",
+      "source": "arabya-curated",
+      "count": 278
+    },
+    "رَسُول": {
+      "sense": "رسول",
+      "source": "arabya-curated",
+      "count": 332
+    },
+    "كَيْف": {
+      "sense": "كيف",
+      "source": "arabya-en-paraphrase",
+      "count": 83
+    },
+    "أَتَى": {
+      "sense": "أتى",
+      "source": "arabya-curated",
+      "count": 264
+    },
+    "نَفْس": {
+      "sense": "نفس / ذات",
+      "source": "arabya-curated",
+      "count": 295
+    },
+    "إِن": {
+      "sense": "إنْ (شرط)",
+      "source": "arabya-curated",
+      "count": 379
+    },
+    "خافَ": {
+      "sense": "خوف / أخاف",
+      "source": "arabya-en-paraphrase",
+      "count": 83
+    },
+    "عَظِيم": {
+      "sense": "عظيم",
+      "source": "arabya-en-paraphrase",
+      "count": 107
+    },
+    "لَو": {
+      "sense": "إن / إذا",
+      "source": "arabya-en-paraphrase",
+      "count": 79
+    },
+    "شاءَ": {
+      "sense": "شاء",
+      "source": "arabya-curated",
+      "count": 236
+    },
+    "مَن": {
+      "sense": "من (موصول / استفهام / شرط)",
+      "source": "arabya-curated",
+      "count": 860
+    },
+    "كَذِب": {
+      "sense": "كذب",
+      "source": "arabya-curated",
+      "count": 33
+    },
+    "كَذَّبَ": {
+      "sense": "كذّب",
+      "source": "arabya-curated",
+      "count": 176
+    },
+    "دُون": {
+      "sense": "دون",
+      "source": "arabya-curated",
+      "count": 144
+    },
+    "بَيْن": {
+      "sense": "بين",
+      "source": "arabya-curated",
+      "count": 266
+    },
+    "أَنزَلَ": {
+      "sense": "أنزل",
+      "source": "arabya-curated",
+      "count": 183
+    },
+    "غَيْب": {
+      "sense": "غيب",
+      "source": "arabya-curated",
+      "count": 49
+    },
+    "مَع": {
+      "sense": "مع",
+      "source": "arabya-curated",
+      "count": 164
+    },
+    "رَحْمَة": {
+      "sense": "رحمة",
+      "source": "arabya-curated",
+      "count": 114
+    },
+    "بَحْر": {
+      "sense": "بحر",
+      "source": "arabya-curated",
+      "count": 41
+    },
+    "حَتَّى": {
+      "sense": "حتى",
+      "source": "arabya-curated",
+      "count": 142
+    },
+    "رِيح": {
+      "sense": "ريح",
+      "source": "arabya-curated",
+      "count": 29
+    },
+    "كُلّ": {
+      "sense": "كلّ",
+      "source": "arabya-curated",
+      "count": 359
+    },
+    "أَيّ": {
+      "sense": "أيّ",
+      "source": "arabya-curated",
+      "count": 215
+    },
+    "ماء": {
+      "sense": "ماء",
+      "source": "arabya-curated",
+      "count": 63
+    },
+    "أَهْل": {
+      "sense": "الناس",
+      "source": "arabya-en-paraphrase",
+      "count": 127
+    },
+    "وَجْه": {
+      "sense": "وجه",
+      "source": "arabya-curated",
+      "count": 72
+    },
+    "سَيِّئَة": {
+      "sense": "سيئة",
+      "source": "arabya-curated",
+      "count": 58
+    },
+    "رَزَقَ": {
+      "sense": "رزق",
+      "source": "arabya-curated",
+      "count": 61
+    },
+    "أَم": {
+      "sense": "أو",
+      "source": "arabya-en-paraphrase",
+      "count": 137
+    },
+    "حَيّ": {
+      "sense": "حيّ",
+      "source": "arabya-curated",
+      "count": 24
+    },
+    "مَيِّت": {
+      "sense": "ميت",
+      "source": "arabya-curated",
+      "count": 38
+    },
+    "ماذا": {
+      "sense": "ما",
+      "source": "arabya-en-paraphrase",
+      "count": 26
+    },
+    "ضَلال": {
+      "sense": "ضلال",
+      "source": "arabya-curated",
+      "count": 38
+    },
+    "أَنَّى": {
+      "sense": "كيف",
+      "source": "arabya-en-paraphrase",
+      "count": 28
+    },
+    "شَىْء": {
+      "sense": "شيء",
+      "source": "arabya-curated",
+      "count": 283
+    },
+    "عَلِيم": {
+      "sense": "عليم",
+      "source": "arabya-curated",
+      "count": 163
+    },
+    "فَعَلَ": {
+      "sense": "تفعلون",
+      "source": "arabya-en-paraphrase",
+      "count": 88
+    },
+    "لٰكِن": {
+      "sense": "لكن / بل",
+      "source": "arabya-en-paraphrase",
+      "count": 65
+    },
+    "يَد": {
+      "sense": "يد",
+      "source": "arabya-curated",
+      "count": 120
+    },
+    "بَل": {
+      "sense": "كلا / بل",
+      "source": "arabya-en-paraphrase",
+      "count": 127
+    },
+    "ظالِم": {
+      "sense": "ظالم",
+      "source": "arabya-curated",
+      "count": 129
+    },
+    "أَبْصَرَ": {
+      "sense": "أبصر",
+      "source": "arabya-curated",
+      "count": 29
+    },
+    "ساعَة": {
+      "sense": "ساعة",
+      "source": "arabya-curated",
+      "count": 48
+    },
+    "بَعْض": {
+      "sense": "بعض",
+      "source": "arabya-curated",
+      "count": 157
+    },
+    "ف": {
+      "sense": "فاء العطف / السببية",
+      "source": "arabya-curated",
+      "count": 403
+    },
+    "مَتَى": {
+      "sense": "إذ / عندما",
+      "source": "arabya-en-paraphrase",
+      "count": 9
+    },
+    "رَأَى": {
+      "sense": "رأى / أبصر",
+      "source": "arabya-curated",
+      "count": 271
+    },
+    "مُؤْمِن": {
+      "sense": "مؤمن",
+      "source": "arabya-curated",
+      "count": 202
+    },
+    "فَضْل": {
+      "sense": "فضل",
+      "source": "arabya-curated",
+      "count": 84
+    },
+    "حَرام": {
+      "sense": "حرام",
+      "source": "arabya-curated",
+      "count": 33
+    },
+    "حَلال": {
+      "sense": "حلال",
+      "source": "arabya-curated",
+      "count": 6
+    },
+    "قِيامَة": {
+      "sense": "القيامة",
+      "source": "arabya-en-paraphrase",
+      "count": 70
+    },
+    "ذُو": {
+      "sense": "ذو (صاحب)",
+      "source": "arabya-curated",
+      "count": 156
+    },
+    "شَكَرَ": {
+      "sense": "شكر",
+      "source": "arabya-curated",
+      "count": 46
+    },
+    "إِذ": {
+      "sense": "إذ",
+      "source": "arabya-curated",
+      "count": 239
+    },
+    "وَلِيّ": {
+      "sense": "وليّ",
+      "source": "arabya-curated",
+      "count": 86
+    },
+    "خَوْف": {
+      "sense": "خوف",
+      "source": "arabya-curated",
+      "count": 26
+    },
+    "سَمِعَ": {
+      "sense": "سمع",
+      "source": "arabya-curated",
+      "count": 78
+    },
+    "وَلَد": {
+      "sense": "ولد",
+      "source": "arabya-curated",
+      "count": 56
+    },
+    "غَنِيّ": {
+      "sense": "غنيّ",
+      "source": "arabya-curated",
+      "count": 24
+    },
+    "أَجْر": {
+      "sense": "أجر",
+      "source": "arabya-curated",
+      "count": 105
+    },
+    "مُسْلِم": {
+      "sense": "مسلم",
+      "source": "arabya-curated",
+      "count": 39
+    },
+    "قَلْب": {
+      "sense": "قلب",
+      "source": "arabya-curated",
+      "count": 132
+    },
+    "مُوسَى": {
+      "sense": "موسى",
+      "source": "arabya-en-paraphrase",
+      "count": 136
+    },
+    "فِرْعَوْن": {
+      "sense": "فرعون",
+      "source": "arabya-curated",
+      "count": 74
+    },
+    "ذُرِّيَّة": {
+      "sense": "ذرية",
+      "source": "arabya-curated",
+      "count": 32
+    },
+    "فِتْنَة": {
+      "sense": "فتنة",
+      "source": "arabya-curated",
+      "count": 34
+    },
+    "أَخ": {
+      "sense": "أخ",
+      "source": "arabya-curated",
+      "count": 75
+    },
+    "مِصْر": {
+      "sense": "مصر",
+      "source": "arabya-curated",
+      "count": 5
+    },
+    "بَيْت": {
+      "sense": "بيت",
+      "source": "arabya-curated",
+      "count": 65
+    },
+    "صَلاة": {
+      "sense": "صلاة",
+      "source": "arabya-curated",
+      "count": 83
+    },
+    "آتَى": {
+      "sense": "آتَى / أعطى",
+      "source": "arabya-curated",
+      "count": 271
+    },
+    "سَبِيل": {
+      "sense": "سبيل / طريق",
+      "source": "arabya-curated",
+      "count": 176
+    },
+    "إِلٰه": {
+      "sense": "إله",
+      "source": "arabya-curated",
+      "count": 147
+    },
+    "قَرَأَ": {
+      "sense": "قرأ",
+      "source": "arabya-curated",
+      "count": 16
+    },
+    "قَرْيَة": {
+      "sense": "قرية",
+      "source": "arabya-curated",
+      "count": 57
+    },
+    "إِذًا": {
+      "sense": "ثم / فـ",
+      "source": "arabya-en-paraphrase",
+      "count": 31
+    },
+    "غَفُور": {
+      "sense": "غفور",
+      "source": "arabya-en-paraphrase",
+      "count": 91
+    },
+    "صَبَرَ": {
+      "sense": "صبر",
+      "source": "arabya-curated",
+      "count": 58
+    },
+    "صُبْح": {
+      "sense": "صبح",
+      "source": "arabya-curated",
+      "count": 5
+    },
+    "حُبّ": {
+      "sense": "حبّ",
+      "source": "arabya-curated",
+      "count": 9
+    },
+    "قَبْر": {
+      "sense": "قبر",
+      "source": "arabya-curated",
+      "count": 6
+    },
+    "جَبَل": {
+      "sense": "جبل",
+      "source": "arabya-curated",
+      "count": 39
+    },
+    "أُمّ": {
+      "sense": "أم",
+      "source": "arabya-curated",
+      "count": 34
+    },
+    "كَلّا": {
+      "sense": "كلا / بل",
+      "source": "arabya-en-paraphrase",
+      "count": 33
+    },
+    "عَيْن": {
+      "sense": "عين",
+      "source": "arabya-curated",
+      "count": 57
+    },
+    "صَبْر": {
+      "sense": "صبر",
+      "source": "arabya-curated",
+      "count": 15
+    },
+    "طَيْر": {
+      "sense": "طير",
+      "source": "arabya-curated",
+      "count": 19
+    },
+    "طَعام": {
+      "sense": "طعام",
+      "source": "arabya-curated",
+      "count": 24
+    },
+    "صَلَّى": {
+      "sense": "صلى",
+      "source": "arabya-curated",
+      "count": 12
+    },
+    "حَسَن": {
+      "sense": "خير / حسن",
+      "source": "arabya-en-paraphrase",
+      "count": 21
+    },
+    "كَبِير": {
+      "sense": "عظيم",
+      "source": "arabya-en-paraphrase",
+      "count": 40
+    },
+    "مَوْت": {
+      "sense": "موت",
+      "source": "arabya-curated",
+      "count": 50
+    },
+    "لَيْسَ": {
+      "sense": "لا / ليس",
+      "source": "arabya-en-paraphrase",
+      "count": 89
+    },
+    "مَغْفِرَة": {
+      "sense": "مغفرة",
+      "source": "arabya-curated",
+      "count": 28
+    },
+    "مَلَك": {
+      "sense": "ملك",
+      "source": "arabya-curated",
+      "count": 88
+    },
+    "صَنَعُ": {
+      "sense": "يفعل / افعل",
+      "source": "arabya-en-paraphrase",
+      "count": 15
+    },
+    "باطِل": {
+      "sense": "باطل",
+      "source": "arabya-en-paraphrase",
+      "count": 26
+    },
+    "نَصَرَ": {
+      "sense": "نصر",
+      "source": "arabya-curated",
+      "count": 59
+    },
+    "لَن": {
+      "sense": "لن / أبداً",
+      "source": "arabya-en-paraphrase",
+      "count": 104
+    },
+    "زَوْج": {
+      "sense": "زوج",
+      "source": "arabya-curated",
+      "count": 76
+    },
+    "رَحِمَ": {
+      "sense": "رحم",
+      "source": "arabya-curated",
+      "count": 28
+    },
+    "صالِح": {
+      "sense": "صالح",
+      "source": "arabya-curated",
+      "count": 74
+    },
+    "غَفَرَ": {
+      "sense": "غفر",
+      "source": "arabya-curated",
+      "count": 65
+    },
+    "ناقَة": {
+      "sense": "ناقة",
+      "source": "arabya-curated",
+      "count": 7
+    },
+    "إِسْحاق": {
+      "sense": "إسحاق",
+      "source": "arabya-curated",
+      "count": 17
+    },
+    "بِنْت": {
+      "sense": "بنت",
+      "source": "arabya-curated",
+      "count": 17
+    },
+    "شُعَيْب": {
+      "sense": "شعيب",
+      "source": "arabya-curated",
+      "count": 11
+    },
+    "وَدُود": {
+      "sense": "ودود",
+      "source": "arabya-curated",
+      "count": 2
+    },
+    "حَسَنَة": {
+      "sense": "حسنة",
+      "source": "arabya-curated",
+      "count": 31
+    },
+    "ظُلْم": {
+      "sense": "ظلم",
+      "source": "arabya-curated",
+      "count": 20
+    },
+    "جَهَنَّم": {
+      "sense": "جهنم",
+      "source": "arabya-curated",
+      "count": 77
+    },
+    "أَجْمَع": {
+      "sense": "كلّ / جميعاً",
+      "source": "arabya-en-paraphrase",
+      "count": 26
+    },
+    "تَوّاب": {
+      "sense": "توّاب",
+      "source": "arabya-curated",
+      "count": 12
+    },
+    "أَب": {
+      "sense": "أب",
+      "source": "arabya-curated",
+      "count": 46
+    },
+    "مَلِك": {
+      "sense": "ملك",
+      "source": "arabya-curated",
+      "count": 15
+    },
+    "لَعَلّ": {
+      "sense": "لعلكم",
+      "source": "arabya-en-paraphrase",
+      "count": 115
+    },
+    "شَيْطان": {
+      "sense": "شيطان",
+      "source": "arabya-curated",
+      "count": 88
+    },
+    "عَدُوّ": {
+      "sense": "عدوّ",
+      "source": "arabya-curated",
+      "count": 50
+    },
+    "نِعْمَة": {
+      "sense": "نعمة",
+      "source": "arabya-curated",
+      "count": 50
+    },
+    "آل": {
+      "sense": "الناس",
+      "source": "arabya-en-paraphrase",
+      "count": 26
+    },
+    "قَتَلَ": {
+      "sense": "قتل",
+      "source": "arabya-curated",
+      "count": 83
+    },
+    "ذِئْب": {
+      "sense": "ذئب",
+      "source": "arabya-curated",
+      "count": 3
+    },
+    "دَم": {
+      "sense": "دم",
+      "source": "arabya-curated",
+      "count": 10
+    },
+    "جَمِيل": {
+      "sense": "خير / حسن",
+      "source": "arabya-en-paraphrase",
+      "count": 7
+    },
+    "لَدَى": {
+      "sense": "معهم",
+      "source": "arabya-en-paraphrase",
+      "count": 22
+    },
+    "خَمْر": {
+      "sense": "خمر",
+      "source": "arabya-curated",
+      "count": 6
+    },
+    "رَأْس": {
+      "sense": "رأس",
+      "source": "arabya-curated",
+      "count": 18
+    },
+    "صاحِب": {
+      "sense": "صاحب",
+      "source": "arabya-curated",
+      "count": 12
+    },
+    "ذَكَرَ": {
+      "sense": "ذكر",
+      "source": "arabya-curated",
+      "count": 84
+    },
+    "ذِكْر": {
+      "sense": "ذكر",
+      "source": "arabya-curated",
+      "count": 76
+    },
+    "عِنَب": {
+      "sense": "عنب",
+      "source": "arabya-curated",
+      "count": 11
+    },
+    "زَرْع": {
+      "sense": "زرع",
+      "source": "arabya-curated",
+      "count": 10
+    },
+    "تُراب": {
+      "sense": "تراب",
+      "source": "arabya-curated",
+      "count": 17
+    },
+    "شَهادَة": {
+      "sense": "شهادة",
+      "source": "arabya-curated",
+      "count": 26
+    },
+    "بَرْق": {
+      "sense": "برق",
+      "source": "arabya-curated",
+      "count": 5
+    },
+    "رَعْد": {
+      "sense": "رعد",
+      "source": "arabya-curated",
+      "count": 2
+    },
+    "دُعاء": {
+      "sense": "دعاء",
+      "source": "arabya-curated",
+      "count": 22
+    },
+    "ظِلّ": {
+      "sense": "ظل",
+      "source": "arabya-curated",
+      "count": 14
+    },
+    "عَهْد": {
+      "sense": "عهد",
+      "source": "arabya-curated",
+      "count": 29
+    },
+    "خَشِيَ": {
+      "sense": "خوف / أخاف",
+      "source": "arabya-en-paraphrase",
+      "count": 40
+    },
+    "حُسْن": {
+      "sense": "خير / حسن",
+      "source": "arabya-en-paraphrase",
+      "count": 13
+    },
+    "ظاهِر": {
+      "sense": "ظاهر",
+      "source": "arabya-curated",
+      "count": 8
+    },
+    "بَلاء": {
+      "sense": "بلاء",
+      "source": "arabya-curated",
+      "count": 6
+    },
+    "بَلَد": {
+      "sense": "بلد",
+      "source": "arabya-curated",
+      "count": 14
+    },
+    "أَمَل": {
+      "sense": "أمل",
+      "source": "arabya-curated",
+      "count": 2
+    },
+    "أَوَّل": {
+      "sense": "أول",
+      "source": "arabya-curated",
+      "count": 82
+    },
+    "رُوح": {
+      "sense": "روح",
+      "source": "arabya-curated",
+      "count": 21
+    },
+    "خَيْل": {
+      "sense": "خيل",
+      "source": "arabya-curated",
+      "count": 5
+    },
+    "حِمار": {
+      "sense": "حمار",
+      "source": "arabya-curated",
+      "count": 5
+    },
+    "شَجَر": {
+      "sense": "شجر",
+      "source": "arabya-curated",
+      "count": 7
+    },
+    "زَيْتُون": {
+      "sense": "زيتون",
+      "source": "arabya-curated",
+      "count": 5
+    },
+    "نَجْم": {
+      "sense": "نجم",
+      "source": "arabya-curated",
+      "count": 13
+    },
+    "لَحْم": {
+      "sense": "لحم",
+      "source": "arabya-curated",
+      "count": 12
+    },
+    "أَيّان": {
+      "sense": "إذ / عندما",
+      "source": "arabya-en-paraphrase",
+      "count": 6
+    },
+    "طَيِّب": {
+      "sense": "طيب",
+      "source": "arabya-curated",
+      "count": 16
+    },
+    "أَعْلَى": {
+      "sense": "أعلى",
+      "source": "arabya-curated",
+      "count": 9
+    },
+    "لَبَن": {
+      "sense": "لبن",
+      "source": "arabya-curated",
+      "count": 2
+    },
+    "نَحْل": {
+      "sense": "نحل",
+      "source": "arabya-curated",
+      "count": 1
+    },
+    "كَي": {
+      "sense": "أن / ذلك",
+      "source": "arabya-en-paraphrase",
+      "count": 10
+    },
+    "عَدْل": {
+      "sense": "عدل",
+      "source": "arabya-curated",
+      "count": 14
+    },
+    "غَضَب": {
+      "sense": "غضب",
+      "source": "arabya-curated",
+      "count": 14
+    },
+    "مَسْجِد": {
+      "sense": "مسجد",
+      "source": "arabya-curated",
+      "count": 28
+    },
+    "إِمّا": {
+      "sense": "أو",
+      "source": "arabya-en-paraphrase",
+      "count": 16
+    },
+    "خَشْيَة": {
+      "sense": "خوف / أخاف",
+      "source": "arabya-en-paraphrase",
+      "count": 8
+    },
+    "أُذُن": {
+      "sense": "أذن",
+      "source": "arabya-curated",
+      "count": 18
+    },
+    "نَبِيّ": {
+      "sense": "نبيّ",
+      "source": "arabya-curated",
+      "count": 75
+    },
+    "آدَم": {
+      "sense": "آدم",
+      "source": "arabya-curated",
+      "count": 25
+    },
+    "غَسَق": {
+      "sense": "ظلمات",
+      "source": "arabya-en-paraphrase",
+      "count": 1
+    },
+    "نافِلَة": {
+      "sense": "نافلة",
+      "source": "arabya-curated",
+      "count": 2
+    },
+    "جِنّ": {
+      "sense": "جنّ",
+      "source": "arabya-curated",
+      "count": 22
+    },
+    "كُفُور": {
+      "sense": "كفر",
+      "source": "arabya-en-paraphrase",
+      "count": 3
+    },
+    "بَيِّن": {
+      "sense": "مبين / بيّن",
+      "source": "arabya-en-paraphrase",
+      "count": 1
+    },
+    "كَلْب": {
+      "sense": "كلب",
+      "source": "arabya-curated",
+      "count": 5
+    },
+    "نَسِيَ": {
+      "sense": "نسي",
+      "source": "arabya-curated",
+      "count": 35
+    },
+    "ذَهَب": {
+      "sense": "ذهب",
+      "source": "arabya-curated",
+      "count": 8
+    },
+    "إِسْتَبْرَق": {
+      "sense": "إستبرق",
+      "source": "arabya-curated",
+      "count": 4
+    },
+    "ثَواب": {
+      "sense": "ثواب",
+      "source": "arabya-curated",
+      "count": 13
+    },
+    "نَخْل": {
+      "sense": "نخل",
+      "source": "arabya-curated",
+      "count": 11
+    },
+    "ثَمَر": {
+      "sense": "ثمر",
+      "source": "arabya-curated",
+      "count": 5
+    },
+    "زَكاة": {
+      "sense": "زكاة",
+      "source": "arabya-curated",
+      "count": 32
+    },
+    "عَرْض": {
+      "sense": "عرض",
+      "source": "arabya-curated",
+      "count": 4
+    },
+    "فِرْدَوْس": {
+      "sense": "فردوس",
+      "source": "arabya-curated",
+      "count": 2
+    },
+    "زَكَرِيّا": {
+      "sense": "زكريا",
+      "source": "arabya-curated",
+      "count": 7
+    },
+    "يَحْيَى": {
+      "sense": "يحيى",
+      "source": "arabya-curated",
+      "count": 5
+    },
+    "مَرْيَم": {
+      "sense": "مريم",
+      "source": "arabya-curated",
+      "count": 34
+    },
+    "صَوْم": {
+      "sense": "صوم",
+      "source": "arabya-curated",
+      "count": 1
+    },
+    "أُخْت": {
+      "sense": "أخت",
+      "source": "arabya-curated",
+      "count": 14
+    },
+    "عَلِيّ": {
+      "sense": "عليّ",
+      "source": "arabya-curated",
+      "count": 11
+    },
+    "طُور": {
+      "sense": "طور",
+      "source": "arabya-curated",
+      "count": 10
+    },
+    "شَفاعَة": {
+      "sense": "شفاعة",
+      "source": "arabya-curated",
+      "count": 13
+    },
+    "فاسِق": {
+      "sense": "فاسق",
+      "source": "arabya-curated",
+      "count": 37
+    },
+    "لَيْلَة": {
+      "sense": "ليل",
+      "source": "arabya-en-paraphrase",
+      "count": 8
+    },
+    "رِجْز": {
+      "sense": "العذاب",
+      "source": "arabya-en-paraphrase",
+      "count": 9
+    },
+    "صابِئ": {
+      "sense": "صابئ",
+      "source": "arabya-curated",
+      "count": 3
+    },
+    "إِثْم": {
+      "sense": "إثم",
+      "source": "arabya-curated",
+      "count": 35
+    },
+    "سُلَيْمان": {
+      "sense": "سليمان",
+      "source": "arabya-curated",
+      "count": 17
+    },
+    "بابِل": {
+      "sense": "بابل",
+      "source": "arabya-curated",
+      "count": 1
+    },
+    "مَرْء": {
+      "sense": "إنسان / رجل",
+      "source": "arabya-en-paraphrase",
+      "count": 4
+    },
+    "يَهُود": {
+      "sense": "يهود",
+      "source": "arabya-curated",
+      "count": 9
+    },
+    "زَكَّى": {
+      "sense": "زكى",
+      "source": "arabya-curated",
+      "count": 12
+    },
+    "حُرّ": {
+      "sense": "حرّ",
+      "source": "arabya-curated",
+      "count": 2
+    },
+    "حَجّ": {
+      "sense": "حج",
+      "source": "arabya-curated",
+      "count": 9
+    },
+    "قِتال": {
+      "sense": "قتال",
+      "source": "arabya-curated",
+      "count": 13
+    },
+    "كُرْسِيّ": {
+      "sense": "كرسي",
+      "source": "arabya-curated",
+      "count": 2
+    },
+    "غَنَم": {
+      "sense": "غنم",
+      "source": "arabya-curated",
+      "count": 3
+    },
+    "سِجِلّ": {
+      "sense": "سجل",
+      "source": "arabya-curated",
+      "count": 1
+    },
+    "بَعْث": {
+      "sense": "بعث",
+      "source": "arabya-curated",
+      "count": 4
+    },
+    "لُؤْلُؤ": {
+      "sense": "لؤلؤ",
+      "source": "arabya-curated",
+      "count": 6
+    },
+    "بِئْر": {
+      "sense": "بئر",
+      "source": "arabya-curated",
+      "count": 1
+    },
+    "جِهاد": {
+      "sense": "جهاد",
+      "source": "arabya-curated",
+      "count": 4
+    },
+    "بَرْزَخ": {
+      "sense": "برزخ",
+      "source": "arabya-curated",
+      "count": 3
+    },
+    "مُبَيِّنَة": {
+      "sense": "مبين / بيّن",
+      "source": "arabya-en-paraphrase",
+      "count": 6
+    },
+    "طاعَة": {
+      "sense": "طاعة",
+      "source": "arabya-curated",
+      "count": 3
+    },
+    "مَطَر": {
+      "sense": "مطر",
+      "source": "arabya-curated",
+      "count": 7
+    },
+    "نَمْل": {
+      "sense": "نمل",
+      "source": "arabya-curated",
+      "count": 2
+    },
+    "رَهْب": {
+      "sense": "خوف / أخاف",
+      "source": "arabya-en-paraphrase",
+      "count": 1
+    },
+    "مُنافِق": {
+      "sense": "منافق",
+      "source": "arabya-curated",
+      "count": 27
+    },
+    "تَوْراة": {
+      "sense": "توراة",
+      "source": "arabya-curated",
+      "count": 18
+    },
+    "فِضَّة": {
+      "sense": "فضة",
+      "source": "arabya-curated",
+      "count": 6
+    },
+    "رِضْوان": {
+      "sense": "رضوان",
+      "source": "arabya-curated",
+      "count": 13
+    },
+    "إِسْلام": {
+      "sense": "إسلام",
+      "source": "arabya-curated",
+      "count": 8
+    },
+    "تَوْبَة": {
+      "sense": "توبة",
+      "source": "arabya-curated",
+      "count": 7
+    },
+    "مُحَمَّد": {
+      "sense": "محمد",
+      "source": "arabya-curated",
+      "count": 4
+    },
+    "سَخَط": {
+      "sense": "سخط",
+      "source": "arabya-curated",
+      "count": 1
+    },
+    "شِرْك": {
+      "sense": "شرك",
+      "source": "arabya-curated",
+      "count": 5
+    },
+    "شُكْر": {
+      "sense": "شكر",
+      "source": "arabya-curated",
+      "count": 1
+    },
+    "سِدْر": {
+      "sense": "سدر",
+      "source": "arabya-curated",
+      "count": 2
+    },
+    "حَبّ": {
+      "sense": "حبّ",
+      "source": "arabya-curated",
+      "count": 7
+    },
+    "فاكِهَة": {
+      "sense": "فاكهة",
+      "source": "arabya-curated",
+      "count": 11
+    },
+    "كَأْس": {
+      "sense": "كأس",
+      "source": "arabya-curated",
+      "count": 6
+    },
+    "مُسْتَبِين": {
+      "sense": "مبين / بيّن",
+      "source": "arabya-en-paraphrase",
+      "count": 1
+    },
+    "صُلْح": {
+      "sense": "صلح",
+      "source": "arabya-curated",
+      "count": 2
+    },
+    "يُبِينُ": {
+      "sense": "مبين / بيّن",
+      "source": "arabya-en-paraphrase",
+      "count": 1
+    },
+    "عَسَل": {
+      "sense": "عسل",
+      "source": "arabya-curated",
+      "count": 1
+    },
+    "سَلْم": {
+      "sense": "سلم",
+      "source": "arabya-curated",
+      "count": 2
+    },
+    "مَكَّة": {
+      "sense": "مكة",
+      "source": "arabya-curated",
+      "count": 1
+    },
+    "حَشْر": {
+      "sense": "حشر",
+      "source": "arabya-curated",
+      "count": 2
+    },
+    "مَرْجان": {
+      "sense": "مرجان",
+      "source": "arabya-curated",
+      "count": 2
+    },
+    "نُحاس": {
+      "sense": "نحاس",
+      "source": "arabya-curated",
+      "count": 1
+    },
+    "رُمّان": {
+      "sense": "رمان",
+      "source": "arabya-curated",
+      "count": 3
+    },
+    "طَلْح": {
+      "sense": "طلح",
+      "source": "arabya-curated",
+      "count": 1
+    },
+    "باطِن": {
+      "sense": "باطن",
+      "source": "arabya-curated",
+      "count": 3
+    },
+    "قُدُّوس": {
+      "sense": "قدوس",
+      "source": "arabya-curated",
+      "count": 2
+    },
+    "إِبِل": {
+      "sense": "إبل",
+      "source": "arabya-curated",
+      "count": 2
+    },
+    "خَفِيف": {
+      "sense": "نور",
+      "source": "arabya-en-paraphrase",
+      "count": 2
+    },
+    "عُرْف": {
+      "sense": "خير / حسن",
+      "source": "arabya-en-paraphrase",
+      "count": 2
+    },
+    "كُبّار": {
+      "sense": "عظيم",
+      "source": "arabya-en-paraphrase",
+      "count": 1
+    },
+    "قَتَرَة": {
+      "sense": "ظلمات",
+      "source": "arabya-en-paraphrase",
+      "count": 1
+    },
+    "نِفاق": {
+      "sense": "نفاق",
+      "source": "arabya-curated",
+      "count": 3
+    },
+    "تِين": {
+      "sense": "تين",
+      "source": "arabya-curated",
+      "count": 1
+    }
+  }
+}

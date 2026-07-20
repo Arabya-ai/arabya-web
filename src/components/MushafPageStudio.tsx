@@ -779,7 +779,7 @@ export function MushafPageStudio({
               <p>{wordMeaning(selected.word, meaningLang) || "—"}</p>
               {meaningLang === "ar" ? (
                 <p className="meaning-ar-note">
-                  معنى دراسي من الصرف (مادة + نوع + إعراب)، وليس ترجمة دلالية
+                  معنى عربي من معجم مواد عربْية (دلالي عند التوفر) مع تلميح صرفي عند الحاجة
                   كلمة بكلمة.
                 </p>
               ) : null}
