@@ -18,6 +18,7 @@ import { normalizeForHafsFont } from "@/lib/quran-text";
 import { isBookmarked, toggleBookmark } from "@/lib/bookmarks";
 import { formatPosLabels } from "@/lib/morph-labels";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
+import { nextTabIndex } from "@/lib/tablist";
 import { makeWordId } from "@/lib/word-id";
 import { ayahAudioUrl, wordAudioUrl } from "@/lib/audio";
 
@@ -73,14 +74,11 @@ export function MushafPageStudio({
   const [mode, setMode] = useState<Mode>("words");
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const onTabKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
-    const count = modes.length;
-    let next: number | null = null;
-    // RTL tablist: ArrowRight moves to the previous tab, ArrowLeft to the next.
-    if (e.key === "ArrowRight") next = (index - 1 + count) % count;
-    else if (e.key === "ArrowLeft") next = (index + 1) % count;
-    else if (e.key === "Home") next = 0;
-    else if (e.key === "End") next = count - 1;
+  const onTabKeyDown = (
+    e: React.KeyboardEvent<HTMLButtonElement>,
+    index: number,
+  ) => {
+    const next = nextTabIndex(e.key, index, modes.length);
     if (next === null) return;
     e.preventDefault();
     setMode(modes[next].id);
