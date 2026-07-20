@@ -37,6 +37,15 @@ const LAST_PAGE_KEY = "arabya-last-mushaf-page";
 const MEANING_LANG_KEY = "arabya-meaning-lang";
 const VERSE_TRANS_KEY = "arabya-verse-trans";
 
+const FONT_SCALE_MIN = 0.7;
+const FONT_SCALE_MAX = 1.6;
+const FONT_SCALE_STEP = 0.1;
+
+function clampFontScale(value: number): number {
+  const rounded = Math.round(value * 10) / 10;
+  return Math.min(FONT_SCALE_MAX, Math.max(FONT_SCALE_MIN, rounded));
+}
+
 function wordMeaning(word: QuranWord, lang: MeaningLang): string {
   if (lang === "ar") return word.meaningAr || word.meaning || "";
   if (lang === "id") return word.meaningId || word.meaning || "";
@@ -64,6 +73,7 @@ export function MushafPageStudio({
   const [mode, setMode] = useState<Mode>("words");
   const [activeWord, setActiveWord] = useState<WordRef | null>(null);
   const [fontScale, setFontScale] = useState(1);
+  const [fontDraft, setFontDraft] = useState("100");
   const [shareNote, setShareNote] = useState<string | null>(null);
   const [meaningLang, setMeaningLang] = useState<MeaningLang>("ar");
   const [verseEdition, setVerseEdition] = useState(
@@ -83,7 +93,7 @@ export function MushafPageStudio({
   useEffect(() => {
     try {
       const saved = Number(localStorage.getItem(FONT_KEY));
-      if (saved >= 0.85 && saved <= 1.35) setFontScale(saved);
+      if (Number.isFinite(saved)) setFontScale(clampFontScale(saved));
       const lang = localStorage.getItem(MEANING_LANG_KEY);
       if (lang === "ar" || lang === "en" || lang === "id" || lang === "ur") {
         setMeaningLang(lang);
@@ -107,6 +117,10 @@ export function MushafPageStudio({
   }, [page.page, fontScale, meaningLang, verseEdition]);
 
   useEffect(() => {
+    setFontDraft(String(Math.round(fontScale * 100)));
+  }, [fontScale]);
+
+  useEffect(() => {
     const hash = window.location.hash;
     if (!hash.startsWith("#s")) return;
     const el = document.querySelector(hash);
@@ -117,10 +131,10 @@ export function MushafPageStudio({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      const el = e.target;
       if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement ||
-        e.target instanceof HTMLSelectElement
+        el instanceof Element &&
+        el.closest("input, textarea, select, [contenteditable='true']")
       ) {
         return;
       }
@@ -403,29 +417,84 @@ export function MushafPageStudio({
   ];
 
   const morph = selected?.morph;
+  const canShrink = fontScale > FONT_SCALE_MIN + 0.001;
+  const canGrow = fontScale < FONT_SCALE_MAX - 0.001;
+  const fontPercent = Math.round(fontScale * 100);
+
+  const commitFontDraft = () => {
+    const normalized = String(fontDraft)
+      .replace(/[٠-٩]/g, (d) => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
+      .replace(/[^\d.]/g, "");
+    const n = Number(normalized);
+    if (!Number.isFinite(n) || normalized === "") {
+      setFontDraft(String(fontPercent));
+      return;
+    }
+    const next = clampFontScale(n / 100);
+    setFontScale(next);
+    setFontDraft(String(Math.round(next * 100)));
+  };
 
   return (
-    <div className="studio">
+    <div
+      className="studio"
+      style={{ ["--mushaf-scale" as string]: String(fontScale) }}
+    >
       <div className="mushaf-toolbar" aria-label="أدوات المصحف">
-        <div className="font-scale" role="group" aria-label="حجم الخط">
+        <div className="font-scale" role="group" aria-label="حجم خط المصحف">
           <button
             type="button"
             className="tool-btn"
             onClick={() =>
-              setFontScale((s) => Math.max(0.85, +(s - 0.1).toFixed(2)))
+              setFontScale((s) => clampFontScale(s - FONT_SCALE_STEP))
             }
+            disabled={!canShrink}
             aria-label="تصغير الخط"
+            title="تصغير"
           >
             أ−
           </button>
-          <span className="font-scale-label">{Math.round(fontScale * 100)}٪</span>
+          <label className="font-scale-field" htmlFor="mushaf-font-scale">
+            <span className="sr-only">نسبة حجم الخط</span>
+            <input
+              id="mushaf-font-scale"
+              name="mushaf-font-scale"
+              type="number"
+              inputMode="numeric"
+              min={Math.round(FONT_SCALE_MIN * 100)}
+              max={Math.round(FONT_SCALE_MAX * 100)}
+              step={Math.round(FONT_SCALE_STEP * 100)}
+              dir="ltr"
+              className="font-scale-input"
+              value={fontDraft}
+              onChange={(e) => setFontDraft(e.target.value)}
+              onBlur={commitFontDraft}
+              onClick={(e) => e.stopPropagation()}
+              onKeyDown={(e) => {
+                e.stopPropagation();
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  commitFontDraft();
+                  (e.target as HTMLInputElement).blur();
+                }
+              }}
+              onKeyUp={(e) => e.stopPropagation()}
+              aria-label="أدخل نسبة حجم الخط يدوياً"
+              title={`اكتب رقماً من ${Math.round(FONT_SCALE_MIN * 100)} إلى ${Math.round(FONT_SCALE_MAX * 100)} ثم Enter`}
+            />
+            <span className="font-scale-suffix" aria-hidden>
+              %
+            </span>
+          </label>
           <button
             type="button"
             className="tool-btn"
             onClick={() =>
-              setFontScale((s) => Math.min(1.35, +(s + 0.1).toFixed(2)))
+              setFontScale((s) => clampFontScale(s + FONT_SCALE_STEP))
             }
+            disabled={!canGrow}
             aria-label="تكبير الخط"
+            title="تكبير"
           >
             أ+
           </button>
@@ -477,9 +546,6 @@ export function MushafPageStudio({
 
               <div
                 className="mushaf-text"
-                style={{
-                  fontSize: `calc(clamp(1.55rem, 3.8vw + 0.5rem, 2.25rem) * ${fontScale})`,
-                }}
                 aria-label="نص المصحف — اضغط أي كلمة"
               >
                 {block.verses.map((verse) => (
