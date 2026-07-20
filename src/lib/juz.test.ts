@@ -13,7 +13,8 @@ describe("juzLabel", () => {
 });
 
 describe("SURAH_START_JUZ", () => {
-  it("is 1-indexed with a placeholder at index 0", () => {
+  it("is 1-indexed with a placeholder at index 0 and covers exactly 114 surahs", () => {
+    expect(SURAH_START_JUZ).toHaveLength(115);
     expect(SURAH_START_JUZ[0]).toBe(0);
   });
 

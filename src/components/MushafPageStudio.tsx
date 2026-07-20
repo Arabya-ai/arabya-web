@@ -18,7 +18,7 @@ import { normalizeForHafsFont } from "@/lib/quran-text";
 import { isBookmarked, toggleBookmark } from "@/lib/bookmarks";
 import { formatPosLabels } from "@/lib/morph-labels";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
-import { nextTabIndex } from "@/lib/tablist";
+import { StudyModeTabs } from "@/components/StudyModeTabs";
 import { makeWordId } from "@/lib/word-id";
 import { ayahAudioUrl, wordAudioUrl } from "@/lib/audio";
 
@@ -72,19 +72,6 @@ export function MushafPageStudio({
   }, [tafsirSources]);
 
   const [mode, setMode] = useState<Mode>("words");
-  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
-
-  const onTabKeyDown = (
-    e: React.KeyboardEvent<HTMLButtonElement>,
-    index: number,
-  ) => {
-    const next = nextTabIndex(e.key, index, modes.length);
-    if (next === null) return;
-    e.preventDefault();
-    setMode(modes[next].id);
-    tabRefs.current[next]?.focus();
-  };
-
   const [activeWord, setActiveWord] = useState<WordRef | null>(null);
   const [fontScale, setFontScale] = useState(1);
   const [fontDraft, setFontDraft] = useState("100");
@@ -825,30 +812,7 @@ export function MushafPageStudio({
         </section>
       ) : null}
 
-      <div className="mode-rail" role="tablist" aria-label="طريقة الدراسة">
-        {modes.map((m, i) => {
-          const active = mode === m.id;
-          return (
-            <button
-              key={m.id}
-              ref={(el) => {
-                tabRefs.current[i] = el;
-              }}
-              type="button"
-              role="tab"
-              id={`study-tab-${m.id}`}
-              aria-selected={active}
-              aria-controls="study-panel"
-              tabIndex={active ? 0 : -1}
-              className={`mode-chip ${active ? "is-active" : ""}`}
-              onClick={() => setMode(m.id)}
-              onKeyDown={(e) => onTabKeyDown(e, i)}
-            >
-              {m.label}
-            </button>
-          );
-        })}
-      </div>
+      <StudyModeTabs modes={modes} mode={mode} onModeChange={setMode} />
 
       {mode === "words" || mode === "irab" ? (
         <section
