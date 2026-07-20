@@ -21,10 +21,8 @@ type SearchHit = {
 
 export function SurahIndex({
   surahs,
-  mushafFirstPage,
 }: {
   surahs: SurahMeta[];
-  mushafFirstPage: Record<string, number>;
 }) {
   const [query, setQuery] = useState("");
   const [ayahHits, setAyahHits] = useState<SearchHit[]>([]);
