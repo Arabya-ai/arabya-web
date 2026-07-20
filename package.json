@@ -20,7 +20,8 @@
     "fetch-translations": "node scripts/fetch-translations.mjs",
     "build-mushaf-index": "node scripts/build-mushaf-index.mjs",
     "build-search-index": "node scripts/build-search-index.mjs",
-    "validate-data": "node scripts/validate-data.mjs"
+    "validate-data": "node scripts/validate-data.mjs",
+    "import-irab-book": "node scripts/import-irab-book.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

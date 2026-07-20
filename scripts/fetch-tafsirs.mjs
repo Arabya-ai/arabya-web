@@ -14,6 +14,8 @@ const TAFSIRS = [
   { id: 91, slug: "sadi", nameAr: "تفسير السعدي" },
   { id: 16, slug: "muyassar", nameAr: "التفسير الميسر" },
   { id: 14, slug: "ibn-kathir", nameAr: "تفسير ابن كثير" },
+  { id: 90, slug: "qurtubi", nameAr: "تفسير القرطبي" },
+  { id: 94, slug: "baghawi", nameAr: "تفسير البغوي" },
 ];
 
 function stripHtml(html) {

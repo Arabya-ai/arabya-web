@@ -8,6 +8,7 @@ import {
 } from "@/lib/mushaf";
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
 import { getIrab, getTafsirSources, getVerseTranslationEditions } from "@/lib/quran";
+import { getBookCatalog } from "@/lib/books";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
 
 type Props = { params: Promise<{ page: string }> };
@@ -78,11 +79,13 @@ export default async function MushafPageRoute({ params }: Props) {
   const pageNum = Number(page);
   if (!Number.isInteger(pageNum) || pageNum < 1 || pageNum > 604) notFound();
 
-  const [pageContent, tafsirSources, verseEditions] = await Promise.all([
-    getMushafPage(pageNum),
-    getTafsirSources(),
-    getVerseTranslationEditions(),
-  ]);
+  const [pageContent, tafsirSources, verseEditions, bookCatalog] =
+    await Promise.all([
+      getMushafPage(pageNum),
+      getTafsirSources(),
+      getVerseTranslationEditions(),
+      getBookCatalog(),
+    ]);
 
   if (!pageContent) notFound();
 
@@ -99,6 +102,14 @@ export default async function MushafPageRoute({ params }: Props) {
     pageNum,
     pageContent.totalPages,
   );
+
+  const bookSources = bookCatalog.map((b) => ({
+    id: b.id,
+    label: b.label,
+    status: b.status,
+    license: b.license,
+    url: b.url,
+  }));
 
   return (
     <div className="shell page-block">
@@ -127,6 +138,7 @@ export default async function MushafPageRoute({ params }: Props) {
         irabBySurah={irabBySurah}
         tafsirSources={tafsirSources}
         verseEditions={verseEditions}
+        bookSources={bookSources}
       />
     </div>
   );

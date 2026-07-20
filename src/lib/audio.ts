@@ -1,9 +1,36 @@
-/** Audio helpers — verse (EveryAyah) + word-by-word (Quran CDN). */
+/** Audio helpers — multi-reciter EveryAyah + word-by-word Quran CDN. */
 
-export function ayahAudioUrl(surahId: number, verse: number): string {
+export type Reciter = {
+  id: string;
+  nameAr: string;
+  /** EveryAyah folder name */
+  folder: string;
+};
+
+export const RECITERS: Reciter[] = [
+  { id: "alafasy", nameAr: "مشاري العفاسي", folder: "Alafasy_128kbps" },
+  { id: "husary", nameAr: "محمود خليل الحصري", folder: "Husary_128kbps" },
+  { id: "minshawi", nameAr: "محمد صديق المنشاوي", folder: "Minshawy_Murattal_128kbps" },
+  { id: "abdulbasit", nameAr: "عبد الباسط عبد الصمد", folder: "Abdul_Basit_Murattal_128kbps" },
+  { id: "sudais", nameAr: "عبد الرحمن السديس", folder: "Abdurrahmaan_As-Sudais_128kbps" },
+  { id: "ghamdi", nameAr: "سعد الغامدي", folder: "Ghamadi_40kbps" },
+];
+
+export const DEFAULT_RECITER_ID = "alafasy";
+
+export function getReciter(id: string | null | undefined): Reciter {
+  return RECITERS.find((r) => r.id === id) ?? RECITERS[0];
+}
+
+export function ayahAudioUrl(
+  surahId: number,
+  verse: number,
+  reciterId: string = DEFAULT_RECITER_ID,
+): string {
+  const reciter = getReciter(reciterId);
   const s = String(surahId).padStart(3, "0");
   const v = String(verse).padStart(3, "0");
-  return `https://everyayah.com/data/Alafasy_128kbps/${s}${v}.mp3`;
+  return `https://everyayah.com/data/${reciter.folder}/${s}${v}.mp3`;
 }
 
 /** Per-word clip from Quran.com CDN (path from API word.audio_url). */

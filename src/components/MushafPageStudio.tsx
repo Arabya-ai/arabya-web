@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   IrabSurah,
@@ -16,20 +15,23 @@ import { formatVerseKey, toArabicNumerals } from "@/lib/format";
 import { juzLabel } from "@/lib/juz";
 import { normalizeForHafsFont } from "@/lib/quran-text";
 import { isBookmarked, toggleBookmark } from "@/lib/bookmarks";
-import { formatPosLabels } from "@/lib/morph-labels";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
 import { StudyModeTabs } from "@/components/StudyModeTabs";
 import { makeWordId } from "@/lib/word-id";
-import { ayahAudioUrl, wordAudioUrl } from "@/lib/audio";
+import { ayahAudioUrl, wordAudioUrl, RECITERS, DEFAULT_RECITER_ID } from "@/lib/audio";
+import { narrativeIrab } from "@/lib/irab-narrative";
+import type { IrabSourceMeta } from "@/lib/claims";
+import { WordStudyDock } from "@/components/WordStudyDock";
 
 type Props = {
   page: MushafPageContent;
   irabBySurah: Record<number, IrabSurah | null>;
   tafsirSources: TafsirSource[];
   verseEditions: VerseTranslationEdition[];
+  bookSources?: IrabSourceMeta[];
 };
 
-type Mode = "words" | "irab" | string;
+type Mode = "words" | "irab" | "meaning-table" | string;
 type WordRef = { surahId: number; verse: number; position: number };
 type MeaningLang = "ar" | "en" | "id" | "ur";
 
@@ -37,6 +39,7 @@ const FONT_KEY = "arabya-mushaf-font";
 const LAST_PAGE_KEY = "arabya-last-mushaf-page";
 const MEANING_LANG_KEY = "arabya-meaning-lang";
 const VERSE_TRANS_KEY = "arabya-verse-trans";
+const RECITER_KEY = "arabya-reciter";
 
 const FONT_SCALE_MIN = 0.7;
 const FONT_SCALE_MAX = 1.6;
@@ -59,11 +62,13 @@ export function MushafPageStudio({
   irabBySurah,
   tafsirSources,
   verseEditions,
+  bookSources = [],
 }: Props) {
   const modes: { id: Mode; label: string }[] = useMemo(() => {
     const list: { id: Mode; label: string }[] = [
       { id: "words", label: "الكلمات" },
       { id: "irab", label: "الإعراب" },
+      { id: "meaning-table", label: "جدول المعنى" },
     ];
     for (const s of tafsirSources) {
       list.push({ id: s.slug, label: s.nameAr });
@@ -80,6 +85,7 @@ export function MushafPageStudio({
   const [verseEdition, setVerseEdition] = useState(
     () => verseEditions[0]?.slug ?? "saheeh-en",
   );
+  const [reciterId, setReciterId] = useState(DEFAULT_RECITER_ID);
   const [bookmarked, setBookmarked] = useState(false);
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [wbwPlaying, setWbwPlaying] = useState(false);
@@ -100,6 +106,10 @@ export function MushafPageStudio({
       const lang = localStorage.getItem(MEANING_LANG_KEY);
       if (lang === "ar" || lang === "en" || lang === "id" || lang === "ur") {
         setMeaningLang(lang);
+      }
+      const savedReciter = localStorage.getItem(RECITER_KEY);
+      if (savedReciter && RECITERS.some((r) => r.id === savedReciter)) {
+        setReciterId(savedReciter);
       }
       const ed = localStorage.getItem(VERSE_TRANS_KEY);
       if (ed && verseEditions.some((e) => e.slug === ed)) setVerseEdition(ed);
@@ -189,7 +199,7 @@ export function MushafPageStudio({
               verseKey: verse.verseKey,
               word,
               morph: morph ?? null,
-              irab: morph?.irab ?? morph?.irabText ?? "—",
+              irab: narrativeIrab(morph ?? null),
             };
           }),
         ),
@@ -240,7 +250,9 @@ export function MushafPageStudio({
   }, []);
 
   const activeTafsir =
-    mode !== "words" && mode !== "irab" ? mode : null;
+    mode !== "words" && mode !== "irab" && mode !== "meaning-table"
+      ? mode
+      : null;
 
   useEffect(() => {
     if (!activeTafsir) return;
@@ -390,7 +402,11 @@ export function MushafPageStudio({
 
   const playAyahAudio = async () => {
     if (!selected) return;
-    const url = ayahAudioUrl(selected.surahId, selected.verseNumber);
+    const url = ayahAudioUrl(
+      selected.surahId,
+      selected.verseNumber,
+      reciterId,
+    );
     try {
       if (!audioRef.current) audioRef.current = new Audio();
       const audio = audioRef.current;
@@ -494,14 +510,6 @@ export function MushafPageStudio({
     window.setTimeout(() => setShareNote(null), 1800);
   };
 
-  const meaningLabels: { id: MeaningLang; label: string }[] = [
-    { id: "ar", label: "عربي" },
-    { id: "en", label: "EN" },
-    { id: "id", label: "ID" },
-    { id: "ur", label: "UR" },
-  ];
-
-  const morph = selected?.morph;
   const canShrink = fontScale > FONT_SCALE_MIN + 0.001;
   const canGrow = fontScale < FONT_SCALE_MAX - 0.001;
   const fontPercent = Math.round(fontScale * 100);
@@ -586,6 +594,31 @@ export function MushafPageStudio({
         </div>
         {selected ? (
           <>
+            <label className="reciter-pick">
+              <span className="sr-only">القارئ</span>
+              <select
+                className="reciter-select"
+                value={reciterId}
+                onChange={(e) => {
+                  const id = e.target.value;
+                  setReciterId(id);
+                  try {
+                    localStorage.setItem(RECITER_KEY, id);
+                  } catch {
+                    /* ignore */
+                  }
+                  stopAllAudio();
+                }}
+                aria-label="اختر القارئ"
+                title="القارئ"
+              >
+                {RECITERS.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.nameAr}
+                  </option>
+                ))}
+              </select>
+            </label>
             <button
               type="button"
               className={`tool-btn bookmark-btn ${bookmarked ? "is-on" : ""}`}
@@ -716,100 +749,18 @@ export function MushafPageStudio({
       </article>
 
       {selected ? (
-        <section className="word-dock" aria-live="polite">
-          <div className="analysis-grid analysis-grid--study">
-            <article className="analysis-card is-ready">
-              <h3>الكلمة</h3>
-              <div className="word-card-body">
-                <span className="word-dock-key">
-                  {formatVerseKey(selected.verseKey)}
-                </span>
-                <p className="word-dock-ar">
-                  {normalizeForHafsFont(selected.word.text)}
-                </p>
-                {selected.word.transliteration ? (
-                  <p className="word-dock-tr">
-                    {selected.word.transliteration}
-                  </p>
-                ) : null}
-                <p className="word-dock-en">
-                  {wordMeaning(selected.word, meaningLang) || "—"}
-                </p>
-                {(morph?.root || morph?.lemma || morph?.pos?.length) ? (
-                  <div className="morph-facts morph-facts--inline" aria-label="بيانات صرفية">
-                    {morph?.root ? (
-                      <Link
-                        href={`/root/${encodeURIComponent(morph.root)}`}
-                        className="morph-chip"
-                      >
-                        جذر: {morph.root}
-                      </Link>
-                    ) : null}
-                    {morph?.lemma ? (
-                      <span className="morph-chip">مادة: {morph.lemma}</span>
-                    ) : null}
-                    {morph?.pos?.length ? (
-                      <span className="morph-chip">
-                        {formatPosLabels(morph.pos, morph.features)}
-                      </span>
-                    ) : null}
-                  </div>
-                ) : null}
-              </div>
-            </article>
-
-            <article className="analysis-card is-ready">
-              <h3>الإعراب / الصرف</h3>
-              <p>{selected.irab}</p>
-            </article>
-
-            <article className="analysis-card is-ready">
-              <h3>معنى الكلمة</h3>
-              <div className="lang-switch" role="group" aria-label="لغة المعنى">
-                {meaningLabels.map((l) => (
-                  <button
-                    key={l.id}
-                    type="button"
-                    className={`lang-chip ${meaningLang === l.id ? "is-active" : ""}`}
-                    onClick={() => setMeaningLang(l.id)}
-                  >
-                    {l.label}
-                  </button>
-                ))}
-              </div>
-              <p>{wordMeaning(selected.word, meaningLang) || "—"}</p>
-              {meaningLang === "ar" ? (
-                <p className="meaning-ar-note">
-                  معنى عربي من معجم مواد عربْية (دلالي عند التوفر) مع تلميح صرفي عند الحاجة
-                  كلمة بكلمة.
-                </p>
-              ) : null}
-            </article>
-          </div>
-
-          {verseEditions.length ? (
-            <article className="analysis-card is-ready verse-trans-card">
-              <div className="verse-trans-head">
-                <h3>ترجمة الآية</h3>
-                <select
-                  className="verse-trans-select"
-                  value={verseEdition}
-                  onChange={(e) => setVerseEdition(e.target.value)}
-                  aria-label="اختر ترجمة الآية"
-                >
-                  {verseEditions.map((e) => (
-                    <option key={e.slug} value={e.slug}>
-                      {e.nameAr}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <p className="verse-trans-body" dir="auto">
-                {selectedVerseTranslation || "جارٍ التحميل…"}
-              </p>
-            </article>
-          ) : null}
-        </section>
+        <WordStudyDock
+          verseKey={selected.verseKey}
+          word={selected.word}
+          morph={selected.morph}
+          meaningLang={meaningLang}
+          onMeaningLang={setMeaningLang}
+          verseEditions={verseEditions}
+          verseEdition={verseEdition}
+          onVerseEdition={setVerseEdition}
+          verseTranslation={selectedVerseTranslation}
+          bookSources={bookSources}
+        />
       ) : null}
 
       <StudyModeTabs modes={modes} mode={mode} onModeChange={setMode} />
@@ -896,7 +847,50 @@ export function MushafPageStudio({
             })}
           </div>
         </section>
-      ) : (
+      ) : null}
+
+      {mode === "meaning-table" ? (
+        <section
+          className="study-sheet meaning-table-sheet"
+          role="tabpanel"
+          id="study-panel"
+          aria-labelledby={`study-tab-${mode}`}
+          tabIndex={0}
+        >
+          <h2>جدول المعنى العربي — صفحة {toArabicNumerals(page.page)}</h2>
+          <p className="table-intro">
+            كلمة | معنى دراسي عربي (معجم مواد عربْية / صرف) — هيكل مشابه لمواقع التفسير
+            كلمة بكلمة، بمحتوى Arabya المفتوح وليس نسخًا من كتب محمية.
+          </p>
+          <div className="meaning-table-grid">
+            {wordRows.map((row) => {
+              const open = selected?.key === row.key;
+              return (
+                <button
+                  key={row.key}
+                  type="button"
+                  className={`meaning-table-row ${open ? "is-selected" : ""}`}
+                  onClick={() =>
+                    selectWord(row.surahId, row.verseNumber, row.word.position)
+                  }
+                >
+                  <span className="meaning-table-word">
+                    {normalizeForHafsFont(row.word.text)}
+                  </span>
+                  <span className="meaning-table-gloss">
+                    {row.word.meaningAr ||
+                      row.morph?.lemma ||
+                      row.word.meaning ||
+                      "—"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
+      {activeTafsir ? (
         <section
           className="study-sheet"
           role="tabpanel"
@@ -947,7 +941,7 @@ export function MushafPageStudio({
             </div>
           )}
         </section>
-      )}
+      ) : null}
     </div>
   );
 }

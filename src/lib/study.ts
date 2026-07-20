@@ -6,6 +6,8 @@ import {
   searchAyahs,
 } from "@/lib/quran";
 import { makeWordId } from "@/lib/word-id";
+import { shortIrabGlance } from "@/lib/irab-narrative";
+import { narrativeIrab } from "@/lib/irab-narrative";
 
 export type StudyWord = {
   wordId: string;
@@ -143,7 +145,7 @@ export async function runStudyQuery(query: string, limit = 6): Promise<{
             meaning: w.meaning,
             root: morph?.root ?? null,
             lemma: morph?.lemma ?? null,
-            irab: morph?.irab ?? null,
+            irab: narrativeIrab(morph ?? null) || shortIrabGlance(morph ?? null) || null,
             matched: Boolean(matched),
           };
         }) ?? [];

@@ -1,0 +1,27 @@
+---
+description: Arabya product vision — word-level Arabic analysis platform (Quran → Hadith → heritage)
+alwaysApply: true
+---
+
+# Arabya Product Vision
+
+Arabya is **not** merely “mushaf + tafsir”. It is a **word-by-word Arabic text analysis platform** applied in stages:
+
+1. **Now — Quran:** every word has layers: morphology (صرف) · syntax/iʿrāb (نحو) · semantics (دلالة) · rhetoric (بلاغة) · lexicon (معجم) · translation (ترجمة), each with clear source attribution.
+2. **Later — Hadith:** same analysis engine, Word IDs, and Claims model.
+3. **After that — poetry & heritage** from المكتبة الشاملة (licensed import only): same per-word analysis.
+
+## Product shape
+
+- Comprehensive portal (reading, audio, tafsirs, translations, tools) **plus** deep word study.
+- Open data now; licensed iʿrāb/semantic books when the owner provides files.
+- Domain `arabya.ai` only after the core product is ready on `arabyaai.com`.
+
+## Hard constraints for agents
+
+- **Never** scrape or republish protected content from competitor sites (irobquran, surahquran, al-eman, quran-words, etc.).
+- Mimic **UX patterns** only; sync data via open APIs/scripts or owner-supplied licensed files.
+- Git-first for static Quran content; cloud accounts/sync later (D1).
+- Every analysis layer needs an explicit `source` (ADR-0002 Claims when opinions differ).
+- Do not build Hadith/poetry pipelines before the six Quran word layers are solid in the UI.
+- Do not copy quran-words.com book text without written permission.

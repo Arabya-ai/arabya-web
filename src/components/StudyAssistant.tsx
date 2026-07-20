@@ -118,11 +118,11 @@ export function StudyAssistant() {
                 {h.explain ? (
                   <span className="study-hit-explain">{h.explain}</span>
                 ) : null}
-                {h.matchedWords && h.matchedWords.length > 0 ? (
+                {h.matchedWords?.length ? (
                   <span className="study-hit-meta">
                     {h.matchedWords
-                      .slice(0, 4)
-                      .map((w) => w.meaningAr || w.lemma || w.text)
+                      .slice(0, 3)
+                      .map((w) => w.irab || w.meaningAr || w.lemma || w.text)
                       .filter(Boolean)
                       .join(" · ")}
                   </span>
@@ -136,6 +136,13 @@ export function StudyAssistant() {
                   </span>
                 ) : null}
               </Link>
+              <p className="study-hit-links">
+                <Link href={`/ayah/${h.surahId}/${h.verse}`}>إعراب الآية</Link>
+                {" · "}
+                <Link href={`/surah/${h.surahId}/read#v-${h.verse}`}>
+                  قراءة السورة
+                </Link>
+              </p>
             </li>
           ))}
         </ul>

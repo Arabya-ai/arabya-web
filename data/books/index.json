@@ -1,0 +1,25 @@
+{
+  "books": [
+    {
+      "id": "darwish",
+      "label": "إعراب القرآن وبيانه — محيي الدين درويش",
+      "title": "إعراب القرآن وبيانه",
+      "status": "awaiting_license",
+      "description": "يُضاف بعد تسليم ملف مرخّص من المالك."
+    },
+    {
+      "id": "tibyan",
+      "label": "التبيان في إعراب القرآن",
+      "title": "التبيان في إعراب القرآن",
+      "status": "awaiting_license",
+      "description": "يُضاف بعد تسليم ملف مرخّص من المالك."
+    },
+    {
+      "id": "kharrat",
+      "label": "مشكل إعراب القرآن — الخراط",
+      "title": "مشكل إعراب القرآن",
+      "status": "awaiting_license",
+      "description": "يُضاف بعد تسليم ملف مرخّص من المالك."
+    }
+  ]
+}

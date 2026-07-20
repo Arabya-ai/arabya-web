@@ -133,7 +133,7 @@ export function SurahIndex({
           {filtered.map((s) => (
             <Link
               key={s.id}
-              href={getMushafPageHref(mushafFirstPage[String(s.id)] ?? s.id)}
+              href={`/surah/${s.id}/read`}
               className="surah-chip"
               aria-label={`سورة ${s.nameArabic}، ${s.revelationLabel}، ${s.versesCount} آية، ${s.juzLabel}`}
             >

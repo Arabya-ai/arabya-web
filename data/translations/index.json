@@ -40,6 +40,20 @@
       "nameAr": "جوناغري (أردو)",
       "nameEn": "Maulana Muhammad Junagarhi",
       "lang": "ur"
+    },
+    {
+      "slug": "indonesian",
+      "resourceId": 33,
+      "nameAr": "الإندونيسية",
+      "nameEn": "Indonesian Ministry of Religious Affairs",
+      "lang": "id"
+    },
+    {
+      "slug": "turkish",
+      "resourceId": 77,
+      "nameAr": "التركية — ديانت",
+      "nameEn": "Turkish (Diyanet)",
+      "lang": "tr"
     }
   ],
   "arabicWbwNote": "No open Arabic word-by-word meaning dataset is currently available via Quran.com or other GPL/CC sources suitable for redistribution. English/Indonesian/Urdu WBW are included instead."

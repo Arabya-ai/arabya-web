@@ -38,6 +38,15 @@ export function SiteHeader() {
           <Link href="/" onClick={() => setOpen(false)}>
             الفهرس
           </Link>
+          <Link href="/juz" onClick={() => setOpen(false)}>
+            الأجزاء
+          </Link>
+          <Link href="/books" onClick={() => setOpen(false)}>
+            الإعراب
+          </Link>
+          <Link href="/resources" onClick={() => setOpen(false)}>
+            موارد
+          </Link>
           <Link href="/about" onClick={() => setOpen(false)}>
             عن Arabya
           </Link>

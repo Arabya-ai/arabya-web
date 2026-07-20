@@ -40,6 +40,20 @@ const VERSE_EDITIONS = [
     nameEn: "Maulana Muhammad Junagarhi",
     lang: "ur",
   },
+  {
+    slug: "indonesian",
+    resourceId: 33,
+    nameAr: "الإندونيسية",
+    nameEn: "Indonesian Ministry of Religious Affairs",
+    lang: "id",
+  },
+  {
+    slug: "turkish",
+    resourceId: 77,
+    nameAr: "التركية — ديانت",
+    nameEn: "Turkish (Diyanet)",
+    lang: "tr",
+  },
 ];
 
 async function fetchJson(url) {

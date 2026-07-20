@@ -17,6 +17,18 @@
       "nameAr": "تفسير ابن كثير",
       "resourceId": 14,
       "api": "https://api.quran.com"
+    },
+    {
+      "slug": "qurtubi",
+      "nameAr": "تفسير القرطبي",
+      "resourceId": 90,
+      "api": "https://api.quran.com"
+    },
+    {
+      "slug": "baghawi",
+      "nameAr": "تفسير البغوي",
+      "resourceId": 94,
+      "api": "https://api.quran.com"
     }
   ]
 }
