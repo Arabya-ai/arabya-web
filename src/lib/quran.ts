@@ -2,6 +2,8 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type {
   IrabSurah,
+  RootEntry,
+  RootsIndex,
   SurahContent,
   SurahMeta,
   TafsirSource,
@@ -128,23 +130,19 @@ let searchCache: SearchHit[] | null = null;
 let searchNormCache: { hit: SearchHit; norm: string; nameNorm: string }[] | null =
   null;
 
-export async function getRootsIndex(): Promise<
-  import("./types").RootsIndex | null
-> {
+export async function getRootsIndex(): Promise<RootsIndex | null> {
   try {
     const raw = await readFile(
       path.join(dataRoot, "roots-index.json"),
       "utf8",
     );
-    return JSON.parse(raw) as import("./types").RootsIndex;
+    return JSON.parse(raw) as RootsIndex;
   } catch {
     return null;
   }
 }
 
-export async function getRootEntry(
-  root: string,
-): Promise<import("./types").RootEntry | null> {
+export async function getRootEntry(root: string): Promise<RootEntry | null> {
   const index = await getRootsIndex();
   if (!index) return null;
   const decoded = decodeURIComponent(root);

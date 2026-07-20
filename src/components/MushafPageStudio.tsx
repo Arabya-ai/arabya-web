@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   IrabSurah,
+  IrabWord,
   TafsirSource,
   TafsirSurah,
   VerseTranslationEdition,
@@ -14,7 +16,10 @@ import { formatVerseKey, toArabicNumerals } from "@/lib/format";
 import { juzLabel } from "@/lib/juz";
 import { normalizeForHafsFont } from "@/lib/quran-text";
 import { isBookmarked, toggleBookmark } from "@/lib/bookmarks";
+import { formatPosLabels } from "@/lib/morph-labels";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
+import { makeWordId } from "@/lib/word-id";
+import { ayahAudioUrl } from "@/lib/audio";
 
 type Props = {
   page: MushafPageContent;
@@ -25,7 +30,7 @@ type Props = {
 
 type Mode = "words" | "irab" | string;
 type WordRef = { surahId: number; verse: number; position: number };
-type MeaningLang = "en" | "id" | "ur";
+type MeaningLang = "ar" | "en" | "id" | "ur";
 
 const FONT_KEY = "arabya-mushaf-font";
 const LAST_PAGE_KEY = "arabya-last-mushaf-page";
@@ -33,6 +38,7 @@ const MEANING_LANG_KEY = "arabya-meaning-lang";
 const VERSE_TRANS_KEY = "arabya-verse-trans";
 
 function wordMeaning(word: QuranWord, lang: MeaningLang): string {
+  if (lang === "ar") return word.meaningAr || word.meaning || "";
   if (lang === "id") return word.meaningId || word.meaning || "";
   if (lang === "ur") return word.meaningUr || word.meaning || "";
   return word.meaning || "";
@@ -59,11 +65,13 @@ export function MushafPageStudio({
   const [activeWord, setActiveWord] = useState<WordRef | null>(null);
   const [fontScale, setFontScale] = useState(1);
   const [shareNote, setShareNote] = useState<string | null>(null);
-  const [meaningLang, setMeaningLang] = useState<MeaningLang>("en");
+  const [meaningLang, setMeaningLang] = useState<MeaningLang>("ar");
   const [verseEdition, setVerseEdition] = useState(
     () => verseEditions[0]?.slug ?? "saheeh-en",
   );
   const [bookmarked, setBookmarked] = useState(false);
+  const [audioPlaying, setAudioPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [tafsirCache, setTafsirCache] = useState<
     Record<string, TafsirSurah | null>
   >({});
@@ -77,7 +85,9 @@ export function MushafPageStudio({
       const saved = Number(localStorage.getItem(FONT_KEY));
       if (saved >= 0.85 && saved <= 1.35) setFontScale(saved);
       const lang = localStorage.getItem(MEANING_LANG_KEY);
-      if (lang === "en" || lang === "id" || lang === "ur") setMeaningLang(lang);
+      if (lang === "ar" || lang === "en" || lang === "id" || lang === "ur") {
+        setMeaningLang(lang);
+      }
       const ed = localStorage.getItem(VERSE_TRANS_KEY);
       if (ed && verseEditions.some((e) => e.slug === ed)) setVerseEdition(ed);
     } catch {
@@ -105,12 +115,31 @@ export function MushafPageStudio({
     }
   }, [page.page]);
 
-  const irabMap = useMemo(() => {
-    const map = new Map<string, string>();
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLSelectElement
+      ) {
+        return;
+      }
+      if (e.key === "ArrowLeft" && page.page < page.totalPages) {
+        window.location.href = `/mushaf/${page.page + 1}`;
+      } else if (e.key === "ArrowRight" && page.page > 1) {
+        window.location.href = `/mushaf/${page.page - 1}`;
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [page.page, page.totalPages]);
+
+  const irabWordMap = useMemo(() => {
+    const map = new Map<string, IrabWord>();
     for (const block of page.blocks) {
       for (const verse of irabBySurah[block.surahId]?.verses ?? []) {
         for (const w of verse.words) {
-          map.set(`${block.surahId}:${verse.verseNumber}:${w.position}`, w.irab);
+          map.set(`${block.surahId}:${verse.verseNumber}:${w.position}`, w);
         }
       }
     }
@@ -121,20 +150,26 @@ export function MushafPageStudio({
     () =>
       page.blocks.flatMap((block) =>
         block.verses.flatMap((verse) =>
-          verse.words.map((word) => ({
-            key: `${block.surahId}:${verse.verseNumber}:${word.position}`,
-            surahId: block.surahId,
-            verseNumber: verse.verseNumber,
-            verseKey: verse.verseKey,
-            word,
-            irab:
-              irabMap.get(
-                `${block.surahId}:${verse.verseNumber}:${word.position}`,
-              ) ?? "—",
-          })),
+          verse.words.map((word) => {
+            const morph = irabWordMap.get(
+              `${block.surahId}:${verse.verseNumber}:${word.position}`,
+            );
+            return {
+              key: `${block.surahId}:${verse.verseNumber}:${word.position}`,
+              wordId:
+                morph?.wordId ??
+                makeWordId(block.surahId, verse.verseNumber, word.position),
+              surahId: block.surahId,
+              verseNumber: verse.verseNumber,
+              verseKey: verse.verseKey,
+              word,
+              morph: morph ?? null,
+              irab: morph?.irab ?? morph?.irabText ?? "—",
+            };
+          }),
         ),
       ),
-    [page.blocks, irabMap],
+    [page.blocks, irabWordMap],
   );
 
   const pageVerseKeys = useMemo(
@@ -171,6 +206,12 @@ export function MushafPageStudio({
     }
     setBookmarked(isBookmarked(selected.verseKey));
   }, [selected]);
+
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+    };
+  }, []);
 
   const activeTafsir =
     mode !== "words" && mode !== "irab" ? mode : null;
@@ -331,11 +372,37 @@ export function MushafPageStudio({
     window.setTimeout(() => setShareNote(null), 1800);
   };
 
+  const playAyahAudio = async () => {
+    if (!selected) return;
+    const url = ayahAudioUrl(selected.surahId, selected.verseNumber);
+    try {
+      if (!audioRef.current) audioRef.current = new Audio();
+      const audio = audioRef.current;
+      if (audioPlaying && audio.src.endsWith(url.split("/").pop() ?? "")) {
+        audio.pause();
+        setAudioPlaying(false);
+        return;
+      }
+      audio.src = url;
+      audio.onended = () => setAudioPlaying(false);
+      await audio.play();
+      setAudioPlaying(true);
+      setShareNote("جاري التلاوة…");
+      window.setTimeout(() => setShareNote(null), 1800);
+    } catch {
+      setShareNote("تعذّر تشغيل الصوت");
+      window.setTimeout(() => setShareNote(null), 2000);
+    }
+  };
+
   const meaningLabels: { id: MeaningLang; label: string }[] = [
+    { id: "ar", label: "عربي" },
     { id: "en", label: "EN" },
     { id: "id", label: "ID" },
     { id: "ur", label: "UR" },
   ];
+
+  const morph = selected?.morph;
 
   return (
     <div className="studio">
@@ -364,14 +431,24 @@ export function MushafPageStudio({
           </button>
         </div>
         {selected ? (
-          <button
-            type="button"
-            className={`tool-btn bookmark-btn ${bookmarked ? "is-on" : ""}`}
-            onClick={onToggleBookmark}
-            aria-pressed={bookmarked}
-          >
-            {bookmarked ? "★ مفضّلة" : "☆ حفظ الآية"}
-          </button>
+          <>
+            <button
+              type="button"
+              className={`tool-btn bookmark-btn ${bookmarked ? "is-on" : ""}`}
+              onClick={onToggleBookmark}
+              aria-pressed={bookmarked}
+            >
+              {bookmarked ? "★ مفضّلة" : "☆ حفظ الآية"}
+            </button>
+            <button
+              type="button"
+              className={`tool-btn ${audioPlaying ? "is-on" : ""}`}
+              onClick={playAyahAudio}
+              aria-pressed={audioPlaying}
+            >
+              {audioPlaying ? "⏸ إيقاف" : "▶ تلاوة"}
+            </button>
+          </>
         ) : null}
         {shareNote ? <span className="share-note">{shareNote}</span> : null}
       </div>
@@ -472,7 +549,7 @@ export function MushafPageStudio({
           ))}
 
           <p className="mushaf-hint">
-            اضغط أي كلمة لدراستها · رقم الآية للمشاركة · ★ لحفظ المفضّلة
+            اضغط أي كلمة · رقم الآية للمشاركة · ▶ للتلاوة · ←→ لتقليب الصفحات
           </p>
         </div>
       </article>
@@ -482,6 +559,7 @@ export function MushafPageStudio({
           <div className="word-dock-main">
             <span className="word-dock-key">
               {formatVerseKey(selected.verseKey)}
+              <span className="word-dock-id">{selected.wordId}</span>
             </span>
             <p className="word-dock-ar">
               {normalizeForHafsFont(selected.word.text)}
@@ -493,6 +571,35 @@ export function MushafPageStudio({
               {wordMeaning(selected.word, meaningLang) || "—"}
             </p>
           </div>
+
+          <div className="morph-facts" aria-label="بيانات صرفية">
+            {morph?.root ? (
+              <div className="morph-fact">
+                <span className="morph-fact-label">الجذر</span>
+                <Link
+                  href={`/root/${encodeURIComponent(morph.root)}`}
+                  className="morph-fact-value morph-link"
+                >
+                  {morph.root}
+                </Link>
+              </div>
+            ) : null}
+            {morph?.lemma ? (
+              <div className="morph-fact">
+                <span className="morph-fact-label">المادة</span>
+                <span className="morph-fact-value">{morph.lemma}</span>
+              </div>
+            ) : null}
+            {morph?.pos?.length ? (
+              <div className="morph-fact">
+                <span className="morph-fact-label">النوع</span>
+                <span className="morph-fact-value">
+                  {formatPosLabels(morph.pos, morph.features)}
+                </span>
+              </div>
+            ) : null}
+          </div>
+
           <div className="analysis-grid analysis-grid--two">
             <article className="analysis-card is-ready">
               <h3>الإعراب / الصرف</h3>
@@ -517,8 +624,9 @@ export function MushafPageStudio({
               </div>
               <p>{wordMeaning(selected.word, meaningLang) || "—"}</p>
               <p className="analysis-note">
-                كلمة بكلمة من Quran.com (إنجليزي / إندونيسي / أردو). لا يتوفر
-                حالياً مصدر عربي مفتوح لمعاني الكلمات.
+                {meaningLang === "ar"
+                  ? "معنى عربي تقريبي من المادة الصرفية — ليس ترجمة دلالية كاملة."
+                  : "كلمة بكلمة من Quran.com (إنجليزي / إندونيسي / أردو)."}
               </p>
             </article>
           </div>

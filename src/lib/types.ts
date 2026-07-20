@@ -14,6 +14,8 @@ export type QuranWord = {
   text: string;
   /** English word-by-word (Quran.com) */
   meaning: string;
+  /** Morphology-based Arabic study gloss (not semantic WBW) */
+  meaningAr?: string;
   /** Indonesian word-by-word */
   meaningId?: string;
   /** Urdu word-by-word */
@@ -56,14 +58,24 @@ export type SurahContent = {
 
 export type IrabWord = {
   position: number;
+  /** Canonical ID e.g. W:001:001:001 */
+  wordId?: string;
   segments: string;
+  surface?: string;
+  root?: string;
+  lemma?: string;
+  pos?: string[];
+  features?: string[];
+  /** Display iʿrāb text */
   irab: string;
+  irabText?: string;
 };
 
 export type IrabSurah = {
   id: number;
   source: string;
   sourceUrl: string;
+  license?: string;
   verses: { verseNumber: number; words: IrabWord[] }[];
 };
 
@@ -100,4 +112,28 @@ export type MushafIndex = {
   surahFirstPage: Record<string, number>;
   surahPages: Record<string, number[]>;
   pages: Record<string, MushafPageVerse[]>;
+};
+
+export type RootOccurrence = {
+  wordId: string;
+  surahId: number;
+  verse: number;
+  position: number;
+  surface: string;
+  lemma?: string;
+  page?: number;
+};
+
+export type RootEntry = {
+  root: string;
+  count: number;
+  occurrences: RootOccurrence[];
+};
+
+export type RootsIndex = {
+  source: string;
+  sourceUrl: string;
+  license: string;
+  rootCount: number;
+  roots: RootEntry[];
 };

@@ -34,6 +34,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title,
     description: `مصحف المدينة — صفحة ${toArabicNumerals(pageNum)} مع دراسة الكلمات — Arabya`,
+    openGraph: {
+      title,
+      description: `ادرس كلمات الصفحة ${toArabicNumerals(pageNum)} مع إعراب وتفسير — Arabya`,
+      locale: "ar_AR",
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: `صفحة ${toArabicNumerals(pageNum)} — دراسة كلمات القرآن`,
+    },
   };
 }
 

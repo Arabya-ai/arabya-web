@@ -278,23 +278,73 @@ async function main() {
     const features = parseFeatures(featuresRaw);
     const meta = extractMeta(pos, features, terms);
     const irab = describeFromMeta(meta, terms);
+    // Prefer DET over bare P so DET+noun words are not labeled حرف جر
+    const posTag = meta.isDet ? "DET" : pos;
     if (!byWord.has(key)) byWord.set(key, []);
-    byWord.get(key).push({ text, pos, features, irab, meta });
+    byWord.get(key).push({ text, pos: posTag, features, irab, meta });
   }
 
   /** @type {Map<number, any>} */
   const surahs = new Map();
+
+  /** @type {Map<string, { root: string, count: number, occurrences: { wordId: string, surahId: number, verse: number, position: number, surface: string, lemma?: string, page?: number }[] }>} */
+  const roots = new Map();
 
   for (const [key, segs] of byWord) {
     const [s, a, w] = key.split(":").map(Number);
     if (!surahs.has(s)) surahs.set(s, { id: s, verses: {} });
     const surah = surahs.get(s);
     if (!surah.verses[a]) surah.verses[a] = { verseNumber: a, words: [] };
+
+    const surface = segs.map((x) => x.text).join("");
+    const irabText = synthesizeWord(segs, terms);
+    const root =
+      segs.map((x) => x.meta.root).find(Boolean) || undefined;
+    const stemSeg = segs.find(
+      (x) =>
+        x.meta.lemma &&
+        !x.meta.isDet &&
+        !x.meta.isRealPrep &&
+        !(x.meta.isPref && !x.meta.root),
+    );
+    const lemma =
+      stemSeg?.meta.lemma ||
+      segs.map((x) => x.meta.lemma).find(Boolean) ||
+      undefined;
+    const pos = uniq(segs.map((x) => x.pos).filter(Boolean));
+    const features = uniq(segs.flatMap((x) => x.features));
+    const wordId = `W:${String(s).padStart(3, "0")}:${String(a).padStart(3, "0")}:${String(w).padStart(3, "0")}`;
+
     surah.verses[a].words.push({
       position: w,
-      segments: segs.map((x) => x.text).join(""),
-      irab: synthesizeWord(segs, terms),
+      wordId,
+      segments: surface,
+      surface,
+      root,
+      lemma,
+      pos,
+      features,
+      irab: irabText,
+      irabText,
     });
+
+    if (root) {
+      if (!roots.has(root)) {
+        roots.set(root, { root, count: 0, occurrences: [] });
+      }
+      const entry = roots.get(root);
+      entry.count += 1;
+      if (entry.occurrences.length < 250) {
+        entry.occurrences.push({
+          wordId,
+          surahId: s,
+          verse: a,
+          position: w,
+          surface,
+          lemma,
+        });
+      }
+    }
   }
 
   for (const [id, surah] of surahs) {
@@ -323,6 +373,25 @@ async function main() {
     process.stdout.write(`irab surah ${id}\n`);
   }
 
+  const rootsList = [...roots.values()].sort((a, b) =>
+    a.root.localeCompare(b.root, "ar"),
+  );
+  await writeFile(
+    path.join(root, "data", "roots-index.json"),
+    JSON.stringify(
+      {
+        source: "Quranic Arabic Corpus morphology",
+        sourceUrl: "http://corpus.quran.com",
+        license: "GNU GPL — attribution required",
+        rootCount: rootsList.length,
+        roots: rootsList,
+      },
+      null,
+      0,
+    ),
+    "utf8",
+  );
+
   await writeFile(
     path.join(root, "data", "irab-index.json"),
     JSON.stringify(
@@ -330,8 +399,9 @@ async function main() {
         source: "Quranic Arabic Corpus",
         sourceUrl: "http://corpus.quran.com",
         license: "GNU GPL — attribution required",
-        note: "Morphological iʿrāb summaries (not full classical parsing). Improved Arabic phrasing in Arabya build-irab.",
+        note: "Structured morphological iʿrāb (not full classical parsing). Includes root/lemma/pos for Word Studio.",
         surahCount: surahs.size,
+        rootCount: rootsList.length,
       },
       null,
       2,
@@ -343,7 +413,7 @@ async function main() {
   const fatiha = surahs.get(1);
   const v1 = fatiha?.verses[1]?.words?.slice(0, 4);
   console.log("Sample 1:1:", JSON.stringify(v1, null, 2));
-  console.log("Done iʿrāb for", surahs.size, "surahs");
+  console.log("Done iʿrāb for", surahs.size, "surahs,", rootsList.length, "roots");
 }
 
 main().catch((err) => {

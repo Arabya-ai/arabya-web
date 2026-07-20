@@ -2,6 +2,7 @@
   "source": "Quranic Arabic Corpus",
   "sourceUrl": "http://corpus.quran.com",
   "license": "GNU GPL — attribution required",
-  "note": "Morphological iʿrāb summaries (not full classical parsing). Improved Arabic phrasing in Arabya build-irab.",
-  "surahCount": 114
+  "note": "Structured morphological iʿrāb (not full classical parsing). Includes root/lemma/pos for Word Studio.",
+  "surahCount": 114,
+  "rootCount": 1651
 }

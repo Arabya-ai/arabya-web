@@ -2,7 +2,7 @@
  * Builds mushaf page index (604 pages) and patches /data/surahs/*.json with page numbers.
  * Source: Quran.com API v4 (page_number on each verse).
  */
-import { readFile, writeFile, readdir } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 

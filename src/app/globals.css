@@ -33,6 +33,22 @@
   --font-display: var(--font-amiri), var(--font-naskh), serif;
 }
 
+html[data-theme="dark"] {
+  --bg: #0b1412;
+  --bg-accent: #12201c;
+  --surface: #152420;
+  --ink: #e8f0ec;
+  --muted: #9bb0a6;
+  --line: #243832;
+  --brand: #2dd4bf;
+  --brand-deep: #14b8a6;
+  --brand-mid: #5eead4;
+  --brand-cyan: #99f6e4;
+  --brand-soft: #0f2924;
+  --select: #134e4a;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 12px 32px rgba(0, 0, 0, 0.28);
+}
+
 @theme inline {
   --color-background: var(--bg);
   --color-foreground: var(--ink);
@@ -1316,4 +1332,124 @@ input {
     position: sticky;
     top: 5.25rem;
   }
+}
+
+.theme-toggle {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.theme-toggle:hover {
+  border-color: var(--brand);
+  color: var(--brand-deep);
+}
+
+.word-dock-id {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-family: ui-monospace, monospace;
+  direction: ltr;
+}
+
+.morph-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin: 0.75rem 0 1rem;
+}
+
+.morph-fact {
+  background: var(--brand-soft);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.55rem 0.8rem;
+  min-width: 5.5rem;
+}
+
+.morph-fact-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 0.2rem;
+}
+
+.morph-fact-value {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.morph-link {
+  color: var(--brand-deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.root-page h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  margin: 0 0 0.35rem;
+}
+
+.root-meta {
+  color: var(--muted);
+  margin-bottom: 1.25rem;
+}
+
+.root-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.root-list a {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: baseline;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.root-list a:hover {
+  border-color: var(--brand);
+}
+
+.root-surface {
+  font-family: var(--font-quran);
+  font-size: 1.25rem;
+}
+
+.root-ref {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.rag-box {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.rag-box h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.rag-box p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
 }

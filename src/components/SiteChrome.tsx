@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { BrandLockup } from "@/components/BrandLockup";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -43,6 +44,7 @@ export function SiteHeader() {
           <Link href="/privacy" onClick={() => setOpen(false)}>
             الخصوصية
           </Link>
+          <ThemeToggle />
         </nav>
       </div>
     </header>
@@ -50,8 +52,6 @@ export function SiteHeader() {
 }
 
 export function SiteFooter() {
-  const year = new Date().getFullYear();
-
   return (
     <footer className="site-footer">
       <div className="shell footer-inner">
@@ -59,7 +59,7 @@ export function SiteFooter() {
           <BrandLockup size="footer" />
         </div>
         <p className="footer-legal">
-          © {year} Arabya · <Link href="/privacy">سياسة الخصوصية</Link>
+          © Arabya · <Link href="/privacy">سياسة الخصوصية</Link>
         </p>
         <p className="footer-sources">
           الرسم العثماني · مصحف المدينة · مصادر مفتوحة:{" "}
