@@ -12,9 +12,31 @@ export type SurahMeta = {
 export type QuranWord = {
   position: number;
   text: string;
+  /** English word-by-word (Quran.com) */
   meaning: string;
+  /** Indonesian word-by-word */
+  meaningId?: string;
+  /** Urdu word-by-word */
+  meaningUr?: string;
   transliteration: string;
   charType: string;
+};
+
+export type VerseTranslationEdition = {
+  slug: string;
+  resourceId: number;
+  nameAr: string;
+  nameEn: string;
+  lang: string;
+};
+
+export type VerseTranslationSurah = {
+  id: number;
+  slug: string;
+  nameAr: string;
+  nameEn: string;
+  lang: string;
+  verses: { verseNumber: number; verseKey: string; text: string }[];
 };
 
 export type Ayah = {

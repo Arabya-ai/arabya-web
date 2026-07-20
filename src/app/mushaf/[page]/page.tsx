@@ -7,7 +7,7 @@ import {
   getMushafPage,
 } from "@/lib/mushaf";
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
-import { getIrab, getTafsirSources } from "@/lib/quran";
+import { getIrab, getTafsirSources, getVerseTranslationEditions } from "@/lib/quran";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
 
 type Props = { params: Promise<{ page: string }> };
@@ -42,9 +42,10 @@ export default async function MushafPageRoute({ params }: Props) {
   const pageNum = Number(page);
   if (!Number.isInteger(pageNum) || pageNum < 1 || pageNum > 604) notFound();
 
-  const [pageContent, tafsirSources] = await Promise.all([
+  const [pageContent, tafsirSources, verseEditions] = await Promise.all([
     getMushafPage(pageNum),
     getTafsirSources(),
+    getVerseTranslationEditions(),
   ]);
 
   if (!pageContent) notFound();
@@ -89,6 +90,7 @@ export default async function MushafPageRoute({ params }: Props) {
         page={pageContent}
         irabBySurah={irabBySurah}
         tafsirSources={tafsirSources}
+        verseEditions={verseEditions}
       />
     </div>
   );

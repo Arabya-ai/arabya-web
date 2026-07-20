@@ -1,0 +1,46 @@
+{
+  "wordByWord": [
+    {
+      "field": "meaning",
+      "lang": "en",
+      "nameAr": "إنجليزي",
+      "source": "Quran.com WBW"
+    },
+    {
+      "field": "meaningId",
+      "lang": "id",
+      "nameAr": "إندونيسي",
+      "source": "Quran.com WBW"
+    },
+    {
+      "field": "meaningUr",
+      "lang": "ur",
+      "nameAr": "أردو",
+      "source": "Quran.com WBW"
+    }
+  ],
+  "verseEditions": [
+    {
+      "slug": "saheeh-en",
+      "resourceId": 20,
+      "nameAr": "صحيح إنترناشونال (إنجليزي)",
+      "nameEn": "Saheeh International",
+      "lang": "en"
+    },
+    {
+      "slug": "hamidullah-fr",
+      "resourceId": 31,
+      "nameAr": "حميد الله (فرنسي)",
+      "nameEn": "Muhammad Hamidullah",
+      "lang": "fr"
+    },
+    {
+      "slug": "junagarhi-ur",
+      "resourceId": 54,
+      "nameAr": "جوناغري (أردو)",
+      "nameEn": "Maulana Muhammad Junagarhi",
+      "lang": "ur"
+    }
+  ],
+  "arabicWbwNote": "No open Arabic word-by-word meaning dataset is currently available via Quran.com or other GPL/CC sources suitable for redistribution. English/Indonesian/Urdu WBW are included instead."
+}

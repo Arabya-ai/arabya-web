@@ -1,29 +1,48 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { IrabSurah, TafsirSource, TafsirSurah } from "@/lib/types";
+import type {
+  IrabSurah,
+  TafsirSource,
+  TafsirSurah,
+  VerseTranslationEdition,
+  VerseTranslationSurah,
+  QuranWord,
+} from "@/lib/types";
 import type { MushafPageContent } from "@/lib/mushaf";
 import { formatVerseKey, toArabicNumerals } from "@/lib/format";
 import { juzLabel } from "@/lib/juz";
 import { normalizeForHafsFont } from "@/lib/quran-text";
+import { isBookmarked, toggleBookmark } from "@/lib/bookmarks";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
 
 type Props = {
   page: MushafPageContent;
   irabBySurah: Record<number, IrabSurah | null>;
   tafsirSources: TafsirSource[];
+  verseEditions: VerseTranslationEdition[];
 };
 
 type Mode = "words" | "irab" | string;
 type WordRef = { surahId: number; verse: number; position: number };
+type MeaningLang = "en" | "id" | "ur";
 
 const FONT_KEY = "arabya-mushaf-font";
 const LAST_PAGE_KEY = "arabya-last-mushaf-page";
+const MEANING_LANG_KEY = "arabya-meaning-lang";
+const VERSE_TRANS_KEY = "arabya-verse-trans";
+
+function wordMeaning(word: QuranWord, lang: MeaningLang): string {
+  if (lang === "id") return word.meaningId || word.meaning || "";
+  if (lang === "ur") return word.meaningUr || word.meaning || "";
+  return word.meaning || "";
+}
 
 export function MushafPageStudio({
   page,
   irabBySurah,
   tafsirSources,
+  verseEditions,
 }: Props) {
   const modes: { id: Mode; label: string }[] = useMemo(() => {
     const list: { id: Mode; label: string }[] = [
@@ -40,8 +59,16 @@ export function MushafPageStudio({
   const [activeWord, setActiveWord] = useState<WordRef | null>(null);
   const [fontScale, setFontScale] = useState(1);
   const [shareNote, setShareNote] = useState<string | null>(null);
+  const [meaningLang, setMeaningLang] = useState<MeaningLang>("en");
+  const [verseEdition, setVerseEdition] = useState(
+    () => verseEditions[0]?.slug ?? "saheeh-en",
+  );
+  const [bookmarked, setBookmarked] = useState(false);
   const [tafsirCache, setTafsirCache] = useState<
     Record<string, TafsirSurah | null>
+  >({});
+  const [transCache, setTransCache] = useState<
+    Record<string, VerseTranslationSurah | null>
   >({});
   const [tafsirLoading, setTafsirLoading] = useState(false);
 
@@ -49,19 +76,25 @@ export function MushafPageStudio({
     try {
       const saved = Number(localStorage.getItem(FONT_KEY));
       if (saved >= 0.85 && saved <= 1.35) setFontScale(saved);
+      const lang = localStorage.getItem(MEANING_LANG_KEY);
+      if (lang === "en" || lang === "id" || lang === "ur") setMeaningLang(lang);
+      const ed = localStorage.getItem(VERSE_TRANS_KEY);
+      if (ed && verseEditions.some((e) => e.slug === ed)) setVerseEdition(ed);
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [verseEditions]);
 
   useEffect(() => {
     try {
       localStorage.setItem(LAST_PAGE_KEY, String(page.page));
       localStorage.setItem(FONT_KEY, String(fontScale));
+      localStorage.setItem(MEANING_LANG_KEY, meaningLang);
+      localStorage.setItem(VERSE_TRANS_KEY, verseEdition);
     } catch {
       /* ignore */
     }
-  }, [page.page, fontScale]);
+  }, [page.page, fontScale, meaningLang, verseEdition]);
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -95,8 +128,9 @@ export function MushafPageStudio({
             verseKey: verse.verseKey,
             word,
             irab:
-              irabMap.get(`${block.surahId}:${verse.verseNumber}:${word.position}`) ??
-              "—",
+              irabMap.get(
+                `${block.surahId}:${verse.verseNumber}:${word.position}`,
+              ) ?? "—",
           })),
         ),
       ),
@@ -129,6 +163,14 @@ export function MushafPageStudio({
       });
     }
   }, [selected, wordRows]);
+
+  useEffect(() => {
+    if (!selected) {
+      setBookmarked(false);
+      return;
+    }
+    setBookmarked(isBookmarked(selected.verseKey));
+  }, [selected]);
 
   const activeTafsir =
     mode !== "words" && mode !== "irab" ? mode : null;
@@ -170,8 +212,47 @@ export function MushafPageStudio({
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch only when tab/page changes; cache read is intentional snapshot
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTafsir, page.page]);
+
+  useEffect(() => {
+    if (!verseEdition || !verseEditions.length) return;
+    const surahIds = [...new Set(page.blocks.map((b) => b.surahId))];
+    let cancelled = false;
+
+    (async () => {
+      const toFetch = surahIds.filter(
+        (id) => transCache[`${verseEdition}:${id}`] === undefined,
+      );
+      if (!toFetch.length) return;
+
+      const entries = await Promise.all(
+        toFetch.map(async (surahId) => {
+          try {
+            const res = await fetch(
+              `/api/translation/${verseEdition}/${surahId}`,
+            );
+            if (!res.ok) return [`${verseEdition}:${surahId}`, null] as const;
+            const data = (await res.json()) as VerseTranslationSurah;
+            return [`${verseEdition}:${surahId}`, data] as const;
+          } catch {
+            return [`${verseEdition}:${surahId}`, null] as const;
+          }
+        }),
+      );
+      if (cancelled) return;
+      setTransCache((prev) => {
+        const next = { ...prev };
+        for (const [key, value] of entries) next[key] = value;
+        return next;
+      });
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verseEdition, page.page, verseEditions.length]);
 
   const tafsirRows = useMemo(() => {
     if (!activeTafsir) return [];
@@ -190,21 +271,71 @@ export function MushafPageStudio({
     });
   }, [activeTafsir, page.blocks, pageVerseKeys, tafsirCache]);
 
+  const selectedVerseTranslation = useMemo(() => {
+    if (!selected) return null;
+    const pack = transCache[`${verseEdition}:${selected.surahId}`];
+    return (
+      pack?.verses.find((v) => v.verseNumber === selected.verseNumber)?.text ??
+      null
+    );
+  }, [selected, transCache, verseEdition]);
+
   const selectWord = (surahId: number, verse: number, position: number) => {
     setActiveWord({ surahId, verse, position });
     if (mode !== "words" && mode !== "irab") setMode("words");
   };
 
   const shareAyah = async (surahId: number, verseNumber: number) => {
+    const block = page.blocks.find((b) => b.surahId === surahId);
+    const verse = block?.verses.find((v) => v.verseNumber === verseNumber);
+    const ayahText = verse?.words.map((w) => w.text).join(" ") ?? "";
     const url = `${window.location.origin}/mushaf/${page.page}#s${surahId}-v-${verseNumber}`;
+    const shareBody = `${ayahText}\n\n${getSurahUthmaniTitle(surahId)} ${toArabicNumerals(verseNumber)}\n${url}`;
     try {
-      await navigator.clipboard.writeText(url);
-      setShareNote("تم نسخ رابط الآية");
+      if (navigator.share) {
+        await navigator.share({
+          title: `Arabya — ${getSurahUthmaniTitle(surahId)} ${verseNumber}`,
+          text: shareBody,
+          url,
+        });
+        setShareNote("تمت المشاركة");
+      } else {
+        await navigator.clipboard.writeText(shareBody);
+        setShareNote("تم نسخ الآية والرابط");
+      }
     } catch {
-      setShareNote(url);
+      try {
+        await navigator.clipboard.writeText(url);
+        setShareNote("تم نسخ الرابط");
+      } catch {
+        setShareNote(url);
+      }
     }
     window.setTimeout(() => setShareNote(null), 2200);
   };
+
+  const onToggleBookmark = () => {
+    if (!selected) return;
+    const next = toggleBookmark({
+      surahId: selected.surahId,
+      verse: selected.verseNumber,
+      page: page.page,
+      key: selected.verseKey,
+    });
+    setBookmarked(next.some((b) => b.key === selected.verseKey));
+    setShareNote(
+      next.some((b) => b.key === selected.verseKey)
+        ? "أُضيفت للمفضّلات"
+        : "أُزيلت من المفضّلات",
+    );
+    window.setTimeout(() => setShareNote(null), 1800);
+  };
+
+  const meaningLabels: { id: MeaningLang; label: string }[] = [
+    { id: "en", label: "EN" },
+    { id: "id", label: "ID" },
+    { id: "ur", label: "UR" },
+  ];
 
   return (
     <div className="studio">
@@ -213,7 +344,9 @@ export function MushafPageStudio({
           <button
             type="button"
             className="tool-btn"
-            onClick={() => setFontScale((s) => Math.max(0.85, +(s - 0.1).toFixed(2)))}
+            onClick={() =>
+              setFontScale((s) => Math.max(0.85, +(s - 0.1).toFixed(2)))
+            }
             aria-label="تصغير الخط"
           >
             أ−
@@ -222,12 +355,24 @@ export function MushafPageStudio({
           <button
             type="button"
             className="tool-btn"
-            onClick={() => setFontScale((s) => Math.min(1.35, +(s + 0.1).toFixed(2)))}
+            onClick={() =>
+              setFontScale((s) => Math.min(1.35, +(s + 0.1).toFixed(2)))
+            }
             aria-label="تكبير الخط"
           >
             أ+
           </button>
         </div>
+        {selected ? (
+          <button
+            type="button"
+            className={`tool-btn bookmark-btn ${bookmarked ? "is-on" : ""}`}
+            onClick={onToggleBookmark}
+            aria-pressed={bookmarked}
+          >
+            {bookmarked ? "★ مفضّلة" : "☆ حفظ الآية"}
+          </button>
+        ) : null}
         {shareNote ? <span className="share-note">{shareNote}</span> : null}
       </div>
 
@@ -255,7 +400,9 @@ export function MushafPageStudio({
 
               <div
                 className="mushaf-text"
-                style={{ fontSize: `calc(clamp(1.55rem, 3.8vw + 0.5rem, 2.25rem) * ${fontScale})` }}
+                style={{
+                  fontSize: `calc(clamp(1.55rem, 3.8vw + 0.5rem, 2.25rem) * ${fontScale})`,
+                }}
                 aria-label="نص المصحف — اضغط أي كلمة"
               >
                 {block.verses.map((verse) => (
@@ -276,9 +423,13 @@ export function MushafPageStudio({
                           type="button"
                           className={`mushaf-word ${isActive ? "is-selected" : ""}`}
                           aria-pressed={isActive}
-                          title={word.meaning || text}
+                          title={wordMeaning(word, meaningLang) || text}
                           onClick={() =>
-                            selectWord(block.surahId, verse.verseNumber, word.position)
+                            selectWord(
+                              block.surahId,
+                              verse.verseNumber,
+                              word.position,
+                            )
                           }
                         >
                           {text}
@@ -295,7 +446,7 @@ export function MushafPageStudio({
                             <button
                               type="button"
                               className="ayah-end"
-                              title="نسخ رابط الآية"
+                              title="مشاركة الآية"
                               onClick={() =>
                                 shareAyah(block.surahId, verse.verseNumber)
                               }
@@ -320,34 +471,79 @@ export function MushafPageStudio({
             </section>
           ))}
 
-          <p className="mushaf-hint">اضغط أي كلمة لدراستها · اضغط رقم الآية لنسخ رابطها</p>
+          <p className="mushaf-hint">
+            اضغط أي كلمة لدراستها · رقم الآية للمشاركة · ★ لحفظ المفضّلة
+          </p>
         </div>
       </article>
 
       {selected ? (
         <section className="word-dock" aria-live="polite">
           <div className="word-dock-main">
-            <span className="word-dock-key">{formatVerseKey(selected.verseKey)}</span>
-            <p className="word-dock-ar">{normalizeForHafsFont(selected.word.text)}</p>
+            <span className="word-dock-key">
+              {formatVerseKey(selected.verseKey)}
+            </span>
+            <p className="word-dock-ar">
+              {normalizeForHafsFont(selected.word.text)}
+            </p>
             {selected.word.transliteration ? (
               <p className="word-dock-tr">{selected.word.transliteration}</p>
             ) : null}
-            <p className="word-dock-en">{selected.word.meaning || "—"}</p>
+            <p className="word-dock-en">
+              {wordMeaning(selected.word, meaningLang) || "—"}
+            </p>
           </div>
           <div className="analysis-grid analysis-grid--two">
             <article className="analysis-card is-ready">
               <h3>الإعراب / الصرف</h3>
               <p>{selected.irab}</p>
+              <p className="analysis-note">
+                من المدونة القرآنية العربية (Quranic Arabic Corpus) — GPL
+              </p>
             </article>
             <article className="analysis-card is-ready">
-              <h3>الترجمة</h3>
-              <p>{selected.word.meaning || "—"}</p>
+              <h3>معنى الكلمة</h3>
+              <div className="lang-switch" role="group" aria-label="لغة المعنى">
+                {meaningLabels.map((l) => (
+                  <button
+                    key={l.id}
+                    type="button"
+                    className={`lang-chip ${meaningLang === l.id ? "is-active" : ""}`}
+                    onClick={() => setMeaningLang(l.id)}
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+              <p>{wordMeaning(selected.word, meaningLang) || "—"}</p>
               <p className="analysis-note">
-                ترجمة كلمة بكلمة (إنجليزية) من مصادر مفتوحة — النسخة العربية قيد
-                الإعداد.
+                كلمة بكلمة من Quran.com (إنجليزي / إندونيسي / أردو). لا يتوفر
+                حالياً مصدر عربي مفتوح لمعاني الكلمات.
               </p>
             </article>
           </div>
+          {verseEditions.length ? (
+            <article className="analysis-card is-ready verse-trans-card">
+              <div className="verse-trans-head">
+                <h3>ترجمة الآية</h3>
+                <select
+                  className="verse-trans-select"
+                  value={verseEdition}
+                  onChange={(e) => setVerseEdition(e.target.value)}
+                  aria-label="اختر ترجمة الآية"
+                >
+                  {verseEditions.map((e) => (
+                    <option key={e.slug} value={e.slug}>
+                      {e.nameAr}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <p className="verse-trans-body" dir="auto">
+                {selectedVerseTranslation || "جارٍ التحميل…"}
+              </p>
+            </article>
+          ) : null}
         </section>
       ) : null}
 
@@ -380,7 +576,7 @@ export function MushafPageStudio({
                 <tr>
                   <th>رقم</th>
                   <th>الكلمة</th>
-                  <th>{mode === "irab" ? "الإعراب" : "الترجمة"}</th>
+                  <th>{mode === "irab" ? "الإعراب" : "المعنى"}</th>
                 </tr>
               </thead>
               <tbody>
@@ -391,7 +587,11 @@ export function MushafPageStudio({
                       key={row.key}
                       className={open ? "is-open" : undefined}
                       onClick={() =>
-                        selectWord(row.surahId, row.verseNumber, row.word.position)
+                        selectWord(
+                          row.surahId,
+                          row.verseNumber,
+                          row.word.position,
+                        )
                       }
                     >
                       <td>{toArabicNumerals(idx + 1)}</td>
@@ -399,7 +599,9 @@ export function MushafPageStudio({
                         {normalizeForHafsFont(row.word.text)}
                       </td>
                       <td className="cell-meaning">
-                        {mode === "irab" ? row.irab : row.word.meaning || "—"}
+                        {mode === "irab"
+                          ? row.irab
+                          : wordMeaning(row.word, meaningLang) || "—"}
                       </td>
                     </tr>
                   );
@@ -420,12 +622,16 @@ export function MushafPageStudio({
                     selectWord(row.surahId, row.verseNumber, row.word.position)
                   }
                 >
-                  <span className="word-card-idx">{toArabicNumerals(idx + 1)}</span>
+                  <span className="word-card-idx">
+                    {toArabicNumerals(idx + 1)}
+                  </span>
                   <span className="word-card-ar">
                     {normalizeForHafsFont(row.word.text)}
                   </span>
                   <span className="word-card-meta">
-                    {mode === "irab" ? row.irab : row.word.meaning || "—"}
+                    {mode === "irab"
+                      ? row.irab
+                      : wordMeaning(row.word, meaningLang) || "—"}
                   </span>
                 </button>
               );
@@ -447,7 +653,9 @@ export function MushafPageStudio({
               {tafsirRows.map((v) => (
                 <article key={v.verseKey} className="tafsir-ayah">
                   <header className="tafsir-head">
-                    <span className="ayah-badge">{formatVerseKey(v.verseKey)}</span>
+                    <span className="ayah-badge">
+                      {formatVerseKey(v.verseKey)}
+                    </span>
                     <div className="tafsir-words">
                       {v.words.map((w) => {
                         const isActive =

@@ -353,6 +353,124 @@ input {
   box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
 }
 
+.bookmarks-section,
+.ayah-search-section {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.bookmarks-section h2,
+.ayah-search-section h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--brand-deep);
+}
+
+.bookmarks-list,
+.ayah-search-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.bookmarks-list a,
+.ayah-search-hit {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.bookmarks-list a:hover,
+.ayah-search-hit:hover {
+  border-color: #5eead4;
+  background: #f0fdfa;
+}
+
+.ayah-search-key {
+  font-weight: 700;
+  color: var(--brand-deep);
+  font-size: 0.92rem;
+}
+
+.ayah-search-text {
+  font-family: var(--font-quran);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+.lang-switch {
+  display: inline-flex;
+  gap: 0.3rem;
+  margin-bottom: 0.55rem;
+}
+
+.lang-chip {
+  min-width: 2.4rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.lang-chip.is-active {
+  background: var(--brand-deep);
+  border-color: var(--brand-deep);
+  color: #fff;
+}
+
+.verse-trans-card {
+  margin-top: 0.15rem;
+}
+
+.verse-trans-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.verse-trans-head h3 {
+  margin: 0;
+}
+
+.verse-trans-select {
+  max-width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.35rem 0.55rem;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+
+.verse-trans-body {
+  margin: 0;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+.bookmark-btn.is-on {
+  background: #ccfbf1;
+  border-color: #5eead4;
+  color: var(--brand-deep);
+  font-weight: 700;
+}
+
 .index-sheet {
   background: var(--surface);
   border: 1px solid var(--line);

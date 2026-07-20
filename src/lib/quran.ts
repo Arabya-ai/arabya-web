@@ -6,6 +6,8 @@ import type {
   SurahMeta,
   TafsirSource,
   TafsirSurah,
+  VerseTranslationEdition,
+  VerseTranslationSurah,
 } from "./types";
 
 const dataRoot = path.join(process.cwd(), "data");
@@ -67,4 +69,81 @@ export async function getTafsir(
   } catch {
     return null;
   }
+}
+
+export async function getVerseTranslationEditions(): Promise<
+  VerseTranslationEdition[]
+> {
+  try {
+    const raw = await readFile(
+      path.join(dataRoot, "translations", "index.json"),
+      "utf8",
+    );
+    const parsed = JSON.parse(raw) as {
+      verseEditions: VerseTranslationEdition[];
+    };
+    return parsed.verseEditions ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function getVerseTranslation(
+  slug: string,
+  id: number,
+): Promise<VerseTranslationSurah | null> {
+  try {
+    const raw = await readFile(
+      path.join(dataRoot, "translations", slug, `${id}.json`),
+      "utf8",
+    );
+    return JSON.parse(raw) as VerseTranslationSurah;
+  } catch {
+    return null;
+  }
+}
+
+export type SearchHit = {
+  key: string;
+  surahId: number;
+  verse: number;
+  page: number;
+  text: string;
+  nameAr: string;
+};
+
+let searchCache: SearchHit[] | null = null;
+
+export async function searchAyahs(
+  query: string,
+  limit = 40,
+): Promise<SearchHit[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+
+  if (!searchCache) {
+    const raw = await readFile(
+      path.join(dataRoot, "search-index.json"),
+      "utf8",
+    );
+    const parsed = JSON.parse(raw) as { verses: SearchHit[] };
+    searchCache = parsed.verses;
+  }
+
+  const digits = q.replace(/[^\d:]/g, "");
+  const hits: SearchHit[] = [];
+
+  for (const v of searchCache) {
+    if (
+      v.key === q ||
+      v.key === digits ||
+      String(v.surahId) === q ||
+      v.nameAr.includes(q) ||
+      v.text.includes(q)
+    ) {
+      hits.push(v);
+      if (hits.length >= limit) break;
+    }
+  }
+  return hits;
 }
