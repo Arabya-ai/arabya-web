@@ -112,7 +112,44 @@ export type SearchHit = {
   nameAr: string;
 };
 
+/** Strip tashkeel / elongations so users can search plain Arabic. */
+export function normalizeArabicSearch(input: string): string {
+  return String(input || "")
+    .normalize("NFKD")
+    .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, "")
+    .replace(/[ٱأإآ]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 let searchCache: SearchHit[] | null = null;
+let searchNormCache: { hit: SearchHit; norm: string; nameNorm: string }[] | null =
+  null;
+
+export async function getRootsIndex(): Promise<
+  import("./types").RootsIndex | null
+> {
+  try {
+    const raw = await readFile(
+      path.join(dataRoot, "roots-index.json"),
+      "utf8",
+    );
+    return JSON.parse(raw) as import("./types").RootsIndex;
+  } catch {
+    return null;
+  }
+}
+
+export async function getRootEntry(
+  root: string,
+): Promise<import("./types").RootEntry | null> {
+  const index = await getRootsIndex();
+  if (!index) return null;
+  const decoded = decodeURIComponent(root);
+  return index.roots.find((r) => r.root === decoded) ?? null;
+}
 
 export async function searchAyahs(
   query: string,
@@ -128,18 +165,29 @@ export async function searchAyahs(
     );
     const parsed = JSON.parse(raw) as { verses: SearchHit[] };
     searchCache = parsed.verses;
+    searchNormCache = null;
   }
 
+  if (!searchNormCache) {
+    searchNormCache = searchCache.map((hit) => ({
+      hit,
+      norm: normalizeArabicSearch(hit.text),
+      nameNorm: normalizeArabicSearch(hit.nameAr),
+    }));
+  }
+
+  const qNorm = normalizeArabicSearch(q);
   const digits = q.replace(/[^\d:]/g, "");
   const hits: SearchHit[] = [];
 
-  for (const v of searchCache) {
+  for (const row of searchNormCache) {
+    const v = row.hit;
     if (
       v.key === q ||
       v.key === digits ||
       String(v.surahId) === q ||
-      v.nameAr.includes(q) ||
-      v.text.includes(q)
+      (qNorm.length >= 2 &&
+        (row.nameNorm.includes(qNorm) || row.norm.includes(qNorm)))
     ) {
       hits.push(v);
       if (hits.length >= limit) break;
