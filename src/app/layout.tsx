@@ -1,16 +1,16 @@
-import type { Metadata } from "next";
-import { Amiri, IBM_Plex_Sans_Arabic } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Cairo, Noto_Naskh_Arabic } from "next/font/google";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
 import "./globals.css";
 
-const amiri = Amiri({
-  variable: "--font-amiri",
+const cairo = Cairo({
+  variable: "--font-cairo",
   subsets: ["arabic", "latin"],
-  weight: ["400", "700"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
-const ibmArabic = IBM_Plex_Sans_Arabic({
-  variable: "--font-ibm",
+const naskh = Noto_Naskh_Arabic({
+  variable: "--font-naskh",
   subsets: ["arabic"],
   weight: ["400", "500", "600", "700"],
 });
@@ -18,19 +18,26 @@ const ibmArabic = IBM_Plex_Sans_Arabic({
 export const metadata: Metadata = {
   metadataBase: new URL("https://arabyaai.com"),
   title: {
-    default: "Arabya.ai | تفسير كلمات القرآن الكريم",
-    template: "%s | Arabya.ai",
+    default: "Arabya | تفسير كلمات القرآن الكريم",
+    template: "%s | Arabya",
   },
   description:
-    "فهرس سور القرآن الكريم مع تفسير معاني الكلمات آيةً آية — Arabya.ai",
+    "فهرس سور القرآن مع دراسة كل كلمة: معنى، إعراب، وتفاسير متعددة — Arabya",
   openGraph: {
-    title: "Arabya.ai | تفسير كلمات القرآن الكريم",
-    description: "فهرس سور القرآن الكريم مع تفسير معاني الكلمات",
+    title: "Arabya | تفسير كلمات القرآن الكريم",
+    description: "ادرس كل كلمة في القرآن مع إعراب وتفاسير قابلة للتبديل",
     url: "https://arabyaai.com",
-    siteName: "Arabya.ai",
+    siteName: "Arabya",
     locale: "ar_AR",
     type: "website",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#0f766e",
 };
 
 export default function RootLayout({
@@ -40,7 +47,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl">
-      <body className={`${amiri.variable} ${ibmArabic.variable} antialiased`}>
+      <body className={`${cairo.variable} ${naskh.variable} antialiased`}>
         <SiteHeader />
         <main>{children}</main>
         <SiteFooter />

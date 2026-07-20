@@ -7,7 +7,11 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "fetch-data": "node scripts/fetch-quran-data.mjs"
+    "fetch-data": "node scripts/fetch-quran-data.mjs",
+    "apply-qpc-text": "node scripts/apply-qpc-hafs-text.mjs",
+    "build-irab": "node scripts/build-irab.mjs",
+    "fetch-tafsirs": "node scripts/fetch-tafsirs.mjs",
+    "build-mushaf-index": "node scripts/build-mushaf-index.mjs"
   },
   "dependencies": {
     "react": "19.1.0",

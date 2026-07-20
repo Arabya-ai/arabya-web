@@ -1,0 +1,22 @@
+{
+  "sources": [
+    {
+      "slug": "sadi",
+      "nameAr": "تفسير السعدي",
+      "resourceId": 91,
+      "api": "https://api.quran.com"
+    },
+    {
+      "slug": "muyassar",
+      "nameAr": "التفسير الميسر",
+      "resourceId": 16,
+      "api": "https://api.quran.com"
+    },
+    {
+      "slug": "ibn-kathir",
+      "nameAr": "تفسير ابن كثير",
+      "resourceId": 14,
+      "api": "https://api.quran.com"
+    }
+  ]
+}

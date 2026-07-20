@@ -1,31 +1,22 @@
-import { SurahGrid, SurahTable } from "@/components/SurahIndex";
+import { SurahIndex } from "@/components/SurahIndex";
+import { ContinueReading } from "@/components/ContinueReading";
+import { getMushafIndex } from "@/lib/mushaf";
 import { getSurahs } from "@/lib/quran";
 
 export default async function HomePage() {
-  const surahs = await getSurahs();
+  const [surahs, mushafIndex] = await Promise.all([
+    getSurahs(),
+    getMushafIndex(),
+  ]);
 
   return (
-    <>
-      <section className="hero">
-        <div className="shell hero-copy">
-          <span className="hero-kicker">Arabya.ai</span>
-          <h1>فهرس القرآن الكريم</h1>
-          <p>
-            تصفّح سور القرآن، وافتح أي سورة لتفسير كلماتها كلمةً كلمة — بواجهة
-            عربية واضحة، جاهزة للتوسّع على arabyaai.com ثم arabya.ai.
-          </p>
-        </div>
-      </section>
-
-      <div className="shell">
-        <section className="panel" aria-labelledby="index-title">
-          <h2 id="index-title" className="sr-only">
-            فهرس السور
-          </h2>
-          <SurahTable surahs={surahs} />
-        </section>
-        <SurahGrid surahs={surahs} />
-      </div>
-    </>
+    <div className="shell home-simple">
+      <header className="home-title-block">
+        <h1>فهرس القرآن الكريم</h1>
+        <p>اختر سورة لقراءة المصحف ودراسة كلماتها</p>
+        <ContinueReading />
+      </header>
+      <SurahIndex surahs={surahs} mushafFirstPage={mushafIndex.surahFirstPage} />
+    </div>
   );
 }

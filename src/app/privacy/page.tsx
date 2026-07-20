@@ -9,7 +9,7 @@ export default function PrivacyPage() {
     <div className="shell privacy-page">
       <h1>سياسة الخصوصية</h1>
       <p>
-        موقع <strong>Arabya.ai</strong> يحترم خصوصيتك. في المرحلة الحالية لا نجمع
+        موقع <strong>Arabya</strong> يحترم خصوصيتك. في المرحلة الحالية لا نجمع
         بيانات شخصية للتصفح، ولا نطلب إنشاء حساب.
       </p>
       <p>

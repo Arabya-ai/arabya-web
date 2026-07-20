@@ -69,7 +69,7 @@ async function fetchChapterVerses(chapterId) {
   while (page <= totalPages) {
     const url =
       `https://api.quran.com/api/v4/verses/by_chapter/${chapterId}` +
-      `?language=en&words=true&word_fields=text_uthmani,translation,transliteration` +
+      `?language=en&words=true&word_fields=text_qpc_hafs,translation,transliteration` +
       `&per_page=50&page=${page}`;
     const data = await fetchJson(url);
     totalPages = data.pagination?.total_pages ?? 1;
@@ -79,11 +79,12 @@ async function fetchChapterVerses(chapterId) {
         verseNumber: v.verse_number,
         verseKey: v.verse_key,
         juz: v.juz_number,
+        page: v.page_number,
         words: (v.words ?? [])
           .filter((w) => w.char_type_name === "word")
           .map((w) => ({
             position: w.position,
-            text: w.text_uthmani || w.text,
+            text: w.text_qpc_hafs || w.text_uthmani || w.text,
             meaning: w.translation?.text ?? "",
             transliteration: w.transliteration?.text ?? "",
             charType: w.char_type_name,

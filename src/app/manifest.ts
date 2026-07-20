@@ -1,0 +1,23 @@
+import type { MetadataRoute } from "next";
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: "Arabya — تفسير كلمات القرآن",
+    short_name: "Arabya",
+    description: "مصحف المدينة مع دراسة كل كلمة: معنى، إعراب، وتفاسير",
+    start_url: "/",
+    display: "standalone",
+    background_color: "#f3f7f5",
+    theme_color: "#0f766e",
+    lang: "ar",
+    dir: "rtl",
+    icons: [
+      {
+        src: "/brand/arabya-mark-square.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+    ],
+  };
+}
