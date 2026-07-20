@@ -71,6 +71,22 @@ export function MushafPageStudio({
   }, [tafsirSources]);
 
   const [mode, setMode] = useState<Mode>("words");
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const onTabKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const count = modes.length;
+    let next: number | null = null;
+    // RTL tablist: ArrowRight moves to the previous tab, ArrowLeft to the next.
+    if (e.key === "ArrowRight") next = (index - 1 + count) % count;
+    else if (e.key === "ArrowLeft") next = (index + 1) % count;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = count - 1;
+    if (next === null) return;
+    e.preventDefault();
+    setMode(modes[next].id);
+    tabRefs.current[next]?.focus();
+  };
+
   const [activeWord, setActiveWord] = useState<WordRef | null>(null);
   const [fontScale, setFontScale] = useState(1);
   const [fontDraft, setFontDraft] = useState("100");
@@ -812,22 +828,38 @@ export function MushafPageStudio({
       ) : null}
 
       <div className="mode-rail" role="tablist" aria-label="طريقة الدراسة">
-        {modes.map((m) => (
-          <button
-            key={m.id}
-            type="button"
-            role="tab"
-            aria-selected={mode === m.id}
-            className={`mode-chip ${mode === m.id ? "is-active" : ""}`}
-            onClick={() => setMode(m.id)}
-          >
-            {m.label}
-          </button>
-        ))}
+        {modes.map((m, i) => {
+          const active = mode === m.id;
+          return (
+            <button
+              key={m.id}
+              ref={(el) => {
+                tabRefs.current[i] = el;
+              }}
+              type="button"
+              role="tab"
+              id={`study-tab-${m.id}`}
+              aria-selected={active}
+              aria-controls="study-panel"
+              tabIndex={active ? 0 : -1}
+              className={`mode-chip ${active ? "is-active" : ""}`}
+              onClick={() => setMode(m.id)}
+              onKeyDown={(e) => onTabKeyDown(e, i)}
+            >
+              {m.label}
+            </button>
+          );
+        })}
       </div>
 
       {mode === "words" || mode === "irab" ? (
-        <section className="study-sheet">
+        <section
+          className="study-sheet"
+          role="tabpanel"
+          id="study-panel"
+          aria-labelledby={`study-tab-${mode}`}
+          tabIndex={0}
+        >
           <h2>
             {mode === "words"
               ? `كلمات صفحة ${toArabicNumerals(page.page)}`
@@ -903,7 +935,13 @@ export function MushafPageStudio({
           </div>
         </section>
       ) : (
-        <section className="study-sheet">
+        <section
+          className="study-sheet"
+          role="tabpanel"
+          id="study-panel"
+          aria-labelledby={`study-tab-${mode}`}
+          tabIndex={0}
+        >
           <h2>
             {tafsirSources.find((s) => s.slug === activeTafsir)?.nameAr ??
               "التفسير"}
