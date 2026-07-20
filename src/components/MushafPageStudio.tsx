@@ -19,7 +19,7 @@ import { isBookmarked, toggleBookmark } from "@/lib/bookmarks";
 import { formatPosLabels } from "@/lib/morph-labels";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
 import { makeWordId } from "@/lib/word-id";
-import { ayahAudioUrl } from "@/lib/audio";
+import { ayahAudioUrl, wordAudioUrl } from "@/lib/audio";
 
 type Props = {
   page: MushafPageContent;
@@ -81,7 +81,9 @@ export function MushafPageStudio({
   );
   const [bookmarked, setBookmarked] = useState(false);
   const [audioPlaying, setAudioPlaying] = useState(false);
+  const [wbwPlaying, setWbwPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const wbwStopRef = useRef(false);
   const [tafsirCache, setTafsirCache] = useState<
     Record<string, TafsirSurah | null>
   >({});
@@ -122,10 +124,18 @@ export function MushafPageStudio({
 
   useEffect(() => {
     const hash = window.location.hash;
-    if (!hash.startsWith("#s")) return;
-    const el = document.querySelector(hash);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    const q = new URLSearchParams(window.location.search).get("v");
+    if (hash.startsWith("#s")) {
+      const el = document.querySelector(hash);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    if (q) {
+      const m = /^(\d{1,3}):(\d{1,3})$/.exec(q);
+      if (m) {
+        const el = document.querySelector(`#s${m[1]}-v-${m[2]}`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
     }
   }, [page.page]);
 
@@ -223,6 +233,7 @@ export function MushafPageStudio({
 
   useEffect(() => {
     return () => {
+      wbwStopRef.current = true;
       audioRef.current?.pause();
     };
   }, []);
@@ -344,7 +355,7 @@ export function MushafPageStudio({
     const block = page.blocks.find((b) => b.surahId === surahId);
     const verse = block?.verses.find((v) => v.verseNumber === verseNumber);
     const ayahText = verse?.words.map((w) => w.text).join(" ") ?? "";
-    const url = `${window.location.origin}/mushaf/${page.page}#s${surahId}-v-${verseNumber}`;
+    const url = `${window.location.origin}/mushaf/${page.page}?v=${surahId}:${verseNumber}#s${surahId}-v-${verseNumber}`;
     const shareBody = `${ayahText}\n\n${getSurahUthmaniTitle(surahId)} ${toArabicNumerals(verseNumber)}\n${url}`;
     try {
       if (navigator.share) {
@@ -369,6 +380,102 @@ export function MushafPageStudio({
     window.setTimeout(() => setShareNote(null), 2200);
   };
 
+  const stopAllAudio = () => {
+    wbwStopRef.current = true;
+    audioRef.current?.pause();
+    setAudioPlaying(false);
+    setWbwPlaying(false);
+  };
+
+  const playAyahAudio = async () => {
+    if (!selected) return;
+    const url = ayahAudioUrl(selected.surahId, selected.verseNumber);
+    try {
+      if (!audioRef.current) audioRef.current = new Audio();
+      const audio = audioRef.current;
+      if (audioPlaying) {
+        stopAllAudio();
+        return;
+      }
+      wbwStopRef.current = true;
+      setWbwPlaying(false);
+      audio.src = url;
+      audio.onended = () => setAudioPlaying(false);
+      await audio.play();
+      setAudioPlaying(true);
+      setShareNote("جاري تلاوة الآية…");
+      window.setTimeout(() => setShareNote(null), 1800);
+    } catch {
+      setShareNote("تعذّر تشغيل الصوت");
+      window.setTimeout(() => setShareNote(null), 2000);
+    }
+  };
+
+  const playWordByWordAudio = async () => {
+    if (!selected) return;
+    if (wbwPlaying || audioPlaying) {
+      stopAllAudio();
+      return;
+    }
+
+    const block = page.blocks.find((b) => b.surahId === selected.surahId);
+    const verse = block?.verses.find(
+      (v) => v.verseNumber === selected.verseNumber,
+    );
+    const words = (verse?.words ?? []).filter(
+      (w) => !w.charType || w.charType === "word",
+    );
+    if (!words.length) return;
+
+    wbwStopRef.current = false;
+    setWbwPlaying(true);
+    setAudioPlaying(false);
+    setShareNote("تلاوة كلمة بكلمة…");
+    if (!audioRef.current) audioRef.current = new Audio();
+    const audio = audioRef.current;
+
+    try {
+      for (const word of words) {
+        if (wbwStopRef.current) break;
+        selectWord(selected.surahId, selected.verseNumber, word.position);
+        const url = wordAudioUrl(
+          selected.surahId,
+          selected.verseNumber,
+          word.position,
+        );
+        await new Promise<void>((resolve, reject) => {
+          const onEnded = () => {
+            cleanup();
+            resolve();
+          };
+          const onError = () => {
+            cleanup();
+            resolve(); // skip missing clips
+          };
+          const cleanup = () => {
+            audio.removeEventListener("ended", onEnded);
+            audio.removeEventListener("error", onError);
+          };
+          audio.addEventListener("ended", onEnded);
+          audio.addEventListener("error", onError);
+          audio.src = url;
+          audio.play().catch(() => {
+            cleanup();
+            resolve();
+          });
+        });
+      }
+    } catch {
+      setShareNote("تعذّر تشغيل التلاوة كلمة بكلمة");
+      window.setTimeout(() => setShareNote(null), 2000);
+    } finally {
+      setWbwPlaying(false);
+      if (!wbwStopRef.current) {
+        setShareNote(null);
+      }
+    }
+  };
+
   const onToggleBookmark = () => {
     if (!selected) return;
     const next = toggleBookmark({
@@ -384,29 +491,6 @@ export function MushafPageStudio({
         : "أُزيلت من المفضّلات",
     );
     window.setTimeout(() => setShareNote(null), 1800);
-  };
-
-  const playAyahAudio = async () => {
-    if (!selected) return;
-    const url = ayahAudioUrl(selected.surahId, selected.verseNumber);
-    try {
-      if (!audioRef.current) audioRef.current = new Audio();
-      const audio = audioRef.current;
-      if (audioPlaying && audio.src.endsWith(url.split("/").pop() ?? "")) {
-        audio.pause();
-        setAudioPlaying(false);
-        return;
-      }
-      audio.src = url;
-      audio.onended = () => setAudioPlaying(false);
-      await audio.play();
-      setAudioPlaying(true);
-      setShareNote("جاري التلاوة…");
-      window.setTimeout(() => setShareNote(null), 1800);
-    } catch {
-      setShareNote("تعذّر تشغيل الصوت");
-      window.setTimeout(() => setShareNote(null), 2000);
-    }
   };
 
   const meaningLabels: { id: MeaningLang; label: string }[] = [
@@ -514,8 +598,18 @@ export function MushafPageStudio({
               className={`tool-btn ${audioPlaying ? "is-on" : ""}`}
               onClick={playAyahAudio}
               aria-pressed={audioPlaying}
+              title="تلاوة الآية كاملة"
             >
-              {audioPlaying ? "⏸ إيقاف" : "▶ تلاوة"}
+              {audioPlaying ? "⏸ إيقاف" : "▶ آية"}
+            </button>
+            <button
+              type="button"
+              className={`tool-btn ${wbwPlaying ? "is-on" : ""}`}
+              onClick={playWordByWordAudio}
+              aria-pressed={wbwPlaying}
+              title="تلاوة كلمة بكلمة مع تمييز الكلمة"
+            >
+              {wbwPlaying ? "⏸ إيقاف" : "▶ كلمات"}
             </button>
           </>
         ) : null}

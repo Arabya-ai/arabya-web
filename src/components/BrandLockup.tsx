@@ -27,7 +27,9 @@ export function BrandLockup({ size = "header" }: BrandLockupProps) {
       </span>
 
       <span className="brand-text">
-        <span className="brand-name">Arabya</span>
+        <span className="brand-name" data-text="Arabya">
+          Arabya
+        </span>
         <span className="brand-tagline">عَرَبِيَّةٌ بِذَكَاء</span>
       </span>
     </span>

@@ -16,8 +16,15 @@ type Props = { params: Promise<{ page: string }> };
 export const dynamicParams = true;
 export const revalidate = 86400;
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ page: string }>;
+  searchParams: Promise<{ v?: string }>;
+}): Promise<Metadata> {
   const { page } = await params;
+  const { v } = await searchParams;
   const pageNum = Number(page);
   if (!Number.isInteger(pageNum) || pageNum < 1 || pageNum > 604) {
     return { title: "صفحة المصحف" };
@@ -26,24 +33,42 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const content = await getMushafPage(pageNum);
   if (!content) return { title: "صفحة المصحف" };
 
-  const title =
+  let title =
     content.blocks.length === 1
       ? `${getSurahUthmaniTitle(content.blocks[0].surahId)} — صفحة ${toArabicNumerals(pageNum)}`
       : `صفحة ${toArabicNumerals(pageNum)} — المصحف`;
 
+  let description = `مصحف المدينة — صفحة ${toArabicNumerals(pageNum)} مع دراسة الكلمات — Arabya`;
+
+  const verseMatch = v?.match(/^(\d{1,3}):(\d{1,3})$/);
+  if (verseMatch) {
+    const surahId = Number(verseMatch[1]);
+    const verseNumber = Number(verseMatch[2]);
+    const block = content.blocks.find((b) => b.surahId === surahId);
+    const verse = block?.verses.find((x) => x.verseNumber === verseNumber);
+    if (verse) {
+      const snippet = verse.words
+        .slice(0, 10)
+        .map((w) => w.text)
+        .join(" ");
+      title = `${getSurahUthmaniTitle(surahId)} ${toArabicNumerals(verseNumber)} · Arabya`;
+      description = `${snippet}${verse.words.length > 10 ? " …" : ""} — دراسة الكلمة والإعراب على Arabya`;
+    }
+  }
+
   return {
     title,
-    description: `مصحف المدينة — صفحة ${toArabicNumerals(pageNum)} مع دراسة الكلمات — Arabya`,
+    description,
     openGraph: {
       title,
-      description: `ادرس كلمات الصفحة ${toArabicNumerals(pageNum)} مع إعراب وتفسير — Arabya`,
+      description,
       locale: "ar_AR",
       type: "article",
     },
     twitter: {
       card: "summary_large_image",
       title,
-      description: `صفحة ${toArabicNumerals(pageNum)} — دراسة كلمات القرآن`,
+      description,
     },
   };
 }
