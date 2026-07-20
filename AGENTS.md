@@ -26,8 +26,10 @@ Study UI: `MushafPageStudio` + `StudyModeTabs` (keyboard-accessible RTL tabs) + 
 ### Gotcha: do not run `next build` while `next dev` is running
 Both share `.next`. A concurrent build causes `Internal Server Error` with `ENOENT ... _buildManifest.js.tmp`. Fix: stop all `next` processes, `rm -rf .next`, restart `npm run dev`.
 
-### npm audit
-Transitive `postcss` advisory inside `next` may appear. Do **not** run `npm audit fix --force` (it downgrades Next to v9). Wait for an upstream Next release.
+### npm audit / postcss
+Next 15.5.x (and stable 16.2.x) still vendors `postcss@8.4.31` (GHSA-qx2v-qp2m-jg93). Vercel notes this is **not exploitable** for normal Next apps (PostCSS runs at build time). Do **not** run `npm audit fix --force` (downgrades Next to v9).
+
+This repo uses `"overrides": { "postcss": "^8.5.10" }` to silence the advisory safely until a stable Next release ships the bump (landed on canary `16.3.0-canary.6+` only so far). After upgrading Next past that line, the override can be removed if nested postcss is already ≥ 8.5.10.
 
 ### Sanity check
 Open `/mushaf/1`, select a word, switch study tabs (الكلمات / الإعراب / تفاسير), confirm dock layers load. Run `npm run test` (Vitest) before merging.
