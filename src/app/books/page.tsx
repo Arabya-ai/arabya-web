@@ -14,8 +14,8 @@ export default async function BooksIndexPage() {
     <div className="shell page-block">
       <h1>كتب الإعراب</h1>
       <p className="table-intro">
-        المصدر المتاح الآن في لوحة الدراسة: المدونة القرآنية العربية (QAC). الكتب
-        أدناه تُدمج بعد تسليم ملفات مرخّصة — بلا سكرابينج من مواقع أخرى.
+        فهرس كتب إعراب القرآن. الكتب أدناه تُدمج بعد تسليم ملفات مرخّصة — بلا
+        سكرابينج من مواقع أخرى.
       </p>
       <ul className="books-list">
         {books.map((b) => (

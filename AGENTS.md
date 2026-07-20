@@ -2,13 +2,32 @@
 
 ## Cursor Cloud specific instructions
 
-`arabya-web` is a single, self-contained Next.js 15 (App Router, Turbopack) + React 19 + TypeScript + Tailwind 4 app. Package manager is **npm** (`package-lock.json`). There is **no database, no `.env`, and no required environment variables** — all content ships as static JSON committed under `/data`, read at runtime by `src/lib/quran.ts` and the `/api/tafsir/[slug]/[surahId]` route.
+`arabya-web` is a Next.js 15 (App Router, Turbopack) + React 19 + TypeScript + Tailwind 4 app. Package manager is **npm** (`package-lock.json`). There is **no database and no required `.env`** for local/dev — Quran content ships as static JSON under `/data` (read by `src/lib/quran.ts`, mushaf helpers, and API routes).
 
-Standard commands are in `package.json` (`dev`, `build`, `start`, `lint`). Notes:
-- Dev server: `npm run dev` serves the whole product (pages + the local-JSON-backed API) at `http://localhost:3000`. This is the only service needed to test end to end.
-- `npm run lint` currently reports one pre-existing warning (unused `readdir` in `scripts/build-mushaf-index.mjs`) and 0 errors.
-- The `npm run fetch-data` / `fetch-tafsirs` / `build-irab` / `apply-qpc-text` / `build-mushaf-index` scripts are **data-prep only** (they hit the external Quran.com API / process the Quranic Arabic Corpus). They are NOT needed to run or test the app since `/data` is already committed; only run them to regenerate bundled data.
-- Core flow to sanity-check: open `/mushaf/1`, click words for translations, and switch the الإعراب (i'rab) and تفسير السعدي (tafsir) tabs to confirm study panels load.
+### Commands
+- `npm install` — dependencies
+- `npm run dev` — http://localhost:3000 (pages + local-JSON APIs)
+- `npm run lint` / `npm run test` / `npm run validate-data` / `npm run build`
+- Data-prep only (optional; hit Quran.com / Corpus): `fetch-data`, `fetch-tafsirs`, `fetch-translations`, `build-irab`, `build-mushaf-index`, `build-search-index`, `import-irab-book`
+
+### Product surface (beyond mushaf reader)
+| Route | Role |
+|-------|------|
+| `/`, `/mushaf/[page]`, `/surah/[id]` | Index + Madinah mushaf + word study |
+| `/ayah/[surah]/[verse]` | Per-ayah iʿrāb narrative |
+| `/juz`, `/root/[root]` | Juz hub + root concordance |
+| `/books`, `/books/[slug]` | Irab book catalog (licensed import later) |
+| `/resources`, `/qiraat` | Hubs / placeholders |
+| `/hadith`, `/heritage` | **Placeholders only** — do not build full pipelines yet |
+| `/api/tafsir/...`, `/api/translation/...`, `/api/search`, `/api/study` | Local JSON APIs |
+
+Study UI: `MushafPageStudio` + `StudyModeTabs` (keyboard-accessible RTL tabs) + `WordStudyDock` (morph/syntax/semantics/…). Do **not** show per-layer “المصدر: …” attribution chips in the dock (removed by product decision); keep footer/about GPL credit where legally needed.
 
 ### Gotcha: do not run `next build` while `next dev` is running
-`next dev` (Turbopack) and `next build` share the same `.next` directory. Running `npm run build` (or `npm run start`, which serves `.next`) while `npm run dev` is live clobbers the dev server's artifacts and makes it throw `Internal Server Error` on every route, with `ENOENT ... .next/static/development/_buildManifest.js.tmp` in the logs. If this happens, stop all `next` processes, delete `.next` (`rm -rf .next`), and restart `npm run dev`. To build/test a production bundle, stop the dev server first (or build into a separate checkout).
+Both share `.next`. A concurrent build causes `Internal Server Error` with `ENOENT ... _buildManifest.js.tmp`. Fix: stop all `next` processes, `rm -rf .next`, restart `npm run dev`.
+
+### npm audit
+Transitive `postcss` advisory inside `next` may appear. Do **not** run `npm audit fix --force` (it downgrades Next to v9). Wait for an upstream Next release.
+
+### Sanity check
+Open `/mushaf/1`, select a word, switch study tabs (الكلمات / الإعراب / تفاسير), confirm dock layers load. Run `npm run test` (Vitest) before merging.

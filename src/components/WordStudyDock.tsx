@@ -129,7 +129,6 @@ export function WordStudyDock({
                 </span>
               ) : null}
             </div>
-            <p className="layer-source">المصدر: المدونة القرآنية العربية (QAC)</p>
           </>
         ) : null}
 
@@ -159,10 +158,6 @@ export function WordStudyDock({
                 <Link href="/books">كتب الإعراب</Link>.
               </p>
             )}
-            <p className="layer-source">
-              Claim · {activeSource?.label}
-              {activeSource?.license ? ` · ${activeSource.license}` : ""}
-            </p>
           </>
         ) : null}
 

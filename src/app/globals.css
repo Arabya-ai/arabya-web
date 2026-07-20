@@ -1254,13 +1254,25 @@ a.morph-chip:hover {
 }
 
 .mode-rail {
+  position: sticky;
+  top: 4.25rem;
+  z-index: 40;
   display: flex;
   flex-wrap: nowrap;
   gap: 0.4rem;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
-  padding-bottom: 0.15rem;
+  padding: 0.45rem 0 0.35rem;
+  margin-inline: -0.15rem;
+  padding-inline: 0.15rem;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid transparent;
+}
+
+html[data-theme="dark"] .mode-rail {
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
 }
 
 .mode-chip {
