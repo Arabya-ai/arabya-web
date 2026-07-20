@@ -701,7 +701,6 @@ async function main() {
   const lemmaCount = new Map();
 
   for (const file of files) {
-    const id = Number(file.replace(".json", ""));
     const irab = JSON.parse(await readFile(path.join(irabDir, file), "utf8"));
     const surah = JSON.parse(
       await readFile(path.join(surahDir, file), "utf8"),

@@ -154,7 +154,7 @@ export function WordStudyDock({
               <p>{qacNarrative}</p>
             ) : (
               <p className="layer-soon">
-                هذا المصدر بانتظار ملف مرخّص من المالك — انظر{" "}
+                المحتوى بانتظار ملف مرخّص من المالك — انظر{" "}
                 <Link href="/books">كتب الإعراب</Link>.
               </p>
             )}

@@ -1255,7 +1255,7 @@ a.morph-chip:hover {
 
 .mode-rail {
   position: sticky;
-  top: 4.25rem;
+  top: max(3.75rem, calc(env(safe-area-inset-top, 0px) + 3.5rem));
   z-index: 40;
   display: flex;
   flex-wrap: nowrap;
@@ -1263,16 +1263,23 @@ a.morph-chip:hover {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
-  padding: 0.45rem 0 0.35rem;
+  padding: 0.5rem 0.15rem 0.45rem;
   margin-inline: -0.15rem;
-  padding-inline: 0.15rem;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid transparent;
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+@media (min-width: 768px) {
+  .mode-rail {
+    top: 4.5rem;
+  }
 }
 
 html[data-theme="dark"] .mode-rail {
-  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
 }
 
 .mode-chip {

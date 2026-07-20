@@ -31,3 +31,6 @@ Transitive `postcss` advisory inside `next` may appear. Do **not** run `npm audi
 
 ### Sanity check
 Open `/mushaf/1`, select a word, switch study tabs (الكلمات / الإعراب / تفاسير), confirm dock layers load. Run `npm run test` (Vitest) before merging.
+
+### Licensed irab books
+`/books` and `import-irab-book` are ready for **owner-supplied licensed files only**. Do not scrape competitor sites. Until files arrive, book entries stay `awaiting`.
