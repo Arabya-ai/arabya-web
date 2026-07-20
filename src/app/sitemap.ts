@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getMushafIndex } from "@/lib/mushaf";
 
-const base = "https://arabyaai.com";
+const base = "https://www.arabyaai.com";
 
 /** Keep sitemap lean: home + key pages + first page of each surah */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

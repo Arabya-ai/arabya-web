@@ -22,7 +22,7 @@ const amiri = Amiri({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://arabyaai.com"),
+  metadataBase: new URL("https://www.arabyaai.com"),
   title: {
     default: "Arabya | تفسير كلمات القرآن الكريم",
     template: "%s | Arabya",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Arabya | تفسير كلمات القرآن الكريم",
     description: "ادرس كل كلمة في القرآن مع إعراب وتفاسير قابلة للتبديل",
-    url: "https://arabyaai.com",
+    url: "https://www.arabyaai.com",
     siteName: "Arabya",
     locale: "ar_AR",
     type: "website",
