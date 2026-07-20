@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cairo, Noto_Naskh_Arabic } from "next/font/google";
+import { Amiri, Cairo, Noto_Naskh_Arabic } from "next/font/google";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
 import "./globals.css";
 
@@ -13,6 +13,12 @@ const naskh = Noto_Naskh_Arabic({
   variable: "--font-naskh",
   subsets: ["arabic"],
   weight: ["400", "500", "600", "700"],
+});
+
+const amiri = Amiri({
+  variable: "--font-amiri",
+  subsets: ["arabic", "latin"],
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -47,7 +53,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl">
-      <body className={`${cairo.variable} ${naskh.variable} antialiased`}>
+      <body className={`${cairo.variable} ${naskh.variable} ${amiri.variable} antialiased`}>
         <SiteHeader />
         <main>{children}</main>
         <SiteFooter />
