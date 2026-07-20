@@ -555,11 +555,10 @@ export function MushafPageStudio({
       </article>
 
       {selected ? (
-        <section className="word-dock" aria-live="polite">
+        <aside className="word-sticky" aria-live="polite">
           <div className="word-dock-main">
             <span className="word-dock-key">
               {formatVerseKey(selected.verseKey)}
-              <span className="word-dock-id">{selected.wordId}</span>
             </span>
             <p className="word-dock-ar">
               {normalizeForHafsFont(selected.word.text)}
@@ -571,7 +570,11 @@ export function MushafPageStudio({
               {wordMeaning(selected.word, meaningLang) || "—"}
             </p>
           </div>
+        </aside>
+      ) : null}
 
+      {selected ? (
+        <section className="word-dock">
           <div className="morph-facts" aria-label="بيانات صرفية">
             {morph?.root ? (
               <div className="morph-fact">

@@ -122,9 +122,13 @@ input {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.86);
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--line);
+}
+
+html[data-theme="dark"] .site-header {
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
 }
 
 .header-inner {
@@ -991,9 +995,22 @@ input {
   gap: 1rem;
 }
 
+/* Selected word stays visible while browsing analysis / word list */
+.word-sticky {
+  position: sticky;
+  top: 4.35rem;
+  z-index: 40;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 0.75rem 1rem;
+}
+
 .word-dock-main {
   text-align: center;
-  padding: 0.4rem 0.2rem;
+  padding: 0.15rem 0.2rem;
 }
 
 .word-dock-key {
@@ -1322,15 +1339,20 @@ input {
   }
 }
 
-@media (min-width: 1024px) {
-  .word-dock {
-    grid-template-columns: 240px 1fr;
-    align-items: start;
+@media (max-width: 640px) {
+  .word-sticky {
+    top: 3.85rem;
+    padding: 0.55rem 0.75rem;
   }
 
-  .word-dock-main {
-    position: sticky;
-    top: 5.25rem;
+  .word-sticky .word-dock-ar {
+    font-size: clamp(1.55rem, 6vw, 2.1rem);
+    margin: 0.25rem 0 0.1rem;
+  }
+
+  .word-sticky .word-dock-tr,
+  .word-sticky .word-dock-en {
+    font-size: 0.85rem;
   }
 }
 
