@@ -18,6 +18,7 @@ import { normalizeForHafsFont } from "@/lib/quran-text";
 import { isBookmarked, toggleBookmark } from "@/lib/bookmarks";
 import { formatPosLabels } from "@/lib/morph-labels";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
+import { StudyModeTabs } from "@/components/StudyModeTabs";
 import { makeWordId } from "@/lib/word-id";
 import { ayahAudioUrl, wordAudioUrl } from "@/lib/audio";
 
@@ -811,23 +812,16 @@ export function MushafPageStudio({
         </section>
       ) : null}
 
-      <div className="mode-rail" role="tablist" aria-label="طريقة الدراسة">
-        {modes.map((m) => (
-          <button
-            key={m.id}
-            type="button"
-            role="tab"
-            aria-selected={mode === m.id}
-            className={`mode-chip ${mode === m.id ? "is-active" : ""}`}
-            onClick={() => setMode(m.id)}
-          >
-            {m.label}
-          </button>
-        ))}
-      </div>
+      <StudyModeTabs modes={modes} mode={mode} onModeChange={setMode} />
 
       {mode === "words" || mode === "irab" ? (
-        <section className="study-sheet">
+        <section
+          className="study-sheet"
+          role="tabpanel"
+          id="study-panel"
+          aria-labelledby={`study-tab-${mode}`}
+          tabIndex={0}
+        >
           <h2>
             {mode === "words"
               ? `كلمات صفحة ${toArabicNumerals(page.page)}`
@@ -903,7 +897,13 @@ export function MushafPageStudio({
           </div>
         </section>
       ) : (
-        <section className="study-sheet">
+        <section
+          className="study-sheet"
+          role="tabpanel"
+          id="study-panel"
+          aria-labelledby={`study-tab-${mode}`}
+          tabIndex={0}
+        >
           <h2>
             {tafsirSources.find((s) => s.slug === activeTafsir)?.nameAr ??
               "التفسير"}
