@@ -555,62 +555,53 @@ export function MushafPageStudio({
       </article>
 
       {selected ? (
-        <aside className="word-sticky" aria-live="polite">
-          <div className="word-dock-main">
-            <span className="word-dock-key">
-              {formatVerseKey(selected.verseKey)}
-            </span>
-            <p className="word-dock-ar">
-              {normalizeForHafsFont(selected.word.text)}
-            </p>
-            {selected.word.transliteration ? (
-              <p className="word-dock-tr">{selected.word.transliteration}</p>
-            ) : null}
-            <p className="word-dock-en">
-              {wordMeaning(selected.word, meaningLang) || "—"}
-            </p>
-          </div>
-        </aside>
-      ) : null}
-
-      {selected ? (
-        <section className="word-dock">
-          <div className="morph-facts" aria-label="بيانات صرفية">
-            {morph?.root ? (
-              <div className="morph-fact">
-                <span className="morph-fact-label">الجذر</span>
-                <Link
-                  href={`/root/${encodeURIComponent(morph.root)}`}
-                  className="morph-fact-value morph-link"
-                >
-                  {morph.root}
-                </Link>
-              </div>
-            ) : null}
-            {morph?.lemma ? (
-              <div className="morph-fact">
-                <span className="morph-fact-label">المادة</span>
-                <span className="morph-fact-value">{morph.lemma}</span>
-              </div>
-            ) : null}
-            {morph?.pos?.length ? (
-              <div className="morph-fact">
-                <span className="morph-fact-label">النوع</span>
-                <span className="morph-fact-value">
-                  {formatPosLabels(morph.pos, morph.features)}
+        <section className="word-dock" aria-live="polite">
+          <div className="analysis-grid analysis-grid--study">
+            <article className="analysis-card is-ready">
+              <h3>الكلمة</h3>
+              <div className="word-card-body">
+                <span className="word-dock-key">
+                  {formatVerseKey(selected.verseKey)}
                 </span>
+                <p className="word-dock-ar">
+                  {normalizeForHafsFont(selected.word.text)}
+                </p>
+                {selected.word.transliteration ? (
+                  <p className="word-dock-tr">
+                    {selected.word.transliteration}
+                  </p>
+                ) : null}
+                <p className="word-dock-en">
+                  {wordMeaning(selected.word, meaningLang) || "—"}
+                </p>
+                {(morph?.root || morph?.lemma || morph?.pos?.length) ? (
+                  <div className="morph-facts morph-facts--inline" aria-label="بيانات صرفية">
+                    {morph?.root ? (
+                      <Link
+                        href={`/root/${encodeURIComponent(morph.root)}`}
+                        className="morph-chip"
+                      >
+                        جذر: {morph.root}
+                      </Link>
+                    ) : null}
+                    {morph?.lemma ? (
+                      <span className="morph-chip">مادة: {morph.lemma}</span>
+                    ) : null}
+                    {morph?.pos?.length ? (
+                      <span className="morph-chip">
+                        {formatPosLabels(morph.pos, morph.features)}
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
-            ) : null}
-          </div>
+            </article>
 
-          <div className="analysis-grid analysis-grid--two">
             <article className="analysis-card is-ready">
               <h3>الإعراب / الصرف</h3>
               <p>{selected.irab}</p>
-              <p className="analysis-note">
-                من المدونة القرآنية العربية (Quranic Arabic Corpus) — GPL
-              </p>
             </article>
+
             <article className="analysis-card is-ready">
               <h3>معنى الكلمة</h3>
               <div className="lang-switch" role="group" aria-label="لغة المعنى">
@@ -626,13 +617,9 @@ export function MushafPageStudio({
                 ))}
               </div>
               <p>{wordMeaning(selected.word, meaningLang) || "—"}</p>
-              <p className="analysis-note">
-                {meaningLang === "ar"
-                  ? "معنى عربي تقريبي من المادة الصرفية — ليس ترجمة دلالية كاملة."
-                  : "كلمة بكلمة من Quran.com (إنجليزي / إندونيسي / أردو)."}
-              </p>
             </article>
           </div>
+
           {verseEditions.length ? (
             <article className="analysis-card is-ready verse-trans-card">
               <div className="verse-trans-head">
