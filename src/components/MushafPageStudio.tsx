@@ -599,7 +599,25 @@ export function MushafPageStudio({
             className="tool-btn"
             title="قراءة السورة مع خيارات الإعراب والدراسة"
           >
-            دراسة
+            قراءة السورة
+          </Link>
+        ) : null}
+        {selected ? (
+          <Link
+            href={`/ayah/${selected.surahId}/${selected.verseNumber}`}
+            className="tool-btn"
+            title="صفحة إعراب الآية كلمة بكلمة"
+          >
+            إعراب الآية
+          </Link>
+        ) : null}
+        {selected?.morph?.root ? (
+          <Link
+            href={`/root/${encodeURIComponent(selected.morph.root)}`}
+            className="tool-btn"
+            title="مواضع الجذر في القرآن"
+          >
+            الجذر
           </Link>
         ) : null}
         {selected ? (
@@ -759,7 +777,8 @@ export function MushafPageStudio({
           ))}
 
           <p className="mushaf-hint">
-            اضغط أي كلمة · رقم الآية للمشاركة · ▶ للتلاوة · ←→ لتقليب الصفحات
+            اضغط أي كلمة للدراسة · من اللوحة: إعراب الآية / الجذر · رقم الآية
+            للمشاركة · ▶ للتلاوة · ←→ لتقليب الصفحات
           </p>
         </div>
       </article>

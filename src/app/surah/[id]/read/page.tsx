@@ -70,13 +70,13 @@ export default async function SurahReadPage({ params }: Props) {
                 href={`/ayah/${surahId}/${v.verseNumber}`}
                 className="nav-pill"
               >
-                إعراب
+                إعراب الآية
               </Link>
               <Link
                 href={`${getMushafPageHref(v.page || firstPage)}?v=${surahId}:${v.verseNumber}`}
                 className="nav-pill"
               >
-                دراسة
+                دراسة في المصحف
               </Link>
             </div>
           </article>

@@ -65,4 +65,16 @@ describe("sliceIrabToVerseNumbers", () => {
     const sliced = sliceIrabToVerseNumbers(sample, [999]);
     expect(sliced?.verses).toEqual([]);
   });
+
+  it("simulates a mushaf page: only on-page verses leak into the payload", () => {
+    // Page-like selection: first two verses of Baqarah — not 286.
+    const pageVerseNumbers = new Set([1, 2]);
+    const sliced = sliceIrabToVerseNumbers(sample, pageVerseNumbers);
+    const leaked = sliced?.verses.some((v) => v.verseNumber === 286);
+    expect(leaked).toBe(false);
+    expect(sliced?.verses).toHaveLength(2);
+    const json = JSON.stringify(sliced);
+    expect(json).not.toContain("W:002:286");
+    expect(json).toContain("W:002:001");
+  });
 });
