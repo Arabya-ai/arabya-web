@@ -1,23 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toArabicNumerals } from "@/lib/format";
 import {
   DEFAULT_PORTAL_CITY,
   PORTAL_CITY_LIST,
 } from "@/lib/portal-cities";
+import {
+  formatCountdown,
+  getNextPrayer,
+  type PrayerTimings,
+} from "@/lib/next-prayer";
 
-type Timings = {
-  fajr: string;
-  sunrise: string;
-  dhuhr: string;
-  asr: string;
-  maghrib: string;
-  isha: string;
-};
+type Timings = PrayerTimings;
 
 type PrayerPayload = {
   cityLabel: string;
+  timezone?: string | null;
   gregorian: { ar: string | null; readable: string | null } | null;
   hijri: { ar: string | null } | null;
   timings: Timings;
@@ -51,6 +50,7 @@ export function PrayerTimesCard() {
   const [qibla, setQibla] = useState<QiblaPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [nowMs, setNowMs] = useState(() => Date.now());
 
   useEffect(() => {
     try {
@@ -61,6 +61,11 @@ export function PrayerTimesCard() {
     } catch {
       /* ignore */
     }
+  }, []);
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNowMs(Date.now()), 1000);
+    return () => window.clearInterval(id);
   }, []);
 
   const load = useCallback(async (cityId: string) => {
@@ -106,6 +111,19 @@ export function PrayerTimesCard() {
       /* ignore */
     }
   };
+
+  const next = useMemo(() => {
+    if (!data?.timings) return null;
+    return getNextPrayer(
+      data.timings,
+      data.timezone,
+      new Date(nowMs),
+    );
+  }, [data, nowMs]);
+
+  const remainingLabel = next
+    ? formatCountdown(next.atMs - nowMs)
+    : null;
 
   const hijri = data?.hijri?.ar;
   const gregorian = data?.gregorian?.ar || data?.gregorian?.readable;
@@ -158,28 +176,55 @@ export function PrayerTimesCard() {
       {data && !loading ? (
         <>
           <ul className="prayer-grid">
-            {LABELS.map((row) => (
-              <li key={row.key}>
-                <span className="prayer-name">{row.ar}</span>
-                <span className="prayer-time">
-                  {toDisplayTime(data.timings[row.key])}
-                </span>
-              </li>
-            ))}
+            {LABELS.map((row) => {
+              const isNext = next?.key === row.key;
+              return (
+                <li
+                  key={row.key}
+                  className={isNext ? "is-next-prayer" : undefined}
+                >
+                  <span className="prayer-name">{row.ar}</span>
+                  <span className="prayer-time">
+                    {toDisplayTime(data.timings[row.key])}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
-          {qibla ? (
-            <p className="prayer-qibla" aria-label="اتجاه القبلة">
+          <div className="prayer-qibla" aria-label="القبلة والصلاة التالية">
+            <div className="prayer-qibla-row">
               <span className="prayer-qibla-label">القبلة</span>
-              <span
-                className="prayer-qibla-needle"
-                style={{ transform: `rotate(${qibla.direction}deg)` }}
-                aria-hidden
-              />
-              <span className="prayer-qibla-deg">
-                {toArabicNumerals(Math.round(qibla.direction))}° من الشمال
-              </span>
-            </p>
-          ) : null}
+              {qibla ? (
+                <>
+                  <span
+                    className="prayer-qibla-needle"
+                    style={{ transform: `rotate(${qibla.direction}deg)` }}
+                    aria-hidden
+                  />
+                  <span className="prayer-qibla-deg">
+                    {toArabicNumerals(Math.round(qibla.direction))}° من الشمال
+                  </span>
+                </>
+              ) : (
+                <span className="prayer-qibla-deg">غير متاح</span>
+              )}
+            </div>
+            {next && remainingLabel ? (
+              <div
+                className="prayer-next"
+                role="timer"
+                aria-live="polite"
+                aria-atomic="true"
+                aria-label={`الصلاة التالية ${next.labelAr}، متبقٍ ${remainingLabel}`}
+              >
+                <span className="prayer-next-label">الصلاة التالية</span>
+                <span className="prayer-next-name">{next.labelAr}</span>
+                <span className="prayer-next-count" dir="ltr">
+                  {remainingLabel}
+                </span>
+              </div>
+            ) : null}
+          </div>
         </>
       ) : null}
     </section>

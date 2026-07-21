@@ -53,6 +53,7 @@ export async function GET(req: Request) {
     const payload = (await res.json()) as {
       data?: {
         timings?: Record<string, string>;
+        meta?: { timezone?: string };
         date?: {
           readable?: string;
           hijri?: {
@@ -97,6 +98,7 @@ export async function GET(req: Request) {
       {
         city: cfg.id,
         cityLabel: cfg.label,
+        timezone: payload.data?.meta?.timezone ?? null,
         source: "api.aladhan.com",
         gregorian: {
           readable: payload.data?.date?.readable ?? null,
