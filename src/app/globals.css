@@ -280,18 +280,122 @@ html[data-theme="dark"] .site-header {
   border-inline-start: 1px solid color-mix(in srgb, var(--brand) 28%, transparent);
 }
 
+/*
+  Brand title: Uthmani + quiet 3D + motion.
+  One React text node only. Depth = ::before. Sheen = ::after (empty).
+  Face color is solid so the name never disappears.
+*/
 .brand-name {
+  --brand-face: #0f766e;
+  --brand-depth: #1e3a8a;
   position: relative;
   display: inline-block;
-  font-size: clamp(1.85rem, 3.2vw, 2.35rem);
-  line-height: 1.3;
+  font-size: clamp(1.9rem, 3.3vw, 2.4rem);
+  line-height: 1.35;
   letter-spacing: 0;
   white-space: nowrap;
-  color: var(--brand-deep);
+  color: var(--brand-face);
+  transform-style: preserve-3d;
+  animation: brand-name-in 720ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: color 200ms ease, transform 220ms ease;
+}
+
+/* Depth plane (behind the real glyphs) */
+.brand-name::before {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  color: var(--brand-depth);
+  opacity: 0.34;
+  transform: translate3d(1.5px, 2.5px, -5px);
+  pointer-events: none;
+  user-select: none;
+  transition: transform 220ms ease, opacity 220ms ease;
+}
+
+/* Motion sheen — not text */
+.brand-name::after {
+  content: "";
+  position: absolute;
+  inset: -12% -18%;
+  border-radius: 0.15em;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 60%
+  );
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.brand:hover .brand-name,
+.brand:focus-visible .brand-name {
+  color: #0d9488;
+  transform: translateY(-1px);
+}
+
+.brand:hover .brand-name::before,
+.brand:focus-visible .brand-name::before {
+  opacity: 0.42;
+  transform: translate3d(2px, 3.25px, -6px);
+}
+
+.brand:hover .brand-name::after,
+.brand:focus-visible .brand-name::after {
+  animation: brand-sheen 1.05s ease-out;
 }
 
 .brand-lockup--footer .brand-name {
-  font-size: clamp(1.45rem, 2.5vw, 1.75rem);
+  font-size: clamp(1.5rem, 2.6vw, 1.85rem);
+  animation: none;
+}
+
+@keyframes brand-name-in {
+  from {
+    opacity: 0.75;
+    transform: translateY(4px) rotateX(8deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg);
+  }
+}
+
+@keyframes brand-sheen {
+  0% {
+    opacity: 0;
+    transform: translateX(-55%);
+  }
+  40% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(55%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-name,
+  .brand-name::after {
+    animation: none !important;
+  }
+
+  .brand-name,
+  .brand-name::before {
+    transition: none;
+  }
+
+  .brand:hover .brand-name,
+  .brand:focus-visible .brand-name {
+    transform: none;
+  }
+
+  .brand-name::before {
+    transform: translate(1.5px, 2px);
+  }
 }
 
 .menu-toggle {
@@ -1632,7 +1736,14 @@ html[data-theme="dark"] .mode-rail {
 }
 
 html[data-theme="dark"] .brand-name {
-  color: var(--brand-deep);
+  --brand-face: #5eead4;
+  --brand-depth: #082f49;
+  color: var(--brand-face);
+}
+
+html[data-theme="dark"] .brand:hover .brand-name,
+html[data-theme="dark"] .brand:focus-visible .brand-name {
+  color: #99f6e4;
 }
 
 html[data-theme="dark"] .site-footer {
