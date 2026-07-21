@@ -23,6 +23,7 @@ import { ayahAudioUrl, wordAudioUrl, RECITERS, DEFAULT_RECITER_ID } from "@/lib/
 import { narrativeIrab } from "@/lib/irab-narrative";
 import type { IrabSourceMeta } from "@/lib/claims";
 import { WordStudyDock } from "@/components/WordStudyDock";
+import { SurahOrnamentTitle } from "@/components/SurahOrnamentTitle";
 
 type Props = {
   page: MushafPageContent;
@@ -669,19 +670,23 @@ export function MushafPageStudio({
               {juzLabel(page.juz)} · صفحة {toArabicNumerals(page.page)} من{" "}
               {toArabicNumerals(page.totalPages)}
             </p>
-            <h1 className="mushaf-sura-name mushaf-page-title">
-              {page.blocks.length === 1
-                ? getSurahUthmaniTitle(page.blocks[0].surahId)
-                : "مُصْحَفُ المَدِينَةِ"}
-            </h1>
+            <SurahOrnamentTitle
+              title={
+                page.blocks.length === 1
+                  ? getSurahUthmaniTitle(page.blocks[0].surahId)
+                  : "مُصْحَفُ المَدِينَةِ"
+              }
+            />
           </header>
 
           {page.blocks.map((block) => (
             <section key={block.surahId} className="mushaf-surah-block">
               {page.blocks.length > 1 ? (
-                <h2 className="mushaf-surah-inline">
-                  {getSurahUthmaniTitle(block.surahId)}
-                </h2>
+                <SurahOrnamentTitle
+                  as="h2"
+                  className="surah-ornament--compact"
+                  title={getSurahUthmaniTitle(block.surahId)}
+                />
               ) : null}
 
               <div

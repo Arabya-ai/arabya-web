@@ -40,9 +40,15 @@
   --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px rgba(13, 148, 136, 0.08);
   --radius: 18px;
   --font-ui: var(--font-cairo);
-  --font-title: var(--font-amiri), var(--font-naskh), serif;
+  --font-title: "UthmanicHafs", var(--font-naskh), serif;
   --font-quran: "UthmanicHafs", var(--font-naskh), serif;
-  --font-display: var(--font-amiri), var(--font-naskh), serif;
+  --font-display: "UthmanicHafs", var(--font-naskh), serif;
+  --surah-wing: #1f6f78;
+  --surah-wing-pattern: #175860;
+  --surah-plaque: #f6f2e5;
+  --surah-plaque-glow: #fffef8;
+  --surah-gold: #c4a035;
+  --surah-title-ink: #1a1a1a;
   color-scheme: light;
 }
 
@@ -72,6 +78,12 @@ html[data-theme="dark"] {
   --glow: rgba(45, 212, 191, 0.12);
   --glow-2: rgba(20, 184, 166, 0.08);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 16px 40px rgba(0, 0, 0, 0.35);
+  --surah-wing: #143f45;
+  --surah-wing-pattern: #0f3338;
+  --surah-plaque: #1a2824;
+  --surah-plaque-glow: #223530;
+  --surah-gold: #b8952c;
+  --surah-title-ink: #eef6f2;
   color-scheme: dark;
 }
 
@@ -127,7 +139,13 @@ input {
 .chip-name,
 .chip-tip strong,
 .surah-card-name,
-.brand-name {
+.brand-name,
+.surah-ornament-text,
+.home-title-block h1,
+.surah-read-head h1,
+.page-block > h1,
+.ayah-study-head h1,
+.ayah-irab-head h1 {
   font-family: "UthmanicHafs", var(--font-naskh), serif !important;
   font-weight: 400 !important;
   font-synthesis: none;
@@ -382,12 +400,12 @@ html[data-theme="dark"] .site-header {
 
 .home-title-block h1 {
   margin: 0;
-  font-family: var(--font-ui);
+  font-family: var(--font-quran);
   font-size: clamp(1.85rem, 5vw, 2.55rem);
-  font-weight: 800;
+  font-weight: 400;
   color: var(--brand-deep);
-  letter-spacing: -0.02em;
-  line-height: 1.25;
+  letter-spacing: 0;
+  line-height: 1.45;
 }
 
 .home-title-block p {
@@ -854,18 +872,111 @@ html[data-theme="dark"] .site-header {
 
 .mushaf-surah-inline {
   margin: 0 0 0.85rem;
-  text-align: center;
-  font-size: clamp(1.55rem, 4.5vw, 2rem);
-  line-height: 1.75;
-  color: var(--ink);
 }
 
 .mushaf-sura-name,
 .mushaf-page-title {
   margin: 0;
-  font-size: clamp(1.75rem, 5vw, 2.35rem);
-  line-height: 1.75;
-  color: var(--ink);
+}
+
+/* Surah ornamental title — teal wings + cream plaque (reference banner) */
+.surah-ornament {
+  display: grid;
+  grid-template-columns: minmax(2.75rem, 1fr) auto minmax(2.75rem, 1fr);
+  align-items: stretch;
+  width: min(100%, 34rem);
+  margin: 0.15rem auto 0.35rem;
+  min-height: 3.1rem;
+  border: 1.5px solid var(--surah-gold);
+  background: var(--surah-wing);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.surah-ornament--compact {
+  width: min(100%, 28rem);
+  min-height: 2.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.surah-ornament-wing {
+  position: relative;
+  display: block;
+  min-width: 2.75rem;
+  background-color: var(--surah-wing);
+  overflow: hidden;
+}
+
+.surah-ornament-wing::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.28;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cpath fill='%23ffffff' d='M32 4c6 8 10 14 10 22s-4 14-10 22c-6-8-10-14-10-22S26 12 32 4zm0 14c3 4 5 7 5 12s-2 8-5 12c-3-4-5-7-5-12s2-8 5-12z'/%3E%3Cpath fill='%23ffffff' d='M8 32c8-6 14-10 22-10s14 4 22 10c-8 6-14 10-22 10S16 38 8 32zm14 0c4-3 7-5 12-5s8 2 12 5c-4 3-7 5-12 5s-8-2-12-5z'/%3E%3Ccircle cx='32' cy='32' r='3' fill='%23ffffff'/%3E%3C/svg%3E");
+  background-size: 56px 56px;
+  background-repeat: repeat;
+  pointer-events: none;
+}
+
+.surah-ornament-plaque {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 1.6rem;
+  margin-block: -1px;
+  background:
+    radial-gradient(
+      ellipse at center,
+      var(--surah-plaque-glow) 0%,
+      var(--surah-plaque) 78%
+    );
+  border-inline: 1.5px solid var(--surah-gold);
+  clip-path: polygon(
+    0% 0%,
+    100% 0%,
+    100% 26%,
+    91% 50%,
+    100% 74%,
+    100% 100%,
+    0% 100%,
+    0% 74%,
+    9% 50%,
+    0% 26%
+  );
+}
+
+.surah-ornament-text {
+  display: block;
+  color: var(--surah-title-ink);
+  font-size: clamp(1.35rem, 4.2vw, 1.85rem);
+  line-height: 1.55;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.surah-ornament--compact .surah-ornament-text {
+  font-size: clamp(1.2rem, 3.8vw, 1.55rem);
+}
+
+.surah-ornament--compact .surah-ornament-plaque {
+  padding: 0.35rem 1.25rem;
+}
+
+@media (max-width: 520px) {
+  .surah-ornament {
+    width: 100%;
+    grid-template-columns: minmax(1.6rem, 0.7fr) auto minmax(1.6rem, 0.7fr);
+  }
+
+  .surah-ornament-plaque {
+    padding-inline: 1.1rem;
+  }
+
+  .surah-ornament-text {
+    font-size: clamp(1.15rem, 5vw, 1.45rem);
+  }
 }
 
 .mushaf-text {
@@ -2069,6 +2180,18 @@ html[data-theme="dark"] ::selection {
   font-size: 0.88rem;
   color: var(--muted);
   line-height: 1.45;
+}
+
+.surah-read-head {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.surah-read-head p {
+  margin: 0.75rem 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
 .ayah-irab-head {
