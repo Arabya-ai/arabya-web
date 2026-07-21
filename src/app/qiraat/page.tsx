@@ -2,8 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "القراءات · Arabya",
-  description: "روايات القرآن المتعددة — جاهزية البنية",
+  title: "القراءات",
+  description: "الرواية المعتمدة في عربية — حفص عن عاصم",
 };
 
 export default function QiraatPage() {
@@ -11,20 +11,14 @@ export default function QiraatPage() {
     <div className="shell page-block">
       <h1>القراءات والروايات</h1>
       <p>
-        النص الافتراضي في Arabya هو <strong>حفص عن عاصم</strong> (QPC). الروايات
-        الأخرى (ورش، قالون، شعبة…) تُضاف كطبقة منفصلة عند توفر بيانات مرخّصة من
-        مجمع الملك فهد / مصادر مفتوحة.
+        النص المعتمد حاليًا في عربية هو <strong>حفص عن عاصم</strong> برسم مصحف
+        المدينة (QPC). إضافة روايات أخرى مؤجّلة حتى اكتمال البيانات.
       </p>
       <ul className="qiraat-list">
-        <li className="is-ready">حفص عن عاصم — متاح (المصحف الحالي)</li>
-        <li>شعبة عن عاصم — بانتظار البيانات</li>
-        <li>ورش عن نافع — بانتظار البيانات</li>
-        <li>قالون عن نافع — بانتظار البيانات</li>
-        <li>مصحف التجويد الملون — بانتظار ترخيص بصري</li>
+        <li className="is-ready">حفص عن عاصم — متاح في المصحف</li>
       </ul>
       <p>
-        <Link href="/mushaf/1">فتح المصحف</Link> ·{" "}
-        <Link href="/resources">الموارد</Link>
+        <Link href="/mushaf/1">فتح المصحف</Link>
       </p>
     </div>
   );

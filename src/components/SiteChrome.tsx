@@ -41,12 +41,6 @@ export function SiteHeader() {
           <Link href="/juz" onClick={() => setOpen(false)}>
             الأجزاء
           </Link>
-          <Link href="/books" onClick={() => setOpen(false)}>
-            الإعراب
-          </Link>
-          <Link href="/resources" onClick={() => setOpen(false)}>
-            موارد
-          </Link>
           <Link href="/about" onClick={() => setOpen(false)}>
             عن عربية
           </Link>
@@ -61,6 +55,8 @@ export function SiteHeader() {
 }
 
 export function SiteFooter() {
+  const year = new Date().getFullYear();
+
   return (
     <footer className="site-footer">
       <div className="shell footer-inner">
@@ -68,12 +64,11 @@ export function SiteFooter() {
           <div className="footer-brand-col">
             <BrandLockup size="footer" />
             <p className="footer-mission">
-              منصة لدراسة القرآن كلمةً بكلمة: صرف، نحو، دلالة، وبلاغة — بمصادر
-              مفتوحة ومنسوبة.
+              القرآن الكريم كلمة بكلمة: نحو وصرف ودلالة وتفسير وترجمة
             </p>
           </div>
 
-          <nav className="footer-nav-grid" aria-label="روابط التذييل">
+          <nav className="footer-nav-grid footer-nav-grid--simple" aria-label="روابط التذييل">
             <div className="footer-col">
               <h2 className="footer-col-title">استكشف</h2>
               <ul className="footer-links">
@@ -89,20 +84,6 @@ export function SiteFooter() {
               </ul>
             </div>
             <div className="footer-col">
-              <h2 className="footer-col-title">دراسة</h2>
-              <ul className="footer-links">
-                <li>
-                  <Link href="/books">كتب الإعراب</Link>
-                </li>
-                <li>
-                  <Link href="/resources">الموارد</Link>
-                </li>
-                <li>
-                  <Link href="/qiraat">القراءات</Link>
-                </li>
-              </ul>
-            </div>
-            <div className="footer-col">
               <h2 className="footer-col-title">عن المنصة</h2>
               <ul className="footer-links">
                 <li>
@@ -111,51 +92,19 @@ export function SiteFooter() {
                 <li>
                   <Link href="/privacy">الخصوصية</Link>
                 </li>
-                <li>
-                  <Link href="/hadith">الأحاديث</Link>
-                </li>
-                <li>
-                  <Link href="/heritage">التراث</Link>
-                </li>
-              </ul>
-            </div>
-            <div className="footer-col">
-              <h2 className="footer-col-title">المصادر</h2>
-              <ul className="footer-links">
-                <li>
-                  <a
-                    href="https://quran.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Quran.com
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="http://corpus.quran.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Quranic Arabic Corpus
-                  </a>
-                </li>
-                <li>
-                  <span className="footer-muted">مصحف المدينة · الرسم العثماني</span>
-                </li>
               </ul>
             </div>
           </nav>
         </div>
 
         <div className="footer-bottom">
-          <p className="footer-legal">
-            © 2026 عربية · جميع الحقوق محفوظة للمحتوى الأصلي للمنصة
+          <p className="footer-legal" suppressHydrationWarning>
+            © {year}{" "}
+            <Link href="/" className="footer-site-link">
+              منصة عربية
+            </Link>
           </p>
-          <p className="footer-sources">
-            النص القرآني والبيانات اللغوية من مصادر مفتوحة مرخّصة — لا نعيد نشر
-            كتب محمية دون إذن.
-          </p>
+          <p className="footer-sources">جميع الحقوق محفوظة لكل مسلم</p>
         </div>
       </div>
     </footer>

@@ -25,18 +25,22 @@ const amiri = Amiri({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.arabyaai.com"),
   title: {
-    default: "Arabya | تفسير كلمات القرآن الكريم",
-    template: "%s | Arabya",
+    default: "عربية | تفسير كلمات القرآن الكريم",
+    template: "%s | عربية",
   },
   description:
-    "فهرس سور القرآن مع دراسة كل كلمة: معنى، إعراب، وتفاسير متعددة — Arabya",
+    "فهرس سور القرآن مع دراسة كل كلمة: معنى، إعراب، وتفاسير متعددة — عربية",
   openGraph: {
-    title: "Arabya | تفسير كلمات القرآن الكريم",
+    title: "عربية | تفسير كلمات القرآن الكريم",
     description: "ادرس كل كلمة في القرآن مع إعراب وتفاسير قابلة للتبديل",
     url: "https://www.arabyaai.com",
-    siteName: "Arabya",
+    siteName: "عربية",
     locale: "ar_AR",
     type: "website",
+  },
+  icons: {
+    icon: [{ url: "/brand/arabya-mark-square.png", type: "image/png" }],
+    apple: [{ url: "/brand/arabya-mark-square.png", type: "image/png" }],
   },
 };
 

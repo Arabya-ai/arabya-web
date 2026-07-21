@@ -11,8 +11,8 @@ export const RECITERS: Reciter[] = [
   { id: "alafasy", nameAr: "مشاري العفاسي", folder: "Alafasy_128kbps" },
   { id: "husary", nameAr: "محمود خليل الحصري", folder: "Husary_128kbps" },
   { id: "minshawi", nameAr: "محمد صديق المنشاوي", folder: "Minshawy_Murattal_128kbps" },
-  { id: "abdulbasit", nameAr: "عبد الباسط عبد الصمد", folder: "Abdul_Basit_Murattal_128kbps" },
-  { id: "sudais", nameAr: "عبد الرحمن السديس", folder: "Abdurrahmaan_As-Sudais_128kbps" },
+  { id: "abdulbasit", nameAr: "عبد الباسط عبد الصمد", folder: "Abdul_Basit_Murattal_192kbps" },
+  { id: "sudais", nameAr: "عبد الرحمن السديس", folder: "Abdurrahmaan_As-Sudais_192kbps" },
   { id: "ghamdi", nameAr: "سعد الغامدي", folder: "Ghamadi_40kbps" },
 ];
 

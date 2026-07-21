@@ -21,7 +21,6 @@ import { StudyModeTabs } from "@/components/StudyModeTabs";
 import { makeWordId } from "@/lib/word-id";
 import { ayahAudioUrl, wordAudioUrl, RECITERS, DEFAULT_RECITER_ID } from "@/lib/audio";
 import { narrativeIrab } from "@/lib/irab-narrative";
-import type { IrabSourceMeta } from "@/lib/claims";
 import { WordStudyDock } from "@/components/WordStudyDock";
 import { SurahOrnamentTitle } from "@/components/SurahOrnamentTitle";
 
@@ -30,7 +29,6 @@ type Props = {
   irabBySurah: Record<number, IrabSurah | null>;
   tafsirSources: TafsirSource[];
   verseEditions: VerseTranslationEdition[];
-  bookSources?: IrabSourceMeta[];
 };
 
 type Mode = "words" | "irab" | "meaning-table" | string;
@@ -64,7 +62,6 @@ export function MushafPageStudio({
   irabBySurah,
   tafsirSources,
   verseEditions,
-  bookSources = [],
 }: Props) {
   const modes: { id: Mode; label: string }[] = useMemo(() => {
     const list: { id: Mode; label: string }[] = [
@@ -666,17 +663,19 @@ export function MushafPageStudio({
       <article className="mushaf-page" aria-label={`مصحف — صفحة ${page.page}`}>
         <div className="mushaf-frame">
           <header className="mushaf-banner">
-            <p className="mushaf-banner-meta">
-              {juzLabel(page.juz)} · صفحة {toArabicNumerals(page.page)} من{" "}
-              {toArabicNumerals(page.totalPages)}
-            </p>
-            <SurahOrnamentTitle
-              title={
-                page.blocks.length === 1
-                  ? getSurahUthmaniTitle(page.blocks[0].surahId)
-                  : "مُصْحَفُ المَدِينَةِ"
-              }
-            />
+            <div className="mushaf-banner-top">
+              <p className="mushaf-madinah-label">مُصْحَفُ المَدِينَةِ</p>
+              <p className="mushaf-banner-meta">
+                {juzLabel(page.juz)} · صفحة {toArabicNumerals(page.page)} من{" "}
+                {toArabicNumerals(page.totalPages)}
+              </p>
+            </div>
+            {page.blocks.length === 1 ? (
+              <SurahOrnamentTitle
+                className="surah-ornament--full"
+                title={getSurahUthmaniTitle(page.blocks[0].surahId)}
+              />
+            ) : null}
           </header>
 
           {page.blocks.map((block) => (
@@ -684,7 +683,7 @@ export function MushafPageStudio({
               {page.blocks.length > 1 ? (
                 <SurahOrnamentTitle
                   as="h2"
-                  className="surah-ornament--compact"
+                  className="surah-ornament--full surah-ornament--compact"
                   title={getSurahUthmaniTitle(block.surahId)}
                 />
               ) : null}
@@ -776,7 +775,7 @@ export function MushafPageStudio({
           verseEdition={verseEdition}
           onVerseEdition={setVerseEdition}
           verseTranslation={selectedVerseTranslation}
-          bookSources={bookSources}
+          tafsirSources={tafsirSources}
         />
       ) : null}
 
@@ -875,10 +874,7 @@ export function MushafPageStudio({
           tabIndex={0}
         >
           <h2>جدول المعنى العربي — صفحة {toArabicNumerals(page.page)}</h2>
-          <p className="table-intro">
-            كلمة | معنى دراسي عربي (معجم مواد عربْية / صرف) — هيكل مشابه لمواقع التفسير
-            كلمة بكلمة، بمحتوى Arabya المفتوح وليس نسخًا من كتب محمية.
-          </p>
+          <p className="table-intro">معاني الكلمات كلمة بكلمة</p>
           <div className="meaning-table-grid">
             {wordRows.map((row) => {
               const open = selected?.key === row.key;
