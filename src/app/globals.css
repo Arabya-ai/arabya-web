@@ -2455,13 +2455,60 @@ html[data-theme="dark"] ::selection {
 }
 
 .habit-card h2 {
-  margin: 0 0 0.55rem;
+  margin: 0 0 0.35rem;
   font-size: 1.15rem;
   color: var(--brand-deep);
 }
 
+.habit-help {
+  margin: 0 0 0.85rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--muted, color-mix(in srgb, var(--ink) 72%, transparent));
+}
+
+.habit-metric {
+  margin: 0.65rem 0;
+}
+
+.habit-metric-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: baseline;
+  margin-bottom: 0.3rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.habit-metric-status {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  color: var(--brand-deep);
+  font-weight: 700;
+}
+
+.habit-bar {
+  height: 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--line) 80%, transparent);
+  overflow: hidden;
+}
+
+.habit-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--brand);
+  transition: width 200ms ease;
+}
+
+.habit-bar--khatm .habit-bar-fill {
+  background: color-mix(in srgb, var(--brand-deep) 70%, var(--brand));
+}
+
 .habit-line {
-  margin: 0.2rem 0;
+  margin: 0.35rem 0;
   font-size: 0.95rem;
   line-height: 1.55;
   color: var(--ink);
@@ -2472,7 +2519,7 @@ html[data-theme="dark"] ::selection {
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
-  margin-top: 0.75rem;
+  margin-top: 0.85rem;
 }
 
 .habit-goal {
@@ -2489,6 +2536,10 @@ html[data-theme="dark"] ::selection {
   border: 1px solid var(--line);
   background: var(--panel);
   color: var(--ink);
+}
+
+.habit-cta {
+  font-weight: 700;
 }
 
 .ayah-note-panel {

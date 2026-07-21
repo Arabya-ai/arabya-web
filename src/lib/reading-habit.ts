@@ -1,18 +1,20 @@
-/** Local reading habit: daily goal, streak, simple khatm planner (localStorage). */
+/** Local reading habit: daily goal, streak, khatm by unique pages (localStorage). */
 
 export type ReadingHabitState = {
   /** Target mushaf pages per calendar day */
   dailyGoalPages: number;
-  /** YYYY-MM-DD → pages completed that day */
+  /** YYYY-MM-DD → unique pages opened that day */
   days: Record<string, number>;
   streak: number;
-  /** Optional khatm: pages done toward 604 */
+  /** Unique mushaf pages ever opened (khatm progress) */
   khatmPagesDone: number;
   lastVisitDate: string | null;
 };
 
 const KEY = "arabya-reading-habit";
+const KHATM_PAGES_KEY = "arabya-reading-habit:khatm-pages";
 const TOTAL_PAGES = 604;
+export const LAST_MUSHAF_PAGE_KEY = "arabya-last-mushaf-page";
 
 function todayKey(): string {
   const d = new Date();
@@ -32,10 +34,31 @@ function emptyState(): ReadingHabitState {
   };
 }
 
+function readKhatmPages(): number[] {
+  try {
+    const raw = localStorage.getItem(KHATM_PAGES_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as number[];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (p) => Number.isInteger(p) && p >= 1 && p <= TOTAL_PAGES,
+    );
+  } catch {
+    return [];
+  }
+}
+
+function writeKhatmPages(pages: number[]): void {
+  localStorage.setItem(KHATM_PAGES_KEY, JSON.stringify(pages.slice(0, TOTAL_PAGES)));
+}
+
 export function readReadingHabit(): ReadingHabitState {
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return emptyState();
+    const khatmCount = readKhatmPages().length;
+    if (!raw) {
+      return { ...emptyState(), khatmPagesDone: khatmCount };
+    }
     const parsed = JSON.parse(raw) as Partial<ReadingHabitState>;
     return {
       ...emptyState(),
@@ -46,10 +69,7 @@ export function readReadingHabit(): ReadingHabitState {
         Math.max(1, Number(parsed.dailyGoalPages) || 2),
       ),
       streak: Math.max(0, Number(parsed.streak) || 0),
-      khatmPagesDone: Math.min(
-        TOTAL_PAGES,
-        Math.max(0, Number(parsed.khatmPagesDone) || 0),
-      ),
+      khatmPagesDone: khatmCount,
     };
   } catch {
     return emptyState();
@@ -90,8 +110,12 @@ function recomputeStreak(days: Record<string, number>, goal: number): number {
   return streak;
 }
 
-/** Record that the user opened/read a mushaf page (counts once per page per day via Set in caller optional). */
+/** Record that the user opened a mushaf page (once per page per day; once forever for khatm). */
 export function recordPageRead(page: number): ReadingHabitState {
+  if (!Number.isInteger(page) || page < 1 || page > TOTAL_PAGES) {
+    return readReadingHabit();
+  }
+
   const state = readReadingHabit();
   const today = todayKey();
   const pagesKey = `${KEY}:pages:${today}`;
@@ -102,15 +126,20 @@ export function recordPageRead(page: number): ReadingHabitState {
   } catch {
     pagesToday = [];
   }
+
   if (!pagesToday.includes(page)) {
     pagesToday.push(page);
     localStorage.setItem(pagesKey, JSON.stringify(pagesToday.slice(-80)));
     state.days[today] = pagesToday.length;
-    state.khatmPagesDone = Math.min(
-      TOTAL_PAGES,
-      Math.max(state.khatmPagesDone, page),
-    );
   }
+
+  const khatm = readKhatmPages();
+  if (!khatm.includes(page)) {
+    khatm.push(page);
+    writeKhatmPages(khatm);
+  }
+  state.khatmPagesDone = khatm.length;
+
   state.lastVisitDate = today;
   state.streak = recomputeStreak(state.days, state.dailyGoalPages);
   writeReadingHabit(state);
@@ -127,6 +156,7 @@ export function setDailyGoal(pages: number): ReadingHabitState {
 
 export function resetKhatmProgress(): ReadingHabitState {
   const state = readReadingHabit();
+  writeKhatmPages([]);
   state.khatmPagesDone = 0;
   writeReadingHabit(state);
   return state;
@@ -143,6 +173,17 @@ export function todayProgress(state: ReadingHabitState): {
     goal: state.dailyGoalPages,
     met: done >= state.dailyGoalPages,
   };
+}
+
+/** Last opened mushaf page, or 1 if none. */
+export function getContinuePage(): number {
+  try {
+    const raw = Number(localStorage.getItem(LAST_MUSHAF_PAGE_KEY));
+    if (Number.isInteger(raw) && raw >= 1 && raw <= TOTAL_PAGES) return raw;
+  } catch {
+    /* ignore */
+  }
+  return 1;
 }
 
 export { TOTAL_PAGES as MUSHAF_TOTAL_PAGES };
