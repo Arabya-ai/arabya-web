@@ -45,6 +45,22 @@ export async function getIrab(id: number): Promise<IrabSurah | null> {
   }
 }
 
+/** Keep only morphology for the verses shown on a mushaf page (cuts multi‑MB payloads). */
+export function sliceIrabToVerseNumbers(
+  irab: IrabSurah | null,
+  verseNumbers: Iterable<number>,
+): IrabSurah | null {
+  if (!irab) return null;
+  const wanted = verseNumbers instanceof Set ? verseNumbers : new Set(verseNumbers);
+  if (wanted.size === 0) {
+    return { ...irab, verses: [] };
+  }
+  return {
+    ...irab,
+    verses: irab.verses.filter((v) => wanted.has(v.verseNumber)),
+  };
+}
+
 export async function getTafsirSources(): Promise<TafsirSource[]> {
   try {
     const raw = await readFile(

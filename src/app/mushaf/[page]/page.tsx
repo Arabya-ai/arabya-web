@@ -7,7 +7,7 @@ import {
   getMushafPage,
 } from "@/lib/mushaf";
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
-import { getIrab, getTafsirSources, getVerseTranslationEditions } from "@/lib/quran";
+import { getIrab, getTafsirSources, getVerseTranslationEditions, sliceIrabToVerseNumbers } from "@/lib/quran";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
 
 type Props = { params: Promise<{ page: string }> };
@@ -87,11 +87,27 @@ export default async function MushafPageRoute({ params }: Props) {
   if (!pageContent) notFound();
 
   const surahIds = [...new Set(pageContent.blocks.map((b) => b.surahId))];
+  const verseNumbersBySurah = new Map<number, Set<number>>();
+  for (const block of pageContent.blocks) {
+    let set = verseNumbersBySurah.get(block.surahId);
+    if (!set) {
+      set = new Set();
+      verseNumbersBySurah.set(block.surahId, set);
+    }
+    for (const verse of block.verses) {
+      set.add(verse.verseNumber);
+    }
+  }
+
   const irabBySurah: Record<number, Awaited<ReturnType<typeof getIrab>>> = {};
 
   await Promise.all(
     surahIds.map(async (surahId) => {
-      irabBySurah[surahId] = await getIrab(surahId);
+      const full = await getIrab(surahId);
+      irabBySurah[surahId] = sliceIrabToVerseNumbers(
+        full,
+        verseNumbersBySurah.get(surahId) ?? new Set(),
+      );
     }),
   );
 
