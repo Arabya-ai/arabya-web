@@ -19,6 +19,12 @@ type SearchHit = {
   nameAr: string;
 };
 
+type RootHit = {
+  root: string;
+  count: number;
+  href: string;
+};
+
 export function SurahIndex({
   surahs,
   mushafFirstPage,
@@ -28,6 +34,7 @@ export function SurahIndex({
 }) {
   const [query, setQuery] = useState("");
   const [ayahHits, setAyahHits] = useState<SearchHit[]>([]);
+  const [rootHit, setRootHit] = useState<RootHit | null>(null);
   const [searching, setSearching] = useState(false);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
 
@@ -50,6 +57,7 @@ export function SurahIndex({
     const q = query.trim();
     if (q.length < 2) {
       setAyahHits([]);
+      setRootHit(null);
       return;
     }
     let cancelled = false;
@@ -58,10 +66,19 @@ export function SurahIndex({
       try {
         const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
         if (!res.ok) return;
-        const data = (await res.json()) as { hits: SearchHit[] };
-        if (!cancelled) setAyahHits(data.hits ?? []);
+        const data = (await res.json()) as {
+          hits: SearchHit[];
+          root: RootHit | null;
+        };
+        if (!cancelled) {
+          setAyahHits(data.hits ?? []);
+          setRootHit(data.root ?? null);
+        }
       } catch {
-        if (!cancelled) setAyahHits([]);
+        if (!cancelled) {
+          setAyahHits([]);
+          setRootHit(null);
+        }
       } finally {
         if (!cancelled) setSearching(false);
       }
@@ -72,15 +89,20 @@ export function SurahIndex({
     };
   }, [query]);
 
+  const showSearchPanel =
+    query.trim().length >= 2 &&
+    (searching || ayahHits.length > 0 || Boolean(rootHit));
+
   return (
     <div className="index-simple">
       <div className="index-search-simple">
         <input
           type="search"
-          placeholder="بحث باسم السورة، رقمها، أو نص آية…"
+          placeholder="بحث باسم السورة، رقمها، نص آية، أو جذر صرفي…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          aria-label="بحث في السور والآيات"
+          aria-label="بحث في السور والآيات والجذور"
+          maxLength={120}
         />
       </div>
 
@@ -102,12 +124,22 @@ export function SurahIndex({
         </section>
       ) : null}
 
-      {query.trim().length >= 2 && (searching || ayahHits.length > 0) ? (
+      {showSearchPanel ? (
         <section className="ayah-search-section" aria-labelledby="ayah-search-h">
-          <h2 id="ayah-search-h">نتائج الآيات</h2>
-          {searching && !ayahHits.length ? (
+          <h2 id="ayah-search-h">نتائج البحث</h2>
+          {rootHit ? (
+            <Link href={rootHit.href} className="root-search-hit">
+              <span className="root-search-label">جذر صرفي</span>
+              <strong className="root-search-root">{rootHit.root}</strong>
+              <span className="root-search-meta">
+                {toArabicNumerals(rootHit.count)} موضعاً في القرآن
+              </span>
+            </Link>
+          ) : null}
+          {searching && !ayahHits.length && !rootHit ? (
             <p className="empty-state">جارٍ البحث…</p>
-          ) : (
+          ) : null}
+          {ayahHits.length ? (
             <ul className="ayah-search-list">
               {ayahHits.map((h) => (
                 <li key={h.key}>
@@ -123,7 +155,7 @@ export function SurahIndex({
                 </li>
               ))}
             </ul>
-          )}
+          ) : null}
         </section>
       ) : null}
 
@@ -151,7 +183,7 @@ export function SurahIndex({
         </div>
       </section>
 
-      {filtered.length === 0 && ayahHits.length === 0 ? (
+      {filtered.length === 0 && ayahHits.length === 0 && !rootHit ? (
         <p className="empty-state">لا توجد نتائج مطابقة.</p>
       ) : null}
     </div>
