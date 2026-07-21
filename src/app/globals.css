@@ -123,8 +123,12 @@ input {
 .word-dock-ar,
 .word-card-ar,
 .cell-word,
-.tafsir-words {
-  font-family: "UthmanicHafs", var(--font-naskh), serif !important;
+.tafsir-words,
+.brand-name,
+.brand-name-depth,
+.brand-name-mid,
+.brand-name-face {
+  font-family: "UthmanicHafs", var(--font-quran), var(--font-naskh), serif !important;
   font-weight: 400 !important;
   font-synthesis: none;
 }
@@ -288,11 +292,11 @@ html[data-theme="dark"] .site-header {
 .brand-name {
   position: relative;
   display: inline-block;
-  font-family: "UthmanicHafs", var(--font-naskh), serif;
-  font-size: clamp(1.7rem, 3.1vw, 2.15rem);
+  font-family: "UthmanicHafs", var(--font-quran), var(--font-naskh), serif;
+  font-size: clamp(1.85rem, 3.2vw, 2.35rem);
   font-weight: 400;
-  letter-spacing: 0.015em;
-  line-height: 1.15;
+  letter-spacing: 0;
+  line-height: 1.25;
   white-space: nowrap;
   font-synthesis: none;
   color: #0f766e;
@@ -304,7 +308,9 @@ html[data-theme="dark"] .site-header {
   position: absolute;
   inset: 0;
   display: block;
-  font: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
   letter-spacing: inherit;
   line-height: inherit;
   white-space: nowrap;
@@ -330,7 +336,9 @@ html[data-theme="dark"] .site-header {
   position: relative;
   z-index: 2;
   display: block;
-  font: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
   letter-spacing: inherit;
   line-height: inherit;
   white-space: nowrap;

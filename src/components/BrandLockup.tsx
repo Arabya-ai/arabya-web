@@ -29,7 +29,7 @@ export function BrandLockup({ size = "header" }: BrandLockupProps) {
       </span>
 
       <span className="brand-text">
-        <span className="brand-name">
+        <span className="brand-name" lang="ar">
           <span className="brand-name-depth" aria-hidden>
             عربية
           </span>
