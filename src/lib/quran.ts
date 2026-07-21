@@ -145,15 +145,19 @@ export function normalizeArabicSearch(input: string): string {
 let searchCache: SearchHit[] | null = null;
 let searchNormCache: { hit: SearchHit; norm: string; nameNorm: string }[] | null =
   null;
+let rootsIndexCache: RootsIndex | null | undefined;
 
 export async function getRootsIndex(): Promise<RootsIndex | null> {
+  if (rootsIndexCache !== undefined) return rootsIndexCache;
   try {
     const raw = await readFile(
       path.join(dataRoot, "roots-index.json"),
       "utf8",
     );
-    return JSON.parse(raw) as RootsIndex;
+    rootsIndexCache = JSON.parse(raw) as RootsIndex;
+    return rootsIndexCache;
   } catch {
+    rootsIndexCache = null;
     return null;
   }
 }
@@ -163,6 +167,33 @@ export async function getRootEntry(root: string): Promise<RootEntry | null> {
   if (!index) return null;
   const decoded = decodeURIComponent(root);
   return index.roots.find((r) => r.root === decoded) ?? null;
+}
+
+/**
+ * Match a user query to a morphology root (exact normalized form).
+ * Prefers exact root equality after Arabic normalization.
+ */
+export async function findRootByQuery(
+  query: string,
+): Promise<RootEntry | null> {
+  const qNorm = normalizeArabicSearch(query);
+  if (qNorm.length < 2 || qNorm.length > 8) return null;
+
+  const index = await getRootsIndex();
+  if (!index) return null;
+
+  const exact = index.roots.find((r) => normalizeArabicSearch(r.root) === qNorm);
+  if (exact) return exact;
+
+  // Short queries only — avoid noisy prefix matches on long ayah text.
+  if (qNorm.length >= 3 && qNorm.length <= 5) {
+    const prefixed = index.roots.filter((r) =>
+      normalizeArabicSearch(r.root).startsWith(qNorm),
+    );
+    if (prefixed.length === 1) return prefixed[0];
+  }
+
+  return null;
 }
 
 export async function searchAyahs(

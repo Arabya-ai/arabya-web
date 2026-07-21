@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { sanitizeSearchQuery } from "@/lib/api-query";
 import { runStudyQuery } from "@/lib/study";
 
 /**
@@ -7,10 +8,10 @@ import { runStudyQuery } from "@/lib/study";
  */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const q = (searchParams.get("q") ?? "").trim();
-  const mode = (searchParams.get("mode") ?? "local").trim();
+  const q = sanitizeSearchQuery(searchParams.get("q"));
+  const mode = (searchParams.get("mode") ?? "local").trim().slice(0, 32);
 
-  if (q.length < 2) {
+  if (!q) {
     return NextResponse.json(
       { error: "أدخل حرفين على الأقل", hits: [], brief: "" },
       { status: 400 },
@@ -42,7 +43,6 @@ export async function GET(req: Request) {
       );
     }
 
-    // Placeholder: wire provider later; never drop retrieval citations.
     return NextResponse.json(
       {
         ...result,
