@@ -14,6 +14,7 @@
     "fetch-data": "node scripts/fetch-quran-data.mjs",
     "apply-qpc-text": "node scripts/apply-qpc-hafs-text.mjs",
     "build-irab": "node scripts/build-irab.mjs",
+    "expand-roots-index": "node scripts/expand-roots-index.mjs",
     "build-lemma-sense-ar": "node scripts/build-lemma-sense-ar.mjs",
     "build-meaning-ar": "node scripts/build-lemma-sense-ar.mjs && node scripts/build-meaning-ar.mjs",
     "fetch-tafsirs": "node scripts/fetch-tafsirs.mjs",

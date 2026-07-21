@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getRootsIndex } from "@/lib/quran";
 import { toArabicNumerals } from "@/lib/format";
+import { topRootsByCount } from "@/lib/roots";
 
 export const metadata: Metadata = {
   title: "فهرس الجذور",
@@ -15,6 +16,7 @@ function firstLetter(root: string): string {
 export default async function RootsIndexPage() {
   const index = await getRootsIndex();
   const roots = index?.roots ?? [];
+  const top = topRootsByCount(roots, 40);
 
   const byLetter = new Map<string, { root: string; count: number }[]>();
   for (const r of roots) {
@@ -32,15 +34,44 @@ export default async function RootsIndexPage() {
         <Link href="/" className="nav-pill">
           ← الفهرس
         </Link>
+        <Link href="/books" className="nav-pill">
+          الكتب المرخّصة
+        </Link>
       </nav>
 
       <header className="roots-index-head">
         <h1>فهرس الجذور الصرفية</h1>
         <p>
           {toArabicNumerals(roots.length)} جذرًا من المدونة القرآنية العربية
-          (QAC)
+          (Quranic Arabic Corpus). الأرقام في المواقع الأخرى قد تختلف لاختلاف
+          منهج الجذر — هذا العدد يطابق مصدر الصرف المستخدم في عربْية.
         </p>
       </header>
+
+      {top.length ? (
+        <section className="roots-top-section" aria-labelledby="roots-top-h">
+          <h2 id="roots-top-h">الأكثر ورودًا — مسار تعلّم</h2>
+          <p className="roots-top-lead">
+            ابدأ بأكثر الجذور شيوعًا في القرآن، ثم انتقل لكل جذر لرؤية مشتقاته
+            ومواضعه كاملة.
+          </p>
+          <ol className="roots-top-list">
+            {top.map((r, i) => (
+              <li key={r.root}>
+                <Link href={`/root/${encodeURIComponent(r.root)}`}>
+                  <span className="roots-top-rank">
+                    {toArabicNumerals(i + 1)}
+                  </span>
+                  <span className="roots-grid-root">{r.root}</span>
+                  <span className="roots-grid-count">
+                    {toArabicNumerals(r.count)}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ) : null}
 
       <nav className="roots-letter-nav" aria-label="حروف الجذور">
         {letters.map((l) => (
