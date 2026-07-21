@@ -334,16 +334,14 @@ async function main() {
       }
       const entry = roots.get(root);
       entry.count += 1;
-      if (entry.occurrences.length < 250) {
-        entry.occurrences.push({
-          wordId,
-          surahId: s,
-          verse: a,
-          position: w,
-          surface,
-          lemma,
-        });
-      }
+      entry.occurrences.push({
+        wordId,
+        surahId: s,
+        verse: a,
+        position: w,
+        surface,
+        lemma,
+      });
     }
   }
 
@@ -384,6 +382,8 @@ async function main() {
         sourceUrl: "http://corpus.quran.com",
         license: "GNU GPL — attribution required",
         rootCount: rootsList.length,
+        occurrenceCap: null,
+        note: "occurrences list every morph word with ROOT; count is the full corpus total.",
         roots: rootsList,
       },
       null,

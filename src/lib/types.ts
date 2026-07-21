@@ -135,5 +135,7 @@ export type RootsIndex = {
   sourceUrl: string;
   license: string;
   rootCount: number;
+  occurrenceCap?: number | null;
+  note?: string;
   roots: RootEntry[];
 };
