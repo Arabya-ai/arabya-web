@@ -61,8 +61,6 @@ export function SiteHeader() {
 }
 
 export function SiteFooter() {
-  const year = new Date().getFullYear();
-
   return (
     <footer className="site-footer">
       <div className="shell footer-inner">
@@ -152,7 +150,7 @@ export function SiteFooter() {
 
         <div className="footer-bottom">
           <p className="footer-legal">
-            © {year} عربية · جميع الحقوق محفوظة للمحتوى الأصلي للمنصة
+            © 2026 عربية · جميع الحقوق محفوظة للمحتوى الأصلي للمنصة
           </p>
           <p className="footer-sources">
             النص القرآني والبيانات اللغوية من مصادر مفتوحة مرخّصة — لا نعيد نشر
