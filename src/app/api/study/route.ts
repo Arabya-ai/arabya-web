@@ -18,7 +18,15 @@ export async function GET(req: Request) {
     );
   }
 
-  const result = await runStudyQuery(q, 6);
+  const wantAll = searchParams.get("all") === "1";
+  const rawLimit = Number(searchParams.get("limit"));
+  const limit = wantAll
+    ? 80
+    : Number.isFinite(rawLimit) && rawLimit > 0
+      ? Math.min(Math.floor(rawLimit), 80)
+      : 10;
+
+  const result = await runStudyQuery(q, { limit });
 
   const llmEnabled =
     process.env.ARABYA_LLM_ENABLED === "1" &&

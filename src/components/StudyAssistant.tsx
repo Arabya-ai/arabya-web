@@ -28,51 +28,28 @@ type StudyHit = {
 
 type StudyResponse = {
   hits?: StudyHit[];
+  total?: number;
   brief?: string;
   note?: string;
   error?: string;
 };
 
+const PREVIEW_LIMIT = 10;
+
 export function StudyAssistant() {
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<StudyHit[]>([]);
+  const [total, setTotal] = useState(0);
   const [brief, setBrief] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
+  const [showAll, setShowAll] = useState(false);
+  const [kick, setKick] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const autoRan = useRef(false);
-
-  const runStudy = async (e?: React.FormEvent, override?: string) => {
-    e?.preventDefault();
-    const q = (override ?? query).trim();
-    if (q.length < 2) {
-      setError("أدخل حرفين على الأقل للبحث الدراسي");
-      return;
-    }
-    setQuery(q);
-    setLoading(true);
-    setError(null);
-    setSearched(true);
-    try {
-      const res = await fetch(`/api/study?q=${encodeURIComponent(q)}`);
-      const data = (await res.json()) as StudyResponse;
-      if (!res.ok) {
-        setHits([]);
-        setBrief(null);
-        setError(data.error || "تعذّر البحث");
-        return;
-      }
-      setHits(data.hits ?? []);
-      setBrief(data.brief ?? null);
-    } catch {
-      setHits([]);
-      setBrief(null);
-      setError("تعذّر الاتصال بخدمة الدراسة");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const reqId = useRef(0);
+  const skipDelayRef = useRef(false);
 
   useEffect(() => {
     if (autoRan.current) return;
@@ -89,8 +66,9 @@ export function StudyAssistant() {
     }
     if (!incoming || incoming.trim().length < 2) return;
     autoRan.current = true;
+    skipDelayRef.current = true;
     setQuery(incoming.trim());
-    void runStudy(undefined, incoming.trim());
+    setKick((n) => n + 1);
     window.requestAnimationFrame(() => {
       document.getElementById("study-h")?.scrollIntoView({
         behavior: "smooth",
@@ -98,24 +76,100 @@ export function StudyAssistant() {
       });
       inputRef.current?.focus();
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot hydrate from study link
   }, []);
 
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 2) {
+      reqId.current += 1;
+      setHits([]);
+      setTotal(0);
+      setBrief(null);
+      setError(null);
+      setSearched(false);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    const delay = skipDelayRef.current ? 0 : 180;
+    skipDelayRef.current = false;
+    const t = window.setTimeout(async () => {
+      const id = ++reqId.current;
+      setLoading(true);
+      setError(null);
+      setSearched(true);
+      try {
+        const params = new URLSearchParams({ q });
+        if (showAll) params.set("all", "1");
+        else params.set("limit", String(PREVIEW_LIMIT));
+        const res = await fetch(`/api/study?${params}`);
+        const data = (await res.json()) as StudyResponse;
+        if (cancelled || id !== reqId.current) return;
+        if (!res.ok) {
+          setHits([]);
+          setTotal(0);
+          setBrief(null);
+          setError(data.error || "تعذّر البحث");
+          return;
+        }
+        setHits(data.hits ?? []);
+        setTotal(data.total ?? data.hits?.length ?? 0);
+        setBrief(data.brief ?? null);
+      } catch {
+        if (cancelled || id !== reqId.current) return;
+        setHits([]);
+        setTotal(0);
+        setBrief(null);
+        setError("تعذّر الاتصال بخدمة الدراسة");
+      } finally {
+        if (!cancelled && id === reqId.current) setLoading(false);
+      }
+    }, delay);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, [query, showAll, kick]);
+
+  const runStudy = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const q = query.trim();
+    if (q.length < 2) {
+      setError("أدخل حرفين على الأقل للبحث الدراسي");
+      return;
+    }
+    setShowAll(false);
+    skipDelayRef.current = true;
+    setKick((n) => n + 1);
+  };
+
+  const studyActive = searched && query.trim().length >= 2;
+  const hasMore = !showAll && total > PREVIEW_LIMIT;
+
   return (
-    <section className="study-assistant" aria-labelledby="study-h">
+    <section
+      className={`study-assistant${studyActive ? " study-assistant--active" : ""}`}
+      aria-labelledby="study-h"
+    >
       <h2 id="study-h">دراسة سريعة</h2>
       <p className="study-assistant-lead">
         ابحث عن كلمة أو عبارة — نعرض شرحاً موجزاً من المعنى العربي والإعراب
-        والتفسير الميسّر، ثم الآيات المرتبطة.
+        والتفسير الميسّر، ثم الآيات المرتبطة فوراً أثناء الكتابة.
       </p>
       <form className="study-assistant-form" onSubmit={runStudy}>
         <input
           ref={inputRef}
           type="search"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="مثال: الحمد · رحمة · صراط…"
+          onChange={(e) => {
+            setShowAll(false);
+            setQuery(e.target.value);
+          }}
+          placeholder="مثال: ابراهيم · الحمد · رحمة…"
           aria-label="استعلام الدراسة"
+          maxLength={120}
         />
         <button type="submit" className="study-assistant-btn" disabled={loading}>
           {loading ? "…" : "ادرس"}
@@ -123,6 +177,14 @@ export function StudyAssistant() {
       </form>
 
       {error ? <p className="study-assistant-error">{error}</p> : null}
+
+      {studyActive && total > 0 ? (
+        <p className="search-results-count" aria-live="polite">
+          {toArabicNumerals(hits.length)}
+          {total > hits.length ? ` من ${toArabicNumerals(total)}` : null} نتيجة
+          دراسية
+        </p>
+      ) : null}
 
       {brief && !error ? (
         <div className="study-brief" role="status">
@@ -178,6 +240,26 @@ export function StudyAssistant() {
             </li>
           ))}
         </ul>
+      ) : null}
+
+      {hasMore ? (
+        <button
+          type="button"
+          className="search-show-all"
+          onClick={() => setShowAll(true)}
+          disabled={loading}
+        >
+          جميع النتائج ({toArabicNumerals(total)})
+        </button>
+      ) : null}
+      {showAll && total > PREVIEW_LIMIT ? (
+        <button
+          type="button"
+          className="search-show-all search-show-all--muted"
+          onClick={() => setShowAll(false)}
+        >
+          عرض أول {toArabicNumerals(PREVIEW_LIMIT)} فقط
+        </button>
       ) : null}
     </section>
   );
