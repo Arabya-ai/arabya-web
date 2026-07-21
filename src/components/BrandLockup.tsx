@@ -29,7 +29,9 @@ export function BrandLockup({ size = "header" }: BrandLockupProps) {
       </span>
 
       <span className="brand-text">
-        <span className="brand-name">عربية</span>
+        <span className="brand-name" suppressHydrationWarning>
+          عربية
+        </span>
       </span>
     </span>
   );
