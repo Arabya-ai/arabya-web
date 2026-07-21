@@ -58,6 +58,25 @@ export default function ResourcesPage() {
       </section>
 
       <section className="resource-block">
+        <h2>خدمات وواجهات API المستخدمة</h2>
+        <ul>
+          <li>
+            مواقيت الصلاة والقبلة — Aladhan عبر{" "}
+            <code>/api/prayer-times</code> و<code>/api/qibla</code>
+          </li>
+          <li>
+            الأسماء الحسنى — islamic.app عبر <code>/api/asma-al-husna</code>{" "}
+            وصفحة <Link href="/asma">/asma</Link>
+          </li>
+          <li>
+            توقيتات التلاوة كلمة بكلمة — Quran.com عبر{" "}
+            <code>/api/audio-timings</code>
+          </li>
+          <li>بحث ودراسة محليان — <code>/api/search</code> و<code>/api/study</code></li>
+        </ul>
+      </section>
+
+      <section className="resource-block">
         <h2>روايات وتجويد ملون</h2>
         <p className="layer-soon">
           طبقة الروايات المتعددة (ورش، قالون…) ومصحف التجويد الملون تُفعَّل عند

@@ -44,6 +44,9 @@ export function SiteHeader() {
           <Link href="/roots" onClick={() => setOpen(false)}>
             الجذور
           </Link>
+          <Link href="/asma" onClick={() => setOpen(false)}>
+            الأسماء الحسنى
+          </Link>
           <Link href="/about" onClick={() => setOpen(false)}>
             عن عربية
           </Link>
@@ -75,6 +78,7 @@ export function SiteFooter() {
             <Link href="/juz">الأجزاء</Link>
             <Link href="/mushaf/1">المصحف</Link>
             <Link href="/roots">الجذور</Link>
+            <Link href="/asma">الأسماء الحسنى</Link>
             <Link href="/about">عن عربية</Link>
             <Link href="/privacy">الخصوصية</Link>
           </nav>

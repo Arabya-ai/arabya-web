@@ -74,7 +74,7 @@ export default async function AyahIrabPage({ params }: Props) {
           </Link>
         ) : null}
         <Link href={`/surah/${surahId}/read`} className="nav-pill">
-          قراءة السورة
+          دراسة السورة
         </Link>
       </nav>
 

@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
+import { STUDY_QUERY_KEY } from "@/components/StudyVerseButton";
 
 type StudyWord = {
   text: string;
@@ -39,14 +40,17 @@ export function StudyAssistant() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const autoRan = useRef(false);
 
-  const runStudy = async (e?: React.FormEvent) => {
+  const runStudy = async (e?: React.FormEvent, override?: string) => {
     e?.preventDefault();
-    const q = query.trim();
+    const q = (override ?? query).trim();
     if (q.length < 2) {
       setError("أدخل حرفين على الأقل للبحث الدراسي");
       return;
     }
+    setQuery(q);
     setLoading(true);
     setError(null);
     setSearched(true);
@@ -70,6 +74,33 @@ export function StudyAssistant() {
     }
   };
 
+  useEffect(() => {
+    if (autoRan.current) return;
+    let incoming: string | null = null;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      incoming = params.get("q") || params.get("study");
+      if (!incoming) {
+        incoming = sessionStorage.getItem(STUDY_QUERY_KEY);
+        if (incoming) sessionStorage.removeItem(STUDY_QUERY_KEY);
+      }
+    } catch {
+      incoming = null;
+    }
+    if (!incoming || incoming.trim().length < 2) return;
+    autoRan.current = true;
+    setQuery(incoming.trim());
+    void runStudy(undefined, incoming.trim());
+    window.requestAnimationFrame(() => {
+      document.getElementById("study-h")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      inputRef.current?.focus();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one-shot hydrate from study link
+  }, []);
+
   return (
     <section className="study-assistant" aria-labelledby="study-h">
       <h2 id="study-h">دراسة سريعة</h2>
@@ -79,6 +110,7 @@ export function StudyAssistant() {
       </p>
       <form className="study-assistant-form" onSubmit={runStudy}>
         <input
+          ref={inputRef}
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -140,7 +172,7 @@ export function StudyAssistant() {
                 <Link href={`/ayah/${h.surahId}/${h.verse}`}>إعراب الآية</Link>
                 {" · "}
                 <Link href={`/surah/${h.surahId}/read#v-${h.verse}`}>
-                  قراءة السورة
+                  دراسة السورة
                 </Link>
               </p>
             </li>

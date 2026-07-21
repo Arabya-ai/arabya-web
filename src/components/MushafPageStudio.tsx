@@ -109,7 +109,7 @@ export function MushafPageStudio({
 
   useEffect(() => {
     try {
-      recordPageRead(page.page);
+      recordPageRead(Number(page.page));
     } catch {
       /* ignore */
     }
@@ -736,9 +736,9 @@ export function MushafPageStudio({
           <Link
             href={`/surah/${studySurahId}/read`}
             className="tool-btn"
-            title="قراءة السورة مع خيارات الإعراب والدراسة"
+            title="دراسة السورة مع خيارات الإعراب والدراسة السريعة"
           >
-            قراءة السورة
+            دراسة السورة
           </Link>
         ) : null}
         {selected ? (
