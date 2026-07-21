@@ -4,6 +4,7 @@ type BrandLockupProps = {
   size?: "header" | "footer";
 };
 
+/** Single React text node (hydration-safe). Depth/motion via CSS only. */
 export function BrandLockup({ size = "header" }: BrandLockupProps) {
   const isHeader = size === "header";
   const logoSize = isHeader ? 46 : 40;
@@ -29,7 +30,7 @@ export function BrandLockup({ size = "header" }: BrandLockupProps) {
       </span>
 
       <span className="brand-text">
-        <span className="brand-name" suppressHydrationWarning>
+        <span className="brand-name" data-text="عربية">
           عربية
         </span>
       </span>
