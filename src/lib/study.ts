@@ -8,6 +8,7 @@ import {
 import { makeWordId } from "@/lib/word-id";
 import { shortIrabGlance } from "@/lib/irab-narrative";
 import { narrativeIrab } from "@/lib/irab-narrative";
+import { toArabicNumerals } from "@/lib/format";
 
 export type StudyWord = {
   wordId: string;
@@ -94,16 +95,26 @@ function buildExplain(
  * Local study retrieval + brief explanation (no LLM).
  * Combines search hits, morphology, Arabic senses, and Muyassar snippet.
  */
-export async function runStudyQuery(query: string, limit = 6): Promise<{
+export async function runStudyQuery(
+  query: string,
+  options: number | { limit?: number } = 10,
+): Promise<{
   query: string;
   mode: string;
   note: string;
   brief: string;
   hits: StudyHit[];
+  total: number;
 }> {
+  const limit =
+    typeof options === "number"
+      ? options
+      : Math.max(1, Math.min(options.limit ?? 10, 100));
   const q = query.trim();
   const qNorm = normalizeArabicSearch(q);
-  const rawHits = await searchAyahs(q, 16);
+  const { hits: rawHits, total } = await searchAyahs(q, {
+    limit: Math.min(Math.max(limit, 16), 100),
+  });
 
   const enriched: StudyHit[] = [];
 
@@ -173,7 +184,7 @@ export async function runStudyQuery(query: string, limit = 6): Promise<{
     hits.length === 0
       ? `لم يُعثر على آيات مطابقة لـ«${q}» في الفهرس المحلي.`
       : [
-          `نتائج دراسية لـ«${q}»: ${hits.length} آية من البيانات المحلية.`,
+          `نتائج دراسية لـ«${q}»: ${toArabicNumerals(total)} آية مطابقة.`,
           hits[0]
             ? `أقرب مطابقة: ${hits[0].nameAr} ${hits[0].verse}.`
             : "",
@@ -188,5 +199,6 @@ export async function runStudyQuery(query: string, limit = 6): Promise<{
     note: "استرجاع وشرح محلي من بيانات عربْية (معنى + صرف + الميسّر).",
     brief,
     hits,
+    total,
   };
 }

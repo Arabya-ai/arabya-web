@@ -191,27 +191,10 @@ export function PrayerTimesCard() {
               );
             })}
           </ul>
-          <div className="prayer-qibla" aria-label="القبلة والصلاة التالية">
-            <div className="prayer-qibla-row">
-              <span className="prayer-qibla-label">القبلة</span>
-              {qibla ? (
-                <>
-                  <span
-                    className="prayer-qibla-needle"
-                    style={{ transform: `rotate(${qibla.direction}deg)` }}
-                    aria-hidden
-                  />
-                  <span className="prayer-qibla-deg">
-                    {toArabicNumerals(Math.round(qibla.direction))}° من الشمال
-                  </span>
-                </>
-              ) : (
-                <span className="prayer-qibla-deg">غير متاح</span>
-              )}
-            </div>
+          <div className="prayer-meta-row" aria-label="الصلاة التالية والقبلة">
             {next && remainingLabel ? (
               <div
-                className="prayer-next"
+                className="prayer-meta-chip prayer-next"
                 role="timer"
                 aria-live="polite"
                 aria-atomic="true"
@@ -224,6 +207,26 @@ export function PrayerTimesCard() {
                 </span>
               </div>
             ) : null}
+            <div className="prayer-meta-chip prayer-qibla">
+              <div className="prayer-qibla-row">
+                <span className="prayer-qibla-label">القبلة</span>
+                {qibla ? (
+                  <>
+                    <span
+                      className="prayer-qibla-needle"
+                      style={{ transform: `rotate(${qibla.direction}deg)` }}
+                      aria-hidden
+                    />
+                    <span className="prayer-qibla-deg">
+                      {toArabicNumerals(Math.round(qibla.direction))}° من
+                      الشمال
+                    </span>
+                  </>
+                ) : (
+                  <span className="prayer-qibla-deg">غير متاح</span>
+                )}
+              </div>
+            </div>
           </div>
         </>
       ) : null}

@@ -130,21 +130,37 @@ export type SearchHit = {
   nameAr: string;
 };
 
-/** Strip tashkeel / elongations so users can search plain Arabic. */
+/**
+ * Strip tashkeel / Quran marks and normalize orthography so plain Arabic
+ * queries match Uthmani text (e.g. ابراهيم ↔ إِبۡرَٰهِـۧمَ).
+ */
 export function normalizeArabicSearch(input: string): string {
   return String(input || "")
     .normalize("NFKD")
-    .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, "")
+    .replace(/\u0670/g, "ا") // dagger alef → alef
+    .replace(/\u06E5/g, "و") // small waw
+    .replace(/[\u06E6\u06E7]/g, "ي") // small yeh / small high yeh
+    .replace(
+      /[\u064B-\u065F\u06D6-\u06ED\u0640\u06DE-\u06E4\u06E8-\u06ED\u0610-\u061A\u08F0-\u08FF]/g,
+      "",
+    )
     .replace(/[ٱأإآ]/g, "ا")
     .replace(/ى/g, "ي")
     .replace(/ة/g, "ه")
+    .replace(/[^\u0621-\u064A0-9:\s]/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
 
+/** Drop alefs for a secondary match (الرحمن ↔ الرحمان). */
+export function foldArabicAlefs(input: string): string {
+  return input.replace(/ا/g, "");
+}
+
 let searchCache: SearchHit[] | null = null;
-let searchNormCache: { hit: SearchHit; norm: string; nameNorm: string }[] | null =
-  null;
+let searchNormCache:
+  | { hit: SearchHit; norm: string; fold: string }[]
+  | null = null;
 let rootsIndexCache: RootsIndex | null | undefined;
 
 export async function getRootsIndex(): Promise<RootsIndex | null> {
@@ -196,12 +212,32 @@ export async function findRootByQuery(
   return null;
 }
 
+export type SearchAyahsOptions = {
+  /** Max hits to return (after offset). Use a large value for «all results». */
+  limit?: number;
+  offset?: number;
+};
+
+export type SearchAyahsResult = {
+  hits: SearchHit[];
+  total: number;
+};
+
+/**
+ * Search ayah text (and verse keys). Does not flood results with every ayah
+ * of a matching surah name — the surah grid already filters by name.
+ */
 export async function searchAyahs(
   query: string,
-  limit = 40,
-): Promise<SearchHit[]> {
+  options: number | SearchAyahsOptions = {},
+): Promise<SearchAyahsResult> {
+  const opts: SearchAyahsOptions =
+    typeof options === "number" ? { limit: options } : options;
+  const limit = Math.max(0, opts.limit ?? 40);
+  const offset = Math.max(0, opts.offset ?? 0);
+
   const q = query.trim();
-  if (q.length < 2) return [];
+  if (q.length < 2) return { hits: [], total: 0 };
 
   if (!searchCache) {
     const raw = await readFile(
@@ -214,29 +250,33 @@ export async function searchAyahs(
   }
 
   if (!searchNormCache) {
-    searchNormCache = searchCache.map((hit) => ({
-      hit,
-      norm: normalizeArabicSearch(hit.text),
-      nameNorm: normalizeArabicSearch(hit.nameAr),
-    }));
+    searchNormCache = searchCache.map((hit) => {
+      const norm = normalizeArabicSearch(hit.text);
+      return { hit, norm, fold: foldArabicAlefs(norm) };
+    });
   }
 
   const qNorm = normalizeArabicSearch(q);
+  const qFold = foldArabicAlefs(qNorm);
   const digits = q.replace(/[^\d:]/g, "");
-  const hits: SearchHit[] = [];
+  const keyHits: SearchHit[] = [];
+  const textHits: SearchHit[] = [];
 
   for (const row of searchNormCache) {
     const v = row.hit;
-    if (
-      v.key === q ||
-      v.key === digits ||
-      String(v.surahId) === q ||
-      (qNorm.length >= 2 &&
-        (row.nameNorm.includes(qNorm) || row.norm.includes(qNorm)))
-    ) {
-      hits.push(v);
-      if (hits.length >= limit) break;
+    if (v.key === q || v.key === digits || String(v.surahId) === q) {
+      keyHits.push(v);
+      continue;
     }
+    if (qNorm.length < 2) continue;
+    const textMatch =
+      row.norm.includes(qNorm) ||
+      (qFold.length >= 3 && row.fold.includes(qFold));
+    if (textMatch) textHits.push(v);
   }
-  return hits;
+
+  const matched = keyHits.length ? keyHits : textHits;
+  const total = matched.length;
+  const hits = matched.slice(offset, offset + limit);
+  return { hits, total };
 }

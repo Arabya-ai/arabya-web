@@ -468,6 +468,49 @@ html[data-theme="dark"] .site-header {
   color: var(--brand-deep);
 }
 
+.search-results-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+}
+
+.search-results-count {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.search-show-all {
+  appearance: none;
+  border: 1px solid color-mix(in srgb, var(--brand) 35%, var(--line));
+  border-radius: 12px;
+  padding: 0.55rem 1rem;
+  background: color-mix(in srgb, var(--brand-soft) 75%, var(--surface));
+  color: var(--brand-deep);
+  font-weight: 700;
+  cursor: pointer;
+  justify-self: start;
+}
+
+.search-show-all:hover,
+.search-show-all:focus-visible {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.search-show-all:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.search-show-all--muted {
+  background: transparent;
+  font-weight: 600;
+  color: var(--muted);
+}
+
 .root-search-hit {
   display: flex;
   flex-wrap: wrap;
@@ -2146,6 +2189,19 @@ html[data-theme="dark"] ::selection {
   box-shadow: var(--shadow);
 }
 
+.home-simple:has(.study-assistant--active) .habit-panel,
+.home-simple:has(.study-assistant--active) .prayer-panel,
+.home-simple:has(.study-assistant--active) .asma-panel {
+  display: none;
+}
+
+.study-assistant--active {
+  border-color: color-mix(in srgb, var(--brand) 40%, var(--line));
+  box-shadow:
+    var(--shadow),
+    0 0 0 1px color-mix(in srgb, var(--brand) 12%, transparent);
+}
+
 .study-assistant h2 {
   margin: 0;
   font-size: 1.15rem;
@@ -3100,15 +3156,26 @@ html[data-theme="dark"] .mushaf-word.is-sync {
   color: var(--ink);
 }
 
-.asma-detail-card--en {
-  background: var(--surface);
+.asma-bilingual-ar {
+  margin: 0 0 0.75rem !important;
+}
+
+.asma-bilingual-en {
+  margin: 0 !important;
+  padding-top: 0.65rem;
+  border-top: 1px dashed color-mix(in srgb, var(--brand) 20%, var(--line));
+  color: var(--muted) !important;
+  font-size: 0.95rem;
+  line-height: 1.7 !important;
+  text-align: start;
 }
 
 .asma-detail-en-body {
-  margin-top: 0.65rem !important;
   white-space: pre-wrap;
-  color: var(--muted) !important;
-  font-size: 0.92rem;
+}
+
+.asma-detail-card--en {
+  background: var(--surface);
 }
 
 .asma-detail-pager {
@@ -3165,14 +3232,32 @@ html[data-theme="dark"] .mushaf-word.is-sync {
   margin-top: 0.5rem;
 }
 
-.prayer-qibla {
+.prayer-meta-row {
   display: grid;
-  gap: 0.65rem;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
   margin: 0.35rem 0 0;
+}
+
+@media (min-width: 720px) {
+  .prayer-meta-row {
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+  }
+}
+
+.prayer-meta-chip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.75rem;
+  margin: 0;
   padding: 0.7rem 0.85rem;
   border-radius: 12px;
   border: 1px solid color-mix(in srgb, var(--brand) 16%, var(--line));
   background: color-mix(in srgb, var(--brand) 6%, var(--surface-2));
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .prayer-qibla-row {
@@ -3180,6 +3265,7 @@ html[data-theme="dark"] .mushaf-word.is-sync {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.55rem 0.75rem;
+  width: 100%;
 }
 
 .prayer-qibla-label {
@@ -3202,15 +3288,6 @@ html[data-theme="dark"] .mushaf-word.is-sync {
 .prayer-qibla-deg {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-}
-
-.prayer-next {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.45rem 0.75rem;
-  padding-top: 0.55rem;
-  border-top: 1px dashed color-mix(in srgb, var(--brand) 22%, var(--line));
 }
 
 .prayer-next-label {

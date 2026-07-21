@@ -6,6 +6,13 @@ import { getAsmaByNumber } from "@/lib/asma";
 
 type Props = { params: Promise<{ n: string }> };
 
+function plainEn(text: string): string {
+  return text
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const num = Number((await params).n);
   const entry = Number.isInteger(num) ? await getAsmaByNumber(num) : null;
@@ -28,6 +35,7 @@ export default async function AsmaDetailPage({ params }: Props) {
 
   const prev = num > 1 ? num - 1 : null;
   const next = num < 99 ? num + 1 : null;
+  const detailsEn = entry.detailsEn ? plainEn(entry.detailsEn) : "";
 
   return (
     <div className="shell page-block asma-detail">
@@ -47,24 +55,28 @@ export default async function AsmaDetailPage({ params }: Props) {
       </header>
 
       <section className="asma-detail-card" aria-labelledby="asma-meaning">
-        <h2 id="asma-meaning">المعنى</h2>
-        <p>{entry.meaningAr}</p>
+        <h2 id="asma-meaning">المعنى · Meaning</h2>
+        {entry.meaningAr ? (
+          <p className="asma-bilingual-ar">{entry.meaningAr}</p>
+        ) : null}
+        {entry.meaningEn ? (
+          <p className="asma-bilingual-en" lang="en" dir="ltr">
+            {entry.meaningEn}
+          </p>
+        ) : null}
       </section>
 
       <section className="asma-detail-card" aria-labelledby="asma-expl">
-        <h2 id="asma-expl">الشرح والدلالة</h2>
-        <p>{entry.explanationAr}</p>
+        <h2 id="asma-expl">الشرح والدلالة · Explanation</h2>
+        {entry.explanationAr ? (
+          <p className="asma-bilingual-ar">{entry.explanationAr}</p>
+        ) : null}
+        {detailsEn ? (
+          <p className="asma-bilingual-en asma-detail-en-body" lang="en" dir="ltr">
+            {detailsEn}
+          </p>
+        ) : null}
       </section>
-
-      {entry.meaningEn || entry.detailsEn ? (
-        <section className="asma-detail-card asma-detail-card--en" aria-labelledby="asma-en">
-          <h2 id="asma-en">Meaning (English)</h2>
-          {entry.meaningEn ? <p>{entry.meaningEn}</p> : null}
-          {entry.detailsEn ? (
-            <p className="asma-detail-en-body">{entry.detailsEn}</p>
-          ) : null}
-        </section>
-      ) : null}
 
       <nav className="asma-detail-pager" aria-label="تنقل بين الأسماء">
         {prev ? (
