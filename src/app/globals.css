@@ -853,15 +853,34 @@ html[data-theme="dark"] .site-header {
 }
 
 .mushaf-banner {
-  text-align: center;
-  margin-bottom: 1.35rem;
+  margin-bottom: 1.25rem;
+}
+
+.mushaf-banner-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.85rem;
+}
+
+.mushaf-madinah-label {
+  margin: 0;
+  font-family: "UthmanicHafs", var(--font-naskh), serif;
+  font-weight: 400;
+  font-size: clamp(1.15rem, 3.2vw, 1.45rem);
+  line-height: 1.5;
+  color: var(--ink);
+  font-synthesis: none;
 }
 
 .mushaf-banner-meta {
-  margin: 0 0 0.45rem;
+  margin: 0;
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .mushaf-surah-block + .mushaf-surah-block {
@@ -879,30 +898,36 @@ html[data-theme="dark"] .site-header {
   margin: 0;
 }
 
-/* Surah ornamental title — teal wings + cream plaque (reference banner) */
+/* Surah ornamental title — full-width teal wings + cream plaque */
 .surah-ornament {
   display: grid;
-  grid-template-columns: minmax(2.75rem, 1fr) auto minmax(2.75rem, 1fr);
+  grid-template-columns: minmax(3.5rem, 1.15fr) minmax(10rem, 1.6fr) minmax(3.5rem, 1.15fr);
   align-items: stretch;
-  width: min(100%, 34rem);
-  margin: 0.15rem auto 0.35rem;
-  min-height: 3.1rem;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  min-height: 3.35rem;
   border: 1.5px solid var(--surah-gold);
   background: var(--surah-wing);
   box-sizing: border-box;
   overflow: hidden;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--surah-gold) 35%, transparent);
+}
+
+.surah-ornament--full {
+  width: 100%;
 }
 
 .surah-ornament--compact {
-  width: min(100%, 28rem);
-  min-height: 2.65rem;
+  min-height: 2.85rem;
   margin-bottom: 0.85rem;
+  grid-template-columns: minmax(2.5rem, 1fr) minmax(8rem, 1.5fr) minmax(2.5rem, 1fr);
 }
 
 .surah-ornament-wing {
   position: relative;
   display: block;
-  min-width: 2.75rem;
+  min-width: 2.5rem;
   background-color: var(--surah-wing);
   overflow: hidden;
 }
@@ -911,9 +936,9 @@ html[data-theme="dark"] .site-header {
   content: "";
   position: absolute;
   inset: 0;
-  opacity: 0.28;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cpath fill='%23ffffff' d='M32 4c6 8 10 14 10 22s-4 14-10 22c-6-8-10-14-10-22S26 12 32 4zm0 14c3 4 5 7 5 12s-2 8-5 12c-3-4-5-7-5-12s2-8 5-12z'/%3E%3Cpath fill='%23ffffff' d='M8 32c8-6 14-10 22-10s14 4 22 10c-8 6-14 10-22 10S16 38 8 32zm14 0c4-3 7-5 12-5s8 2 12 5c-4 3-7 5-12 5s-8-2-12-5z'/%3E%3Ccircle cx='32' cy='32' r='3' fill='%23ffffff'/%3E%3C/svg%3E");
-  background-size: 56px 56px;
+  opacity: 0.22;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cpath fill='%23ffffff' d='M36 6c7 9 11 16 11 24S43 53 36 62C29 53 25 46 25 30S29 15 36 6zm0 16c3.5 4.5 5.5 8 5.5 14S39.5 47 36 52c-3.5-5-5.5-8.5-5.5-16S32.5 26.5 36 22z'/%3E%3Cpath fill='%23ffffff' d='M8 36c9-7 16-11 28-11s19 4 28 11c-9 7-16 11-28 11S17 43 8 36zm16 0c4.5-3.5 8-5.5 14-5.5S46.5 32.5 51 36c-4.5 3.5-8 5.5-14 5.5S28.5 39.5 24 36z'/%3E%3Ccircle cx='36' cy='36' r='3.5' fill='%23ffffff'/%3E%3Cpath fill='%23ffffff' d='M12 12c4 3 7 7 7 12s-3 9-7 12c-4-3-7-7-7-12s3-9 7-12zm48 0c4 3 7 7 7 12s-3 9-7 12c-4-3-7-7-7-12s3-9 7-12zM12 48c4 3 7 7 7 12s-3 9-7 12c-4-3-7-7-7-12s3-9 7-12zm48 0c4 3 7 7 7 12s-3 9-7 12c-4-3-7-7-7-12s3-9 7-12z'/%3E%3C/svg%3E");
+  background-size: 64px 64px;
   background-repeat: repeat;
   pointer-events: none;
 }
@@ -924,58 +949,68 @@ html[data-theme="dark"] .site-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.45rem 1.6rem;
+  padding: 0.5rem 1.35rem;
   margin-block: -1px;
   background:
     radial-gradient(
       ellipse at center,
       var(--surah-plaque-glow) 0%,
-      var(--surah-plaque) 78%
+      var(--surah-plaque) 82%
     );
   border-inline: 1.5px solid var(--surah-gold);
   clip-path: polygon(
     0% 0%,
     100% 0%,
-    100% 26%,
-    91% 50%,
-    100% 74%,
+    100% 22%,
+    93.5% 50%,
+    100% 78%,
     100% 100%,
     0% 100%,
-    0% 74%,
-    9% 50%,
-    0% 26%
+    0% 78%,
+    6.5% 50%,
+    0% 22%
   );
 }
 
 .surah-ornament-text {
   display: block;
   color: var(--surah-title-ink);
-  font-size: clamp(1.35rem, 4.2vw, 1.85rem);
+  font-size: clamp(1.4rem, 3.8vw, 1.95rem);
   line-height: 1.55;
   white-space: nowrap;
   text-align: center;
 }
 
 .surah-ornament--compact .surah-ornament-text {
-  font-size: clamp(1.2rem, 3.8vw, 1.55rem);
+  font-size: clamp(1.2rem, 3.4vw, 1.55rem);
 }
 
 .surah-ornament--compact .surah-ornament-plaque {
-  padding: 0.35rem 1.25rem;
+  padding: 0.4rem 1.1rem;
 }
 
 @media (max-width: 520px) {
+  .mushaf-banner-top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem;
+  }
+
+  .mushaf-banner-meta {
+    white-space: normal;
+  }
+
   .surah-ornament {
-    width: 100%;
-    grid-template-columns: minmax(1.6rem, 0.7fr) auto minmax(1.6rem, 0.7fr);
+    grid-template-columns: minmax(1.75rem, 0.85fr) minmax(0, 1.8fr) minmax(1.75rem, 0.85fr);
   }
 
   .surah-ornament-plaque {
-    padding-inline: 1.1rem;
+    padding-inline: 0.85rem;
   }
 
   .surah-ornament-text {
-    font-size: clamp(1.15rem, 5vw, 1.45rem);
+    font-size: clamp(1.15rem, 5vw, 1.4rem);
+    white-space: normal;
   }
 }
 
@@ -1512,6 +1547,37 @@ html[data-theme="dark"] .mode-rail {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1.25rem 1.5rem;
+}
+
+.footer-nav-grid--simple {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 28rem;
+}
+
+.footer-site-link {
+  color: var(--brand-deep);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.layer-subhead {
+  margin: 1rem 0 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--brand-deep);
+}
+
+.word-sense {
+  margin: 0.35rem 0 0;
+  line-height: 1.7;
+}
+
+.tafsir-dock-body {
+  margin: 0.65rem 0 0;
+  line-height: 1.85;
+  font-size: 0.98rem;
+  white-space: pre-wrap;
 }
 
 .footer-col-title {

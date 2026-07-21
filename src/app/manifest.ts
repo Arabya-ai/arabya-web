@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Arabya — تفسير كلمات القرآن",
-    short_name: "Arabya",
+    name: "عربية — تفسير كلمات القرآن",
+    short_name: "عربية",
     description: "مصحف المدينة مع دراسة كل كلمة: معنى، إعراب، وتفاسير",
     start_url: "/",
     display: "standalone",
