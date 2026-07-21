@@ -116,8 +116,7 @@ export function PrayerTimesCard() {
         <div>
           <h2 id="prayer-h">مواقيت الصلاة والقبلة</h2>
           <p className="prayer-help">
-            مواقيت اليوم واتجاه القبلة عبر Aladhan — المدينة الافتراضية:
-            القاهرة.
+            مواقيت اليوم واتجاه القبلة — المدينة الافتراضية: القاهرة.
           </p>
         </div>
         <label className="prayer-city">
@@ -137,17 +136,20 @@ export function PrayerTimesCard() {
       </header>
 
       {hijri || gregorian ? (
-        <p className="prayer-dates">
-          {hijri ? <span className="prayer-hijri">{hijri}</span> : null}
-          {hijri && gregorian ? (
-            <span className="prayer-date-sep" aria-hidden>
-              ·
-            </span>
+        <div className="prayer-dates" aria-label="التاريخ">
+          {hijri ? (
+            <div className="prayer-date-chip">
+              <span className="prayer-date-label">هجري</span>
+              <span className="prayer-date-value">{hijri}</span>
+            </div>
           ) : null}
           {gregorian ? (
-            <span className="prayer-gregorian">{gregorian}</span>
+            <div className="prayer-date-chip">
+              <span className="prayer-date-label">ميلادي</span>
+              <span className="prayer-date-value">{gregorian}</span>
+            </div>
           ) : null}
-        </p>
+        </div>
       ) : null}
 
       {loading ? <p className="prayer-status">جاري التحميل…</p> : null}
