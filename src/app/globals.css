@@ -2143,6 +2143,27 @@ html[data-theme="dark"] ::selection {
   margin-bottom: 0.65rem;
 }
 
+.word-dock-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.75rem;
+  margin-top: 0.55rem;
+}
+
+.word-dock-link {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--brand-deep);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--brand) 35%, transparent);
+}
+
+.word-dock-link:hover,
+.word-dock-link:focus-visible {
+  color: var(--brand);
+  border-bottom-color: var(--brand);
+}
+
 .layer-rail {
   display: flex;
   flex-wrap: wrap;

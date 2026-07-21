@@ -152,6 +152,11 @@ export function WordStudyDock({
     };
   }, [layer, tafsirSlug, verseKey]);
 
+  const { surahId: dockSurahId, verse: dockVerse } = useMemo(
+    () => parseVerseKey(verseKey),
+    [verseKey],
+  );
+
   return (
     <section className="word-dock" aria-live="polite">
       <div className="word-dock-head">
@@ -160,6 +165,22 @@ export function WordStudyDock({
         {word.transliteration ? (
           <p className="word-dock-tr">{word.transliteration}</p>
         ) : null}
+        <nav className="word-dock-links" aria-label="روابط الدراسة">
+          <Link
+            href={`/ayah/${dockSurahId}/${dockVerse}`}
+            className="word-dock-link"
+          >
+            إعراب الآية كاملة
+          </Link>
+          {morph?.root ? (
+            <Link
+              href={`/root/${encodeURIComponent(morph.root)}`}
+              className="word-dock-link"
+            >
+              جذر «{morph.root}»
+            </Link>
+          ) : null}
+        </nav>
       </div>
 
       <div className="layer-rail" role="tablist" aria-label="طبقات تحليل الكلمة">
