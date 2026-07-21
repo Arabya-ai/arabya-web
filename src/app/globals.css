@@ -2991,27 +2991,178 @@ html[data-theme="dark"] .mushaf-word.is-sync {
 }
 
 .prayer-dates {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.35rem 0.55rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
   margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.5;
 }
 
-.prayer-dates .prayer-hijri {
+.prayer-date-chip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--brand) 16%, var(--line));
+  background: color-mix(in srgb, var(--brand) 6%, var(--surface-2));
+  min-width: 0;
+}
+
+.prayer-date-label {
   font-weight: 700;
+  color: var(--brand-deep);
+  font-size: 0.85rem;
+}
+
+.prayer-date-value {
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 560px) {
+  .prayer-dates {
+    grid-template-columns: 1fr;
+  }
+}
+
+.asma-grid-link {
+  display: grid;
+  gap: 0.2rem;
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+}
+
+.asma-grid-link:hover .asma-grid-name,
+.asma-grid-link:focus-visible .asma-grid-name {
+  color: var(--brand);
+}
+
+.asma-today-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 12px;
+  transition: background 140ms ease;
+}
+
+.asma-today-link:hover,
+.asma-today-link:focus-visible {
+  background: color-mix(in srgb, var(--brand) 6%, transparent);
+}
+
+.asma-detail-head {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.asma-detail-num {
+  margin: 0;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.asma-detail-head h1 {
+  margin: 0.25rem 0;
+  font-family: var(--font-quran);
+  font-size: clamp(2rem, 5vw, 2.6rem);
+  color: var(--brand-deep);
+  font-weight: 400;
+}
+
+.asma-detail-trans {
+  margin: 0;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.asma-detail-card {
+  margin: 0 0 0.85rem;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--brand) 16%, var(--line));
+  background: color-mix(in srgb, var(--brand) 6%, var(--surface-2));
+}
+
+.asma-detail-card h2 {
+  margin: 0 0 0.45rem;
+  font-size: 1rem;
   color: var(--brand-deep);
 }
 
-.prayer-gregorian {
-  color: var(--muted);
-  font-weight: 600;
+.asma-detail-card p {
+  margin: 0;
+  line-height: 1.85;
+  color: var(--ink);
 }
 
-.prayer-date-sep {
+.asma-detail-card--en {
+  background: var(--surface);
+}
+
+.asma-detail-en-body {
+  margin-top: 0.65rem !important;
+  white-space: pre-wrap;
+  color: var(--muted) !important;
+  font-size: 0.92rem;
+}
+
+.asma-detail-pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.study-teaser {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.75rem 0 1rem;
+  padding: 1.1rem 1.15rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.study-teaser h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: var(--brand-deep);
+  font-family: var(--font-title);
+}
+
+.study-teaser p {
+  margin: 0;
   color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.study-teaser .habit-cta {
+  justify-self: start;
+  margin-top: 0.25rem;
+}
+
+.home-study-focus-link {
+  margin: 0.35rem 0 0;
+  text-align: center;
+  font-size: 0.88rem;
+}
+
+.home-study-focus-link a {
+  color: var(--brand-deep);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.study-page .study-assistant {
+  margin-top: 0.5rem;
 }
 
 .prayer-qibla {

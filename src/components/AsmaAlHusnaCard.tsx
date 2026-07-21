@@ -6,8 +6,9 @@ import { toArabicNumerals } from "@/lib/format";
 
 type AsmaName = {
   number: number;
-  name: string;
+  nameAr: string;
   transliteration: string;
+  meaningAr: string;
   meaningEn: string;
 };
 
@@ -43,7 +44,6 @@ export function AsmaAlHusnaCard() {
       <header className="asma-panel-head">
         <div>
           <h2 id="asma-h">الأسماء الحسنى</h2>
-          <p className="asma-help">اسم اليوم من islamic.app — مجاني ومفتوح.</p>
         </div>
         <Link href="/asma" className="nav-pill">
           عرض الكل
@@ -53,14 +53,16 @@ export function AsmaAlHusnaCard() {
       {error ? <p className="prayer-status prayer-status--err">{error}</p> : null}
 
       {today ? (
-        <div className="asma-today">
+        <Link href={`/asma/${today.number}`} className="asma-today asma-today-link">
           <p className="asma-number">{toArabicNumerals(today.number)}</p>
-          <p className="asma-name">{today.name}</p>
+          <p className="asma-name">{today.nameAr}</p>
           <p className="asma-trans">{today.transliteration}</p>
-          {today.meaningEn ? (
+          {today.meaningAr ? (
+            <p className="asma-meaning">{today.meaningAr}</p>
+          ) : today.meaningEn ? (
             <p className="asma-meaning">{today.meaningEn}</p>
           ) : null}
-        </div>
+        </Link>
       ) : !error ? (
         <p className="prayer-status">جاري التحميل…</p>
       ) : null}

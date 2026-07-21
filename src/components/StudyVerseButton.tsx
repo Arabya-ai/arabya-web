@@ -9,7 +9,7 @@ type Props = {
   className?: string;
 };
 
-/** Sends ayah text to home Quick Study and navigates there. */
+/** Sends ayah text to the dedicated Quick Study page. */
 export function StudyVerseButton({ verseText, className = "nav-pill" }: Props) {
   const router = useRouter();
 
@@ -21,7 +21,7 @@ export function StudyVerseButton({ verseText, className = "nav-pill" }: Props) {
     } catch {
       /* ignore quota */
     }
-    router.push("/#study-h");
+    router.push("/study");
   };
 
   return (
@@ -29,7 +29,7 @@ export function StudyVerseButton({ verseText, className = "nav-pill" }: Props) {
       type="button"
       className={className}
       onClick={onStudy}
-      title="نسخ الآية إلى الدراسة السريعة"
+      title="فتح الدراسة السريعة لهذه الآية"
     >
       دراسة
     </button>
