@@ -7,15 +7,16 @@ import { normalizeForHafsFont } from "@/lib/quran-text";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
 import { getMushafIndex } from "@/lib/mushaf";
 import { SurahOrnamentTitle } from "@/components/SurahOrnamentTitle";
+import { StudyVerseButton } from "@/components/StudyVerseButton";
 
 type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const sid = Number(id);
-  if (!Number.isInteger(sid)) return { title: "قراءة سورة" };
+  if (!Number.isInteger(sid)) return { title: "دراسة سورة" };
   return {
-    title: `قراءة ${getSurahUthmaniTitle(sid)} · Arabya`,
+    title: `دراسة ${getSurahUthmaniTitle(sid)} · Arabya`,
     description: `نص سورة ${getSurahUthmaniTitle(sid)} كاملًا مع روابط للدراسة والإعراب`,
   };
 }
@@ -54,33 +55,41 @@ export default async function SurahReadPage({ params }: Props) {
       </header>
 
       <div className="surah-read-body">
-        {surah.verses.map((v) => (
-          <article key={v.verseNumber} className="surah-read-ayah" id={`v-${v.verseNumber}`}>
-            <div className="surah-read-ayah-text">
-              {v.words
-                .filter((w) => !w.charType || w.charType === "word")
-                .map((w) => normalizeForHafsFont(w.text))
-                .join(" ")}
-              <span className="ayah-end-mark">
-                {toArabicNumerals(v.verseNumber)}
-              </span>
-            </div>
-            <div className="surah-read-actions">
-              <Link
-                href={`/ayah/${surahId}/${v.verseNumber}`}
-                className="nav-pill"
-              >
-                إعراب الآية
-              </Link>
-              <Link
-                href={`${getMushafPageHref(v.page || firstPage)}?v=${surahId}:${v.verseNumber}`}
-                className="nav-pill"
-              >
-                دراسة في المصحف
-              </Link>
-            </div>
-          </article>
-        ))}
+        {surah.verses.map((v) => {
+          const verseText = v.words
+            .filter((w) => !w.charType || w.charType === "word")
+            .map((w) => normalizeForHafsFont(w.text))
+            .join(" ");
+          return (
+            <article
+              key={v.verseNumber}
+              className="surah-read-ayah"
+              id={`v-${v.verseNumber}`}
+            >
+              <div className="surah-read-ayah-text">
+                {verseText}
+                <span className="ayah-end-mark">
+                  {toArabicNumerals(v.verseNumber)}
+                </span>
+              </div>
+              <div className="surah-read-actions">
+                <Link
+                  href={`/ayah/${surahId}/${v.verseNumber}`}
+                  className="nav-pill"
+                >
+                  إعراب الآية
+                </Link>
+                <Link
+                  href={`${getMushafPageHref(v.page || firstPage)}?v=${surahId}:${v.verseNumber}`}
+                  className="nav-pill"
+                >
+                  قراءة في المصحف
+                </Link>
+                <StudyVerseButton verseText={verseText} />
+              </div>
+            </article>
+          );
+        })}
       </div>
     </div>
   );

@@ -16,6 +16,9 @@ const KHATM_PAGES_KEY = "arabya-reading-habit:khatm-pages";
 const TOTAL_PAGES = 604;
 export const LAST_MUSHAF_PAGE_KEY = "arabya-last-mushaf-page";
 
+/** In-memory guard against Strict Mode double-invoke races in the same tick. */
+const sessionCounted = new Set<string>();
+
 function todayKey(): string {
   const d = new Date();
   const y = d.getFullYear();
@@ -34,36 +37,81 @@ function emptyState(): ReadingHabitState {
   };
 }
 
+function normalizePage(page: number): number | null {
+  const n = Math.trunc(Number(page));
+  if (!Number.isFinite(n) || n < 1 || n > TOTAL_PAGES) return null;
+  return n;
+}
+
+function uniquePages(raw: unknown): number[] {
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set<number>();
+  const out: number[] = [];
+  for (const item of raw) {
+    const n = normalizePage(Number(item));
+    if (n == null || seen.has(n)) continue;
+    seen.add(n);
+    out.push(n);
+  }
+  return out;
+}
+
+function pagesTodayKey(day = todayKey()): string {
+  return `${KEY}:pages:${day}`;
+}
+
+function readPagesToday(day = todayKey()): number[] {
+  try {
+    return uniquePages(JSON.parse(localStorage.getItem(pagesTodayKey(day)) || "[]"));
+  } catch {
+    return [];
+  }
+}
+
+function writePagesToday(pages: number[], day = todayKey()): void {
+  localStorage.setItem(
+    pagesTodayKey(day),
+    JSON.stringify(uniquePages(pages).slice(-120)),
+  );
+}
+
 function readKhatmPages(): number[] {
   try {
-    const raw = localStorage.getItem(KHATM_PAGES_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as number[];
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (p) => Number.isInteger(p) && p >= 1 && p <= TOTAL_PAGES,
-    );
+    return uniquePages(JSON.parse(localStorage.getItem(KHATM_PAGES_KEY) || "[]"));
   } catch {
     return [];
   }
 }
 
 function writeKhatmPages(pages: number[]): void {
-  localStorage.setItem(KHATM_PAGES_KEY, JSON.stringify(pages.slice(0, TOTAL_PAGES)));
+  localStorage.setItem(
+    KHATM_PAGES_KEY,
+    JSON.stringify(uniquePages(pages).slice(0, TOTAL_PAGES)),
+  );
 }
 
 export function readReadingHabit(): ReadingHabitState {
   try {
     const raw = localStorage.getItem(KEY);
+    const today = todayKey();
+    const pagesToday = readPagesToday(today);
     const khatmCount = readKhatmPages().length;
     if (!raw) {
-      return { ...emptyState(), khatmPagesDone: khatmCount };
+      return {
+        ...emptyState(),
+        days: pagesToday.length ? { [today]: pagesToday.length } : {},
+        khatmPagesDone: khatmCount,
+      };
     }
     const parsed = JSON.parse(raw) as Partial<ReadingHabitState>;
+    const days =
+      parsed.days && typeof parsed.days === "object" ? { ...parsed.days } : {};
+    // Source of truth for today = unique page list, not a stale counter.
+    days[today] = pagesToday.length;
     return {
       ...emptyState(),
       ...parsed,
-      days: parsed.days && typeof parsed.days === "object" ? parsed.days : {},
+      days,
       dailyGoalPages: Math.min(
         30,
         Math.max(1, Number(parsed.dailyGoalPages) || 2),
@@ -112,34 +160,28 @@ function recomputeStreak(days: Record<string, number>, goal: number): number {
 
 /** Record that the user opened a mushaf page (once per page per day; once forever for khatm). */
 export function recordPageRead(page: number): ReadingHabitState {
-  if (!Number.isInteger(page) || page < 1 || page > TOTAL_PAGES) {
-    return readReadingHabit();
+  const p = normalizePage(page);
+  if (p == null) return readReadingHabit();
+
+  const today = todayKey();
+  const sessionKey = `${today}:${p}`;
+  const pagesToday = readPagesToday(today);
+
+  if (!pagesToday.includes(p) && !sessionCounted.has(sessionKey)) {
+    pagesToday.push(p);
+    writePagesToday(pagesToday, today);
+  }
+  sessionCounted.add(sessionKey);
+
+  const khatm = readKhatmPages();
+  if (!khatm.includes(p)) {
+    khatm.push(p);
+    writeKhatmPages(khatm);
   }
 
   const state = readReadingHabit();
-  const today = todayKey();
-  const pagesKey = `${KEY}:pages:${today}`;
-  let pagesToday: number[] = [];
-  try {
-    pagesToday = JSON.parse(localStorage.getItem(pagesKey) || "[]") as number[];
-    if (!Array.isArray(pagesToday)) pagesToday = [];
-  } catch {
-    pagesToday = [];
-  }
-
-  if (!pagesToday.includes(page)) {
-    pagesToday.push(page);
-    localStorage.setItem(pagesKey, JSON.stringify(pagesToday.slice(-80)));
-    state.days[today] = pagesToday.length;
-  }
-
-  const khatm = readKhatmPages();
-  if (!khatm.includes(page)) {
-    khatm.push(page);
-    writeKhatmPages(khatm);
-  }
-  state.khatmPagesDone = khatm.length;
-
+  state.days[today] = readPagesToday(today).length;
+  state.khatmPagesDone = readKhatmPages().length;
   state.lastVisitDate = today;
   state.streak = recomputeStreak(state.days, state.dailyGoalPages);
   writeReadingHabit(state);
@@ -148,7 +190,8 @@ export function recordPageRead(page: number): ReadingHabitState {
 
 export function setDailyGoal(pages: number): ReadingHabitState {
   const state = readReadingHabit();
-  state.dailyGoalPages = Math.min(30, Math.max(1, pages));
+  const n = Math.trunc(Number(pages));
+  state.dailyGoalPages = Math.min(30, Math.max(1, Number.isFinite(n) ? n : 2));
   state.streak = recomputeStreak(state.days, state.dailyGoalPages);
   writeReadingHabit(state);
   return state;
@@ -162,12 +205,52 @@ export function resetKhatmProgress(): ReadingHabitState {
   return state;
 }
 
+/** Wipe habit progress and restore defaults (goal=2, empty streak/khatm/today). */
+export function resetReadingHabit(): ReadingHabitState {
+  const prefix = `${KEY}:pages:`;
+  const remove: string[] = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (
+        k &&
+        (k === KEY || k === KHATM_PAGES_KEY || k.startsWith(prefix))
+      ) {
+        remove.push(k);
+      }
+    }
+  } catch {
+    remove.push(KEY, KHATM_PAGES_KEY, pagesTodayKey());
+  }
+  for (const k of remove) {
+    try {
+      localStorage.removeItem(k);
+    } catch {
+      /* ignore */
+    }
+  }
+  try {
+    localStorage.removeItem(LAST_MUSHAF_PAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+  sessionCounted.clear();
+  const state = emptyState();
+  writeReadingHabit(state);
+  return state;
+}
+
 export function todayProgress(state: ReadingHabitState): {
   done: number;
   goal: number;
   met: boolean;
 } {
-  const done = state.days[todayKey()] ?? 0;
+  let done = 0;
+  try {
+    done = readPagesToday().length;
+  } catch {
+    done = state.days[todayKey()] ?? 0;
+  }
   return {
     done,
     goal: state.dailyGoalPages,
