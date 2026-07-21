@@ -1,7 +1,23 @@
 import { describe, expect, it } from "vitest";
+import { sanitizeSearchQuery } from "@/lib/api-query";
 import { GET as getSearch } from "@/app/api/search/route";
+import { GET as getStudy } from "@/app/api/study/route";
 import { GET as getTafsir } from "@/app/api/tafsir/[slug]/[surahId]/route";
-import { normalizeArabicSearch } from "@/lib/quran";
+import { findRootByQuery, normalizeArabicSearch } from "@/lib/quran";
+
+describe("sanitizeSearchQuery", () => {
+  it("rejects short or empty input", () => {
+    expect(sanitizeSearchQuery("")).toBeNull();
+    expect(sanitizeSearchQuery("ا")).toBeNull();
+    expect(sanitizeSearchQuery("  ا  ")).toBeNull();
+  });
+
+  it("strips control characters and caps length", () => {
+    expect(sanitizeSearchQuery("الحمد\u0000لله")).toBe("الحمدلله");
+    const long = "ا".repeat(200);
+    expect(sanitizeSearchQuery(long)?.length).toBe(120);
+  });
+});
 
 describe("normalizeArabicSearch", () => {
   it("strips tashkeel and normalizes alef forms", () => {
@@ -10,12 +26,21 @@ describe("normalizeArabicSearch", () => {
   });
 });
 
+describe("findRootByQuery", () => {
+  it("resolves a known triliteral root", async () => {
+    const entry = await findRootByQuery("رحم");
+    expect(entry?.root).toBe("رحم");
+    expect(entry?.count).toBeGreaterThan(0);
+  });
+});
+
 describe("GET /api/search", () => {
   it("returns empty hits for short queries", async () => {
     const res = await getSearch(new Request("http://localhost/api/search?q=ا"));
     expect(res.status).toBe(200);
-    const body = (await res.json()) as { hits: unknown[] };
+    const body = (await res.json()) as { hits: unknown[]; root: unknown };
     expect(body.hits).toEqual([]);
+    expect(body.root).toBeNull();
   });
 
   it("finds ayahs for a common Arabic query", async () => {
@@ -30,6 +55,38 @@ describe("GET /api/search", () => {
     expect(body.query).toBe("الحمد");
     expect(body.hits.length).toBeGreaterThan(0);
     expect(body.hits.some((h) => h.surahId === 1)).toBe(true);
+  });
+
+  it("includes a root match when the query is a known root", async () => {
+    const res = await getSearch(
+      new Request("http://localhost/api/search?q=رحم"),
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      root: { root: string; count: number; href: string } | null;
+    };
+    expect(body.root?.root).toBe("رحم");
+    expect(body.root?.href).toBe(`/root/${encodeURIComponent("رحم")}`);
+  });
+});
+
+describe("GET /api/study", () => {
+  it("returns 400 for short queries", async () => {
+    const res = await getStudy(new Request("http://localhost/api/study?q=ا"));
+    expect(res.status).toBe(400);
+  });
+
+  it("returns a local study brief for a valid query", async () => {
+    const res = await getStudy(
+      new Request("http://localhost/api/study?q=الحمد"),
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      hits: unknown[];
+      brief: string;
+    };
+    expect(body.hits.length).toBeGreaterThan(0);
+    expect(body.brief.length).toBeGreaterThan(0);
   });
 });
 
