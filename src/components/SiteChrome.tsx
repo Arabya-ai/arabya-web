@@ -60,51 +60,32 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="shell footer-inner">
-        <div className="footer-top">
-          <div className="footer-brand-col">
+        <div className="footer-bar">
+          <div className="footer-brand-inline">
             <BrandLockup size="footer" />
             <p className="footer-mission">
               القرآن الكريم كلمة بكلمة: نحو وصرف ودلالة وتفسير وترجمة
             </p>
           </div>
-
-          <nav className="footer-nav-grid footer-nav-grid--simple" aria-label="روابط التذييل">
-            <div className="footer-col">
-              <h2 className="footer-col-title">استكشف</h2>
-              <ul className="footer-links">
-                <li>
-                  <Link href="/">فهرس السور</Link>
-                </li>
-                <li>
-                  <Link href="/juz">الأجزاء</Link>
-                </li>
-                <li>
-                  <Link href="/mushaf/1">المصحف</Link>
-                </li>
-              </ul>
-            </div>
-            <div className="footer-col">
-              <h2 className="footer-col-title">عن المنصة</h2>
-              <ul className="footer-links">
-                <li>
-                  <Link href="/about">عن عربية</Link>
-                </li>
-                <li>
-                  <Link href="/privacy">الخصوصية</Link>
-                </li>
-              </ul>
-            </div>
+          <nav className="footer-inline-nav" aria-label="روابط التذييل">
+            <Link href="/">الفهرس</Link>
+            <Link href="/juz">الأجزاء</Link>
+            <Link href="/mushaf/1">المصحف</Link>
+            <Link href="/about">عن عربية</Link>
+            <Link href="/privacy">الخصوصية</Link>
           </nav>
         </div>
-
         <div className="footer-bottom">
           <p className="footer-legal" suppressHydrationWarning>
             © {year}{" "}
             <Link href="/" className="footer-site-link">
               منصة عربية
             </Link>
+            <span className="footer-sep" aria-hidden>
+              ·
+            </span>
+            <span>جميع الحقوق محفوظة لكل مسلم</span>
           </p>
-          <p className="footer-sources">جميع الحقوق محفوظة لكل مسلم</p>
         </div>
       </div>
     </footer>
