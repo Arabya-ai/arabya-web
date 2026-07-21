@@ -19,10 +19,12 @@ import { isBookmarked, toggleBookmark } from "@/lib/bookmarks";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
 import { StudyModeTabs } from "@/components/StudyModeTabs";
 import { makeWordId } from "@/lib/word-id";
-import { ayahAudioUrl, wordAudioUrl, RECITERS, DEFAULT_RECITER_ID } from "@/lib/audio";
+import { ayahAudioUrl, wordAudioUrl, RECITERS, DEFAULT_RECITER_ID, getReciter, type VerseTiming } from "@/lib/audio";
 import { narrativeIrab } from "@/lib/irab-narrative";
 import { WordStudyDock } from "@/components/WordStudyDock";
 import { SurahOrnamentTitle } from "@/components/SurahOrnamentTitle";
+import { recordPageRead } from "@/lib/reading-habit";
+import { getAyahNote, saveAyahNote } from "@/lib/ayah-notes";
 
 type Props = {
   page: MushafPageContent;
@@ -88,8 +90,15 @@ export function MushafPageStudio({
   const [bookmarked, setBookmarked] = useState(false);
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [wbwPlaying, setWbwPlaying] = useState(false);
+  const [repeatCount, setRepeatCount] = useState(1);
+  const [ayahNoteDraft, setAyahNoteDraft] = useState("");
+  const [syncHighlightPos, setSyncHighlightPos] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const wbwStopRef = useRef(false);
+  const ayahStopRef = useRef(false);
+  const timingsCacheRef = useRef<
+    Record<string, { audioUrl: string; verses: Record<string, VerseTiming> }>
+  >({});
   const [tafsirCache, setTafsirCache] = useState<
     Record<string, TafsirSurah | null>
   >({});
@@ -97,6 +106,14 @@ export function MushafPageStudio({
     Record<string, VerseTranslationSurah | null>
   >({});
   const [tafsirLoading, setTafsirLoading] = useState(false);
+
+  useEffect(() => {
+    try {
+      recordPageRead(page.page);
+    } catch {
+      /* ignore */
+    }
+  }, [page.page]);
 
   useEffect(() => {
     try {
@@ -394,38 +411,160 @@ export function MushafPageStudio({
 
   const stopAllAudio = () => {
     wbwStopRef.current = true;
+    ayahStopRef.current = true;
     audioRef.current?.pause();
+    if (audioRef.current) {
+      audioRef.current.ontimeupdate = null;
+      audioRef.current.onended = null;
+    }
     setAudioPlaying(false);
     setWbwPlaying(false);
+    setSyncHighlightPos(null);
+  };
+
+  const loadChapterTimings = async (surahId: number, rid: string) => {
+    const cacheKey = `${rid}:${surahId}`;
+    if (timingsCacheRef.current[cacheKey]) {
+      return timingsCacheRef.current[cacheKey];
+    }
+    const reciter = getReciter(rid);
+    if (!reciter.quranComChapterReciterId) return null;
+    try {
+      const res = await fetch(`/api/audio-timings/${rid}/${surahId}`);
+      if (!res.ok) return null;
+      const data = (await res.json()) as {
+        audioUrl: string;
+        verses: Record<string, VerseTiming>;
+      };
+      timingsCacheRef.current[cacheKey] = data;
+      return data;
+    } catch {
+      return null;
+    }
   };
 
   const playAyahAudio = async () => {
     if (!selected) return;
-    const url = ayahAudioUrl(
-      selected.surahId,
-      selected.verseNumber,
-      reciterId,
-    );
+    if (audioPlaying) {
+      stopAllAudio();
+      return;
+    }
+
+    ayahStopRef.current = false;
+    wbwStopRef.current = true;
+    setWbwPlaying(false);
+    if (!audioRef.current) audioRef.current = new Audio();
+    const audio = audioRef.current;
+    const times = Math.max(1, Math.min(10, repeatCount));
+
+    const pack = await loadChapterTimings(selected.surahId, reciterId);
+    const verseTiming = pack?.verses[selected.verseKey];
+    const useSync = Boolean(pack?.audioUrl && verseTiming);
+
     try {
-      if (!audioRef.current) audioRef.current = new Audio();
-      const audio = audioRef.current;
-      if (audioPlaying) {
-        stopAllAudio();
-        return;
-      }
-      wbwStopRef.current = true;
-      setWbwPlaying(false);
-      audio.src = url;
-      audio.onended = () => setAudioPlaying(false);
-      await audio.play();
       setAudioPlaying(true);
-      setShareNote("جاري تلاوة الآية…");
-      window.setTimeout(() => setShareNote(null), 1800);
+      setShareNote(
+        useSync ? "تلاوة مع تمييز الكلمات…" : "جاري تلاوة الآية…",
+      );
+
+      for (let i = 0; i < times; i++) {
+        if (ayahStopRef.current) break;
+
+        if (useSync && pack && verseTiming) {
+          await new Promise<void>((resolve) => {
+            const onTime = () => {
+              if (ayahStopRef.current) {
+                cleanup();
+                resolve();
+                return;
+              }
+              const ms = audio.currentTime * 1000;
+              if (ms >= verseTiming.timestampTo - 40) {
+                audio.pause();
+                cleanup();
+                resolve();
+                return;
+              }
+              const seg = verseTiming.segments.find(
+                (s) => ms >= s.startMs && ms < s.endMs,
+              );
+              if (seg) {
+                setSyncHighlightPos(seg.position);
+                setActiveWord({
+                  surahId: selected.surahId,
+                  verse: selected.verseNumber,
+                  position: seg.position,
+                });
+              }
+            };
+            const onEnded = () => {
+              cleanup();
+              resolve();
+            };
+            const cleanup = () => {
+              audio.removeEventListener("timeupdate", onTime);
+              audio.removeEventListener("ended", onEnded);
+              setSyncHighlightPos(null);
+            };
+            audio.addEventListener("timeupdate", onTime);
+            audio.addEventListener("ended", onEnded);
+            audio.src = pack.audioUrl;
+            const start = () => {
+              try {
+                audio.currentTime = verseTiming.timestampFrom / 1000;
+              } catch {
+                /* ignore seek errors */
+              }
+              audio.play().catch(() => {
+                cleanup();
+                resolve();
+              });
+            };
+            if (audio.readyState >= 1) start();
+            else audio.addEventListener("loadedmetadata", start, { once: true });
+          });
+        } else {
+          const url = ayahAudioUrl(
+            selected.surahId,
+            selected.verseNumber,
+            reciterId,
+          );
+          await new Promise<void>((resolve) => {
+            const onEnded = () => {
+              audio.removeEventListener("ended", onEnded);
+              resolve();
+            };
+            audio.addEventListener("ended", onEnded);
+            audio.src = url;
+            audio.play().catch(() => {
+              audio.removeEventListener("ended", onEnded);
+              resolve();
+            });
+          });
+        }
+      }
     } catch {
       setShareNote("تعذّر تشغيل الصوت");
       window.setTimeout(() => setShareNote(null), 2000);
+    } finally {
+      setAudioPlaying(false);
+      setSyncHighlightPos(null);
+      if (!ayahStopRef.current) setShareNote(null);
     }
   };
+
+  useEffect(() => {
+    const key = selected?.verseKey;
+    if (!key) {
+      setAyahNoteDraft("");
+      return;
+    }
+    try {
+      setAyahNoteDraft(getAyahNote(key)?.text ?? "");
+    } catch {
+      setAyahNoteDraft("");
+    }
+  }, [selected?.verseKey]);
 
   const playWordByWordAudio = async () => {
     if (!selected) return;
@@ -655,12 +794,28 @@ export function MushafPageStudio({
             >
               {bookmarked ? "★ مفضّلة" : "☆ حفظ الآية"}
             </button>
+            <label className="repeat-pick">
+              <span className="sr-only">تكرار التلاوة</span>
+              <select
+                className="reciter-select"
+                value={repeatCount}
+                onChange={(e) => setRepeatCount(Number(e.target.value))}
+                aria-label="عدد مرات تكرار الآية"
+                title="تكرار الآية"
+              >
+                {[1, 2, 3, 5, 7, 10].map((n) => (
+                  <option key={n} value={n}>
+                    ×{toArabicNumerals(n)}
+                  </option>
+                ))}
+              </select>
+            </label>
             <button
               type="button"
               className={`tool-btn ${audioPlaying ? "is-on" : ""}`}
               onClick={playAyahAudio}
               aria-pressed={audioPlaying}
-              title="تلاوة الآية كاملة"
+              title="تلاوة الآية (مع تمييز الكلمات عند توفر التوقيت)"
             >
               {audioPlaying ? "⏸ إيقاف" : "▶ آية"}
             </button>
@@ -721,12 +876,17 @@ export function MushafPageStudio({
                         activeWord?.surahId === block.surahId &&
                         activeWord?.verse === verse.verseNumber &&
                         activeWord?.position === word.position;
+                      const isSync =
+                        audioPlaying &&
+                        selected?.surahId === block.surahId &&
+                        selected?.verseNumber === verse.verseNumber &&
+                        syncHighlightPos === word.position;
                       const text = normalizeForHafsFont(word.text.trim());
                       const isLast = wi === verse.words.length - 1;
                       const button = (
                         <button
                           type="button"
-                          className={`mushaf-word ${isActive ? "is-selected" : ""}`}
+                          className={`mushaf-word ${isActive ? "is-selected" : ""} ${isSync ? "is-sync" : ""}`}
                           aria-pressed={isActive}
                           title={wordMeaning(word, meaningLang) || text}
                           onClick={() =>
@@ -784,18 +944,46 @@ export function MushafPageStudio({
       </article>
 
       {selected ? (
-        <WordStudyDock
-          verseKey={selected.verseKey}
-          word={selected.word}
-          morph={selected.morph}
-          meaningLang={meaningLang}
-          onMeaningLang={setMeaningLang}
-          verseEditions={verseEditions}
-          verseEdition={verseEdition}
-          onVerseEdition={setVerseEdition}
-          verseTranslation={selectedVerseTranslation}
-          tafsirSources={tafsirSources}
-        />
+        <>
+          <WordStudyDock
+            verseKey={selected.verseKey}
+            word={selected.word}
+            morph={selected.morph}
+            meaningLang={meaningLang}
+            onMeaningLang={setMeaningLang}
+            verseEditions={verseEditions}
+            verseEdition={verseEdition}
+            onVerseEdition={setVerseEdition}
+            verseTranslation={selectedVerseTranslation}
+            tafsirSources={tafsirSources}
+          />
+          <div className="ayah-note-panel">
+            <label className="ayah-note-label" htmlFor="ayah-note">
+              ملاحظة على الآية {formatVerseKey(selected.verseKey)}
+            </label>
+            <textarea
+              id="ayah-note"
+              className="ayah-note-input"
+              rows={3}
+              maxLength={4000}
+              value={ayahNoteDraft}
+              placeholder="اكتب ملاحظة محلية تُحفظ في هذا الجهاز…"
+              onChange={(e) => setAyahNoteDraft(e.target.value)}
+              onBlur={() => {
+                try {
+                  saveAyahNote({
+                    key: selected.verseKey,
+                    surahId: selected.surahId,
+                    verse: selected.verseNumber,
+                    text: ayahNoteDraft,
+                  });
+                } catch {
+                  /* ignore quota */
+                }
+              }}
+            />
+          </div>
+        </>
       ) : null}
 
       <StudyModeTabs modes={modes} mode={mode} onModeChange={setMode} />

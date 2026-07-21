@@ -1,18 +1,37 @@
-/** Audio helpers — multi-reciter EveryAyah + word-by-word Quran CDN. */
+/** Audio helpers — multi-reciter EveryAyah + word-by-word Quran CDN + optional sync. */
 
 export type Reciter = {
   id: string;
   nameAr: string;
   /** EveryAyah folder name */
   folder: string;
+  /** Quran.com chapter_recitations id when sync timings are available */
+  quranComChapterReciterId?: number;
 };
 
 export const RECITERS: Reciter[] = [
-  { id: "alafasy", nameAr: "مشاري العفاسي", folder: "Alafasy_128kbps" },
+  {
+    id: "alafasy",
+    nameAr: "مشاري العفاسي",
+    folder: "Alafasy_128kbps",
+    quranComChapterReciterId: 7,
+  },
   { id: "husary", nameAr: "محمود خليل الحصري", folder: "Husary_128kbps" },
-  { id: "minshawi", nameAr: "محمد صديق المنشاوي", folder: "Minshawy_Murattal_128kbps" },
-  { id: "abdulbasit", nameAr: "عبد الباسط عبد الصمد", folder: "Abdul_Basit_Murattal_192kbps" },
-  { id: "sudais", nameAr: "عبد الرحمن السديس", folder: "Abdurrahmaan_As-Sudais_192kbps" },
+  {
+    id: "minshawi",
+    nameAr: "محمد صديق المنشاوي",
+    folder: "Minshawy_Murattal_128kbps",
+  },
+  {
+    id: "abdulbasit",
+    nameAr: "عبد الباسط عبد الصمد",
+    folder: "Abdul_Basit_Murattal_192kbps",
+  },
+  {
+    id: "sudais",
+    nameAr: "عبد الرحمن السديس",
+    folder: "Abdurrahmaan_As-Sudais_192kbps",
+  },
   { id: "ghamdi", nameAr: "سعد الغامدي", folder: "Ghamadi_40kbps" },
 ];
 
@@ -44,3 +63,16 @@ export function wordAudioUrl(
   const w = String(position).padStart(3, "0");
   return `https://audio.qurancdn.com/wbw/${s}_${v}_${w}.mp3`;
 }
+
+export type WordTimingSegment = {
+  position: number;
+  startMs: number;
+  endMs: number;
+};
+
+export type VerseTiming = {
+  verseKey: string;
+  timestampFrom: number;
+  timestampTo: number;
+  segments: WordTimingSegment[];
+};
