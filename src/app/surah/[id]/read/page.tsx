@@ -6,6 +6,7 @@ import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
 import { normalizeForHafsFont } from "@/lib/quran-text";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
 import { getMushafIndex } from "@/lib/mushaf";
+import { SurahOrnamentTitle } from "@/components/SurahOrnamentTitle";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -45,7 +46,7 @@ export default async function SurahReadPage({ params }: Props) {
       </nav>
 
       <header className="surah-read-head">
-        <h1>{getSurahUthmaniTitle(surahId)}</h1>
+        <SurahOrnamentTitle title={getSurahUthmaniTitle(surahId)} />
         <p>
           {meta.revelationLabel} · {toArabicNumerals(meta.versesCount)} آية ·{" "}
           {meta.juzLabel}
