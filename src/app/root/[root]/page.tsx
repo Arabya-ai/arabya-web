@@ -40,8 +40,11 @@ export default async function RootPage({ params }: Props) {
   return (
     <div className="shell page-block root-page">
       <nav className="surah-nav" aria-label="تنقل">
+        <Link href="/roots" className="nav-pill">
+          ← فهرس الجذور
+        </Link>
         <Link href="/" className="nav-pill">
-          ← الفهرس
+          الفهرس
         </Link>
       </nav>
 
