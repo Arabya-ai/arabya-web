@@ -4,10 +4,9 @@ type BrandLockupProps = {
   size?: "header" | "footer";
 };
 
-/** Single React text node (hydration-safe). Depth/motion via CSS only. */
 export function BrandLockup({ size = "header" }: BrandLockupProps) {
   const isHeader = size === "header";
-  const logoSize = isHeader ? 46 : 40;
+  const logoSize = isHeader ? 46 : 38;
 
   return (
     <span
