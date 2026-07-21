@@ -41,14 +41,20 @@ describe("reading-habit", () => {
     expect(todayProgress(state)).toEqual({ done: 0, goal: 2, met: false });
   });
 
-  it("counts unique pages once per day and updates khatm", () => {
+  it("counts unique pages once per day and unique pages for khatm", () => {
     recordPageRead(10);
     recordPageRead(10);
     const state = recordPageRead(12);
     const progress = todayProgress(state);
     expect(progress.done).toBe(2);
-    expect(state.khatmPagesDone).toBe(12);
+    expect(state.khatmPagesDone).toBe(2);
     expect(state.khatmPagesDone).toBeLessThanOrEqual(MUSHAF_TOTAL_PAGES);
+  });
+
+  it("does not treat a high page number as full khatm", () => {
+    const state = recordPageRead(604);
+    expect(state.khatmPagesDone).toBe(1);
+    expect(todayProgress(state).done).toBe(1);
   });
 
   it("recomputes streak when daily goal is met", () => {
