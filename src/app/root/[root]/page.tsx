@@ -50,7 +50,6 @@ export default async function RootPage({ params }: Props) {
   }
 
   const lemmas = summarizeRootLemmas(entry, senseFile?.senses);
-  const senseAttr = senseFile?.attribution?.senses ?? "Arabya";
 
   return (
     <div className="shell page-block root-page">
@@ -68,41 +67,11 @@ export default async function RootPage({ params }: Props) {
         {toArabicNumerals(entry.count)} موضعًا في القرآن
       </p>
 
-      <section className="root-source-card" aria-labelledby="root-source-h">
-        <h2 id="root-source-h">المصدر</h2>
-        <p>
-          الصرف والجذر من{" "}
-          <a
-            href="http://corpus.quran.com"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Quranic Arabic Corpus
-          </a>{" "}
-          (GPL) عبر فرع mustafa0x/quran-morphology. المعاني العربية للمشتقات —
-          إن وُجدت — من طبقة عربية ({senseAttr}).
-        </p>
-      </section>
-
-      <section className="root-claims-card" aria-labelledby="root-claims-h">
-        <h2 id="root-claims-h">اختلاف المصادر</h2>
-        <p>
-          حاليًا يُعرض جذر واحد من المدونة الصرفية أعلاه. عند إضافة معاجم
-          مرخّصة (مثل مقاييس اللغة) ستظهر الآراء المختلفة هنا بنموذج Claims مع
-          إسناد كل رأي لمصدره — انظر{" "}
-          <Link href="/books">كتب الإعراب والمعاجم</Link>.
-        </p>
-      </section>
-
       {lemmas.length ? (
         <section className="root-lemmas" aria-labelledby="root-lemmas-h">
-          <h2 id="root-lemmas-h">المشتقات (lemma)</h2>
+          <h2 id="root-lemmas-h">المشتقات</h2>
           <p className="root-lemmas-lead">
-            صيغ مرتبطة بهذا الجذر في المدونة
-            {senseFile
-              ? "، مع معنى عربي موجز عند توفره في طبقة المعجم المحلية"
-              : ""}
-            .
+            صيغ مرتبطة بهذا الجذر في المدونة.
           </p>
           <ul className="root-lemma-list">
             {lemmas.slice(0, 40).map((L) => (

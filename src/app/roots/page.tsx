@@ -34,17 +34,14 @@ export default async function RootsIndexPage() {
         <Link href="/" className="nav-pill">
           ← الفهرس
         </Link>
-        <Link href="/books" className="nav-pill">
-          الكتب المرخّصة
-        </Link>
       </nav>
 
       <header className="roots-index-head">
         <h1>فهرس الجذور الصرفية</h1>
         <p>
-          {toArabicNumerals(roots.length)} جذرًا من المدونة القرآنية العربية
-          (Quranic Arabic Corpus). الأرقام في المواقع الأخرى قد تختلف لاختلاف
-          منهج الجذر — هذا العدد يطابق مصدر الصرف المستخدم في عربْية.
+          {toArabicNumerals(roots.length)} جذرًا. الأرقام في المواقع الأخرى قد
+          تختلف لاختلاف منهج الجذر — هذا العدد يطابق مصدر الصرف المستخدم في
+          عربْية.
         </p>
       </header>
 
