@@ -75,12 +75,10 @@ export function useQuranAudio({
     return () => {
       stopAllAudio();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- unmount only
   }, []);
 
   useEffect(() => {
     stopAllAudio();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- stop when page or reciter changes
   }, [pageNum, reciterId]);
 
   const loadChapterTimings = async (surahId: number, rid: string) => {
