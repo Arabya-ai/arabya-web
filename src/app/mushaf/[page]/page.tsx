@@ -9,6 +9,10 @@ import {
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
 import { getIrab, getTafsirSources, getVerseTranslationEditions, sliceIrabToVerseNumbers } from "@/lib/quran";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
+import {
+  buildSocialMetadata,
+  mushafOgImagePath,
+} from "@/lib/og-meta";
 
 type Props = { params: Promise<{ page: string }> };
 
@@ -21,10 +25,10 @@ export async function generateMetadata({
   searchParams,
 }: {
   params: Promise<{ page: string }>;
-  searchParams: Promise<{ v?: string }>;
+  searchParams: Promise<{ v?: string; listen?: string; reciter?: string }>;
 }): Promise<Metadata> {
   const { page } = await params;
-  const { v } = await searchParams;
+  const { v, listen } = await searchParams;
   const pageNum = Number(page);
   if (!Number.isInteger(pageNum) || pageNum < 1 || pageNum > 604) {
     return { title: "صفحة المصحف" };
@@ -56,20 +60,32 @@ export async function generateMetadata({
     }
   }
 
+  if (listen === "surah") {
+    title = `استماع السورة · ${title}`;
+    description = `استمع لتلاوة السورة على Arabya — ${description}`;
+  } else if (listen === "ayah") {
+    title = `استماع الآية · ${title}`;
+    description = `استمع لتلاوة الآية على Arabya — ${description}`;
+  } else if (listen === "wbw") {
+    title = `استماع كلمة بكلمة · ${title}`;
+    description = `استمع كلمة بكلمة على Arabya — ${description}`;
+  }
+
+  const path = `/mushaf/${pageNum}${v ? `?v=${v}` : ""}${
+    listen ? `${v ? "&" : "?"}listen=${listen}` : ""
+  }`;
+  const social = buildSocialMetadata({
+    title,
+    description,
+    url: path,
+    imageUrl: mushafOgImagePath(pageNum),
+    imageAlt: title,
+  });
+
   return {
     title,
     description,
-    openGraph: {
-      title,
-      description,
-      locale: "ar_AR",
-      type: "article",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-    },
+    ...social,
   };
 }
 

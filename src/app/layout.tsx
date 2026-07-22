@@ -37,6 +37,20 @@ export const metadata: Metadata = {
     siteName: "عربية",
     locale: "ar_AR",
     type: "website",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Arabya — عربية بذكاء",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "عربية | تفسير كلمات القرآن الكريم",
+    description: "ادرس كل كلمة في القرآن مع إعراب وتفاسير قابلة للتبديل",
+    images: ["/opengraph-image"],
   },
   icons: {
     icon: [

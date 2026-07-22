@@ -3,7 +3,7 @@ import { sanitizeSearchQuery } from "@/lib/api-query";
 import { GET as getSearch } from "@/app/api/search/route";
 import { GET as getStudy } from "@/app/api/study/route";
 import { GET as getTafsir } from "@/app/api/tafsir/[slug]/[surahId]/route";
-import { findRootByQuery, normalizeArabicSearch } from "@/lib/quran";
+import { findRootByQuery, normalizeArabicSearch, expandSearchQueryVariants } from "@/lib/quran";
 
 describe("sanitizeSearchQuery", () => {
   it("rejects short or empty input", () => {
@@ -28,6 +28,24 @@ describe("normalizeArabicSearch", () => {
   it("maps Uthmani Ibrahim orthography to plain ابراهيم", () => {
     expect(normalizeArabicSearch("إِبۡرَٰهِـۧمَ")).toBe("ابراهيم");
     expect(normalizeArabicSearch("ابراهيم")).toBe("ابراهيم");
+  });
+});
+
+describe("expandSearchQueryVariants", () => {
+  it("adds or strips ال carefully", () => {
+    expect(expandSearchQueryVariants("الحمد")).toEqual(
+      expect.arrayContaining(["الحمد", "حمد"]),
+    );
+    expect(expandSearchQueryVariants("حمد")).toEqual(
+      expect.arrayContaining(["حمد", "الحمد"]),
+    );
+  });
+
+  it("does not strip ال from short stems", () => {
+    expect(expandSearchQueryVariants("ال")).toEqual(["ال"]);
+    expect(expandSearchQueryVariants("الى")).toEqual(
+      expect.arrayContaining(["الى"]),
+    );
   });
 });
 

@@ -157,6 +157,22 @@ export function foldArabicAlefs(input: string): string {
   return input.replace(/ا/g, "");
 }
 
+/**
+ * Limited, intentional query variants (not fuzzy search).
+ * Currently: optional definite article ال — strip or add when the stem is long enough.
+ */
+export function expandSearchQueryVariants(qNorm: string): string[] {
+  const q = qNorm.trim();
+  if (q.length < 2) return [];
+  const out = new Set<string>([q]);
+  if (q.startsWith("ال") && q.length >= 5) {
+    out.add(q.slice(2));
+  } else if (!q.startsWith("ال") && q.length >= 3) {
+    out.add(`ال${q}`);
+  }
+  return [...out];
+}
+
 let searchCache: SearchHit[] | null = null;
 let searchNormCache:
   | { hit: SearchHit; norm: string; fold: string }[]
@@ -257,7 +273,10 @@ export async function searchAyahs(
   }
 
   const qNorm = normalizeArabicSearch(q);
-  const qFold = foldArabicAlefs(qNorm);
+  const qVariants = expandSearchQueryVariants(qNorm);
+  const qFoldVariants = qVariants
+    .map(foldArabicAlefs)
+    .filter((f) => f.length >= 3);
   const digits = q.replace(/[^\d:]/g, "");
   const keyHits: SearchHit[] = [];
   const textHits: SearchHit[] = [];
@@ -270,8 +289,8 @@ export async function searchAyahs(
     }
     if (qNorm.length < 2) continue;
     const textMatch =
-      row.norm.includes(qNorm) ||
-      (qFold.length >= 3 && row.fold.includes(qFold));
+      qVariants.some((variant) => row.norm.includes(variant)) ||
+      qFoldVariants.some((fold) => row.fold.includes(fold));
     if (textMatch) textHits.push(v);
   }
 
