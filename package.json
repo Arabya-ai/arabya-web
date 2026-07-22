@@ -25,6 +25,7 @@
     "import-irab-book": "node scripts/import-irab-book.mjs"
   },
   "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@vercel/analytics": "^2.0.1",
     "next": "15.5.20",
     "react": "19.1.0",

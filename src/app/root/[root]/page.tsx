@@ -7,7 +7,8 @@ import { getMushafIndex } from "@/lib/mushaf";
 import { getLemmaSenseFile, summarizeRootLemmas } from "@/lib/roots";
 import { RootOccurrencesList } from "@/components/RootOccurrencesList";
 import { PageShareButton } from "@/components/PageShareButton";
-import { buildSocialMetadata, rootOgImagePath } from "@/lib/og-meta";
+import { buildSocialMetadata } from "@/lib/og-meta";
+import { shareOgImageUrl } from "@/lib/share";
 
 type Props = { params: Promise<{ root: string }> };
 
@@ -19,8 +20,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const social = buildSocialMetadata({
     title,
     description,
-    url: `/root/${encodeURIComponent(decoded)}`,
-    imageUrl: rootOgImagePath(decoded),
+    url: `/root/${encodeURIComponent(decoded)}?share=root`,
+    imageUrl: shareOgImageUrl({ kind: "root", root: decoded }),
   });
   return {
     title,
@@ -79,10 +80,12 @@ export default async function RootPage({ params }: Props) {
       </p>
       <div className="root-share-row">
         <PageShareButton
-          title={`Arabya — الجذر ${entry.root}`}
+          title={`عربية — الجذر ${entry.root}`}
           text={`مواضع الجذر «${entry.root}» في القرآن (${entry.count} موضعًا)`}
-          path={`/root/${encodeURIComponent(entry.root)}`}
+          path={`/root/${encodeURIComponent(entry.root)}?share=root`}
+          kind="root"
           label="مشاركة الجذر"
+          hint="رابط صفحة هذا الجذر ومواضعه في القرآن."
         />
       </div>
 

@@ -1,14 +1,14 @@
-import { renderOgCard } from "@/lib/og-card";
+import { renderOgCardLatin } from "@/lib/og-card";
 import { OG_IMAGE_SIZE } from "@/lib/og-meta";
 
 export const size = OG_IMAGE_SIZE;
 export const contentType = "image/png";
-export const alt = "Arabya — Quran word study";
+export const alt = "عربية — تفسير كلمات القرآن";
 
 export default function OgImage() {
-  return renderOgCard({
+  return renderOgCardLatin({
     title: "Arabya",
-    subtitle: "Word-by-word Quran: meaning, grammar, tafsir",
+    subtitle: "Word-by-word Quran study",
     footer: "arabyaai.com",
   });
 }
