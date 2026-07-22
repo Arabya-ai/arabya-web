@@ -7,6 +7,8 @@ import { formatVerseKey, getMushafPageHref, toArabicNumerals } from "@/lib/forma
 import { normalizeForHafsFont } from "@/lib/quran-text";
 import { narrativeIrab } from "@/lib/irab-narrative";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
+import { PageShareButton } from "@/components/PageShareButton";
+import { ayahOgImagePath, buildSocialMetadata } from "@/lib/og-meta";
 
 type Props = { params: Promise<{ surah: string; verse: string }> };
 
@@ -18,9 +20,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: "إعراب آية" };
   }
   const title = `إعراب ${getSurahUthmaniTitle(sid)} ${toArabicNumerals(vid)} · Arabya`;
+  const description = `إعراب مفصّل لآية ${formatVerseKey(`${sid}:${vid}`)} من مصادر مفتوحة — Arabya`;
+  const social = buildSocialMetadata({
+    title,
+    description,
+    url: `/ayah/${sid}/${vid}`,
+    imageUrl: ayahOgImagePath(sid, vid),
+  });
   return {
     title,
-    description: `إعراب مفصّل لآية ${formatVerseKey(`${sid}:${vid}`)} من مصادر مفتوحة — Arabya`,
+    description,
+    ...social,
   };
 }
 
@@ -89,6 +99,14 @@ export default async function AyahIrabPage({ params }: Props) {
             .map((w) => normalizeForHafsFont(w.text))
             .join(" ")}
         </p>
+        <div className="root-share-row">
+          <PageShareButton
+            title={`Arabya — إعراب ${getSurahUthmaniTitle(surahId)} ${verseNumber}`}
+            text={`إعراب ${getSurahUthmaniTitle(surahId)} ${toArabicNumerals(verseNumber)}`}
+            path={`/ayah/${surahId}/${verseNumber}`}
+            label="مشاركة الإعراب"
+          />
+        </div>
       </header>
 
       <ol className="ayah-irab-list">

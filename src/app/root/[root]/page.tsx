@@ -6,15 +6,26 @@ import { toArabicNumerals } from "@/lib/format";
 import { getMushafIndex } from "@/lib/mushaf";
 import { getLemmaSenseFile, summarizeRootLemmas } from "@/lib/roots";
 import { RootOccurrencesList } from "@/components/RootOccurrencesList";
+import { PageShareButton } from "@/components/PageShareButton";
+import { buildSocialMetadata, rootOgImagePath } from "@/lib/og-meta";
 
 type Props = { params: Promise<{ root: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { root } = await params;
   const decoded = decodeURIComponent(root);
+  const title = `الجذر ${decoded}`;
+  const description = `مواضع الجذر «${decoded}» في القرآن — Arabya`;
+  const social = buildSocialMetadata({
+    title,
+    description,
+    url: `/root/${encodeURIComponent(decoded)}`,
+    imageUrl: rootOgImagePath(decoded),
+  });
   return {
-    title: `الجذر ${decoded}`,
-    description: `مواضع الجذر «${decoded}» في القرآن — Arabya`,
+    title,
+    description,
+    ...social,
   };
 }
 
@@ -66,6 +77,14 @@ export default async function RootPage({ params }: Props) {
       <p className="root-meta">
         {toArabicNumerals(entry.count)} موضعًا في القرآن
       </p>
+      <div className="root-share-row">
+        <PageShareButton
+          title={`Arabya — الجذر ${entry.root}`}
+          text={`مواضع الجذر «${entry.root}» في القرآن (${entry.count} موضعًا)`}
+          path={`/root/${encodeURIComponent(entry.root)}`}
+          label="مشاركة الجذر"
+        />
+      </div>
 
       {lemmas.length ? (
         <section className="root-lemmas" aria-labelledby="root-lemmas-h">

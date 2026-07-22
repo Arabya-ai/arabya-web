@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   IrabSurah,
   IrabWord,
@@ -20,7 +20,9 @@ import { RECITERS, reciterHasWordSync } from "@/lib/audio";
 import { narrativeIrab } from "@/lib/irab-narrative";
 import { WordStudyDock } from "@/components/WordStudyDock";
 import { SurahOrnamentTitle } from "@/components/SurahOrnamentTitle";
+import { ShareMenu } from "@/components/ShareMenu";
 import { getAyahNote, saveAyahNote } from "@/lib/ayah-notes";
+import { buildListenUrl } from "@/lib/share";
 import { useMushafPrefs } from "@/hooks/useMushafPrefs";
 import { useMushafStudyCache } from "@/hooks/useMushafStudyCache";
 import { useQuranAudio } from "@/hooks/useQuranAudio";
@@ -146,8 +148,31 @@ export function MushafPageStudio({
     onStatusNote: flashShareNote,
   });
 
+  const listenBootRef = useRef<{
+    listen: string | null;
+    verseKey: string | null;
+    done: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || listenBootRef.current) return;
+    const params = new URLSearchParams(window.location.search);
+    listenBootRef.current = {
+      listen: params.get("listen"),
+      verseKey: params.get("v"),
+      done: false,
+    };
+    const reciter = params.get("reciter");
+    if (reciter) prefs.persistReciterId(reciter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- capture deep-link once
+  }, []);
+
   useEffect(() => {
     if (!selected && wordRows[0]) {
+      const hasVerseLink =
+        typeof window !== "undefined" &&
+        Boolean(new URLSearchParams(window.location.search).get("v"));
+      if (hasVerseLink) return;
       setActiveWord({
         surahId: wordRows[0].surahId,
         verse: wordRows[0].verseNumber,
@@ -155,6 +180,70 @@ export function MushafPageStudio({
       });
     }
   }, [selected, wordRows]);
+
+  useEffect(() => {
+    const dl = listenBootRef.current;
+    if (!dl || dl.done || !wordRows.length) return;
+
+    if (dl.verseKey) {
+      const m = /^(\d{1,3}):(\d{1,3})$/.exec(dl.verseKey);
+      if (m) {
+        const sid = Number(m[1]);
+        const vid = Number(m[2]);
+        const found = wordRows.find(
+          (r) => r.surahId === sid && r.verseNumber === vid,
+        );
+        if (found) {
+          const matches =
+            selected?.surahId === sid && selected?.verseNumber === vid;
+          if (!matches) {
+            setActiveWord({
+              surahId: found.surahId,
+              verse: found.verseNumber,
+              position: found.word.position,
+            });
+            return;
+          }
+        }
+      }
+    }
+
+    if (!dl.listen) {
+      dl.done = true;
+      return;
+    }
+
+    if (!selected) return;
+
+    if (dl.verseKey) {
+      const m = /^(\d{1,3}):(\d{1,3})$/.exec(dl.verseKey);
+      if (
+        m &&
+        (selected.surahId !== Number(m[1]) ||
+          selected.verseNumber !== Number(m[2]))
+      ) {
+        return;
+      }
+    }
+
+    dl.done = true;
+    const block =
+      page.blocks.find((b) => b.surahId === selected.surahId) ??
+      page.blocks[0];
+    if (dl.listen === "surah" && block) {
+      void audio.playSurahAudio(
+        block.surahId,
+        block.meta.versesCount,
+        selected.verseNumber,
+      );
+    } else if (dl.listen === "ayah") {
+      void audio.playAyahAudio();
+    } else if (dl.listen === "wbw") {
+      void audio.playWordByWordAudio();
+    }
+    // Intentional: deep-link boot once selection is ready
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected, wordRows, page.blocks]);
 
   useEffect(() => {
     if (!selected) {
@@ -225,6 +314,122 @@ export function MushafPageStudio({
 
   const studySurahId =
     activeWord?.surahId ?? page.blocks[0]?.surahId ?? null;
+
+  const studyBlock =
+    page.blocks.find((b) => b.surahId === studySurahId) ?? page.blocks[0];
+
+  const shareItems = useMemo(() => {
+    const path = `/mushaf/${page.page}`;
+    const pageUrl = `${path}`;
+    const items: {
+      id: string;
+      label: string;
+      payload: { title: string; text: string; url: string };
+    }[] = [
+      {
+        id: "page",
+        label: `صفحة المصحف ${toArabicNumerals(page.page)}`,
+        payload: {
+          title: `Arabya — صفحة ${page.page}`,
+          text: `مصحف المدينة — صفحة ${toArabicNumerals(page.page)}`,
+          url: pageUrl,
+        },
+      },
+    ];
+
+    if (selected && studyBlock) {
+      const verse = studyBlock.verses.find(
+        (v) => v.verseNumber === selected.verseNumber,
+      );
+      const ayahText = verse?.words.map((w) => w.text).join(" ") ?? "";
+      const verseKey = `${selected.surahId}:${selected.verseNumber}`;
+      const ayahUrl = `${path}?v=${verseKey}#s${selected.surahId}-v-${selected.verseNumber}`;
+      const title = `Arabya — ${getSurahUthmaniTitle(selected.surahId)} ${selected.verseNumber}`;
+      items.unshift({
+        id: "ayah",
+        label: "الآية الحالية",
+        payload: {
+          title,
+          text: `${ayahText}\n\n${getSurahUthmaniTitle(selected.surahId)} ${toArabicNumerals(selected.verseNumber)}`,
+          url: ayahUrl,
+        },
+      });
+      items.push({
+        id: "listen-ayah",
+        label: "رابط استماع الآية",
+        payload: {
+          title: `${title} — استماع`,
+          text: `استمع للآية على عربـيا`,
+          url: buildListenUrl({
+            path,
+            listen: "ayah",
+            reciter: prefs.reciterId,
+            verse: verseKey,
+          }),
+        },
+      });
+      items.push({
+        id: "listen-wbw",
+        label: "رابط استماع كلمة بكلمة",
+        payload: {
+          title: `${title} — كلمة بكلمة`,
+          text: `استمع كلمة بكلمة على عربـيا`,
+          url: buildListenUrl({
+            path,
+            listen: "wbw",
+            reciter: prefs.reciterId,
+            verse: verseKey,
+          }),
+        },
+      });
+      items.push({
+        id: "listen-surah",
+        label: "رابط استماع السورة",
+        payload: {
+          title: `Arabya — ${getSurahUthmaniTitle(studyBlock.surahId)} — استماع`,
+          text: `استمع لسورة ${getSurahUthmaniTitle(studyBlock.surahId)}`,
+          url: buildListenUrl({
+            path,
+            listen: "surah",
+            reciter: prefs.reciterId,
+            verse: verseKey,
+          }),
+        },
+      });
+      const note = ayahNoteDraft.trim();
+      if (note) {
+        items.push({
+          id: "note",
+          label: "الملاحظة مع الآية",
+          payload: {
+            title,
+            text: `${ayahText}\n\nملاحظة: ${note}`,
+            url: ayahUrl,
+          },
+        });
+      }
+    }
+
+    if (studyBlock) {
+      items.push({
+        id: "surah-page",
+        label: `سورة ${getSurahUthmaniTitle(studyBlock.surahId)}`,
+        payload: {
+          title: `Arabya — ${getSurahUthmaniTitle(studyBlock.surahId)}`,
+          text: `دراسة سورة ${getSurahUthmaniTitle(studyBlock.surahId)}`,
+          url: `/surah/${studyBlock.surahId}`,
+        },
+      });
+    }
+
+    return items;
+  }, [
+    ayahNoteDraft,
+    page.page,
+    prefs.reciterId,
+    selected,
+    studyBlock,
+  ]);
 
   return (
     <div
@@ -369,7 +574,7 @@ export function MushafPageStudio({
             <button
               type="button"
               className={`tool-btn ${audio.audioPlaying ? "is-on" : ""}`}
-              onClick={audio.playAyahAudio}
+              onClick={() => void audio.playAyahAudio()}
               aria-pressed={audio.audioPlaying}
               title={
                 reciterHasWordSync(prefs.reciterId)
@@ -382,14 +587,42 @@ export function MushafPageStudio({
             <button
               type="button"
               className={`tool-btn ${audio.wbwPlaying ? "is-on" : ""}`}
-              onClick={audio.playWordByWordAudio}
+              onClick={() => void audio.playWordByWordAudio()}
               aria-pressed={audio.wbwPlaying}
               title="تلاوة كلمة بكلمة مع تمييز الكلمة"
             >
               {audio.wbwPlaying ? "⏸ إيقاف" : "▶ كلمات"}
             </button>
+            {studyBlock ? (
+              <button
+                type="button"
+                className={`tool-btn ${audio.surahPlaying ? "is-on" : ""}`}
+                onClick={() =>
+                  void audio.playSurahAudio(
+                    studyBlock.surahId,
+                    studyBlock.meta.versesCount,
+                    selected?.verseNumber ?? 1,
+                  )
+                }
+                aria-pressed={audio.surahPlaying}
+                title="تلاوة السورة كاملة من الآية الحالية"
+              >
+                {audio.surahPlaying ? "⏸ إيقاف" : "▶ سورة"}
+              </button>
+            ) : null}
+            <ShareMenu
+              items={shareItems}
+              label="مشاركة"
+              onStatus={flashShareNote}
+            />
           </>
-        ) : null}
+        ) : (
+          <ShareMenu
+            items={shareItems}
+            label="مشاركة"
+            onStatus={flashShareNote}
+          />
+        )}
         {shareNote ? <span className="share-note">{shareNote}</span> : null}
       </div>
 

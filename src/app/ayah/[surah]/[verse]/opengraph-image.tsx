@@ -1,45 +1,45 @@
 import { ImageResponse } from "next/og";
-import { getMushafPage } from "@/lib/mushaf";
+import { getSurah, getSurahMeta } from "@/lib/quran";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
 import { toArabicNumerals } from "@/lib/format";
 import { OG_IMAGE_SIZE } from "@/lib/og-meta";
 
 export const size = OG_IMAGE_SIZE;
 export const contentType = "image/png";
-export const alt = "Arabya — مصحف ودراسة الكلمات";
+export const alt = "Arabya — إعراب آية";
 
-type Props = {
-  params: Promise<{ page: string }>;
-};
+type Props = { params: Promise<{ surah: string; verse: string }> };
 
-export default async function OgImage({ params }: Props) {
-  const { page } = await params;
-  const pageNum = Number(page);
-  let title = `صفحة ${page}`;
-  let subtitle = "Arabya — دراسة كلمات القرآن";
-  let ayahSnippet = "";
+export default async function AyahOgImage({ params }: Props) {
+  const { surah, verse } = await params;
+  const surahId = Number(surah);
+  const verseNumber = Number(verse);
+  let title = "إعراب آية";
+  let snippet = "";
 
-  if (Number.isInteger(pageNum) && pageNum >= 1 && pageNum <= 604) {
+  if (
+    Number.isInteger(surahId) &&
+    Number.isInteger(verseNumber) &&
+    surahId >= 1 &&
+    surahId <= 114
+  ) {
+    title = `إعراب ${getSurahUthmaniTitle(surahId)} ${toArabicNumerals(verseNumber)}`;
     try {
-      const content = await getMushafPage(pageNum);
-      if (content) {
-        const first = content.blocks[0];
-        title =
-          content.blocks.length === 1
-            ? getSurahUthmaniTitle(first.surahId)
-            : "مصحف المدينة";
-        subtitle = `صفحة ${toArabicNumerals(pageNum)} · Arabya`;
-        const verse = first?.verses?.[0];
-        if (verse) {
-          ayahSnippet = verse.words
-            .slice(0, 12)
-            .map((w) => w.text)
-            .join(" ");
-          if (verse.words.length > 12) ayahSnippet += " …";
-        }
+      const [content, meta] = await Promise.all([
+        getSurah(surahId),
+        getSurahMeta(surahId),
+      ]);
+      const ayah = content?.verses.find((v) => v.verseNumber === verseNumber);
+      if (ayah && meta) {
+        snippet = ayah.words
+          .filter((w) => !w.charType || w.charType === "word")
+          .slice(0, 12)
+          .map((w) => w.text)
+          .join(" ");
+        if (ayah.words.length > 12) snippet += " …";
       }
     } catch {
-      /* keep defaults */
+      /* defaults */
     }
   }
 
@@ -71,58 +71,44 @@ export default async function OgImage({ params }: Props) {
           <div style={{ fontSize: 28, opacity: 0.8 }}>arabyaai.com</div>
           <div style={{ fontSize: 40, fontWeight: 700 }}>Arabya</div>
         </div>
-
         <div
           style={{
             display: "flex",
             flexDirection: "column",
             alignItems: "flex-end",
-            width: "100%",
             gap: 16,
+            width: "100%",
           }}
         >
           <div
             style={{
-              fontSize: 64,
+              fontSize: 56,
               fontWeight: 700,
-              lineHeight: 1.2,
-              textAlign: "right",
               direction: "rtl",
+              textAlign: "right",
             }}
           >
             {title}
           </div>
-          <div
-            style={{
-              fontSize: 30,
-              opacity: 0.9,
-              direction: "rtl",
-            }}
-          >
-            {subtitle}
-          </div>
-          {ayahSnippet ? (
+          {snippet ? (
             <div
               style={{
-                marginTop: 12,
                 padding: "18px 22px",
                 borderRadius: 18,
                 background: "rgba(15, 23, 42, 0.28)",
                 border: "1px solid rgba(153, 246, 228, 0.35)",
-                fontSize: 36,
+                fontSize: 34,
                 lineHeight: 1.7,
-                textAlign: "right",
                 direction: "rtl",
-                maxWidth: "100%",
+                textAlign: "right",
               }}
             >
-              {ayahSnippet}
+              {snippet}
             </div>
           ) : null}
         </div>
-
         <div style={{ fontSize: 24, opacity: 0.75, direction: "rtl" }}>
-          عربية بذكاء · تفسير كلمات القرآن
+          إعراب كلمة بكلمة
         </div>
       </div>
     ),
