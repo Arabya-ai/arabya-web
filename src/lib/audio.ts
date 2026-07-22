@@ -41,6 +41,11 @@ export function getReciter(id: string | null | undefined): Reciter {
   return RECITERS.find((r) => r.id === id) ?? RECITERS[0];
 }
 
+/** True when Quran.com chapter timings exist for word-highlight sync. */
+export function reciterHasWordSync(id: string | null | undefined): boolean {
+  return Boolean(getReciter(id).quranComChapterReciterId);
+}
+
 export function ayahAudioUrl(
   surahId: number,
   verse: number,
