@@ -1,10 +1,9 @@
 import { getSurahMeta } from "@/lib/quran";
-import { renderOgCard } from "@/lib/og-card";
+import { renderOgCardLatin } from "@/lib/og-card";
 import { OG_IMAGE_SIZE } from "@/lib/og-meta";
-
 export const size = OG_IMAGE_SIZE;
 export const contentType = "image/png";
-export const alt = "Arabya — Ayah grammar";
+export const alt = "عربية — إعراب آية";
 
 type Props = { params: Promise<{ surah: string; verse: string }> };
 
@@ -12,8 +11,8 @@ export default async function AyahOgImage({ params }: Props) {
   const { surah, verse } = await params;
   const surahId = Number(surah);
   const verseNumber = Number(verse);
-  let title = "Ayah grammar";
-  let subtitle = "Word-by-word iʿrāb on Arabya";
+  let title = "Ayah iʿrāb";
+  let subtitle = "Word-by-word grammar · Arabya";
 
   if (
     Number.isInteger(surahId) &&
@@ -32,7 +31,7 @@ export default async function AyahOgImage({ params }: Props) {
     }
   }
 
-  return renderOgCard({
+  return renderOgCardLatin({
     eyebrow: "Iʿrāb",
     title,
     subtitle,

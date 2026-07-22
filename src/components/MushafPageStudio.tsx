@@ -22,7 +22,11 @@ import { WordStudyDock } from "@/components/WordStudyDock";
 import { SurahOrnamentTitle } from "@/components/SurahOrnamentTitle";
 import { ShareMenu } from "@/components/ShareMenu";
 import { getAyahNote, saveAyahNote } from "@/lib/ayah-notes";
-import { buildListenUrl } from "@/lib/share";
+import {
+  buildMushafShareUrl,
+  copyLinkOnly,
+  type ShareTarget,
+} from "@/lib/share";
 import { useMushafPrefs } from "@/hooks/useMushafPrefs";
 import { useMushafStudyCache } from "@/hooks/useMushafStudyCache";
 import { useQuranAudio } from "@/hooks/useQuranAudio";
@@ -267,31 +271,14 @@ export function MushafPageStudio({
   }, [selected?.verseKey]);
 
   const shareAyah = async (surahId: number, verseNumber: number) => {
-    const block = page.blocks.find((b) => b.surahId === surahId);
-    const verse = block?.verses.find((v) => v.verseNumber === verseNumber);
-    const ayahText = verse?.words.map((w) => w.text).join(" ") ?? "";
-    const url = `${window.location.origin}/mushaf/${page.page}?v=${surahId}:${verseNumber}#s${surahId}-v-${verseNumber}`;
-    const shareBody = `${ayahText}\n\n${getSurahUthmaniTitle(surahId)} ${toArabicNumerals(verseNumber)}\n${url}`;
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: `Arabya — ${getSurahUthmaniTitle(surahId)} ${verseNumber}`,
-          text: shareBody,
-          url,
-        });
-        setShareNote("تمت المشاركة");
-      } else {
-        await navigator.clipboard.writeText(shareBody);
-        setShareNote("تم نسخ الآية والرابط");
-      }
-    } catch {
-      try {
-        await navigator.clipboard.writeText(url);
-        setShareNote("تم نسخ الرابط");
-      } catch {
-        setShareNote(url);
-      }
-    }
+    const path = buildMushafShareUrl({
+      page: page.page,
+      kind: "ayah",
+      verse: `${surahId}:${verseNumber}`,
+      surahId,
+    });
+    const ok = await copyLinkOnly(path);
+    setShareNote(ok ? "تم نسخ رابط الآية" : path);
     window.setTimeout(() => setShareNote(null), 2200);
   };
 
@@ -318,24 +305,42 @@ export function MushafPageStudio({
   const studyBlock =
     page.blocks.find((b) => b.surahId === studySurahId) ?? page.blocks[0];
 
-  const shareItems = useMemo(() => {
-    const path = `/mushaf/${page.page}`;
-    const pageUrl = `${path}`;
-    const items: {
-      id: string;
-      label: string;
-      payload: { title: string; text: string; url: string };
-    }[] = [
+  const shareTargets = useMemo((): ShareTarget[] => {
+    const targets: ShareTarget[] = [
       {
         id: "page",
-        label: `صفحة المصحف ${toArabicNumerals(page.page)}`,
+        kind: "page",
+        label: "الصفحة",
+        hint: `رابط صفحة المصحف ${toArabicNumerals(page.page)} — يفتح هذه الصفحة مباشرة.`,
         payload: {
-          title: `Arabya — صفحة ${page.page}`,
-          text: `مصحف المدينة — صفحة ${toArabicNumerals(page.page)}`,
-          url: pageUrl,
+          kind: "page",
+          title: `عربية — صفحة ${toArabicNumerals(page.page)}`,
+          text: `مصحف المدينة — الصفحة ${toArabicNumerals(page.page)} على عربية`,
+          url: buildMushafShareUrl({ page: page.page, kind: "page" }),
         },
       },
     ];
+
+    if (studyBlock) {
+      const sid = studyBlock.surahId;
+      const surahTitle = getSurahUthmaniTitle(sid);
+      targets.push({
+        id: "surah",
+        kind: "surah",
+        label: "السورة",
+        hint: `رابط سورة ${surahTitle} — يميّز السورة عن الصفحة والآية.`,
+        payload: {
+          kind: "surah",
+          title: `عربية — ${surahTitle}`,
+          text: `دراسة سورة ${surahTitle} على عربية`,
+          url: buildMushafShareUrl({
+            page: page.page,
+            kind: "surah",
+            surahId: sid,
+          }),
+        },
+      });
+    }
 
     if (selected && studyBlock) {
       const verse = studyBlock.verses.find(
@@ -343,86 +348,107 @@ export function MushafPageStudio({
       );
       const ayahText = verse?.words.map((w) => w.text).join(" ") ?? "";
       const verseKey = `${selected.surahId}:${selected.verseNumber}`;
-      const ayahUrl = `${path}?v=${verseKey}#s${selected.surahId}-v-${selected.verseNumber}`;
-      const title = `Arabya — ${getSurahUthmaniTitle(selected.surahId)} ${selected.verseNumber}`;
-      items.unshift({
+      const surahTitle = getSurahUthmaniTitle(selected.surahId);
+      const ayahLabel = `${surahTitle} ${toArabicNumerals(selected.verseNumber)}`;
+
+      targets.unshift({
         id: "ayah",
-        label: "الآية الحالية",
+        kind: "ayah",
+        label: "الآية",
+        hint: `رابط الآية ${ayahLabel} — ينقلك إلى نفس الآية في المصحف.`,
         payload: {
-          title,
-          text: `${ayahText}\n\n${getSurahUthmaniTitle(selected.surahId)} ${toArabicNumerals(selected.verseNumber)}`,
-          url: ayahUrl,
+          kind: "ayah",
+          title: `عربية — ${ayahLabel}`,
+          text: `${ayahText}\n\n${ayahLabel}`,
+          url: buildMushafShareUrl({
+            page: page.page,
+            kind: "ayah",
+            verse: verseKey,
+            surahId: selected.surahId,
+          }),
         },
       });
-      items.push({
+
+      targets.push({
         id: "listen-ayah",
-        label: "رابط استماع الآية",
+        kind: "listen-ayah",
+        label: "استماع آية",
+        hint: "رابط يشغّل تلاوة الآية تلقائياً عند الفتح.",
         payload: {
-          title: `${title} — استماع`,
-          text: `استمع للآية على عربـيا`,
-          url: buildListenUrl({
-            path,
-            listen: "ayah",
-            reciter: prefs.reciterId,
+          kind: "listen-ayah",
+          title: `استماع — ${ayahLabel}`,
+          text: `استمع لتلاوة ${ayahLabel} على عربية`,
+          url: buildMushafShareUrl({
+            page: page.page,
+            kind: "listen-ayah",
             verse: verseKey,
+            surahId: selected.surahId,
+            reciter: prefs.reciterId,
           }),
         },
       });
-      items.push({
+
+      targets.push({
         id: "listen-wbw",
-        label: "رابط استماع كلمة بكلمة",
+        kind: "listen-wbw",
+        label: "كلمة بكلمة",
+        hint: "رابط يشغّل التلاوة كلمة بكلمة عند الفتح.",
         payload: {
-          title: `${title} — كلمة بكلمة`,
-          text: `استمع كلمة بكلمة على عربـيا`,
-          url: buildListenUrl({
-            path,
-            listen: "wbw",
-            reciter: prefs.reciterId,
+          kind: "listen-wbw",
+          title: `كلمة بكلمة — ${ayahLabel}`,
+          text: `استمع كلمة بكلمة لـ ${ayahLabel} على عربية`,
+          url: buildMushafShareUrl({
+            page: page.page,
+            kind: "listen-wbw",
             verse: verseKey,
+            surahId: selected.surahId,
+            reciter: prefs.reciterId,
           }),
         },
       });
-      items.push({
+
+      targets.push({
         id: "listen-surah",
-        label: "رابط استماع السورة",
+        kind: "listen-surah",
+        label: "استماع سورة",
+        hint: `رابط يشغّل سورة ${surahTitle} من الآية الحالية.`,
         payload: {
-          title: `Arabya — ${getSurahUthmaniTitle(studyBlock.surahId)} — استماع`,
-          text: `استمع لسورة ${getSurahUthmaniTitle(studyBlock.surahId)}`,
-          url: buildListenUrl({
-            path,
-            listen: "surah",
-            reciter: prefs.reciterId,
+          kind: "listen-surah",
+          title: `استماع — ${surahTitle}`,
+          text: `استمع لسورة ${surahTitle} على عربية`,
+          url: buildMushafShareUrl({
+            page: page.page,
+            kind: "listen-surah",
             verse: verseKey,
+            surahId: selected.surahId,
+            reciter: prefs.reciterId,
           }),
         },
       });
+
       const note = ayahNoteDraft.trim();
       if (note) {
-        items.push({
+        targets.push({
           id: "note",
-          label: "الملاحظة مع الآية",
+          kind: "note",
+          label: "الملاحظة",
+          hint: "مشاركة الملاحظة مع رابط الآية.",
           payload: {
-            title,
+            kind: "note",
+            title: `ملاحظة — ${ayahLabel}`,
             text: `${ayahText}\n\nملاحظة: ${note}`,
-            url: ayahUrl,
+            url: buildMushafShareUrl({
+              page: page.page,
+              kind: "note",
+              verse: verseKey,
+              surahId: selected.surahId,
+            }),
           },
         });
       }
     }
 
-    if (studyBlock) {
-      items.push({
-        id: "surah-page",
-        label: `سورة ${getSurahUthmaniTitle(studyBlock.surahId)}`,
-        payload: {
-          title: `Arabya — ${getSurahUthmaniTitle(studyBlock.surahId)}`,
-          text: `دراسة سورة ${getSurahUthmaniTitle(studyBlock.surahId)}`,
-          url: `/surah/${studyBlock.surahId}`,
-        },
-      });
-    }
-
-    return items;
+    return targets;
   }, [
     ayahNoteDraft,
     page.page,
@@ -611,14 +637,14 @@ export function MushafPageStudio({
               </button>
             ) : null}
             <ShareMenu
-              items={shareItems}
+              targets={shareTargets}
               label="مشاركة"
               onStatus={flashShareNote}
             />
           </>
         ) : (
           <ShareMenu
-            items={shareItems}
+            targets={shareTargets}
             label="مشاركة"
             onStatus={flashShareNote}
           />
