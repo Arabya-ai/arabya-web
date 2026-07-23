@@ -129,49 +129,22 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="shell footer-inner">
-        <div className="footer-top">
-          <div className="footer-brand-block">
+        <div className="footer-bar">
+          <Link href="/" className="brand footer-brand" aria-label="عربية — الصفحة الرئيسية">
             <BrandLockup size="footer" />
-            <p className="footer-mission">
-              القرآن كلمة بكلمة: نحو وصرف ودلالة وتفسير وترجمة
-            </p>
-          </div>
-
-          <nav className="footer-cols" aria-label="روابط التذييل">
-            <div className="footer-col">
-              <h2 className="footer-col-title">استكشف</h2>
-              <Link href="/">الرئيسية</Link>
-              <Link href="/mushaf/1">المصحف</Link>
-              <Link href="/favorites">المفضّلات</Link>
-            </div>
-            <div className="footer-col">
-              <h2 className="footer-col-title">خدماتنا</h2>
-              <Link href="/juz">الأجزاء</Link>
-              <Link href="/roots">الجذور</Link>
-              <Link href="/asma">الأسماء الحسنى</Link>
-              <Link href="/study">دراسة سريعة</Link>
-            </div>
-            <div className="footer-col">
-              <h2 className="footer-col-title">عن المنصة</h2>
-              <Link href="/about">عن عربية</Link>
-              <Link href="/privacy">الخصوصية</Link>
-              <Link href="/account">حسابي</Link>
-            </div>
+          </Link>
+          <nav className="footer-nav" aria-label="روابط التذييل">
+            <Link href="/">الرئيسية</Link>
+            <Link href="/mushaf/1">المصحف</Link>
+            <Link href="/juz">الأجزاء</Link>
+            <Link href="/roots">الجذور</Link>
+            <Link href="/about">عن عربية</Link>
+            <Link href="/privacy">الخصوصية</Link>
           </nav>
         </div>
-
-        <div className="footer-bottom">
-          <p className="footer-legal" suppressHydrationWarning>
-            © {year}{" "}
-            <Link href="/" className="footer-site-link">
-              منصة عربية
-            </Link>
-            <span className="footer-sep" aria-hidden>
-              ·
-            </span>
-            <span>جميع الحقوق محفوظة لكل مسلم</span>
-          </p>
-        </div>
+        <p className="footer-legal" suppressHydrationWarning>
+          © {year} منصة عربية · جميع الحقوق محفوظة لكل مسلم
+        </p>
       </div>
     </footer>
   );
