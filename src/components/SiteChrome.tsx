@@ -127,7 +127,7 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="site-footer">
+    <footer className="site-footer" data-footer="shell-width-v2">
       <div className="shell site-footer-shell">
         <div className="arabya-footer-panel">
           <Link

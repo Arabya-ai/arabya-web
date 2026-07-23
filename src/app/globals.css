@@ -2045,29 +2045,30 @@ html[data-theme="dark"] .mode-rail {
 
 .site-footer {
   margin-top: 1.75rem;
-  padding: 1rem 0 calc(1.1rem + env(safe-area-inset-bottom, 0px));
+  padding: 0;
   border-top: 1px solid var(--line);
-  background: transparent;
+  background: color-mix(in srgb, var(--surface) 88%, var(--brand-soft));
   color: var(--muted);
 }
 
 .site-footer-shell {
   display: block;
   width: 100%;
+  padding-block: 1.05rem calc(1.05rem + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
 }
 
 .arabya-footer-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto auto auto;
-  justify-items: center;
-  align-content: start;
-  gap: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.85rem;
   width: 100%;
-  max-width: none;
+  max-width: 100%;
   margin: 0;
-  padding: 1rem 0 0.85rem;
-  text-align: center;
+  padding: 0;
+  text-align: start;
   box-sizing: border-box;
   border: none;
   border-radius: 0;
@@ -2077,22 +2078,23 @@ html[data-theme="dark"] .mode-rail {
 .arabya-footer-brand {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  align-self: flex-start;
   text-decoration: none;
   color: inherit;
   max-width: 100%;
 }
 
 .arabya-footer-brand .brand-lockup--footer {
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .arabya-footer-menu {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
-  gap: 0.35rem 0.9rem;
+  gap: 0.35rem 1.15rem;
   width: 100%;
   margin: 0;
   padding: 0;
@@ -2102,9 +2104,9 @@ html[data-theme="dark"] .mode-rail {
   display: inline-flex;
   align-items: center;
   min-height: 2.1rem;
-  padding: 0.15rem 0.2rem;
+  padding: 0.15rem 0;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 600;
   line-height: 1.35;
   text-decoration: none;
@@ -2121,39 +2123,46 @@ html[data-theme="dark"] .mode-rail {
   max-width: none;
   font-size: 0.78rem;
   line-height: 1.55;
+  text-align: start;
   color: color-mix(in srgb, var(--ink) 58%, var(--muted));
   text-wrap: pretty;
 }
 
 @media (max-width: 480px) {
+  .site-footer-shell {
+    padding-block: 0.9rem calc(0.95rem + env(safe-area-inset-bottom, 0px));
+  }
+
   .arabya-footer-panel {
-    padding: 0.85rem 0 0.7rem;
-    gap: 0.65rem;
+    gap: 0.7rem;
   }
 
   .arabya-footer-menu {
-    gap: 0.25rem 0.65rem;
+    gap: 0.25rem 0.75rem;
   }
 
   .arabya-footer-menu a {
-    font-size: 0.84rem;
+    font-size: 0.86rem;
   }
 }
 
 @media (min-width: 768px) {
+  .site-footer-shell {
+    padding-block: 1.15rem calc(1.15rem + env(safe-area-inset-bottom, 0px));
+  }
+
   .arabya-footer-panel {
-    padding: 1.05rem 0 0.9rem;
-    gap: 0.85rem;
+    gap: 0.95rem;
   }
 }
 
 html[data-theme="dark"] .site-footer {
-  background: transparent;
+  background: color-mix(in srgb, var(--surface) 90%, var(--brand-soft));
 }
 
 html[data-theme="dark"] .arabya-footer-panel {
   background: transparent;
-  border-color: transparent;
+  border: none;
 }
 
 .layer-subhead {
