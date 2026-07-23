@@ -80,9 +80,30 @@ Client Secret: ....
 
 ---
 
-## ملاحظة عن AUTH_SECRET
-المبرمج يولّد قيمة عشوائية في `.env.local` باسم `AUTH_SECRET`.  
-أنت لا تحتاج إنشاؤها يدويًا إن وُجدت بالفعل — فقط أرسل مفاتيح Google + بريد المدير.
+## تفعيل الدخول على الموقع الحي (Vercel)
+
+بعد نجاح التجربة محليًا، أضف نفس المفاتيح في Vercel حتى يعمل الدخول على https://www.arabyaai.com
+
+### خطوات سريعة
+1. افتح: https://vercel.com/dashboard  
+2. اختر مشروع **arabya-web** (فريق Arabya).  
+3. **Settings** → **Environment Variables**.  
+4. أضف المتغيرات التالية لبيئات **Production** و**Preview** و**Development** إن أمكن:
+
+| الاسم | القيمة |
+|--------|--------|
+| `AUTH_SECRET` | نفس القيمة من `.env.local` على جهازك (أو قيمة جديدة مولَّدة) |
+| `AUTH_GOOGLE_ID` | Client ID من Google |
+| `AUTH_GOOGLE_SECRET` | Client Secret من Google |
+| `ARABYA_ADMIN_EMAILS` | `egywebdev@gmail.com` |
+| `AUTH_URL` | `https://www.arabyaai.com` |
+
+5. بعد الحفظ: **Deployments** → افتح آخر نشر على Production → **Redeploy** (إعادة نشر) حتى تُحمَّل المتغيرات.  
+6. جرّب: https://www.arabyaai.com/login
+
+### تذكير Google
+تأكد أن Redirect URI للإنتاج موجود:
+`https://www.arabyaai.com/api/auth/callback/google`
 
 ---
 

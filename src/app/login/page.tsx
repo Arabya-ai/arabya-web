@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   description: "ادخل إلى حسابك في عربية عبر Google",
 };
 
+/** Always render with current server env (Vercel secrets). */
+export const dynamic = "force-dynamic";
+
 export default async function LoginPage() {
   const session = await auth();
   if (session?.user) redirect("/account");
