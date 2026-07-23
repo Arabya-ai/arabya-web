@@ -26,8 +26,28 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
     };
   }, [open]);
 
+  function go(href: string) {
+    return () => {
+      setOpen(false);
+      onNavigate?.();
+    };
+  }
+
   return (
-    <div className={`nav-dropdown ${open ? "is-open" : ""}`} ref={rootRef}>
+    <div
+      className={`nav-dropdown ${open ? "is-open" : ""}`}
+      ref={rootRef}
+      onMouseEnter={() => {
+        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+          setOpen(true);
+        }
+      }}
+      onMouseLeave={() => {
+        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+          setOpen(false);
+        }
+      }}
+    >
       <button
         type="button"
         className="nav-dropdown-trigger nav-link-btn"
@@ -38,44 +58,16 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
         خدماتنا
       </button>
       <div className="nav-dropdown-menu" role="menu">
-        <Link
-          href="/juz"
-          role="menuitem"
-          onClick={() => {
-            setOpen(false);
-            onNavigate?.();
-          }}
-        >
+        <Link href="/juz" role="menuitem" onClick={go("/juz")}>
           الأجزاء
         </Link>
-        <Link
-          href="/roots"
-          role="menuitem"
-          onClick={() => {
-            setOpen(false);
-            onNavigate?.();
-          }}
-        >
+        <Link href="/roots" role="menuitem" onClick={go("/roots")}>
           الجذور
         </Link>
-        <Link
-          href="/asma"
-          role="menuitem"
-          onClick={() => {
-            setOpen(false);
-            onNavigate?.();
-          }}
-        >
+        <Link href="/asma" role="menuitem" onClick={go("/asma")}>
           الأسماء الحسنى
         </Link>
-        <Link
-          href="/study"
-          role="menuitem"
-          onClick={() => {
-            setOpen(false);
-            onNavigate?.();
-          }}
-        >
+        <Link href="/study" role="menuitem" onClick={go("/study")}>
           دراسة سريعة
         </Link>
       </div>
@@ -137,28 +129,37 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="shell footer-inner">
-        <div className="footer-bar">
-          <div className="footer-brand-inline">
+        <div className="footer-top">
+          <div className="footer-brand-block">
             <BrandLockup size="footer" />
             <p className="footer-mission">
-              القرآن الكريم كلمة بكلمة: نحو وصرف ودلالة وتفسير وترجمة
+              القرآن كلمة بكلمة: نحو وصرف ودلالة وتفسير وترجمة
             </p>
           </div>
-          <nav className="footer-inline-nav" aria-label="روابط التذييل">
-            <Link href="/">الرئيسية</Link>
-            <span className="footer-nav-group" aria-label="خدماتنا">
-              <span className="footer-nav-label">خدماتنا:</span>
+
+          <nav className="footer-cols" aria-label="روابط التذييل">
+            <div className="footer-col">
+              <h2 className="footer-col-title">استكشف</h2>
+              <Link href="/">الرئيسية</Link>
+              <Link href="/mushaf/1">المصحف</Link>
+              <Link href="/favorites">المفضّلات</Link>
+            </div>
+            <div className="footer-col">
+              <h2 className="footer-col-title">خدماتنا</h2>
               <Link href="/juz">الأجزاء</Link>
               <Link href="/roots">الجذور</Link>
               <Link href="/asma">الأسماء الحسنى</Link>
               <Link href="/study">دراسة سريعة</Link>
-            </span>
-            <Link href="/mushaf/1">المصحف</Link>
-            <Link href="/favorites">المفضّلات</Link>
-            <Link href="/about">عن عربية</Link>
-            <Link href="/privacy">الخصوصية</Link>
+            </div>
+            <div className="footer-col">
+              <h2 className="footer-col-title">عن المنصة</h2>
+              <Link href="/about">عن عربية</Link>
+              <Link href="/privacy">الخصوصية</Link>
+              <Link href="/account">حسابي</Link>
+            </div>
           </nav>
         </div>
+
         <div className="footer-bottom">
           <p className="footer-legal" suppressHydrationWarning>
             © {year}{" "}
