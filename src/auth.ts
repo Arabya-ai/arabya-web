@@ -23,19 +23,19 @@ declare module "@auth/core/jwt" {
   }
 }
 
-const googleConfigured = Boolean(
-  process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET,
-);
+/**
+ * Read at call-time (not module init) so Vercel runtime env is respected
+ * after variables are added and the deployment is rebuilt.
+ */
+export function isGoogleAuthConfigured(): boolean {
+  const id = process.env["AUTH_GOOGLE_ID"];
+  const secret = process.env["AUTH_GOOGLE_SECRET"];
+  return Boolean(id && secret);
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  providers: googleConfigured
-    ? [
-        Google({
-          clientId: process.env.AUTH_GOOGLE_ID!,
-          clientSecret: process.env.AUTH_GOOGLE_SECRET!,
-        }),
-      ]
-    : [],
+  // Always register Google; Auth.js uses AUTH_GOOGLE_ID / AUTH_GOOGLE_SECRET.
+  providers: [Google],
   trustHost: true,
   pages: {
     signIn: "/login",
@@ -43,7 +43,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     authorized({ auth: session, request }) {
       const path = request.nextUrl.pathname;
-      if (path.startsWith("/account") || path.startsWith("/studio") || path.startsWith("/admin")) {
+      if (
+        path.startsWith("/account") ||
+        path.startsWith("/studio") ||
+        path.startsWith("/admin")
+      ) {
         return !!session?.user;
       }
       return true;
@@ -62,7 +66,3 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 });
-
-export function isGoogleAuthConfigured(): boolean {
-  return googleConfigured;
-}
