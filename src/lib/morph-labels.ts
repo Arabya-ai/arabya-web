@@ -87,6 +87,12 @@ const FEATURE_LABELS: Record<string, string> = {
   "3FP": "غائب مؤنث جمع",
   "3D": "غائب مثنى",
   SP: "اسم تفضيل",
+  IM: "صيغة مبالغة",
+  INDEF: "نكرة",
+  DEF: "معرفة",
+  PREFIX: "سابقة",
+  SUFFIX: "لاحقة",
+  STEM: "جذع",
 };
 
 const CONTENT_FIRST = [

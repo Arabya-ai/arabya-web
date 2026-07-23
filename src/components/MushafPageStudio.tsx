@@ -805,6 +805,10 @@ export function MushafPageStudio({
         </>
       ) : null}
 
+      <p className="study-modes-hint">
+        أوضاع عرض الصفحة (كلمات · إعراب · جدول معنى · تفاسير) منفصلة عن طبقات
+        دراسة الكلمة أعلاه عند اختيار كلمة.
+      </p>
       <StudyModeTabs modes={modes} mode={mode} onModeChange={setMode} />
 
       {mode === "words" || mode === "irab" ? (

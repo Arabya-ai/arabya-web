@@ -30,11 +30,27 @@ type Props = {
 };
 
 /** Visible study layers — balāgha deferred (see docs/DEVELOPMENT.md). */
-const LAYERS: { id: string; label: string }[] = [
-  { id: "syntax", label: "إعراب" },
-  { id: "morph", label: "معجم" },
-  { id: "translation", label: "ترجمة" },
-  { id: "tafsir", label: "تفسير" },
+const LAYERS: { id: string; label: string; hint: string }[] = [
+  {
+    id: "syntax",
+    label: "إعراب",
+    hint: "موقع الكلمة وإعرابها في سياق الآية",
+  },
+  {
+    id: "morph",
+    label: "صرف ومعجم",
+    hint: "الجذر والمادة والخصائص الصرفية",
+  },
+  {
+    id: "translation",
+    label: "ترجمة ودلالة",
+    hint: "معنى الكلمة الدراسي وترجمة الآية",
+  },
+  {
+    id: "tafsir",
+    label: "تفسير",
+    hint: "شرح الآية من التفسير المختار",
+  },
 ];
 
 const MEANING_LABELS: { id: MeaningLang; label: string }[] = [
@@ -202,13 +218,19 @@ export function WordStudyDock({
         {layer === "syntax" ? (
           <>
             <h3>الإعراب</h3>
+            <p className="layer-hint">
+              {LAYERS.find((l) => l.id === "syntax")?.hint}
+            </p>
             <p>{qacNarrative}</p>
           </>
         ) : null}
 
         {layer === "morph" ? (
           <>
-            <h3>المعجم والصرف</h3>
+            <h3>الصرف والمعجم</h3>
+            <p className="layer-hint">
+              {LAYERS.find((l) => l.id === "morph")?.hint}
+            </p>
             <div className="morph-facts morph-facts--inline">
               {morphChips.map((c) => (
                 <span key={c.key}>{c.node}</span>
@@ -235,6 +257,12 @@ export function WordStudyDock({
         {layer === "translation" ? (
           <>
             <h3>الترجمة والدلالة</h3>
+            <p className="layer-hint">
+              {LAYERS.find((l) => l.id === "translation")?.hint}
+              {meaningLang === "ar"
+                ? " — المعنى العربي هنا معنى دراسي مختصر للكلمة."
+                : ""}
+            </p>
             <div className="lang-switch" role="group" aria-label="لغة معنى الكلمة">
               {MEANING_LABELS.map((l) => (
                 <button
@@ -274,6 +302,9 @@ export function WordStudyDock({
         {layer === "tafsir" ? (
           <>
             <h3>التفسير</h3>
+            <p className="layer-hint">
+              {LAYERS.find((l) => l.id === "tafsir")?.hint}
+            </p>
             {tafsirSources.length ? (
               <>
                 <select

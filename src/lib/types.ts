@@ -30,6 +30,8 @@ export type VerseTranslationEdition = {
   nameAr: string;
   nameEn: string;
   lang: string;
+  source?: string;
+  sourceUrl?: string;
 };
 
 export type VerseTranslationSurah = {
@@ -96,6 +98,9 @@ export type TafsirSource = {
   slug: string;
   nameAr: string;
   resourceId: number;
+  api?: string;
+  source?: string;
+  sourceUrl?: string;
 };
 
 export type StudyMode = "words" | "irab" | string;

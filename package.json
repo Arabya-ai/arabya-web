@@ -22,7 +22,9 @@
     "build-mushaf-index": "node scripts/build-mushaf-index.mjs",
     "build-search-index": "node scripts/build-search-index.mjs",
     "validate-data": "node scripts/validate-data.mjs",
-    "import-irab-book": "node scripts/import-irab-book.mjs"
+    "import-irab-book": "node scripts/import-irab-book.mjs",
+    "fetch-ia-item": "node scripts/fetch-ia-item.mjs",
+    "import-from-incoming": "node scripts/import-from-incoming.mjs"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
