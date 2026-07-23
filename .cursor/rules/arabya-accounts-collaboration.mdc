@@ -21,7 +21,8 @@ When working on the **accounts & roles plan** (Google sign-in, `/account`, `/stu
 ## Memory of product constraints for this plan
 - Sign-up / login = **Google (Gmail) OAuth**, not paid billing (billing stays deferred).
 - Roles: `admin` · `editor` · `user` (+ guest without account).
-- Personal data moves to cloud DB; Quran reference content stays **Git-first** under `/data`.
+- Personal data moves to **Cloudflare D1** (via a small Worker API); the Next.js site stays on Vercel for now. Do not push Neon as the default for this rollout unless the owner changes course.
+- Quran reference content stays **Git-first** under `/data`.
 - Explain dashboards per role in user language before wiring advanced APIs.
 
 ## Response style during this rollout
