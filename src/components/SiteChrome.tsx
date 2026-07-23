@@ -1,10 +1,87 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AuthButton } from "@/components/AuthButton";
 import { BrandLockup } from "@/components/BrandLockup";
 import { ThemeToggle } from "@/components/ThemeToggle";
+
+function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onDoc(e: MouseEvent) {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div className={`nav-dropdown ${open ? "is-open" : ""}`} ref={rootRef}>
+      <button
+        type="button"
+        className="nav-dropdown-trigger nav-link-btn"
+        aria-expanded={open}
+        aria-haspopup="menu"
+        onClick={() => setOpen((v) => !v)}
+      >
+        خدماتنا
+      </button>
+      <div className="nav-dropdown-menu" role="menu">
+        <Link
+          href="/juz"
+          role="menuitem"
+          onClick={() => {
+            setOpen(false);
+            onNavigate?.();
+          }}
+        >
+          الأجزاء
+        </Link>
+        <Link
+          href="/roots"
+          role="menuitem"
+          onClick={() => {
+            setOpen(false);
+            onNavigate?.();
+          }}
+        >
+          الجذور
+        </Link>
+        <Link
+          href="/asma"
+          role="menuitem"
+          onClick={() => {
+            setOpen(false);
+            onNavigate?.();
+          }}
+        >
+          الأسماء الحسنى
+        </Link>
+        <Link
+          href="/study"
+          role="menuitem"
+          onClick={() => {
+            setOpen(false);
+            onNavigate?.();
+          }}
+        >
+          دراسة سريعة
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -37,20 +114,9 @@ export function SiteHeader() {
           aria-label="التنقل الرئيسي"
         >
           <Link href="/" onClick={() => setOpen(false)}>
-            الفهرس
+            الرئيسية
           </Link>
-          <Link href="/juz" onClick={() => setOpen(false)}>
-            الأجزاء
-          </Link>
-          <Link href="/roots" onClick={() => setOpen(false)}>
-            الجذور
-          </Link>
-          <Link href="/asma" onClick={() => setOpen(false)}>
-            الأسماء الحسنى
-          </Link>
-          <Link href="/study" onClick={() => setOpen(false)}>
-            دراسة سريعة
-          </Link>
+          <ServicesMenu onNavigate={() => setOpen(false)} />
           <Link href="/about" onClick={() => setOpen(false)}>
             عن عربية
           </Link>
@@ -79,12 +145,16 @@ export function SiteFooter() {
             </p>
           </div>
           <nav className="footer-inline-nav" aria-label="روابط التذييل">
-            <Link href="/">الفهرس</Link>
-            <Link href="/juz">الأجزاء</Link>
+            <Link href="/">الرئيسية</Link>
+            <span className="footer-nav-group" aria-label="خدماتنا">
+              <span className="footer-nav-label">خدماتنا:</span>
+              <Link href="/juz">الأجزاء</Link>
+              <Link href="/roots">الجذور</Link>
+              <Link href="/asma">الأسماء الحسنى</Link>
+              <Link href="/study">دراسة سريعة</Link>
+            </span>
             <Link href="/mushaf/1">المصحف</Link>
-            <Link href="/roots">الجذور</Link>
-            <Link href="/asma">الأسماء الحسنى</Link>
-            <Link href="/study">دراسة سريعة</Link>
+            <Link href="/favorites">المفضّلات</Link>
             <Link href="/about">عن عربية</Link>
             <Link href="/privacy">الخصوصية</Link>
           </nav>

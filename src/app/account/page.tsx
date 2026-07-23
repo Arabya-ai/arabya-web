@@ -1,10 +1,11 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
+import { AccountPersonalData } from "@/components/AccountPersonalData";
 import { CloudSyncPanel } from "@/components/CloudSyncPanel";
 import { isCloudSyncConfigured } from "@/lib/cloud-sync";
 import { canAccessAdmin, canAccessStudio, roleLabelAr } from "@/lib/roles";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "حسابي",
@@ -47,35 +48,12 @@ export default async function AccountPage() {
         )}
       </header>
 
-      <section className="account-grid" aria-label="أقسام الحساب">
-        <article className="account-panel">
-          <h2>متابعة القراءة</h2>
-          <p>
-            {syncReady
-              ? "استخدم أزرار المزامنة أدناه لنقل آخر صفحة بين أجهزتك."
-              : "قريبًا: آخر صفحة مصحف متزامنة مع حسابك."}
-          </p>
-          <Link href="/mushaf/1" className="account-panel-link">
-            فتح المصحف
-          </Link>
-        </article>
-        <article className="account-panel">
-          <h2>المفضّلات والملاحظات</h2>
-          <p>
-            {syncReady
-              ? "تُزامن تلقائيًا مع حسابك بعد تسجيل الدخول."
-              : "حاليًا تُحفظ على جهازك فقط إلى أن يكتمل ربط D1."}
-          </p>
-        </article>
-        <article className="account-panel">
-          <h2>عادة القراءة</h2>
-          <p>
-            {syncReady
-              ? "الهدف والسلسلة يُرفعان مع بقية بياناتك عند المزامنة."
-              : "الهدف اليومي والسلسلة سيظهران هنا بعد تفعيل المزامنة."}
-          </p>
-        </article>
-        {(canAccessStudio(role) || canAccessAdmin(role)) && (
+      <section className="account-grid account-grid--personal" aria-label="بياناتك">
+        <AccountPersonalData />
+      </section>
+
+      {(canAccessStudio(role) || canAccessAdmin(role)) && (
+        <section className="account-grid" aria-label="مساحات العمل">
           <article className="account-panel account-panel--accent">
             <h2>مساحات العمل</h2>
             <p>لديك صلاحيات إضافية حسب دورك.</p>
@@ -92,20 +70,10 @@ export default async function AccountPage() {
               ) : null}
             </div>
           </article>
-        )}
-      </section>
-
-      {syncReady ? (
-        <CloudSyncPanel />
-      ) : (
-        <section className="account-panel" aria-label="حالة المزامنة">
-          <h2>المزامنة السحابية</h2>
-          <p>
-            قاعدة D1 جاهزة. نُكمل نشر عامل Cloudflare وربط المفاتيح، ثم تظهر هنا
-            أزرار الرفع والسحب.
-          </p>
         </section>
       )}
+
+      {syncReady ? <CloudSyncPanel /> : null}
 
       <form
         className="account-signout"
