@@ -11,11 +11,31 @@ export const metadata: Metadata = {
 /** Always render with current server env (Vercel secrets). */
 export const dynamic = "force-dynamic";
 
-export default async function LoginPage() {
+function errorMessageAr(code: string | undefined): string | null {
+  if (!code) return null;
+  switch (code) {
+    case "Configuration":
+      return "إعداد الدخول على السيرفر غير مكتمل. تحقق من AUTH_SECRET ومفاتيح Google وAUTH_URL في Vercel (يجب أن يكون https://www.arabyaai.com بشرطتين بعد https).";
+    case "AccessDenied":
+      return "رُفض الدخول. إن كان التطبيق في وضع الاختبار، أضف بريدك كـ Test user في Google.";
+    case "OAuthAccountNotLinked":
+      return "هذا البريد مرتبط بطريقة دخول أخرى.";
+    default:
+      return `تعذّر تسجيل الدخول (${code}). أعد المحاولة أو راجع إعدادات Google.`;
+  }
+}
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const session = await auth();
   if (session?.user) redirect("/account");
 
+  const { error } = await searchParams;
   const ready = isGoogleAuthConfigured();
+  const errorText = errorMessageAr(error);
 
   return (
     <div className="shell page-block auth-page">
@@ -26,6 +46,12 @@ export default async function LoginPage() {
           اربط حساب Google للمتابعة بين أجهزتك: المفضّلات، الملاحظات، وعادة
           القراءة. قراءة المصحف والدراسة تبقى متاحة بدون حساب.
         </p>
+
+        {errorText ? (
+          <div className="auth-setup-note" role="alert">
+            <p>{errorText}</p>
+          </div>
+        ) : null}
 
         {ready ? (
           <form
