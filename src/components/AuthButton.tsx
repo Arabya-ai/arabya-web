@@ -35,7 +35,20 @@ export function AuthButton() {
 
   if (data?.user) {
     return (
-      <div className={`nav-dropdown ${open ? "is-open" : ""}`} ref={rootRef}>
+      <div
+        className={`nav-dropdown ${open ? "is-open" : ""}`}
+        ref={rootRef}
+        onMouseEnter={() => {
+          if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+            setOpen(true);
+          }
+        }}
+        onMouseLeave={() => {
+          if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+            setOpen(false);
+          }
+        }}
+      >
         <button
           type="button"
           className="auth-btn auth-btn--account nav-dropdown-trigger"
