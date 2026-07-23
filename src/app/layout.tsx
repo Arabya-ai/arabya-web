@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { Amiri, Cairo, Noto_Naskh_Arabic } from "next/font/google";
+import { AuthSessionProvider } from "@/components/AuthSessionProvider";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
 import "./globals.css";
 
@@ -92,9 +93,11 @@ export default function RootLayout({
         />
       </head>
       <body className={`${cairo.variable} ${naskh.variable} ${amiri.variable} antialiased`}>
-        <SiteHeader />
-        <main>{children}</main>
-        <SiteFooter />
+        <AuthSessionProvider>
+          <SiteHeader />
+          <main>{children}</main>
+          <SiteFooter />
+        </AuthSessionProvider>
         <Analytics />
       </body>
     </html>
