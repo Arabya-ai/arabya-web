@@ -8,6 +8,12 @@ export type Bookmark = {
 
 const BOOKMARKS_KEY = "arabya-bookmarks";
 
+function notify() {
+  void import("@/lib/cloud-sync-client")
+    .then((m) => m.notifyCloudSyncNeeded())
+    .catch(() => undefined);
+}
+
 export function readBookmarks(): Bookmark[] {
   try {
     const raw = localStorage.getItem(BOOKMARKS_KEY);
@@ -21,6 +27,7 @@ export function readBookmarks(): Bookmark[] {
 
 export function writeBookmarks(list: Bookmark[]) {
   localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(list.slice(0, 200)));
+  notify();
 }
 
 export function toggleBookmark(entry: Omit<Bookmark, "savedAt">): Bookmark[] {

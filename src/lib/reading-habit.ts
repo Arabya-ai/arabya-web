@@ -126,6 +126,9 @@ export function readReadingHabit(): ReadingHabitState {
 
 export function writeReadingHabit(state: ReadingHabitState): void {
   localStorage.setItem(KEY, JSON.stringify(state));
+  void import("@/lib/cloud-sync-client")
+    .then((m) => m.notifyCloudSyncNeeded())
+    .catch(() => undefined);
 }
 
 function prevDateKey(key: string): string {

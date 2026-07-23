@@ -24,6 +24,9 @@ export function readAyahNotes(): AyahNote[] {
 
 function writeAll(list: AyahNote[]) {
   localStorage.setItem(KEY, JSON.stringify(list.slice(0, MAX)));
+  void import("@/lib/cloud-sync-client")
+    .then((m) => m.notifyCloudSyncNeeded())
+    .catch(() => undefined);
 }
 
 export function getAyahNote(key: string): AyahNote | null {

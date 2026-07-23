@@ -61,13 +61,23 @@ export function useMushafPrefs(
   useEffect(() => {
     try {
       localStorage.setItem(LAST_PAGE_KEY, String(page.page));
+      void import("@/lib/cloud-sync-client")
+        .then((m) => m.notifyCloudSyncNeeded())
+        .catch(() => undefined);
+    } catch {
+      /* ignore */
+    }
+  }, [page.page]);
+
+  useEffect(() => {
+    try {
       localStorage.setItem(FONT_KEY, String(fontScale));
       localStorage.setItem(MEANING_LANG_KEY, meaningLang);
       localStorage.setItem(VERSE_TRANS_KEY, verseEdition);
     } catch {
       /* ignore */
     }
-  }, [page.page, fontScale, meaningLang, verseEdition]);
+  }, [fontScale, meaningLang, verseEdition]);
 
   useEffect(() => {
     setFontDraft(String(Math.round(fontScale * 100)));
