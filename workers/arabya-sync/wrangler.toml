@@ -1,0 +1,14 @@
+# Arabya sync worker (Cloudflare) — binds to D1 `arabya-user-data`
+# Database ID from dashboard (not a secret): 67ca115e-ec6d-4cd6-ac7d-77c8c619bb17
+
+workers_dev = true
+preview_urls = false
+
+name = "arabya-sync"
+main = "src/index.ts"
+compatibility_date = "2026-07-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "arabya-user-data"
+database_id = "67ca115e-ec6d-4cd6-ac7d-77c8c619bb17"

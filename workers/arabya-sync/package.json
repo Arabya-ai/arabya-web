@@ -1,0 +1,17 @@
+{
+  "name": "arabya-sync",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250724.0",
+    "typescript": "^5",
+    "wrangler": "^4.26.0"
+  },
+  "dependencies": {
+    "arabya-web": "file:../.."
+  }
+}

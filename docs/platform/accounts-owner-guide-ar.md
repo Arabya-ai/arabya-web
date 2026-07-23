@@ -1,113 +1,106 @@
-# دليل المالك — إعداد حسابات عربية (تسجيل Google)
+# دليل المالك — إعداد حسابات عربية (تسجيل Google + مزامنة D1)
 
 هذا الدليل مكتوب لك خطوة بخطوة. لا تحتاج معرفة برمجة. نفّذ الخطوات بالترتيب وأرسل للمبرمج (الوكيل) النتائج عندما يطلبها.
 
 ## أين نحن؟
-**المرحلة A — الخطوة 1:** إنشاء مفاتيح تسجيل الدخول عبر Google (مثل «بطاقة دخول» بين موقع عربية وحسابات Gmail).
-
-بدون هذه المفاتيح لا يستطيع الزائر الضغط على «تسجيل الدخول بـ Google» بنجاح.
+- **المرحلة A:** تسجيل الدخول بـ Google — **تمت** على المحلي والموقع الحي.
+- **المرحلة B:** مزامنة المفضّلات/الملاحظات/عادة القراءة عبر **Cloudflare D1**.
 
 ---
 
-## ماذا ستحصل عليه في النهاية؟
-قيمتان سريّتان تضعان في ملف محلي على جهازك (لن تُرفع إلى GitHub):
+## المرحلة A — Google (مرجع سريع إن احتجت إعادة الإعداد)
 
+### ماذا تحتاج؟
 1. `AUTH_GOOGLE_ID` — معرّف العميل (Client ID)
 2. `AUTH_GOOGLE_SECRET` — السرّ (Client Secret)
-3. `AUTH_SECRET` — مفتاح عشوائي لحماية الجلسات (سنولّده معًا)
+3. `AUTH_SECRET` — مفتاح عشوائي لحماية الجلسات
 4. `ARABYA_ADMIN_EMAILS` — بريدك ليُعتبر مديرًا
 
----
-
-## خطوات Google Cloud (انسخها واتبعها)
-
-### 1) افتح وحدة تحكم Google
-اذهب إلى: https://console.cloud.google.com/  
-سجّل الدخول بنفس جيميل الذي تريد أن يكون حساب المدير.
-
-### 2) أنشئ مشروعًا (أو اختر موجودًا)
-1. أعلى الصفحة بجانب «Google Cloud» اضغط قائمة المشاريع.
-2. **New Project** / مشروع جديد.
-3. الاسم المقترح: `Arabya` أو `arabya-web`.
-4. Create / إنشاء، وانتظر حتى يُختار المشروع.
-
-### 3) فعّل شاشة الموافقة OAuth
-1. من القائمة الجانبية: **APIs & Services** → **OAuth consent screen**.
-2. اختر **External** (خارجي) ثم Create.
-3. Application name: `عربية` أو `Arabya`.
-4. User support email: اختر بريدك.
-5. Developer contact: بريدك مرة أخرى.
-6. Save and Continue.
-7. في Scopes اضغط Save and Continue دون إضافة معقّدات (الافتراضي يكفي في البداية).
-8. في Test users (إن ظهرت وأنت في وضع Testing): **Add users** → أضف بريدك Gmail.
-9. Save حتى النهاية.
-
-### 4) أنشئ بيانات اعتماد OAuth
-1. **APIs & Services** → **Credentials**.
-2. **Create Credentials** → **OAuth client ID**.
-3. Application type: **Web application**.
-4. Name: `Arabya Web`.
-5. **Authorized JavaScript origins** أضف:
-   - `http://localhost:3000`
-   - لاحقًا للإنتاج: `https://www.arabyaai.com`
-6. **Authorized redirect URIs** أضف بدقة:
+### خطوات Google Cloud
+1. https://console.cloud.google.com/ — مشروع Arabya  
+2. OAuth consent screen → External  
+3. Credentials → OAuth client ID → Web application  
+4. Origins: `http://localhost:3000` و `https://www.arabyaai.com`  
+5. Redirect URIs:
    - `http://localhost:3000/api/auth/callback/google`
-   - لاحقًا للإنتاج: `https://www.arabyaai.com/api/auth/callback/google`
-7. Create.
-8. ستظهر نافذة فيها:
-   - **Client ID** (انسخه)
-   - **Client Secret** (انسخه واحفظه في مكان آمن — يظهر مرة أو يمكن إعادة إنشائه)
+   - `https://www.arabyaai.com/api/auth/callback/google`  
+6. نفس القيم في Vercel → Environment Variables → Redeploy  
 
-### 5) أرسل للمبرمج (أو الصق في المحادثة بحذر)
-عند الانتهاء اكتب رسالة مثل:
-
-```
-جاهز مفاتيح Google:
-Client ID: ....apps.googleusercontent.com
-Client Secret: ....
-بريد المدير: you@gmail.com
-```
-
-**تحذير:** لا تنشر Client Secret في مكان عام (تويتر، لقطة شاشة علنية، مستودع Git عام). في المحادثة الخاصة مع الوكيل داخل مشروعك مقبول مؤقتًا ثم نضعها في ملف `.env.local` فقط.
+**تنبيه:** `AUTH_GOOGLE_ID` يجب أن يكون معرّفًا ينتهي بـ `.apps.googleusercontent.com` — **ليس** رابط `callback/google`.
 
 ---
 
-## ماذا سيفعل المبرمج بعد ذلك؟
-1. يضع المفاتيح في `.env.local` على جهازك (ملف سري لا يُرفع إلى GitHub).
-2. يفعّل زر «دخول» في رأس الموقع → صفحة `/login`.
-3. يفتح صفحة `/account` كبداية لوحة المشترك، مع هيكل `/studio` و`/admin`.
-4. يطلب منك تجربة الدخول محليًا على `http://localhost:3000`.
+## المرحلة B — Cloudflare D1 (المسار الحالي)
 
----
-
-## تفعيل الدخول على الموقع الحي (Vercel)
-
-بعد نجاح التجربة محليًا، أضف نفس المفاتيح في Vercel حتى يعمل الدخول على https://www.arabyaai.com
-
-### خطوات سريعة
-1. افتح: https://vercel.com/dashboard  
-2. اختر مشروع **arabya-web** (فريق Arabya).  
-3. **Settings** → **Environment Variables**.  
-4. أضف المتغيرات التالية لبيئات **Production** و**Preview** و**Development** إن أمكن:
-
-| الاسم | القيمة |
+### توضيح: Vercel و D1 ليسا بديلين
+| الاسم | الدور |
 |--------|--------|
-| `AUTH_SECRET` | نفس القيمة من `.env.local` على جهازك (أو قيمة جديدة مولَّدة) |
-| `AUTH_GOOGLE_ID` | Client ID من Google |
-| `AUTH_GOOGLE_SECRET` | Client Secret من Google |
-| `ARABYA_ADMIN_EMAILS` | `egywebdev@gmail.com` |
-| `AUTH_URL` | `https://www.arabyaai.com` |
+| **Vercel** | يستضيف موقع عربية (الصفحات + دخول Google) — **يبقى** |
+| **Cloudflare D1** | خزانة بيانات المشترك للمزامنة — **نضيفها الآن** |
 
-5. بعد الحفظ: **Deployments** → افتح آخر نشر على Production → **Redeploy** (إعادة نشر) حتى تُحمَّل المتغيرات.  
-6. جرّب: https://www.arabyaai.com/login
+المتصفح → موقع عربية على Vercel → بعد الدخول → عامل Cloudflare (Worker) → قاعدة D1.
 
-### تذكير Google
-تأكد أن Redirect URI للإنتاج موجود:
-`https://www.arabyaai.com/api/auth/callback/google`
+الزائر بلا حساب يبقى على تخزين الجهاز فقط. نص القرآن يبقى في Git.
+
+### الخطوة B1 — حساب Cloudflare
+1. افتح: https://dash.cloudflare.com/sign-up  
+2. سجّل (يُفضّل `egywebdev@gmail.com`).  
+3. أكّد البريد إن طُلب.  
+4. ادخل: https://dash.cloudflare.com/
+
+### الخطوة B2 — إنشاء قاعدة D1
+1. من القائمة: **Workers & Pages** → **D1** (أو ابحث عن D1 أعلى الصفحة).  
+2. **Create database**.  
+3. الاسم بالضبط:
+   ```
+   arabya-user-data
+   ```
+4. المنطقة: الأقرب (Western Europe إن وُجدت).  
+5. Create.  
+6. تأكد أن صفحة القاعدة تعرض الاسم `arabya-user-data`.
+
+### الخطوة B3 — أرسل للمبرمج
+```
+جاهز Cloudflare D1:
+- الحساب: نعم
+- اسم القاعدة: arabya-user-data
+```
+لقطة شاشة مفيدة إن ظهرت شاشة غير واضحة.
+
+### الخطوة B4 — إنشاء الجداول (مرة واحدة)
+1. افتح قاعدة `arabya-user-data` في Cloudflare.  
+2. من التبويبات أعلى الصفحة اختر **Console** (أو **Explore Data** / محرر SQL).  
+3. امسح أي نص قديم في المربع.  
+4. الصق محتوى الملف من المشروع:
+   `workers/arabya-sync/schema.sql`  
+   (أو اطلب من المبرمج لصق النص الكامل في المحادثة).  
+5. اضغط **Run** / تنفيذ.  
+6. ارجع لتبويب **Overview** — يجب أن يصبح **Number of Tables** = **4**  
+   (`users`, `bookmarks`, `ayah_notes`, `reading_progress`).
+
+ثم اكتب للمبرمج: `الجداول جاهزة — 4 جداول`
+
+### الخطوة B5 — نشر عامل المزامنة (مع المبرمج)
+المبرمج يجهّز المجلد `workers/arabya-sync`. أنت تحتاج مرة واحدة:
+
+1. في Cursor/الطرفية (المبرمج يشغّلها معك): تسجيل دخول Cloudflare CLI.  
+2. سيُفتح متصفح — اسمح لـ Wrangler بالوصول لحسابك.  
+3. بعد النجاح ينشر المبرمج الـ Worker ويربط السرّ `ARABYA_SYNC_SECRET`.  
+4. تضيف في Vercel:
+   - `ARABYA_D1_ENABLED=1`
+   - `ARABYA_SYNC_URL` = رابط الـ Worker (مثل `https://arabya-sync.…workers.dev`)
+   - `ARABYA_SYNC_SECRET` = نفس السرّ  
+5. Redeploy لموقع عربية.  
+6. من صفحة **حسابي**: ارفع ثم اسحب للتجربة.
+
+### بعد تأكيدك سيفعل المبرمج
+1. نشر Worker المزامنة.  
+2. ربط الأسرار في Vercel و Cloudflare.  
+3. تجربة الرفع/السحب معك على صفحة حسابي.
 
 ---
 
 ## ملاحظات مهمة
 - القراءة في المصحف تبقى متاحة **بدون** تسجيل دخول.
-- الحسابات المدفوعة غير مشمولة الآن؛ «الاشتراك» هنا = إنشاء حساب عبر Gmail.
-- لو تعثّرت في أي شاشة Google: صِف ما تراه (أو أرسل لقطة) وسنكمل من نفس النقطة.
+- «الاشتراك» هنا = حساب عبر Gmail (ليس دفعًا).  
+- لو تعثّرت: صِف الشاشة أو أرسل لقطة وسنكمل من نفس النقطة.
