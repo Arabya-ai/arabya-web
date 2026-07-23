@@ -1,6 +1,11 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { auth, isGoogleAuthConfigured, signIn } from "@/auth";
+import {
+  auth,
+  getAuthEnvDiagnostics,
+  isGoogleAuthConfigured,
+  signIn,
+} from "@/auth";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
@@ -15,7 +20,7 @@ function errorMessageAr(code: string | undefined): string | null {
   if (!code) return null;
   switch (code) {
     case "Configuration":
-      return "إعداد الدخول على السيرفر غير مكتمل. تحقق من AUTH_SECRET ومفاتيح Google وAUTH_URL في Vercel (يجب أن يكون https://www.arabyaai.com بشرطتين بعد https).";
+      return "إعداد الدخول على السيرفر غير مكتمل، أو Google رفض معرّف العميل (invalid_client). أعد لصق AUTH_GOOGLE_ID و AUTH_GOOGLE_SECRET في Vercel بدون مسافات أو علامات اقتباس، ثم Redeploy.";
     case "AccessDenied":
       return "رُفض الدخول. إن كان التطبيق في وضع الاختبار، أضف بريدك كـ Test user في Google.";
     case "OAuthAccountNotLinked":
@@ -28,14 +33,16 @@ function errorMessageAr(code: string | undefined): string | null {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; diag?: string }>;
 }) {
   const session = await auth();
   if (session?.user) redirect("/account");
 
-  const { error } = await searchParams;
+  const { error, diag } = await searchParams;
   const ready = isGoogleAuthConfigured();
   const errorText = errorMessageAr(error);
+  const showDiag = diag === "1" || Boolean(error);
+  const diagnostics = showDiag ? getAuthEnvDiagnostics() : null;
 
   return (
     <div className="shell page-block auth-page">
@@ -50,6 +57,21 @@ export default async function LoginPage({
         {errorText ? (
           <div className="auth-setup-note" role="alert">
             <p>{errorText}</p>
+          </div>
+        ) : null}
+
+        {diagnostics ? (
+          <div className="auth-setup-note" role="status">
+            <p>
+              فحص الإعداد (بدون أسرار): سر الجلسة=
+              {diagnostics.hasSecret ? "موجود" : "ناقص"} · Google ID=
+              {diagnostics.hasGoogleId ? "موجود" : "ناقص"} · Google Secret=
+              {diagnostics.hasGoogleSecret ? "موجود" : "ناقص"}
+              <br />
+              AUTH_URL: <code>{diagnostics.authUrl}</code>
+              <br />
+              نهاية Client ID: <code>{diagnostics.googleIdTail}</code>
+            </p>
           </div>
         ) : null}
 
@@ -78,6 +100,8 @@ export default async function LoginPage({
           <Link href="/">العودة للصفحة الرئيسية</Link>
           {" · "}
           <Link href="/privacy">الخصوصية</Link>
+          {" · "}
+          <Link href="/login?diag=1">فحص الإعداد</Link>
         </p>
       </div>
     </div>
