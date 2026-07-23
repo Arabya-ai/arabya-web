@@ -128,11 +128,16 @@ export function SiteFooter() {
 
   return (
     <footer className="site-footer">
-      <div className="shell footer-inner">
-        <div className="footer-bar">
-          <Link href="/" className="brand footer-brand" aria-label="عربية — الصفحة الرئيسية">
+      <div className="shell">
+        <div className="footer-box">
+          <Link
+            href="/"
+            className="footer-brand"
+            aria-label="عربية — الصفحة الرئيسية"
+          >
             <BrandLockup size="footer" />
           </Link>
+
           <nav className="footer-nav" aria-label="روابط التذييل">
             <Link href="/">الرئيسية</Link>
             <Link href="/mushaf/1">المصحف</Link>
@@ -141,10 +146,11 @@ export function SiteFooter() {
             <Link href="/about">عن عربية</Link>
             <Link href="/privacy">الخصوصية</Link>
           </nav>
+
+          <p className="footer-legal" suppressHydrationWarning>
+            © {year} منصة عربية · جميع الحقوق محفوظة لكل مسلم
+          </p>
         </div>
-        <p className="footer-legal" suppressHydrationWarning>
-          © {year} منصة عربية · جميع الحقوق محفوظة لكل مسلم
-        </p>
       </div>
     </footer>
   );
