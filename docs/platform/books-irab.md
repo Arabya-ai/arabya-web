@@ -27,6 +27,11 @@ data/books/
 
 ## سكربت الاستيراد
 
-`npm run import-irab-book -- --slug=darwish --from=./incoming/darwish`
+`npm run import-irab-book -- --slug=darwish --from=./incoming/darwish.json`
+
+أو بعد التجهيز من قناة IA المحلية:
+
+`npm run import-from-incoming -- --slug=… --from=./incoming/prepared.json --i-confirm-rights`
 
 يتوقع JSON موحّد؛ لا يستورد HTML من مواقع خارجية.
+تفاصيل IA: [`docs/platform/internet-archive.md`](internet-archive.md).

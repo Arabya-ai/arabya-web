@@ -25,36 +25,46 @@
       "resourceId": 20,
       "nameAr": "صحيح إنترناشونال (إنجليزي)",
       "nameEn": "Saheeh International",
-      "lang": "en"
+      "lang": "en",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
     },
     {
       "slug": "hamidullah-fr",
       "resourceId": 31,
       "nameAr": "حميد الله (فرنسي)",
       "nameEn": "Muhammad Hamidullah",
-      "lang": "fr"
+      "lang": "fr",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
     },
     {
       "slug": "junagarhi-ur",
       "resourceId": 54,
       "nameAr": "جوناغري (أردو)",
       "nameEn": "Maulana Muhammad Junagarhi",
-      "lang": "ur"
+      "lang": "ur",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
     },
     {
       "slug": "indonesian",
       "resourceId": 33,
       "nameAr": "الإندونيسية",
       "nameEn": "Indonesian Ministry of Religious Affairs",
-      "lang": "id"
+      "lang": "id",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
     },
     {
       "slug": "turkish",
       "resourceId": 77,
       "nameAr": "التركية — ديانت",
       "nameEn": "Turkish (Diyanet)",
-      "lang": "tr"
+      "lang": "tr",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
     }
   ],
-  "arabicWbwNote": "No open Arabic word-by-word meaning dataset is currently available via Quran.com or other GPL/CC sources suitable for redistribution. English/Indonesian/Urdu WBW are included instead."
+  "arabicWbwNote": "No open Arabic word-by-word meaning dataset is currently available via Quran.com or other GPL/CC sources suitable for redistribution. English/Indonesian/Urdu WBW are included instead. Arabic study senses are Arabya-curated via lemma-sense-ar.json."
 }

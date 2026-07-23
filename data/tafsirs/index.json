@@ -4,31 +4,41 @@
       "slug": "sadi",
       "nameAr": "تفسير السعدي",
       "resourceId": 91,
-      "api": "https://api.quran.com"
+      "api": "https://api.quran.com",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
     },
     {
       "slug": "muyassar",
       "nameAr": "التفسير الميسر",
       "resourceId": 16,
-      "api": "https://api.quran.com"
+      "api": "https://api.quran.com",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
     },
     {
       "slug": "ibn-kathir",
       "nameAr": "تفسير ابن كثير",
       "resourceId": 14,
-      "api": "https://api.quran.com"
+      "api": "https://api.quran.com",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
     },
     {
       "slug": "qurtubi",
       "nameAr": "تفسير القرطبي",
       "resourceId": 90,
-      "api": "https://api.quran.com"
+      "api": "https://api.quran.com",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
     },
     {
       "slug": "baghawi",
       "nameAr": "تفسير البغوي",
       "resourceId": 94,
-      "api": "https://api.quran.com"
+      "api": "https://api.quran.com",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
     }
   ]
 }

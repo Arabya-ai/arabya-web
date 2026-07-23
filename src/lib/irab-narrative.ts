@@ -29,8 +29,8 @@ const FORM_LABEL: Record<string, string> = {
 };
 
 /**
- * Richer Arabic iʿrāb prose from QAC morphology features.
- * Does not copy third-party grammar books — template expansion of open corpus tags.
+ * Richer Arabic iʿrāb prose from morphology features.
+ * Template expansion of open corpus tags — Arabya study wording.
  */
 export function narrativeIrab(morph: IrabWord | null | undefined): string {
   if (!morph) return "—";
@@ -42,22 +42,26 @@ export function narrativeIrab(morph: IrabWord | null | undefined): string {
   const bits: string[] = [];
 
   const posLabel = formatPosLabels(pos, feats);
-  if (posLabel) bits.push(posLabel);
+  if (posLabel) bits.push(`تصنيفها النحوي: ${posLabel}`);
 
   for (const f of feats) {
-    if (CASE_LABEL[f]) bits.push(`${CASE_LABEL[f]} وعلامة إعرابه ظاهرة أو مقدّرة حسب السياق`);
-    if (TENSE_LABEL[f]) bits.push(`فعل ${TENSE_LABEL[f]}`);
-    if (MOOD_LABEL[f]) bits.push(`حالة الإعراب: ${MOOD_LABEL[f]}`);
-    if (FORM_LABEL[f]) bits.push(FORM_LABEL[f]);
+    if (CASE_LABEL[f]) {
+      bits.push(
+        `${CASE_LABEL[f]}؛ وعلامة الإعراب ظاهرة أو مقدّرة بحسب آخر الكلمة والسياق`,
+      );
+    }
+    if (TENSE_LABEL[f]) bits.push(`زمن الفعل: ${TENSE_LABEL[f]}`);
+    if (MOOD_LABEL[f]) bits.push(`إعراب المضارع: ${MOOD_LABEL[f]}`);
+    if (FORM_LABEL[f]) bits.push(`الصيغة: ${FORM_LABEL[f]}`);
     if (f === "PASS") bits.push("مبني للمجهول");
-    if (f === "ADJ") bits.push("نعت");
+    if (f === "ACT") bits.push("مبني للمعلوم");
+    if (f === "ADJ") bits.push("يأتي نعتًا في السياق");
     if (f === "DET" || f.startsWith("LEM:ال")) bits.push("معرّف بأل");
   }
 
-  if (morph.lemma) bits.push(`المادة: ${morph.lemma}`);
-  if (morph.root) bits.push(`الجذر: ${morph.root}`);
+  if (morph.lemma) bits.push(`مادتها المعجمية: ${morph.lemma}`);
+  if (morph.root) bits.push(`جذرها: ${morph.root}`);
 
-  // Pronoun person/number hints
   const person = feats.find((f) => /^[123]/.test(f));
   if (person) {
     const map: Record<string, string> = {
@@ -66,24 +70,27 @@ export function narrativeIrab(morph: IrabWord | null | undefined): string {
       "3": "غائب",
     };
     const p = person[0];
-    const gender = person.includes("F") ? "مؤنث" : person.includes("M") ? "مذكر" : "";
+    const gender = person.includes("F")
+      ? "مؤنث"
+      : person.includes("M")
+        ? "مذكر"
+        : "";
     const number = person.includes("P")
       ? "جمع"
       : person.includes("D")
         ? "مثنى"
         : "مفرد";
     bits.push(
-      [map[p], gender, number].filter(Boolean).join("، "),
+      `الإسناد: ${[map[p], gender, number].filter(Boolean).join("، ")}`,
     );
   }
 
   const generated = bits.length
-    ? `${surface ? `«${surface}» — ` : ""}${bits.join(" · ")}`
+    ? `${surface ? `الكلمة «${surface}» — ` : ""}${bits.join(" · ")}`
     : "";
 
-  // Prefer existing curated sentence when longer; append generated detail if distinct
   if (existing && generated && !existing.includes(morph.lemma ?? "___")) {
-    return `${existing} | تفصيل: ${generated}`;
+    return `${existing} | تفصيل دراسي: ${generated}`;
   }
   if (existing.length >= generated.length) return existing || generated || "—";
   return generated || existing || "—";
