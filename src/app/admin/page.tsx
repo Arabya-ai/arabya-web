@@ -1,12 +1,16 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { AdminStatsCards } from "@/components/dashboard/AdminStatsCards";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { canAccessAdmin } from "@/lib/roles";
+import { isCloudSyncConfigured } from "@/lib/cloud-sync";
 
 export const metadata: Metadata = {
-  title: "لوحة المدير",
+  title: "إدارة عربية — إحصائيات",
 };
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   const session = await auth();
@@ -14,16 +18,32 @@ export default async function AdminPage() {
   if (!canAccessAdmin(session.user.role)) redirect("/account");
 
   return (
-    <div className="shell page-block account-page">
-      <p className="auth-kicker">إدارة عربية</p>
-      <h1>لوحة المدير</h1>
-      <p className="auth-lead">
-        إدارة المستخدمين والأدوار والأعلام ستُبنى هنا. الوصول محصور بحسابات
-        المدراء المعرّفة في الإعدادات.
-      </p>
-      <Link href="/account" className="account-panel-link">
-        العودة لحسابي
-      </Link>
-    </div>
+    <DashboardShell
+      area="admin"
+      role={session.user.role}
+      kicker="إدارة عربية"
+      title="لوحة الإحصائيات"
+      userName={session.user.name}
+      userImage={session.user.image}
+    >
+      <div className="dash-stack">
+        {!isCloudSyncConfigured() ? (
+          <p className="dash-banner dash-banner--warn">
+            مزامنة D1 غير مفعّلة — فعّل ARABYA_D1_ENABLED ورابط الـ Worker لعرض
+            الإحصائيات الحية.
+          </p>
+        ) : (
+          <AdminStatsCards />
+        )}
+        <section className="dash-card">
+          <h2>ماذا يمكنك فعله هنا؟</h2>
+          <ul className="dash-list">
+            <li>مراجعة المستخدمين وترقية المحررين من تبويب المستخدمون.</li>
+            <li>الموافقة على طلبات الترقية.</li>
+            <li>مراجعة سجل تغيير الأدوار.</li>
+          </ul>
+        </section>
+      </div>
+    </DashboardShell>
   );
 }

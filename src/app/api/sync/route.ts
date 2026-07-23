@@ -21,7 +21,6 @@ export async function GET() {
       email: session.user.email,
       name: session.user.name,
       image: session.user.image,
-      role: session.user.role,
     });
     return NextResponse.json(data);
   } catch (err) {
@@ -59,7 +58,6 @@ export async function PUT(request: Request) {
         email: session.user.email,
         name: session.user.name,
         image: session.user.image,
-        role: session.user.role,
       },
       {
         bookmarks: Array.isArray(body.bookmarks) ? (body.bookmarks as never) : [],

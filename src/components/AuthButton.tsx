@@ -75,6 +75,16 @@ export function AuthButton() {
           <Link href="/favorites" role="menuitem" onClick={() => setOpen(false)}>
             المفضّلات والملاحظات
           </Link>
+          {data.user.role === "editor" || data.user.role === "admin" ? (
+            <Link href="/studio" role="menuitem" onClick={() => setOpen(false)}>
+              الاستوديو
+            </Link>
+          ) : null}
+          {data.user.role === "admin" ? (
+            <Link href="/admin" role="menuitem" onClick={() => setOpen(false)}>
+              إدارة عربية
+            </Link>
+          ) : null}
           <button
             type="button"
             role="menuitem"

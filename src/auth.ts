@@ -1,6 +1,11 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
-import { resolveRoleFromEmail, type UserRole } from "@/lib/roles";
+import { fetchCloudRole } from "@/lib/cloud-sync";
+import {
+  mergeRoleWithEnvAdmin,
+  resolveRoleFromEmail,
+  type UserRole,
+} from "@/lib/roles";
 
 declare module "next-auth" {
   interface Session {
@@ -20,13 +25,13 @@ declare module "next-auth" {
 declare module "@auth/core/jwt" {
   interface JWT {
     role?: UserRole;
+    roleFetchedAt?: number;
   }
 }
 
 function env(name: string): string | undefined {
   let value = process.env[name]?.trim();
   if (!value) return undefined;
-  // Vercel/UI paste sometimes wraps values in quotes
   if (
     (value.startsWith('"') && value.endsWith('"')) ||
     (value.startsWith("'") && value.endsWith("'"))
@@ -53,6 +58,8 @@ export function getAuthEnvDiagnostics() {
   };
 }
 
+const ROLE_REFRESH_MS = 5 * 60 * 1000;
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: env("AUTH_SECRET"),
   providers: [
@@ -78,10 +85,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return true;
     },
-    jwt({ token }) {
-      if (token.email) {
-        token.role = resolveRoleFromEmail(String(token.email));
+    async jwt({ token, trigger }) {
+      if (!token.email) {
+        token.role = "user";
+        return token;
       }
+
+      const email = String(token.email);
+      const now = Date.now();
+      const shouldRefresh =
+        trigger === "signIn" ||
+        trigger === "update" ||
+        !token.roleFetchedAt ||
+        now - Number(token.roleFetchedAt) > ROLE_REFRESH_MS;
+
+      if (shouldRefresh) {
+        const cloudRole = await fetchCloudRole(email);
+        token.role = mergeRoleWithEnvAdmin(email, cloudRole);
+        token.roleFetchedAt = now;
+      } else if (!token.role) {
+        token.role = resolveRoleFromEmail(email);
+      } else {
+        token.role = mergeRoleWithEnvAdmin(email, token.role as UserRole);
+      }
+
       return token;
     },
     session({ session, token }) {

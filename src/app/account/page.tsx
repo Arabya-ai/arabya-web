@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { auth, signOut } from "@/auth";
 import { AccountPersonalData } from "@/components/AccountPersonalData";
 import { CloudSyncPanel } from "@/components/CloudSyncPanel";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { RoleRequestPanel } from "@/components/dashboard/RoleRequestPanel";
 import { isCloudSyncConfigured } from "@/lib/cloud-sync";
-import { canAccessAdmin, canAccessStudio, roleLabelAr } from "@/lib/roles";
-import Link from "next/link";
+import { canAccessAdmin, canAccessStudio } from "@/lib/roles";
 
 export const metadata: Metadata = {
-  title: "حسابي",
+  title: "لوحة الحساب",
   description: "لوحة المشترك في عربية",
 };
 
@@ -20,72 +22,60 @@ export default async function AccountPage() {
 
   const role = session.user.role ?? "user";
   const name = session.user.name || "مشترك عربية";
-  const email = session.user.email || "";
   const syncReady = isCloudSyncConfigured();
 
   return (
-    <div className="shell page-block account-page">
-      <header className="account-hero">
-        <div className="account-hero-text">
-          <p className="auth-kicker">حساب المشترك</p>
-          <h1>{name}</h1>
-          <p className="account-email">{email}</p>
-          <p className="account-role-pill">الدور: {roleLabelAr(role)}</p>
-        </div>
-        {session.user.image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={session.user.image}
-            alt=""
-            className="account-hero-avatar"
-            width={88}
-            height={88}
-          />
-        ) : (
-          <div className="account-hero-avatar account-hero-avatar--fallback" aria-hidden>
-            {name.slice(0, 1)}
+    <DashboardShell
+      area="account"
+      role={role}
+      kicker="لوحة المشترك"
+      title={`مرحبًا، ${name}`}
+      userName={name}
+      userImage={session.user.image}
+    >
+      <div className="dash-stack">
+        <section className="dash-card">
+          <h2>بياناتك الشخصية</h2>
+          <p className="dash-muted">{session.user.email}</p>
+          <div className="account-grid account-grid--personal">
+            <AccountPersonalData />
           </div>
-        )}
-      </header>
+        </section>
 
-      <section className="account-grid account-grid--personal" aria-label="بياناتك">
-        <AccountPersonalData />
-      </section>
-
-      {(canAccessStudio(role) || canAccessAdmin(role)) && (
-        <section className="account-grid" aria-label="مساحات العمل">
-          <article className="account-panel account-panel--accent">
+        {(canAccessStudio(role) || canAccessAdmin(role)) && (
+          <section className="dash-card dash-card--accent">
             <h2>مساحات العمل</h2>
-            <p>لديك صلاحيات إضافية حسب دورك.</p>
-            <div className="account-panel-actions">
+            <div className="dash-actions">
               {canAccessStudio(role) ? (
                 <Link href="/studio" className="account-panel-link">
-                  لوحة المحرر
+                  الاستوديو
                 </Link>
               ) : null}
               {canAccessAdmin(role) ? (
                 <Link href="/admin" className="account-panel-link">
-                  لوحة المدير
+                  إدارة عربية
                 </Link>
               ) : null}
             </div>
-          </article>
-        </section>
-      )}
+          </section>
+        )}
 
-      {syncReady ? <CloudSyncPanel /> : null}
+        {syncReady ? <CloudSyncPanel /> : null}
 
-      <form
-        className="account-signout"
-        action={async () => {
-          "use server";
-          await signOut({ redirectTo: "/" });
-        }}
-      >
-        <button type="submit" className="auth-btn auth-btn--ghost">
-          تسجيل الخروج
-        </button>
-      </form>
-    </div>
+        <RoleRequestPanel canRequest={role === "user"} />
+
+        <form
+          className="account-signout"
+          action={async () => {
+            "use server";
+            await signOut({ redirectTo: "/" });
+          }}
+        >
+          <button type="submit" className="auth-btn auth-btn--ghost">
+            تسجيل الخروج
+          </button>
+        </form>
+      </div>
+    </DashboardShell>
   );
 }
