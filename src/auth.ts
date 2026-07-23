@@ -23,22 +23,28 @@ declare module "@auth/core/jwt" {
   }
 }
 
-/**
- * Read at call-time (not module init) so Vercel runtime env is respected
- * after variables are added and the deployment is rebuilt.
- */
+function env(name: string): string | undefined {
+  const value = process.env[name]?.trim();
+  return value || undefined;
+}
+
+/** True when Google OAuth env vars are present at runtime. */
 export function isGoogleAuthConfigured(): boolean {
-  const id = process.env["AUTH_GOOGLE_ID"];
-  const secret = process.env["AUTH_GOOGLE_SECRET"];
-  return Boolean(id && secret);
+  return Boolean(env("AUTH_GOOGLE_ID") && env("AUTH_GOOGLE_SECRET"));
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  // Always register Google; Auth.js uses AUTH_GOOGLE_ID / AUTH_GOOGLE_SECRET.
-  providers: [Google],
+  secret: env("AUTH_SECRET"),
+  providers: [
+    Google({
+      clientId: env("AUTH_GOOGLE_ID"),
+      clientSecret: env("AUTH_GOOGLE_SECRET"),
+    }),
+  ],
   trustHost: true,
   pages: {
     signIn: "/login",
+    error: "/login",
   },
   callbacks: {
     authorized({ auth: session, request }) {
