@@ -404,6 +404,30 @@ html[data-theme="dark"] .site-header {
   color: var(--brand-deep);
 }
 
+/* Auth chips in the header must beat `.nav a` muted color */
+.nav a.auth-btn--google,
+.nav a.auth-btn--google:hover,
+.nav a.auth-btn--google:focus-visible {
+  background: var(--brand-deep);
+  border-color: var(--brand-deep);
+  color: #fff;
+}
+
+.nav a.auth-btn--google:hover,
+.nav a.auth-btn--google:focus-visible {
+  background: color-mix(in srgb, var(--brand-deep) 88%, #000);
+  border-color: color-mix(in srgb, var(--brand-deep) 88%, #000);
+}
+
+.nav a.auth-btn--account {
+  color: var(--brand-deep);
+}
+
+.nav a.auth-btn--account:hover {
+  background: var(--brand-soft);
+  color: var(--brand-deep);
+}
+
 /* Home */
 .home-simple {
   padding: 2rem 0 3rem;
@@ -4000,10 +4024,16 @@ html[data-theme="dark"] .mushaf-word.is-sync {
   color: #fff;
 }
 
-.auth-btn--google:hover {
+.auth-btn--google:hover,
+.auth-btn--google:focus-visible {
   background: color-mix(in srgb, var(--brand-deep) 88%, #000);
   border-color: color-mix(in srgb, var(--brand-deep) 88%, #000);
   color: #fff;
+}
+
+a.auth-btn--google {
+  color: #fff;
+  text-decoration: none;
 }
 
 .auth-btn--account {
