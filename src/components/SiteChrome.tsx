@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { AuthButton } from "@/components/AuthButton";
 import { BrandLockup } from "@/components/BrandLockup";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -56,6 +57,7 @@ export function SiteHeader() {
           <Link href="/privacy" onClick={() => setOpen(false)}>
             الخصوصية
           </Link>
+          <AuthButton />
           <ThemeToggle />
         </nav>
       </div>

@@ -1,0 +1,30 @@
+---
+description: Accounts rollout — slow pair-programming with non-developer owner; explain every step
+alwaysApply: true
+---
+
+# Arabya Accounts Collaboration (مدير / محرر / مستخدم)
+
+When working on the **accounts & roles plan** (Google sign-in, `/account`, `/studio`, `/admin`):
+
+## How to work with the owner
+- The site owner is **not a programmer**. The agent is the professional implementer.
+- **Go slowly.** Do not dump large unexplained changes. After each meaningful step, explain in plain Arabic:
+  - what was done and why
+  - what changed for the visitor/subscriber
+  - **exactly what the owner must do next** (clicks, URLs, copy-paste values) with numbered steps
+- Prefer short checkpoints: one setup task for the owner, then wait for confirmation before the next risky step (OAuth secrets, DB provisioning, deploy).
+- Never assume they know terms like OAuth, env, middleware, Drizzle — define them in one simple sentence when first used.
+- UI/UX for account dashboards must match Arabya branding: teal brand tokens (`--brand`, `--brand-deep`, `--brand-soft`, `--surface`, `--ink`), RTL Arabic, calm professional panels — not generic purple SaaS dashboards or noisy cards.
+- Guest reading must keep working without login. Do not force account for mushaf/study.
+
+## Memory of product constraints for this plan
+- Sign-up / login = **Google (Gmail) OAuth**, not paid billing (billing stays deferred).
+- Roles: `admin` · `editor` · `user` (+ guest without account).
+- Personal data moves to cloud DB; Quran reference content stays **Git-first** under `/data`.
+- Explain dashboards per role in user language before wiring advanced APIs.
+
+## Response style during this rollout
+- Start replies with where we are in the plan (e.g. «المرحلة A — الخطوة 2 من 5»).
+- End with a clear **«مطلوب منك الآن»** section when the owner must act.
+- If blocked on a secret they must create (Google Client ID, database URL), stop coding that depends on it and guide them through the console UI.

@@ -9,13 +9,13 @@ const contentSecurityPolicy = [
   "base-uri 'self'",
   "frame-ancestors 'self'",
   "object-src 'none'",
-  "form-action 'self'",
+  "form-action 'self' https://accounts.google.com",
   "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
   "img-src 'self' data: blob: https:",
   "media-src 'self' https://everyayah.com https://audio.qurancdn.com https://download.quranicaudio.com",
-  "connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com https://api.quran.com",
+  "connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com https://api.quran.com https://accounts.google.com",
   "upgrade-insecure-requests",
 ].join("; ");
 
