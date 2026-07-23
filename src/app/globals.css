@@ -211,7 +211,7 @@ html[data-theme="dark"] .site-header {
 }
 
 .brand-lockup--footer {
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .brand-lockup--footer .brand-text {
@@ -2045,141 +2045,71 @@ html[data-theme="dark"] .mode-rail {
 
 .site-footer {
   margin-top: 2.5rem;
-  padding: 2rem 0 calc(1.35rem + env(safe-area-inset-bottom, 0px));
+  padding: 0.95rem 0 calc(1rem + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--line);
   color: var(--muted);
   background: color-mix(in srgb, var(--surface) 92%, var(--brand-soft));
 }
 
 .footer-inner {
-  display: grid;
-  gap: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
   width: 100%;
 }
 
-.footer-top {
-  display: grid;
-  gap: 1.5rem;
-  align-items: start;
+.footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.footer-brand-block {
-  display: grid;
-  gap: 0.55rem;
-  justify-items: start;
-  text-align: start;
+.footer-brand {
+  flex-shrink: 0;
 }
 
-.footer-mission {
-  margin: 0;
-  max-width: 22rem;
-  font-size: 0.88rem;
-  line-height: 1.65;
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem 1rem;
+}
+
+.footer-nav a {
   color: var(--muted);
-  text-wrap: pretty;
-}
-
-.footer-cols {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.25rem 1.5rem;
-}
-
-.footer-col {
-  display: grid;
-  gap: 0.4rem;
-  align-content: start;
-  justify-items: start;
-}
-
-.footer-col-title {
-  margin: 0 0 0.2rem;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  color: var(--brand-deep);
-}
-
-.footer-col a {
-  color: color-mix(in srgb, var(--ink) 78%, var(--muted));
   font-size: 0.9rem;
   font-weight: 600;
   text-decoration: none;
-  line-height: 1.5;
-  padding-block: 0.15rem;
+  white-space: nowrap;
 }
 
-.footer-col a:hover,
-.footer-col a:focus-visible {
+.footer-nav a:hover,
+.footer-nav a:focus-visible {
   color: var(--brand-deep);
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-}
-
-.footer-site-link {
-  color: var(--brand-deep);
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.footer-site-link:hover,
-.footer-site-link:focus-visible {
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-}
-
-.footer-sep {
-  margin-inline: 0.35rem;
-  opacity: 0.55;
-}
-
-.footer-bottom {
-  display: flex;
-  justify-content: flex-start;
-  width: 100%;
-  padding-top: 1rem;
-  border-top: 1px solid color-mix(in srgb, var(--line) 85%, transparent);
 }
 
 .footer-legal {
   margin: 0;
-  font-size: 0.8rem;
-  line-height: 1.6;
-  color: color-mix(in srgb, var(--ink) 68%, var(--muted));
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--ink) 62%, var(--muted));
   text-align: start;
-  text-wrap: pretty;
-}
-
-@media (min-width: 800px) {
-  .footer-top {
-    grid-template-columns: minmax(12rem, 0.9fr) minmax(0, 1.4fr);
-    gap: 2rem;
-  }
 }
 
 @media (max-width: 640px) {
-  .footer-cols {
-    grid-template-columns: 1fr 1fr;
-    gap: 1.15rem 1rem;
+  .footer-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.7rem;
   }
 
-  .footer-col:last-child {
-    grid-column: 1 / -1;
+  .footer-nav {
+    justify-content: flex-start;
+    gap: 0.35rem 0.85rem;
   }
-}
-
-@media (max-width: 420px) {
-  .footer-cols {
-    grid-template-columns: 1fr;
-  }
-
-  .footer-col:last-child {
-    grid-column: auto;
-  }
-}
-
-html[data-theme="dark"] .site-footer {
-  background: color-mix(in srgb, var(--surface) 92%, var(--brand-soft));
 }
 
 .layer-subhead {
@@ -2556,12 +2486,7 @@ html[data-theme="dark"] .brand-name::before {
 }
 
 html[data-theme="dark"] .site-footer {
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--brand-soft) 40%, transparent) 0%,
-      color-mix(in srgb, var(--surface) 88%, #0a1f1c) 100%
-    );
+  background: color-mix(in srgb, var(--surface) 92%, var(--brand-soft));
 }
 
 html[data-theme="dark"] .brand-emblem-plate {
