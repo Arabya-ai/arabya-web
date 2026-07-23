@@ -1,12 +1,15 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { auth } from "@/auth";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { canAccessStudio } from "@/lib/roles";
 
 export const metadata: Metadata = {
-  title: "لوحة المحرر",
+  title: "استوديو المحرر",
 };
+
+export const dynamic = "force-dynamic";
 
 export default async function StudioPage() {
   const session = await auth();
@@ -14,16 +17,34 @@ export default async function StudioPage() {
   if (!canAccessStudio(session.user.role)) redirect("/account");
 
   return (
-    <div className="shell page-block account-page">
-      <p className="auth-kicker">محرر عربية</p>
-      <h1>لوحة المحرر</h1>
-      <p className="auth-lead">
-        هنا ستظهر لاحقًا طوابير جودة المحتوى، الفهارس، وكتب الإعراب. الهيكل جاهز؛
-        الأدوات تُضاف في مرحلة لاحقة من الخطة.
-      </p>
-      <Link href="/account" className="account-panel-link">
-        العودة لحسابي
-      </Link>
-    </div>
+    <DashboardShell
+      area="studio"
+      role={session.user.role}
+      kicker="استوديو عربية"
+      title="لوحة المحرر"
+      userName={session.user.name}
+      userImage={session.user.image}
+    >
+      <div className="dash-stack">
+        <section className="dash-card">
+          <h2>مرحباً بالمحرر</h2>
+          <p className="dash-muted">
+            هنا تراجع جودة المحتوى والمصادر. لا تدير حسابات المستخدمين — ذلك
+            للأدمن فقط.
+          </p>
+          <div className="dash-actions">
+            <Link href="/studio/queue" className="account-panel-link">
+              طابور الجودة
+            </Link>
+            <Link href="/studio/sources" className="account-panel-link">
+              المصادر
+            </Link>
+            <Link href="/mushaf/1" className="account-panel-link">
+              فتح المصحف
+            </Link>
+          </div>
+        </section>
+      </div>
+    </DashboardShell>
   );
 }

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   canAccessAdmin,
   canAccessStudio,
+  mergeRoleWithEnvAdmin,
   parseAdminEmails,
   resolveRoleFromEmail,
   roleLabelAr,
@@ -29,11 +30,21 @@ describe("resolveRoleFromEmail", () => {
     );
   });
 
-  it("defaults to user", () => {
+  it("defaults to user and never assigns editor from email alone", () => {
     expect(resolveRoleFromEmail("reader@gmail.com", ["owner@gmail.com"])).toBe(
       "user",
     );
     expect(resolveRoleFromEmail(null, [])).toBe("user");
+  });
+});
+
+describe("mergeRoleWithEnvAdmin", () => {
+  it("keeps env admins as admin even if cloud says user", () => {
+    expect(mergeRoleWithEnvAdmin("a@x.com", "user", ["a@x.com"])).toBe("admin");
+    expect(mergeRoleWithEnvAdmin("b@x.com", "editor", ["a@x.com"])).toBe(
+      "editor",
+    );
+    expect(mergeRoleWithEnvAdmin("b@x.com", null, [])).toBe("user");
   });
 });
 

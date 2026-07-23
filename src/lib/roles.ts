@@ -7,12 +7,37 @@ export function parseAdminEmails(raw: string | undefined): string[] {
     .filter(Boolean);
 }
 
+export function isEnvAdminEmail(
+  email: string | null | undefined,
+  adminEmails = parseAdminEmails(process.env.ARABYA_ADMIN_EMAILS),
+): boolean {
+  if (!email) return false;
+  return adminEmails.includes(email.toLowerCase());
+}
+
+/**
+ * Fallback when D1 is unavailable: env admins → admin, else user.
+ * Editor is never assigned here — only via admin approval in D1.
+ */
 export function resolveRoleFromEmail(
   email: string | null | undefined,
   adminEmails = parseAdminEmails(process.env.ARABYA_ADMIN_EMAILS),
 ): UserRole {
   if (!email) return "user";
   if (adminEmails.includes(email.toLowerCase())) return "admin";
+  return "user";
+}
+
+/** Merge D1 role with immutable env-admin override. */
+export function mergeRoleWithEnvAdmin(
+  email: string | null | undefined,
+  cloudRole: UserRole | null | undefined,
+  adminEmails = parseAdminEmails(process.env.ARABYA_ADMIN_EMAILS),
+): UserRole {
+  if (isEnvAdminEmail(email, adminEmails)) return "admin";
+  if (cloudRole === "admin" || cloudRole === "editor" || cloudRole === "user") {
+    return cloudRole;
+  }
   return "user";
 }
 
@@ -33,4 +58,9 @@ export function canAccessStudio(role: UserRole): boolean {
 
 export function canAccessAdmin(role: UserRole): boolean {
   return role === "admin";
+}
+
+export function normalizeUserRole(value: unknown): UserRole {
+  if (value === "admin" || value === "editor" || value === "user") return value;
+  return "user";
 }
