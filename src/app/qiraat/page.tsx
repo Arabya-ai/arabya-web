@@ -1,14 +1,11 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { readFile } from "fs/promises";
-import path from "path";
+import qiraatIndex from "../../../data/qiraat/index.json";
 
 export const metadata: Metadata = {
   title: "القراءات",
   description: "الروايات والقراءات في عربية — حفص متاح؛ الباقي بعد الترخيص",
 };
-
-export const dynamic = "force-dynamic";
 
 type Reading = {
   slug: string;
@@ -17,22 +14,9 @@ type Reading = {
   note: string;
 };
 
-async function loadReadings(): Promise<Reading[]> {
-  try {
-    const raw = await readFile(
-      path.join(process.cwd(), "data", "qiraat", "index.json"),
-      "utf8",
-    );
-    const data = JSON.parse(raw) as { readings?: Reading[] };
-    return Array.isArray(data.readings) ? data.readings : [];
-  } catch {
-    return [];
-  }
-}
+const readings = (qiraatIndex.readings ?? []) as Reading[];
 
-export default async function QiraatPage() {
-  const readings = await loadReadings();
-
+export default function QiraatPage() {
   return (
     <div className="shell page-block">
       <h1>القراءات والروايات</h1>
@@ -47,17 +31,29 @@ export default async function QiraatPage() {
             key={r.slug}
             className={r.status === "ready" ? "is-ready" : "is-pending"}
           >
-            <strong>{r.nameAr}</strong>
-            <span className="qiraat-status">
-              {r.status === "ready" ? "متاح" : "بانتظار ترخيص"}
-            </span>
+            <div className="qiraat-row">
+              <strong>{r.nameAr}</strong>
+              <span className="qiraat-status">
+                {r.status === "ready" ? "متاح" : "بانتظار ترخيص"}
+              </span>
+            </div>
             <p>{r.note}</p>
+            {r.status === "ready" ? (
+              <p>
+                <Link href="/mushaf/1" className="account-panel-link">
+                  فتح المصحف (حفص)
+                </Link>
+              </p>
+            ) : null}
           </li>
         ))}
       </ul>
-      <p>
-        <Link href="/mushaf/1">فتح مصحف حفص</Link>
-      </p>
+      {readings.length === 0 ? (
+        <p className="dash-banner dash-banner--warn">
+          لم يُحمَّل فهرس القراءات. أعد تحميل الصفحة أو راجع{" "}
+          <code>data/qiraat/index.json</code>.
+        </p>
+      ) : null}
     </div>
   );
 }
