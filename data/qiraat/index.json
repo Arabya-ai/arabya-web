@@ -1,0 +1,36 @@
+{
+  "updatedAt": "2026-07-24",
+  "note": "الروايات الإضافية تُفعَّل بعد توفر بيانات مرخّصة فقط — لا نصوص وهمية.",
+  "readings": [
+    {
+      "slug": "hafs",
+      "nameAr": "حفص عن عاصم",
+      "status": "ready",
+      "note": "النص المعتمد في المصحف (QPC المدينة)."
+    },
+    {
+      "slug": "warsh",
+      "nameAr": "ورش عن نافع",
+      "status": "awaiting_license",
+      "note": "بانتظار ملفات مرخّصة من المالك."
+    },
+    {
+      "slug": "qalun",
+      "nameAr": "قالون عن نافع",
+      "status": "awaiting_license",
+      "note": "بانتظار ملفات مرخّصة من المالك."
+    },
+    {
+      "slug": "shubah",
+      "nameAr": "شعبة عن عاصم",
+      "status": "awaiting_license",
+      "note": "بانتظار ملفات مرخّصة من المالك."
+    },
+    {
+      "slug": "tajweed-color",
+      "nameAr": "مصحف التجويد الملون",
+      "status": "awaiting_license",
+      "note": "عرض تجويدي ملون بعد ترخيص البيانات البصرية."
+    }
+  ]
+}

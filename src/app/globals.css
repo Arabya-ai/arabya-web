@@ -3189,11 +3189,43 @@ html[data-theme="dark"] ::selection {
 
 .qiraat-list {
   line-height: 1.9;
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.qiraat-list li {
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
 }
 
 .qiraat-list .is-ready {
   font-weight: 700;
   color: var(--brand-deep);
+  border-color: color-mix(in srgb, var(--brand) 35%, var(--line));
+  background: color-mix(in srgb, var(--brand-soft) 55%, var(--surface));
+}
+
+.qiraat-list .is-pending {
+  opacity: 0.95;
+}
+
+.qiraat-status {
+  display: inline-block;
+  margin-inline-start: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.qiraat-list p {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .reciter-pick {

@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { SourcesUploadPanel } from "@/components/dashboard/SourcesUploadPanel";
 import { canAccessStudio } from "@/lib/roles";
+import { isCloudSyncConfigured } from "@/lib/cloud-sync";
 
 export const metadata: Metadata = {
   title: "المصادر والاستيراد",
@@ -21,7 +23,7 @@ export default async function StudioSourcesPage() {
       role={session.user.role}
       kicker="استوديو عربية"
       title="المصادر والاستيراد"
-      subtitle="إدارة مصادر المحتوى والاستيراد حسب ما تقرّره للمنصة."
+      subtitle="رفع ملفات JSON وربطها بسكربتات الاستيراد في المستودع."
       userName={session.user.name}
       userEmail={session.user.email}
       userImage={session.user.image}
@@ -29,25 +31,28 @@ export default async function StudioSourcesPage() {
       backLabel="رجوع للاستوديو"
     >
       <div className="dash-stack">
-        <section className="dash-card">
-          <h2>أدوات الاستيراد</h2>
-          <p className="dash-muted">
-            من هنا تُدار عمليات الاستيراد والملفات المرفوعة لاحقًا. يمكنك ربط
-            سكربتات المشروع (`scripts/import-*`, `fetch-*`) أو رفع مصادر جديدة
-            حسب سير عملك.
+        {!isCloudSyncConfigured() ? (
+          <p className="dash-banner dash-banner--warn">
+            مزامنة D1 غير مفعّلة — فعّلها لتخزين المرفوعات في السحابة.
           </p>
+        ) : (
+          <SourcesUploadPanel />
+        )}
+        <section className="dash-card">
+          <h2>سكربتات الاستيراد المحلية</h2>
           <ul className="dash-list">
-            <li>استيراد من ملفات محلية يزوّدها فريق عربية.</li>
-            <li>تشغيل فهارس البناء وتحديث طبقات التحليل.</li>
-            <li>متابعة حالة آخر استيراد (تُربط هنا في التحديثات القادمة).</li>
+            <li>
+              <code>npm run import-irab-book</code> — استيراد كتاب إعراب إلى{" "}
+              <code>data/books</code>
+            </li>
+            <li>
+              <code>npm run import-from-incoming</code> — من مجلد{" "}
+              <code>incoming/</code> بعد تأكيد الحقوق
+            </li>
+            <li>
+              <code>npm run fetch-ia-item</code> — قناة Internet Archive المحلية
+            </li>
           </ul>
-        </section>
-        <section className="dash-card">
-          <h2>رفع مصدر</h2>
-          <p className="dash-muted">
-            واجهة الرفع المباشر تُفعَّل في خطوة لاحقة مع تخزين آمن للملفات. حتى
-            ذلك الحين استخدم سكربتات الاستيراد المعتمدة في المستودع.
-          </p>
         </section>
       </div>
     </DashboardShell>

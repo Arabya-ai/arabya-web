@@ -82,3 +82,37 @@ CREATE TABLE IF NOT EXISTS role_audit (
 
 CREATE INDEX IF NOT EXISTS idx_role_audit_user ON role_audit(user_id);
 CREATE INDEX IF NOT EXISTS idx_role_audit_created ON role_audit(created_at);
+
+CREATE TABLE IF NOT EXISTS study_entries (
+  user_id TEXT NOT NULL,
+  id TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  title TEXT NOT NULL,
+  query TEXT,
+  surah_id INTEGER,
+  verse INTEGER,
+  word_index INTEGER,
+  snippet TEXT,
+  notes TEXT NOT NULL DEFAULT '',
+  href TEXT,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  PRIMARY KEY (user_id, id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_study_entries_user ON study_entries(user_id);
+
+CREATE TABLE IF NOT EXISTS source_uploads (
+  id TEXT PRIMARY KEY,
+  uploader_id TEXT NOT NULL,
+  filename TEXT NOT NULL,
+  kind TEXT NOT NULL DEFAULT 'json',
+  payload TEXT NOT NULL,
+  notes TEXT,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (uploader_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_source_uploads_created ON source_uploads(created_at);

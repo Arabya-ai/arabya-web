@@ -1,37 +1,42 @@
--- Run on existing arabya-user-data D1 (safe IF NOT EXISTS / ignore duplicate column errors)
+-- Incremental migrate for arabya-user-data
+-- Safe to re-run: uses IF NOT EXISTS. Skip ALTER lines that already applied.
 
-ALTER TABLE users ADD COLUMN status TEXT NOT NULL DEFAULT 'active';
-ALTER TABLE users ADD COLUMN last_seen_at INTEGER;
-ALTER TABLE users ADD COLUMN uid TEXT;
-ALTER TABLE role_requests ADD COLUMN target_role TEXT NOT NULL DEFAULT 'editor';
-
-CREATE UNIQUE INDEX IF NOT EXISTS idx_users_uid ON users(uid);
-
-CREATE TABLE IF NOT EXISTS role_requests (
-  id TEXT PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS study_entries (
   user_id TEXT NOT NULL,
-  message TEXT NOT NULL DEFAULT '',
-  status TEXT NOT NULL DEFAULT 'pending',
-  target_role TEXT NOT NULL DEFAULT 'editor',
-  reviewed_by TEXT,
-  review_note TEXT,
+  id TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  title TEXT NOT NULL,
+  query TEXT,
+  surah_id INTEGER,
+  verse INTEGER,
+  word_index INTEGER,
+  snippet TEXT,
+  notes TEXT NOT NULL DEFAULT '',
+  href TEXT,
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL,
+  PRIMARY KEY (user_id, id),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_role_requests_status ON role_requests(status);
-CREATE INDEX IF NOT EXISTS idx_role_requests_user ON role_requests(user_id);
+CREATE INDEX IF NOT EXISTS idx_study_entries_user ON study_entries(user_id);
 
-CREATE TABLE IF NOT EXISTS role_audit (
+CREATE TABLE IF NOT EXISTS source_uploads (
   id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
-  actor_id TEXT,
-  from_role TEXT,
-  to_role TEXT NOT NULL,
-  reason TEXT,
-  created_at INTEGER NOT NULL
+  uploader_id TEXT NOT NULL,
+  filename TEXT NOT NULL,
+  kind TEXT NOT NULL DEFAULT 'json',
+  payload TEXT NOT NULL,
+  notes TEXT,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at INTEGER NOT NULL,
+  FOREIGN KEY (uploader_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_role_audit_user ON role_audit(user_id);
-CREATE INDEX IF NOT EXISTS idx_role_audit_created ON role_audit(created_at);
+CREATE INDEX IF NOT EXISTS idx_source_uploads_created ON source_uploads(created_at);
+
+-- Legacy (already applied on production — kept for fresh DBs via schema.sql)
+-- ALTER TABLE users ADD COLUMN status TEXT NOT NULL DEFAULT 'active';
+-- ALTER TABLE users ADD COLUMN last_seen_at INTEGER;
+-- ALTER TABLE users ADD COLUMN uid TEXT;
+-- ALTER TABLE role_requests ADD COLUMN target_role TEXT NOT NULL DEFAULT 'editor';

@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { isCloudSyncConfigured, pullCloudSync, pushCloudSync } from "@/lib/cloud-sync";
+import type { StudyEntry } from "@/lib/study-archive";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +45,7 @@ export async function PUT(request: Request) {
   let body: {
     bookmarks?: unknown;
     notes?: unknown;
+    study?: unknown;
     progress?: { lastPage?: number | null; habit?: unknown };
   };
   try {
@@ -62,6 +64,7 @@ export async function PUT(request: Request) {
       {
         bookmarks: Array.isArray(body.bookmarks) ? (body.bookmarks as never) : [],
         notes: Array.isArray(body.notes) ? (body.notes as never) : [],
+        study: Array.isArray(body.study) ? (body.study as StudyEntry[]) : [],
         progress: {
           lastPage: body.progress?.lastPage ?? null,
           habit: (body.progress?.habit as never) || {},
