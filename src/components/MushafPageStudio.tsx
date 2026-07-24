@@ -570,7 +570,10 @@ export function MushafPageStudio({
               title="دراسة السورة مع خيارات الإعراب والدراسة السريعة"
             >
               <ToolIcon name="study" />
-              <span>دراسة السورة</span>
+              <span>
+                <span className="mtb-full">دراسة السورة</span>
+                <span className="mtb-short">دراسة</span>
+              </span>
             </Link>
           ) : null}
           {selected ? (
@@ -580,7 +583,10 @@ export function MushafPageStudio({
               title="صفحة إعراب الآية كلمة بكلمة"
             >
               <ToolIcon name="irab" />
-              <span>إعراب الآية</span>
+              <span>
+                <span className="mtb-full">إعراب الآية</span>
+                <span className="mtb-short">إعراب</span>
+              </span>
             </Link>
           ) : null}
           {selected?.morph?.root ? (
@@ -596,9 +602,9 @@ export function MushafPageStudio({
         </div>
 
         <div className="mtb-group mtb-listen" role="group" aria-label="استماع">
-          <span className="mtb-label">
+          <span className="mtb-label" title="استماع">
             <ToolIcon name="listen" />
-            استماع
+            <span className="mtb-label-text">استماع</span>
           </span>
           <label className="reciter-pick">
             <span className="sr-only">القارئ</span>
@@ -637,10 +643,8 @@ export function MushafPageStudio({
               ))}
             </select>
           </label>
-          <span className="mtb-scope-label" aria-hidden>
-            يُطبَّق على
-          </span>
-          <div className="mtb-scope" role="group" aria-label="نطاق الاستماع">
+          <span className="mtb-scope-label">يُطبَّق على</span>
+          <div className="mtb-scope" role="group" aria-label="يُطبَّق التكرار على كلمات أو آية أو سورة">
             <button
               type="button"
               className={`tool-btn mtb-link ${audio.wbwPlaying ? "is-on" : ""}`}
@@ -698,7 +702,16 @@ export function MushafPageStudio({
               aria-pressed={bookmarked}
             >
               <ToolIcon name="bookmark" />
-              <span>{bookmarked ? "مفضّلة" : "حفظ الآية"}</span>
+              <span>
+                {bookmarked ? (
+                  "مفضّلة"
+                ) : (
+                  <>
+                    <span className="mtb-full">حفظ الآية</span>
+                    <span className="mtb-short">حفظ</span>
+                  </>
+                )}
+              </span>
             </button>
           ) : null}
           <ShareMenu
