@@ -5,7 +5,8 @@
 ## مؤجّل حتى اكتمال الأساس
 
 ### التعدد اللغوي والتطبيق المحمول
-- خطة كاملة: `docs/plans/i18n-and-mobile.md` (next-intl، Capacitor مقابل Flutter، فصل لغة الواجهة عن ترجمة الكلمة/الآية).
+- خطة i18n/موبايل: `docs/plans/i18n-and-mobile.md`
+- مراجعة المشروع وخارطة الطريق التنفيذية: `docs/plans/project-audit-and-roadmap.md`
 
 ### البلاغة
 - إعادة طبقة «بلاغة» في `WordStudyDock` عند توفر مصادر مرخّصة.
