@@ -36,6 +36,8 @@ import {
   wordMeaning,
   type WordRef,
 } from "@/hooks/mushaf-utils";
+import { MeaningLangSwitch } from "@/components/MeaningLangSwitch";
+import { editionDisplayName } from "@/lib/translation-label";
 
 type Props = {
   page: MushafPageContent;
@@ -909,13 +911,22 @@ export function MushafPageStudio({
               : `إعراب صفحة ${toArabicNumerals(page.page)}`}
           </h2>
 
+          {mode === "words" ? (
+            <MeaningLangSwitch
+              value={prefs.meaningLang}
+              onChange={prefs.setMeaningLang}
+              idPrefix="page-words-meaning"
+              note="تغيير اللغة يحدّث عمود الترجمة في هذا الجدول، ويتزامن مع تبويب الترجمة في لوحة دراسة الكلمة."
+            />
+          ) : null}
+
           <div className="table-wrap desktop-only">
             <table className="study-table">
               <thead>
                 <tr>
                   <th>رقم</th>
                   <th>الكلمة</th>
-                  <th>{mode === "irab" ? "الإعراب" : "المعنى"}</th>
+                  <th>{mode === "irab" ? "الإعراب" : "الترجمة"}</th>
                 </tr>
               </thead>
               <tbody>

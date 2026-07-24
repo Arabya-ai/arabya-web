@@ -23,8 +23,9 @@ import { formatFeatureLabels, formatPosLabels } from "@/lib/morph-labels";
 import { lexiconCardLines, narrativeIrab } from "@/lib/irab-narrative";
 import { upsertStudyEntry } from "@/lib/study-archive";
 import { nextTabIndex } from "@/lib/tablist";
-
-type MeaningLang = "ar" | "en" | "id" | "ur";
+import { editionDisplayName } from "@/lib/translation-label";
+import { MeaningLangSwitch } from "@/components/MeaningLangSwitch";
+import type { MeaningLang } from "@/hooks/mushaf-utils";
 
 export type VerseTranslationStatus = "idle" | "loading" | "ready" | "error" | "empty";
 
@@ -55,8 +56,8 @@ const LAYERS: { id: string; label: string; hint: string }[] = [
   },
   {
     id: "translation",
-    label: "ترجمة ودلالة",
-    hint: "معنى الكلمة الدراسي ثم ترجمة الآية المختارة",
+    label: "ترجمة",
+    hint: "ترجمة الكلمة المحددة ثم ترجمة الآية المختارة",
   },
   {
     id: "tafsir",
@@ -65,12 +66,8 @@ const LAYERS: { id: string; label: string; hint: string }[] = [
   },
 ];
 
-const MEANING_LABELS: { id: MeaningLang; label: string }[] = [
-  { id: "ar", label: "عربي" },
-  { id: "en", label: "EN" },
-  { id: "id", label: "ID" },
-  { id: "ur", label: "UR" },
-];
+const MEANING_LANG_NOTE =
+  "تغيير اللغة يؤدي إلى تغيير معاني الكلمات في الجدول أدناه (تبويب الكلمات).";
 
 function wordMeaning(word: QuranWord, lang: MeaningLang): string {
   if (lang === "ar") return word.meaningAr || word.meaning || "";
@@ -81,9 +78,9 @@ function wordMeaning(word: QuranWord, lang: MeaningLang): string {
 
 function meaningSourceHint(lang: MeaningLang): string {
   if (lang === "ar") {
-    return "معنى دراسي مختصر مشتق من المادة — ليس ترجمة حرفية كاملة";
+    return "ترجمة الكلمة المحددة — معنى دراسي مختصر مشتق من المادة";
   }
-  return "معنى كلمة بكلمة";
+  return "ترجمة الكلمة المحددة";
 }
 
 function parseVerseKey(verseKey: string): { surahId: number; verse: number } {
@@ -366,31 +363,25 @@ export function WordStudyDock({
 
         {layer === "translation" ? (
           <>
-            <h3>الترجمة والدلالة</h3>
+            <h3>الترجمة</h3>
             <p className="layer-hint">
               {LAYERS.find((l) => l.id === "translation")?.hint}
             </p>
 
-            <h4 className="layer-subhead">معنى الكلمة</h4>
+            <h4 className="layer-subhead">ترجمة الكلمة المحددة</h4>
             <p className="layer-hint layer-hint--tight">
               {meaningSourceHint(meaningLang)}
             </p>
-            <div className="lang-switch" role="group" aria-label="لغة معنى الكلمة">
-              {MEANING_LABELS.map((l) => (
-                <button
-                  key={l.id}
-                  type="button"
-                  className={`lang-chip ${meaningLang === l.id ? "is-active" : ""}`}
-                  onClick={() => onMeaningLang(l.id)}
-                >
-                  {l.label}
-                </button>
-              ))}
-            </div>
+            <MeaningLangSwitch
+              value={meaningLang}
+              onChange={onMeaningLang}
+              idPrefix="dock-meaning"
+              note={MEANING_LANG_NOTE}
+            />
             {sense ? (
               <p className="word-sense">{sense}</p>
             ) : (
-              <p className="layer-empty">لا يتوفر معنى لهذه الكلمة بهذه اللغة.</p>
+              <p className="layer-empty">لا تتوفر ترجمة لهذه الكلمة بهذه اللغة.</p>
             )}
 
             {verseEditions.length ? (
@@ -404,7 +395,7 @@ export function WordStudyDock({
                 >
                   {verseEditions.map((e) => (
                     <option key={e.slug} value={e.slug}>
-                      {e.nameAr}
+                      {editionDisplayName(e)}
                     </option>
                   ))}
                 </select>

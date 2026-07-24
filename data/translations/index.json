@@ -1,20 +1,30 @@
 {
   "wordByWord": [
     {
+      "field": "meaningAr",
+      "lang": "ar",
+      "nameNative": "عربي",
+      "nameAr": "عربي",
+      "source": "Arabya lemma-sense"
+    },
+    {
       "field": "meaning",
       "lang": "en",
+      "nameNative": "English",
       "nameAr": "إنجليزي",
       "source": "Quran.com WBW"
     },
     {
       "field": "meaningId",
       "lang": "id",
+      "nameNative": "Bahasa Indonesia",
       "nameAr": "إندونيسي",
       "source": "Quran.com WBW"
     },
     {
       "field": "meaningUr",
       "lang": "ur",
+      "nameNative": "اردو",
       "nameAr": "أردو",
       "source": "Quran.com WBW"
     }
@@ -23,8 +33,29 @@
     {
       "slug": "saheeh-en",
       "resourceId": 20,
-      "nameAr": "صحيح إنترناشونال (إنجليزي)",
+      "nameNative": "Saheeh International (English)",
+      "nameAr": "صحيح إنترناشونال",
       "nameEn": "Saheeh International",
+      "lang": "en",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "pickthall-en",
+      "resourceId": 19,
+      "nameNative": "M. Pickthall (English)",
+      "nameAr": "بكثال",
+      "nameEn": "M. Pickthall",
+      "lang": "en",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "clear-en",
+      "resourceId": 131,
+      "nameNative": "The Clear Quran (English)",
+      "nameAr": "القرآن الواضح",
+      "nameEn": "Dr. Mustafa Khattab — The Clear Quran",
       "lang": "en",
       "source": "Quran.com",
       "sourceUrl": "https://api.quran.com"
@@ -32,39 +63,213 @@
     {
       "slug": "hamidullah-fr",
       "resourceId": 31,
-      "nameAr": "حميد الله (فرنسي)",
+      "nameNative": "Muhammad Hamidullah (Français)",
+      "nameAr": "حميد الله",
       "nameEn": "Muhammad Hamidullah",
       "lang": "fr",
       "source": "Quran.com",
       "sourceUrl": "https://api.quran.com"
     },
     {
-      "slug": "junagarhi-ur",
-      "resourceId": 54,
-      "nameAr": "جوناغري (أردو)",
-      "nameEn": "Maulana Muhammad Junagarhi",
-      "lang": "ur",
+      "slug": "bubenheim-de",
+      "resourceId": 27,
+      "nameNative": "Bubenheim & Elyas (Deutsch)",
+      "nameAr": "بوبنهايم",
+      "nameEn": "Frank Bubenheim and Nadeem Elyas",
+      "lang": "de",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "isa-garcia-es",
+      "resourceId": 83,
+      "nameNative": "Isa García (Español)",
+      "nameAr": "عيسى غارسيا",
+      "nameEn": "Sheikh Isa Garcia",
+      "lang": "es",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "piccardo-it",
+      "resourceId": 153,
+      "nameNative": "Hamza Roberto Piccardo (Italiano)",
+      "nameAr": "بيكارو",
+      "nameEn": "Hamza Roberto Piccardo",
+      "lang": "it",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "samir-pt",
+      "resourceId": 43,
+      "nameNative": "Samir (Português)",
+      "nameAr": "سمير",
+      "nameEn": "Portuguese Translation (Samir)",
+      "lang": "pt",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "abdalsalaam-nl",
+      "resourceId": 235,
+      "nameNative": "Abdalsalaam (Nederlands)",
+      "nameAr": "عبدالسلام",
+      "nameEn": "Malak Faris Abdalsalaam",
+      "lang": "nl",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "knut-sv",
+      "resourceId": 48,
+      "nameNative": "Knut Bernström (Svenska)",
+      "nameAr": "كنوت",
+      "nameEn": "Knut Bernström",
+      "lang": "sv",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "kuliev-ru",
+      "resourceId": 45,
+      "nameNative": "Эльмир Кулиев (Русский)",
+      "nameAr": "كولييف",
+      "nameEn": "Elmir Kuliev",
+      "lang": "ru",
       "source": "Quran.com",
       "sourceUrl": "https://api.quran.com"
     },
     {
       "slug": "indonesian",
       "resourceId": 33,
-      "nameAr": "الإندونيسية",
+      "nameNative": "Kemenag RI (Bahasa Indonesia)",
+      "nameAr": "وزارة الشؤون الدينية الإندونيسية",
       "nameEn": "Indonesian Ministry of Religious Affairs",
       "lang": "id",
       "source": "Quran.com",
       "sourceUrl": "https://api.quran.com"
     },
     {
+      "slug": "basmeih-ms",
+      "resourceId": 39,
+      "nameNative": "Abdullah Basmeih (Bahasa Melayu)",
+      "nameAr": "بسمييه",
+      "nameEn": "Abdullah Muhammad Basmeih",
+      "lang": "ms",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
       "slug": "turkish",
       "resourceId": 77,
-      "nameAr": "التركية — ديانت",
+      "nameNative": "Diyanet İşleri (Türkçe)",
+      "nameAr": "ديانت",
       "nameEn": "Turkish (Diyanet)",
       "lang": "tr",
       "source": "Quran.com",
       "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "junagarhi-ur",
+      "resourceId": 54,
+      "nameNative": "مولانا محمد جوناگڑھی (اردو)",
+      "nameAr": "جوناغري",
+      "nameEn": "Maulana Muhammad Junagarhi",
+      "lang": "ur",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "taisirul-bn",
+      "resourceId": 161,
+      "nameNative": "তাইসিরুল কুরআন (বাংলা)",
+      "nameAr": "تيسير القرآن",
+      "nameEn": "Taisirul Quran",
+      "lang": "bn",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "umari-hi",
+      "resourceId": 122,
+      "nameNative": "मौलाना अज़ीज़ुल हक़ (हिन्दी)",
+      "nameAr": "العمري",
+      "nameEn": "Maulana Azizul Haque al-Umari",
+      "lang": "hi",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "ma-jain-zh",
+      "resourceId": 56,
+      "nameNative": "马坚译（中文）",
+      "nameAr": "ما جيان",
+      "nameEn": "Chinese Translation (Ma Jian)",
+      "lang": "zh",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "mita-ja",
+      "resourceId": 35,
+      "nameNative": "三田了一（日本語）",
+      "nameAr": "ميتا",
+      "nameEn": "Ryoichi Mita",
+      "lang": "ja",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "korean-ko",
+      "resourceId": 36,
+      "nameNative": "한국어 번역",
+      "nameAr": "كوري",
+      "nameEn": "Korean",
+      "lang": "ko",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "gumi-ha",
+      "resourceId": 32,
+      "nameNative": "Abubakar Mahmoud Gumi (Hausa)",
+      "nameAr": "غومي",
+      "nameEn": "Hausa Translation (Abubakar Gumi)",
+      "lang": "ha",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "barwani-sw",
+      "resourceId": 49,
+      "nameNative": "Ali Muhsin Al-Barwani (Kiswahili)",
+      "nameAr": "البرواني",
+      "nameEn": "Ali Muhsin Al-Barwani",
+      "lang": "sw",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "mehanovic-bs",
+      "resourceId": 25,
+      "nameNative": "Muhamed Mehanović (Bosanski)",
+      "nameAr": "مهانوفيتش",
+      "nameEn": "Muhamed Mehanović",
+      "lang": "bs",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "ahmeti-sq",
+      "resourceId": 89,
+      "nameNative": "Sherif Ahmeti (Shqip)",
+      "nameAr": "أحمتي",
+      "nameEn": "Albanian Translation (Ahmeti)",
+      "lang": "sq",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
     }
   ],
-  "arabicWbwNote": "No open Arabic word-by-word meaning dataset is currently available via Quran.com or other GPL/CC sources suitable for redistribution. English/Indonesian/Urdu WBW are included instead. Arabic study senses are Arabya-curated via lemma-sense-ar.json."
+  "arabicWbwNote": "No open Arabic word-by-word meaning dataset is currently available via Quran.com. English/Indonesian/Urdu WBW are included; Arabic study senses use lemma-sense-ar.json."
 }

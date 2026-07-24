@@ -27,6 +27,8 @@ export type QuranWord = {
 export type VerseTranslationEdition = {
   slug: string;
   resourceId: number;
+  /** Label in the edition's own language (preferred in UI). */
+  nameNative?: string;
   nameAr: string;
   nameEn: string;
   lang: string;

@@ -3646,8 +3646,19 @@ html[data-theme="dark"] ::selection {
   color: color-mix(in srgb, var(--ink) 62%, transparent);
 }
 
-.layer-hint--tight {
-  margin-bottom: 0.45rem;
+.meaning-lang-block {
+  margin: 0 0 0.85rem;
+}
+
+.meaning-lang-note {
+  margin: 0.45rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--ink) 68%, transparent);
+  padding: 0.45rem 0.65rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--brand-soft) 55%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--brand) 16%, var(--line));
 }
 
 .layer-body {
