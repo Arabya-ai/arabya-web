@@ -1,20 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { AdminUserRow } from "@/lib/cloud-sync";
 import { roleLabelAr, type UserRole } from "@/lib/roles";
-
-type ColKey = "uid" | "user" | "email" | "role" | "status" | "actions";
-
-const ALL_COLS: { key: ColKey; label: string }[] = [
-  { key: "uid", label: "ID" },
-  { key: "user", label: "المستخدم" },
-  { key: "email", label: "البريد / Username" },
-  { key: "role", label: "الدور" },
-  { key: "status", label: "الحالة" },
-  { key: "actions", label: "إجراءات" },
-];
 
 export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   const [users, setUsers] = useState<AdminUserRow[]>([]);
@@ -23,14 +12,7 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   const [role, setRole] = useState("");
   const [pageSize, setPageSize] = useState(25);
   const [page, setPage] = useState(0);
-  const [cols, setCols] = useState<Record<ColKey, boolean>>({
-    uid: true,
-    user: true,
-    email: true,
-    role: true,
-    status: true,
-    actions: true,
-  });
+  const [showUid, setShowUid] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
@@ -65,11 +47,6 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   }, [load]);
 
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
-
-  const visibleCols = useMemo(
-    () => ALL_COLS.filter((c) => cols[c.key]),
-    [cols],
-  );
 
   async function setUserRole(id: string, next: "user" | "editor" | "admin") {
     if (next === "admin" && !isSuperAdmin) {
@@ -134,10 +111,126 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
     }
   }
 
+  function UserIdentity({ u }: { u: AdminUserRow }) {
+    const displayName = u.name?.trim() || u.email.split("@")[0] || "مستخدم";
+    const uid = u.uid || u.id;
+    const inner = (
+      <>
+        {u.image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={u.image} alt="" width={44} height={44} />
+        ) : (
+          <span className="dash-user-fallback" aria-hidden>
+            {displayName.slice(0, 1)}
+          </span>
+        )}
+        <span className="users-id-meta">
+          <span className="users-id-name">{displayName}</span>
+          <span className="users-id-email" dir="ltr" title={u.email}>
+            {u.email}
+          </span>
+          {showUid ? (
+            <span className="users-id-uid" dir="ltr" title={uid}>
+              ID: {uid}
+            </span>
+          ) : null}
+        </span>
+      </>
+    );
+
+    if (isSuperAdmin) {
+      return (
+        <Link
+          href={`/admin/users/${encodeURIComponent(u.id)}`}
+          className="users-id-cell users-id-cell--link"
+        >
+          {inner}
+        </Link>
+      );
+    }
+    return <div className="users-id-cell">{inner}</div>;
+  }
+
+  function RoleBadge({ role }: { role: UserRole }) {
+    return (
+      <span className={`users-badge users-badge--${role}`}>
+        {roleLabelAr(role)}
+      </span>
+    );
+  }
+
+  function StatusBadge({ status }: { status: string }) {
+    const banned = status === "banned";
+    return (
+      <span
+        className={`users-badge ${banned ? "users-badge--banned" : "users-badge--active"}`}
+      >
+        {banned ? "محظور" : "نشط"}
+      </span>
+    );
+  }
+
+  function Actions({ u }: { u: AdminUserRow }) {
+    const busy = busyId === u.id;
+    if (u.role === "admin") {
+      return <span className="users-actions-locked">محمي</span>;
+    }
+    return (
+      <div className="users-actions">
+        {u.role !== "editor" ? (
+          <button
+            type="button"
+            className="users-action users-action--primary"
+            disabled={busy}
+            onClick={() => void setUserRole(u.id, "editor")}
+          >
+            ترقية
+          </button>
+        ) : null}
+        {u.role === "editor" && isSuperAdmin ? (
+          <button
+            type="button"
+            className="users-action users-action--primary"
+            disabled={busy}
+            onClick={() => void setUserRole(u.id, "admin")}
+          >
+            مدير
+          </button>
+        ) : null}
+        {u.role === "editor" ? (
+          <button
+            type="button"
+            className="users-action"
+            disabled={busy}
+            onClick={() => void setUserRole(u.id, "user")}
+          >
+            سحب
+          </button>
+        ) : null}
+        <button
+          type="button"
+          className="users-action"
+          disabled={busy}
+          onClick={() => void banUser(u.id, u.status !== "banned")}
+        >
+          {u.status === "banned" ? "رفع الحظر" : "حظر"}
+        </button>
+        <button
+          type="button"
+          className="users-action users-action--danger"
+          disabled={busy}
+          onClick={() => void removeUser(u.id)}
+        >
+          حذف
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="dash-stack">
+    <div className="dash-stack users-panel">
       <form
-        className="dash-toolbar"
+        className="users-toolbar"
         onSubmit={(e) => {
           e.preventDefault();
           setPage(0);
@@ -146,12 +239,14 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
       >
         <input
           type="search"
-          placeholder="بحث ديناميكي: اسم / بريد / ID"
+          className="users-toolbar-search"
+          placeholder="بحث بالاسم أو البريد أو ID…"
           value={q}
           onChange={(e) => {
             setPage(0);
             setQ(e.target.value);
           }}
+          aria-label="بحث المستخدمين"
         />
         <select
           value={role}
@@ -159,6 +254,7 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
             setPage(0);
             setRole(e.target.value);
           }}
+          aria-label="فلتر الدور"
         >
           <option value="">كل الأدوار</option>
           <option value="user">مشترك</option>
@@ -179,161 +275,78 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
             </option>
           ))}
         </select>
-        <button type="submit" className="auth-btn auth-btn--google">
+        <label className="users-uid-toggle">
+          <input
+            type="checkbox"
+            checked={showUid}
+            onChange={(e) => setShowUid(e.target.checked)}
+          />
+          إظهار ID
+        </label>
+        <button type="submit" className="auth-btn auth-btn--google users-toolbar-btn">
           تحديث
         </button>
       </form>
 
-      <div className="dash-col-toggles">
-        <span>الأعمدة:</span>
-        {ALL_COLS.map((c) => (
-          <label key={c.key}>
-            <input
-              type="checkbox"
-              checked={cols[c.key]}
-              onChange={(e) =>
-                setCols((prev) => ({ ...prev, [c.key]: e.target.checked }))
-              }
-            />
-            {c.label}
-          </label>
-        ))}
-      </div>
-
       {error ? <p className="dash-banner dash-banner--warn">{error}</p> : null}
 
-      <div className="dash-table-wrap">
-        <table className="dash-table">
+      {/* Desktop / tablet table */}
+      <div className="users-table-shell">
+        <table className="users-table">
           <thead>
             <tr>
-              {visibleCols.map((c) => (
-                <th key={c.key}>{c.label}</th>
-              ))}
+              <th scope="col">المستخدم</th>
+              <th scope="col">الدور</th>
+              <th scope="col">الحالة</th>
+              <th scope="col">إجراءات</th>
             </tr>
           </thead>
           <tbody>
             {users.map((u) => (
-              <tr key={u.id}>
-                {cols.uid ? (
-                  <td dir="ltr" className="dash-mono">
-                    {u.uid || u.id}
-                  </td>
-                ) : null}
-                {cols.user ? (
-                  <td>
-                    {isSuperAdmin ? (
-                      <Link
-                        href={`/admin/users/${encodeURIComponent(u.id)}`}
-                        className="dash-user-cell dash-user-link"
-                      >
-                        {u.image ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={u.image} alt="" width={36} height={36} />
-                        ) : (
-                          <span className="dash-user-fallback" aria-hidden>
-                            {(u.name || u.email || "?").slice(0, 1)}
-                          </span>
-                        )}
-                        <span>{u.name || "—"}</span>
-                      </Link>
-                    ) : (
-                      <div className="dash-user-cell">
-                        {u.image ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={u.image} alt="" width={36} height={36} />
-                        ) : (
-                          <span className="dash-user-fallback" aria-hidden>
-                            {(u.name || u.email || "?").slice(0, 1)}
-                          </span>
-                        )}
-                        <span>{u.name || "—"}</span>
-                      </div>
-                    )}
-                  </td>
-                ) : null}
-                {cols.email ? (
-                  <td dir="ltr">
-                    {isSuperAdmin ? (
-                      <Link href={`/admin/users/${encodeURIComponent(u.id)}`}>
-                        {u.email}
-                      </Link>
-                    ) : (
-                      u.email
-                    )}
-                  </td>
-                ) : null}
-                {cols.role ? (
-                  <td>{roleLabelAr((u.role as UserRole) || "user")}</td>
-                ) : null}
-                {cols.status ? (
-                  <td>{u.status === "banned" ? "محظور" : "نشط"}</td>
-                ) : null}
-                {cols.actions ? (
-                  <td>
-                    <div className="dash-row-actions">
-                      {u.role !== "editor" && u.role !== "admin" ? (
-                        <button
-                          type="button"
-                          disabled={busyId === u.id}
-                          onClick={() => void setUserRole(u.id, "editor")}
-                        >
-                          ترقية لمحرر
-                        </button>
-                      ) : null}
-                      {u.role === "editor" && isSuperAdmin ? (
-                        <button
-                          type="button"
-                          disabled={busyId === u.id}
-                          onClick={() => void setUserRole(u.id, "admin")}
-                        >
-                          ترقية لمدير
-                        </button>
-                      ) : null}
-                      {u.role === "editor" ? (
-                        <button
-                          type="button"
-                          disabled={busyId === u.id}
-                          onClick={() => void setUserRole(u.id, "user")}
-                        >
-                          سحب المحرر
-                        </button>
-                      ) : null}
-                      {u.role !== "admin" ? (
-                        <>
-                          <button
-                            type="button"
-                            disabled={busyId === u.id}
-                            onClick={() =>
-                              void banUser(u.id, u.status !== "banned")
-                            }
-                          >
-                            {u.status === "banned" ? "إلغاء الحظر" : "حظر"}
-                          </button>
-                          <button
-                            type="button"
-                            className="danger"
-                            disabled={busyId === u.id}
-                            onClick={() => void removeUser(u.id)}
-                          >
-                            حذف
-                          </button>
-                        </>
-                      ) : null}
-                    </div>
-                  </td>
-                ) : null}
+              <tr key={u.id} className={u.status === "banned" ? "is-banned" : undefined}>
+                <td>
+                  <UserIdentity u={u} />
+                </td>
+                <td>
+                  <RoleBadge role={(u.role as UserRole) || "user"} />
+                </td>
+                <td>
+                  <StatusBadge status={u.status} />
+                </td>
+                <td>
+                  <Actions u={u} />
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
         {users.length === 0 ? (
-          <p className="dash-muted" style={{ padding: "1rem" }}>
-            لا نتائج.
-          </p>
+          <p className="users-empty">لا نتائج مطابقة للبحث.</p>
         ) : null}
       </div>
 
-      <div className="dash-pagination">
+      {/* Mobile cards */}
+      <div className="users-cards">
+        {users.length === 0 ? (
+          <p className="users-empty">لا نتائج مطابقة للبحث.</p>
+        ) : (
+          users.map((u) => (
+            <article
+              key={u.id}
+              className={`users-card${u.status === "banned" ? " is-banned" : ""}`}
+            >
+              <UserIdentity u={u} />
+              <div className="users-card-meta">
+                <RoleBadge role={(u.role as UserRole) || "user"} />
+                <StatusBadge status={u.status} />
+              </div>
+              <Actions u={u} />
+            </article>
+          ))
+        )}
+      </div>
+
+      <div className="dash-pagination users-pagination">
         <button
           type="button"
           disabled={page <= 0}
