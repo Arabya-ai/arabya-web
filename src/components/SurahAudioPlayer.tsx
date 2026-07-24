@@ -10,6 +10,44 @@ function formatTime(sec: number) {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
+function IconPlay() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden>
+      <path fill="currentColor" d="M8 5.14v13.72a1 1 0 0 0 1.5.86l11-6.86a1 1 0 0 0 0-1.72l-11-6.86A1 1 0 0 0 8 5.14z" />
+    </svg>
+  );
+}
+
+function IconPause() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden>
+      <path
+        fill="currentColor"
+        d="M7 5h3.5a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm6.5 0H17a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-3.5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"
+      />
+    </svg>
+  );
+}
+
+function IconPin({ pinned }: { pinned: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill={pinned ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M12 17v5" />
+      <path d="m15 4.5 1.5 4.5H21l-3.8 3.2L18.5 18 12 14.2 5.5 18l1.3-5.8L3 9h4.5L9 4.5 12 2l3 2.5z" />
+    </svg>
+  );
+}
+
 export function SurahAudioPlayer({
   state,
   onPause,
@@ -63,7 +101,7 @@ export function SurahAudioPlayer({
         <div className="surah-player-actions">
           <button
             type="button"
-            className={`tool-btn${state.pinned ? " is-on" : ""}`}
+            className={`surah-player-pin${state.pinned ? " is-on" : ""}`}
             onClick={() => onPin(!state.pinned)}
             aria-pressed={state.pinned}
             title={
@@ -72,25 +110,12 @@ export function SurahAudioPlayer({
                 : "تثبيت المشغّل أسفل الشاشة أثناء التصفح"
             }
           >
-            <svg
-              viewBox="0 0 24 24"
-              width="14"
-              height="14"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-            >
-              <path d="M12 17v5" />
-              <path d="M5 9.5 9 3h6l4 6.5-6.5 3.5L5 9.5z" />
-            </svg>
-            {state.pinned ? "مثبّت" : "تثبيت"}
+            <IconPin pinned={state.pinned} />
+            <span>{state.pinned ? "مثبّت" : "تثبيت"}</span>
           </button>
           <button
             type="button"
-            className="tool-btn"
+            className="surah-player-close"
             onClick={onClose}
             aria-label="إغلاق المشغّل"
             title="إغلاق"
@@ -103,11 +128,12 @@ export function SurahAudioPlayer({
       <div className="surah-player-controls">
         <button
           type="button"
-          className="tool-btn surah-player-play"
+          className={`surah-player-play${state.playing ? " is-playing" : ""}`}
           onClick={() => (state.playing ? onPause() : onResume())}
           aria-label={state.playing ? "إيقاف مؤقت" : "تشغيل"}
+          title={state.playing ? "إيقاف مؤقت" : "تشغيل"}
         >
-          {state.playing ? "⏸" : "▶"}
+          {state.playing ? <IconPause /> : <IconPlay />}
         </button>
 
         {state.mode === "chapter" ? (
