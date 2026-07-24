@@ -2406,18 +2406,15 @@ a.morph-chip:hover {
   opacity: 0.72;
 }
 
-.mode-rail {
+.mode-rail-wrap {
   position: sticky;
   top: max(3.75rem, calc(env(safe-area-inset-top, 0px) + 3.5rem));
   z-index: 40;
   display: flex;
-  flex-wrap: nowrap;
-  gap: 0.4rem;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  padding: 0.5rem 0.15rem 0.45rem;
+  align-items: center;
+  gap: 0.25rem;
   margin-inline: -0.15rem;
+  padding: 0.35rem 0.15rem 0.35rem;
   background: color-mix(in srgb, var(--bg) 94%, transparent);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
@@ -2425,14 +2422,49 @@ a.morph-chip:hover {
 }
 
 @media (min-width: 768px) {
-  .mode-rail {
+  .mode-rail-wrap {
     top: 4.5rem;
   }
 }
 
-html[data-theme="dark"] .mode-rail {
+html[data-theme="dark"] .mode-rail-wrap {
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.28);
+}
+
+.mode-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.15rem 0;
+  overflow: visible;
+}
+
+.mode-rail-nav {
+  display: none;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--brand-deep);
+  cursor: pointer;
+  padding: 0;
+}
+
+.mode-rail-nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.mode-rail-nav:not(:disabled):hover {
+  background: var(--brand-soft);
+  border-color: var(--brand);
 }
 
 .mode-chip {
@@ -2453,6 +2485,24 @@ html[data-theme="dark"] .mode-rail {
   background: var(--brand-deep);
   color: var(--on-brand);
   border-color: transparent;
+}
+
+@media (max-width: 1023px) {
+  .mode-rail {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+  }
+
+  .mode-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mode-rail-wrap.has-overflow .mode-rail-nav {
+    display: inline-flex;
+  }
 }
 
 .study-sheet h2 {
@@ -3614,38 +3664,14 @@ html[data-theme="dark"] ::selection {
 }
 
 .layer-source {
-  margin: 0.75rem 0 0;
-  padding-top: 0.55rem;
-  border-top: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
+  margin: 0.65rem 0 0;
   font-size: 0.78rem;
-  line-height: 1.5;
   color: var(--muted);
 }
 
-.layer-source-label {
-  font-weight: 800;
-  color: color-mix(in srgb, var(--ink) 72%, transparent);
-}
-
-.layer-source a {
-  color: var(--brand-deep);
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-}
-
-.layer-source-extra {
-  opacity: 0.9;
-}
-
-.layer-chip--soon {
-  opacity: 0.72;
-  cursor: default;
-  border-style: dashed;
-  pointer-events: none;
-  font-weight: 600;
+.layer-soon {
   color: var(--muted);
-  background: transparent;
+  line-height: 1.6;
 }
 
 .verse-trans-body.is-error {

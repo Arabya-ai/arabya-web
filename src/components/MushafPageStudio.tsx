@@ -93,7 +93,7 @@ export function MushafPageStudio({
       { id: "meaning-table", label: "جدول المعنى" },
     ];
     for (const s of tafsirSources) {
-      list.push({ id: s.slug, label: `تفسير الصفحة · ${s.nameAr}` });
+      list.push({ id: s.slug, label: s.nameAr });
     }
     return list;
   }, [tafsirSources]);
@@ -857,9 +857,6 @@ export function MushafPageStudio({
             verseTranslation={study.selectedVerseTranslation}
             verseTranslationStatus={study.selectedVerseTranslationStatus}
             tafsirSources={tafsirSources}
-            irabSource={irabBySurah[selected.surahId]?.source}
-            irabSourceUrl={irabBySurah[selected.surahId]?.sourceUrl}
-            irabLicense={irabBySurah[selected.surahId]?.license}
           />
           <div className="ayah-note-panel">
             <label className="ayah-note-label" htmlFor="ayah-note">

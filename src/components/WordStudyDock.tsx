@@ -22,7 +22,6 @@ import { normalizeForHafsFont } from "@/lib/quran-text";
 import { formatFeatureLabels, formatPosLabels } from "@/lib/morph-labels";
 import { lexiconCardLines, narrativeIrab } from "@/lib/irab-narrative";
 import { upsertStudyEntry } from "@/lib/study-archive";
-import { QAC_IRAB_SOURCE } from "@/lib/claims";
 import { nextTabIndex } from "@/lib/tablist";
 
 type MeaningLang = "ar" | "en" | "id" | "ur";
@@ -41,10 +40,6 @@ type Props = {
   verseTranslation: string | null;
   verseTranslationStatus?: VerseTranslationStatus;
   tafsirSources?: TafsirSource[];
-  /** From IrabSurah for the selected word's surah */
-  irabSource?: string | null;
-  irabSourceUrl?: string | null;
-  irabLicense?: string | null;
 };
 
 const LAYERS: { id: string; label: string; hint: string }[] = [
@@ -86,38 +81,14 @@ function wordMeaning(word: QuranWord, lang: MeaningLang): string {
 
 function meaningSourceHint(lang: MeaningLang): string {
   if (lang === "ar") {
-    return "معنى دراسي مختصر مشتق من المادة (lemma-sense) — ليس ترجمة حرفية كاملة";
+    return "معنى دراسي مختصر مشتق من المادة — ليس ترجمة حرفية كاملة";
   }
-  return "معنى كلمة بكلمة عبر Quran.com WBW";
+  return "معنى كلمة بكلمة";
 }
 
 function parseVerseKey(verseKey: string): { surahId: number; verse: number } {
   const [s, v] = verseKey.split(":").map(Number);
   return { surahId: s || 1, verse: v || 1 };
-}
-
-function SourceLine({
-  label,
-  href,
-  extra,
-}: {
-  label: string;
-  href?: string | null;
-  extra?: string | null;
-}) {
-  return (
-    <p className="layer-source">
-      <span className="layer-source-label">المصدر:</span>{" "}
-      {href ? (
-        <a href={href} target="_blank" rel="noopener noreferrer">
-          {label}
-        </a>
-      ) : (
-        label
-      )}
-      {extra ? <span className="layer-source-extra"> · {extra}</span> : null}
-    </p>
-  );
 }
 
 export function WordStudyDock({
@@ -132,9 +103,6 @@ export function WordStudyDock({
   verseTranslation,
   verseTranslationStatus = "idle",
   tafsirSources = [],
-  irabSource,
-  irabSourceUrl,
-  irabLicense,
 }: Props) {
   const [layer, setLayer] = useState("syntax");
   const [tafsirSlug, setTafsirSlug] = useState(tafsirSources[0]?.slug ?? "");
@@ -255,12 +223,6 @@ export function WordStudyDock({
     [verseKey],
   );
 
-  const activeEdition = verseEditions.find((e) => e.slug === verseEdition);
-  const activeTafsirMeta = tafsirSources.find((s) => s.slug === tafsirSlug);
-  const syntaxSourceLabel = irabSource?.trim() || QAC_IRAB_SOURCE.label;
-  const syntaxSourceUrl = irabSourceUrl || QAC_IRAB_SOURCE.url;
-  const syntaxLicense = irabLicense || QAC_IRAB_SOURCE.license;
-
   const onTabKeyDown = (e: KeyboardEvent<HTMLButtonElement>, index: number) => {
     const next = nextTabIndex(e.key, index, LAYERS.length);
     if (next === null) return;
@@ -332,12 +294,6 @@ export function WordStudyDock({
             </button>
           );
         })}
-        <span
-          className="layer-chip layer-chip--soon"
-          title="طبقة البلاغة مؤجّلة حتى توفر مصادر مرخّصة"
-        >
-          بلاغة · قريبًا
-        </span>
       </div>
 
       <article
@@ -368,11 +324,6 @@ export function WordStudyDock({
                 ) : null}
               </p>
             )}
-            <SourceLine
-              label={syntaxSourceLabel}
-              href={syntaxSourceUrl}
-              extra={syntaxLicense}
-            />
           </>
         ) : null}
 
@@ -410,11 +361,6 @@ export function WordStudyDock({
                 </Link>
               </p>
             ) : null}
-            <SourceLine
-              label={syntaxSourceLabel}
-              href={syntaxSourceUrl}
-              extra="صرف المدونة القرآنية"
-            />
           </>
         ) : null}
 
@@ -470,16 +416,6 @@ export function WordStudyDock({
                 >
                   {verseTransBody}
                 </p>
-                {activeEdition ? (
-                  <SourceLine
-                    label={
-                      activeEdition.source
-                        ? `${activeEdition.nameAr} — ${activeEdition.source}`
-                        : activeEdition.nameAr
-                    }
-                    href={activeEdition.sourceUrl}
-                  />
-                ) : null}
               </>
             ) : null}
           </>
@@ -508,16 +444,6 @@ export function WordStudyDock({
                 <p className="tafsir-dock-body" dir="rtl">
                   {tafsirLoading ? "جارٍ التحميل…" : tafsirText || "—"}
                 </p>
-                {activeTafsirMeta ? (
-                  <SourceLine
-                    label={
-                      activeTafsirMeta.source
-                        ? `${activeTafsirMeta.nameAr} — ${activeTafsirMeta.source}`
-                        : activeTafsirMeta.nameAr
-                    }
-                    href={activeTafsirMeta.sourceUrl}
-                  />
-                ) : null}
               </>
             ) : (
               <p className="layer-empty">لا تتوفر تفاسير محمّلة في هذه النسخة.</p>
