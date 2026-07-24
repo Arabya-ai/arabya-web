@@ -88,8 +88,8 @@ export function MushafPageStudio({
 }: Props) {
   const modes: { id: Mode; label: string }[] = useMemo(() => {
     const list: { id: Mode; label: string }[] = [
-      { id: "words", label: "كلمات الصفحة" },
-      { id: "irab", label: "إعراب الصفحة" },
+      { id: "words", label: "الكلمات" },
+      { id: "irab", label: "الإعراب" },
       { id: "meaning-table", label: "جدول المعنى" },
     ];
     for (const s of tafsirSources) {
@@ -888,8 +888,8 @@ export function MushafPageStudio({
       ) : null}
 
       <p className="study-modes-hint">
-        <strong>أوضاع الصفحة</strong> أدناه (كلمات · إعراب الصفحة · جدول معنى ·
-        تفاسير الصفحة) تعرض محتوى الصفحة كاملة.{" "}
+        <strong>أوضاع الصفحة</strong> أدناه (كلمات · إعراب · جدول معنى · تفاسير)
+        تعرض محتوى الصفحة كاملة.{" "}
         <strong>طبقات الكلمة</strong> في اللوحة أعلاه تخص الكلمة المحددة فقط —
         ومنها «تفسير الآية» للآية الحالية دون خلط مع تفسير الصفحة.
       </p>
