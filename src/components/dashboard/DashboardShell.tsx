@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { UserRole } from "@/lib/roles";
 import { roleLabelAr } from "@/lib/roles";
 import { unifiedDashNav } from "@/lib/dashboard-nav";
@@ -38,12 +38,27 @@ export function DashboardShell({
 }: DashboardShellProps) {
   const pathname = usePathname();
   const nav = unifiedDashNav(role, userEmail);
+  const [navOpen, setNavOpen] = useState(true);
+  const [isCompact, setIsCompact] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 960px)");
+    const sync = () => {
+      setIsCompact(mq.matches);
+      if (!mq.matches) setNavOpen(true);
+    };
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   const groups = nav.reduce<Record<string, typeof nav>>((acc, item) => {
     const g = item.group || "عام";
     (acc[g] ||= []).push(item);
     return acc;
   }, {});
+
+  const showNav = !isCompact || navOpen;
 
   return (
     <div className={`dash-shell shell page-block dash-shell--${area}`}>
@@ -80,41 +95,68 @@ export function DashboardShell({
           </div>
         </div>
 
-        <nav className="dash-nav">
-          {Object.entries(groups).map(([group, items]) => (
-            <div key={group} className="dash-nav-group">
-              <p className="dash-nav-group-label">{group}</p>
-              {items.map((item) => {
-                const base = item.href.split("#")[0];
-                const active =
-                  pathname === base ||
-                  (base !== "/account" &&
-                    base !== "/studio" &&
-                    base !== "/admin" &&
-                    pathname.startsWith(base));
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`dash-nav-link${active ? " is-active" : ""}`}
-                  >
-                    <span className="dash-nav-icon">
-                      <DashIcon name={item.icon} />
-                    </span>
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
-          ))}
-        </nav>
+        {isCompact ? (
+          <button
+            type="button"
+            className="dash-nav-toggle"
+            aria-expanded={navOpen}
+            aria-controls="dash-panel-nav"
+            onClick={() => setNavOpen((v) => !v)}
+          >
+            <DashIcon name="home" />
+            <span>{navOpen ? "إخفاء قائمة اللوحة" : "قائمة اللوحة"}</span>
+            <span className="dash-nav-toggle-count">{nav.length}</span>
+          </button>
+        ) : null}
 
-        <Link href="/" className="dash-nav-link dash-nav-link--muted">
-          <span className="dash-nav-icon">
-            <DashIcon name="back" />
-          </span>
-          <span>العودة للموقع</span>
-        </Link>
+        {showNav ? (
+          <>
+            <nav id="dash-panel-nav" className="dash-nav">
+              {Object.entries(groups).map(([group, items]) => (
+                <div key={group} className="dash-nav-group">
+                  <p className="dash-nav-group-label">{group}</p>
+                  {items.map((item) => {
+                    const base = item.href.split("#")[0];
+                    const active =
+                      pathname === base ||
+                      (base !== "/account" &&
+                        base !== "/studio" &&
+                        base !== "/admin" &&
+                        pathname.startsWith(base));
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`dash-nav-link${active ? " is-active" : ""}`}
+                        onClick={() => {
+                          if (isCompact) setNavOpen(false);
+                        }}
+                      >
+                        <span className="dash-nav-icon">
+                          <DashIcon name={item.icon} />
+                        </span>
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ))}
+            </nav>
+
+            <Link
+              href="/"
+              className="dash-nav-link dash-nav-link--muted"
+              onClick={() => {
+                if (isCompact) setNavOpen(false);
+              }}
+            >
+              <span className="dash-nav-icon">
+                <DashIcon name="back" />
+              </span>
+              <span>العودة للموقع</span>
+            </Link>
+          </>
+        ) : null}
       </aside>
 
       <div className="dash-main">
