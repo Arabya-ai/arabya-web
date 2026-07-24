@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CLOUD_SYNC_EVENT } from "@/lib/cloud-sync-client";
 import { type Bookmark, readBookmarks, writeBookmarks } from "@/lib/bookmarks";
 import { type AyahNote, readAyahNotes, saveAyahNote } from "@/lib/ayah-notes";
@@ -22,6 +22,7 @@ export function FavoritesLibrary({
 }) {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [notes, setNotes] = useState<AyahNote[]>([]);
+  const [filter, setFilter] = useState("");
 
   useEffect(() => {
     const load = () => {
@@ -38,8 +39,38 @@ export function FavoritesLibrary({
     };
   }, []);
 
-  const shownBookmarks = mode === "preview" ? bookmarks.slice(0, 5) : bookmarks;
-  const shownNotes = mode === "preview" ? notes.slice(0, 5) : notes;
+  const q = filter.trim().toLowerCase();
+
+  const filteredBookmarks = useMemo(() => {
+    if (!q) return bookmarks;
+    return bookmarks.filter((b) => {
+      const title = getSurahUthmaniTitle(b.surahId);
+      return (
+        title.includes(filter.trim()) ||
+        String(b.surahId).includes(q) ||
+        String(b.verse).includes(q) ||
+        String(b.page).includes(q)
+      );
+    });
+  }, [bookmarks, filter, q]);
+
+  const filteredNotes = useMemo(() => {
+    if (!q) return notes;
+    return notes.filter((n) => {
+      const title = getSurahUthmaniTitle(n.surahId);
+      return (
+        title.includes(filter.trim()) ||
+        n.text.toLowerCase().includes(q) ||
+        String(n.surahId).includes(q) ||
+        String(n.verse).includes(q)
+      );
+    });
+  }, [notes, filter, q]);
+
+  const shownBookmarks =
+    mode === "preview" ? filteredBookmarks.slice(0, 5) : filteredBookmarks;
+  const shownNotes =
+    mode === "preview" ? filteredNotes.slice(0, 5) : filteredNotes;
 
   function removeBookmark(key: string) {
     writeBookmarks(readBookmarks().filter((b) => b.key !== key));
@@ -58,12 +89,41 @@ export function FavoritesLibrary({
 
   return (
     <div className="library-stack">
+      {mode === "full" ? (
+        <div className="library-archive-hero">
+          <div className="library-archive-stats">
+            <div className="library-archive-stat">
+              <strong>{toArabicNumerals(bookmarks.length)}</strong>
+              <span>مفضّلة</span>
+            </div>
+            <div className="library-archive-stat">
+              <strong>{toArabicNumerals(notes.length)}</strong>
+              <span>ملاحظة</span>
+            </div>
+            <div className="library-archive-stat">
+              <strong>
+                {toArabicNumerals(bookmarks.length + notes.length)}
+              </strong>
+              <span>إجمالي الأرشيف</span>
+            </div>
+          </div>
+          <input
+            type="search"
+            className="library-archive-filter"
+            placeholder="تصفية الأرشيف بالسورة أو رقم الآية أو نص الملاحظة…"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            aria-label="تصفية الأرشيف"
+          />
+        </div>
+      ) : null}
+
       <section className="library-block" aria-labelledby="lib-bookmarks-h">
         <div className="library-block-head">
           <h2 id="lib-bookmarks-h">
             المفضّلات{" "}
             <span className="library-count">
-              ({toArabicNumerals(bookmarks.length)})
+              ({toArabicNumerals(filteredBookmarks.length)})
             </span>
           </h2>
           {mode === "preview" ? (
@@ -102,12 +162,12 @@ export function FavoritesLibrary({
         )}
       </section>
 
-      <section className="library-block" aria-labelledby="lib-notes-h">
+      <section className="library-block" aria-labelledby="lib-notes-h" id="notes">
         <div className="library-block-head">
           <h2 id="lib-notes-h">
             الملاحظات{" "}
             <span className="library-count">
-              ({toArabicNumerals(notes.length)})
+              ({toArabicNumerals(filteredNotes.length)})
             </span>
           </h2>
           {mode === "preview" ? (

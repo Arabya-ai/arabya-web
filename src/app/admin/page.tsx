@@ -25,7 +25,10 @@ export default async function AdminPage() {
       title="لوحة الإحصائيات"
       subtitle="نظرة حيّة على الحسابات والنشاط والمزامنة السحابية."
       userName={session.user.name}
+      userEmail={session.user.email}
       userImage={session.user.image}
+      backHref="/account"
+      backLabel="رجوع لحسابي"
     >
       <div className="dash-stack">
         {!isCloudSyncConfigured() ? (

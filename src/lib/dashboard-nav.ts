@@ -6,42 +6,98 @@ export type DashNavItem = {
   href: string;
   label: string;
   icon: DashIconName;
+  group?: string;
 };
 
-export function userDashNav(): DashNavItem[] {
-  return [
-    { href: "/account", label: "نظرة عامة", icon: "home" },
-    { href: "/favorites", label: "المفضّلات", icon: "favorites" },
-    { href: "/account#role-request", label: "طلب محرر", icon: "upgrade" },
+/** قائمة موحّدة حسب الدور — تظهر كاملة في الحساب والاستوديو والإدارة. */
+export function unifiedDashNav(
+  role: UserRole,
+  _email?: string | null,
+): DashNavItem[] {
+  const items: DashNavItem[] = [
+    { href: "/account", label: "نظرة عامة", icon: "home", group: "حسابي" },
+    {
+      href: "/account/stats",
+      label: "لوحة الإحصائيات",
+      icon: "stats",
+      group: "حسابي",
+    },
+    {
+      href: "/favorites",
+      label: "المفضّلات",
+      icon: "favorites",
+      group: "حسابي",
+    },
+    { href: "/account/study", label: "دراسة", icon: "book", group: "حسابي" },
+    {
+      href: "/account#role-request",
+      label: "طلب ترقية",
+      icon: "upgrade",
+      group: "حسابي",
+    },
   ];
+
+  if (canAccessStudio(role)) {
+    items.push(
+      { href: "/studio", label: "الاستوديو", icon: "studio", group: "استوديو" },
+      {
+        href: "/studio/queue",
+        label: "طابور الجودة",
+        icon: "queue",
+        group: "استوديو",
+      },
+      {
+        href: "/studio/sources",
+        label: "المصادر",
+        icon: "sources",
+        group: "استوديو",
+      },
+    );
+  }
+
+  if (canAccessAdmin(role)) {
+    items.push(
+      {
+        href: "/admin",
+        label: "إحصائيات المنصة",
+        icon: "stats",
+        group: "إدارة",
+      },
+      {
+        href: "/admin/users",
+        label: "المستخدمون",
+        icon: "users",
+        group: "إدارة",
+      },
+      {
+        href: "/admin/requests",
+        label: "طلبات الترقية",
+        icon: "requests",
+        group: "إدارة",
+      },
+      {
+        href: "/admin/audit",
+        label: "سجل الأدوار",
+        icon: "audit",
+        group: "إدارة",
+      },
+      {
+        href: "/admin/settings",
+        label: "إعدادات",
+        icon: "settings",
+        group: "إدارة",
+      },
+    );
+  }
+
+  return items;
 }
 
-export function studioDashNav(): DashNavItem[] {
-  return [
-    { href: "/studio", label: "نظرة عامة", icon: "studio" },
-    { href: "/studio/queue", label: "طابور الجودة", icon: "queue" },
-    { href: "/studio/sources", label: "المصادر", icon: "sources" },
-    { href: "/account", label: "حسابي", icon: "home" },
-  ];
-}
-
-export function adminDashNav(): DashNavItem[] {
-  return [
-    { href: "/admin", label: "إحصائيات", icon: "stats" },
-    { href: "/admin/users", label: "المستخدمون", icon: "users" },
-    { href: "/admin/requests", label: "طلبات الترقية", icon: "requests" },
-    { href: "/admin/audit", label: "سجل الأدوار", icon: "audit" },
-    { href: "/admin/settings", label: "إعدادات", icon: "settings" },
-    { href: "/studio", label: "الاستوديو", icon: "studio" },
-    { href: "/account", label: "حسابي", icon: "home" },
-  ];
-}
-
+/** @deprecated use unifiedDashNav */
 export function dashNavForRole(
   role: UserRole,
-  area: "account" | "studio" | "admin",
+  _area?: "account" | "studio" | "admin",
+  email?: string | null,
 ): DashNavItem[] {
-  if (area === "admin" && canAccessAdmin(role)) return adminDashNav();
-  if (area === "studio" && canAccessStudio(role)) return studioDashNav();
-  return userDashNav();
+  return unifiedDashNav(role, email);
 }

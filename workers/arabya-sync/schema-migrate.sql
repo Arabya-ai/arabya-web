@@ -2,12 +2,17 @@
 
 ALTER TABLE users ADD COLUMN status TEXT NOT NULL DEFAULT 'active';
 ALTER TABLE users ADD COLUMN last_seen_at INTEGER;
+ALTER TABLE users ADD COLUMN uid TEXT;
+ALTER TABLE role_requests ADD COLUMN target_role TEXT NOT NULL DEFAULT 'editor';
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_uid ON users(uid);
 
 CREATE TABLE IF NOT EXISTS role_requests (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,
   message TEXT NOT NULL DEFAULT '',
   status TEXT NOT NULL DEFAULT 'pending',
+  target_role TEXT NOT NULL DEFAULT 'editor',
   reviewed_by TEXT,
   review_note TEXT,
   created_at INTEGER NOT NULL,

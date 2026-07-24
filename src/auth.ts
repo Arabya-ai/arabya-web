@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
-import { fetchCloudRole } from "@/lib/cloud-sync";
+import { fetchCloudRoleStatus } from "@/lib/cloud-sync";
 import {
   mergeRoleWithEnvAdmin,
   resolveRoleFromEmail,
@@ -15,6 +15,7 @@ declare module "next-auth" {
       image?: string | null;
       role: UserRole;
     };
+    error?: "Banned";
   }
 
   interface User {
@@ -26,6 +27,7 @@ declare module "@auth/core/jwt" {
   interface JWT {
     role?: UserRole;
     roleFetchedAt?: number;
+    banned?: boolean;
   }
 }
 
@@ -74,8 +76,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/login",
   },
   callbacks: {
+    async signIn({ user }) {
+      const email = user.email?.trim().toLowerCase();
+      if (!email) return false;
+      const status = await fetchCloudRoleStatus(email);
+      if (status.banned) return "/login?error=banned";
+      return true;
+    },
     authorized({ auth: session, request }) {
       const path = request.nextUrl.pathname;
+      if (session?.error === "Banned") return false;
       if (
         path.startsWith("/account") ||
         path.startsWith("/studio") ||
@@ -88,6 +98,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, trigger }) {
       if (!token.email) {
         token.role = "user";
+        token.banned = false;
         return token;
       }
 
@@ -100,8 +111,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         now - Number(token.roleFetchedAt) > ROLE_REFRESH_MS;
 
       if (shouldRefresh) {
-        const cloudRole = await fetchCloudRole(email);
-        token.role = mergeRoleWithEnvAdmin(email, cloudRole);
+        const status = await fetchCloudRoleStatus(email);
+        token.banned = status.banned;
+        if (status.banned) {
+          token.role = "user";
+        } else {
+          token.role = mergeRoleWithEnvAdmin(email, status.role);
+        }
         token.roleFetchedAt = now;
       } else if (!token.role) {
         token.role = resolveRoleFromEmail(email);
@@ -112,6 +128,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
     session({ session, token }) {
+      if (token.banned) {
+        session.error = "Banned";
+      }
       if (session.user) {
         session.user.role = (token.role as UserRole) || "user";
       }

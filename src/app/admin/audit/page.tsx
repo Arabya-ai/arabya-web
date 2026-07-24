@@ -23,7 +23,10 @@ export default async function AdminAuditPage() {
       kicker="إدارة عربية"
       title="سجل تغيير الأدوار"
       userName={session.user.name}
+      userEmail={session.user.email}
       userImage={session.user.image}
+      backHref="/admin"
+      backLabel="رجوع للإحصائيات"
     >
       <AdminAuditList />
     </DashboardShell>

@@ -43,21 +43,32 @@ export default async function StudioQueuePage() {
       role={session.user.role}
       kicker="استوديو عربية"
       title="طابور الجودة"
+      subtitle="المشكلات المكتشفة فعليًا في المحتوى — لا تُعرض عناصر وهمية."
       userName={session.user.name}
+      userEmail={session.user.email}
       userImage={session.user.image}
+      backHref="/studio"
+      backLabel="رجوع للاستوديو"
     >
       <div className="dash-stack">
-        {items.map((item) => (
-          <article key={item.id} className="dash-card">
-            <p className="dash-kicker">أولوية: {item.priority}</p>
-            <h2>{item.title}</h2>
-            <p className="dash-muted">{item.surahHint}</p>
-            <p>{item.note}</p>
-          </article>
-        ))}
         {items.length === 0 ? (
-          <p className="dash-muted">الطابور فارغ حاليًا.</p>
-        ) : null}
+          <section className="dash-card">
+            <h2>لا مشكلات مكتشفة حاليًا</h2>
+            <p className="dash-muted">
+              تم فحص طابور الجودة ولا توجد عناصر معلّقة. عند ظهور مشكلات حقيقية
+              من أدوات الفحص ستُدرج هنا تلقائيًا.
+            </p>
+          </section>
+        ) : (
+          items.map((item) => (
+            <article key={item.id} className="dash-card">
+              <p className="dash-kicker">أولوية: {item.priority}</p>
+              <h2>{item.title}</h2>
+              <p className="dash-muted">{item.surahHint}</p>
+              <p>{item.note}</p>
+            </article>
+          ))
+        )}
       </div>
     </DashboardShell>
   );

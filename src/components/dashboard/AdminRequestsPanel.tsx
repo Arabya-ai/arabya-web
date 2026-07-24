@@ -70,6 +70,11 @@ export function AdminRequestsPanel() {
               </div>
             </div>
             <p>{r.message || "بدون رسالة"}</p>
+            {r.targetRole ? (
+              <p className="dash-muted">
+                المطلوب: {r.targetRole === "admin" ? "مدير" : "محرر"}
+              </p>
+            ) : null}
             <div className="dash-row-actions">
               <button
                 type="button"

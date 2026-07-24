@@ -13,6 +13,7 @@ import { formatVerseKey } from "@/lib/format";
 import { normalizeForHafsFont } from "@/lib/quran-text";
 import { formatFeatureLabels, formatPosLabels } from "@/lib/morph-labels";
 import { lexiconCardLines, narrativeIrab } from "@/lib/irab-narrative";
+import { upsertStudyEntry } from "@/lib/study-archive";
 
 type MeaningLang = "ar" | "en" | "id" | "ur";
 
@@ -88,6 +89,21 @@ export function WordStudyDock({
   const [tafsirSlug, setTafsirSlug] = useState(tafsirSources[0]?.slug ?? "");
   const [tafsirText, setTafsirText] = useState<string | null>(null);
   const [tafsirLoading, setTafsirLoading] = useState(false);
+
+  useEffect(() => {
+    const { surahId, verse } = parseVerseKey(verseKey);
+    const text = word.text || "";
+    if (!text) return;
+    upsertStudyEntry({
+      kind: "word",
+      title: text,
+      surahId,
+      verse,
+      wordIndex: word.position,
+      snippet: wordMeaning(word, "ar") || undefined,
+      href: `/ayah/${surahId}/${verse}`,
+    });
+  }, [verseKey, word]);
 
   const qacNarrative = narrativeIrab(morph ?? null);
   const lexicon = lexiconCardLines(morph ?? null);

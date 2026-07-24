@@ -29,6 +29,7 @@ export type AdminStats = {
 
 export type AdminUserRow = {
   id: string;
+  uid?: string;
   email: string;
   name: string | null;
   image: string | null;
@@ -45,6 +46,7 @@ export type RoleRequestRow = {
   message: string;
   status: string;
   reviewNote?: string | null;
+  targetRole?: string;
   createdAt: number;
   updatedAt: number;
   name?: string | null;
@@ -112,17 +114,28 @@ function profileBody(user: {
   };
 }
 
-export async function fetchCloudRole(email: string): Promise<UserRole | null> {
-  if (!isCloudSyncConfigured()) return null;
+export async function fetchCloudRoleStatus(
+  email: string,
+): Promise<{ role: UserRole | null; banned: boolean }> {
+  if (!isCloudSyncConfigured()) return { role: null, banned: false };
   try {
-    const data = await callWorker<{ role?: UserRole }>(
+    const data = await callWorker<{ role?: UserRole; banned?: boolean }>(
       "/v1/role",
       { email, ensureAdmin: isEnvAdminEmail(email) },
     );
-    return data.role ?? null;
+    return {
+      role: data.role ?? null,
+      banned: data.banned === true,
+    };
   } catch {
-    return null;
+    return { role: null, banned: false };
   }
+}
+
+export async function fetchCloudRole(email: string): Promise<UserRole | null> {
+  const status = await fetchCloudRoleStatus(email);
+  if (status.banned) return null;
+  return status.role;
 }
 
 export async function pullCloudSync(user: {
@@ -184,12 +197,38 @@ export async function getRoleRequest(email: string) {
 export async function createRoleRequest(
   user: { email: string; name?: string | null; image?: string | null },
   message: string,
+  targetRole: "editor" | "admin" = "editor",
 ) {
   return callWorker<{ id: string; status: string }>("/v1/role-request", {
     ...profileBody(user),
     action: "create",
     message,
+    targetRole,
   });
+}
+
+export async function adminBanUser(
+  actorEmail: string,
+  userId: string,
+  banned: boolean,
+  reason?: string,
+) {
+  return callWorker<{ status: string }>("/v1/admin/ban-user", {
+    actorEmail,
+    userId,
+    banned,
+    reason: reason || "",
+  });
+}
+
+export async function adminGetPortfolio(actorEmail: string, userId: string) {
+  return callWorker<{
+    user: AdminUserRow & { uid?: string };
+    bookmarkCount: number;
+    noteCount: number;
+    bookmarks: unknown[];
+    notes: unknown[];
+  }>("/v1/admin/portfolio", { actorEmail, userId });
 }
 
 export async function adminGetStats(actorEmail: string) {
@@ -225,7 +264,7 @@ export async function adminGetUser(actorEmail: string, userId: string) {
 export async function adminSetRole(
   actorEmail: string,
   userId: string,
-  role: "user" | "editor",
+  role: "user" | "editor" | "admin",
   reason?: string,
 ) {
   return callWorker<{ role: string; fromRole?: string }>(

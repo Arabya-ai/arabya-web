@@ -1,20 +1,33 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { UserRole } from "@/lib/roles";
 
 type RequestState = {
   id: string;
   status: string;
   message?: string;
   reviewNote?: string | null;
+  targetRole?: string;
 } | null;
 
-export function RoleRequestPanel({ canRequest }: { canRequest: boolean }) {
+export function RoleRequestPanel({
+  role,
+}: {
+  role: UserRole;
+}) {
   const [request, setRequest] = useState<RequestState>(null);
   const [message, setMessage] = useState("");
+  const [targetRole, setTargetRole] = useState<"editor" | "admin">(
+    role === "editor" ? "admin" : "editor",
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+
+  const canRequestEditor = role === "user";
+  const canRequestAdmin = role === "editor";
+  const canRequest = canRequestEditor || canRequestAdmin;
 
   useEffect(() => {
     let cancelled = false;
@@ -44,16 +57,22 @@ export function RoleRequestPanel({ canRequest }: { canRequest: boolean }) {
     setBusy(true);
     setError(null);
     try {
+      const roleToSend = canRequestAdmin ? targetRole : "editor";
       const res = await fetch("/api/account/role-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, targetRole: roleToSend }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string; id?: string };
       if (!res.ok || !data.ok) {
         throw new Error(data.error || "تعذّر إرسال الطلب");
       }
-      setRequest({ id: data.id || "", status: "pending", message });
+      setRequest({
+        id: data.id || "",
+        status: "pending",
+        message,
+        targetRole: roleToSend,
+      });
       setMessage("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "خطأ");
@@ -65,7 +84,7 @@ export function RoleRequestPanel({ canRequest }: { canRequest: boolean }) {
   if (!loaded) {
     return (
       <section id="role-request" className="dash-card">
-        <h2>طلب ترقية إلى محرر</h2>
+        <h2>طلب ترقية</h2>
         <p className="dash-muted">جاري التحميل…</p>
       </section>
     );
@@ -75,59 +94,58 @@ export function RoleRequestPanel({ canRequest }: { canRequest: boolean }) {
 
   return (
     <section id="role-request" className="dash-card">
-      <h2>طلب ترقية إلى محرر</h2>
+      <h2>طلب ترقية</h2>
       <p className="dash-muted">
-        المحرر يساعد في مراجعة جودة المحتوى والمصادر. الترقية تتم بعد موافقة
-        المدير فقط.
+        اطلب ترقية صلاحياتك. ترقية المحرر تتم بموافقة أي أدمن، وترقية المدير
+        بموافقة السوبر أدمن فقط.
       </p>
 
       {!canRequest ? (
-        <p className="dash-banner dash-banner--ok">لديك صلاحية محرر أو أعلى بالفعل.</p>
+        <p className="dash-banner dash-banner--ok">
+          حسابك بإدارة كاملة أو أعلى من طلب الترقية المتاح هنا.
+        </p>
       ) : status === "pending" ? (
-        <p className="dash-banner">طلبك قيد المراجعة من المدير.</p>
+        <p className="dash-banner">
+          طلبك قيد المراجعة
+          {request?.targetRole ? ` (إلى: ${request.targetRole})` : ""}.
+        </p>
       ) : status === "approved" ? (
         <p className="dash-banner dash-banner--ok">
-          تمت الموافقة. أعد تسجيل الدخول أو انتظر دقائق لتحديث الصلاحية.
+          تمت الموافقة. انتظر قليلًا أو أعد الدخول لتحديث الصلاحية.
         </p>
-      ) : status === "rejected" ? (
-        <div>
-          <p className="dash-banner dash-banner--warn">
-            رُفض الطلب السابق
-            {request?.reviewNote ? `: ${request.reviewNote}` : "."}
-          </p>
-          <form className="dash-form" onSubmit={submit}>
-            <label>
-              رسالة جديدة للمدير
-              <textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                rows={3}
-                maxLength={500}
-                required
-              />
-            </label>
-            <button type="submit" className="auth-btn auth-btn--google" disabled={busy}>
-              {busy ? "…" : "إعادة الطلب"}
-            </button>
-          </form>
-        </div>
       ) : (
         <form className="dash-form" onSubmit={submit}>
+          {canRequestAdmin ? (
+            <label>
+              نوع الترقية
+              <select
+                value={targetRole}
+                onChange={(e) => setTargetRole(e.target.value as "editor" | "admin")}
+              >
+                <option value="admin">ترقية إلى مدير</option>
+              </select>
+            </label>
+          ) : (
+            <p className="dash-muted">الطلب: ترقية إلى محرر</p>
+          )}
           <label>
-            لماذا تريد صلاحية المحرر؟
+            رسالة للمدير
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={3}
               maxLength={500}
-              placeholder="مثال: أراجع مصادر الإعراب والدلالة…"
+              placeholder="اكتب سبب الطلب…"
               required
             />
           </label>
           {error ? <p className="dash-banner dash-banner--warn">{error}</p> : null}
           <button type="submit" className="auth-btn auth-btn--google" disabled={busy}>
-            {busy ? "…" : "إرسال طلب الترقية"}
+            {busy ? "…" : status === "rejected" ? "إعادة الطلب" : "إرسال طلب الترقية"}
           </button>
+          {status === "rejected" && request?.reviewNote ? (
+            <p className="dash-banner dash-banner--warn">رفض سابق: {request.reviewNote}</p>
+          ) : null}
         </form>
       )}
     </section>

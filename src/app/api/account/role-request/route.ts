@@ -33,17 +33,30 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
   }
 
-  let body: { message?: string };
+  let body: { message?: string; targetRole?: string };
   try {
-    body = (await request.json()) as { message?: string };
+    body = (await request.json()) as { message?: string; targetRole?: string };
   } catch {
     return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
+  }
+
+  const targetRole =
+    body.targetRole === "admin" && gate.role === "editor"
+      ? "admin"
+      : "editor";
+
+  if (gate.role === "admin") {
+    return NextResponse.json({ ok: false, error: "already_admin" }, { status: 400 });
+  }
+  if (targetRole === "editor" && gate.role !== "user") {
+    return NextResponse.json({ ok: false, error: "already_elevated" }, { status: 400 });
   }
 
   try {
     const data = await createRoleRequest(
       { email: gate.email, name: gate.name, image: gate.image },
       String(body.message || ""),
+      targetRole,
     );
     return NextResponse.json({ ok: true, ...data });
   } catch (err) {

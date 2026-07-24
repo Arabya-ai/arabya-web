@@ -9,7 +9,7 @@ main = "src/index.ts"
 compatibility_date = "2026-07-01"
 
 [vars]
-ARABYA_ADMIN_EMAILS = "egywebdev@gmail.com"
+ARABYA_ADMIN_EMAILS = "egywebdev@gmail.com,arabyaaicom@gmail.com"
 
 [[d1_databases]]
 binding = "DB"

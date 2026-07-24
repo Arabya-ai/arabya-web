@@ -25,6 +25,9 @@ function errorMessageAr(code: string | undefined): string | null {
       return "رُفض الدخول. إن كان التطبيق في وضع الاختبار، أضف بريدك كـ Test user في Google.";
     case "OAuthAccountNotLinked":
       return "هذا البريد مرتبط بطريقة دخول أخرى.";
+    case "banned":
+    case "Banned":
+      return "هذا الحساب محظور. لا يمكن تسجيل الدخول بنفس البريد مرة أخرى حتى يُرفع الحظر من الإدارة.";
     default:
       return `تعذّر تسجيل الدخول (${code}). أعد المحاولة أو راجع إعدادات Google.`;
   }
