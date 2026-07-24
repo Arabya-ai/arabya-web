@@ -21,6 +21,7 @@ import { narrativeIrab } from "@/lib/irab-narrative";
 import { WordStudyDock } from "@/components/WordStudyDock";
 import { SurahOrnamentTitle } from "@/components/SurahOrnamentTitle";
 import { ShareMenu } from "@/components/ShareMenu";
+import { SurahAudioPlayer } from "@/components/SurahAudioPlayer";
 import { getAyahNote, saveAyahNote } from "@/lib/ayah-notes";
 import {
   buildMushafShareUrl,
@@ -44,6 +45,40 @@ type Props = {
 };
 
 type Mode = "words" | "irab" | "meaning-table" | string;
+
+function ToolIcon({
+  name,
+}: {
+  name: "study" | "irab" | "root" | "listen" | "bookmark" | "share" | "words" | "ayah" | "surah";
+}) {
+  const paths: Record<string, string> = {
+    study: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v15H6.5A2.5 2.5 0 0 0 4 19.5V4.5A2.5 2.5 0 0 1 6.5 2Z",
+    irab: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h5",
+    root: "M12 22V8M12 8c0-3 2-5 5-5M12 8c0-3-2-5-5-5M7 14c2 0 4 1 5 3 1-2 3-3 5-3",
+    listen: "M11 5 6 9H2v6h4l5 4V5Zm7.07 1.93a8 8 0 0 1 0 10.14M15.54 8.46a5 5 0 0 1 0 7.07",
+    bookmark: "M19 21 12 16 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z",
+    share: "M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13",
+    words: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",
+    ayah: "M5 3l14 9-14 9V3z",
+    surah: "M9 18V5l12-2v13M6 18a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm12-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
+  };
+  return (
+    <svg
+      className="mtb-icon"
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d={paths[name]} />
+    </svg>
+  );
+}
 
 export function MushafPageStudio({
   page,
@@ -239,6 +274,7 @@ export function MushafPageStudio({
         block.surahId,
         block.meta.versesCount,
         selected.verseNumber,
+        getSurahUthmaniTitle(block.surahId),
       );
     } else if (dl.listen === "ayah") {
       void audio.playAyahAudio();
@@ -463,7 +499,7 @@ export function MushafPageStudio({
       style={{ ["--mushaf-scale" as string]: String(prefs.fontScale) }}
     >
       <div className="mushaf-toolbar" aria-label="أدوات المصحف">
-        <div className="font-scale" role="group" aria-label="حجم خط المصحف">
+        <div className="mtb-group mtb-font font-scale" role="group" aria-label="حجم خط المصحف">
           <button
             type="button"
             className="tool-btn"
@@ -525,132 +561,164 @@ export function MushafPageStudio({
             أ+
           </button>
         </div>
-        {studySurahId ? (
-          <Link
-            href={`/surah/${studySurahId}/read`}
-            className="tool-btn"
-            title="دراسة السورة مع خيارات الإعراب والدراسة السريعة"
-          >
-            دراسة السورة
-          </Link>
-        ) : null}
-        {selected ? (
-          <Link
-            href={`/ayah/${selected.surahId}/${selected.verseNumber}`}
-            className="tool-btn"
-            title="صفحة إعراب الآية كلمة بكلمة"
-          >
-            إعراب الآية
-          </Link>
-        ) : null}
-        {selected?.morph?.root ? (
-          <Link
-            href={`/root/${encodeURIComponent(selected.morph.root)}`}
-            className="tool-btn"
-            title="مواضع الجذر في القرآن"
-          >
-            الجذر
-          </Link>
-        ) : null}
-        {selected ? (
-          <>
-            <label className="reciter-pick">
-              <span className="sr-only">القارئ</span>
-              <select
-                className="reciter-select"
-                value={prefs.reciterId}
-                onChange={(e) => {
-                  prefs.persistReciterId(e.target.value);
-                  audio.stopAllAudio();
-                }}
-                aria-label="اختر القارئ"
-                title="القارئ"
-              >
-                {RECITERS.map((r) => (
-                  <option key={r.id} value={r.id}>
-                    {r.nameAr}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button
-              type="button"
-              className={`tool-btn bookmark-btn ${bookmarked ? "is-on" : ""}`}
-              onClick={onToggleBookmark}
-              aria-pressed={bookmarked}
+
+        <div className="mtb-group mtb-study" role="group" aria-label="دراسة">
+          {studySurahId ? (
+            <Link
+              href={`/surah/${studySurahId}/read`}
+              className="tool-btn mtb-link"
+              title="دراسة السورة مع خيارات الإعراب والدراسة السريعة"
             >
-              {bookmarked ? "★ مفضّلة" : "☆ حفظ الآية"}
-            </button>
-            <label className="repeat-pick">
-              <span className="sr-only">تكرار التلاوة</span>
-              <select
-                className="reciter-select"
-                value={repeatCount}
-                onChange={(e) => setRepeatCount(Number(e.target.value))}
-                aria-label="عدد مرات تكرار الآية"
-                title="تكرار الآية"
-              >
-                {[1, 2, 3, 5, 7, 10].map((n) => (
-                  <option key={n} value={n}>
-                    ×{toArabicNumerals(n)}
-                  </option>
-                ))}
-              </select>
-            </label>
+              <ToolIcon name="study" />
+              <span>دراسة السورة</span>
+            </Link>
+          ) : null}
+          {selected ? (
+            <Link
+              href={`/ayah/${selected.surahId}/${selected.verseNumber}`}
+              className="tool-btn mtb-link"
+              title="صفحة إعراب الآية كلمة بكلمة"
+            >
+              <ToolIcon name="irab" />
+              <span>إعراب الآية</span>
+            </Link>
+          ) : null}
+          {selected?.morph?.root ? (
+            <Link
+              href={`/root/${encodeURIComponent(selected.morph.root)}`}
+              className="tool-btn mtb-link"
+              title="مواضع الجذر في القرآن"
+            >
+              <ToolIcon name="root" />
+              <span>الجذر</span>
+            </Link>
+          ) : null}
+        </div>
+
+        <div className="mtb-group mtb-listen" role="group" aria-label="استماع">
+          <span className="mtb-label">
+            <ToolIcon name="listen" />
+            استماع
+          </span>
+          <label className="reciter-pick">
+            <span className="sr-only">القارئ</span>
+            <select
+              className="reciter-select"
+              value={prefs.reciterId}
+              onChange={(e) => {
+                prefs.persistReciterId(e.target.value);
+                audio.stopAllAudio();
+              }}
+              aria-label="اختر القارئ"
+              title="القارئ"
+              disabled={!selected && !studyBlock}
+            >
+              {RECITERS.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.nameAr}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="repeat-pick">
+            <span className="sr-only">تكرار التلاوة</span>
+            <select
+              className="reciter-select"
+              value={repeatCount}
+              onChange={(e) => setRepeatCount(Number(e.target.value))}
+              aria-label="عدد مرات التكرار (كلمات أو آية أو سورة)"
+              title="يُطبَّق التكرار على الكلمات والآية والسورة"
+              disabled={!selected && !studyBlock}
+            >
+              {[1, 2, 3, 5, 7, 10].map((n) => (
+                <option key={n} value={n}>
+                  ×{toArabicNumerals(n)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <span className="mtb-scope-label" aria-hidden>
+            يُطبَّق على
+          </span>
+          <div className="mtb-scope" role="group" aria-label="نطاق الاستماع">
             <button
               type="button"
-              className={`tool-btn ${audio.audioPlaying ? "is-on" : ""}`}
+              className={`tool-btn mtb-link ${audio.wbwPlaying ? "is-on" : ""}`}
+              onClick={() => void audio.playWordByWordAudio()}
+              aria-pressed={audio.wbwPlaying}
+              disabled={!selected}
+              title="تلاوة كلمة بكلمة — مع التكرار المحدد"
+            >
+              <ToolIcon name="words" />
+              <span>{audio.wbwPlaying ? "إيقاف" : "كلمات"}</span>
+            </button>
+            <button
+              type="button"
+              className={`tool-btn mtb-link ${audio.audioPlaying ? "is-on" : ""}`}
               onClick={() => void audio.playAyahAudio()}
               aria-pressed={audio.audioPlaying}
+              disabled={!selected}
               title={
                 reciterHasWordSync(prefs.reciterId)
                   ? "تلاوة الآية مع تمييز الكلمات"
                   : "تلاوة الآية (تمييز الكلمات غير متاح لهذا القارئ — جرّب العفاسي)"
               }
             >
-              {audio.audioPlaying ? "⏸ إيقاف" : "▶ آية"}
+              <ToolIcon name="ayah" />
+              <span>{audio.audioPlaying ? "إيقاف" : "آية"}</span>
             </button>
             <button
               type="button"
-              className={`tool-btn ${audio.wbwPlaying ? "is-on" : ""}`}
-              onClick={() => void audio.playWordByWordAudio()}
-              aria-pressed={audio.wbwPlaying}
-              title="تلاوة كلمة بكلمة مع تمييز الكلمة"
+              className={`tool-btn mtb-link ${audio.surahPlaying ? "is-on" : ""}`}
+              onClick={() => {
+                if (!studyBlock) return;
+                void audio.playSurahAudio(
+                  studyBlock.surahId,
+                  studyBlock.meta.versesCount,
+                  selected?.verseNumber ?? 1,
+                  getSurahUthmaniTitle(studyBlock.surahId),
+                );
+              }}
+              aria-pressed={audio.surahPlaying}
+              disabled={!studyBlock}
+              title="تلاوة السورة كاملة مع مشغّل التحكم"
             >
-              {audio.wbwPlaying ? "⏸ إيقاف" : "▶ كلمات"}
+              <ToolIcon name="surah" />
+              <span>{audio.surahPlaying ? "إيقاف" : "سورة"}</span>
             </button>
-            {studyBlock ? (
-              <button
-                type="button"
-                className={`tool-btn ${audio.surahPlaying ? "is-on" : ""}`}
-                onClick={() =>
-                  void audio.playSurahAudio(
-                    studyBlock.surahId,
-                    studyBlock.meta.versesCount,
-                    selected?.verseNumber ?? 1,
-                  )
-                }
-                aria-pressed={audio.surahPlaying}
-                title="تلاوة السورة كاملة من الآية الحالية"
-              >
-                {audio.surahPlaying ? "⏸ إيقاف" : "▶ سورة"}
-              </button>
-            ) : null}
-            <ShareMenu
-              targets={shareTargets}
-              label="مشاركة"
-              onStatus={flashShareNote}
-            />
-          </>
-        ) : (
+          </div>
+        </div>
+
+        <div className="mtb-group mtb-actions" role="group" aria-label="إجراءات">
+          {selected ? (
+            <button
+              type="button"
+              className={`tool-btn mtb-link bookmark-btn ${bookmarked ? "is-on" : ""}`}
+              onClick={onToggleBookmark}
+              aria-pressed={bookmarked}
+            >
+              <ToolIcon name="bookmark" />
+              <span>{bookmarked ? "مفضّلة" : "حفظ الآية"}</span>
+            </button>
+          ) : null}
           <ShareMenu
             targets={shareTargets}
             label="مشاركة"
             onStatus={flashShareNote}
           />
-        )}
+        </div>
         {shareNote ? <span className="share-note">{shareNote}</span> : null}
       </div>
+
+      <SurahAudioPlayer
+        state={audio.surahPlayer}
+        onPause={audio.pauseSurah}
+        onResume={audio.resumeSurah}
+        onSeek={audio.seekSurah}
+        onRate={audio.setSurahRate}
+        onPin={audio.setSurahPinned}
+        onClose={audio.closeSurahPlayer}
+      />
 
       <article className="mushaf-page" aria-label={`مصحف — صفحة ${page.page}`}>
         <div className="mushaf-frame">
