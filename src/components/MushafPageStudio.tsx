@@ -37,7 +37,6 @@ import {
   type WordRef,
 } from "@/hooks/mushaf-utils";
 import { MeaningLangSwitch } from "@/components/MeaningLangSwitch";
-import { editionDisplayName } from "@/lib/translation-label";
 
 type Props = {
   page: MushafPageContent;
@@ -895,13 +894,18 @@ export function MushafPageStudio({
         <strong>طبقات الكلمة</strong> في اللوحة أعلاه تخص الكلمة المحددة فقط —
         ومنها «تفسير الآية» للآية الحالية دون خلط مع تفسير الصفحة.
       </p>
-      <StudyModeTabs modes={modes} mode={mode} onModeChange={setMode} />
+      <StudyModeTabs
+        modes={modes}
+        mode={mode}
+        onModeChange={setMode}
+        panelId={`study-panel-${mode}`}
+      />
 
       {mode === "words" || mode === "irab" ? (
         <section
           className="study-sheet"
           role="tabpanel"
-          id="study-panel"
+          id={`study-panel-${mode}`}
           aria-labelledby={`study-tab-${mode}`}
           tabIndex={0}
         >
@@ -994,7 +998,7 @@ export function MushafPageStudio({
         <section
           className="study-sheet meaning-table-sheet"
           role="tabpanel"
-          id="study-panel"
+          id={`study-panel-${mode}`}
           aria-labelledby={`study-tab-${mode}`}
           tabIndex={0}
         >
@@ -1048,7 +1052,7 @@ export function MushafPageStudio({
         <section
           className="study-sheet"
           role="tabpanel"
-          id="study-panel"
+          id={`study-panel-${mode}`}
           aria-labelledby={`study-tab-${mode}`}
           tabIndex={0}
         >

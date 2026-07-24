@@ -61,12 +61,15 @@ export function StudyModeTabs({
     updateScrollState();
     const onScroll = () => updateScrollState();
     el.addEventListener("scroll", onScroll, { passive: true });
-    const ro = new ResizeObserver(() => updateScrollState());
-    ro.observe(el);
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver(() => updateScrollState());
+      ro.observe(el);
+    }
     window.addEventListener("resize", updateScrollState);
     return () => {
       el.removeEventListener("scroll", onScroll);
-      ro.disconnect();
+      ro?.disconnect();
       window.removeEventListener("resize", updateScrollState);
     };
   }, [modes, updateScrollState]);
@@ -74,11 +77,17 @@ export function StudyModeTabs({
   useEffect(() => {
     const idx = modes.findIndex((m) => m.id === mode);
     const tab = idx >= 0 ? tabRefs.current[idx] : null;
-    tab?.scrollIntoView({
-      behavior: "smooth",
-      inline: "nearest",
-      block: "nearest",
-    });
+    if (tab && typeof tab.scrollIntoView === "function") {
+      try {
+        tab.scrollIntoView({
+          behavior: "smooth",
+          inline: "nearest",
+          block: "nearest",
+        });
+      } catch {
+        /* jsdom stubs may throw on option bags */
+      }
+    }
     updateScrollState();
   }, [mode, modes, updateScrollState]);
 

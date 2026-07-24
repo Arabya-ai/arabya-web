@@ -1,4 +1,9 @@
 /**
+ * @deprecated Use `npm run fetch-translations` (= scripts/fetch-new-translations.mjs).
+ * This legacy script rewrites index.json with only 5 editions and can clobber
+ * the expanded catalog. Kept temporarily for reference.
+ */
+/**
  * Fetches open translation sources from Quran.com API v4:
  * - Word-by-word: English (existing), Indonesian, Urdu
  * - Verse-level: Saheeh International, Muhammad Hamidullah (FR), Junagarhi (UR)

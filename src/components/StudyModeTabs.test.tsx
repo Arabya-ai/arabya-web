@@ -31,6 +31,21 @@ describe("StudyModeTabs", () => {
     expect(tabs[0]).toHaveAttribute("aria-controls", "study-panel");
   });
 
+  it("uses a custom panelId when provided", () => {
+    render(
+      <StudyModeTabs
+        modes={MODES}
+        mode="words"
+        onModeChange={() => {}}
+        panelId="study-panel-words"
+      />,
+    );
+    expect(screen.getAllByRole("tab")[0]).toHaveAttribute(
+      "aria-controls",
+      "study-panel-words",
+    );
+  });
+
   it("ArrowLeft selects the next tab (RTL) and moves focus", async () => {
     const user = userEvent.setup();
     const onModeChange = vi.fn();
