@@ -12,10 +12,13 @@ CREATE TABLE IF NOT EXISTS users (
   image TEXT,
   role TEXT NOT NULL DEFAULT 'user',
   status TEXT NOT NULL DEFAULT 'active',
+  uid TEXT UNIQUE,
   last_seen_at INTEGER,
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_uid ON users(uid);
 
 CREATE TABLE IF NOT EXISTS bookmarks (
   user_id TEXT NOT NULL,
@@ -56,6 +59,7 @@ CREATE TABLE IF NOT EXISTS role_requests (
   user_id TEXT NOT NULL,
   message TEXT NOT NULL DEFAULT '',
   status TEXT NOT NULL DEFAULT 'pending',
+  target_role TEXT NOT NULL DEFAULT 'editor',
   reviewed_by TEXT,
   review_note TEXT,
   created_at INTEGER NOT NULL,

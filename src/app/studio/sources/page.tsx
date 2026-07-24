@@ -5,7 +5,7 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { canAccessStudio } from "@/lib/roles";
 
 export const metadata: Metadata = {
-  title: "مصادر المحتوى",
+  title: "المصادر والاستيراد",
 };
 
 export const dynamic = "force-dynamic";
@@ -21,23 +21,32 @@ export default async function StudioSourcesPage() {
       role={session.user.role}
       kicker="استوديو عربية"
       title="المصادر والاستيراد"
+      subtitle="إدارة مصادر المحتوى والاستيراد حسب ما تقرّره للمنصة."
       userName={session.user.name}
+      userEmail={session.user.email}
       userImage={session.user.image}
+      backHref="/studio"
+      backLabel="رجوع للاستوديو"
     >
       <div className="dash-stack">
         <section className="dash-card">
-          <h2>سياسة المصادر</h2>
+          <h2>أدوات الاستيراد</h2>
+          <p className="dash-muted">
+            من هنا تُدار عمليات الاستيراد والملفات المرفوعة لاحقًا. يمكنك ربط
+            سكربتات المشروع (`scripts/import-*`, `fetch-*`) أو رفع مصادر جديدة
+            حسب سير عملك.
+          </p>
           <ul className="dash-list">
-            <li>لا يُعاد نشر محتوى محمي من مواقع منافسة.</li>
-            <li>الاستيراد فقط من APIs مفتوحة أو ملفات مرخّصة يزوّدها المالك.</li>
-            <li>كل طبقة تحليل تحتاج حقل مصدر واضح في الواجهة.</li>
+            <li>استيراد من ملفات محلية يزوّدها فريق عربية.</li>
+            <li>تشغيل فهارس البناء وتحديث طبقات التحليل.</li>
+            <li>متابعة حالة آخر استيراد (تُربط هنا في التحديثات القادمة).</li>
           </ul>
         </section>
         <section className="dash-card">
-          <h2>حالة الأدوات</h2>
+          <h2>رفع مصدر</h2>
           <p className="dash-muted">
-            سكربتات الاستيراد (`scripts/import-*`, `fetch-*`) تُشغَّل من بيئة
-            التطوير/CI. ستظهر هنا لاحقًا حالة آخر تشغيل عند ربطها باللوحة.
+            واجهة الرفع المباشر تُفعَّل في خطوة لاحقة مع تخزين آمن للملفات. حتى
+            ذلك الحين استخدم سكربتات الاستيراد المعتمدة في المستودع.
           </p>
         </section>
       </div>

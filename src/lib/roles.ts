@@ -1,5 +1,11 @@
 export type UserRole = "user" | "editor" | "admin";
 
+/** سوبر أدمن فقط — الموافقة على ترقية مدير */
+export const SUPER_ADMIN_EMAILS = [
+  "egywebdev@gmail.com",
+  "arabyaaicom@gmail.com",
+] as const;
+
 export function parseAdminEmails(raw: string | undefined): string[] {
   return (raw || "")
     .split(/[,;\s]+/)
@@ -7,16 +13,25 @@ export function parseAdminEmails(raw: string | undefined): string[] {
     .filter(Boolean);
 }
 
+export function isSuperAdminEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  return (SUPER_ADMIN_EMAILS as readonly string[]).includes(
+    email.trim().toLowerCase(),
+  );
+}
+
 export function isEnvAdminEmail(
   email: string | null | undefined,
   adminEmails = parseAdminEmails(process.env.ARABYA_ADMIN_EMAILS),
 ): boolean {
   if (!email) return false;
-  return adminEmails.includes(email.toLowerCase());
+  const lower = email.toLowerCase();
+  if (isSuperAdminEmail(lower)) return true;
+  return adminEmails.includes(lower);
 }
 
 /**
- * Fallback when D1 is unavailable: env admins → admin, else user.
+ * Fallback when D1 is unavailable: env/super admins → admin, else user.
  * Editor is never assigned here — only via admin approval in D1.
  */
 export function resolveRoleFromEmail(
@@ -24,7 +39,7 @@ export function resolveRoleFromEmail(
   adminEmails = parseAdminEmails(process.env.ARABYA_ADMIN_EMAILS),
 ): UserRole {
   if (!email) return "user";
-  if (adminEmails.includes(email.toLowerCase())) return "admin";
+  if (isEnvAdminEmail(email, adminEmails)) return "admin";
   return "user";
 }
 
@@ -58,6 +73,11 @@ export function canAccessStudio(role: UserRole): boolean {
 
 export function canAccessAdmin(role: UserRole): boolean {
   return role === "admin";
+}
+
+/** ترقية إلى مدير — موافقة السوبر أدمن فقط */
+export function canApproveAdminRole(email: string | null | undefined): boolean {
+  return isSuperAdminEmail(email);
 }
 
 export function normalizeUserRole(value: unknown): UserRole {

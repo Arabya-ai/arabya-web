@@ -28,16 +28,19 @@ export default async function AccountPage() {
     <DashboardShell
       area="account"
       role={role}
-      kicker="لوحة المشترك"
+      kicker="لوحة الحساب"
       title={`مرحبًا، ${name}`}
-      subtitle="إدارة قراءتك ومفضّلاتك وطلب صلاحيات المحرر من مكان واحد."
+      subtitle="إدارة قراءتك ومفضّلاتك ودراستك وصلاحياتك من قائمة واحدة."
       userName={name}
+      userEmail={session.user.email}
       userImage={session.user.image}
     >
       <div className="dash-stack">
         <section className="dash-card">
           <h2>بياناتك الشخصية</h2>
-          <p className="dash-muted">{session.user.email}</p>
+          <p className="dash-muted" dir="ltr">
+            {session.user.email}
+          </p>
           <div className="account-grid account-grid--personal">
             <AccountPersonalData />
           </div>
@@ -45,7 +48,7 @@ export default async function AccountPage() {
 
         {(canAccessStudio(role) || canAccessAdmin(role)) && (
           <section className="dash-card dash-card--accent">
-            <h2>مساحات العمل</h2>
+            <h2>اختصارات</h2>
             <div className="dash-actions">
               {canAccessStudio(role) ? (
                 <Link href="/studio" className="account-panel-link">
@@ -57,13 +60,19 @@ export default async function AccountPage() {
                   إدارة عربية
                 </Link>
               ) : null}
+              <Link href="/account/study" className="account-panel-link">
+                دراسة
+              </Link>
+              <Link href="/favorites" className="account-panel-link">
+                المفضّلات
+              </Link>
             </div>
           </section>
         )}
 
         {syncReady ? <CloudSyncPanel /> : null}
 
-        <RoleRequestPanel canRequest={role === "user"} />
+        <RoleRequestPanel role={role} />
 
         <form
           className="account-signout"

@@ -21,9 +21,13 @@ export default async function AdminRequestsPage() {
       area="admin"
       role={session.user.role}
       kicker="إدارة عربية"
-      title="طلبات ترقية المحرر"
+      title="طلبات الترقية"
+      subtitle="طلبات المحررين والمديرين — ترقية المدير للسوبر أدمن فقط."
       userName={session.user.name}
+      userEmail={session.user.email}
       userImage={session.user.image}
+      backHref="/admin"
+      backLabel="رجوع للإحصائيات"
     >
       <AdminRequestsPanel />
     </DashboardShell>

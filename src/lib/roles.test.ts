@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   canAccessAdmin,
   canAccessStudio,
+  canApproveAdminRole,
+  isSuperAdminEmail,
   mergeRoleWithEnvAdmin,
   parseAdminEmails,
   resolveRoleFromEmail,
@@ -45,6 +47,25 @@ describe("mergeRoleWithEnvAdmin", () => {
       "editor",
     );
     expect(mergeRoleWithEnvAdmin("b@x.com", null, [])).toBe("user");
+  });
+
+  it("treats super-admin emails as admin", () => {
+    expect(mergeRoleWithEnvAdmin("egywebdev@gmail.com", "user", [])).toBe(
+      "admin",
+    );
+    expect(mergeRoleWithEnvAdmin("arabyaaicom@gmail.com", "editor", [])).toBe(
+      "admin",
+    );
+  });
+});
+
+describe("super admin", () => {
+  it("recognizes only the two owner emails", () => {
+    expect(isSuperAdminEmail("egywebdev@gmail.com")).toBe(true);
+    expect(isSuperAdminEmail("arabyaaicom@gmail.com")).toBe(true);
+    expect(isSuperAdminEmail("other@gmail.com")).toBe(false);
+    expect(canApproveAdminRole("egywebdev@gmail.com")).toBe(true);
+    expect(canApproveAdminRole("editor@gmail.com")).toBe(false);
   });
 });
 

@@ -27,7 +27,10 @@ export default async function AdminSettingsPage() {
       kicker="إدارة عربية"
       title="إعدادات المنصة"
       userName={session.user.name}
+      userEmail={session.user.email}
       userImage={session.user.image}
+      backHref="/admin"
+      backLabel="رجوع للإحصائيات"
     >
       <div className="dash-stack">
         <section className="dash-card">
@@ -42,17 +45,16 @@ export default async function AdminSettingsPage() {
             <li dir="ltr">AUTH_URL: {authDiag.authUrl}</li>
           </ul>
           <p className="dash-muted">
-            المدراء الأعلى يُعرَّفون عبر ARABYA_ADMIN_EMAILS في Vercel ولا
-            يُخفَّضون من الواجهة. بعد نشر Worker الجديد شغّل schema-migrate.sql
-            على D1.
+            السوبر أدمن: egywebdev@gmail.com و arabyaaicom@gmail.com — لا
+            يُخفَّضون من الواجهة. بعد نشر Worker شغّل أعمدة uid و target_role عبر
+            schema-migrate.sql على D1.
           </p>
         </section>
         <section className="dash-card">
-          <h2>قيود المحتوى (Git-first)</h2>
+          <h2>محتوى المنصة</h2>
           <p className="dash-muted">
-            نص القرآن وطبقات التحليل المرجعية تُدار من مستودع Git وسكربتات
-            الاستيراد. لوحة الإدارة تدير المستخدمين والصلاحيات والطوابير — لا
-            تعدّل ملفات /data مباشرة من المتصفح في هذه المرحلة.
+            نص القرآن وطبقات التحليل تُدار من مستودع Git وسكربتات الاستيراد،
+            ولوحة الاستوديو لمتابعة الجودة والمصادر حسب سير عملك.
           </p>
         </section>
       </div>

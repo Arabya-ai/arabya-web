@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { upsertStudyEntry } from "@/lib/study-archive";
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
 import { STUDY_QUERY_KEY } from "@/components/StudyVerseButton";
 
@@ -116,6 +117,18 @@ export function StudyAssistant() {
         setHits(data.hits ?? []);
         setTotal(data.total ?? data.hits?.length ?? 0);
         setBrief(data.brief ?? null);
+        if ((data.hits?.length ?? 0) > 0) {
+          const first = data.hits![0];
+          upsertStudyEntry({
+            kind: "quick",
+            title: q,
+            query: q,
+            surahId: first.surahId,
+            verse: first.verse,
+            snippet: data.brief || first.text?.slice(0, 180),
+            href: `${getMushafPageHref(first.page)}#s${first.surahId}-v-${first.verse}`,
+          });
+        }
       } catch {
         if (cancelled || id !== reqId.current) return;
         setHits([]);

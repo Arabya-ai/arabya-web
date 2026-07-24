@@ -4446,7 +4446,7 @@ a.auth-btn--google {
   padding-block: 1.35rem 2.25rem;
   font-family: var(--font-dash);
   isolation: isolate;
-  overflow: hidden;
+  /* لا تستخدم overflow:hidden هنا — يكسر sticky للسايدبار */
 }
 
 .dash-shell :lang(en),
@@ -4495,6 +4495,9 @@ a.auth-btn--google {
 .dash-sidebar {
   position: sticky;
   top: 5rem;
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   display: grid;
   gap: 1rem;
   padding: 1.15rem;
@@ -4508,6 +4511,7 @@ a.auth-btn--google {
     var(--shadow);
   transform-style: preserve-3d;
   animation: dash-rise 0.55s var(--dash-ease) both;
+  scrollbar-width: thin;
 }
 
 .dash-sidebar-top {
@@ -4628,7 +4632,159 @@ a.auth-btn--google {
 
 .dash-nav {
   display: grid;
+  gap: 0.55rem;
+}
+
+.dash-nav-group {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.dash-nav-group-label {
+  margin: 0.35rem 0 0.1rem;
+  padding-inline: 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  text-transform: none;
+}
+
+.dash-user-chip--primary {
+  padding: 0.7rem 0.75rem;
+}
+
+.dash-user-chip--primary img,
+.dash-user-chip--primary .dash-user-fallback {
+  width: 3rem;
+  height: 3rem;
+}
+
+.dash-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.55rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--line));
+  background: color-mix(in srgb, var(--brand-soft) 70%, var(--surface));
+  color: var(--brand-deep);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.2s var(--dash-ease), background 0.2s ease;
+}
+
+.dash-back-btn:hover,
+.dash-back-btn:focus-visible {
+  transform: translateX(2px);
+  background: var(--brand-soft);
+}
+
+.dash-back-btn .dash-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.dash-col-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.85rem;
+  align-items: center;
+  padding: 0.65rem 0.85rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--brand-soft) 40%, var(--surface));
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.dash-col-toggles label {
+  display: inline-flex;
+  align-items: center;
   gap: 0.3rem;
+  cursor: pointer;
+}
+
+.dash-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dash-pagination button {
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--brand) 18%, var(--line));
+  background: var(--surface);
+  color: var(--brand-deep);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dash-pagination button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.dash-mono {
+  font-family: var(--font-latin);
+  font-size: 0.78rem;
+}
+
+.dash-user-link {
+  text-decoration: none;
+  color: inherit;
+  font-weight: 700;
+}
+
+.study-archive-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.library-archive-hero {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.library-archive-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: 0.65rem;
+}
+
+.library-archive-stat {
+  padding: 0.75rem;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--brand) 14%, var(--line));
+  background: linear-gradient(165deg, var(--surface), color-mix(in srgb, var(--brand-soft) 55%, var(--surface)));
+  text-align: center;
+}
+
+.library-archive-stat strong {
+  display: block;
+  font-family: var(--font-latin);
+  font-size: 1.35rem;
+  color: var(--brand-deep);
+}
+
+.library-archive-filter {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
 }
 
 .dash-nav-link {

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AdminUsersTable } from "@/components/dashboard/AdminUsersTable";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { canAccessAdmin } from "@/lib/roles";
+import { canAccessAdmin, isSuperAdminEmail } from "@/lib/roles";
 
 export const metadata: Metadata = {
   title: "إدارة المستخدمين",
@@ -22,10 +22,14 @@ export default async function AdminUsersPage() {
       role={session.user.role}
       kicker="إدارة عربية"
       title="المستخدمون"
+      subtitle="بحث وفلترة وتحكم بالأدوار والحظر — مع ID فريد لكل حساب."
       userName={session.user.name}
+      userEmail={session.user.email}
       userImage={session.user.image}
+      backHref="/admin"
+      backLabel="رجوع للإحصائيات"
     >
-      <AdminUsersTable />
+      <AdminUsersTable isSuperAdmin={isSuperAdminEmail(session.user.email)} />
     </DashboardShell>
   );
 }

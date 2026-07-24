@@ -73,6 +73,7 @@ function parseAdminEmails(raw: string | undefined): string[] {
 }
 
 function isProtectedAdmin(email: string, env: Env): boolean {
+  if (isSuperAdmin(email)) return true;
   return parseAdminEmails(env.ARABYA_ADMIN_EMAILS).includes(
     email.trim().toLowerCase(),
   );
@@ -87,6 +88,15 @@ function normalizeRole(role: unknown): UserRole {
   return "user";
 }
 
+function isSuperAdmin(email: string): boolean {
+  const e = email.trim().toLowerCase();
+  return e === "egywebdev@gmail.com" || e === "arabyaaicom@gmail.com";
+}
+
+function makeUid(): string {
+  return `u_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
 /** Upsert profile without overwriting an existing role (D1 is role source of truth). */
 async function upsertUserProfile(
   db: D1Database,
@@ -94,15 +104,21 @@ async function upsertUserProfile(
   name: string | null,
   image: string | null,
   fallbackRole: UserRole = "user",
-): Promise<{ id: string; role: UserRole }> {
+): Promise<{ id: string; role: UserRole; status: string }> {
   const id = userIdFromEmail(email);
   const now = Date.now();
   const existing = await db
-    .prepare(`SELECT role, status FROM users WHERE id = ?`)
+    .prepare(`SELECT role, status, uid FROM users WHERE id = ?`)
     .bind(id)
-    .first<{ role: string; status: string }>();
+    .first<{ role: string; status: string; uid: string | null }>();
 
   if (existing) {
+    if (!existing.uid) {
+      await db
+        .prepare(`UPDATE users SET uid = ? WHERE id = ? AND (uid IS NULL OR uid = '')`)
+        .bind(makeUid(), id)
+        .run();
+    }
     await db
       .prepare(
         `UPDATE users SET
@@ -114,28 +130,35 @@ async function upsertUserProfile(
       )
       .bind(name, image, now, now, id)
       .run();
-    return { id, role: normalizeRole(existing.role) };
+    return {
+      id,
+      role: normalizeRole(existing.role),
+      status: existing.status || "active",
+    };
   }
 
+  const uid = makeUid();
   await db
     .prepare(
-      `INSERT INTO users (id, email, name, image, role, status, last_seen_at, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, 'active', ?, ?, ?)`,
+      `INSERT INTO users (id, email, name, image, role, status, uid, last_seen_at, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, 'active', ?, ?, ?, ?)`,
     )
-    .bind(id, id, name, image, fallbackRole, now, now, now)
+    .bind(id, id, name, image, fallbackRole, uid, now, now, now)
     .run();
-  return { id, role: fallbackRole };
+  return { id, role: fallbackRole, status: "active" };
 }
 
-async function getUserRole(db: D1Database, email: string): Promise<UserRole | null> {
+async function getUserRole(
+  db: D1Database,
+  email: string,
+): Promise<{ role: UserRole; status: string } | null> {
   const id = userIdFromEmail(email);
   const row = await db
     .prepare(`SELECT role, status FROM users WHERE id = ?`)
     .bind(id)
     .first<{ role: string; status: string }>();
   if (!row) return null;
-  if (row.status === "disabled") return "user";
-  return normalizeRole(row.role);
+  return { role: normalizeRole(row.role), status: row.status || "active" };
 }
 
 async function writeAudit(
@@ -331,14 +354,14 @@ async function listUsers(
   offset: number,
 ) {
   const needle = q.trim().toLowerCase();
-  let sql = `SELECT id, email, name, image, role, status, last_seen_at as lastSeenAt,
+  let sql = `SELECT id, uid, email, name, image, role, status, last_seen_at as lastSeenAt,
                     created_at as createdAt, updated_at as updatedAt
              FROM users WHERE 1=1`;
   const binds: (string | number)[] = [];
 
   if (needle) {
-    sql += ` AND (email LIKE ? OR IFNULL(name, '') LIKE ?)`;
-    binds.push(`%${needle}%`, `%${needle}%`);
+    sql += ` AND (email LIKE ? OR IFNULL(name, '') LIKE ? OR IFNULL(uid, '') LIKE ? OR id LIKE ?)`;
+    binds.push(`%${needle}%`, `%${needle}%`, `%${needle}%`, `%${needle}%`);
   }
   if (role === "user" || role === "editor" || role === "admin") {
     sql += ` AND role = ?`;
@@ -353,7 +376,7 @@ async function listUsers(
     .all();
 
   const countSql = needle
-    ? `SELECT COUNT(*) as c FROM users WHERE (email LIKE ? OR IFNULL(name, '') LIKE ?)${
+    ? `SELECT COUNT(*) as c FROM users WHERE (email LIKE ? OR IFNULL(name, '') LIKE ? OR IFNULL(uid, '') LIKE ? OR id LIKE ?)${
         role === "user" || role === "editor" || role === "admin"
           ? " AND role = ?"
           : ""
@@ -366,7 +389,7 @@ async function listUsers(
 
   const countBinds: (string | number)[] = [];
   if (needle) {
-    countBinds.push(`%${needle}%`, `%${needle}%`);
+    countBinds.push(`%${needle}%`, `%${needle}%`, `%${needle}%`, `%${needle}%`);
   }
   if (role === "user" || role === "editor" || role === "admin") {
     countBinds.push(role);
@@ -387,7 +410,7 @@ async function listUsers(
 async function getUserDetail(db: D1Database, userId: string) {
   const user = await db
     .prepare(
-      `SELECT id, email, name, image, role, status, last_seen_at as lastSeenAt,
+      `SELECT id, uid, email, name, image, role, status, last_seen_at as lastSeenAt,
               created_at as createdAt, updated_at as updatedAt
        FROM users WHERE id = ?`,
     )
@@ -445,6 +468,12 @@ export default {
     // --- Role lookup (no profile mutation required beyond read) ---
     if (url.pathname === "/v1/role") {
       if (!email || !email.includes("@")) return badRequest("email_required");
+      const row = await env.DB.prepare(`SELECT role, status FROM users WHERE id = ?`)
+        .bind(userIdFromEmail(email))
+        .first<{ role: string; status: string }>();
+      if (row?.status === "banned") {
+        return json({ ok: true, role: "user", banned: true });
+      }
       const ensureAdmin =
         body.ensureAdmin === true || isProtectedAdmin(email, env);
       if (ensureAdmin) {
@@ -452,10 +481,14 @@ export default {
         await env.DB.prepare(`UPDATE users SET role = 'admin' WHERE id = ?`)
           .bind(userIdFromEmail(email))
           .run();
-        return json({ ok: true, role: "admin" as UserRole });
+        return json({ ok: true, role: "admin" as UserRole, banned: false });
       }
-      const role = await getUserRole(env.DB, email);
-      return json({ ok: true, role: role ?? "user" });
+      const info = await getUserRole(env.DB, email);
+      return json({
+        ok: true,
+        role: info?.role ?? "user",
+        banned: info?.status === "banned",
+      });
     }
 
     // --- Personal sync ---
@@ -465,13 +498,17 @@ export default {
       const ensureAdmin =
         body.ensureAdmin === true || isProtectedAdmin(email, env);
       const fallbackRole: UserRole = ensureAdmin ? "admin" : "user";
-      const { id: userId, role } = await upsertUserProfile(
+      const { id: userId, role, status } = await upsertUserProfile(
         env.DB,
         email,
         (body.name as string | null) ?? null,
         (body.image as string | null) ?? null,
         fallbackRole,
       );
+
+      if (status === "banned") {
+        return forbidden("account_banned");
+      }
 
       if (ensureAdmin && role !== "admin") {
         await env.DB.prepare(`UPDATE users SET role = 'admin' WHERE id = ?`)
@@ -484,7 +521,8 @@ export default {
 
       if (url.pathname === "/v1/pull") {
         const data = await pullAll(env.DB, userId);
-        return json({ ok: true, userId, role: await getUserRole(env.DB, email), ...data });
+        const info = await getUserRole(env.DB, email);
+        return json({ ok: true, userId, role: info?.role ?? role, ...data });
       }
 
       await pushAll(
@@ -495,10 +533,11 @@ export default {
         (body.progress as ProgressPayload) || { lastPage: null, habit: {} },
       );
       const data = await pullAll(env.DB, userId);
+      const info = await getUserRole(env.DB, email);
       return json({
         ok: true,
         userId,
-        role: await getUserRole(env.DB, email),
+        role: info?.role ?? role,
         ...data,
       });
     }
@@ -516,7 +555,9 @@ export default {
       const action = String(body.action || "get");
       if (action === "get") {
         const latest = await env.DB.prepare(
-          `SELECT id, status, message, review_note as reviewNote, created_at as createdAt, updated_at as updatedAt
+          `SELECT id, status, message, review_note as reviewNote,
+                  COALESCE(target_role, 'editor') as targetRole,
+                  created_at as createdAt, updated_at as updatedAt
            FROM role_requests WHERE user_id = ? ORDER BY created_at DESC LIMIT 1`,
         )
           .bind(userId)
@@ -525,9 +566,14 @@ export default {
       }
 
       if (action === "create") {
-        const currentRole = await getUserRole(env.DB, email);
-        if (currentRole === "editor" || currentRole === "admin") {
+        const info = await getUserRole(env.DB, email);
+        const targetRole =
+          String(body.targetRole || "editor") === "admin" ? "admin" : "editor";
+        if (targetRole === "editor" && info?.role !== "user") {
           return badRequest("already_elevated");
+        }
+        if (targetRole === "admin" && info?.role !== "editor") {
+          return badRequest("editor_required_for_admin_request");
         }
         const pending = await env.DB.prepare(
           `SELECT id FROM role_requests WHERE user_id = ? AND status = 'pending' LIMIT 1`,
@@ -542,12 +588,12 @@ export default {
           .trim()
           .slice(0, 500);
         await env.DB.prepare(
-          `INSERT INTO role_requests (id, user_id, message, status, created_at, updated_at)
-           VALUES (?, ?, ?, 'pending', ?, ?)`,
+          `INSERT INTO role_requests (id, user_id, message, status, target_role, created_at, updated_at)
+           VALUES (?, ?, ?, 'pending', ?, ?, ?)`,
         )
-          .bind(id, userId, message, now, now)
+          .bind(id, userId, message, targetRole, now, now)
           .run();
-        return json({ ok: true, id, status: "pending" });
+        return json({ ok: true, id, status: "pending", targetRole });
       }
 
       return badRequest("unknown_action");
@@ -561,8 +607,10 @@ export default {
       return badRequest("actor_email_required");
     }
     if (!isProtectedAdmin(actorEmail, env)) {
-      const actorRole = await getUserRole(env.DB, actorEmail);
-      if (actorRole !== "admin") return forbidden("admin_required");
+      const actorInfo = await getUserRole(env.DB, actorEmail);
+      if (actorInfo?.role !== "admin" || actorInfo.status === "banned") {
+        return forbidden("admin_required");
+      }
     }
 
     if (url.pathname === "/v1/admin/stats") {
@@ -590,8 +638,10 @@ export default {
       const targetId = userIdFromEmail(String(body.userId || body.email || ""));
       const toRole = normalizeRole(body.role);
       if (!targetId) return badRequest("user_required");
-      if (toRole === "admin") return badRequest("cannot_grant_admin_via_api");
-      if (isProtectedAdmin(targetId, env)) {
+      if (toRole === "admin" && !isSuperAdmin(actorEmail)) {
+        return forbidden("super_admin_required_for_admin_role");
+      }
+      if (isProtectedAdmin(targetId, env) && toRole !== "admin") {
         return forbidden("cannot_change_protected_admin");
       }
 
@@ -622,8 +672,7 @@ export default {
         String(body.reason || "admin_set_role").slice(0, 300),
       );
 
-      // Close pending requests if demoting/promoting
-      if (toRole === "editor") {
+      if (toRole === "editor" || toRole === "admin") {
         await env.DB.prepare(
           `UPDATE role_requests SET status = 'approved', reviewed_by = ?, updated_at = ?
            WHERE user_id = ? AND status = 'pending'`,
@@ -633,6 +682,50 @@ export default {
       }
 
       return json({ ok: true, role: toRole, fromRole });
+    }
+
+    if (url.pathname === "/v1/admin/ban-user") {
+      const targetId = userIdFromEmail(String(body.userId || body.email || ""));
+      if (!targetId) return badRequest("user_required");
+      if (isProtectedAdmin(targetId, env) || isSuperAdmin(targetId)) {
+        return forbidden("cannot_ban_protected_admin");
+      }
+      if (targetId === actorEmail) return forbidden("cannot_ban_self");
+      const banned = body.banned !== false;
+      const status = banned ? "banned" : "active";
+      const now = Date.now();
+      await env.DB.prepare(
+        `UPDATE users SET status = ?, updated_at = ? WHERE id = ?`,
+      )
+        .bind(status, now, targetId)
+        .run();
+      await writeAudit(
+        env.DB,
+        targetId,
+        actorEmail,
+        null,
+        status,
+        String(body.reason || (banned ? "ban" : "unban")).slice(0, 300),
+      );
+      return json({ ok: true, status });
+    }
+
+    if (url.pathname === "/v1/admin/portfolio") {
+      if (!isSuperAdmin(actorEmail)) {
+        return forbidden("super_admin_required");
+      }
+      const targetId = userIdFromEmail(String(body.userId || body.email || ""));
+      if (!targetId) return badRequest("user_required");
+      const detail = await getUserDetail(env.DB, targetId);
+      if (!detail) return json({ ok: false, error: "not_found" }, 404);
+      const data = await pullAll(env.DB, targetId);
+      return json({
+        ok: true,
+        ...detail,
+        bookmarks: data.bookmarks,
+        notes: data.notes,
+        progress: data.progress,
+      });
     }
 
     if (url.pathname === "/v1/admin/delete-user") {
@@ -661,6 +754,7 @@ export default {
         const status = String(body.status || "pending");
         const rows = await env.DB.prepare(
           `SELECT r.id, r.user_id as userId, r.message, r.status, r.review_note as reviewNote,
+                  COALESCE(r.target_role, 'editor') as targetRole,
                   r.created_at as createdAt, r.updated_at as updatedAt,
                   u.name, u.email, u.image
            FROM role_requests r
@@ -681,12 +775,18 @@ export default {
           return badRequest("invalid_review");
         }
         const req = await env.DB.prepare(
-          `SELECT id, user_id as userId, status FROM role_requests WHERE id = ?`,
+          `SELECT id, user_id as userId, status, COALESCE(target_role, 'editor') as targetRole
+           FROM role_requests WHERE id = ?`,
         )
           .bind(requestId)
-          .first<{ id: string; userId: string; status: string }>();
+          .first<{ id: string; userId: string; status: string; targetRole: string }>();
         if (!req) return json({ ok: false, error: "not_found" }, 404);
         if (req.status !== "pending") return badRequest("not_pending");
+
+        const toRole = req.targetRole === "admin" ? "admin" : "editor";
+        if (toRole === "admin" && !isSuperAdmin(actorEmail)) {
+          return forbidden("super_admin_required_for_admin_role");
+        }
 
         const now = Date.now();
         const note = String(body.reviewNote || "").trim().slice(0, 500);
@@ -698,7 +798,7 @@ export default {
           .run();
 
         if (decision === "approved") {
-          if (isProtectedAdmin(req.userId, env)) {
+          if (isProtectedAdmin(req.userId, env) && toRole !== "admin") {
             return forbidden("cannot_change_protected_admin");
           }
           const existing = await env.DB.prepare(
@@ -708,16 +808,16 @@ export default {
             .first<{ role: string }>();
           const fromRole = normalizeRole(existing?.role);
           await env.DB.prepare(
-            `UPDATE users SET role = 'editor', updated_at = ? WHERE id = ?`,
+            `UPDATE users SET role = ?, updated_at = ? WHERE id = ?`,
           )
-            .bind(now, req.userId)
+            .bind(toRole, now, req.userId)
             .run();
           await writeAudit(
             env.DB,
             req.userId,
             actorEmail,
             fromRole,
-            "editor",
+            toRole,
             note || "role_request_approved",
           );
         }
