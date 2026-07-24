@@ -3577,17 +3577,97 @@ html[data-theme="dark"] ::selection {
   color: color-mix(in srgb, var(--ink) 62%, transparent);
 }
 
+.layer-hint--tight {
+  margin-bottom: 0.45rem;
+}
+
+.layer-body {
+  margin: 0;
+  line-height: 1.75;
+}
+
+.layer-empty {
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--brand-soft) 55%, var(--surface));
+  border: 1px dashed color-mix(in srgb, var(--brand) 22%, var(--line));
+  color: color-mix(in srgb, var(--ink) 78%, transparent);
+  line-height: 1.65;
+  font-size: 0.9rem;
+}
+
+.layer-empty a {
+  font-weight: 700;
+}
+
 .study-modes-hint {
   margin: 0.75rem 0 0.45rem;
   font-size: 0.78rem;
-  line-height: 1.5;
+  line-height: 1.55;
   color: color-mix(in srgb, var(--ink) 68%, transparent);
 }
 
+.study-modes-hint strong {
+  color: var(--brand-deep);
+  font-weight: 800;
+}
+
 .layer-source {
-  margin: 0.65rem 0 0;
+  margin: 0.75rem 0 0;
+  padding-top: 0.55rem;
+  border-top: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
   font-size: 0.78rem;
+  line-height: 1.5;
   color: var(--muted);
+}
+
+.layer-source-label {
+  font-weight: 800;
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
+}
+
+.layer-source a {
+  color: var(--brand-deep);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.layer-source-extra {
+  opacity: 0.9;
+}
+
+.layer-chip--soon {
+  opacity: 0.72;
+  cursor: default;
+  border-style: dashed;
+  pointer-events: none;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+}
+
+.verse-trans-body.is-error {
+  color: color-mix(in srgb, #b91c1c 70%, var(--ink));
+}
+
+.meaning-table-fallback {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.meaning-table-fallback-tag {
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 800;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand-deep);
 }
 
 .layer-soon {

@@ -1,7 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 import type {
   IrabWord,
   QuranWord,
@@ -14,8 +22,12 @@ import { normalizeForHafsFont } from "@/lib/quran-text";
 import { formatFeatureLabels, formatPosLabels } from "@/lib/morph-labels";
 import { lexiconCardLines, narrativeIrab } from "@/lib/irab-narrative";
 import { upsertStudyEntry } from "@/lib/study-archive";
+import { QAC_IRAB_SOURCE } from "@/lib/claims";
+import { nextTabIndex } from "@/lib/tablist";
 
 type MeaningLang = "ar" | "en" | "id" | "ur";
+
+export type VerseTranslationStatus = "idle" | "loading" | "ready" | "error" | "empty";
 
 type Props = {
   verseKey: string;
@@ -27,30 +39,34 @@ type Props = {
   verseEdition: string;
   onVerseEdition: (slug: string) => void;
   verseTranslation: string | null;
+  verseTranslationStatus?: VerseTranslationStatus;
   tafsirSources?: TafsirSource[];
+  /** From IrabSurah for the selected word's surah */
+  irabSource?: string | null;
+  irabSourceUrl?: string | null;
+  irabLicense?: string | null;
 };
 
-/** Visible study layers — balāgha deferred (see docs/DEVELOPMENT.md). */
 const LAYERS: { id: string; label: string; hint: string }[] = [
   {
     id: "syntax",
     label: "إعراب",
-    hint: "موقع الكلمة وإعرابها في سياق الآية",
+    hint: "موقع الكلمة النحوي في سياق الآية — مبني على صرف المدونة مع صياغة دراسية",
   },
   {
     id: "morph",
     label: "صرف ومعجم",
-    hint: "الجذر والمادة والخصائص الصرفية",
+    hint: "الجذر والمادة والخصائص الصرفية وخطوط المعجم المختصرة",
   },
   {
     id: "translation",
     label: "ترجمة ودلالة",
-    hint: "معنى الكلمة الدراسي وترجمة الآية",
+    hint: "معنى الكلمة الدراسي ثم ترجمة الآية المختارة",
   },
   {
     id: "tafsir",
-    label: "تفسير",
-    hint: "شرح الآية من التفسير المختار",
+    label: "تفسير الآية",
+    hint: "نص التفسير للآية الحالية فقط — لتفسير الصفحة كاملة استخدم أوضاع العرض أسفل اللوحة",
   },
 ];
 
@@ -68,9 +84,40 @@ function wordMeaning(word: QuranWord, lang: MeaningLang): string {
   return word.meaning || "";
 }
 
+function meaningSourceHint(lang: MeaningLang): string {
+  if (lang === "ar") {
+    return "معنى دراسي مختصر مشتق من المادة (lemma-sense) — ليس ترجمة حرفية كاملة";
+  }
+  return "معنى كلمة بكلمة عبر Quran.com WBW";
+}
+
 function parseVerseKey(verseKey: string): { surahId: number; verse: number } {
   const [s, v] = verseKey.split(":").map(Number);
   return { surahId: s || 1, verse: v || 1 };
+}
+
+function SourceLine({
+  label,
+  href,
+  extra,
+}: {
+  label: string;
+  href?: string | null;
+  extra?: string | null;
+}) {
+  return (
+    <p className="layer-source">
+      <span className="layer-source-label">المصدر:</span>{" "}
+      {href ? (
+        <a href={href} target="_blank" rel="noopener noreferrer">
+          {label}
+        </a>
+      ) : (
+        label
+      )}
+      {extra ? <span className="layer-source-extra"> · {extra}</span> : null}
+    </p>
+  );
 }
 
 export function WordStudyDock({
@@ -83,12 +130,18 @@ export function WordStudyDock({
   verseEdition,
   onVerseEdition,
   verseTranslation,
+  verseTranslationStatus = "idle",
   tafsirSources = [],
+  irabSource,
+  irabSourceUrl,
+  irabLicense,
 }: Props) {
   const [layer, setLayer] = useState("syntax");
   const [tafsirSlug, setTafsirSlug] = useState(tafsirSources[0]?.slug ?? "");
   const [tafsirText, setTafsirText] = useState<string | null>(null);
   const [tafsirLoading, setTafsirLoading] = useState(false);
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const baseId = useId();
 
   useEffect(() => {
     const { surahId, verse } = parseVerseKey(verseKey);
@@ -109,6 +162,15 @@ export function WordStudyDock({
   const lexicon = lexiconCardLines(morph ?? null);
   const featureLabels = formatFeatureLabels(morph?.features);
   const posLabels = formatPosLabels(morph?.pos, morph?.features);
+  const hasMorphPayload = Boolean(
+    morph &&
+      (morph.root ||
+        morph.lemma ||
+        morph.pos?.length ||
+        morph.features?.length ||
+        morph.irab ||
+        morph.irabText),
+  );
 
   const morphChips = useMemo(() => {
     const chips: { key: string; node: ReactNode }[] = [];
@@ -172,7 +234,11 @@ export function WordStudyDock({
         if (!res.ok) throw new Error("tafsir");
         const data = (await res.json()) as TafsirSurah;
         const hit = data.verses?.find((v) => v.verseNumber === verse);
-        if (!cancelled) setTafsirText(hit?.text?.trim() || "لا يتوفر تفسير لهذه الآية في هذا المصدر.");
+        if (!cancelled) {
+          setTafsirText(
+            hit?.text?.trim() || "لا يتوفر تفسير لهذه الآية في هذا المصدر.",
+          );
+        }
       } catch {
         if (!cancelled) setTafsirText("تعذّر تحميل التفسير.");
       } finally {
@@ -188,6 +254,34 @@ export function WordStudyDock({
     () => parseVerseKey(verseKey),
     [verseKey],
   );
+
+  const activeEdition = verseEditions.find((e) => e.slug === verseEdition);
+  const activeTafsirMeta = tafsirSources.find((s) => s.slug === tafsirSlug);
+  const syntaxSourceLabel = irabSource?.trim() || QAC_IRAB_SOURCE.label;
+  const syntaxSourceUrl = irabSourceUrl || QAC_IRAB_SOURCE.url;
+  const syntaxLicense = irabLicense || QAC_IRAB_SOURCE.license;
+
+  const onTabKeyDown = (e: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const next = nextTabIndex(e.key, index, LAYERS.length);
+    if (next === null) return;
+    e.preventDefault();
+    setLayer(LAYERS[next].id);
+    tabRefs.current[next]?.focus();
+  };
+
+  const sense = wordMeaning(word, meaningLang);
+  const panelId = `${baseId}-panel`;
+
+  let verseTransBody: string;
+  if (verseTranslationStatus === "loading" || verseTranslationStatus === "idle") {
+    verseTransBody = "جارٍ التحميل…";
+  } else if (verseTranslationStatus === "error") {
+    verseTransBody = "تعذّر تحميل ترجمة الآية — جرّب طبعة أخرى أو أعد المحاولة.";
+  } else if (verseTranslation?.trim()) {
+    verseTransBody = verseTranslation;
+  } else {
+    verseTransBody = "لا تتوفر ترجمة لهذه الآية في الطبعة المختارة.";
+  }
 
   return (
     <section className="word-dock" aria-live="polite">
@@ -216,28 +310,69 @@ export function WordStudyDock({
       </div>
 
       <div className="layer-rail" role="tablist" aria-label="طبقات تحليل الكلمة">
-        {LAYERS.map((l) => (
-          <button
-            key={l.id}
-            type="button"
-            role="tab"
-            aria-selected={layer === l.id}
-            className={`layer-chip ${layer === l.id ? "is-active" : ""}`}
-            onClick={() => setLayer(l.id)}
-          >
-            {l.label}
-          </button>
-        ))}
+        {LAYERS.map((l, i) => {
+          const active = layer === l.id;
+          return (
+            <button
+              key={l.id}
+              ref={(el) => {
+                tabRefs.current[i] = el;
+              }}
+              type="button"
+              role="tab"
+              id={`${baseId}-tab-${l.id}`}
+              aria-selected={active}
+              aria-controls={panelId}
+              tabIndex={active ? 0 : -1}
+              className={`layer-chip ${active ? "is-active" : ""}`}
+              onClick={() => setLayer(l.id)}
+              onKeyDown={(e) => onTabKeyDown(e, i)}
+            >
+              {l.label}
+            </button>
+          );
+        })}
+        <span
+          className="layer-chip layer-chip--soon"
+          title="طبقة البلاغة مؤجّلة حتى توفر مصادر مرخّصة"
+        >
+          بلاغة · قريبًا
+        </span>
       </div>
 
-      <article className="analysis-card is-ready layer-panel">
+      <article
+        className="analysis-card is-ready layer-panel"
+        role="tabpanel"
+        id={panelId}
+        aria-labelledby={`${baseId}-tab-${layer}`}
+        tabIndex={0}
+      >
         {layer === "syntax" ? (
           <>
-            <h3>الإعراب</h3>
+            <h3>إعراب الكلمة</h3>
             <p className="layer-hint">
               {LAYERS.find((l) => l.id === "syntax")?.hint}
             </p>
-            <p>{qacNarrative}</p>
+            {hasMorphPayload && qacNarrative && qacNarrative !== "—" ? (
+              <p className="layer-body">{qacNarrative}</p>
+            ) : (
+              <p className="layer-empty">
+                لا تتوفر بيانات إعراب لهذه الكلمة في الصفحة الحالية.
+                {dockSurahId ? (
+                  <>
+                    {" "}
+                    <Link href={`/ayah/${dockSurahId}/${dockVerse}`}>
+                      افتح إعراب الآية كاملة
+                    </Link>
+                  </>
+                ) : null}
+              </p>
+            )}
+            <SourceLine
+              label={syntaxSourceLabel}
+              href={syntaxSourceUrl}
+              extra={syntaxLicense}
+            />
           </>
         ) : null}
 
@@ -247,19 +382,27 @@ export function WordStudyDock({
             <p className="layer-hint">
               {LAYERS.find((l) => l.id === "morph")?.hint}
             </p>
-            <div className="morph-facts morph-facts--inline">
-              {morphChips.map((c) => (
-                <span key={c.key}>{c.node}</span>
-              ))}
-            </div>
-            {lexiconExtra.length ? (
-              <ul className="lexicon-list">
-                {lexiconExtra.map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
-            ) : null}
-            {!morphChips.length && !lexiconExtra.length ? <p>—</p> : null}
+            {morphChips.length || lexiconExtra.length ? (
+              <>
+                <div className="morph-facts morph-facts--inline">
+                  {morphChips.map((c) => (
+                    <span key={c.key}>{c.node}</span>
+                  ))}
+                </div>
+                {lexiconExtra.length ? (
+                  <ul className="lexicon-list">
+                    {lexiconExtra.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </>
+            ) : (
+              <p className="layer-empty">
+                لا تتوفر خصائص صرفية أو معجمية لهذه الكلمة بعد.
+                {morph?.root ? null : " قد تكون أداةً أو ضميرًا بلا جذر مستقل."}
+              </p>
+            )}
             {morph?.root ? (
               <p>
                 <Link href={`/root/${encodeURIComponent(morph.root)}`}>
@@ -267,6 +410,11 @@ export function WordStudyDock({
                 </Link>
               </p>
             ) : null}
+            <SourceLine
+              label={syntaxSourceLabel}
+              href={syntaxSourceUrl}
+              extra="صرف المدونة القرآنية"
+            />
           </>
         ) : null}
 
@@ -275,9 +423,11 @@ export function WordStudyDock({
             <h3>الترجمة والدلالة</h3>
             <p className="layer-hint">
               {LAYERS.find((l) => l.id === "translation")?.hint}
-              {meaningLang === "ar"
-                ? " — المعنى العربي هنا معنى دراسي مختصر للكلمة."
-                : ""}
+            </p>
+
+            <h4 className="layer-subhead">معنى الكلمة</h4>
+            <p className="layer-hint layer-hint--tight">
+              {meaningSourceHint(meaningLang)}
             </p>
             <div className="lang-switch" role="group" aria-label="لغة معنى الكلمة">
               {MEANING_LABELS.map((l) => (
@@ -291,7 +441,12 @@ export function WordStudyDock({
                 </button>
               ))}
             </div>
-            <p className="word-sense">{wordMeaning(word, meaningLang) || "—"}</p>
+            {sense ? (
+              <p className="word-sense">{sense}</p>
+            ) : (
+              <p className="layer-empty">لا يتوفر معنى لهذه الكلمة بهذه اللغة.</p>
+            )}
+
             {verseEditions.length ? (
               <>
                 <h4 className="layer-subhead">ترجمة الآية</h4>
@@ -307,9 +462,24 @@ export function WordStudyDock({
                     </option>
                   ))}
                 </select>
-                <p className="verse-trans-body" dir="auto">
-                  {verseTranslation || "جارٍ التحميل…"}
+                <p
+                  className={`verse-trans-body${
+                    verseTranslationStatus === "error" ? " is-error" : ""
+                  }`}
+                  dir="auto"
+                >
+                  {verseTransBody}
                 </p>
+                {activeEdition ? (
+                  <SourceLine
+                    label={
+                      activeEdition.source
+                        ? `${activeEdition.nameAr} — ${activeEdition.source}`
+                        : activeEdition.nameAr
+                    }
+                    href={activeEdition.sourceUrl}
+                  />
+                ) : null}
               </>
             ) : null}
           </>
@@ -317,7 +487,7 @@ export function WordStudyDock({
 
         {layer === "tafsir" ? (
           <>
-            <h3>التفسير</h3>
+            <h3>تفسير الآية</h3>
             <p className="layer-hint">
               {LAYERS.find((l) => l.id === "tafsir")?.hint}
             </p>
@@ -338,9 +508,19 @@ export function WordStudyDock({
                 <p className="tafsir-dock-body" dir="rtl">
                   {tafsirLoading ? "جارٍ التحميل…" : tafsirText || "—"}
                 </p>
+                {activeTafsirMeta ? (
+                  <SourceLine
+                    label={
+                      activeTafsirMeta.source
+                        ? `${activeTafsirMeta.nameAr} — ${activeTafsirMeta.source}`
+                        : activeTafsirMeta.nameAr
+                    }
+                    href={activeTafsirMeta.sourceUrl}
+                  />
+                ) : null}
               </>
             ) : (
-              <p>لا تتوفر تفاسير محمّلة.</p>
+              <p className="layer-empty">لا تتوفر تفاسير محمّلة في هذه النسخة.</p>
             )}
           </>
         ) : null}

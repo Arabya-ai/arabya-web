@@ -44,6 +44,7 @@ export function useMushafStudyCache({
     Record<string, VerseTranslationSurah | null>
   >({});
   const [tafsirLoading, setTafsirLoading] = useState(false);
+  const [transLoading, setTransLoading] = useState(false);
 
   const tafsirCacheRef = useRef(tafsirCache);
   const transCacheRef = useRef(transCache);
@@ -129,26 +130,31 @@ export function useMushafStudyCache({
       );
       if (!toFetch.length) return;
 
-      const entries = await Promise.all(
-        toFetch.map(async (surahId) => {
-          try {
-            const res = await fetch(
-              `/api/translation/${verseEdition}/${surahId}`,
-            );
-            if (!res.ok) return [`${verseEdition}:${surahId}`, null] as const;
-            const data = (await res.json()) as VerseTranslationSurah;
-            return [`${verseEdition}:${surahId}`, data] as const;
-          } catch {
-            return [`${verseEdition}:${surahId}`, null] as const;
-          }
-        }),
-      );
-      if (cancelled) return;
-      setTransCache((prev) => {
-        const next = { ...prev };
-        for (const [key, value] of entries) next[key] = value;
-        return next;
-      });
+      setTransLoading(true);
+      try {
+        const entries = await Promise.all(
+          toFetch.map(async (surahId) => {
+            try {
+              const res = await fetch(
+                `/api/translation/${verseEdition}/${surahId}`,
+              );
+              if (!res.ok) return [`${verseEdition}:${surahId}`, null] as const;
+              const data = (await res.json()) as VerseTranslationSurah;
+              return [`${verseEdition}:${surahId}`, data] as const;
+            } catch {
+              return [`${verseEdition}:${surahId}`, null] as const;
+            }
+          }),
+        );
+        if (cancelled) return;
+        setTransCache((prev) => {
+          const next = { ...prev };
+          for (const [key, value] of entries) next[key] = value;
+          return next;
+        });
+      } finally {
+        if (!cancelled) setTransLoading(false);
+      }
     })();
 
     return () => {
@@ -182,10 +188,26 @@ export function useMushafStudyCache({
     );
   }, [selected, transCache, verseEdition]);
 
+  const selectedVerseTranslationStatus = useMemo(() => {
+    if (!selected || !verseEdition) return "idle" as const;
+    const key = `${verseEdition}:${selected.surahId}`;
+    if (!(key in transCache)) {
+      return transLoading ? ("loading" as const) : ("idle" as const);
+    }
+    const pack = transCache[key];
+    if (pack === null) return "error" as const;
+    const text = pack.verses.find(
+      (v) => v.verseNumber === selected.verseNumber,
+    )?.text;
+    if (text?.trim()) return "ready" as const;
+    return "empty" as const;
+  }, [selected, transCache, verseEdition, transLoading]);
+
   return {
     activeTafsir,
     tafsirRows,
     tafsirLoading,
     selectedVerseTranslation,
+    selectedVerseTranslationStatus,
   };
 }

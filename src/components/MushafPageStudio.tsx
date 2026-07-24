@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type {
   IrabSurah,
   IrabWord,
@@ -88,12 +88,12 @@ export function MushafPageStudio({
 }: Props) {
   const modes: { id: Mode; label: string }[] = useMemo(() => {
     const list: { id: Mode; label: string }[] = [
-      { id: "words", label: "الكلمات" },
-      { id: "irab", label: "الإعراب" },
+      { id: "words", label: "كلمات الصفحة" },
+      { id: "irab", label: "إعراب الصفحة" },
       { id: "meaning-table", label: "جدول المعنى" },
     ];
     for (const s of tafsirSources) {
-      list.push({ id: s.slug, label: s.nameAr });
+      list.push({ id: s.slug, label: `تفسير الصفحة · ${s.nameAr}` });
     }
     return list;
   }, [tafsirSources]);
@@ -855,7 +855,11 @@ export function MushafPageStudio({
             verseEdition={prefs.verseEdition}
             onVerseEdition={prefs.setVerseEdition}
             verseTranslation={study.selectedVerseTranslation}
+            verseTranslationStatus={study.selectedVerseTranslationStatus}
             tafsirSources={tafsirSources}
+            irabSource={irabBySurah[selected.surahId]?.source}
+            irabSourceUrl={irabBySurah[selected.surahId]?.sourceUrl}
+            irabLicense={irabBySurah[selected.surahId]?.license}
           />
           <div className="ayah-note-panel">
             <label className="ayah-note-label" htmlFor="ayah-note">
@@ -887,8 +891,10 @@ export function MushafPageStudio({
       ) : null}
 
       <p className="study-modes-hint">
-        أوضاع عرض الصفحة (كلمات · إعراب · جدول معنى · تفاسير) منفصلة عن طبقات
-        دراسة الكلمة أعلاه عند اختيار كلمة.
+        <strong>أوضاع الصفحة</strong> أدناه (كلمات · إعراب الصفحة · جدول معنى ·
+        تفاسير الصفحة) تعرض محتوى الصفحة كاملة.{" "}
+        <strong>طبقات الكلمة</strong> في اللوحة أعلاه تخص الكلمة المحددة فقط —
+        ومنها «تفسير الآية» للآية الحالية دون خلط مع تفسير الصفحة.
       </p>
       <StudyModeTabs modes={modes} mode={mode} onModeChange={setMode} />
 
@@ -985,10 +991,31 @@ export function MushafPageStudio({
           tabIndex={0}
         >
           <h2>جدول المعنى العربي — صفحة {toArabicNumerals(page.page)}</h2>
-          <p className="table-intro">معاني الكلمات كلمة بكلمة</p>
+          <p className="table-intro">
+            معنى دراسي للكلمة عند توفره؛ إن ظهر اسم المادة بين قوسين فهو بديل
+            صرفي وليس ترجمة.
+          </p>
           <div className="meaning-table-grid">
             {wordRows.map((row) => {
               const open = selected?.key === row.key;
+              const glossAr = row.word.meaningAr?.trim();
+              const glossEn = row.word.meaning?.trim();
+              const lemmaFallback = row.morph?.lemma?.trim();
+              let glossNode: ReactNode;
+              if (glossAr) {
+                glossNode = glossAr;
+              } else if (glossEn) {
+                glossNode = glossEn;
+              } else if (lemmaFallback) {
+                glossNode = (
+                  <span className="meaning-table-fallback">
+                    ({lemmaFallback})
+                    <span className="meaning-table-fallback-tag">مادة</span>
+                  </span>
+                );
+              } else {
+                glossNode = "—";
+              }
               return (
                 <button
                   key={row.key}
@@ -1001,12 +1028,7 @@ export function MushafPageStudio({
                   <span className="meaning-table-word">
                     {normalizeForHafsFont(row.word.text)}
                   </span>
-                  <span className="meaning-table-gloss">
-                    {row.word.meaningAr ||
-                      row.morph?.lemma ||
-                      row.word.meaning ||
-                      "—"}
-                  </span>
+                  <span className="meaning-table-gloss">{glossNode}</span>
                 </button>
               );
             })}
