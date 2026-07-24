@@ -4512,19 +4512,10 @@ a.auth-btn--google {
     var(--shadow);
   transform-style: preserve-3d;
   animation: dash-rise 0.55s var(--dash-ease) both;
-}
-
-/* sticky + تمرير داخلي على سطح المكتب فقط — على الموبايل يمرّر مع الصفحة */
-@media (min-width: 961px) {
-  .dash-sidebar {
-    position: sticky;
-    top: 5rem;
-    max-height: calc(100vh - 6rem);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
-    -webkit-overflow-scrolling: touch;
-  }
+  /* بدون تمرير داخلي — القائمة تتحرك مع تمرير الصفحة */
+  position: static;
+  max-height: none;
+  overflow: visible;
 }
 
 .dash-sidebar-top {
@@ -5579,7 +5570,6 @@ a.auth-btn--google {
     position: static;
     max-height: none;
     overflow: visible;
-    overscroll-behavior: auto;
     padding: 0.9rem;
     border-radius: 18px;
   }
