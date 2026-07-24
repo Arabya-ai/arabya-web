@@ -2,6 +2,18 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { AdminStats } from "@/lib/cloud-sync";
+import { DashIcon, type DashIconName } from "@/components/dashboard/DashIcon";
+
+const cardMeta: { key: keyof AdminStats; label: string; icon: DashIconName }[] = [
+  { key: "totalUsers", label: "إجمالي المستخدمين", icon: "users" },
+  { key: "users", label: "مشتركون", icon: "spark" },
+  { key: "editors", label: "محررون", icon: "studio" },
+  { key: "admins", label: "مدراء", icon: "shield" },
+  { key: "pendingRoleRequests", label: "طلبات معلّقة", icon: "requests" },
+  { key: "activeLast7Days", label: "نشطون 7 أيام", icon: "stats" },
+  { key: "totalBookmarks", label: "مفضّلات سحابية", icon: "favorites" },
+  { key: "totalNotes", label: "ملاحظات سحابية", icon: "book" },
+];
 
 export function AdminStatsCards() {
   const [stats, setStats] = useState<AdminStats | null>(null);
@@ -33,25 +45,27 @@ export function AdminStatsCards() {
     return <p className="dash-banner dash-banner--warn">{error}</p>;
   }
   if (!stats) {
-    return <p className="dash-muted">جاري تحميل الإحصائيات…</p>;
+    return (
+      <div className="dash-stat-grid dash-stat-grid--loading" aria-busy>
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="dash-stat dash-stat--skeleton" />
+        ))}
+      </div>
+    );
   }
-
-  const cards: { label: string; value: number }[] = [
-    { label: "إجمالي المستخدمين", value: stats.totalUsers },
-    { label: "مشتركون", value: stats.users },
-    { label: "محررون", value: stats.editors },
-    { label: "مدراء", value: stats.admins },
-    { label: "طلبات ترقية معلّقة", value: stats.pendingRoleRequests },
-    { label: "نشطون آخر 7 أيام", value: stats.activeLast7Days },
-    { label: "مفضّلات سحابية", value: stats.totalBookmarks },
-    { label: "ملاحظات سحابية", value: stats.totalNotes },
-  ];
 
   return (
     <div className="dash-stat-grid">
-      {cards.map((c) => (
-        <article key={c.label} className="dash-stat">
-          <p className="dash-stat-value">{c.value}</p>
+      {cardMeta.map((c, i) => (
+        <article
+          key={c.key}
+          className="dash-stat"
+          style={{ animationDelay: `${i * 45}ms` }}
+        >
+          <span className="dash-stat-icon">
+            <DashIcon name={c.icon} />
+          </span>
+          <p className="dash-stat-value">{stats[c.key]}</p>
           <p className="dash-stat-label">{c.label}</p>
         </article>
       ))}

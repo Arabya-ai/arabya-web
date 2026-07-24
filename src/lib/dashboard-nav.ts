@@ -1,41 +1,46 @@
 import type { UserRole } from "@/lib/roles";
 import { canAccessAdmin, canAccessStudio } from "@/lib/roles";
+import type { DashIconName } from "@/components/dashboard/DashIcon";
 
 export type DashNavItem = {
   href: string;
   label: string;
+  icon: DashIconName;
 };
 
 export function userDashNav(): DashNavItem[] {
   return [
-    { href: "/account", label: "نظرة عامة" },
-    { href: "/favorites", label: "المفضّلات" },
-    { href: "/account#role-request", label: "طلب محرر" },
+    { href: "/account", label: "نظرة عامة", icon: "home" },
+    { href: "/favorites", label: "المفضّلات", icon: "favorites" },
+    { href: "/account#role-request", label: "طلب محرر", icon: "upgrade" },
   ];
 }
 
 export function studioDashNav(): DashNavItem[] {
   return [
-    { href: "/studio", label: "نظرة عامة" },
-    { href: "/studio/queue", label: "طابور الجودة" },
-    { href: "/studio/sources", label: "المصادر" },
-    { href: "/account", label: "حسابي" },
+    { href: "/studio", label: "نظرة عامة", icon: "studio" },
+    { href: "/studio/queue", label: "طابور الجودة", icon: "queue" },
+    { href: "/studio/sources", label: "المصادر", icon: "sources" },
+    { href: "/account", label: "حسابي", icon: "home" },
   ];
 }
 
 export function adminDashNav(): DashNavItem[] {
   return [
-    { href: "/admin", label: "إحصائيات" },
-    { href: "/admin/users", label: "المستخدمون" },
-    { href: "/admin/requests", label: "طلبات الترقية" },
-    { href: "/admin/audit", label: "سجل الأدوار" },
-    { href: "/admin/settings", label: "إعدادات" },
-    { href: "/studio", label: "الاستوديو" },
-    { href: "/account", label: "حسابي" },
+    { href: "/admin", label: "إحصائيات", icon: "stats" },
+    { href: "/admin/users", label: "المستخدمون", icon: "users" },
+    { href: "/admin/requests", label: "طلبات الترقية", icon: "requests" },
+    { href: "/admin/audit", label: "سجل الأدوار", icon: "audit" },
+    { href: "/admin/settings", label: "إعدادات", icon: "settings" },
+    { href: "/studio", label: "الاستوديو", icon: "studio" },
+    { href: "/account", label: "حسابي", icon: "home" },
   ];
 }
 
-export function dashNavForRole(role: UserRole, area: "account" | "studio" | "admin"): DashNavItem[] {
+export function dashNavForRole(
+  role: UserRole,
+  area: "account" | "studio" | "admin",
+): DashNavItem[] {
   if (area === "admin" && canAccessAdmin(role)) return adminDashNav();
   if (area === "studio" && canAccessStudio(role)) return studioDashNav();
   return userDashNav();

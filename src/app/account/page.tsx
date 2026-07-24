@@ -30,6 +30,7 @@ export default async function AccountPage() {
       role={role}
       kicker="لوحة المشترك"
       title={`مرحبًا، ${name}`}
+      subtitle="إدارة قراءتك ومفضّلاتك وطلب صلاحيات المحرر من مكان واحد."
       userName={name}
       userImage={session.user.image}
     >

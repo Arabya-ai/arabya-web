@@ -1,6 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
-import { Amiri, Cairo, Noto_Naskh_Arabic } from "next/font/google";
+import {
+  Amiri,
+  Cairo,
+  IBM_Plex_Sans_Arabic,
+  Noto_Naskh_Arabic,
+  Plus_Jakarta_Sans,
+} from "next/font/google";
 import { AuthSessionProvider } from "@/components/AuthSessionProvider";
 import { CloudAutoSync } from "@/components/CloudAutoSync";
 import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
@@ -9,6 +15,18 @@ import "./globals.css";
 const cairo = Cairo({
   variable: "--font-cairo",
   subsets: ["arabic", "latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const plexArabic = IBM_Plex_Sans_Arabic({
+  variable: "--font-plex-ar",
+  subsets: ["arabic", "latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
+  subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
 });
 
@@ -93,7 +111,9 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${cairo.variable} ${naskh.variable} ${amiri.variable} antialiased`}>
+      <body
+        className={`${cairo.variable} ${plexArabic.variable} ${jakarta.variable} ${naskh.variable} ${amiri.variable} antialiased`}
+      >
         <AuthSessionProvider>
           <CloudAutoSync />
           <SiteHeader />
