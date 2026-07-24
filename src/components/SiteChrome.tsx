@@ -64,6 +64,9 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
         <Link href="/roots" role="menuitem" onClick={go("/roots")}>
           الجذور
         </Link>
+        <Link href="/qiraat" role="menuitem" onClick={go("/qiraat")}>
+          القراءات
+        </Link>
         <Link href="/asma" role="menuitem" onClick={go("/asma")}>
           الأسماء الحسنى
         </Link>
@@ -143,6 +146,7 @@ export function SiteFooter() {
             <Link href="/mushaf/1">المصحف</Link>
             <Link href="/juz">الأجزاء</Link>
             <Link href="/roots">الجذور</Link>
+            <Link href="/qiraat">القراءات</Link>
             <Link href="/about">عن عربية</Link>
             <Link href="/privacy">الخصوصية</Link>
           </nav>

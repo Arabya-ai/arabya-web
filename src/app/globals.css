@@ -3221,6 +3221,13 @@ html[data-theme="dark"] ::selection {
   color: var(--muted);
 }
 
+.qiraat-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.65rem;
+}
+
 .qiraat-list p {
   margin: 0.35rem 0 0;
   color: var(--muted);
