@@ -6,6 +6,7 @@ import { DEFAULT_RECITER_ID, RECITERS } from "@/lib/audio";
 import { recordPageRead } from "@/lib/reading-habit";
 import {
   FONT_KEY,
+  FONT_SCALE_DEFAULT,
   FONT_SCALE_MAX,
   FONT_SCALE_MIN,
   FONT_SCALE_STEP,
@@ -23,13 +24,16 @@ export function useMushafPrefs(
   page: PageNav,
   verseEditions: VerseTranslationEdition[],
 ) {
-  const [fontScale, setFontScale] = useState(1);
-  const [fontDraft, setFontDraft] = useState("100");
+  const [fontScale, setFontScale] = useState(FONT_SCALE_DEFAULT);
+  const [fontDraft, setFontDraft] = useState(
+    String(Math.round(FONT_SCALE_DEFAULT * 100)),
+  );
   const [meaningLang, setMeaningLang] = useState<MeaningLang>("ar");
   const [verseEdition, setVerseEdition] = useState(
     () => verseEditions[0]?.slug ?? "saheeh-en",
   );
   const [reciterId, setReciterId] = useState(DEFAULT_RECITER_ID);
+  const [fontHydrated, setFontHydrated] = useState(false);
 
   useEffect(() => {
     try {
@@ -41,8 +45,18 @@ export function useMushafPrefs(
 
   useEffect(() => {
     try {
-      const saved = Number(localStorage.getItem(FONT_KEY));
-      if (Number.isFinite(saved)) setFontScale(clampFontScale(saved));
+      const raw = localStorage.getItem(FONT_KEY);
+      if (raw != null && raw !== "") {
+        const saved = Number(raw);
+        // Ignore 0 / NaN — Number(null) is 0 and used to clamp to 70%.
+        if (Number.isFinite(saved) && saved > 0) {
+          setFontScale(clampFontScale(saved));
+        } else {
+          setFontScale(FONT_SCALE_DEFAULT);
+        }
+      } else {
+        setFontScale(FONT_SCALE_DEFAULT);
+      }
       const lang = localStorage.getItem(MEANING_LANG_KEY);
       if (lang === "ar" || lang === "en" || lang === "id" || lang === "ur") {
         setMeaningLang(lang);
@@ -54,7 +68,9 @@ export function useMushafPrefs(
       const ed = localStorage.getItem(VERSE_TRANS_KEY);
       if (ed && verseEditions.some((e) => e.slug === ed)) setVerseEdition(ed);
     } catch {
-      /* ignore */
+      setFontScale(FONT_SCALE_DEFAULT);
+    } finally {
+      setFontHydrated(true);
     }
   }, [verseEditions]);
 
@@ -70,6 +86,7 @@ export function useMushafPrefs(
   }, [page.page]);
 
   useEffect(() => {
+    if (!fontHydrated) return;
     try {
       localStorage.setItem(FONT_KEY, String(fontScale));
       localStorage.setItem(MEANING_LANG_KEY, meaningLang);
@@ -77,7 +94,7 @@ export function useMushafPrefs(
     } catch {
       /* ignore */
     }
-  }, [fontScale, meaningLang, verseEdition]);
+  }, [fontHydrated, fontScale, meaningLang, verseEdition]);
 
   useEffect(() => {
     setFontDraft(String(Math.round(fontScale * 100)));
