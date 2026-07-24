@@ -10,6 +10,11 @@ import {
   writeReadingHabit,
   type ReadingHabitState,
 } from "@/lib/reading-habit";
+import {
+  readStudyEntries,
+  writeStudyEntries,
+  type StudyEntry,
+} from "@/lib/study-archive";
 
 export const CLOUD_SYNC_EVENT = "arabya-cloud-sync-needed";
 export const DATA_REV_KEY = "arabya-data-rev";
@@ -46,6 +51,7 @@ export function collectLocalSyncPayload() {
   return {
     bookmarks: readBookmarks(),
     notes: readAyahNotes(),
+    study: readStudyEntries(),
     progress: {
       lastPage: Number.isFinite(lastPage) ? lastPage : null,
       habit: readReadingHabit(),
@@ -56,11 +62,13 @@ export function collectLocalSyncPayload() {
 export function applyCloudToLocal(data: {
   bookmarks: Bookmark[];
   notes: AyahNote[];
+  study?: StudyEntry[];
   progress: { lastPage: number | null; habit: unknown; updatedAt?: number | null };
 }) {
   withCloudSyncSuppressed(() => {
     if (Array.isArray(data.bookmarks)) writeBookmarks(data.bookmarks);
     if (Array.isArray(data.notes)) writeAllNotes(data.notes);
+    if (Array.isArray(data.study)) writeStudyEntries(data.study);
 
     const habit = data.progress?.habit;
     if (habit && typeof habit === "object") {
@@ -100,9 +108,24 @@ function mergeNotes(local: AyahNote[], cloud: AyahNote[]): AyahNote[] {
     .slice(0, 300);
 }
 
+function mergeStudy(local: StudyEntry[], cloud: StudyEntry[]): StudyEntry[] {
+  const map = new Map<string, StudyEntry>();
+  for (const item of [...cloud, ...local]) {
+    if (!item?.id) continue;
+    const prev = map.get(item.id);
+    if (!prev || (item.updatedAt || 0) >= (prev.updatedAt || 0)) {
+      map.set(item.id, item);
+    }
+  }
+  return [...map.values()]
+    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+    .slice(0, 200);
+}
+
 export function mergeCloudAndLocal(cloud: {
   bookmarks: Bookmark[];
   notes: AyahNote[];
+  study?: StudyEntry[];
   progress: { lastPage: number | null; habit: unknown; updatedAt?: number | null };
 }) {
   const local = collectLocalSyncPayload();
@@ -126,6 +149,7 @@ export function mergeCloudAndLocal(cloud: {
   return {
     bookmarks: mergeBookmarks(local.bookmarks, cloud.bookmarks || []),
     notes: mergeNotes(local.notes, cloud.notes || []),
+    study: mergeStudy(local.study, cloud.study || []),
     progress,
   };
 }
@@ -150,6 +174,7 @@ export async function pullMergeAndPush(): Promise<{
   applyCloudToLocal({
     bookmarks: merged.bookmarks,
     notes: merged.notes,
+    study: merged.study,
     progress: {
       ...merged.progress,
       updatedAt: pullData.progress?.updatedAt ?? null,
@@ -169,7 +194,7 @@ export async function pullMergeAndPush(): Promise<{
   applyCloudToLocal(pushData);
   return {
     ok: true,
-    message: `تمت المزامنة تلقائيًا (${pushData.bookmarks?.length ?? 0} مفضّلة، ${pushData.notes?.length ?? 0} ملاحظة).`,
+    message: `تمت المزامنة تلقائيًا (${pushData.bookmarks?.length ?? 0} مفضّلة، ${pushData.notes?.length ?? 0} ملاحظة، ${pushData.study?.length ?? 0} دراسة).`,
   };
 }
 

@@ -25,6 +25,21 @@ type NoteRow = {
   updatedAt: number;
 };
 
+type StudyEntryRow = {
+  id: string;
+  kind: string;
+  title: string;
+  query?: string | null;
+  surahId?: number | null;
+  verse?: number | null;
+  wordIndex?: number | null;
+  snippet?: string | null;
+  notes: string;
+  href?: string | null;
+  createdAt: number;
+  updatedAt: number;
+};
+
 type ProgressPayload = {
   lastPage: number | null;
   habit: unknown;
@@ -195,6 +210,22 @@ async function pullAll(db: D1Database, userId: string) {
     .bind(userId)
     .all<NoteRow>();
 
+  let studyRows: StudyEntryRow[] = [];
+  try {
+    const study = await db
+      .prepare(
+        `SELECT id, kind, title, query, surah_id as surahId, verse,
+                word_index as wordIndex, snippet, notes, href,
+                created_at as createdAt, updated_at as updatedAt
+         FROM study_entries WHERE user_id = ? ORDER BY updated_at DESC`,
+      )
+      .bind(userId)
+      .all<StudyEntryRow>();
+    studyRows = study.results ?? [];
+  } catch {
+    studyRows = [];
+  }
+
   const progress = await db
     .prepare(
       `SELECT last_page as lastPage, habit_json as habitJson, updated_at as updatedAt
@@ -215,6 +246,7 @@ async function pullAll(db: D1Database, userId: string) {
   return {
     bookmarks: bookmarks.results ?? [],
     notes: notes.results ?? [],
+    study: studyRows,
     progress: {
       lastPage: progress?.lastPage ?? null,
       habit,
@@ -229,6 +261,7 @@ async function pushAll(
   bookmarks: BookmarkRow[],
   notes: NoteRow[],
   progress: ProgressPayload,
+  study: StudyEntryRow[] = [],
 ) {
   const stmts: D1PreparedStatement[] = [];
 
@@ -270,6 +303,37 @@ async function pushAll(
           Number(n.verse) || 0,
           text,
           Number(n.updatedAt) || Date.now(),
+        ),
+    );
+  }
+
+  stmts.push(db.prepare(`DELETE FROM study_entries WHERE user_id = ?`).bind(userId));
+  for (const s of study.slice(0, 200)) {
+    if (!s?.id || !s?.title) continue;
+    const kind =
+      s.kind === "word" || s.kind === "quick" || s.kind === "ayah" ? s.kind : "quick";
+    stmts.push(
+      db
+        .prepare(
+          `INSERT INTO study_entries (
+             user_id, id, kind, title, query, surah_id, verse, word_index,
+             snippet, notes, href, created_at, updated_at
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        )
+        .bind(
+          userId,
+          String(s.id).slice(0, 64),
+          kind,
+          String(s.title).slice(0, 300),
+          s.query ? String(s.query).slice(0, 300) : null,
+          s.surahId != null ? Number(s.surahId) || null : null,
+          s.verse != null ? Number(s.verse) || null : null,
+          s.wordIndex != null ? Number(s.wordIndex) || null : null,
+          s.snippet ? String(s.snippet).slice(0, 500) : null,
+          String(s.notes ?? "").slice(0, 4000),
+          s.href ? String(s.href).slice(0, 400) : null,
+          Number(s.createdAt) || Date.now(),
+          Number(s.updatedAt) || Date.now(),
         ),
     );
   }
@@ -531,6 +595,7 @@ export default {
         Array.isArray(body.bookmarks) ? (body.bookmarks as BookmarkRow[]) : [],
         Array.isArray(body.notes) ? (body.notes as NoteRow[]) : [],
         (body.progress as ProgressPayload) || { lastPage: null, habit: {} },
+        Array.isArray(body.study) ? (body.study as StudyEntryRow[]) : [],
       );
       const data = await pullAll(env.DB, userId);
       const info = await getUserRole(env.DB, email);
@@ -594,6 +659,80 @@ export default {
           .bind(id, userId, message, targetRole, now, now)
           .run();
         return json({ ok: true, id, status: "pending", targetRole });
+      }
+
+      return badRequest("unknown_action");
+    }
+
+    // --- Studio uploads (editor or admin) ---
+    if (url.pathname === "/v1/studio/uploads") {
+      const actorEmail = String(body.actorEmail || body.email || "")
+        .trim()
+        .toLowerCase();
+      if (!actorEmail || !actorEmail.includes("@")) {
+        return badRequest("actor_email_required");
+      }
+      const actor = await getUserRole(env.DB, actorEmail);
+      const elevated =
+        isProtectedAdmin(actorEmail, env) ||
+        actor?.role === "admin" ||
+        actor?.role === "editor";
+      if (!elevated || actor?.status === "banned") {
+        return forbidden("studio_required");
+      }
+
+      const action = String(body.action || "list");
+      if (action === "list") {
+        const rows = await env.DB.prepare(
+          `SELECT id, uploader_id as uploaderId, filename, kind, notes, status,
+                  created_at as createdAt, length(payload) as bytes
+           FROM source_uploads ORDER BY created_at DESC LIMIT 50`,
+        ).all();
+        return json({ ok: true, uploads: rows.results ?? [] });
+      }
+
+      if (action === "create") {
+        const filename = String(body.filename || "upload.json").slice(0, 200);
+        const payload = String(body.payload || "");
+        if (!payload || payload.length > 500_000) {
+          return badRequest("payload_too_large_or_empty");
+        }
+        try {
+          JSON.parse(payload);
+        } catch {
+          return badRequest("payload_must_be_json");
+        }
+        const id = newId("src");
+        const now = Date.now();
+        await env.DB.prepare(
+          `INSERT INTO source_uploads (id, uploader_id, filename, kind, payload, notes, status, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)`,
+        )
+          .bind(
+            id,
+            actorEmail,
+            filename,
+            String(body.kind || "json").slice(0, 40),
+            payload,
+            String(body.notes || "").slice(0, 500),
+            now,
+          )
+          .run();
+        return json({ ok: true, id, status: "pending" });
+      }
+
+      if (action === "get") {
+        const id = String(body.id || "");
+        if (!id) return badRequest("id_required");
+        const row = await env.DB.prepare(
+          `SELECT id, uploader_id as uploaderId, filename, kind, payload, notes, status,
+                  created_at as createdAt
+           FROM source_uploads WHERE id = ?`,
+        )
+          .bind(id)
+          .first();
+        if (!row) return json({ ok: false, error: "not_found" }, 404);
+        return json({ ok: true, upload: row });
       }
 
       return badRequest("unknown_action");

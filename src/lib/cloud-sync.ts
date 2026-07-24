@@ -3,6 +3,7 @@ import type { AyahNote } from "@/lib/ayah-notes";
 import type { ReadingHabitState } from "@/lib/reading-habit";
 import type { UserRole } from "@/lib/roles";
 import { isEnvAdminEmail } from "@/lib/roles";
+import type { StudyEntry } from "@/lib/study-archive";
 
 export type SyncProgress = {
   lastPage: number | null;
@@ -13,6 +14,7 @@ export type SyncProgress = {
 export type SyncPayload = {
   bookmarks: Bookmark[];
   notes: AyahNote[];
+  study: StudyEntry[];
   progress: SyncProgress;
 };
 
@@ -153,6 +155,7 @@ export async function pullCloudSync(user: {
     role: data.role,
     bookmarks: Array.isArray(data.bookmarks) ? data.bookmarks : [],
     notes: Array.isArray(data.notes) ? data.notes : [],
+    study: Array.isArray(data.study) ? data.study : [],
     progress: data.progress || { lastPage: null, habit: {}, updatedAt: null },
   };
 }
@@ -172,6 +175,7 @@ export async function pushCloudSync(
     ...profileBody(user),
     bookmarks: payload.bookmarks,
     notes: payload.notes,
+    study: payload.study,
     progress: {
       lastPage: payload.progress.lastPage,
       habit: payload.progress.habit,
@@ -183,9 +187,39 @@ export async function pushCloudSync(
     role: data.role,
     bookmarks: Array.isArray(data.bookmarks) ? data.bookmarks : [],
     notes: Array.isArray(data.notes) ? data.notes : [],
+    study: Array.isArray(data.study) ? data.study : [],
     progress: data.progress || { lastPage: null, habit: {}, updatedAt: null },
   };
 }
+
+export async function studioListUploads(actorEmail: string) {
+  return callWorker<{ uploads: SourceUploadRow[] }>("/v1/studio/uploads", {
+    actorEmail,
+    action: "list",
+  });
+}
+
+export async function studioCreateUpload(
+  actorEmail: string,
+  input: { filename: string; payload: string; notes?: string; kind?: string },
+) {
+  return callWorker<{ id: string; status: string }>("/v1/studio/uploads", {
+    actorEmail,
+    action: "create",
+    ...input,
+  });
+}
+
+export type SourceUploadRow = {
+  id: string;
+  uploaderId: string;
+  filename: string;
+  kind: string;
+  notes?: string | null;
+  status: string;
+  createdAt: number;
+  bytes?: number;
+};
 
 export async function getRoleRequest(email: string) {
   return callWorker<{ request: RoleRequestRow | null }>("/v1/role-request", {
@@ -228,6 +262,7 @@ export async function adminGetPortfolio(actorEmail: string, userId: string) {
     noteCount: number;
     bookmarks: unknown[];
     notes: unknown[];
+    study?: unknown[];
   }>("/v1/admin/portfolio", { actorEmail, userId });
 }
 

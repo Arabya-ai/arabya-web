@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
@@ -142,9 +141,26 @@ export default async function AdminUserPortfolioPage({ params }: Props) {
           )}
         </section>
 
+        <section className="dash-card">
+          <h2>أرشيف الدراسة ({Array.isArray(data.study) ? data.study.length : 0})</h2>
+          {!Array.isArray(data.study) || data.study.length === 0 ? (
+            <p className="dash-muted">لا دراسات مزامَنة.</p>
+          ) : (
+            <ul className="dash-list">
+              {(data.study as { id?: string; title?: string; kind?: string; notes?: string }[])
+                .slice(0, 50)
+                .map((s) => (
+                  <li key={s.id || s.title}>
+                    {s.kind || "دراسة"} — {s.title}
+                    {s.notes ? ` · ${s.notes.slice(0, 80)}` : ""}
+                  </li>
+                ))}
+            </ul>
+          )}
+        </section>
+
         <p className="dash-muted">
-          أرشيف الدراسة المحلي لا يُزامَن بعد إلى السحابة؛ يظهر للمستخدم في{" "}
-          <Link href="/account/study">دراسة</Link> على جهازه.
+          البيانات أعلاه من المزامنة السحابية (D1) للمفضّلات والملاحظات والدراسة.
         </p>
       </div>
     </DashboardShell>

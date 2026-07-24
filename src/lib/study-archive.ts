@@ -1,4 +1,4 @@
-/** حفظ جلسات الدراسة في الحساب (localStorage + مزامنة لاحقًا). */
+/** حفظ جلسات الدراسة في الحساب (localStorage + مزامنة D1). */
 
 export type StudyEntry = {
   id: string;
@@ -38,6 +38,12 @@ export function writeStudyEntries(list: StudyEntry[]) {
   if (typeof window === "undefined") return;
   localStorage.setItem(KEY, JSON.stringify(list.slice(0, MAX)));
   window.dispatchEvent(new Event("arabya-study-updated"));
+  try {
+    localStorage.setItem("arabya-data-rev", String(Date.now()));
+    window.dispatchEvent(new Event("arabya-cloud-sync-needed"));
+  } catch {
+    /* ignore */
+  }
 }
 
 export function upsertStudyEntry(
