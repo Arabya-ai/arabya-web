@@ -16,6 +16,20 @@ type SelectedAyah = {
   verseKey: string;
 } | null;
 
+export type SurahPlayerState = {
+  active: boolean;
+  playing: boolean;
+  pinned: boolean;
+  surahId: number | null;
+  title: string;
+  currentTime: number;
+  duration: number;
+  playbackRate: number;
+  mode: "chapter" | "verses";
+  verseIndex: number;
+  versesCount: number;
+};
+
 function hardStopMedia(audio: HTMLAudioElement | null) {
   if (!audio) return;
   try {
@@ -29,6 +43,20 @@ function hardStopMedia(audio: HTMLAudioElement | null) {
     /* ignore */
   }
 }
+
+const emptyPlayer: SurahPlayerState = {
+  active: false,
+  playing: false,
+  pinned: false,
+  surahId: null,
+  title: "",
+  currentTime: 0,
+  duration: 0,
+  playbackRate: 1,
+  mode: "verses",
+  verseIndex: 0,
+  versesCount: 0,
+};
 
 export function useQuranAudio({
   selected,
@@ -51,10 +79,20 @@ export function useQuranAudio({
   const [wbwPlaying, setWbwPlaying] = useState(false);
   const [surahPlaying, setSurahPlaying] = useState(false);
   const [syncHighlightPos, setSyncHighlightPos] = useState<number | null>(null);
+  const [surahPlayer, setSurahPlayer] = useState<SurahPlayerState>(emptyPlayer);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const wbwStopRef = useRef(false);
   const ayahStopRef = useRef(false);
   const surahStopRef = useRef(false);
+  const surahPausedRef = useRef(false);
+  const pinnedRef = useRef(false);
+  const rateRef = useRef(1);
+  const surahMetaRef = useRef<{
+    surahId: number;
+    versesCount: number;
+    fromVerse: number;
+    title: string;
+  } | null>(null);
   const timingsCacheRef = useRef<
     Record<string, { audioUrl: string; verses: Record<string, VerseTiming> }>
   >({});
@@ -64,11 +102,16 @@ export function useQuranAudio({
     wbwStopRef.current = true;
     ayahStopRef.current = true;
     surahStopRef.current = true;
+    surahPausedRef.current = false;
     hardStopMedia(audioRef.current);
     setAudioPlaying(false);
     setWbwPlaying(false);
     setSurahPlaying(false);
     setSyncHighlightPos(null);
+    setSurahPlayer((p) => ({
+      ...emptyPlayer,
+      pinned: pinnedRef.current ? p.pinned : false,
+    }));
   };
 
   useEffect(() => {
@@ -114,6 +157,7 @@ export function useQuranAudio({
     surahStopRef.current = true;
     setWbwPlaying(false);
     setSurahPlaying(false);
+    setSurahPlayer(emptyPlayer);
     setAudioPlaying(true);
     if (!audioRef.current) audioRef.current = new Audio();
     const audio = audioRef.current;
@@ -285,41 +329,46 @@ export function useQuranAudio({
     setWbwPlaying(true);
     setAudioPlaying(false);
     setSurahPlaying(false);
+    setSurahPlayer(emptyPlayer);
     onStatusNote("تلاوة كلمة بكلمة…");
     if (!audioRef.current) audioRef.current = new Audio();
     const audio = audioRef.current;
+    const times = Math.max(1, Math.min(10, repeatCount));
 
     let failed = false;
     try {
-      for (const word of words) {
+      for (let round = 0; round < times; round++) {
         if (wbwStopRef.current) break;
-        onSelectWord(selected.surahId, selected.verseNumber, word.position);
-        const url = wordAudioUrl(
-          selected.surahId,
-          selected.verseNumber,
-          word.position,
-        );
-        await new Promise<void>((resolve) => {
-          const onEnded = () => {
-            cleanup();
-            resolve();
-          };
-          const onError = () => {
-            cleanup();
-            resolve();
-          };
-          const cleanup = () => {
-            audio.removeEventListener("ended", onEnded);
-            audio.removeEventListener("error", onError);
-          };
-          audio.addEventListener("ended", onEnded);
-          audio.addEventListener("error", onError);
-          audio.src = url;
-          audio.play().catch(() => {
-            cleanup();
-            resolve();
+        for (const word of words) {
+          if (wbwStopRef.current) break;
+          onSelectWord(selected.surahId, selected.verseNumber, word.position);
+          const url = wordAudioUrl(
+            selected.surahId,
+            selected.verseNumber,
+            word.position,
+          );
+          await new Promise<void>((resolve) => {
+            const onEnded = () => {
+              cleanup();
+              resolve();
+            };
+            const onError = () => {
+              cleanup();
+              resolve();
+            };
+            const cleanup = () => {
+              audio.removeEventListener("ended", onEnded);
+              audio.removeEventListener("error", onError);
+            };
+            audio.addEventListener("ended", onEnded);
+            audio.addEventListener("error", onError);
+            audio.src = url;
+            audio.play().catch(() => {
+              cleanup();
+              resolve();
+            });
           });
-        });
+        }
       }
     } catch {
       failed = true;
@@ -336,6 +385,7 @@ export function useQuranAudio({
     surahId: number,
     versesCount: number,
     fromVerse = 1,
+    title = "",
   ) => {
     if (!surahId || versesCount < 1) {
       onStatusNote("تعذّر تحديد السورة للتشغيل", 2200);
@@ -347,6 +397,7 @@ export function useQuranAudio({
     }
 
     surahStopRef.current = false;
+    surahPausedRef.current = false;
     ayahStopRef.current = true;
     wbwStopRef.current = true;
     setSurahPlaying(true);
@@ -357,51 +408,235 @@ export function useQuranAudio({
     if (!audioRef.current) audioRef.current = new Audio();
     const audio = audioRef.current;
     const start = Math.max(1, Math.min(fromVerse, versesCount));
+    const times = Math.max(1, Math.min(10, repeatCount));
+    const label = title || `سورة ${surahId}`;
+    surahMetaRef.current = { surahId, versesCount, fromVerse: start, title: label };
+
+    setSurahPlayer({
+      active: true,
+      playing: true,
+      pinned: pinnedRef.current,
+      surahId,
+      title: label,
+      currentTime: 0,
+      duration: 0,
+      playbackRate: rateRef.current,
+      mode: "verses",
+      verseIndex: start,
+      versesCount,
+    });
+
     onStatusNote(`تشغيل السورة من الآية ${start}…`);
+
+    const pack = await loadChapterTimings(surahId, reciterId);
+    if (surahStopRef.current) {
+      setSurahPlaying(false);
+      return;
+    }
 
     let failed = false;
     let playedAny = false;
+
+    const waitWhilePaused = async () => {
+      while (surahPausedRef.current && !surahStopRef.current) {
+        await new Promise((r) => setTimeout(r, 120));
+      }
+    };
+
     try {
-      for (let v = start; v <= versesCount; v++) {
-        if (surahStopRef.current) break;
-        const url = ayahAudioUrl(surahId, v, reciterId);
-        const ok = await new Promise<boolean>((resolve) => {
-          const onEnded = () => {
-            cleanup();
-            resolve(true);
-          };
-          const onError = () => {
-            cleanup();
-            resolve(false);
-          };
-          const cleanup = () => {
-            audio.removeEventListener("ended", onEnded);
-            audio.removeEventListener("error", onError);
-          };
-          audio.addEventListener("ended", onEnded);
-          audio.addEventListener("error", onError);
-          audio.src = url;
-          audio.play().catch(() => {
-            cleanup();
-            resolve(false);
+      if (pack?.audioUrl) {
+        setSurahPlayer((p) => ({ ...p, mode: "chapter", active: true, playing: true }));
+        for (let round = 0; round < times; round++) {
+          if (surahStopRef.current) break;
+          await waitWhilePaused();
+          if (surahStopRef.current) break;
+
+          const ok = await new Promise<boolean>((resolve) => {
+            let settled = false;
+            const finish = (v: boolean) => {
+              if (settled) return;
+              settled = true;
+              audio.removeEventListener("timeupdate", onTime);
+              audio.removeEventListener("ended", onEnded);
+              audio.removeEventListener("error", onError);
+              audio.removeEventListener("loadedmetadata", onMeta);
+              resolve(v);
+            };
+            const onTime = () => {
+              if (surahStopRef.current) {
+                audio.pause();
+                finish(true);
+                return;
+              }
+              setSurahPlayer((p) => ({
+                ...p,
+                currentTime: audio.currentTime,
+                duration: Number.isFinite(audio.duration) ? audio.duration : p.duration,
+                playing: !audio.paused,
+              }));
+            };
+            const onEnded = () => finish(true);
+            const onError = () => finish(false);
+            const onMeta = () => {
+              const fromKey = `${surahId}:${start}`;
+              const timing = pack.verses[fromKey];
+              if (timing) {
+                try {
+                  audio.currentTime = Math.max(0, timing.timestampFrom / 1000);
+                } catch {
+                  /* ignore */
+                }
+              }
+              setSurahPlayer((p) => ({
+                ...p,
+                duration: Number.isFinite(audio.duration) ? audio.duration : 0,
+              }));
+              void audio.play().catch(() => finish(false));
+            };
+            audio.playbackRate = rateRef.current;
+            audio.addEventListener("timeupdate", onTime);
+            audio.addEventListener("ended", onEnded);
+            audio.addEventListener("error", onError);
+            audio.addEventListener("loadedmetadata", onMeta, { once: true });
+            audio.src = pack.audioUrl;
+            audio.load();
           });
-        });
-        if (!ok) {
-          if (!playedAny) {
-            failed = true;
-            onStatusNote("تعذّر تشغيل السورة — تحقق من الاتصال", 2500);
+
+          if (!ok) {
+            failed = !playedAny;
+            break;
           }
-          break;
+          playedAny = true;
         }
-        playedAny = true;
+      } else {
+        for (let round = 0; round < times; round++) {
+          if (surahStopRef.current) break;
+          for (let v = start; v <= versesCount; v++) {
+            if (surahStopRef.current) break;
+            await waitWhilePaused();
+            if (surahStopRef.current) break;
+
+            setSurahPlayer((p) => ({
+              ...p,
+              mode: "verses",
+              verseIndex: v,
+              playing: true,
+              active: true,
+            }));
+
+            const url = ayahAudioUrl(surahId, v, reciterId);
+            const ok = await new Promise<boolean>((resolve) => {
+              const onEnded = () => {
+                cleanup();
+                resolve(true);
+              };
+              const onError = () => {
+                cleanup();
+                resolve(false);
+              };
+              const onTime = () => {
+                setSurahPlayer((p) => ({
+                  ...p,
+                  currentTime: audio.currentTime,
+                  duration: Number.isFinite(audio.duration) ? audio.duration : 0,
+                  playing: !audio.paused,
+                }));
+              };
+              const cleanup = () => {
+                audio.removeEventListener("ended", onEnded);
+                audio.removeEventListener("error", onError);
+                audio.removeEventListener("timeupdate", onTime);
+              };
+              audio.addEventListener("ended", onEnded);
+              audio.addEventListener("error", onError);
+              audio.addEventListener("timeupdate", onTime);
+              audio.playbackRate = rateRef.current;
+              audio.src = url;
+              audio.play().catch(() => {
+                cleanup();
+                resolve(false);
+              });
+            });
+            if (!ok) {
+              if (!playedAny) {
+                failed = true;
+                onStatusNote("تعذّر تشغيل السورة — تحقق من الاتصال", 2500);
+              }
+              break;
+            }
+            playedAny = true;
+          }
+          if (failed) break;
+        }
       }
     } catch {
       failed = true;
       onStatusNote("تعذّر تشغيل السورة", 2000);
     } finally {
       setSurahPlaying(false);
+      setSurahPlayer((p) =>
+        p.pinned || pinnedRef.current
+          ? { ...p, playing: false, active: true }
+          : { ...emptyPlayer, pinned: false },
+      );
       if (!surahStopRef.current && !failed) onStatusNote(null);
+      if (failed && !playedAny) {
+        setSurahPlayer(emptyPlayer);
+      }
     }
+  };
+
+  const pauseSurah = () => {
+    surahPausedRef.current = true;
+    audioRef.current?.pause();
+    setSurahPlayer((p) => ({ ...p, playing: false }));
+  };
+
+  const resumeSurah = () => {
+    if (!surahPlaying) {
+      const meta = surahMetaRef.current;
+      if (meta) {
+        void playSurahAudio(
+          meta.surahId,
+          meta.versesCount,
+          meta.fromVerse,
+          meta.title,
+        );
+      }
+      return;
+    }
+    surahPausedRef.current = false;
+    void audioRef.current?.play().catch(() => undefined);
+    setSurahPlayer((p) => ({ ...p, playing: true }));
+  };
+
+  const seekSurah = (time: number) => {
+    const audio = audioRef.current;
+    if (!audio || !Number.isFinite(time)) return;
+    try {
+      audio.currentTime = Math.max(0, time);
+      setSurahPlayer((p) => ({ ...p, currentTime: audio.currentTime }));
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const setSurahRate = (rate: number) => {
+    const next = Math.min(2, Math.max(0.75, rate));
+    rateRef.current = next;
+    if (audioRef.current) audioRef.current.playbackRate = next;
+    setSurahPlayer((p) => ({ ...p, playbackRate: next }));
+  };
+
+  const setSurahPinned = (pinned: boolean) => {
+    pinnedRef.current = pinned;
+    setSurahPlayer((p) => ({ ...p, pinned }));
+  };
+
+  const closeSurahPlayer = () => {
+    stopAllAudio();
+    pinnedRef.current = false;
+    setSurahPlayer(emptyPlayer);
   };
 
   return {
@@ -409,9 +644,16 @@ export function useQuranAudio({
     wbwPlaying,
     surahPlaying,
     syncHighlightPos,
+    surahPlayer,
     stopAllAudio,
     playAyahAudio,
     playWordByWordAudio,
     playSurahAudio,
+    pauseSurah,
+    resumeSurah,
+    seekSurah,
+    setSurahRate,
+    setSurahPinned,
+    closeSurahPlayer,
   };
 }
