@@ -23,6 +23,7 @@ export default async function AdminPage() {
       role={session.user.role}
       kicker="إدارة عربية"
       title="لوحة الإحصائيات"
+      subtitle="نظرة حيّة على الحسابات والنشاط والمزامنة السحابية."
       userName={session.user.name}
       userImage={session.user.image}
     >

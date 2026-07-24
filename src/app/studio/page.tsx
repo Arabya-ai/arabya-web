@@ -22,6 +22,7 @@ export default async function StudioPage() {
       role={session.user.role}
       kicker="استوديو عربية"
       title="لوحة المحرر"
+      subtitle="راجع الجودة والمصادر بواجهة هادئة وسريعة."
       userName={session.user.name}
       userImage={session.user.image}
     >
