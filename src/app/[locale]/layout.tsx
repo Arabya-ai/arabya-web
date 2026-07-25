@@ -12,7 +12,7 @@ import { getMessages, getTranslations, setRequestLocale } from "next-intl/server
 import { notFound } from "next/navigation";
 import { AuthSessionProvider } from "@/components/AuthSessionProvider";
 import { CloudAutoSync } from "@/components/CloudAutoSync";
-import { SiteFooter, SiteHeader } from "@/components/SiteChrome";
+import { AppShell } from "@/components/SiteChrome";
 import { SyncUiLocaleFromPath } from "@/components/SyncUiLocaleFromPath";
 import {
   isAppLocale,
@@ -123,9 +123,7 @@ export default async function LocaleLayout({ children, params }: Props) {
           <SyncUiLocaleFromPath />
           <AuthSessionProvider>
             <CloudAutoSync />
-            <SiteHeader />
-            <main>{children}</main>
-            <SiteFooter />
+            <AppShell>{children}</AppShell>
           </AuthSessionProvider>
         </NextIntlClientProvider>
         <Analytics />

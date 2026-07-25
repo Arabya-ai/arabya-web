@@ -6,7 +6,21 @@ import { AuthButton } from "@/components/AuthButton";
 import { BrandLockup } from "@/components/BrandLockup";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
+
+/** Immersive Ayat Studio — hide Arabya site chrome on /create. */
+export function AppShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isStudio = pathname === "/create" || pathname.startsWith("/create/");
+  if (isStudio) return <>{children}</>;
+  return (
+    <>
+      <SiteHeader />
+      <main>{children}</main>
+      <SiteFooter />
+    </>
+  );
+}
 
 function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
   const t = useTranslations("Nav");

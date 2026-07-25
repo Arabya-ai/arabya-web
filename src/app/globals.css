@@ -1,4 +1,6 @@
 ﻿@import "tailwindcss";
+@plugin "tailwindcss-animate";
+@import "../ayat-studio/theme.css";
 
 @font-face {
   font-family: "UthmanicHafs";

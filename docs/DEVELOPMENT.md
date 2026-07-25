@@ -12,7 +12,7 @@
 4. **موبايل Capacitor** — غلاف فوق الموقع بعد استقرار اللغات.
 5. **مؤجّل دائمًا حاليًا** — حديث/تراث كامل، دفع، `arabya.ai`، كاش `getIrab` للأداء.
 
-فحص دمج استوديو إنشاء الآيات: `docs/plans/ayat-creator-pro-integration.md` — **منفَّذ** (`/create`, `/pricing`, `UserPlan`). دليل الاستخدام: `docs/platform/create-studio-owner-guide-ar.md`. بوابة الدفع التالية: **PayPal**.
+فحص دمج استوديو إنشاء الآيات: `docs/plans/ayat-creator-pro-integration.md` — **واجهة Lovable كاملة تحت `/create`**. دليل: `docs/platform/create-studio-owner-guide-ar.md`. بوابة الدفع التالية: **PayPal**.
 
 ## مؤجّل حتى اكتمال الأساس
 

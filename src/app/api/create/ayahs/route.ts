@@ -1,18 +1,14 @@
 import { auth } from "@/auth";
-import { canCreateVideo } from "@/lib/plans";
 import { getSurah } from "@/lib/quran";
 import { normalizeForHafsFont } from "@/lib/quran-text";
 
 export const runtime = "nodejs";
 
-/** Authenticated ayah text range for the video studio (local QPC). */
+/** Authenticated ayah text range for Ayat Studio (local QPC). */
 export async function GET(request: Request) {
   const session = await auth();
   if (!session?.user) {
     return Response.json({ error: "auth_required" }, { status: 401 });
-  }
-  if (!canCreateVideo(session.user.plan ?? "free")) {
-    return Response.json({ error: "plus_required" }, { status: 403 });
   }
 
   const { searchParams } = new URL(request.url);
@@ -28,7 +24,7 @@ export async function GET(request: Request) {
 
   const start = Math.max(1, from);
   const end = Math.min(surah.versesCount, Math.max(start, to));
-  if (end - start > 20) {
+  if (end - start > 40) {
     return Response.json({ error: "range_too_long" }, { status: 400 });
   }
 
