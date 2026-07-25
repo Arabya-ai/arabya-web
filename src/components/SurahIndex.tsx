@@ -6,8 +6,10 @@ import { useEffect, useMemo, useState } from "react";
 import { type Bookmark, readBookmarks } from "@/lib/bookmarks";
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
 import {
+  getSurahDisplayName,
+  getSurahDisplayTitle,
+  getSurahEnglishName,
   getSurahUthmaniChipName,
-  getSurahUthmaniTitle,
 } from "@/lib/surah-names";
 import type { SurahMeta } from "@/lib/types";
 
@@ -59,10 +61,13 @@ export function SurahIndex({
   const filtered = useMemo(() => {
     const q = query.trim();
     if (!q) return surahs;
+    const qLower = q.toLowerCase();
     return surahs.filter(
       (s) =>
         s.nameArabic.includes(q) ||
-        s.nameSimple.toLowerCase().includes(q.toLowerCase()) ||
+        s.nameSimple.toLowerCase().includes(qLower) ||
+        getSurahEnglishName(s.id).toLowerCase().includes(qLower) ||
+        getSurahUthmaniChipName(s.id).includes(q) ||
         String(s.id) === q,
     );
   }, [surahs, query]);
@@ -149,7 +154,7 @@ export function SurahIndex({
                 <Link
                   href={`${getMushafPageHref(b.page)}#s${b.surahId}-v-${b.verse}`}
                 >
-                  {getSurahUthmaniTitle(b.surahId)} —{" "}
+                  {getSurahDisplayTitle(b.surahId, locale)} —{" "}
                   {formatCount(b.verse, locale)}
                 </Link>
               </li>
@@ -239,16 +244,16 @@ export function SurahIndex({
               href={getMushafPageHref(mushafFirstPage[String(s.id)] ?? 1)}
               className="surah-chip"
               aria-label={t("surahAria", {
-                name: s.nameArabic,
+                name: getSurahDisplayTitle(s.id, locale),
                 revelation: revelationLabel(s),
                 verses: formatCount(s.versesCount, locale),
                 juz: juzLabel(s),
               })}
             >
               <span className="chip-num">{formatCount(s.id, locale)}</span>
-              <span className="chip-name">{getSurahUthmaniChipName(s.id)}</span>
+              <span className="chip-name">{getSurahDisplayName(s.id, locale)}</span>
               <span className="chip-tip" role="tooltip">
-                <strong>{getSurahUthmaniTitle(s.id)}</strong>
+                <strong>{getSurahDisplayTitle(s.id, locale)}</strong>
                 <span>
                   {revelationLabel(s)} ·{" "}
                   {t("verseCount", {

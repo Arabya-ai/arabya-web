@@ -2,7 +2,7 @@
   {
     "id": 1,
     "nameArabic": "الفاتحة",
-    "nameSimple": "Al-Fatihah",
+    "nameSimple": "Fatiha",
     "versesCount": 7,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -12,7 +12,7 @@
   {
     "id": 2,
     "nameArabic": "البقرة",
-    "nameSimple": "Al-Baqarah",
+    "nameSimple": "Baqarah",
     "versesCount": 286,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -22,7 +22,7 @@
   {
     "id": 3,
     "nameArabic": "آل عمران",
-    "nameSimple": "Ali 'Imran",
+    "nameSimple": "Al Imran",
     "versesCount": 200,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -32,7 +32,7 @@
   {
     "id": 4,
     "nameArabic": "النساء",
-    "nameSimple": "An-Nisa",
+    "nameSimple": "Nisa",
     "versesCount": 176,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -42,7 +42,7 @@
   {
     "id": 5,
     "nameArabic": "المائدة",
-    "nameSimple": "Al-Ma'idah",
+    "nameSimple": "Maidah",
     "versesCount": 120,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -52,7 +52,7 @@
   {
     "id": 6,
     "nameArabic": "الأنعام",
-    "nameSimple": "Al-An'am",
+    "nameSimple": "Anam",
     "versesCount": 165,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -62,7 +62,7 @@
   {
     "id": 7,
     "nameArabic": "الأعراف",
-    "nameSimple": "Al-A'raf",
+    "nameSimple": "Araf",
     "versesCount": 206,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -72,7 +72,7 @@
   {
     "id": 8,
     "nameArabic": "الأنفال",
-    "nameSimple": "Al-Anfal",
+    "nameSimple": "Anfal",
     "versesCount": 75,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -82,7 +82,7 @@
   {
     "id": 9,
     "nameArabic": "التوبة",
-    "nameSimple": "At-Tawbah",
+    "nameSimple": "Tawbah",
     "versesCount": 129,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -122,7 +122,7 @@
   {
     "id": 13,
     "nameArabic": "الرعد",
-    "nameSimple": "Ar-Ra'd",
+    "nameSimple": "Raad",
     "versesCount": 43,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -142,7 +142,7 @@
   {
     "id": 15,
     "nameArabic": "الحجر",
-    "nameSimple": "Al-Hijr",
+    "nameSimple": "Hijr",
     "versesCount": 99,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -152,7 +152,7 @@
   {
     "id": 16,
     "nameArabic": "النحل",
-    "nameSimple": "An-Nahl",
+    "nameSimple": "Nahl",
     "versesCount": 128,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -162,7 +162,7 @@
   {
     "id": 17,
     "nameArabic": "الإسراء",
-    "nameSimple": "Al-Isra",
+    "nameSimple": "Al Isra",
     "versesCount": 111,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -172,7 +172,7 @@
   {
     "id": 18,
     "nameArabic": "الكهف",
-    "nameSimple": "Al-Kahf",
+    "nameSimple": "Kahf",
     "versesCount": 110,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -192,7 +192,7 @@
   {
     "id": 20,
     "nameArabic": "طه",
-    "nameSimple": "Taha",
+    "nameSimple": "TaHa",
     "versesCount": 135,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -202,7 +202,7 @@
   {
     "id": 21,
     "nameArabic": "الأنبياء",
-    "nameSimple": "Al-Anbya",
+    "nameSimple": "Anbiya",
     "versesCount": 112,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -212,7 +212,7 @@
   {
     "id": 22,
     "nameArabic": "الحج",
-    "nameSimple": "Al-Hajj",
+    "nameSimple": "Hajj",
     "versesCount": 78,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -222,7 +222,7 @@
   {
     "id": 23,
     "nameArabic": "المؤمنون",
-    "nameSimple": "Al-Mu'minun",
+    "nameSimple": "Muminun",
     "versesCount": 118,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -232,7 +232,7 @@
   {
     "id": 24,
     "nameArabic": "النور",
-    "nameSimple": "An-Nur",
+    "nameSimple": "An Nur",
     "versesCount": 64,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -242,7 +242,7 @@
   {
     "id": 25,
     "nameArabic": "الفرقان",
-    "nameSimple": "Al-Furqan",
+    "nameSimple": "Furqan",
     "versesCount": 77,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -252,7 +252,7 @@
   {
     "id": 26,
     "nameArabic": "الشعراء",
-    "nameSimple": "Ash-Shu'ara",
+    "nameSimple": "Shuara",
     "versesCount": 227,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -262,7 +262,7 @@
   {
     "id": 27,
     "nameArabic": "النمل",
-    "nameSimple": "An-Naml",
+    "nameSimple": "Naml",
     "versesCount": 93,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -272,7 +272,7 @@
   {
     "id": 28,
     "nameArabic": "القصص",
-    "nameSimple": "Al-Qasas",
+    "nameSimple": "Qasas",
     "versesCount": 88,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -282,7 +282,7 @@
   {
     "id": 29,
     "nameArabic": "العنكبوت",
-    "nameSimple": "Al-'Ankabut",
+    "nameSimple": "Ankabut",
     "versesCount": 69,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -292,7 +292,7 @@
   {
     "id": 30,
     "nameArabic": "الروم",
-    "nameSimple": "Ar-Rum",
+    "nameSimple": "Rum",
     "versesCount": 60,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -312,7 +312,7 @@
   {
     "id": 32,
     "nameArabic": "السجدة",
-    "nameSimple": "As-Sajdah",
+    "nameSimple": "Sajdah",
     "versesCount": 30,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -322,7 +322,7 @@
   {
     "id": 33,
     "nameArabic": "الأحزاب",
-    "nameSimple": "Al-Ahzab",
+    "nameSimple": "Ahzab",
     "versesCount": 73,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -352,7 +352,7 @@
   {
     "id": 36,
     "nameArabic": "يس",
-    "nameSimple": "Ya-Sin",
+    "nameSimple": "Yasin",
     "versesCount": 83,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -362,7 +362,7 @@
   {
     "id": 37,
     "nameArabic": "الصافات",
-    "nameSimple": "As-Saffat",
+    "nameSimple": "Assaaffat",
     "versesCount": 182,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -382,7 +382,7 @@
   {
     "id": 39,
     "nameArabic": "الزمر",
-    "nameSimple": "Az-Zumar",
+    "nameSimple": "Zumar",
     "versesCount": 75,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -412,7 +412,7 @@
   {
     "id": 42,
     "nameArabic": "الشورى",
-    "nameSimple": "Ash-Shuraa",
+    "nameSimple": "Shura",
     "versesCount": 53,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -422,7 +422,7 @@
   {
     "id": 43,
     "nameArabic": "الزخرف",
-    "nameSimple": "Az-Zukhruf",
+    "nameSimple": "Zukhruf",
     "versesCount": 89,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -432,7 +432,7 @@
   {
     "id": 44,
     "nameArabic": "الدخان",
-    "nameSimple": "Ad-Dukhan",
+    "nameSimple": "Ad Dukhaan",
     "versesCount": 59,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -442,7 +442,7 @@
   {
     "id": 45,
     "nameArabic": "الجاثية",
-    "nameSimple": "Al-Jathiyah",
+    "nameSimple": "Jathiyah",
     "versesCount": 37,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -452,7 +452,7 @@
   {
     "id": 46,
     "nameArabic": "الأحقاف",
-    "nameSimple": "Al-Ahqaf",
+    "nameSimple": "Ahqaf",
     "versesCount": 35,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -472,7 +472,7 @@
   {
     "id": 48,
     "nameArabic": "الفتح",
-    "nameSimple": "Al-Fath",
+    "nameSimple": "Al Fath",
     "versesCount": 29,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -482,7 +482,7 @@
   {
     "id": 49,
     "nameArabic": "الحجرات",
-    "nameSimple": "Al-Hujurat",
+    "nameSimple": "Hujurat",
     "versesCount": 18,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -502,7 +502,7 @@
   {
     "id": 51,
     "nameArabic": "الذاريات",
-    "nameSimple": "Adh-Dhariyat",
+    "nameSimple": "Zariyat",
     "versesCount": 60,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -512,7 +512,7 @@
   {
     "id": 52,
     "nameArabic": "الطور",
-    "nameSimple": "At-Tur",
+    "nameSimple": "Tur",
     "versesCount": 49,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -522,7 +522,7 @@
   {
     "id": 53,
     "nameArabic": "النجم",
-    "nameSimple": "An-Najm",
+    "nameSimple": "Najm",
     "versesCount": 62,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -532,7 +532,7 @@
   {
     "id": 54,
     "nameArabic": "القمر",
-    "nameSimple": "Al-Qamar",
+    "nameSimple": "Al Qamar",
     "versesCount": 55,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -542,7 +542,7 @@
   {
     "id": 55,
     "nameArabic": "الرحمن",
-    "nameSimple": "Ar-Rahman",
+    "nameSimple": "Rahman",
     "versesCount": 78,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -552,7 +552,7 @@
   {
     "id": 56,
     "nameArabic": "الواقعة",
-    "nameSimple": "Al-Waqi'ah",
+    "nameSimple": "Waqiah",
     "versesCount": 96,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -562,7 +562,7 @@
   {
     "id": 57,
     "nameArabic": "الحديد",
-    "nameSimple": "Al-Hadid",
+    "nameSimple": "Hadid",
     "versesCount": 29,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -572,7 +572,7 @@
   {
     "id": 58,
     "nameArabic": "المجادلة",
-    "nameSimple": "Al-Mujadila",
+    "nameSimple": "Mujadilah",
     "versesCount": 22,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -582,7 +582,7 @@
   {
     "id": 59,
     "nameArabic": "الحشر",
-    "nameSimple": "Al-Hashr",
+    "nameSimple": "Al Hashr",
     "versesCount": 24,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -592,7 +592,7 @@
   {
     "id": 60,
     "nameArabic": "الممتحنة",
-    "nameSimple": "Al-Mumtahanah",
+    "nameSimple": "Mumtahina",
     "versesCount": 13,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -602,7 +602,7 @@
   {
     "id": 61,
     "nameArabic": "الصف",
-    "nameSimple": "As-Saf",
+    "nameSimple": "Saff",
     "versesCount": 14,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -612,7 +612,7 @@
   {
     "id": 62,
     "nameArabic": "الجمعة",
-    "nameSimple": "Al-Jumu'ah",
+    "nameSimple": "Jumuah",
     "versesCount": 11,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -622,7 +622,7 @@
   {
     "id": 63,
     "nameArabic": "المنافقون",
-    "nameSimple": "Al-Munafiqun",
+    "nameSimple": "Munafiqun",
     "versesCount": 11,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -632,7 +632,7 @@
   {
     "id": 64,
     "nameArabic": "التغابن",
-    "nameSimple": "At-Taghabun",
+    "nameSimple": "Taghabun",
     "versesCount": 18,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -642,7 +642,7 @@
   {
     "id": 65,
     "nameArabic": "الطلاق",
-    "nameSimple": "At-Talaq",
+    "nameSimple": "Talaq",
     "versesCount": 12,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -652,7 +652,7 @@
   {
     "id": 66,
     "nameArabic": "التحريم",
-    "nameSimple": "At-Tahrim",
+    "nameSimple": "Tahrim",
     "versesCount": 12,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -662,7 +662,7 @@
   {
     "id": 67,
     "nameArabic": "الملك",
-    "nameSimple": "Al-Mulk",
+    "nameSimple": "Mulk",
     "versesCount": 30,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -672,7 +672,7 @@
   {
     "id": 68,
     "nameArabic": "القلم",
-    "nameSimple": "Al-Qalam",
+    "nameSimple": "Qalam",
     "versesCount": 52,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -692,7 +692,7 @@
   {
     "id": 70,
     "nameArabic": "المعارج",
-    "nameSimple": "Al-Ma'arij",
+    "nameSimple": "Maarij",
     "versesCount": 44,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -712,7 +712,7 @@
   {
     "id": 72,
     "nameArabic": "الجن",
-    "nameSimple": "Al-Jinn",
+    "nameSimple": "Jinn",
     "versesCount": 28,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -722,7 +722,7 @@
   {
     "id": 73,
     "nameArabic": "المزمل",
-    "nameSimple": "Al-Muzzammil",
+    "nameSimple": "Muzammil",
     "versesCount": 20,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -732,7 +732,7 @@
   {
     "id": 74,
     "nameArabic": "المدثر",
-    "nameSimple": "Al-Muddaththir",
+    "nameSimple": "Muddathir",
     "versesCount": 56,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -742,7 +742,7 @@
   {
     "id": 75,
     "nameArabic": "القيامة",
-    "nameSimple": "Al-Qiyamah",
+    "nameSimple": "Qiyamah",
     "versesCount": 40,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -752,7 +752,7 @@
   {
     "id": 76,
     "nameArabic": "الانسان",
-    "nameSimple": "Al-Insan",
+    "nameSimple": "Insan",
     "versesCount": 31,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -762,7 +762,7 @@
   {
     "id": 77,
     "nameArabic": "المرسلات",
-    "nameSimple": "Al-Mursalat",
+    "nameSimple": "Mursalat",
     "versesCount": 50,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -772,7 +772,7 @@
   {
     "id": 78,
     "nameArabic": "النبإ",
-    "nameSimple": "An-Naba",
+    "nameSimple": "An Naba",
     "versesCount": 40,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -782,7 +782,7 @@
   {
     "id": 79,
     "nameArabic": "النازعات",
-    "nameSimple": "An-Nazi'at",
+    "nameSimple": "Naziat",
     "versesCount": 46,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -792,7 +792,7 @@
   {
     "id": 80,
     "nameArabic": "عبس",
-    "nameSimple": "'Abasa",
+    "nameSimple": "Abasa",
     "versesCount": 42,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -802,7 +802,7 @@
   {
     "id": 81,
     "nameArabic": "التكوير",
-    "nameSimple": "At-Takwir",
+    "nameSimple": "Takwir",
     "versesCount": 29,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -812,7 +812,7 @@
   {
     "id": 82,
     "nameArabic": "الإنفطار",
-    "nameSimple": "Al-Infitar",
+    "nameSimple": "Infitar",
     "versesCount": 19,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -822,7 +822,7 @@
   {
     "id": 83,
     "nameArabic": "المطففين",
-    "nameSimple": "Al-Mutaffifin",
+    "nameSimple": "Mutaffifin",
     "versesCount": 36,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -832,7 +832,7 @@
   {
     "id": 84,
     "nameArabic": "الإنشقاق",
-    "nameSimple": "Al-Inshiqaq",
+    "nameSimple": "Inshiqaq",
     "versesCount": 25,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -842,7 +842,7 @@
   {
     "id": 85,
     "nameArabic": "البروج",
-    "nameSimple": "Al-Buruj",
+    "nameSimple": "Buruj",
     "versesCount": 22,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -852,7 +852,7 @@
   {
     "id": 86,
     "nameArabic": "الطارق",
-    "nameSimple": "At-Tariq",
+    "nameSimple": "Tariq",
     "versesCount": 17,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -862,7 +862,7 @@
   {
     "id": 87,
     "nameArabic": "الأعلى",
-    "nameSimple": "Al-A'la",
+    "nameSimple": "Al Ala",
     "versesCount": 19,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -872,7 +872,7 @@
   {
     "id": 88,
     "nameArabic": "الغاشية",
-    "nameSimple": "Al-Ghashiyah",
+    "nameSimple": "Ghashiya",
     "versesCount": 26,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -882,7 +882,7 @@
   {
     "id": 89,
     "nameArabic": "الفجر",
-    "nameSimple": "Al-Fajr",
+    "nameSimple": "Fajr",
     "versesCount": 30,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -892,7 +892,7 @@
   {
     "id": 90,
     "nameArabic": "البلد",
-    "nameSimple": "Al-Balad",
+    "nameSimple": "Al Balad",
     "versesCount": 20,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -902,7 +902,7 @@
   {
     "id": 91,
     "nameArabic": "الشمس",
-    "nameSimple": "Ash-Shams",
+    "nameSimple": "Shams",
     "versesCount": 15,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -912,7 +912,7 @@
   {
     "id": 92,
     "nameArabic": "الليل",
-    "nameSimple": "Al-Layl",
+    "nameSimple": "Lail",
     "versesCount": 21,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -922,7 +922,7 @@
   {
     "id": 93,
     "nameArabic": "الضحى",
-    "nameSimple": "Ad-Duhaa",
+    "nameSimple": "Duha",
     "versesCount": 11,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -932,7 +932,7 @@
   {
     "id": 94,
     "nameArabic": "الشرح",
-    "nameSimple": "Ash-Sharh",
+    "nameSimple": "Sharh",
     "versesCount": 8,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -942,7 +942,7 @@
   {
     "id": 95,
     "nameArabic": "التين",
-    "nameSimple": "At-Tin",
+    "nameSimple": "Tin",
     "versesCount": 8,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -952,7 +952,7 @@
   {
     "id": 96,
     "nameArabic": "العلق",
-    "nameSimple": "Al-'Alaq",
+    "nameSimple": "Al Alaq",
     "versesCount": 19,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -962,7 +962,7 @@
   {
     "id": 97,
     "nameArabic": "القدر",
-    "nameSimple": "Al-Qadr",
+    "nameSimple": "Qadr",
     "versesCount": 5,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -972,7 +972,7 @@
   {
     "id": 98,
     "nameArabic": "البينة",
-    "nameSimple": "Al-Bayyinah",
+    "nameSimple": "Bayyinah",
     "versesCount": 8,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -982,7 +982,7 @@
   {
     "id": 99,
     "nameArabic": "الزلزلة",
-    "nameSimple": "Az-Zalzalah",
+    "nameSimple": "Zalzalah",
     "versesCount": 8,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -992,7 +992,7 @@
   {
     "id": 100,
     "nameArabic": "العاديات",
-    "nameSimple": "Al-'Adiyat",
+    "nameSimple": "Adiyat",
     "versesCount": 11,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -1002,7 +1002,7 @@
   {
     "id": 101,
     "nameArabic": "القارعة",
-    "nameSimple": "Al-Qari'ah",
+    "nameSimple": "Qariah",
     "versesCount": 11,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -1012,7 +1012,7 @@
   {
     "id": 102,
     "nameArabic": "التكاثر",
-    "nameSimple": "At-Takathur",
+    "nameSimple": "Takathur",
     "versesCount": 8,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -1022,7 +1022,7 @@
   {
     "id": 103,
     "nameArabic": "العصر",
-    "nameSimple": "Al-'Asr",
+    "nameSimple": "Al Asr",
     "versesCount": 3,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -1032,7 +1032,7 @@
   {
     "id": 104,
     "nameArabic": "الهمزة",
-    "nameSimple": "Al-Humazah",
+    "nameSimple": "Humazah",
     "versesCount": 9,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -1042,7 +1042,7 @@
   {
     "id": 105,
     "nameArabic": "الفيل",
-    "nameSimple": "Al-Fil",
+    "nameSimple": "Al Fil",
     "versesCount": 5,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -1062,7 +1062,7 @@
   {
     "id": 107,
     "nameArabic": "الماعون",
-    "nameSimple": "Al-Ma'un",
+    "nameSimple": "Maun",
     "versesCount": 7,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -1072,7 +1072,7 @@
   {
     "id": 108,
     "nameArabic": "الكوثر",
-    "nameSimple": "Al-Kawthar",
+    "nameSimple": "Kawthar",
     "versesCount": 3,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -1082,7 +1082,7 @@
   {
     "id": 109,
     "nameArabic": "الكافرون",
-    "nameSimple": "Al-Kafirun",
+    "nameSimple": "Kafirun",
     "versesCount": 6,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -1092,7 +1092,7 @@
   {
     "id": 110,
     "nameArabic": "النصر",
-    "nameSimple": "An-Nasr",
+    "nameSimple": "Nasr",
     "versesCount": 3,
     "revelationPlace": "madinah",
     "revelationLabel": "مدنيّة",
@@ -1102,7 +1102,7 @@
   {
     "id": 111,
     "nameArabic": "المسد",
-    "nameSimple": "Al-Masad",
+    "nameSimple": "Masad",
     "versesCount": 5,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -1112,7 +1112,7 @@
   {
     "id": 112,
     "nameArabic": "الإخلاص",
-    "nameSimple": "Al-Ikhlas",
+    "nameSimple": "Ikhlas",
     "versesCount": 4,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -1122,7 +1122,7 @@
   {
     "id": 113,
     "nameArabic": "الفلق",
-    "nameSimple": "Al-Falaq",
+    "nameSimple": "Falaq",
     "versesCount": 5,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
@@ -1132,7 +1132,7 @@
   {
     "id": 114,
     "nameArabic": "الناس",
-    "nameSimple": "An-Nas",
+    "nameSimple": "An Nas",
     "versesCount": 6,
     "revelationPlace": "makkah",
     "revelationLabel": "مكيّة",
