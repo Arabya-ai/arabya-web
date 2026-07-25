@@ -146,8 +146,9 @@ export default function AccountSettings() {
               </button>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              يُستخدم هذا المفتاح للبحث عن خلفيات احترافية من مكتبة Pexels مباشرة من المحرر.
-              يتم حفظ المفتاح محلياً في متصفحك ولا يُرسل إلى أي خادم.
+              يُستخدم المفتاح عبر خادم عربية (`/api/studio/pexels`) للبحث في صور/فيديوهات Pexels من المحرر.
+              يُحفظ محليًا في متصفحك ويُرسل فقط إلى خادمنا عند البحث (لا يُخزَّن في قاعدة البيانات).
+              يمكن للمالك أيضًا ضبط المتغير <code className="text-accent">PEXELS_API_KEY</code> على Vercel بدل إدخال المفتاح هنا.
             </p>
             <a
               href="https://www.pexels.com/api/new/"

@@ -52,6 +52,7 @@ export default function Editor() {
   const plusOk = canCreateVideo(plan);
   const [project, setProject] = useState<StoredProject | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [exportingPng, setExportingPng] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressLabel, setProgressLabel] = useState("");
 
@@ -143,9 +144,60 @@ export default function Editor() {
         size: "—",
       });
       update({ status: "فشل" });
-      toast({ title: "فشل التصدير", description: err?.message || "حدث خطأ", variant: "destructive" });
+      const raw = String(err?.message || "");
+      const description = /failed to fetch/i.test(raw)
+        ? "تعذّر جلب الصوت أو الآيات من الخادم. حدّث الصفحة، تأكد من تسجيل الدخول، وحاول على Chrome."
+        : raw || "حدث خطأ أثناء التصدير";
+      toast({ title: "فشل التصدير", description, variant: "destructive" });
     } finally {
       setExporting(false);
+    }
+  };
+
+  const handleExportPng = async () => {
+    setExportingPng(true);
+    try {
+      const aspect =
+        project.ratio === "9:16" || project.ratio === "16:9" || project.ratio === "1:1"
+          ? project.ratio
+          : "1:1";
+      const q = new URLSearchParams({
+        s: String(project.surahId),
+        v: String(project.ayahStart),
+        aspect,
+      });
+      if (project.bgUrl && project.bgKind !== "video" && project.bgUrl.startsWith("#")) {
+        q.set("bg", project.bgUrl);
+      }
+      const res = await fetch(`/api/create/image?${q}`, {
+        credentials: "same-origin",
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(
+          err.error === "plus_required"
+            ? "مقاسات/خلفيات الصورة المتقدمة تتطلب بلس"
+            : err.error === "auth_required"
+              ? "يلزم تسجيل الدخول"
+              : "فشل إنشاء الصورة",
+        );
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${project.title || "ayah"}-${project.ayahStart}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: "تم تنزيل الصورة", description: `آية ${project.ayahStart} بصيغة PNG` });
+    } catch (err: any) {
+      toast({
+        title: "فشل تصدير الصورة",
+        description: err?.message || "حدث خطأ",
+        variant: "destructive",
+      });
+    } finally {
+      setExportingPng(false);
     }
   };
 
@@ -332,12 +384,29 @@ export default function Editor() {
               </SelectContent>
             </Select>
           </div>
-          <Button variant="hero" size="lg" className="w-full" onClick={handleExport} disabled={exporting}>
+          <Button variant="hero" size="lg" className="w-full" onClick={handleExport} disabled={exporting || exportingPng}>
             {exporting ? <><Loader2 className="h-4 w-4 animate-spin" /> {progressLabel || "جاري التصدير"} {progress}%</> : <><Download className="h-4 w-4" /> تصدير وتنزيل MP4</>}
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full"
+            onClick={handleExportPng}
+            disabled={exporting || exportingPng}
+          >
+            {exportingPng ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" /> جاري إنشاء الصورة…
+              </>
+            ) : (
+              <>
+                <ImageIcon className="h-4 w-4" /> تصدير صورة PNG (الآية الأولى)
+              </>
+            )}
           </Button>
           {!plusOk && (
             <p className="text-xs text-center text-accent/90">
-              التصدير لخطة بلس —{" "}
+              فيديو MP4 لخطة بلس — الصورة PNG متاحة للجميع (بعلامة مائية للخطة المجانية).{" "}
               <Link href="/pricing" className="underline hover:text-accent">
                 عرض الأسعار
               </Link>
@@ -348,7 +417,9 @@ export default function Editor() {
               <div className="h-full gradient-gold transition-all" style={{ width: `${progress}%` }} />
             </div>
           )}
-          <p className="text-xs text-muted-foreground text-center leading-relaxed">يتم تنزيل الفيديو بصيغة MP4 مع صوت التلاوة والتأثيرات.</p>
+          <p className="text-xs text-muted-foreground text-center leading-relaxed">
+            الفيديو MP4 مع الصوت في المتصفح (Chrome/Edge). الصورة PNG من خادم عربية.
+          </p>
         </EditorPanel>
       </div>
 

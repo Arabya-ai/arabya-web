@@ -1,4 +1,5 @@
-// Fetch Quran ayah text + audio. Text from Arabya QPC API; audio from everyayah.com.
+// Fetch Quran ayah text + audio. Text from Arabya QPC API;
+// audio via same-origin proxy (avoids EveryAyah CORS / Failed to fetch).
 export interface AyahData {
   number: number;
   numberInSurah: number;
@@ -6,16 +7,17 @@ export interface AyahData {
   audioUrl: string;
 }
 
-function pad(n: number, width: number) {
-  return n.toString().padStart(width, "0");
-}
-
-function buildAudioUrl(
+function buildProxiedAudioUrl(
   reciterFolder: string,
   surahId: number,
   ayahInSurah: number,
 ): string {
-  return `https://everyayah.com/data/${reciterFolder}/${pad(surahId, 3)}${pad(ayahInSurah, 3)}.mp3`;
+  const q = new URLSearchParams({
+    folder: reciterFolder,
+    s: String(surahId),
+    v: String(ayahInSurah),
+  });
+  return `/api/create/audio?${q.toString()}`;
 }
 
 async function fetchSurahText(
@@ -33,7 +35,9 @@ async function fetchSurahText(
         ? "يتطلب اشتراك بلس"
         : err.error === "auth_required"
           ? "يلزم تسجيل الدخول"
-          : "فشل جلب نص الآيات",
+          : err.error === "range_too_long"
+            ? "نطاق الآيات طويل جدًا (الحد 40 آية لكل تصدير)"
+            : "فشل جلب نص الآيات",
     );
   }
   const json = await res.json();
@@ -59,8 +63,18 @@ export async function fetchAyahs(
       number: a.numberInSurah,
       numberInSurah: a.numberInSurah,
       text: a.text,
-      audioUrl: buildAudioUrl(reciterFolder, surahId, a.numberInSurah),
+      audioUrl: buildProxiedAudioUrl(reciterFolder, surahId, a.numberInSurah),
     }));
+}
+
+function networkErrorMessage(err: unknown, ayah?: number): string {
+  const raw = err instanceof Error ? err.message : String(err);
+  if (/failed to fetch|networkerror|load failed/i.test(raw)) {
+    return ayah
+      ? `تعذّر تنزيل صوت الآية ${ayah}. حدّث الصفحة وتأكد من تسجيل الدخول.`
+      : "تعذّر الاتصال بالخادم. حدّث الصفحة وتأكد من تسجيل الدخول.";
+  }
+  return raw;
 }
 
 export async function fetchAndDecodeAudio(
@@ -77,11 +91,17 @@ export async function fetchAndDecodeAudio(
 }> {
   const buffers = await Promise.all(
     ayahs.map(async (a) => {
-      const res = await fetch(a.audioUrl, { mode: "cors" });
-      if (!res.ok)
+      let res: Response;
+      try {
+        res = await fetch(a.audioUrl, { credentials: "same-origin" });
+      } catch (e) {
+        throw new Error(networkErrorMessage(e, a.numberInSurah));
+      }
+      if (!res.ok) {
         throw new Error(
           `فشل تنزيل صوت آية ${a.numberInSurah} (HTTP ${res.status})`,
         );
+      }
       const arr = await res.arrayBuffer();
       try {
         return await new Promise<AudioBuffer>((resolve, reject) => {

@@ -58,8 +58,8 @@ export default function Landing() {
           <Link href={studioPath("/")} className="flex items-center gap-3 group">
             <ArabesqueMedallion size={36} className="text-accent transition-transform group-hover:rotate-45 duration-700" />
             <div className="flex flex-col leading-none">
-              <span className="font-display text-lg font-bold text-foreground">آيات ستوديو</span>
-              <span className="text-[10px] text-accent/70 tracking-widest">AYAT • STUDIO</span>
+              <span className="font-display text-lg font-bold text-foreground">عربية ستوديو</span>
+              <span className="text-[10px] text-accent/70 tracking-widest">ARABYA • STUDIO</span>
             </div>
           </Link>
           <div className="flex items-center gap-2">
@@ -144,7 +144,7 @@ export default function Landing() {
                 <div className="h-2.5 w-2.5 rounded-full bg-accent/60" />
                 <div className="h-2.5 w-2.5 rounded-full bg-primary/60" />
               </div>
-              <span className="mr-4 font-display text-xs tracking-wider text-muted-foreground">آيات ستوديو — لوحة التحرير</span>
+              <span className="mr-4 font-display text-xs tracking-wider text-muted-foreground">عربية ستوديو — لوحة التحرير</span>
               <div className="ml-auto text-[10px] text-accent/60">● مباشر</div>
             </div>
 
@@ -350,12 +350,12 @@ export default function Landing() {
             <div className="flex items-center gap-3">
               <ArabesqueMedallion size={32} className="text-accent" />
               <div>
-                <div className="font-display font-bold text-foreground">آيات ستوديو</div>
-                <div className="text-[10px] tracking-widest text-accent/70">AYAT • STUDIO</div>
+                <div className="font-display font-bold text-foreground">عربية ستوديو</div>
+                <div className="text-[10px] tracking-widest text-accent/70">ARABYA • STUDIO</div>
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} آيات ستوديو — صُنع بحب لخدمة كتاب الله
+              © {new Date().getFullYear()} عربية ستوديو — صُنع بحب لخدمة كتاب الله
             </p>
             <div className="flex gap-4 text-xs text-muted-foreground">
               <a href="#features" className="hover:text-accent transition-colors">المميزات</a>

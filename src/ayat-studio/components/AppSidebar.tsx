@@ -49,8 +49,8 @@ export function AppSidebar() {
           />
           {!collapsed && (
             <div className="flex flex-col leading-none">
-              <span className="font-display font-bold text-sidebar-foreground">آيات ستوديو</span>
-              <span className="text-[9px] tracking-widest text-accent/70">AYAT • STUDIO</span>
+              <span className="font-display font-bold text-sidebar-foreground">عربية ستوديو</span>
+              <span className="text-[9px] tracking-widest text-accent/70">ARABYA • STUDIO</span>
             </div>
           )}
         </Link>

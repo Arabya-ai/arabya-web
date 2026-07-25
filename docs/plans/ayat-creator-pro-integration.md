@@ -9,7 +9,7 @@
 
 | المسار | الصفحة |
 |--------|--------|
-| `/studio` | Landing آيات ستوديو |
+| `/studio` | Landing عربية ستوديو |
 | `/studio/dashboard` | لوحة التحكم |
 | `/studio/projects` · `/new` | المشاريع |
 | `/studio/editor/[id]` | المحرر |

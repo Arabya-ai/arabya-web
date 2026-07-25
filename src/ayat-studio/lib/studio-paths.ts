@@ -1,6 +1,6 @@
 export const STUDIO_BASE = "/studio" as const;
 
-/** Build an Ayat Studio path under `/studio` (legacy `/create` normalized). */
+/** Build an Arabya Studio path under `/studio` (legacy `/create` normalized). */
 export function studioPath(path: string): string {
   if (!path || path === "/") return STUDIO_BASE;
   const p = path.startsWith("/") ? path : `/${path}`;
@@ -12,7 +12,7 @@ export function studioPath(path: string): string {
   return `${STUDIO_BASE}${p}`;
 }
 
-/** Immersive Ayat Studio chrome (no site header/footer). */
+/** Immersive Arabya Studio chrome (no site header/footer). */
 export function isAyatStudioPath(pathname: string): boolean {
   const bare = pathname.startsWith("/en/")
     ? pathname.slice(3)

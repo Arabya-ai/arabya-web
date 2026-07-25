@@ -49,7 +49,7 @@ export default function Dashboard() {
               <span>أهلاً بك في الاستوديو</span>
             </div>
             <h1 className="font-display text-3xl font-bold text-foreground md:text-4xl">
-              مرحباً بك في <span className="text-gradient-gold">آيات ستوديو</span>
+              مرحباً بك في <span className="text-gradient-gold">عربية ستوديو</span>
             </h1>
             <p className="mt-2 text-muted-foreground">
               ابدأ تحفتك القرآنية القادمة — كل الأدوات بين يديك
