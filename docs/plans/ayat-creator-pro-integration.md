@@ -3,34 +3,19 @@
 تاريخ الفحص: 2026-07-26  
 آخر تحديث تنفيذ: 2026-07-26  
 المستودع المرجعي: https://github.com/mohamedtaghayen/ayat-creator-pro  
-الحالة: **واجهة Lovable كاملة تحت `/create`** + Auth/Plus في عربية؛ بوابة **PayPal لاحقًا**.
+الحالة: **واجهة Lovable تحت `/studio`** (مع redirects من `/create`)؛ بوابة **PayPal لاحقًا**.
 
----
-
-## ما دُمج في عربية
-
-| المصدر | ماذا أُخذ |
-|--------|-----------|
-| ayat-creator-pro (Lovable) | الثيم الذهبي/التركوازي، shadcn، Landing، Dashboard، Projects، NewProject، Editor، Exports، Settings، Pexels picker، Audio preview، WebCodecs + visualizer |
-| المسار في الكود | `src/ayat-studio/` + مسارات App Router تحت `src/app/[locale]/create/` |
-
-**لم يُدمَج:** Vite standalone، Supabase، alquran.cloud.
-
-نص الآيات من QPC المحلي عبر `/api/create/ayahs`؛ الصوت من EveryAyah (مجلدات القرّاء كما في ayat-creator-pro).
-
-### مسارات المنتج (كما على Lovable)
+### مسارات المنتج
 
 | المسار | الصفحة |
 |--------|--------|
-| `/create` | Landing آيات ستوديو |
-| `/create/dashboard` | لوحة التحكم |
-| `/create/projects` | مشاريعي |
-| `/create/projects/new` | مشروع جديد |
-| `/create/editor/[id]` | المحرر الكامل |
-| `/create/exports` | سجل التصدير |
-| `/create/settings` | الإعدادات (مفتاح Pexels محليًا) |
-| `/create/image` و`/create/video` | إعادة توجيه إلى مشروع جديد |
-| `/pricing` | Free vs Plus |
+| `/studio` | Landing آيات ستوديو |
+| `/studio/dashboard` | لوحة التحكم |
+| `/studio/projects` · `/new` | المشاريع |
+| `/studio/editor/[id]` | المحرر |
+| `/studio/exports` · `/settings` | السجل والإعدادات |
+| `/studio/queue` · `/sources` | طابور الجودة والمصادر (محررون) |
+| `/create/*` | إعادة توجيه إلى `/studio/*` |
 
 - بدون SiteHeader/Footer داخل `/create` (تجربة غامرة مثل Lovable)
 - حراسة تسجيل دخول عبر middleware على `/create`

@@ -40,6 +40,7 @@
     "ayahIrab": "Ayah iʿrāb",
     "readInMushaf": "Open in mushaf",
     "create": "Create",
+    "studio": "Studio",
     "pricing": "Plans"
   },
   "Home": {
@@ -255,9 +256,10 @@
     "personalTitle": "Your profile",
     "planLine": "Plan: {plan}",
     "viewPricing": "View plans",
-    "openCreate": "Create hub",
+    "openCreate": "Open Studio",
     "shortcuts": "Shortcuts",
     "studio": "Studio",
+    "qualityQueue": "Quality queue",
     "admin": "Admin",
     "study": "Study",
     "favorites": "Favorites",

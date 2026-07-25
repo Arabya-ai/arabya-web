@@ -295,13 +295,13 @@ export function WordStudyDock({
           {dockSurahId && dockVerse ? (
             <>
               <Link
-                href={`/create/image?s=${dockSurahId}&v=${dockVerse}`}
+                href="/studio/projects/new"
                 className="word-dock-link"
               >
                 {t("createImage")}
               </Link>
               <Link
-                href={`/create/video?s=${dockSurahId}&v=${dockVerse}`}
+                href="/studio/projects/new"
                 className="word-dock-link"
               >
                 {t("createVideo")}

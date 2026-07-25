@@ -1,6 +1,6 @@
 import DashboardLayout from "@/ayat-studio/components/DashboardLayout";
 
-export default function CreateAppLayout({
+export default function AyatStudioShellLayout({
   children,
 }: {
   children: React.ReactNode;

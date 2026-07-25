@@ -26,7 +26,7 @@ export function unifiedDashNav(role: UserRole): DashNavItem[] {
       group: "groupAccount",
     },
     { href: "/account/study", label: "study", icon: "book", group: "groupAccount" },
-    { href: "/create", label: "create", icon: "spark", group: "groupAccount" },
+    { href: "/studio", label: "studio", icon: "spark", group: "groupAccount" },
     { href: "/pricing", label: "pricing", icon: "upgrade", group: "groupAccount" },
     {
       href: "/account#role-request",
@@ -38,7 +38,6 @@ export function unifiedDashNav(role: UserRole): DashNavItem[] {
 
   if (canAccessStudio(role)) {
     items.push(
-      { href: "/studio", label: "studio", icon: "studio", group: "groupStudio" },
       {
         href: "/studio/queue",
         label: "queue",

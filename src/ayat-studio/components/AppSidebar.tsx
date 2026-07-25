@@ -1,8 +1,10 @@
 "use client";
-import { Home, FolderOpen, Plus, History, Settings } from "lucide-react";
+import { Home, FolderOpen, Plus, History, Settings, ListChecks } from "lucide-react";
 import { NavLink } from "@/ayat-studio/components/NavLink";
 import { Link, usePathname } from "@/i18n/navigation";
 import { studioPath } from "@/ayat-studio/lib/studio-paths";
+import { useSession } from "next-auth/react";
+import { canAccessStudio } from "@/lib/roles";
 import {
   Sidebar,
   SidebarContent,
@@ -28,6 +30,8 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const showEditorTools = canAccessStudio(session?.user?.role ?? "user");
 
   return (
     <Sidebar collapsible="icon" side="right" className="border-l border-sidebar-border">
@@ -86,6 +90,44 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {showEditorTools ? (
+          <SidebarGroup className="relative pt-2">
+            {!collapsed && (
+              <SidebarGroupLabel className="text-[10px] font-medium uppercase tracking-[0.2em] text-accent/70 px-3">
+                أدوات المحرر
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu className="gap-1 px-2">
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith("/studio/queue")}
+                    className="rounded-lg text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-accent border border-transparent"
+                  >
+                    <Link href="/studio/queue">
+                      <ListChecks className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span className="font-medium">طابور الجودة</span>}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith("/studio/sources")}
+                    className="rounded-lg text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-accent border border-transparent"
+                  >
+                    <Link href="/studio/sources">
+                      <FolderOpen className="h-4 w-4 shrink-0" />
+                      {!collapsed && <span className="font-medium">المصادر</span>}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ) : null}
 
         {/* Footer ornament */}
         {!collapsed && (

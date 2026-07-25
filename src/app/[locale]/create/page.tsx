@@ -1,16 +1,11 @@
-import type { Metadata } from "next";
-import Landing from "@/ayat-studio/pages/Landing";
+import { redirect } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
+import { studioPath } from "@/ayat-studio/lib/studio-paths";
 
 type Props = { params: Promise<{ locale: string }> };
 
-export const metadata: Metadata = {
-  title: "آيات ستوديو — إنشاء فيديوهات قرآنية",
-  description:
-    "استوديو إنشاء فيديوهات الآيات: خلفيات، قرّاء، تصدير MP4 — داخل عربية",
-};
-
-export default async function CreateLandingPage({ params }: Props) {
-  await resolveLocale(params);
-  return <Landing />;
+/** Legacy `/create` → `/studio`. */
+export default async function LegacyCreateRedirect({ params }: Props) {
+  const locale = await resolveLocale(params);
+  redirect({ href: studioPath("/"), locale });
 }

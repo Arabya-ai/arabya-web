@@ -31,7 +31,7 @@ export default async function ResourcesPage({ params }: Props) {
         <h2>{t("createTitle")}</h2>
         <p>
           {t.rich("createLead", {
-            create: (c) => <Link href="/create">{c}</Link>,
+            create: (c) => <Link href="/studio">{c}</Link>,
             pricing: (c) => <Link href="/pricing">{c}</Link>,
           })}
         </p>

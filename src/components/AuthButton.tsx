@@ -82,11 +82,9 @@ export function AuthButton() {
           >
             {t("favorites")}
           </Link>
-          {data.user.role === "editor" || data.user.role === "admin" ? (
-            <Link href="/studio" role="menuitem" onClick={() => setOpen(false)}>
-              {t("studio")}
-            </Link>
-          ) : null}
+          <Link href="/studio" role="menuitem" onClick={() => setOpen(false)}>
+            {t("studio")}
+          </Link>
           {data.user.role === "admin" ? (
             <Link href="/admin" role="menuitem" onClick={() => setOpen(false)}>
               {t("admin")}

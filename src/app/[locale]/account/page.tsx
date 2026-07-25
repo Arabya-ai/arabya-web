@@ -67,7 +67,7 @@ export default async function AccountPage({ params }: Props) {
             })}{" "}
             <Link href="/pricing">{t("viewPricing")}</Link>
             {" · "}
-            <Link href="/create">{t("openCreate")}</Link>
+            <Link href="/studio">{t("openCreate")}</Link>
           </p>
           <div className="account-grid account-grid--personal">
             <AccountPersonalData />
@@ -76,29 +76,30 @@ export default async function AccountPage({ params }: Props) {
 
         <AccountLanguagePanel />
 
-        {(canAccessStudio(role) || canAccessAdmin(role)) && (
-          <section className="dash-card dash-card--accent">
-            <h2>{t("shortcuts")}</h2>
-            <div className="dash-actions">
-              {canAccessStudio(role) ? (
-                <Link href="/studio" className="account-panel-link">
-                  {t("studio")}
-                </Link>
-              ) : null}
-              {canAccessAdmin(role) ? (
-                <Link href="/admin" className="account-panel-link">
-                  {t("admin")}
-                </Link>
-              ) : null}
-              <Link href="/account/study" className="account-panel-link">
-                {t("study")}
+        <section className="dash-card dash-card--accent">
+          <h2>{t("shortcuts")}</h2>
+          <div className="dash-actions">
+            <Link href="/studio" className="account-panel-link">
+              {t("studio")}
+            </Link>
+            {canAccessAdmin(role) ? (
+              <Link href="/admin" className="account-panel-link">
+                {t("admin")}
               </Link>
-              <Link href="/favorites" className="account-panel-link">
-                {t("favorites")}
+            ) : null}
+            {canAccessStudio(role) ? (
+              <Link href="/studio/queue" className="account-panel-link">
+                {t("qualityQueue")}
               </Link>
-            </div>
-          </section>
-        )}
+            ) : null}
+            <Link href="/account/study" className="account-panel-link">
+              {t("study")}
+            </Link>
+            <Link href="/favorites" className="account-panel-link">
+              {t("favorites")}
+            </Link>
+          </div>
+        </section>
 
         {syncReady ? <CloudSyncPanel /> : null}
 

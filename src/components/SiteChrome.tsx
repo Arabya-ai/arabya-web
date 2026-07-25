@@ -7,12 +7,12 @@ import { BrandLockup } from "@/components/BrandLockup";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Link, usePathname } from "@/i18n/navigation";
+import { isAyatStudioPath } from "@/ayat-studio/lib/studio-paths";
 
-/** Immersive Ayat Studio — hide Arabya site chrome on /create. */
+/** Immersive Ayat Studio — hide Arabya site chrome on /studio (and legacy /create). */
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isStudio = pathname === "/create" || pathname.startsWith("/create/");
-  if (isStudio) return <>{children}</>;
+  if (isAyatStudioPath(pathname)) return <>{children}</>;
   return (
     <>
       <SiteHeader />
@@ -90,8 +90,8 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
         <Link href="/study" role="menuitem" onClick={go()}>
           {t("study")}
         </Link>
-        <Link href="/create" role="menuitem" onClick={go()}>
-          {t("create")}
+        <Link href="/studio" role="menuitem" onClick={go()}>
+          {t("studio")}
         </Link>
         <Link href="/pricing" role="menuitem" onClick={go()}>
           {t("pricing")}
@@ -181,7 +181,7 @@ export function SiteFooter() {
             <Link href="/juz">{t("juz")}</Link>
             <Link href="/roots">{t("roots")}</Link>
             <Link href="/qiraat">{t("qiraat")}</Link>
-            <Link href="/create">{t("create")}</Link>
+            <Link href="/studio">{t("studio")}</Link>
             <Link href="/pricing">{t("pricing")}</Link>
             <Link href="/about">{t("about")}</Link>
             <Link href="/privacy">{t("privacy")}</Link>

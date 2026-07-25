@@ -40,6 +40,7 @@
     "ayahIrab": "إعراب الآية",
     "readInMushaf": "قراءة في المصحف",
     "create": "إنشاء",
+    "studio": "الاستوديو",
     "pricing": "الخطط"
   },
   "Home": {
@@ -255,9 +256,10 @@
     "personalTitle": "بياناتك الشخصية",
     "planLine": "الخطة: {plan}",
     "viewPricing": "عرض الخطط",
-    "openCreate": "مركز الإنشاء",
+    "openCreate": "فتح الاستوديو",
     "shortcuts": "اختصارات",
     "studio": "الاستوديو",
+    "qualityQueue": "طابور الجودة",
     "admin": "إدارة عربية",
     "study": "دراسة",
     "favorites": "المفضّلات",
