@@ -4,6 +4,12 @@ export type UserPlan = "free" | "plus";
 
 export type AppLocale = "ar" | "en";
 
+/** Owner accounts always on Plus until PayPal billing is live. */
+export const OWNER_PLUS_EMAILS = [
+  "egywebdev@gmail.com",
+  "arabyaaicom@gmail.com",
+] as const;
+
 const PLAN_LABELS: Record<AppLocale, Record<UserPlan, string>> = {
   ar: { free: "مجاني", plus: "بلس" },
   en: { free: "Free", plus: "Plus" },
@@ -16,13 +22,20 @@ export function parsePlusEmails(raw: string | undefined): string[] {
     .filter(Boolean);
 }
 
+export function isOwnerPlusEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  return (OWNER_PLUS_EMAILS as readonly string[]).includes(
+    email.trim().toLowerCase(),
+  );
+}
+
 export function normalizeUserPlan(value: unknown): UserPlan {
   return value === "plus" ? "plus" : "free";
 }
 
 /**
- * Resolve billing plan without Stripe/PayPal yet.
- * Order: explicit cloud plan → Plus email allowlist → admin/editor roles → free.
+ * Resolve billing plan without PayPal yet.
+ * Order: cloud plus → owner emails → ARABYA_PLUS_EMAILS → admin/editor → free.
  */
 export function resolveUserPlan(opts: {
   email?: string | null;
@@ -30,11 +43,13 @@ export function resolveUserPlan(opts: {
   cloudPlan?: UserPlan | null;
   plusEmails?: string[];
 }): UserPlan {
-  if (opts.cloudPlan === "plus" || opts.cloudPlan === "free") {
-    if (opts.cloudPlan === "plus") return "plus";
-  }
+  if (opts.cloudPlan === "plus") return "plus";
+
   const email = opts.email?.trim().toLowerCase() ?? "";
-  const allow = opts.plusEmails ?? parsePlusEmails(process.env.ARABYA_PLUS_EMAILS);
+  if (isOwnerPlusEmail(email)) return "plus";
+
+  const allow =
+    opts.plusEmails ?? parsePlusEmails(process.env.ARABYA_PLUS_EMAILS);
   if (email && allow.includes(email)) return "plus";
   if (opts.role === "admin" || opts.role === "editor") return "plus";
   if (email && isEnvAdminEmail(email)) return "plus";

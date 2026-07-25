@@ -31,7 +31,7 @@
 ### الاشتراك (قبل PayPal)
 
 - `UserPlan`: `free` | `plus` في [`src/lib/plans.ts`](../../src/lib/plans.ts) + `session.user.plan`
-- منح بلس: `ARABYA_PLUS_EMAILS` أو دور editor/admin
+- منح بلس: بريدات المالك المضمّنة (`egywebdev@gmail.com`, `arabyaaicom@gmail.com`) أو `ARABYA_PLUS_EMAILS` أو دور editor/admin
 - الدفع لاحقًا: **PayPal** (Webhook يحدّث الخطة) — انظر `platform-expansion-and-subscriptions.md`
 
 ---

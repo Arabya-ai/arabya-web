@@ -37,6 +37,15 @@ describe("resolveUserPlan", () => {
       }),
     ).toBe("plus");
   });
+
+  it("grants plus to owner emails", () => {
+    expect(
+      resolveUserPlan({ email: "egywebdev@gmail.com", role: "user" }),
+    ).toBe("plus");
+    expect(
+      resolveUserPlan({ email: "arabyaaicom@gmail.com", role: "user" }),
+    ).toBe("plus");
+  });
 });
 
 describe("entitlements", () => {
