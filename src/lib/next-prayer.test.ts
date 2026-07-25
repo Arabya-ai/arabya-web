@@ -15,7 +15,6 @@ describe("getNextPrayer", () => {
     const now = new Date("2026-07-21T10:00:00+03:00");
     const next = getNextPrayer(sample, "Africa/Cairo", now);
     expect(next?.key).toBe("dhuhr");
-    expect(next?.labelAr).toBe("الظهر");
   });
 
   it("rolls to fajr tomorrow after isha", () => {

@@ -1,13 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import type { MeaningLang } from "@/hooks/mushaf-utils";
 
-const MEANING_LABELS: { id: MeaningLang; label: string }[] = [
-  { id: "ar", label: "عربي" },
-  { id: "en", label: "English" },
-  { id: "id", label: "Bahasa Indonesia" },
-  { id: "ur", label: "اردو" },
-];
+const MEANING_LANGS: MeaningLang[] = ["ar", "en", "id", "ur"];
 
 export function MeaningLangSwitch({
   value,
@@ -20,23 +17,25 @@ export function MeaningLangSwitch({
   idPrefix?: string;
   note?: string;
 }) {
+  const t = useTranslations("MeaningLang");
+
   return (
     <div className="meaning-lang-block">
       <div
         className="lang-switch"
         role="group"
-        aria-label="لغة ترجمة الكلمة"
+        aria-label={t("ariaLabel")}
         id={`${idPrefix}-group`}
       >
-        {MEANING_LABELS.map((l) => (
+        {MEANING_LANGS.map((id) => (
           <button
-            key={l.id}
+            key={id}
             type="button"
-            className={`lang-chip ${value === l.id ? "is-active" : ""}`}
-            onClick={() => onChange(l.id)}
-            aria-pressed={value === l.id}
+            className={`lang-chip ${value === id ? "is-active" : ""}`}
+            onClick={() => onChange(id)}
+            aria-pressed={value === id}
           >
-            {l.label}
+            {t(id)}
           </button>
         ))}
       </div>

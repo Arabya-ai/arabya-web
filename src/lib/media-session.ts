@@ -55,8 +55,8 @@ export function setMediaSessionPlaying(
   try {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: meta.title,
-      artist: meta.artist ?? "عربية",
-      album: meta.album ?? "مصحف عربية",
+      artist: meta.artist ?? "Arabya",
+      album: meta.album ?? "Arabya Mushaf",
     });
     navigator.mediaSession.playbackState = "playing";
     if (handlers) bindHandlers(handlers);

@@ -9,45 +9,45 @@ export type DashNavItem = {
   group?: string;
 };
 
-/** قائمة موحّدة حسب الدور — تظهر كاملة في الحساب والاستوديو والإدارة. */
+/** Unified nav by role — shown in account, studio, and admin shells. */
 export function unifiedDashNav(role: UserRole): DashNavItem[] {
   const items: DashNavItem[] = [
-    { href: "/account", label: "نظرة عامة", icon: "home", group: "حسابي" },
+    { href: "/account", label: "overview", icon: "home", group: "groupAccount" },
     {
       href: "/account/stats",
-      label: "لوحة الإحصائيات",
+      label: "stats",
       icon: "stats",
-      group: "حسابي",
+      group: "groupAccount",
     },
     {
       href: "/favorites",
-      label: "المفضّلات",
+      label: "favorites",
       icon: "favorites",
-      group: "حسابي",
+      group: "groupAccount",
     },
-    { href: "/account/study", label: "دراسة", icon: "book", group: "حسابي" },
+    { href: "/account/study", label: "study", icon: "book", group: "groupAccount" },
     {
       href: "/account#role-request",
-      label: "طلب ترقية",
+      label: "upgrade",
       icon: "upgrade",
-      group: "حسابي",
+      group: "groupAccount",
     },
   ];
 
   if (canAccessStudio(role)) {
     items.push(
-      { href: "/studio", label: "الاستوديو", icon: "studio", group: "استوديو" },
+      { href: "/studio", label: "studio", icon: "studio", group: "groupStudio" },
       {
         href: "/studio/queue",
-        label: "طابور الجودة",
+        label: "queue",
         icon: "queue",
-        group: "استوديو",
+        group: "groupStudio",
       },
       {
         href: "/studio/sources",
-        label: "المصادر",
+        label: "sources",
         icon: "sources",
-        group: "استوديو",
+        group: "groupStudio",
       },
     );
   }
@@ -56,33 +56,33 @@ export function unifiedDashNav(role: UserRole): DashNavItem[] {
     items.push(
       {
         href: "/admin",
-        label: "إحصائيات المنصة",
+        label: "adminStats",
         icon: "stats",
-        group: "إدارة",
+        group: "groupAdmin",
       },
       {
         href: "/admin/users",
-        label: "المستخدمون",
+        label: "users",
         icon: "users",
-        group: "إدارة",
+        group: "groupAdmin",
       },
       {
         href: "/admin/requests",
-        label: "طلبات الترقية",
+        label: "requests",
         icon: "requests",
-        group: "إدارة",
+        group: "groupAdmin",
       },
       {
         href: "/admin/audit",
-        label: "سجل الأدوار",
+        label: "audit",
         icon: "audit",
-        group: "إدارة",
+        group: "groupAdmin",
       },
       {
         href: "/admin/settings",
-        label: "إعدادات",
+        label: "settings",
         icon: "settings",
-        group: "إدارة",
+        group: "groupAdmin",
       },
     );
   }

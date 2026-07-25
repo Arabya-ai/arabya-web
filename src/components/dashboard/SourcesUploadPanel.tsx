@@ -1,9 +1,12 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import type { SourceUploadRow } from "@/lib/cloud-sync";
 
 export function SourcesUploadPanel() {
+  const t = useTranslations("Studio");
+  const locale = useLocale();
   const [uploads, setUploads] = useState<SourceUploadRow[]>([]);
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
@@ -18,13 +21,13 @@ export function SourcesUploadPanel() {
         uploads?: SourceUploadRow[];
         error?: string;
       };
-      if (!res.ok || !data.ok) throw new Error(data.error || "فشل التحميل");
+      if (!res.ok || !data.ok) throw new Error(data.error || t("loadError"));
       setUploads(data.uploads || []);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "خطأ");
+      setError(err instanceof Error ? err.message : t("genericError"));
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void load();
@@ -49,12 +52,12 @@ export function SourcesUploadPanel() {
         }),
       });
       const data = (await res.json()) as { ok?: boolean; id?: string; error?: string };
-      if (!res.ok || !data.ok) throw new Error(data.error || "فشل الرفع");
-      setOkMsg(`تم رفع الملف (${data.id}). يمكن استيراده لاحقًا عبر سكربتات المشروع.`);
+      if (!res.ok || !data.ok) throw new Error(data.error || t("uploadError"));
+      setOkMsg(t("uploadOk", { id: data.id ?? "" }));
       setNotes("");
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "خطأ");
+      setError(err instanceof Error ? err.message : t("genericError"));
     } finally {
       setBusy(false);
     }
@@ -63,26 +66,27 @@ export function SourcesUploadPanel() {
   return (
     <div className="dash-stack">
       <section className="dash-card">
-        <h2>رفع مصدر JSON</h2>
+        <h2>{t("uploadTitle")}</h2>
         <p className="dash-muted">
-          ارفع ملف JSON جاهز للاستيراد (كتب إعراب أو مصادر تحليل). يُخزَّن في
-          السحابة بحالة «قيد المراجعة» ثم يُمرَّر إلى{" "}
-          <code>import-irab-book</code> / <code>import-from-incoming</code> عند
-          الاعتماد.
+          {t("uploadLead")}{" "}
+          <code>import-irab-book</code> / <code>import-from-incoming</code>
         </p>
         <div className="dash-form">
           <label>
-            ملاحظات للمحرر
+            {t("editorNotes")}
             <textarea
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               maxLength={500}
-              placeholder="مثال: نسخة مرخّصة من كتاب…"
+              placeholder={t("notesPlaceholder")}
             />
           </label>
-          <label className="users-action users-action--primary" style={{ display: "inline-flex", cursor: "pointer" }}>
-            {busy ? "جاري الرفع…" : "اختر ملف JSON"}
+          <label
+            className="users-action users-action--primary"
+            style={{ display: "inline-flex", cursor: "pointer" }}
+          >
+            {busy ? t("uploadBusy") : t("chooseJson")}
             <input
               type="file"
               accept="application/json,.json"
@@ -97,16 +101,16 @@ export function SourcesUploadPanel() {
       </section>
 
       <section className="dash-card">
-        <h2>الملفات المرفوعة</h2>
+        <h2>{t("uploadedTitle")}</h2>
         {uploads.length === 0 ? (
-          <p className="dash-muted">لا مرفوعات بعد.</p>
+          <p className="dash-muted">{t("noUploads")}</p>
         ) : (
           <ul className="dash-list">
             {uploads.map((u) => (
               <li key={u.id}>
                 <strong>{u.filename}</strong> — {u.status}
-                {u.bytes != null ? ` · ${u.bytes} بايت` : ""} ·{" "}
-                {new Date(u.createdAt).toLocaleString("ar")}
+                {u.bytes != null ? ` · ${t("bytes", { bytes: u.bytes })}` : ""} ·{" "}
+                {new Date(u.createdAt).toLocaleString(locale)}
                 {u.notes ? ` · ${u.notes}` : ""}
               </li>
             ))}

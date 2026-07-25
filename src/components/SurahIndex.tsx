@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { type Bookmark, readBookmarks } from "@/lib/bookmarks";
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
@@ -27,6 +28,13 @@ type RootHit = {
 
 const PREVIEW_LIMIT = 10;
 
+function formatCount(
+  value: number,
+  locale: string,
+): string {
+  return locale === "ar" ? toArabicNumerals(value) : String(value);
+}
+
 export function SurahIndex({
   surahs,
   mushafFirstPage,
@@ -34,6 +42,8 @@ export function SurahIndex({
   surahs: SurahMeta[];
   mushafFirstPage: Record<string, number>;
 }) {
+  const t = useTranslations("Search");
+  const locale = useLocale();
   const [query, setQuery] = useState("");
   const [ayahHits, setAyahHits] = useState<SearchHit[]>([]);
   const [total, setTotal] = useState(0);
@@ -71,7 +81,7 @@ export function SurahIndex({
       return;
     }
     let cancelled = false;
-    const t = window.setTimeout(async () => {
+    const timer = window.setTimeout(async () => {
       setSearching(true);
       try {
         const params = new URLSearchParams({ q });
@@ -101,7 +111,7 @@ export function SurahIndex({
     }, 160);
     return () => {
       cancelled = true;
-      window.clearTimeout(t);
+      window.clearTimeout(timer);
     };
   }, [query, showAll]);
 
@@ -111,22 +121,28 @@ export function SurahIndex({
 
   const hasMore = !showAll && total > PREVIEW_LIMIT;
 
+  const revelationLabel = (s: SurahMeta) =>
+    t(`revelation.${s.revelationPlace}`);
+
+  const juzLabel = (s: SurahMeta) =>
+    locale === "ar" ? s.juzLabel : t("juz", { n: s.juz });
+
   return (
     <div className="index-simple">
       <div className="index-search-simple">
         <input
           type="search"
-          placeholder="بحث باسم السورة، رقمها، نص آية، أو جذر صرفي…"
+          placeholder={t("placeholder")}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          aria-label="بحث في السور والآيات والجذور"
+          aria-label={t("ariaLabel")}
           maxLength={120}
         />
       </div>
 
       {bookmarks.length ? (
         <section className="bookmarks-section" aria-labelledby="bookmarks-h">
-          <h2 id="bookmarks-h">المفضّلات</h2>
+          <h2 id="bookmarks-h">{t("bookmarks")}</h2>
           <ul className="bookmarks-list">
             {bookmarks.slice(0, 12).map((b) => (
               <li key={b.key}>
@@ -134,7 +150,7 @@ export function SurahIndex({
                   href={`${getMushafPageHref(b.page)}#s${b.surahId}-v-${b.verse}`}
                 >
                   {getSurahUthmaniTitle(b.surahId)} —{" "}
-                  {toArabicNumerals(b.verse)}
+                  {formatCount(b.verse, locale)}
                 </Link>
               </li>
             ))}
@@ -145,28 +161,33 @@ export function SurahIndex({
       {showSearchPanel ? (
         <section className="ayah-search-section" aria-labelledby="ayah-search-h">
           <div className="search-results-head">
-            <h2 id="ayah-search-h">نتائج البحث</h2>
+            <h2 id="ayah-search-h">{t("resultsTitle")}</h2>
             {total > 0 ? (
               <p className="search-results-count" aria-live="polite">
-                {toArabicNumerals(ayahHits.length)}
                 {total > ayahHits.length
-                  ? ` من ${toArabicNumerals(total)}`
-                  : null}{" "}
-                نتيجة
+                  ? t("resultsCount", {
+                      shown: formatCount(ayahHits.length, locale),
+                      total: formatCount(total, locale),
+                    })
+                  : t("resultsCountOnly", {
+                      count: formatCount(ayahHits.length, locale),
+                    })}
               </p>
             ) : null}
           </div>
           {rootHit ? (
             <Link href={rootHit.href} className="root-search-hit">
-              <span className="root-search-label">جذر صرفي</span>
+              <span className="root-search-label">{t("rootLabel")}</span>
               <strong className="root-search-root">{rootHit.root}</strong>
               <span className="root-search-meta">
-                {toArabicNumerals(rootHit.count)} موضعاً في القرآن
+                {t("rootMeta", {
+                  count: formatCount(rootHit.count, locale),
+                })}
               </span>
             </Link>
           ) : null}
           {searching && !ayahHits.length && !rootHit ? (
-            <p className="empty-state">جارٍ البحث…</p>
+            <p className="empty-state">{t("searching")}</p>
           ) : null}
           {ayahHits.length ? (
             <ul className="ayah-search-list">
@@ -177,7 +198,7 @@ export function SurahIndex({
                     className="ayah-search-hit"
                   >
                     <span className="ayah-search-key">
-                      {h.nameAr} {toArabicNumerals(h.verse)}
+                      {h.nameAr} {formatCount(h.verse, locale)}
                     </span>
                     <span className="ayah-search-text">{h.text}</span>
                   </Link>
@@ -192,7 +213,7 @@ export function SurahIndex({
               onClick={() => setShowAll(true)}
               disabled={searching}
             >
-              جميع النتائج ({toArabicNumerals(total)})
+              {t("showAll", { total: formatCount(total, locale) })}
             </button>
           ) : null}
           {showAll && total > PREVIEW_LIMIT ? (
@@ -201,30 +222,40 @@ export function SurahIndex({
               className="search-show-all search-show-all--muted"
               onClick={() => setShowAll(false)}
             >
-              عرض أول {toArabicNumerals(PREVIEW_LIMIT)} فقط
+              {t("showPreview", {
+                limit: formatCount(PREVIEW_LIMIT, locale),
+              })}
             </button>
           ) : null}
         </section>
       ) : null}
 
       <section className="surah-grid-section" aria-labelledby="all-surahs">
-        <h2 id="all-surahs">جميع سور القرآن الكريم</h2>
+        <h2 id="all-surahs">{t("allSurahs")}</h2>
         <div className="surah-grid">
           {filtered.map((s) => (
             <Link
               key={s.id}
               href={getMushafPageHref(mushafFirstPage[String(s.id)] ?? 1)}
               className="surah-chip"
-              aria-label={`سورة ${s.nameArabic}، ${s.revelationLabel}، ${s.versesCount} آية، ${s.juzLabel}`}
+              aria-label={t("surahAria", {
+                name: s.nameArabic,
+                revelation: revelationLabel(s),
+                verses: formatCount(s.versesCount, locale),
+                juz: juzLabel(s),
+              })}
             >
-              <span className="chip-num">{toArabicNumerals(s.id)}</span>
+              <span className="chip-num">{formatCount(s.id, locale)}</span>
               <span className="chip-name">{getSurahUthmaniChipName(s.id)}</span>
               <span className="chip-tip" role="tooltip">
                 <strong>{getSurahUthmaniTitle(s.id)}</strong>
                 <span>
-                  {s.revelationLabel} · {toArabicNumerals(s.versesCount)} آية
+                  {revelationLabel(s)} ·{" "}
+                  {t("verseCount", {
+                    count: formatCount(s.versesCount, locale),
+                  })}
                 </span>
-                <span>{s.juzLabel}</span>
+                <span>{juzLabel(s)}</span>
               </span>
             </Link>
           ))}
@@ -232,7 +263,7 @@ export function SurahIndex({
       </section>
 
       {filtered.length === 0 && ayahHits.length === 0 && !rootHit ? (
-        <p className="empty-state">لا توجد نتائج مطابقة.</p>
+        <p className="empty-state">{t("noResults")}</p>
       ) : null}
     </div>
   );

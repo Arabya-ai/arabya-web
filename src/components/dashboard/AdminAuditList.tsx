@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 type Entry = {
@@ -13,6 +14,8 @@ type Entry = {
 };
 
 export function AdminAuditList() {
+  const t = useTranslations("Admin");
+  const locale = useLocale();
   const [entries, setEntries] = useState<Entry[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,33 +28,33 @@ export function AdminAuditList() {
           entries?: Entry[];
           error?: string;
         };
-        if (!res.ok || !data.ok) throw new Error(data.error || "فشل");
+        if (!res.ok || !data.ok) throw new Error(data.error || t("loadError"));
         setEntries(data.entries || []);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "خطأ");
+        setError(err instanceof Error ? err.message : t("genericError"));
       }
     })();
-  }, []);
+  }, [t]);
 
   if (error) return <p className="dash-banner dash-banner--warn">{error}</p>;
-  if (!entries.length) return <p className="dash-muted">لا سجلات بعد.</p>;
+  if (!entries.length) return <p className="dash-muted">{t("auditEmpty")}</p>;
 
   return (
     <div className="dash-table-wrap">
       <table className="dash-table">
         <thead>
           <tr>
-            <th>الوقت</th>
-            <th>المستخدم</th>
-            <th>من → إلى</th>
-            <th>الفاعل</th>
-            <th>السبب</th>
+            <th>{t("auditTime")}</th>
+            <th>{t("auditUser")}</th>
+            <th>{t("auditChange")}</th>
+            <th>{t("auditActor")}</th>
+            <th>{t("auditReason")}</th>
           </tr>
         </thead>
         <tbody>
           {entries.map((e) => (
             <tr key={e.id}>
-              <td>{new Date(e.createdAt).toLocaleString("ar")}</td>
+              <td>{new Date(e.createdAt).toLocaleString(locale)}</td>
               <td dir="ltr">{e.userId}</td>
               <td>
                 {e.fromRole || "—"} → {e.toRole}

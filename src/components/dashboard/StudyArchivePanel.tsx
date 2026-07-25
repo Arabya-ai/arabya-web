@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import {
   deleteStudyEntry,
@@ -10,7 +11,13 @@ import {
 } from "@/lib/study-archive";
 import { toArabicNumerals } from "@/lib/format";
 
+function formatCount(value: number, locale: string): string {
+  return locale === "ar" ? toArabicNumerals(value) : String(value);
+}
+
 export function StudyArchivePanel() {
+  const t = useTranslations("StudyArchive");
+  const locale = useLocale();
   const [entries, setEntries] = useState<StudyEntry[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
@@ -29,24 +36,27 @@ export function StudyArchivePanel() {
     };
   }, []);
 
+  function kindLabel(kind: StudyEntry["kind"]) {
+    if (kind === "quick") return t("kindQuick");
+    if (kind === "word") return t("kindWord");
+    return t("kindAyah");
+  }
+
   return (
     <div className="dash-stack">
       <section className="dash-card">
         <h2>
-          أرشيف الدراسة{" "}
-          <span className="library-count">({toArabicNumerals(entries.length)})</span>
+          {t("title")}{" "}
+          <span className="library-count">({formatCount(entries.length, locale)})</span>
         </h2>
-        <p className="dash-muted">
-          تُحفظ تلقائيًا عند استخدام «دراسة سريعة» أو دراسة كلمة. يمكنك إضافة
-          ملاحظات أو الحذف.
-        </p>
+        <p className="dash-muted">{t("lead")}</p>
       </section>
 
       {entries.length === 0 ? (
         <section className="dash-card">
           <p className="dash-muted">
-            لا دراسات محفوظة بعد. ابدأ من{" "}
-            <Link href="/study">دراسة سريعة</Link>.
+            {t("empty")}{" "}
+            <Link href="/study">{t("quickStudyLink")}</Link>.
           </p>
         </section>
       ) : (
@@ -54,16 +64,14 @@ export function StudyArchivePanel() {
           <article key={e.id} className="dash-card study-archive-card">
             <div className="study-archive-head">
               <div>
-                <p className="dash-kicker">
-                  {e.kind === "quick" ? "دراسة سريعة" : e.kind === "word" ? "كلمة" : "آية"}
-                </p>
+                <p className="dash-kicker">{kindLabel(e.kind)}</p>
                 <h2>{e.title}</h2>
                 {e.snippet ? <p className="dash-muted">{e.snippet}</p> : null}
               </div>
               <div className="dash-row-actions">
                 {e.href ? (
                   <Link href={e.href} className="account-panel-link">
-                    فتح
+                    {t("open")}
                   </Link>
                 ) : null}
                 <button
@@ -74,14 +82,14 @@ export function StudyArchivePanel() {
                     reload();
                   }}
                 >
-                  حذف
+                  {t("delete")}
                 </button>
               </div>
             </div>
             {editing === e.id ? (
               <div className="dash-form">
                 <label>
-                  ملاحظات
+                  {t("notesLabel")}
                   <textarea
                     rows={3}
                     value={draft}
@@ -97,16 +105,16 @@ export function StudyArchivePanel() {
                       reload();
                     }}
                   >
-                    حفظ
+                    {t("save")}
                   </button>
                   <button type="button" onClick={() => setEditing(null)}>
-                    إلغاء
+                    {t("cancel")}
                   </button>
                 </div>
               </div>
             ) : (
               <div>
-                {e.notes ? <p>{e.notes}</p> : <p className="dash-muted">لا ملاحظات بعد.</p>}
+                {e.notes ? <p>{e.notes}</p> : <p className="dash-muted">{t("noNotes")}</p>}
                 <button
                   type="button"
                   onClick={() => {
@@ -114,12 +122,14 @@ export function StudyArchivePanel() {
                     setDraft(e.notes || "");
                   }}
                 >
-                  تعديل الملاحظات
+                  {t("editNotes")}
                 </button>
               </div>
             )}
             <p className="dash-muted" style={{ marginTop: "0.5rem", marginBottom: 0 }}>
-              آخر تحديث: {new Date(e.updatedAt).toLocaleString("ar")}
+              {t("updatedAt", {
+                date: new Date(e.updatedAt).toLocaleString(locale),
+              })}
             </p>
           </article>
         ))

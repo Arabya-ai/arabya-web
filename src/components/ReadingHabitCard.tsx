@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
 import {
@@ -13,7 +14,13 @@ import {
   type ReadingHabitState,
 } from "@/lib/reading-habit";
 
+function formatCount(value: number, locale: string): string {
+  return locale === "ar" ? toArabicNumerals(value) : String(value);
+}
+
 export function ReadingHabitCard() {
+  const t = useTranslations("Habit");
+  const locale = useLocale();
   const [state, setState] = useState<ReadingHabitState | null>(null);
   const [continuePage, setContinuePage] = useState(1);
   const [goalDraft, setGoalDraft] = useState("2");
@@ -58,7 +65,7 @@ export function ReadingHabitCard() {
   const onReset = () => {
     if (
       typeof window !== "undefined" &&
-      !window.confirm("هل تريد مسح عادة القراءة والبدء من جديد؟")
+      !window.confirm(t("resetConfirm"))
     ) {
       return;
     }
@@ -88,13 +95,13 @@ export function ReadingHabitCard() {
       <header className="habit-panel-head">
         <div className="habit-panel-titles">
           <div className="habit-title-row">
-            <h2 id="habit-h">عادة القراءة</h2>
+            <h2 id="habit-h">{t("title")}</h2>
             <button
               type="button"
               className="habit-reset-btn"
               onClick={onReset}
-              title="مسح التسجيل والعودة للافتراضي"
-              aria-label="مسح تسجيل عادة القراءة والعودة للافتراضي"
+              title={t("resetTitle")}
+              aria-label={t("resetAria")}
             >
               <svg
                 width="16"
@@ -127,13 +134,10 @@ export function ReadingHabitCard() {
               </svg>
             </button>
           </div>
-          <p className="habit-help">
-            كل صفحة مصحف جديدة تُحسب مرة واحدة فقط في اليوم — لا يتكرر عدّ نفس
-            الصفحة.
-          </p>
+          <p className="habit-help">{t("help")}</p>
         </div>
         <label className="habit-goal">
-          <span>الهدف اليومي (صفحات)</span>
+          <span>{t("dailyGoal")}</span>
           <input
             type="number"
             inputMode="numeric"
@@ -149,17 +153,17 @@ export function ReadingHabitCard() {
                 (e.target as HTMLInputElement).blur();
               }
             }}
-            aria-label="أدخل عدد الصفحات المستهدف يوميًا"
+            aria-label={t("dailyGoalAria")}
           />
         </label>
       </header>
 
-      <div className="habit-stats" role="group" aria-label="مؤشرات القراءة">
+      <div className="habit-stats" role="group" aria-label={t("statsAria")}>
         <article className="habit-stat">
-          <p className="habit-stat-label">اليوم</p>
+          <p className="habit-stat-label">{t("today")}</p>
           <p className="habit-stat-value">
-            <strong>{toArabicNumerals(progress.done)}</strong>
-            <span> / {toArabicNumerals(progress.goal)}</span>
+            <strong>{formatCount(progress.done, locale)}</strong>
+            <span> / {formatCount(progress.goal, locale)}</span>
           </p>
           <div
             className="habit-bar"
@@ -167,31 +171,33 @@ export function ReadingHabitCard() {
             aria-valuenow={progress.done}
             aria-valuemin={0}
             aria-valuemax={progress.goal}
-            aria-label="تقدّم الهدف اليومي"
+            aria-label={t("dailyProgressAria")}
           >
             <span className="habit-bar-fill" style={{ width: `${dailyPct}%` }} />
           </div>
           <p className="habit-stat-foot">
             {progress.met
-              ? "أتممت هدف اليوم"
-              : `يتبقى ${toArabicNumerals(remaining)}`}
+              ? t("goalMet")
+              : t("remaining", {
+                  count: formatCount(remaining, locale),
+                })}
           </p>
         </article>
 
         <article className="habit-stat">
-          <p className="habit-stat-label">السلسلة</p>
+          <p className="habit-stat-label">{t("streak")}</p>
           <p className="habit-stat-value">
-            <strong>{toArabicNumerals(state.streak)}</strong>
-            <span> يومًا</span>
+            <strong>{formatCount(state.streak, locale)}</strong>
+            <span> {t("streakUnit")}</span>
           </p>
-          <p className="habit-stat-foot">أيام متتالية بأهداف مكتملة</p>
+          <p className="habit-stat-foot">{t("streakFoot")}</p>
         </article>
 
         <article className="habit-stat habit-stat--wide">
-          <p className="habit-stat-label">الختم</p>
+          <p className="habit-stat-label">{t("khatm")}</p>
           <p className="habit-stat-value">
-            <strong>{toArabicNumerals(state.khatmPagesDone)}</strong>
-            <span> / {toArabicNumerals(MUSHAF_TOTAL_PAGES)}</span>
+            <strong>{formatCount(state.khatmPagesDone, locale)}</strong>
+            <span> / {formatCount(MUSHAF_TOTAL_PAGES, locale)}</span>
           </p>
           <div
             className="habit-bar habit-bar--khatm"
@@ -199,12 +205,14 @@ export function ReadingHabitCard() {
             aria-valuenow={state.khatmPagesDone}
             aria-valuemin={0}
             aria-valuemax={MUSHAF_TOTAL_PAGES}
-            aria-label="تقدّم الختم"
+            aria-label={t("khatmProgressAria")}
           >
             <span className="habit-bar-fill" style={{ width: `${khatmPct}%` }} />
           </div>
           <p className="habit-stat-foot">
-            {toArabicNumerals(khatmPct)}٪ صفحات مختلفة فُتحت
+            {t("khatmFoot", {
+              pct: formatCount(khatmPct, locale),
+            })}
           </p>
         </article>
       </div>
@@ -212,8 +220,10 @@ export function ReadingHabitCard() {
       <div className="habit-actions">
         <Link href={startHref} className="habit-cta">
           {isFresh
-            ? "ابدأ القراءة من المصحف"
-            : `متابعة من الصفحة ${toArabicNumerals(continuePage)}`}
+            ? t("startFresh")
+            : t("continue", {
+                page: formatCount(continuePage, locale),
+              })}
         </Link>
       </div>
     </section>

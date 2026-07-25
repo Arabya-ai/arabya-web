@@ -85,11 +85,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     authorized({ auth: session, request }) {
       const path = request.nextUrl.pathname;
+      const bare =
+        path === "/en" || path.startsWith("/en/")
+          ? path.slice(3) || "/"
+          : path;
       if (session?.error === "Banned") return false;
       if (
-        path.startsWith("/account") ||
-        path.startsWith("/studio") ||
-        path.startsWith("/admin")
+        bare.startsWith("/account") ||
+        bare.startsWith("/studio") ||
+        bare.startsWith("/admin")
       ) {
         return !!session?.user;
       }

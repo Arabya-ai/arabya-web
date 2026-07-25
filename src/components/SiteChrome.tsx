@@ -1,12 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { AuthButton } from "@/components/AuthButton";
 import { BrandLockup } from "@/components/BrandLockup";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Link } from "@/i18n/navigation";
 
 function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
+  const t = useTranslations("Nav");
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -55,23 +58,23 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
         aria-haspopup="menu"
         onClick={() => setOpen((v) => !v)}
       >
-        خدماتنا
+        {t("services")}
       </button>
       <div className="nav-dropdown-menu" role="menu">
         <Link href="/juz" role="menuitem" onClick={go()}>
-          الأجزاء
+          {t("juz")}
         </Link>
         <Link href="/roots" role="menuitem" onClick={go()}>
-          الجذور
+          {t("roots")}
         </Link>
         <Link href="/qiraat" role="menuitem" onClick={go()}>
-          القراءات
+          {t("qiraat")}
         </Link>
         <Link href="/asma" role="menuitem" onClick={go()}>
-          الأسماء الحسنى
+          {t("asma")}
         </Link>
         <Link href="/study" role="menuitem" onClick={go()}>
-          دراسة سريعة
+          {t("study")}
         </Link>
       </div>
     </div>
@@ -79,6 +82,7 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 export function SiteHeader() {
+  const t = useTranslations("Nav");
   const [open, setOpen] = useState(false);
 
   return (
@@ -87,37 +91,45 @@ export function SiteHeader() {
         <Link
           href="/"
           className="brand"
-          aria-label="عربية — الصفحة الرئيسية"
+          aria-label={t("brandHome")}
           onClick={() => setOpen(false)}
         >
           <BrandLockup size="header" />
         </Link>
 
-        <button
-          type="button"
-          className="menu-toggle"
-          aria-expanded={open}
-          aria-controls="main-nav"
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? "إغلاق" : "القائمة"}
-        </button>
+        <div className="header-actions">
+          <div className="header-locale" aria-hidden={open ? true : undefined}>
+            <LocaleSwitcher compact />
+          </div>
+          <button
+            type="button"
+            className="menu-toggle"
+            aria-expanded={open}
+            aria-controls="main-nav"
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? t("close") : t("menu")}
+          </button>
+        </div>
 
         <nav
           id="main-nav"
           className={`nav ${open ? "is-open" : ""}`}
-          aria-label="التنقل الرئيسي"
+          aria-label={t("mainNav")}
         >
           <Link href="/" onClick={() => setOpen(false)}>
-            الرئيسية
+            {t("home")}
           </Link>
           <ServicesMenu onNavigate={() => setOpen(false)} />
           <Link href="/about" onClick={() => setOpen(false)}>
-            عن عربية
+            {t("about")}
           </Link>
           <Link href="/privacy" onClick={() => setOpen(false)}>
-            الخصوصية
+            {t("privacy")}
           </Link>
+          <div className="nav-locale-row">
+            <LocaleSwitcher compact />
+          </div>
           <AuthButton />
           <ThemeToggle />
         </nav>
@@ -127,6 +139,8 @@ export function SiteHeader() {
 }
 
 export function SiteFooter() {
+  const t = useTranslations("Nav");
+  const tFooter = useTranslations("Footer");
   const year = new Date().getFullYear();
 
   return (
@@ -136,23 +150,27 @@ export function SiteFooter() {
           <Link
             href="/"
             className="arabya-footer-brand"
-            aria-label="عربية — الصفحة الرئيسية"
+            aria-label={t("brandHome")}
           >
             <BrandLockup size="footer" />
           </Link>
 
-          <nav className="arabya-footer-menu" aria-label="روابط التذييل">
-            <Link href="/">الرئيسية</Link>
-            <Link href="/mushaf/1">المصحف</Link>
-            <Link href="/juz">الأجزاء</Link>
-            <Link href="/roots">الجذور</Link>
-            <Link href="/qiraat">القراءات</Link>
-            <Link href="/about">عن عربية</Link>
-            <Link href="/privacy">الخصوصية</Link>
+          <nav className="arabya-footer-menu" aria-label={t("footerNav")}>
+            <Link href="/">{t("home")}</Link>
+            <Link href="/mushaf/1">{t("mushaf")}</Link>
+            <Link href="/juz">{t("juz")}</Link>
+            <Link href="/roots">{t("roots")}</Link>
+            <Link href="/qiraat">{t("qiraat")}</Link>
+            <Link href="/about">{t("about")}</Link>
+            <Link href="/privacy">{t("privacy")}</Link>
           </nav>
 
+          <div className="arabya-footer-locale">
+            <LocaleSwitcher compact />
+          </div>
+
           <p className="arabya-footer-credit" suppressHydrationWarning>
-            © {year} منصة عربية · جميع الحقوق محفوظة لكل مسلم
+            {tFooter("credit", { year })}
           </p>
         </div>
       </div>

@@ -1,9 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import type { RoleRequestRow } from "@/lib/cloud-sync";
 
 export function AdminRequestsPanel() {
+  const t = useTranslations("Admin");
+  const tRoles = useTranslations("Roles");
   const [requests, setRequests] = useState<RoleRequestRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -18,13 +21,13 @@ export function AdminRequestsPanel() {
         requests?: RoleRequestRow[];
         error?: string;
       };
-      if (!res.ok || !data.ok) throw new Error(data.error || "فشل التحميل");
+      if (!res.ok || !data.ok) throw new Error(data.error || t("loadError"));
       setRequests(data.requests || []);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "خطأ");
+      setError(err instanceof Error ? err.message : t("genericError"));
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void load();
@@ -39,10 +42,10 @@ export function AdminRequestsPanel() {
         body: JSON.stringify({ requestId: id, decision }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
-      if (!res.ok || !data.ok) throw new Error(data.error || "فشل");
+      if (!res.ok || !data.ok) throw new Error(data.error || t("actionError"));
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "خطأ");
+      setError(err instanceof Error ? err.message : t("genericError"));
     } finally {
       setBusyId(null);
     }
@@ -53,7 +56,7 @@ export function AdminRequestsPanel() {
   return (
     <div className="dash-stack">
       {requests.length === 0 ? (
-        <p className="dash-muted">لا طلبات معلّقة حاليًا.</p>
+        <p className="dash-muted">{t("noPendingRequests")}</p>
       ) : (
         requests.map((r) => (
           <article key={r.id} className="dash-card">
@@ -69,10 +72,11 @@ export function AdminRequestsPanel() {
                 </p>
               </div>
             </div>
-            <p>{r.message || "بدون رسالة"}</p>
+            <p>{r.message || t("noMessage")}</p>
             {r.targetRole ? (
               <p className="dash-muted">
-                المطلوب: {r.targetRole === "admin" ? "مدير" : "محرر"}
+                {t("requestedRole")}:{" "}
+                {tRoles(r.targetRole as "admin" | "editor" | "user")}
               </p>
             ) : null}
             <div className="dash-row-actions">
@@ -81,7 +85,7 @@ export function AdminRequestsPanel() {
                 disabled={busyId === r.id}
                 onClick={() => void review(r.id, "approved")}
               >
-                موافقة
+                {t("approve")}
               </button>
               <button
                 type="button"
@@ -89,7 +93,7 @@ export function AdminRequestsPanel() {
                 disabled={busyId === r.id}
                 onClick={() => void review(r.id, "rejected")}
               >
-                رفض
+                {t("reject")}
               </button>
             </div>
           </article>

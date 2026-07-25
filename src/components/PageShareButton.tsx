@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { ShareMenu } from "@/components/ShareMenu";
 import type { ShareKind, ShareTarget } from "@/lib/share";
 
@@ -8,8 +10,8 @@ export function PageShareButton({
   text,
   path,
   kind = "irab",
-  label = "مشاركة",
-  hint = "انسخ الرابط أو شاركه عبر التطبيقات.",
+  label,
+  hint,
 }: {
   title: string;
   text: string;
@@ -18,14 +20,18 @@ export function PageShareButton({
   label?: string;
   hint?: string;
 }) {
+  const t = useTranslations("Share");
+  const shareLabel = label ?? t("label");
+  const shareHint = hint ?? t("defaultHint");
+
   const targets: ShareTarget[] = [
     {
       id: "main",
       kind,
-      label,
-      hint,
+      label: shareLabel,
+      hint: shareHint,
       payload: { kind, title, text, url: path },
     },
   ];
-  return <ShareMenu targets={targets} label={label} />;
+  return <ShareMenu targets={targets} label={shareLabel} />;
 }

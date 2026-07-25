@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { useMemo, useState } from "react";
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
@@ -18,6 +19,7 @@ export function RootOccurrencesList({
   occurrences: RootOccurrence[];
   pageOf: Record<string, number>;
 }) {
+  const t = useTranslations("Roots");
   const [visible, setVisible] = useState(
     Math.min(PREVIEW, occurrences.length),
   );
@@ -29,16 +31,20 @@ export function RootOccurrencesList({
 
   const remaining = occurrences.length - visible;
   const canMore = remaining > 0;
+  const totalPart =
+    occurrences.length > shown.length
+      ? t("occTotalPart", { total: toArabicNumerals(occurrences.length) })
+      : "";
 
   return (
     <div className="root-occ-block">
       <div className="root-occ-toolbar">
         <p className="root-occ-count" aria-live="polite">
-          عرض {toArabicNumerals(shown.length)}
-          {occurrences.length > shown.length
-            ? ` من ${toArabicNumerals(occurrences.length)}`
-            : null}{" "}
-          موضعًا للجذر «{root}»
+          {t("occShowing", {
+            shown: toArabicNumerals(shown.length),
+            totalPart,
+            root,
+          })}
         </p>
         {canMore ? (
           <div className="root-occ-actions">
@@ -49,14 +55,16 @@ export function RootOccurrencesList({
                 setVisible((n) => Math.min(n + STEP, occurrences.length))
               }
             >
-              المزيد ({toArabicNumerals(Math.min(STEP, remaining))})
+              {t("occMore", { count: toArabicNumerals(Math.min(STEP, remaining)) })}
             </button>
             <button
               type="button"
               className="search-show-all search-show-all--muted"
               onClick={() => setVisible(occurrences.length)}
             >
-              جميع المواضع ({toArabicNumerals(occurrences.length)})
+              {t("occShowAll", {
+                count: toArabicNumerals(occurrences.length),
+              })}
             </button>
           </div>
         ) : null}
@@ -66,7 +74,7 @@ export function RootOccurrencesList({
             className="search-show-all search-show-all--muted"
             onClick={() => setVisible(PREVIEW)}
           >
-            عرض أول {toArabicNumerals(PREVIEW)} فقط
+            {t("occShowFirst", { count: toArabicNumerals(PREVIEW) })}
           </button>
         ) : null}
       </div>

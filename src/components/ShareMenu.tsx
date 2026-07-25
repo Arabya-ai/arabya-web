@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import {
   absoluteUrl,
   copyLinkOnly,
@@ -84,20 +85,22 @@ const SOCIAL_ICONS: Record<string, () => ReactNode> = {
 
 export function ShareMenu({
   targets,
-  label = "مشاركة",
+  label,
   onStatus,
 }: {
   targets: ShareTarget[];
   label?: string;
   onStatus?: (note: string | null, clearMs?: number) => void;
 }) {
+  const t = useTranslations("Share");
+  const shareLabel = label ?? t("label");
   const [open, setOpen] = useState(false);
   const [activeId, setActiveId] = useState(targets[0]?.id ?? "");
   const rootRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
 
   useEffect(() => {
-    if (!targets.some((t) => t.id === activeId)) {
+    if (!targets.some((target) => target.id === activeId)) {
       setActiveId(targets[0]?.id ?? "");
     }
   }, [targets, activeId]);
@@ -119,7 +122,7 @@ export function ShareMenu({
   }, [open]);
 
   const active = useMemo(
-    () => targets.find((t) => t.id === activeId) ?? targets[0] ?? null,
+    () => targets.find((target) => target.id === activeId) ?? targets[0] ?? null,
     [targets, activeId],
   );
 
@@ -129,13 +132,13 @@ export function ShareMenu({
 
   const onCopyLink = async () => {
     const ok = await copyLinkOnly(active.payload.url);
-    onStatus?.(ok ? "تم نسخ الرابط" : "تعذّر نسخ الرابط", 1800);
+    onStatus?.(ok ? t("copiedLink") : t("copyFailed"), 1800);
   };
 
   const onNativeShare = async () => {
     const result = await shareOrCopy(active.payload);
-    if (result === "shared") onStatus?.("تمت المشاركة", 1800);
-    else if (result === "copied") onStatus?.("تم نسخ النص والرابط", 1800);
+    if (result === "shared") onStatus?.(t("shared"), 1800);
+    else if (result === "copied") onStatus?.(t("copiedText"), 1800);
     else onStatus?.(fullUrl, 2500);
   };
 
@@ -147,25 +150,25 @@ export function ShareMenu({
         aria-expanded={open}
         aria-controls={menuId}
         onClick={() => setOpen((v) => !v)}
-        title={label}
+        title={shareLabel}
       >
         <IconShare />
-        <span>{label}</span>
+        <span>{shareLabel}</span>
       </button>
       {open ? (
-        <div id={menuId} className="share-menu-panel" role="dialog" aria-label={label}>
-          <p className="share-menu-heading">ماذا تشارك؟</p>
-          <div className="share-kind-list" role="tablist" aria-label="نوع المشاركة">
-            {targets.map((t) => (
+        <div id={menuId} className="share-menu-panel" role="dialog" aria-label={shareLabel}>
+          <p className="share-menu-heading">{t("heading")}</p>
+          <div className="share-kind-list" role="tablist" aria-label={t("kindAria")}>
+            {targets.map((target) => (
               <button
-                key={t.id}
+                key={target.id}
                 type="button"
                 role="tab"
-                aria-selected={t.id === active.id}
-                className={`share-kind-chip ${t.id === active.id ? "is-on" : ""}`}
-                onClick={() => setActiveId(t.id)}
+                aria-selected={target.id === active.id}
+                className={`share-kind-chip ${target.id === active.id ? "is-on" : ""}`}
+                onClick={() => setActiveId(target.id)}
               >
-                {t.label}
+                {target.label}
               </button>
             ))}
           </div>
@@ -180,16 +183,17 @@ export function ShareMenu({
               type="button"
               className="share-icon-btn share-icon-btn--copy"
               onClick={() => void onCopyLink()}
-              title="نسخ الرابط"
-              aria-label="نسخ الرابط"
+              title={t("copyLinkTitle")}
+              aria-label={t("copyLink")}
             >
               <IconCopy />
             </button>
           </div>
 
-          <div className="share-icon-row" aria-label="المشاركة عبر">
+          <div className="share-icon-row" aria-label={t("viaAria")}>
             {socialShareLinks(active.payload).map((s) => {
               const Icon = SOCIAL_ICONS[s.id];
+              const socialLabel = t(`social.${s.id}` as "social.whatsapp");
               return (
                 <a
                   key={s.id}
@@ -197,11 +201,11 @@ export function ShareMenu({
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`share-icon-btn share-icon-btn--${s.id}`}
-                  title={s.label}
-                  aria-label={s.label}
+                  title={socialLabel}
+                  aria-label={socialLabel}
                   onClick={() => setOpen(false)}
                 >
-                  {Icon ? <Icon /> : s.label}
+                  {Icon ? <Icon /> : socialLabel}
                 </a>
               );
             })}
@@ -209,8 +213,8 @@ export function ShareMenu({
               type="button"
               className="share-icon-btn share-icon-btn--native"
               onClick={() => void onNativeShare()}
-              title="مشاركة الجهاز"
-              aria-label="مشاركة الجهاز"
+              title={t("nativeShare")}
+              aria-label={t("nativeShare")}
             >
               <IconShare />
             </button>

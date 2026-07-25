@@ -19,6 +19,8 @@ export const STORAGE_KEYS = {
   meaningLang: "arabya-meaning-lang",
   verseTrans: "arabya-verse-trans",
   reciter: "arabya-reciter",
+  /** UI locale preference (ar | en) — separate from meaningLang / verseTrans */
+  uiLocale: "arabya-ui-locale",
   studyQuery: "arabya-study-query",
   autosyncDone: "arabya-autosync-done",
 } as const;

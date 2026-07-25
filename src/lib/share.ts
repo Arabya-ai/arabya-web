@@ -111,12 +111,12 @@ export function socialShareLinks(payload: SharePayload): {
   return [
     {
       id: "whatsapp",
-      label: "واتساب",
+      label: "WhatsApp",
       href: `https://wa.me/?text=${encodeURIComponent(body)}`,
     },
     {
       id: "telegram",
-      label: "تيليجرام",
+      label: "Telegram",
       href: `https://t.me/share/url?url=${u}&text=${t}`,
     },
     {
@@ -126,7 +126,7 @@ export function socialShareLinks(payload: SharePayload): {
     },
     {
       id: "facebook",
-      label: "فيسبوك",
+      label: "Facebook",
       href: `https://www.facebook.com/sharer/sharer.php?u=${u}`,
     },
   ];

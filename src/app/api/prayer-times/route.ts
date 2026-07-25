@@ -97,7 +97,6 @@ export async function GET(req: Request) {
     return NextResponse.json(
       {
         city: cfg.id,
-        cityLabel: cfg.label,
         timezone: payload.data?.meta?.timezone ?? null,
         source: "api.aladhan.com",
         gregorian: {

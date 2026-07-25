@@ -386,6 +386,30 @@ html[data-theme="dark"] .site-header {
   font-weight: 600;
 }
 
+.header-actions {
+  display: none;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.header-locale {
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-locale-row {
+  display: inline-flex;
+  align-items: center;
+  padding-inline: 0.15rem;
+}
+
+.arabya-footer-locale {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.85rem;
+}
+
 .nav {
   display: flex;
   align-items: center;
@@ -1174,6 +1198,29 @@ button.nav-pill {
 
 .mushaf-page {
   display: grid;
+}
+
+/**
+ * Quran reading surfaces stay RTL forever — never inherit UI locale (en → ltr).
+ * Verse/uthmani text is not translated; only chrome/labels may be.
+ */
+.mushaf-page,
+.mushaf-frame,
+.mushaf-text,
+.mushaf-ayah,
+.mushaf-word,
+.mushaf-basmalah,
+.mushaf-sura-name,
+.mushaf-page-title,
+.surah-read-body,
+.surah-read-ayah-text,
+.ayah-irab-text,
+.ayah-irab-list,
+.word-dock-ar,
+.tafsir-words,
+.cell-word {
+  direction: rtl;
+  unicode-bidi: isolate;
 }
 
 .mushaf-frame {
@@ -3081,6 +3128,14 @@ html[data-theme="dark"] .arabya-footer-panel {
     align-items: center;
   }
 
+  .header-actions {
+    display: inline-flex;
+  }
+
+  .nav-locale-row {
+    display: none;
+  }
+
   .nav {
     display: none;
     position: absolute;
@@ -3108,6 +3163,8 @@ html[data-theme="dark"] .arabya-footer-panel {
 
   .nav a,
   .nav .theme-toggle,
+  .nav .locale-switch,
+  .nav .nav-locale-row,
   .nav .auth-btn,
   .nav .auth-chip-row,
   .nav .nav-dropdown,
@@ -3122,12 +3179,23 @@ html[data-theme="dark"] .arabya-footer-panel {
     align-items: stretch;
   }
 
-  .nav-dropdown-menu {
+  .nav .nav-dropdown-menu {
     position: static;
     box-shadow: none;
     border: 1px dashed color-mix(in srgb, var(--brand) 22%, var(--line));
     margin-top: 0.25rem;
     width: 100%;
+  }
+
+  .header-locale .nav-dropdown-menu {
+    position: absolute;
+    inset-inline-end: 0;
+    inset-inline-start: auto;
+    top: calc(100% + 0.35rem);
+    width: max-content;
+    min-width: 11rem;
+    box-shadow: var(--shadow);
+    border: 1px solid color-mix(in srgb, var(--brand) 18%, var(--line));
   }
 }
 
@@ -3192,6 +3260,114 @@ html[data-theme="dark"] .arabya-footer-panel {
 .theme-toggle:focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: 2px;
+}
+
+.locale-switch {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+
+.locale-switch-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1.2;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.locale-switch-trigger:hover,
+.locale-switch.is-open .locale-switch-trigger {
+  border-color: var(--brand);
+  color: var(--brand-deep);
+  background: var(--brand-soft);
+}
+
+.locale-switch-trigger:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.locale-switch--compact .locale-switch-trigger {
+  padding: 0.4rem 0.55rem;
+  min-height: 2.5rem;
+}
+
+.locale-switch-trigger-flag {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  min-width: 1.4rem;
+  text-align: center;
+}
+
+.locale-switch-trigger-text {
+  white-space: nowrap;
+}
+
+.locale-switch-menu {
+  min-width: 11rem;
+}
+
+.locale-switch-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.65rem;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  padding: 0.55rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+  cursor: pointer;
+  text-align: start;
+  border-radius: 10px;
+}
+
+.locale-switch-option:hover,
+.locale-switch-option:focus-visible {
+  background: var(--brand-soft);
+  color: var(--brand-deep);
+  outline: none;
+}
+
+.locale-switch-option.is-active {
+  background: color-mix(in srgb, var(--brand) 16%, var(--surface));
+  color: var(--brand-deep);
+}
+
+.locale-switch-option-flag {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  width: 1.75rem;
+  text-align: center;
+  padding: 0.2rem 0.3rem;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--brand) 12%, var(--surface-2));
+  color: var(--brand-deep);
+}
+
+.dash-header-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-shrink: 0;
 }
 
 .theme-toggle-icon {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import type {
   IrabSurah,
   IrabWord,
@@ -26,7 +27,7 @@ import {
 } from "@/lib/share";
 import { useMushafPrefs } from "@/hooks/useMushafPrefs";
 import { useMushafStudyCache } from "@/hooks/useMushafStudyCache";
-import { useQuranAudio } from "@/hooks/useQuranAudio";
+import { useQuranAudio, type AudioStatusKey } from "@/hooks/useQuranAudio";
 import { clampFontScale, type WordRef } from "@/hooks/mushaf-utils";
 
 type Props = {
@@ -38,23 +39,34 @@ type Props = {
 
 type Mode = "words" | "irab" | "meaning-table" | string;
 
+function formatPageNum(page: number, locale: string): string {
+  return locale === "ar" ? toArabicNumerals(page) : String(page);
+}
+
 export function MushafPageStudio({
   page,
   irabBySurah,
   tafsirSources,
   verseEditions,
 }: Props) {
+  const locale = useLocale();
+  const tModes = useTranslations("Mushaf.modes");
+  const tMushaf = useTranslations("Mushaf");
+  const tShare = useTranslations("Mushaf.shareTargets");
+  const tToast = useTranslations("Mushaf.toast");
+  const tAudio = useTranslations("Audio");
+
   const modes: { id: Mode; label: string }[] = useMemo(() => {
     const list: { id: Mode; label: string }[] = [
-      { id: "words", label: "الكلمات" },
-      { id: "irab", label: "الإعراب" },
-      { id: "meaning-table", label: "جدول المعنى" },
+      { id: "words", label: tModes("words") },
+      { id: "irab", label: tModes("irab") },
+      { id: "meaning-table", label: tModes("meaningTable") },
     ];
     for (const s of tafsirSources) {
       list.push({ id: s.slug, label: s.nameAr });
     }
     return list;
-  }, [tafsirSources]);
+  }, [tafsirSources, tModes]);
 
   const [mode, setMode] = useState<Mode>("words");
   const [activeWord, setActiveWord] = useState<WordRef | null>(null);
@@ -135,6 +147,14 @@ export function MushafPageStudio({
     if (mode !== "words" && mode !== "irab") setMode("words");
   };
 
+  const onAudioStatus = (
+    key: AudioStatusKey | null,
+    values?: Record<string, string | number>,
+    clearMs?: number,
+  ) => {
+    flashShareNote(key ? tAudio(key, values) : null, clearMs);
+  };
+
   const audio = useQuranAudio({
     selected,
     reciterId: prefs.reciterId,
@@ -142,7 +162,8 @@ export function MushafPageStudio({
     page,
     onHighlightWord: setActiveWord,
     onSelectWord: selectWord,
-    onStatusNote: flashShareNote,
+    onStatusNote: onAudioStatus,
+    tAudio,
   });
 
   const listenBootRef = useRef<{
@@ -272,7 +293,7 @@ export function MushafPageStudio({
       surahId,
     });
     const ok = await copyLinkOnly(path);
-    setShareNote(ok ? "تم نسخ رابط الآية" : path);
+    setShareNote(ok ? tToast("ayahLinkCopied") : path);
     window.setTimeout(() => setShareNote(null), 2200);
   };
 
@@ -287,8 +308,8 @@ export function MushafPageStudio({
     setBookmarked(next.some((b) => b.key === selected.verseKey));
     setShareNote(
       next.some((b) => b.key === selected.verseKey)
-        ? "أُضيفت للمفضّلات"
-        : "أُزيلت من المفضّلات",
+        ? tToast("bookmarkAdded")
+        : tToast("bookmarkRemoved"),
     );
     window.setTimeout(() => setShareNote(null), 1800);
   };
@@ -300,16 +321,17 @@ export function MushafPageStudio({
     page.blocks.find((b) => b.surahId === studySurahId) ?? page.blocks[0];
 
   const shareTargets = useMemo((): ShareTarget[] => {
+    const pageLabel = formatPageNum(page.page, locale);
     const targets: ShareTarget[] = [
       {
         id: "page",
         kind: "page",
-        label: "الصفحة",
-        hint: `رابط صفحة المصحف ${toArabicNumerals(page.page)} — يفتح هذه الصفحة مباشرة.`,
+        label: tShare("page"),
+        hint: tShare("hintPage", { page: pageLabel }),
         payload: {
           kind: "page",
-          title: `عربية — صفحة ${toArabicNumerals(page.page)}`,
-          text: `مصحف المدينة — الصفحة ${toArabicNumerals(page.page)} على عربية`,
+          title: tShare("titlePage", { page: pageLabel }),
+          text: tShare("textPage", { page: pageLabel }),
           url: buildMushafShareUrl({ page: page.page, kind: "page" }),
         },
       },
@@ -321,12 +343,12 @@ export function MushafPageStudio({
       targets.push({
         id: "surah",
         kind: "surah",
-        label: "السورة",
-        hint: `رابط سورة ${surahTitle} — يميّز السورة عن الصفحة والآية.`,
+        label: tShare("surah"),
+        hint: tShare("hintSurah", { surah: surahTitle }),
         payload: {
           kind: "surah",
-          title: `عربية — ${surahTitle}`,
-          text: `دراسة سورة ${surahTitle} على عربية`,
+          title: tShare("titleSurah", { surah: surahTitle }),
+          text: tShare("textSurah", { surah: surahTitle }),
           url: buildMushafShareUrl({
             page: page.page,
             kind: "surah",
@@ -343,16 +365,16 @@ export function MushafPageStudio({
       const ayahText = verse?.words.map((w) => w.text).join(" ") ?? "";
       const verseKey = `${selected.surahId}:${selected.verseNumber}`;
       const surahTitle = getSurahUthmaniTitle(selected.surahId);
-      const ayahLabel = `${surahTitle} ${toArabicNumerals(selected.verseNumber)}`;
+      const ayahLabel = `${surahTitle} ${formatPageNum(selected.verseNumber, locale)}`;
 
       targets.unshift({
         id: "ayah",
         kind: "ayah",
-        label: "الآية",
-        hint: `رابط الآية ${ayahLabel} — ينقلك إلى نفس الآية في المصحف.`,
+        label: tShare("ayah"),
+        hint: tShare("hintAyah", { label: ayahLabel }),
         payload: {
           kind: "ayah",
-          title: `عربية — ${ayahLabel}`,
+          title: tShare("titleAyah", { label: ayahLabel }),
           text: `${ayahText}\n\n${ayahLabel}`,
           url: buildMushafShareUrl({
             page: page.page,
@@ -366,12 +388,12 @@ export function MushafPageStudio({
       targets.push({
         id: "listen-ayah",
         kind: "listen-ayah",
-        label: "استماع آية",
-        hint: "رابط يشغّل تلاوة الآية تلقائياً عند الفتح.",
+        label: tShare("listenAyah"),
+        hint: tShare("hintListenAyah"),
         payload: {
           kind: "listen-ayah",
-          title: `استماع — ${ayahLabel}`,
-          text: `استمع لتلاوة ${ayahLabel} على عربية`,
+          title: tShare("titleListenAyah", { label: ayahLabel }),
+          text: tShare("textListenAyah", { label: ayahLabel }),
           url: buildMushafShareUrl({
             page: page.page,
             kind: "listen-ayah",
@@ -385,12 +407,12 @@ export function MushafPageStudio({
       targets.push({
         id: "listen-wbw",
         kind: "listen-wbw",
-        label: "كلمة بكلمة",
-        hint: "رابط يشغّل التلاوة كلمة بكلمة عند الفتح.",
+        label: tShare("listenWbw"),
+        hint: tShare("hintListenWbw"),
         payload: {
           kind: "listen-wbw",
-          title: `كلمة بكلمة — ${ayahLabel}`,
-          text: `استمع كلمة بكلمة لـ ${ayahLabel} على عربية`,
+          title: tShare("titleListenWbw", { label: ayahLabel }),
+          text: tShare("textListenWbw", { label: ayahLabel }),
           url: buildMushafShareUrl({
             page: page.page,
             kind: "listen-wbw",
@@ -404,12 +426,12 @@ export function MushafPageStudio({
       targets.push({
         id: "listen-surah",
         kind: "listen-surah",
-        label: "استماع سورة",
-        hint: `رابط يشغّل سورة ${surahTitle} من الآية الحالية.`,
+        label: tShare("listenSurah"),
+        hint: tShare("hintListenSurah", { surah: surahTitle }),
         payload: {
           kind: "listen-surah",
-          title: `استماع — ${surahTitle}`,
-          text: `استمع لسورة ${surahTitle} على عربية`,
+          title: tShare("titleListenSurah", { surah: surahTitle }),
+          text: tShare("textListenSurah", { surah: surahTitle }),
           url: buildMushafShareUrl({
             page: page.page,
             kind: "listen-surah",
@@ -425,12 +447,12 @@ export function MushafPageStudio({
         targets.push({
           id: "note",
           kind: "note",
-          label: "الملاحظة",
-          hint: "مشاركة الملاحظة مع رابط الآية.",
+          label: tShare("note"),
+          hint: tShare("hintNote"),
           payload: {
             kind: "note",
-            title: `ملاحظة — ${ayahLabel}`,
-            text: `${ayahText}\n\nملاحظة: ${note}`,
+            title: tShare("titleNote", { label: ayahLabel }),
+            text: `${ayahText}\n\n${tShare("textNoteSuffix", { note })}`,
             url: buildMushafShareUrl({
               page: page.page,
               kind: "note",
@@ -445,10 +467,12 @@ export function MushafPageStudio({
     return targets;
   }, [
     ayahNoteDraft,
+    locale,
     page.page,
     prefs.reciterId,
     selected,
     studyBlock,
+    tShare,
   ]);
 
   return (
@@ -517,7 +541,7 @@ export function MushafPageStudio({
           />
           <div className="ayah-note-panel">
             <label className="ayah-note-label" htmlFor="ayah-note">
-              ملاحظة على الآية {formatVerseKey(selected.verseKey)}
+              {tMushaf("noteLabel", { verse: formatVerseKey(selected.verseKey) })}
             </label>
             <textarea
               id="ayah-note"
@@ -525,7 +549,7 @@ export function MushafPageStudio({
               rows={3}
               maxLength={4000}
               value={ayahNoteDraft}
-              placeholder="اكتب ملاحظة محلية تُحفظ في هذا الجهاز…"
+              placeholder={tMushaf("notePlaceholder")}
               onChange={(e) => setAyahNoteDraft(e.target.value)}
               onBlur={() => {
                 try {

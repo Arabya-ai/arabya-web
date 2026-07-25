@@ -22,6 +22,23 @@ type SelectedAyah = {
   verseKey: string;
 } | null;
 
+export type AudioStatusKey =
+  | "ayahSyncPlaying"
+  | "ayahPlayingNoSync"
+  | "playError"
+  | "wbwPlaying"
+  | "wbwError"
+  | "surahResolveError"
+  | "surahPlayingFrom"
+  | "surahConnectionError"
+  | "surahPlayError";
+
+export type OnAudioStatus = (
+  key: AudioStatusKey | null,
+  values?: Record<string, string | number>,
+  clearMs?: number,
+) => void;
+
 export type SurahPlayerState = {
   active: boolean;
   playing: boolean;
@@ -72,6 +89,7 @@ export function useQuranAudio({
   onHighlightWord,
   onSelectWord,
   onStatusNote,
+  tAudio,
 }: {
   selected: SelectedAyah;
   reciterId: string;
@@ -79,7 +97,8 @@ export function useQuranAudio({
   page: MushafPageContent;
   onHighlightWord: (ref: WordRef) => void;
   onSelectWord: (surahId: number, verse: number, position: number) => void;
-  onStatusNote: (note: string | null, clearMs?: number) => void;
+  onStatusNote: OnAudioStatus;
+  tAudio: (key: string, values?: Record<string, string | number>) => string;
 }) {
   const [audioPlaying, setAudioPlaying] = useState(false);
   const [wbwPlaying, setWbwPlaying] = useState(false);
@@ -172,7 +191,9 @@ export function useQuranAudio({
     const reciter = getReciter(reciterId);
     setMediaSessionPlaying(
       {
-        title: `آية ${selected.verseKey || `${selected.surahId}:${selected.verseNumber}`}`,
+        title: tAudio("mediaSessionAyah", {
+          verseKey: selected.verseKey || `${selected.surahId}:${selected.verseNumber}`,
+        }),
         artist: reciter.nameAr,
       },
       {
@@ -195,9 +216,7 @@ export function useQuranAudio({
     let failed = false;
     try {
       onStatusNote(
-        useSync
-          ? "تلاوة مع تمييز الكلمات…"
-          : "جاري تلاوة الآية… (بدون تمييز كلمات لهذا القارئ)",
+        useSync ? "ayahSyncPlaying" : "ayahPlayingNoSync",
       );
 
       for (let i = 0; i < times; i++) {
@@ -318,7 +337,7 @@ export function useQuranAudio({
       }
     } catch {
       failed = true;
-      onStatusNote("تعذّر تشغيل الصوت", 2000);
+      onStatusNote("playError", undefined, 2000);
     } finally {
       setAudioPlaying(false);
       setSyncHighlightPos(null);
@@ -350,14 +369,14 @@ export function useQuranAudio({
     setAudioPlaying(false);
     setSurahPlaying(false);
     setSurahPlayer(emptyPlayer);
-    onStatusNote("تلاوة كلمة بكلمة…");
+    onStatusNote("wbwPlaying");
     if (!audioRef.current) audioRef.current = new Audio();
     const audio = audioRef.current;
     const times = Math.max(1, Math.min(10, repeatCount));
     const reciter = getReciter(reciterId);
     setMediaSessionPlaying(
       {
-        title: `كلمة بكلمة — ${selected.verseKey}`,
+        title: tAudio("mediaSessionWbw", { verseKey: selected.verseKey }),
         artist: reciter.nameAr,
       },
       {
@@ -403,7 +422,7 @@ export function useQuranAudio({
       }
     } catch {
       failed = true;
-      onStatusNote("تعذّر تشغيل التلاوة كلمة بكلمة", 2000);
+      onStatusNote("wbwError", undefined, 2000);
     } finally {
       setWbwPlaying(false);
       clearMediaSession();
@@ -420,7 +439,7 @@ export function useQuranAudio({
     title = "",
   ) => {
     if (!surahId || versesCount < 1) {
-      onStatusNote("تعذّر تحديد السورة للتشغيل", 2200);
+      onStatusNote("surahResolveError", undefined, 2200);
       return;
     }
     if (surahPlaying || audioPlaying || wbwPlaying) {
@@ -441,7 +460,7 @@ export function useQuranAudio({
     const audio = audioRef.current;
     const start = Math.max(1, Math.min(fromVerse, versesCount));
     const times = Math.max(1, Math.min(10, repeatCount));
-    const label = title || `سورة ${surahId}`;
+    const label = title || tAudio("surahFallbackLabel", { surahId });
     surahMetaRef.current = { surahId, versesCount, fromVerse: start, title: label };
 
     setSurahPlayer({
@@ -458,7 +477,7 @@ export function useQuranAudio({
       versesCount,
     });
 
-    onStatusNote(`تشغيل السورة من الآية ${start}…`);
+    onStatusNote("surahPlayingFrom", { verse: start });
     const reciter = getReciter(reciterId);
     setMediaSessionPlaying(
       {
@@ -618,7 +637,7 @@ export function useQuranAudio({
             if (!ok) {
               if (!playedAny) {
                 failed = true;
-                onStatusNote("تعذّر تشغيل السورة — تحقق من الاتصال", 2500);
+                onStatusNote("surahConnectionError", undefined, 2500);
               }
               break;
             }
@@ -629,7 +648,7 @@ export function useQuranAudio({
       }
     } catch {
       failed = true;
-      onStatusNote("تعذّر تشغيل السورة", 2000);
+      onStatusNote("surahPlayError", undefined, 2000);
     } finally {
       setSurahPlaying(false);
       setSurahPlayer((p) =>
@@ -675,7 +694,7 @@ export function useQuranAudio({
     setSurahPlayer((p) => ({ ...p, playing: true }));
     const meta = surahMetaRef.current;
     setMediaSessionPlaying({
-      title: meta?.title || "سورة",
+      title: meta?.title || tAudio("mediaSessionSurahFallback"),
       artist: getReciter(reciterId).nameAr,
     });
   };

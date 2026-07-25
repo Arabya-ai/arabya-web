@@ -1,14 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { toArabicNumerals } from "@/lib/format";
 import {
   DEFAULT_PORTAL_CITY,
   PORTAL_CITY_LIST,
+  type PortalCityId,
 } from "@/lib/portal-cities";
 import {
   formatCountdown,
   getNextPrayer,
+  PRAYER_GRID_KEYS,
   type PrayerTimings,
 } from "@/lib/next-prayer";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
@@ -16,7 +19,6 @@ import { STORAGE_KEYS } from "@/lib/storage-keys";
 type Timings = PrayerTimings;
 
 type PrayerPayload = {
-  cityLabel: string;
   timezone?: string | null;
   gregorian: { ar: string | null; readable: string | null } | null;
   hijri: { ar: string | null } | null;
@@ -30,22 +32,17 @@ type QiblaPayload = {
 
 const CITY_KEY = STORAGE_KEYS.prayerCity;
 
-const LABELS: { key: keyof Timings; ar: string }[] = [
-  { key: "fajr", ar: "الفجر" },
-  { key: "sunrise", ar: "الشروق" },
-  { key: "dhuhr", ar: "الظهر" },
-  { key: "asr", ar: "العصر" },
-  { key: "maghrib", ar: "المغرب" },
-  { key: "isha", ar: "العشاء" },
-];
-
-function toDisplayTime(t: string): string {
+function formatTime(t: string, locale: string): string {
   const m = t.match(/^(\d{1,2}):(\d{2})/);
   if (!m) return t;
-  return `${toArabicNumerals(m[1])}:${toArabicNumerals(m[2])}`;
+  const formatPart = (part: string) =>
+    locale === "ar" ? toArabicNumerals(part) : part;
+  return `${formatPart(m[1])}:${formatPart(m[2])}`;
 }
 
 export function PrayerTimesCard() {
+  const t = useTranslations("Prayer");
+  const locale = useLocale();
   const [city, setCity] = useState<string>(DEFAULT_PORTAL_CITY);
   const [data, setData] = useState<PrayerPayload | null>(null);
   const [qibla, setQibla] = useState<QiblaPayload | null>(null);
@@ -82,7 +79,7 @@ export function PrayerTimesCard() {
       };
       if (!prayerRes.ok) {
         setData(null);
-        setError("تعذّر جلب المواقيت");
+        setError(t("errorFetch"));
         return;
       }
       setData(prayerJson);
@@ -94,11 +91,11 @@ export function PrayerTimesCard() {
     } catch {
       setData(null);
       setQibla(null);
-      setError("تعذّر الاتصال بخدمات المواقيت والقبلة");
+      setError(t("errorConnection"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void load(city);
@@ -123,31 +120,32 @@ export function PrayerTimesCard() {
   }, [data, nowMs]);
 
   const remainingLabel = next
-    ? formatCountdown(next.atMs - nowMs)
+    ? formatCountdown(next.atMs - nowMs, locale)
     : null;
 
   const hijri = data?.hijri?.ar;
   const gregorian = data?.gregorian?.ar || data?.gregorian?.readable;
 
+  const formatDegrees = (degrees: number) =>
+    locale === "ar" ? toArabicNumerals(Math.round(degrees)) : String(Math.round(degrees));
+
   return (
     <section className="prayer-panel" aria-labelledby="prayer-h">
       <header className="prayer-panel-head">
         <div>
-          <h2 id="prayer-h">مواقيت الصلاة والقبلة</h2>
-          <p className="prayer-help">
-            مواقيت اليوم واتجاه القبلة — المدينة الافتراضية: القاهرة.
-          </p>
+          <h2 id="prayer-h">{t("title")}</h2>
+          <p className="prayer-help">{t("help")}</p>
         </div>
         <label className="prayer-city">
-          <span className="sr-only">المدينة</span>
+          <span className="sr-only">{t("city")}</span>
           <select
             value={city}
             onChange={(e) => onCity(e.target.value)}
-            aria-label="اختر المدينة"
+            aria-label={t("citySelect")}
           >
             {PORTAL_CITY_LIST.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.label}
+                {t(`cities.${c.id}` as `cities.${PortalCityId}`)}
               </option>
             ))}
           </select>
@@ -155,54 +153,61 @@ export function PrayerTimesCard() {
       </header>
 
       {hijri || gregorian ? (
-        <div className="prayer-dates" aria-label="التاريخ">
+        <div className="prayer-dates" aria-label={t("date")}>
           {hijri ? (
             <div className="prayer-date-chip">
-              <span className="prayer-date-label">هجري</span>
+              <span className="prayer-date-label">{t("hijri")}</span>
               <span className="prayer-date-value">{hijri}</span>
             </div>
           ) : null}
           {gregorian ? (
             <div className="prayer-date-chip">
-              <span className="prayer-date-label">ميلادي</span>
+              <span className="prayer-date-label">{t("gregorian")}</span>
               <span className="prayer-date-value">{gregorian}</span>
             </div>
           ) : null}
         </div>
       ) : null}
 
-      {loading ? <p className="prayer-status">جاري التحميل…</p> : null}
+      {loading ? <p className="prayer-status">{t("loading")}</p> : null}
       {error ? <p className="prayer-status prayer-status--err">{error}</p> : null}
 
       {data && !loading ? (
         <>
           <ul className="prayer-grid">
-            {LABELS.map((row) => {
-              const isNext = next?.key === row.key;
+            {PRAYER_GRID_KEYS.map((key) => {
+              const isNext = next?.key === key;
               return (
                 <li
-                  key={row.key}
+                  key={key}
                   className={isNext ? "is-next-prayer" : undefined}
                 >
-                  <span className="prayer-name">{row.ar}</span>
+                  <span className="prayer-name">
+                    {t(`names.${key}` as `names.${keyof PrayerTimings}`)}
+                  </span>
                   <span className="prayer-time">
-                    {toDisplayTime(data.timings[row.key])}
+                    {formatTime(data.timings[key], locale)}
                   </span>
                 </li>
               );
             })}
           </ul>
-          <div className="prayer-meta-row" aria-label="الصلاة التالية والقبلة">
+          <div className="prayer-meta-row" aria-label={t("nextPrayer")}>
             {next && remainingLabel ? (
               <div
                 className="prayer-meta-chip prayer-next"
                 role="timer"
                 aria-live="polite"
                 aria-atomic="true"
-                aria-label={`الصلاة التالية ${next.labelAr}، متبقٍ ${remainingLabel}`}
+                aria-label={t("nextPrayerAria", {
+                  prayer: t(`names.${next.key}` as `names.${keyof PrayerTimings}`),
+                  remaining: remainingLabel,
+                })}
               >
-                <span className="prayer-next-label">الصلاة التالية</span>
-                <span className="prayer-next-name">{next.labelAr}</span>
+                <span className="prayer-next-label">{t("nextPrayer")}</span>
+                <span className="prayer-next-name">
+                  {t(`names.${next.key}` as `names.${keyof PrayerTimings}`)}
+                </span>
                 <span className="prayer-next-count" dir="ltr">
                   {remainingLabel}
                 </span>
@@ -210,7 +215,7 @@ export function PrayerTimesCard() {
             ) : null}
             <div className="prayer-meta-chip prayer-qibla">
               <div className="prayer-qibla-row">
-                <span className="prayer-qibla-label">القبلة</span>
+                <span className="prayer-qibla-label">{t("qibla")}</span>
                 {qibla ? (
                   <>
                     <span
@@ -219,12 +224,13 @@ export function PrayerTimesCard() {
                       aria-hidden
                     />
                     <span className="prayer-qibla-deg">
-                      {toArabicNumerals(Math.round(qibla.direction))}° من
-                      الشمال
+                      {t("qiblaDegrees", {
+                        degrees: formatDegrees(qibla.direction),
+                      })}
                     </span>
                   </>
                 ) : (
-                  <span className="prayer-qibla-deg">غير متاح</span>
+                  <span className="prayer-qibla-deg">{t("qiblaUnavailable")}</span>
                 )}
               </div>
             </div>

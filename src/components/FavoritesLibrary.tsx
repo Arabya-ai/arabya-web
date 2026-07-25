@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { CLOUD_SYNC_EVENT } from "@/lib/cloud-sync-client";
 import { type Bookmark, readBookmarks, writeBookmarks } from "@/lib/bookmarks";
@@ -20,6 +21,7 @@ export function FavoritesLibrary({
 }: {
   mode?: "full" | "preview";
 }) {
+  const t = useTranslations("Favorites");
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [notes, setNotes] = useState<AyahNote[]>([]);
   const [filter, setFilter] = useState("");
@@ -94,26 +96,26 @@ export function FavoritesLibrary({
           <div className="library-archive-stats">
             <div className="library-archive-stat">
               <strong>{toArabicNumerals(bookmarks.length)}</strong>
-              <span>مفضّلة</span>
+              <span>{t("statBookmarks")}</span>
             </div>
             <div className="library-archive-stat">
               <strong>{toArabicNumerals(notes.length)}</strong>
-              <span>ملاحظة</span>
+              <span>{t("statNotes")}</span>
             </div>
             <div className="library-archive-stat">
               <strong>
                 {toArabicNumerals(bookmarks.length + notes.length)}
               </strong>
-              <span>إجمالي الأرشيف</span>
+              <span>{t("statTotal")}</span>
             </div>
           </div>
           <input
             type="search"
             className="library-archive-filter"
-            placeholder="تصفية الأرشيف بالسورة أو رقم الآية أو نص الملاحظة…"
+            placeholder={t("filterPlaceholder")}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            aria-label="تصفية الأرشيف"
+            aria-label={t("filterAria")}
           />
         </div>
       ) : null}
@@ -121,14 +123,14 @@ export function FavoritesLibrary({
       <section className="library-block" aria-labelledby="lib-bookmarks-h">
         <div className="library-block-head">
           <h2 id="lib-bookmarks-h">
-            المفضّلات{" "}
+            {t("bookmarksTitle")}{" "}
             <span className="library-count">
               ({toArabicNumerals(filteredBookmarks.length)})
             </span>
           </h2>
           {mode === "preview" ? (
             <Link href="/favorites" className="account-panel-link">
-              عرض الكل
+              {t("viewAll")}
             </Link>
           ) : null}
         </div>
@@ -142,7 +144,7 @@ export function FavoritesLibrary({
                   {getSurahUthmaniTitle(b.surahId)} —{" "}
                   {toArabicNumerals(b.verse)}
                   <span className="library-meta">
-                    صفحة {toArabicNumerals(b.page)}
+                    {t("pageLabel", { page: toArabicNumerals(b.page) })}
                   </span>
                 </Link>
                 {mode === "full" ? (
@@ -151,28 +153,28 @@ export function FavoritesLibrary({
                     className="library-remove"
                     onClick={() => removeBookmark(b.key)}
                   >
-                    إزالة
+                    {t("remove")}
                   </button>
                 ) : null}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="library-empty">لا مفضّلات بعد. أضفها من صفحة المصحف.</p>
+          <p className="library-empty">{t("emptyBookmarks")}</p>
         )}
       </section>
 
       <section className="library-block" aria-labelledby="lib-notes-h" id="notes">
         <div className="library-block-head">
           <h2 id="lib-notes-h">
-            الملاحظات{" "}
+            {t("notesTitle")}{" "}
             <span className="library-count">
               ({toArabicNumerals(filteredNotes.length)})
             </span>
           </h2>
           {mode === "preview" ? (
             <Link href="/favorites#notes" className="account-panel-link">
-              عرض الكل
+              {t("viewAll")}
             </Link>
           ) : null}
         </div>
@@ -196,14 +198,14 @@ export function FavoritesLibrary({
                     className="library-remove"
                     onClick={() => removeNote(n.key)}
                   >
-                    حذف
+                    {t("delete")}
                   </button>
                 ) : null}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="library-empty">لا ملاحظات بعد. اكتبها من دراسة الآية.</p>
+          <p className="library-empty">{t("emptyNotes")}</p>
         )}
       </section>
     </div>

@@ -1,10 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { signOut, useSession } from "next-auth/react";
+import { Link } from "@/i18n/navigation";
 
 export function AuthButton() {
+  const t = useTranslations("Auth");
+  const locale = useLocale();
   const { data, status } = useSession();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -28,7 +31,7 @@ export function AuthButton() {
   if (status === "loading") {
     return (
       <span className="auth-btn auth-btn--ghost" aria-busy="true">
-        …
+        {t("loading")}
       </span>
     );
   }
@@ -66,23 +69,27 @@ export function AuthButton() {
               height={28}
             />
           ) : null}
-          <span>حسابي</span>
+          <span>{t("account")}</span>
         </button>
         <div className="nav-dropdown-menu" role="menu">
           <Link href="/account" role="menuitem" onClick={() => setOpen(false)}>
-            لوحة الحساب
+            {t("dashboard")}
           </Link>
-          <Link href="/favorites" role="menuitem" onClick={() => setOpen(false)}>
-            المفضّلات والملاحظات
+          <Link
+            href="/favorites"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+          >
+            {t("favorites")}
           </Link>
           {data.user.role === "editor" || data.user.role === "admin" ? (
             <Link href="/studio" role="menuitem" onClick={() => setOpen(false)}>
-              الاستوديو
+              {t("studio")}
             </Link>
           ) : null}
           {data.user.role === "admin" ? (
             <Link href="/admin" role="menuitem" onClick={() => setOpen(false)}>
-              إدارة عربية
+              {t("admin")}
             </Link>
           ) : null}
           <button
@@ -91,10 +98,12 @@ export function AuthButton() {
             className="nav-dropdown-action"
             onClick={() => {
               setOpen(false);
-              void signOut({ callbackUrl: "/" });
+              void signOut({
+                callbackUrl: locale === "en" ? "/en" : "/",
+              });
             }}
           >
-            خروج
+            {t("signOut")}
           </button>
         </div>
       </div>
@@ -103,7 +112,7 @@ export function AuthButton() {
 
   return (
     <Link href="/login" className="auth-btn auth-btn--google">
-      دخول
+      {t("signIn")}
     </Link>
   );
 }

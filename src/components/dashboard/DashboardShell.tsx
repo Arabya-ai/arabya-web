@@ -1,13 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { usePathname } from "@/i18n/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import type { UserRole } from "@/lib/roles";
-import { roleLabelAr } from "@/lib/roles";
-import { unifiedDashNav } from "@/lib/dashboard-nav";
-import { DashIcon } from "@/components/dashboard/DashIcon";
+import { unifiedDashNav } from "@/lib/dashboard-nav";import { DashIcon } from "@/components/dashboard/DashIcon";
 import { DashBackButton } from "@/components/dashboard/DashBackButton";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 
 type DashboardShellProps = {
   area: "account" | "studio" | "admin";
@@ -36,6 +36,9 @@ export function DashboardShell({
   backHref,
   backLabel,
 }: DashboardShellProps) {
+  const t = useTranslations("Account");
+  const tDash = useTranslations("Dash");
+  const tRoles = useTranslations("Roles");
   const pathname = usePathname();
   const nav = unifiedDashNav(role);
   const [navOpen, setNavOpen] = useState(true);
@@ -53,7 +56,7 @@ export function DashboardShell({
   }, []);
 
   const groups = nav.reduce<Record<string, typeof nav>>((acc, item) => {
-    const g = item.group || "عام";
+    const g = item.group || "groupAccount";
     (acc[g] ||= []).push(item);
     return acc;
   }, {});
@@ -65,7 +68,7 @@ export function DashboardShell({
       <div className="dash-orb dash-orb--a" aria-hidden />
       <div className="dash-orb dash-orb--b" aria-hidden />
 
-      <aside className="dash-sidebar" aria-label="تنقل اللوحة">
+      <aside className="dash-sidebar" aria-label={t("navAria")}>
         <div className="dash-user-chip dash-user-chip--primary">
           {userImage ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -76,15 +79,14 @@ export function DashboardShell({
             </span>
           )}
           <div className="dash-user-meta">
-            <span className="dash-user-name">{userName || "مستخدم عربية"}</span>
+            <span className="dash-user-name">{userName || t("defaultUser")}</span>
             <span className="dash-role">
               <DashIcon
                 name={
                   role === "admin" ? "shield" : role === "editor" ? "studio" : "spark"
                 }
               />
-              {roleLabelAr(role)}
-            </span>
+              {tRoles(role)}            </span>
             {userEmail ? (
               <span className="dash-user-area" dir="ltr">
                 {userEmail}
@@ -104,7 +106,7 @@ export function DashboardShell({
             onClick={() => setNavOpen((v) => !v)}
           >
             <DashIcon name="home" />
-            <span>{navOpen ? "إخفاء قائمة اللوحة" : "قائمة اللوحة"}</span>
+            <span>{navOpen ? t("hideNav") : t("showNav")}</span>
             <span className="dash-nav-toggle-count">{nav.length}</span>
           </button>
         ) : null}
@@ -114,7 +116,7 @@ export function DashboardShell({
             <nav id="dash-panel-nav" className="dash-nav">
               {Object.entries(groups).map(([group, items]) => (
                 <div key={group} className="dash-nav-group">
-                  <p className="dash-nav-group-label">{group}</p>
+                  <p className="dash-nav-group-label">{tDash(group as "groupAccount")}</p>
                   {items.map((item) => {
                     const base = item.href.split("#")[0];
                     const active =
@@ -135,7 +137,7 @@ export function DashboardShell({
                         <span className="dash-nav-icon">
                           <DashIcon name={item.icon} />
                         </span>
-                        <span>{item.label}</span>
+                        <span>{tDash(item.label as "overview")}</span>
                       </Link>
                     );
                   })}
@@ -153,7 +155,7 @@ export function DashboardShell({
               <span className="dash-nav-icon">
                 <DashIcon name="back" />
               </span>
-              <span>العودة للموقع</span>
+              <span>{t("backToSite")}</span>
             </Link>
           </>
         ) : null}
@@ -163,14 +165,17 @@ export function DashboardShell({
         <header className="dash-header">
           <div>
             {backHref ? (
-              <DashBackButton href={backHref} label={backLabel || "رجوع"} />
+              <DashBackButton href={backHref} label={backLabel || t("back")} />
             ) : null}
             <p className="dash-header-kicker">{kicker}</p>
             <h1>{title}</h1>
             {subtitle ? <p className="dash-header-sub">{subtitle}</p> : null}
           </div>
-          <div className="dash-header-badge" aria-hidden>
-            <DashIcon name="spark" />
+          <div className="dash-header-tools">
+            <LocaleSwitcher compact />
+            <div className="dash-header-badge" aria-hidden>
+              <DashIcon name="spark" />
+            </div>
           </div>
         </header>
         <div className="dash-content">{children}</div>

@@ -1,21 +1,23 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import type { AdminStats } from "@/lib/cloud-sync";
 import { DashIcon, type DashIconName } from "@/components/dashboard/DashIcon";
 
-const cardMeta: { key: keyof AdminStats; label: string; icon: DashIconName }[] = [
-  { key: "totalUsers", label: "إجمالي المستخدمين", icon: "users" },
-  { key: "users", label: "مشتركون", icon: "spark" },
-  { key: "editors", label: "محررون", icon: "studio" },
-  { key: "admins", label: "مدراء", icon: "shield" },
-  { key: "pendingRoleRequests", label: "طلبات معلّقة", icon: "requests" },
-  { key: "activeLast7Days", label: "نشطون 7 أيام", icon: "stats" },
-  { key: "totalBookmarks", label: "مفضّلات سحابية", icon: "favorites" },
-  { key: "totalNotes", label: "ملاحظات سحابية", icon: "book" },
+const cardMeta: { key: keyof AdminStats; labelKey: string; icon: DashIconName }[] = [
+  { key: "totalUsers", labelKey: "statTotalUsers", icon: "users" },
+  { key: "users", labelKey: "statUsers", icon: "spark" },
+  { key: "editors", labelKey: "statEditors", icon: "studio" },
+  { key: "admins", labelKey: "statAdmins", icon: "shield" },
+  { key: "pendingRoleRequests", labelKey: "statPendingRequests", icon: "requests" },
+  { key: "activeLast7Days", labelKey: "statActive7d", icon: "stats" },
+  { key: "totalBookmarks", labelKey: "statBookmarks", icon: "favorites" },
+  { key: "totalNotes", labelKey: "statNotes", icon: "book" },
 ];
 
 export function AdminStatsCards() {
+  const t = useTranslations("Admin");
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,14 +30,14 @@ export function AdminStatsCards() {
         error?: string;
       };
       if (!res.ok || !data.ok || !data.stats) {
-        throw new Error(data.error || "تعذّر تحميل الإحصائيات");
+        throw new Error(data.error || t("statsLoadError"));
       }
       setStats(data.stats);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "خطأ");
+      setError(err instanceof Error ? err.message : t("genericError"));
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void load();
@@ -66,7 +68,7 @@ export function AdminStatsCards() {
             <DashIcon name={c.icon} />
           </span>
           <p className="dash-stat-value">{stats[c.key]}</p>
-          <p className="dash-stat-label">{c.label}</p>
+          <p className="dash-stat-label">{t(c.labelKey as "statTotalUsers")}</p>
         </article>
       ))}
     </div>

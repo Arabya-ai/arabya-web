@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { RECITERS, reciterHasWordSync } from "@/lib/audio";
+import { useTranslations } from "next-intl";
+import { RECITERS } from "@/lib/audio";
 import { toArabicNumerals } from "@/lib/format";
 import { ShareMenu } from "@/components/ShareMenu";
 import { MushafToolIcon } from "@/components/mushaf/MushafToolIcon";
+import { Link } from "@/i18n/navigation";
 import type { ShareTarget } from "@/lib/share";
 import type { IrabWord } from "@/lib/types";
 import type { Dispatch, SetStateAction } from "react";
@@ -72,12 +73,14 @@ export function MushafToolbar({
   clampFontScale,
   audio,
 }: Props) {
+  const t = useTranslations("Mushaf.toolbar");
+
   return (
-    <div className="mushaf-toolbar" aria-label="أدوات المصحف">
+    <div className="mushaf-toolbar" aria-label={t("actions")}>
       <div
         className="mtb-group mtb-font font-scale"
         role="group"
-        aria-label="حجم خط المصحف"
+        aria-label={t("font")}
       >
         <button
           type="button"
@@ -88,13 +91,13 @@ export function MushafToolbar({
             )
           }
           disabled={!prefs.canShrink}
-          aria-label="تصغير الخط"
-          title="تصغير"
+          aria-label={t("shrink")}
+          title={t("shrink")}
         >
           أ−
         </button>
         <label className="font-scale-field" htmlFor="mushaf-font-scale">
-          <span className="sr-only">نسبة حجم الخط</span>
+          <span className="sr-only">{t("fontPercent")}</span>
           <input
             id="mushaf-font-scale"
             name="mushaf-font-scale"
@@ -118,8 +121,8 @@ export function MushafToolbar({
               }
             }}
             onKeyUp={(e) => e.stopPropagation()}
-            aria-label="أدخل نسبة حجم الخط يدوياً"
-            title={`اكتب رقماً من ${Math.round(prefs.FONT_SCALE_MIN * 100)} إلى ${Math.round(prefs.FONT_SCALE_MAX * 100)} ثم Enter`}
+            aria-label={t("fontPercent")}
+            title={`${Math.round(prefs.FONT_SCALE_MIN * 100)}–${Math.round(prefs.FONT_SCALE_MAX * 100)}`}
           />
           <span className="font-scale-suffix" aria-hidden>
             %
@@ -134,24 +137,24 @@ export function MushafToolbar({
             )
           }
           disabled={!prefs.canGrow}
-          aria-label="تكبير الخط"
-          title="تكبير"
+          aria-label={t("grow")}
+          title={t("grow")}
         >
           أ+
         </button>
       </div>
 
-      <div className="mtb-group mtb-study" role="group" aria-label="دراسة">
+      <div className="mtb-group mtb-study" role="group" aria-label={t("study")}>
         {studySurahId ? (
           <Link
             href={`/surah/${studySurahId}/read`}
             className="tool-btn mtb-link"
-            title="دراسة السورة مع خيارات الإعراب والدراسة السريعة"
+            title={t("studySurah")}
           >
             <MushafToolIcon name="study" />
             <span>
-              <span className="mtb-full">دراسة السورة</span>
-              <span className="mtb-short">دراسة</span>
+              <span className="mtb-full">{t("studySurah")}</span>
+              <span className="mtb-short">{t("studySurahShort")}</span>
             </span>
           </Link>
         ) : null}
@@ -159,12 +162,12 @@ export function MushafToolbar({
           <Link
             href={`/ayah/${selected.surahId}/${selected.verseNumber}`}
             className="tool-btn mtb-link"
-            title="صفحة إعراب الآية كلمة بكلمة"
+            title={t("ayahIrab")}
           >
             <MushafToolIcon name="irab" />
             <span>
-              <span className="mtb-full">إعراب الآية</span>
-              <span className="mtb-short">إعراب</span>
+              <span className="mtb-full">{t("ayahIrab")}</span>
+              <span className="mtb-short">{t("ayahIrabShort")}</span>
             </span>
           </Link>
         ) : null}
@@ -172,21 +175,21 @@ export function MushafToolbar({
           <Link
             href={`/root/${encodeURIComponent(selected.morph.root)}`}
             className="tool-btn mtb-link"
-            title="مواضع الجذر في القرآن"
+            title={t("root")}
           >
             <MushafToolIcon name="root" />
-            <span>الجذر</span>
+            <span>{t("root")}</span>
           </Link>
         ) : null}
       </div>
 
-      <div className="mtb-group mtb-listen" role="group" aria-label="استماع">
-        <span className="mtb-label" title="استماع">
+      <div className="mtb-group mtb-listen" role="group" aria-label={t("listen")}>
+        <span className="mtb-label" title={t("listen")}>
           <MushafToolIcon name="listen" />
-          <span className="mtb-label-text">استماع</span>
+          <span className="mtb-label-text">{t("listen")}</span>
         </span>
         <label className="reciter-pick">
-          <span className="sr-only">القارئ</span>
+          <span className="sr-only">{t("reciter")}</span>
           <select
             className="reciter-select"
             value={prefs.reciterId}
@@ -194,8 +197,8 @@ export function MushafToolbar({
               prefs.persistReciterId(e.target.value);
               audio.stopAllAudio();
             }}
-            aria-label="اختر القارئ"
-            title="القارئ"
+            aria-label={t("reciter")}
+            title={t("reciter")}
             disabled={!selected && !studyBlock}
           >
             {RECITERS.map((r) => (
@@ -206,13 +209,13 @@ export function MushafToolbar({
           </select>
         </label>
         <label className="repeat-pick">
-          <span className="sr-only">تكرار التلاوة</span>
+          <span className="sr-only">{t("repeat")}</span>
           <select
             className="reciter-select"
             value={repeatCount}
             onChange={(e) => setRepeatCount(Number(e.target.value))}
-            aria-label="عدد مرات التكرار (كلمات أو آية أو سورة)"
-            title="يُطبَّق التكرار على الكلمات والآية والسورة"
+            aria-label={t("repeat")}
+            title={t("repeat")}
             disabled={!selected && !studyBlock}
           >
             {[1, 2, 3, 5, 7, 10].map((n) => (
@@ -222,11 +225,11 @@ export function MushafToolbar({
             ))}
           </select>
         </label>
-        <span className="mtb-scope-label">يُطبَّق على</span>
+        <span className="mtb-scope-label">{t("appliesTo")}</span>
         <div
           className="mtb-scope"
           role="group"
-          aria-label="يُطبَّق التكرار على كلمات أو آية أو سورة"
+          aria-label={t("appliesTo")}
         >
           <button
             type="button"
@@ -234,10 +237,10 @@ export function MushafToolbar({
             onClick={() => void audio.playWordByWordAudio()}
             aria-pressed={audio.wbwPlaying}
             disabled={!selected}
-            title="تلاوة كلمة بكلمة — مع التكرار المحدد"
+            title={t("words")}
           >
             <MushafToolIcon name="words" />
-            <span>{audio.wbwPlaying ? "إيقاف" : "كلمات"}</span>
+            <span>{audio.wbwPlaying ? t("stop") : t("words")}</span>
           </button>
           <button
             type="button"
@@ -245,14 +248,10 @@ export function MushafToolbar({
             onClick={() => void audio.playAyahAudio()}
             aria-pressed={audio.audioPlaying}
             disabled={!selected}
-            title={
-              reciterHasWordSync(prefs.reciterId)
-                ? "تلاوة الآية مع تمييز الكلمات"
-                : "تلاوة الآية (تمييز الكلمات غير متاح لهذا القارئ — جرّب العفاسي)"
-            }
+            title={t("ayah")}
           >
             <MushafToolIcon name="ayah" />
-            <span>{audio.audioPlaying ? "إيقاف" : "آية"}</span>
+            <span>{audio.audioPlaying ? t("stop") : t("ayah")}</span>
           </button>
           <button
             type="button"
@@ -268,15 +267,15 @@ export function MushafToolbar({
             }}
             aria-pressed={audio.surahPlaying}
             disabled={!studyBlock}
-            title="تلاوة السورة كاملة مع مشغّل التحكم"
+            title={t("surah")}
           >
             <MushafToolIcon name="surah" />
-            <span>{audio.surahPlaying ? "إيقاف" : "سورة"}</span>
+            <span>{audio.surahPlaying ? t("stop") : t("surah")}</span>
           </button>
         </div>
       </div>
 
-      <div className="mtb-group mtb-actions" role="group" aria-label="إجراءات">
+      <div className="mtb-group mtb-actions" role="group" aria-label={t("actions")}>
         {selected ? (
           <button
             type="button"
@@ -287,11 +286,11 @@ export function MushafToolbar({
             <MushafToolIcon name="bookmark" />
             <span>
               {bookmarked ? (
-                "مفضّلة"
+                t("bookmarked")
               ) : (
                 <>
-                  <span className="mtb-full">حفظ الآية</span>
-                  <span className="mtb-short">حفظ</span>
+                  <span className="mtb-full">{t("bookmark")}</span>
+                  <span className="mtb-short">{t("bookmarkShort")}</span>
                 </>
               )}
             </span>
@@ -299,7 +298,7 @@ export function MushafToolbar({
         ) : null}
         <ShareMenu
           targets={shareTargets}
-          label="مشاركة"
+          label={t("share")}
           onStatus={onShareStatus}
         />
       </div>

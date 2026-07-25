@@ -1,11 +1,14 @@
 "use client";
 
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { useCallback, useEffect, useState } from "react";
 import type { AdminUserRow } from "@/lib/cloud-sync";
-import { roleLabelAr, type UserRole } from "@/lib/roles";
+import type { UserRole } from "@/lib/roles";
 
 export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
+  const t = useTranslations("Admin");
+  const tRoles = useTranslations("Roles");
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [total, setTotal] = useState(0);
   const [q, setQ] = useState("");
@@ -32,25 +35,25 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
         total?: number;
         error?: string;
       };
-      if (!res.ok || !data.ok) throw new Error(data.error || "فشل التحميل");
+      if (!res.ok || !data.ok) throw new Error(data.error || t("loadError"));
       setUsers(data.users || []);
       setTotal(data.total || 0);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "خطأ");
+      setError(err instanceof Error ? err.message : t("genericError"));
     }
-  }, [q, role, pageSize, offset]);
+  }, [offset, pageSize, q, role, t]);
 
   useEffect(() => {
-    const t = window.setTimeout(() => void load(), 220);
-    return () => window.clearTimeout(t);
+    const timer = window.setTimeout(() => void load(), 220);
+    return () => window.clearTimeout(timer);
   }, [load]);
 
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
 
   async function setUserRole(id: string, next: "user" | "editor" | "admin") {
     if (next === "admin" && !isSuperAdmin) {
-      setError("ترقية المدير للسوبر أدمن فقط");
+      setError(t("adminOnlyPromote"));
       return;
     }
     setBusyId(id);
@@ -61,19 +64,17 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
         body: JSON.stringify({ role: next }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
-      if (!res.ok || !data.ok) throw new Error(data.error || "فشل التحديث");
+      if (!res.ok || !data.ok) throw new Error(data.error || t("updateError"));
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "خطأ");
+      setError(err instanceof Error ? err.message : t("genericError"));
     } finally {
       setBusyId(null);
     }
   }
 
   async function banUser(id: string, banned: boolean) {
-    const msg = banned
-      ? `حظر ${id}؟ لن يتمكن من استخدام الحساب بنفس البريد.`
-      : `إلغاء حظر ${id}؟`;
+    const msg = banned ? t("confirmBan", { id }) : t("confirmUnban", { id });
     if (!window.confirm(msg)) return;
     setBusyId(id);
     try {
@@ -83,17 +84,17 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
         body: JSON.stringify({ action: "ban", banned }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
-      if (!res.ok || !data.ok) throw new Error(data.error || "فشل");
+      if (!res.ok || !data.ok) throw new Error(data.error || t("actionError"));
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "خطأ");
+      setError(err instanceof Error ? err.message : t("genericError"));
     } finally {
       setBusyId(null);
     }
   }
 
   async function removeUser(id: string) {
-    if (!window.confirm(`حذف بيانات السحابة لـ ${id}؟`)) return;
+    if (!window.confirm(t("confirmDelete", { id }))) return;
     setBusyId(id);
     try {
       const res = await fetch(`/api/admin/users/${encodeURIComponent(id)}`, {
@@ -102,17 +103,17 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
         body: JSON.stringify({ reason: "admin_ui_delete" }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
-      if (!res.ok || !data.ok) throw new Error(data.error || "فشل الحذف");
+      if (!res.ok || !data.ok) throw new Error(data.error || t("deleteError"));
       await load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "خطأ");
+      setError(err instanceof Error ? err.message : t("genericError"));
     } finally {
       setBusyId(null);
     }
   }
 
   function UserIdentity({ u }: { u: AdminUserRow }) {
-    const displayName = u.name?.trim() || u.email.split("@")[0] || "مستخدم";
+    const displayName = u.name?.trim() || u.email.split("@")[0] || t("defaultUser");
     const uid = u.uid || u.id;
     const inner = (
       <>
@@ -151,10 +152,10 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
     return <div className="users-id-cell">{inner}</div>;
   }
 
-  function RoleBadge({ role }: { role: UserRole }) {
+  function RoleBadge({ role: userRole }: { role: UserRole }) {
     return (
-      <span className={`users-badge users-badge--${role}`}>
-        {roleLabelAr(role)}
+      <span className={`users-badge users-badge--${userRole}`}>
+        {tRoles(userRole)}
       </span>
     );
   }
@@ -165,7 +166,7 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
       <span
         className={`users-badge ${banned ? "users-badge--banned" : "users-badge--active"}`}
       >
-        {banned ? "محظور" : "نشط"}
+        {banned ? t("statusBanned") : t("statusActive")}
       </span>
     );
   }
@@ -173,7 +174,7 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   function Actions({ u }: { u: AdminUserRow }) {
     const busy = busyId === u.id;
     if (u.role === "admin") {
-      return <span className="users-actions-locked">محمي</span>;
+      return <span className="users-actions-locked">{t("protected")}</span>;
     }
     return (
       <div className="users-actions">
@@ -184,7 +185,7 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
             disabled={busy}
             onClick={() => void setUserRole(u.id, "editor")}
           >
-            ترقية
+            {t("promote")}
           </button>
         ) : null}
         {u.role === "editor" && isSuperAdmin ? (
@@ -194,7 +195,7 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
             disabled={busy}
             onClick={() => void setUserRole(u.id, "admin")}
           >
-            مدير
+            {t("makeAdmin")}
           </button>
         ) : null}
         {u.role === "editor" ? (
@@ -204,7 +205,7 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
             disabled={busy}
             onClick={() => void setUserRole(u.id, "user")}
           >
-            سحب
+            {t("demote")}
           </button>
         ) : null}
         <button
@@ -213,7 +214,7 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
           disabled={busy}
           onClick={() => void banUser(u.id, u.status !== "banned")}
         >
-          {u.status === "banned" ? "رفع الحظر" : "حظر"}
+          {u.status === "banned" ? t("unban") : t("ban")}
         </button>
         <button
           type="button"
@@ -221,7 +222,7 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
           disabled={busy}
           onClick={() => void removeUser(u.id)}
         >
-          حذف
+          {t("delete")}
         </button>
       </div>
     );
@@ -240,13 +241,13 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
         <input
           type="search"
           className="users-toolbar-search"
-          placeholder="بحث بالاسم أو البريد أو ID…"
+          placeholder={t("searchPlaceholder")}
           value={q}
           onChange={(e) => {
             setPage(0);
             setQ(e.target.value);
           }}
-          aria-label="بحث المستخدمين"
+          aria-label={t("searchAria")}
         />
         <select
           value={role}
@@ -254,12 +255,12 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
             setPage(0);
             setRole(e.target.value);
           }}
-          aria-label="فلتر الدور"
+          aria-label={t("filterRoleAria")}
         >
-          <option value="">كل الأدوار</option>
-          <option value="user">مشترك</option>
-          <option value="editor">محرر</option>
-          <option value="admin">مدير</option>
+          <option value="">{t("allRoles")}</option>
+          <option value="user">{tRoles("user")}</option>
+          <option value="editor">{tRoles("editor")}</option>
+          <option value="admin">{tRoles("admin")}</option>
         </select>
         <select
           value={pageSize}
@@ -267,11 +268,11 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
             setPage(0);
             setPageSize(Number(e.target.value));
           }}
-          aria-label="عدد الصفوف"
+          aria-label={t("pageSizeAria")}
         >
           {[10, 25, 50, 100].map((n) => (
             <option key={n} value={n}>
-              {n} صف
+              {t("rowsPerPage", { n })}
             </option>
           ))}
         </select>
@@ -281,24 +282,23 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
             checked={showUid}
             onChange={(e) => setShowUid(e.target.checked)}
           />
-          إظهار ID
+          {t("showUid")}
         </label>
         <button type="submit" className="auth-btn auth-btn--google users-toolbar-btn">
-          تحديث
+          {t("refresh")}
         </button>
       </form>
 
       {error ? <p className="dash-banner dash-banner--warn">{error}</p> : null}
 
-      {/* Desktop / tablet table */}
       <div className="users-table-shell">
         <table className="users-table">
           <thead>
             <tr>
-              <th scope="col">المستخدم</th>
-              <th scope="col">الدور</th>
-              <th scope="col">الحالة</th>
-              <th scope="col">إجراءات</th>
+              <th scope="col">{t("colUser")}</th>
+              <th scope="col">{t("colRole")}</th>
+              <th scope="col">{t("colStatus")}</th>
+              <th scope="col">{t("colActions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -320,15 +320,12 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
             ))}
           </tbody>
         </table>
-        {users.length === 0 ? (
-          <p className="users-empty">لا نتائج مطابقة للبحث.</p>
-        ) : null}
+        {users.length === 0 ? <p className="users-empty">{t("noResults")}</p> : null}
       </div>
 
-      {/* Mobile cards */}
       <div className="users-cards">
         {users.length === 0 ? (
-          <p className="users-empty">لا نتائج مطابقة للبحث.</p>
+          <p className="users-empty">{t("noResults")}</p>
         ) : (
           users.map((u) => (
             <article
@@ -352,17 +349,17 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
           disabled={page <= 0}
           onClick={() => setPage((p) => Math.max(0, p - 1))}
         >
-          السابق
+          {t("prev")}
         </button>
         <span>
-          صفحة {page + 1} / {pageCount} — الإجمالي {total}
+          {t("pageInfo", { page: page + 1, total: pageCount, count: total })}
         </span>
         <button
           type="button"
           disabled={page + 1 >= pageCount}
           onClick={() => setPage((p) => p + 1)}
         >
-          التالي
+          {t("next")}
         </button>
       </div>
     </div>

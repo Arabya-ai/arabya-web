@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import {
   collectLocalSyncPayload,
@@ -8,37 +9,38 @@ import {
 } from "@/lib/cloud-sync-client";
 
 export function CloudSyncPanel() {
-  const [status, setStatus] = useState("المزامنة تعمل تلقائيًا بعد تسجيل الدخول.");
+  const t = useTranslations("Sync");
+  const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     const local = collectLocalSyncPayload();
     setStatus(
-      `تلقائي: تُحفظ المفضّلات والملاحظات وعادة القراءة على حسابك دون أزرار. (محليًا الآن: ${local.bookmarks.length} مفضّلة، ${local.notes.length} ملاحظة)`,
+      t("statusLocal", {
+        bookmarks: local.bookmarks.length,
+        notes: local.notes.length,
+      }),
     );
-  }, []);
+  }, [t]);
 
   async function run(mode: "full" | "push") {
     setBusy(true);
-    setStatus(mode === "full" ? "مزامنة كاملة…" : "رفع فوري…");
+    setStatus(mode === "full" ? t("statusFullSync") : t("statusPush"));
     try {
       const result =
         mode === "full" ? await pullMergeAndPush() : await pushLocalOnly();
       setStatus(result.message);
     } catch (err) {
-      setStatus(err instanceof Error ? err.message : "تعذّرت المزامنة");
+      setStatus(err instanceof Error ? err.message : t("statusError"));
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <section className="account-panel account-panel--accent" aria-label="مزامنة سحابية">
-      <h2>مزامنة الأجهزة (تلقائية)</h2>
-      <p>
-        بعد دخولك، تُزامن بياناتك مع السحابة تلقائيًا عند فتح الموقع وعند كل تغيير
-        (مفضّلة، ملاحظة، عادة قراءة). الأزرار أدناه اختيارية للطوارئ فقط.
-      </p>
+    <section className="account-panel account-panel--accent" aria-label={t("ariaLabel")}>
+      <h2>{t("title")}</h2>
+      <p>{t("lead")}</p>
       <div className="account-panel-actions">
         <button
           type="button"
@@ -46,7 +48,7 @@ export function CloudSyncPanel() {
           disabled={busy}
           onClick={() => void run("push")}
         >
-          مزامنة فورية
+          {t("syncNow")}
         </button>
         <button
           type="button"
@@ -54,7 +56,7 @@ export function CloudSyncPanel() {
           disabled={busy}
           onClick={() => void run("full")}
         >
-          مزامنة كاملة الآن
+          {t("syncFull")}
         </button>
       </div>
       {status ? <p className="account-sync-status">{status}</p> : null}

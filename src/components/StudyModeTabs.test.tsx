@@ -1,11 +1,14 @@
 /** @vitest-environment jsdom */
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { NextIntlClientProvider } from "next-intl";
+import type { ReactElement } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   scrollTabIntoRail,
   StudyModeTabs,
 } from "@/components/StudyModeTabs";
+import ar from "../../messages/ar.json";
 
 const MODES = [
   { id: "words", label: "الكلمات" },
@@ -15,13 +18,21 @@ const MODES = [
   { id: "ibn-kathir", label: "ابن كثير" },
 ];
 
+function renderTabs(ui: ReactElement) {
+  return render(
+    <NextIntlClientProvider locale="ar" messages={ar}>
+      {ui}
+    </NextIntlClientProvider>,
+  );
+}
+
 afterEach(() => {
   cleanup();
 });
 
 describe("StudyModeTabs", () => {
   it("renders an accessible RTL tablist with roving tabindex", () => {
-    render(
+    renderTabs(
       <StudyModeTabs modes={MODES} mode="words" onModeChange={() => {}} />,
     );
 
@@ -35,7 +46,7 @@ describe("StudyModeTabs", () => {
   });
 
   it("uses a custom panelId when provided", () => {
-    render(
+    renderTabs(
       <StudyModeTabs
         modes={MODES}
         mode="words"
@@ -52,7 +63,7 @@ describe("StudyModeTabs", () => {
   it("ArrowLeft selects the next tab (RTL) and moves focus", async () => {
     const user = userEvent.setup();
     const onModeChange = vi.fn();
-    const { rerender } = render(
+    const { rerender } = renderTabs(
       <StudyModeTabs
         modes={MODES}
         mode="words"
@@ -65,7 +76,9 @@ describe("StudyModeTabs", () => {
     expect(onModeChange).toHaveBeenCalledWith("irab");
 
     rerender(
-      <StudyModeTabs modes={MODES} mode="irab" onModeChange={onModeChange} />,
+      <NextIntlClientProvider locale="ar" messages={ar}>
+        <StudyModeTabs modes={MODES} mode="irab" onModeChange={onModeChange} />
+      </NextIntlClientProvider>,
     );
     expect(document.activeElement).toBe(
       screen.getByRole("tab", { name: "الإعراب" }),
@@ -75,7 +88,7 @@ describe("StudyModeTabs", () => {
   it("ArrowRight selects the previous tab (RTL)", async () => {
     const user = userEvent.setup();
     const onModeChange = vi.fn();
-    render(
+    renderTabs(
       <StudyModeTabs modes={MODES} mode="irab" onModeChange={onModeChange} />,
     );
 
@@ -87,7 +100,7 @@ describe("StudyModeTabs", () => {
   it("Home and End jump to the first and last tabs", async () => {
     const user = userEvent.setup();
     const onModeChange = vi.fn();
-    render(
+    renderTabs(
       <StudyModeTabs modes={MODES} mode="irab" onModeChange={onModeChange} />,
     );
 
@@ -102,7 +115,7 @@ describe("StudyModeTabs", () => {
   it("clicking a tab selects it", async () => {
     const user = userEvent.setup();
     const onModeChange = vi.fn();
-    render(
+    renderTabs(
       <StudyModeTabs
         modes={MODES}
         mode="words"

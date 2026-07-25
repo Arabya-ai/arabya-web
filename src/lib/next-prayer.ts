@@ -11,17 +11,25 @@ export type PrayerTimings = {
 
 export type NextPrayerInfo = {
   key: keyof PrayerTimings;
-  labelAr: string;
   /** Instant of the next occurrence */
   atMs: number;
 };
 
-const PRAYER_ORDER: { key: keyof PrayerTimings; labelAr: string }[] = [
-  { key: "fajr", labelAr: "الفجر" },
-  { key: "dhuhr", labelAr: "الظهر" },
-  { key: "asr", labelAr: "العصر" },
-  { key: "maghrib", labelAr: "المغرب" },
-  { key: "isha", labelAr: "العشاء" },
+export const PRAYER_GRID_KEYS: (keyof PrayerTimings)[] = [
+  "fajr",
+  "sunrise",
+  "dhuhr",
+  "asr",
+  "maghrib",
+  "isha",
+];
+
+export const PRAYER_ORDER: (keyof PrayerTimings)[] = [
+  "fajr",
+  "dhuhr",
+  "asr",
+  "maghrib",
+  "isha",
 ];
 
 function parseHm(raw: string): { h: number; m: number } | null {
@@ -106,12 +114,12 @@ export function getNextPrayer(
   const tz = timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
   const todayYmd = ymdInTimeZone(now, tz);
 
-  for (const row of PRAYER_ORDER) {
-    const hm = parseHm(timings[row.key]);
+  for (const key of PRAYER_ORDER) {
+    const hm = parseHm(timings[key]);
     if (!hm) continue;
     const at = zonedDateTime(todayYmd, hm.h, hm.m, tz);
     if (at.getTime() > now.getTime() + 500) {
-      return { key: row.key, labelAr: row.labelAr, atMs: at.getTime() };
+      return { key, atMs: at.getTime() };
     }
   }
 
@@ -119,14 +127,17 @@ export function getNextPrayer(
   if (!fajr) return null;
   const tomorrow = addDaysYmd(todayYmd, 1);
   const at = zonedDateTime(tomorrow, fajr.h, fajr.m, tz);
-  return { key: "fajr", labelAr: "الفجر", atMs: at.getTime() };
+  return { key: "fajr", atMs: at.getTime() };
 }
 
-export function formatCountdown(ms: number): string {
+export function formatCountdown(ms: number, locale = "ar"): string {
   const total = Math.max(0, Math.floor(ms / 1000));
   const h = Math.floor(total / 3600);
   const m = Math.floor((total % 3600) / 60);
   const s = total % 60;
-  const pad = (n: number) => toArabicNumerals(String(n).padStart(2, "0"));
+  const pad = (n: number) => {
+    const raw = String(n).padStart(2, "0");
+    return locale === "ar" ? toArabicNumerals(raw) : raw;
+  };
   return `${pad(h)}:${pad(m)}:${pad(s)}`;
 }

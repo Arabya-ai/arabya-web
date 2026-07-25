@@ -31,7 +31,6 @@ export async function GET(req: Request) {
     return NextResponse.json(
       {
         city: cfg.id,
-        cityLabel: cfg.label,
         source: "api.aladhan.com",
         latitude: cfg.latitude,
         longitude: cfg.longitude,

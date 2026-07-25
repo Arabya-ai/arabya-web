@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import type { UserRole } from "@/lib/roles";
 
@@ -16,6 +17,8 @@ export function RoleRequestPanel({
 }: {
   role: UserRole;
 }) {
+  const t = useTranslations("Upgrade");
+  const tRoles = useTranslations("Roles");
   const [request, setRequest] = useState<RequestState>(null);
   const [message, setMessage] = useState("");
   const [targetRole, setTargetRole] = useState<"editor" | "admin">(
@@ -65,7 +68,7 @@ export function RoleRequestPanel({
       });
       const data = (await res.json()) as { ok?: boolean; error?: string; id?: string };
       if (!res.ok || !data.ok) {
-        throw new Error(data.error || "تعذّر إرسال الطلب");
+        throw new Error(data.error || t("submitError"));
       }
       setRequest({
         id: data.id || "",
@@ -75,7 +78,7 @@ export function RoleRequestPanel({
       });
       setMessage("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "خطأ");
+      setError(err instanceof Error ? err.message : t("genericError"));
     } finally {
       setBusy(false);
     }
@@ -84,8 +87,8 @@ export function RoleRequestPanel({
   if (!loaded) {
     return (
       <section id="role-request" className="dash-card">
-        <h2>طلب ترقية</h2>
-        <p className="dash-muted">جاري التحميل…</p>
+        <h2>{t("title")}</h2>
+        <p className="dash-muted">{t("loading")}</p>
       </section>
     );
   }
@@ -94,57 +97,57 @@ export function RoleRequestPanel({
 
   return (
     <section id="role-request" className="dash-card">
-      <h2>طلب ترقية</h2>
-      <p className="dash-muted">
-        اطلب ترقية صلاحياتك. ترقية المحرر تتم بموافقة أي أدمن، وترقية المدير
-        بموافقة السوبر أدمن فقط.
-      </p>
+      <h2>{t("title")}</h2>
+      <p className="dash-muted">{t("lead")}</p>
 
       {!canRequest ? (
-        <p className="dash-banner dash-banner--ok">
-          حسابك بإدارة كاملة أو أعلى من طلب الترقية المتاح هنا.
-        </p>
+        <p className="dash-banner dash-banner--ok">{t("noRequestNeeded")}</p>
       ) : status === "pending" ? (
         <p className="dash-banner">
-          طلبك قيد المراجعة
-          {request?.targetRole ? ` (إلى: ${request.targetRole})` : ""}.
+          {t("pending")}
+          {request?.targetRole
+            ? t("pendingTarget", {
+                role: tRoles(request.targetRole as "admin" | "editor" | "user"),
+              })
+            : ""}
+          .
         </p>
       ) : status === "approved" ? (
-        <p className="dash-banner dash-banner--ok">
-          تمت الموافقة. انتظر قليلًا أو أعد الدخول لتحديث الصلاحية.
-        </p>
+        <p className="dash-banner dash-banner--ok">{t("approved")}</p>
       ) : (
         <form className="dash-form" onSubmit={submit}>
           {canRequestAdmin ? (
             <label>
-              نوع الترقية
+              {t("upgradeType")}
               <select
                 value={targetRole}
                 onChange={(e) => setTargetRole(e.target.value as "editor" | "admin")}
               >
-                <option value="admin">ترقية إلى مدير</option>
+                <option value="admin">{t("toAdmin")}</option>
               </select>
             </label>
           ) : (
-            <p className="dash-muted">الطلب: ترقية إلى محرر</p>
+            <p className="dash-muted">{t("requestEditor")}</p>
           )}
           <label>
-            رسالة للمدير
+            {t("messageLabel")}
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={3}
               maxLength={500}
-              placeholder="اكتب سبب الطلب…"
+              placeholder={t("messagePlaceholder")}
               required
             />
           </label>
           {error ? <p className="dash-banner dash-banner--warn">{error}</p> : null}
           <button type="submit" className="auth-btn auth-btn--google" disabled={busy}>
-            {busy ? "…" : status === "rejected" ? "إعادة الطلب" : "إرسال طلب الترقية"}
+            {busy ? "…" : status === "rejected" ? t("resubmit") : t("submit")}
           </button>
           {status === "rejected" && request?.reviewNote ? (
-            <p className="dash-banner dash-banner--warn">رفض سابق: {request.reviewNote}</p>
+            <p className="dash-banner dash-banner--warn">
+              {t("rejectedNote", { note: request.reviewNote })}
+            </p>
           ) : null}
         </form>
       )}

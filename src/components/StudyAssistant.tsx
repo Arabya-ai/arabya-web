@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { upsertStudyEntry } from "@/lib/study-archive";
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
@@ -37,7 +38,14 @@ type StudyResponse = {
 
 const PREVIEW_LIMIT = 10;
 
+function formatCount(value: number, locale: string): string {
+  return locale === "ar" ? toArabicNumerals(value) : String(value);
+}
+
 export function StudyAssistant() {
+  const t = useTranslations("Study");
+  const tNav = useTranslations("Nav");
+  const locale = useLocale();
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<StudyHit[]>([]);
   const [total, setTotal] = useState(0);
@@ -95,7 +103,7 @@ export function StudyAssistant() {
     let cancelled = false;
     const delay = skipDelayRef.current ? 0 : 180;
     skipDelayRef.current = false;
-    const t = window.setTimeout(async () => {
+    const timer = window.setTimeout(async () => {
       const id = ++reqId.current;
       setLoading(true);
       setError(null);
@@ -111,7 +119,7 @@ export function StudyAssistant() {
           setHits([]);
           setTotal(0);
           setBrief(null);
-          setError(data.error || "تعذّر البحث");
+          setError(data.error || t("errorSearch"));
           return;
         }
         setHits(data.hits ?? []);
@@ -134,7 +142,7 @@ export function StudyAssistant() {
         setHits([]);
         setTotal(0);
         setBrief(null);
-        setError("تعذّر الاتصال بخدمة الدراسة");
+        setError(t("errorConnection"));
       } finally {
         if (!cancelled && id === reqId.current) setLoading(false);
       }
@@ -142,15 +150,15 @@ export function StudyAssistant() {
 
     return () => {
       cancelled = true;
-      window.clearTimeout(t);
+      window.clearTimeout(timer);
     };
-  }, [query, showAll, kick]);
+  }, [query, showAll, kick, t]);
 
   const runStudy = (e?: React.FormEvent) => {
     e?.preventDefault();
     const q = query.trim();
     if (q.length < 2) {
-      setError("أدخل حرفين على الأقل للبحث الدراسي");
+      setError(t("minChars"));
       return;
     }
     setShowAll(false);
@@ -166,11 +174,8 @@ export function StudyAssistant() {
       className={`study-assistant${studyActive ? " study-assistant--active" : ""}`}
       aria-labelledby="study-h"
     >
-      <h2 id="study-h">دراسة سريعة</h2>
-      <p className="study-assistant-lead">
-        ابحث عن كلمة أو عبارة — نعرض شرحاً موجزاً من المعنى العربي والإعراب
-        والتفسير الميسّر، ثم الآيات المرتبطة فوراً أثناء الكتابة.
-      </p>
+      <h2 id="study-h">{t("title")}</h2>
+      <p className="study-assistant-lead">{t("lead")}</p>
       <form className="study-assistant-form" onSubmit={runStudy}>
         <input
           ref={inputRef}
@@ -180,12 +185,12 @@ export function StudyAssistant() {
             setShowAll(false);
             setQuery(e.target.value);
           }}
-          placeholder="مثال: ابراهيم · الحمد · رحمة…"
-          aria-label="استعلام الدراسة"
+          placeholder={t("placeholder")}
+          aria-label={t("queryAria")}
           maxLength={120}
         />
         <button type="submit" className="study-assistant-btn" disabled={loading}>
-          {loading ? "…" : "ادرس"}
+          {loading ? "…" : t("submit")}
         </button>
       </form>
 
@@ -193,21 +198,26 @@ export function StudyAssistant() {
 
       {studyActive && total > 0 ? (
         <p className="search-results-count" aria-live="polite">
-          {toArabicNumerals(hits.length)}
-          {total > hits.length ? ` من ${toArabicNumerals(total)}` : null} نتيجة
-          دراسية
+          {total > hits.length
+            ? t("resultsCount", {
+                shown: formatCount(hits.length, locale),
+                total: formatCount(total, locale),
+              })
+            : t("resultsCountOnly", {
+                count: formatCount(hits.length, locale),
+              })}
         </p>
       ) : null}
 
       {brief && !error ? (
         <div className="study-brief" role="status">
-          <h3>ملخص دراسي</h3>
+          <h3>{t("briefTitle")}</h3>
           <p>{brief}</p>
         </div>
       ) : null}
 
       {searched && !loading && !error && hits.length === 0 ? (
-        <p className="empty-state">لا توجد نتائج مطابقة.</p>
+        <p className="empty-state">{t("noResults")}</p>
       ) : null}
 
       {hits.length > 0 ? (
@@ -219,7 +229,7 @@ export function StudyAssistant() {
                 className="study-hit"
               >
                 <span className="study-hit-key">
-                  {h.nameAr} {toArabicNumerals(h.verse)}
+                  {h.nameAr} {formatCount(h.verse, locale)}
                 </span>
                 <span className="study-hit-text">{h.text}</span>
                 {h.explain ? (
@@ -244,10 +254,12 @@ export function StudyAssistant() {
                 ) : null}
               </Link>
               <p className="study-hit-links">
-                <Link href={`/ayah/${h.surahId}/${h.verse}`}>إعراب الآية</Link>
+                <Link href={`/ayah/${h.surahId}/${h.verse}`}>
+                  {tNav("ayahIrab")}
+                </Link>
                 {" · "}
                 <Link href={`/surah/${h.surahId}/read#v-${h.verse}`}>
-                  دراسة السورة
+                  {tNav("studySurah")}
                 </Link>
               </p>
             </li>
@@ -262,7 +274,7 @@ export function StudyAssistant() {
           onClick={() => setShowAll(true)}
           disabled={loading}
         >
-          جميع النتائج ({toArabicNumerals(total)})
+          {t("showAll", { total: formatCount(total, locale) })}
         </button>
       ) : null}
       {showAll && total > PREVIEW_LIMIT ? (
@@ -271,7 +283,9 @@ export function StudyAssistant() {
           className="search-show-all search-show-all--muted"
           onClick={() => setShowAll(false)}
         >
-          عرض أول {toArabicNumerals(PREVIEW_LIMIT)} فقط
+          {t("showPreview", {
+            limit: formatCount(PREVIEW_LIMIT, locale),
+          })}
         </button>
       ) : null}
     </section>

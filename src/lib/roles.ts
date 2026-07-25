@@ -56,15 +56,15 @@ export function mergeRoleWithEnvAdmin(
   return "user";
 }
 
-export function roleLabelAr(role: UserRole): string {
-  switch (role) {
-    case "admin":
-      return "مدير";
-    case "editor":
-      return "محرر";
-    default:
-      return "مشترك";
-  }
+export type AppLocale = "ar" | "en";
+
+const ROLE_LABELS: Record<AppLocale, Record<UserRole, string>> = {
+  ar: { admin: "مدير", editor: "محرر", user: "مشترك" },
+  en: { admin: "Admin", editor: "Editor", user: "Member" },
+};
+
+export function roleLabel(role: UserRole, locale: AppLocale = "ar"): string {
+  return ROLE_LABELS[locale][role] ?? ROLE_LABELS[locale].user;
 }
 
 export function canAccessStudio(role: UserRole): boolean {

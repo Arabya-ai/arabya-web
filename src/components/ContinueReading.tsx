@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
 
@@ -9,6 +10,8 @@ import { STORAGE_KEYS } from "@/lib/storage-keys";
 const LAST_PAGE_KEY = STORAGE_KEYS.lastMushafPage;
 
 export function ContinueReading() {
+  const t = useTranslations("Home");
+  const locale = useLocale();
   const [page, setPage] = useState<number | null>(null);
 
   useEffect(() => {
@@ -22,10 +25,13 @@ export function ContinueReading() {
 
   if (!page) return null;
 
+  const pageLabel =
+    locale === "ar" ? toArabicNumerals(page) : String(page);
+
   return (
     <p className="continue-reading">
       <Link href={getMushafPageHref(page)} className="continue-link">
-        متابعة القراءة من الصفحة {toArabicNumerals(page)}
+        {t("continueReading", { page: pageLabel })}
       </Link>
     </p>
   );

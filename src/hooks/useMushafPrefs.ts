@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "next-intl";
 import type { VerseTranslationEdition } from "@/lib/types";
 import { DEFAULT_RECITER_ID, RECITERS } from "@/lib/audio";
 import { recordPageRead } from "@/lib/reading-habit";
@@ -24,6 +25,7 @@ export function useMushafPrefs(
   page: PageNav,
   verseEditions: VerseTranslationEdition[],
 ) {
+  const locale = useLocale();
   const [fontScale, setFontScale] = useState(FONT_SCALE_DEFAULT);
   const [fontDraft, setFontDraft] = useState(
     String(Math.round(FONT_SCALE_DEFAULT * 100)),
@@ -121,6 +123,8 @@ export function useMushafPrefs(
   }, [page.page]);
 
   useEffect(() => {
+    const mushafPath = (n: number) =>
+      locale === "en" ? `/en/mushaf/${n}` : `/mushaf/${n}`;
     const onKey = (e: KeyboardEvent) => {
       const el = e.target;
       if (
@@ -130,14 +134,14 @@ export function useMushafPrefs(
         return;
       }
       if (e.key === "ArrowLeft" && page.page < page.totalPages) {
-        window.location.href = `/mushaf/${page.page + 1}`;
+        window.location.href = mushafPath(page.page + 1);
       } else if (e.key === "ArrowRight" && page.page > 1) {
-        window.location.href = `/mushaf/${page.page - 1}`;
+        window.location.href = mushafPath(page.page - 1);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [page.page, page.totalPages]);
+  }, [page.page, page.totalPages, locale]);
 
   const fontPercent = Math.round(fontScale * 100);
   const canShrink = fontScale > FONT_SCALE_MIN + 0.001;

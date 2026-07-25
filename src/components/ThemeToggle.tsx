@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { STORAGE_KEYS } from "@/lib/storage-keys";
@@ -38,6 +39,7 @@ function MoonIcon() {
 }
 
 export function ThemeToggle() {
+  const t = useTranslations("Theme");
   const [theme, setTheme] = useState<Theme>("light");
   const [ready, setReady] = useState(false);
 
@@ -75,7 +77,7 @@ export function ThemeToggle() {
     return (
       <button type="button" className="theme-toggle" aria-hidden tabIndex={-1}>
         <MoonIcon />
-        <span>ليلي</span>
+        <span>{t("dark")}</span>
       </button>
     );
   }
@@ -87,12 +89,12 @@ export function ThemeToggle() {
       type="button"
       className="theme-toggle"
       onClick={toggle}
-      aria-label={isDark ? "التبديل إلى الوضع النهاري" : "التبديل إلى الوضع الليلي"}
+      aria-label={isDark ? t("switchToLight") : t("switchToDark")}
       aria-pressed={isDark}
-      title={isDark ? "الوضع النهاري" : "الوضع الليلي"}
+      title={isDark ? t("titleLight") : t("titleDark")}
     >
       {isDark ? <SunIcon /> : <MoonIcon />}
-      <span>{isDark ? "نهاري" : "ليلي"}</span>
+      <span>{isDark ? t("light") : t("dark")}</span>
     </button>
   );
 }

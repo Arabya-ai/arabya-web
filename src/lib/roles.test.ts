@@ -7,7 +7,7 @@ import {
   mergeRoleWithEnvAdmin,
   parseAdminEmails,
   resolveRoleFromEmail,
-  roleLabelAr,
+  roleLabel,
 } from "@/lib/roles";
 
 describe("parseAdminEmails", () => {
@@ -70,10 +70,13 @@ describe("super admin", () => {
 });
 
 describe("role helpers", () => {
-  it("labels roles in Arabic", () => {
-    expect(roleLabelAr("admin")).toBe("مدير");
-    expect(roleLabelAr("editor")).toBe("محرر");
-    expect(roleLabelAr("user")).toBe("مشترك");
+  it("labels roles by locale", () => {
+    expect(roleLabel("admin", "ar")).toBe("مدير");
+    expect(roleLabel("editor", "ar")).toBe("محرر");
+    expect(roleLabel("user", "ar")).toBe("مشترك");
+    expect(roleLabel("admin", "en")).toBe("Admin");
+    expect(roleLabel("editor", "en")).toBe("Editor");
+    expect(roleLabel("user", "en")).toBe("Member");
   });
 
   it("gates studio and admin access", () => {

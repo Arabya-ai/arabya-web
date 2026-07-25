@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { SurahPlayerState } from "@/hooks/useQuranAudio";
 import { toArabicNumerals } from "@/lib/format";
 
@@ -65,6 +66,7 @@ export function SurahAudioPlayer({
   onPin: (pinned: boolean) => void;
   onClose: () => void;
 }) {
+  const t = useTranslations("Mushaf");
   if (!state.active) return null;
 
   const progress =
@@ -78,7 +80,7 @@ export function SurahAudioPlayer({
     <div
       className={`surah-player${state.pinned ? " is-pinned" : ""}`}
       role="region"
-      aria-label="مشغّل تلاوة السورة"
+      aria-label={t("playerAria")}
     >
       <div className="surah-player-head">
         <div className="surah-player-title">
@@ -94,7 +96,10 @@ export function SurahAudioPlayer({
             <p>
               {state.mode === "chapter"
                 ? `${formatTime(state.currentTime)} / ${formatTime(state.duration)}`
-                : `آية ${toArabicNumerals(state.verseIndex)} من ${toArabicNumerals(state.versesCount)}`}
+                : t("playerVerseOf", {
+                  current: toArabicNumerals(state.verseIndex),
+                  total: toArabicNumerals(state.versesCount),
+                })}
             </p>
           </div>
         </div>
@@ -104,21 +109,17 @@ export function SurahAudioPlayer({
             className={`surah-player-pin${state.pinned ? " is-on" : ""}`}
             onClick={() => onPin(!state.pinned)}
             aria-pressed={state.pinned}
-            title={
-              state.pinned
-                ? "إلغاء التثبيت — المشغّل يعود لمكانه فوق المصحف"
-                : "تثبيت المشغّل أسفل الشاشة أثناء التصفح"
-            }
+            title={state.pinned ? t("unpin") : t("pin")}
           >
             <IconPin pinned={state.pinned} />
-            <span>{state.pinned ? "مثبّت" : "تثبيت"}</span>
+            <span>{state.pinned ? t("unpin") : t("pin")}</span>
           </button>
           <button
             type="button"
             className="surah-player-close"
             onClick={onClose}
-            aria-label="إغلاق المشغّل"
-            title="إغلاق"
+            aria-label={t("closePlayer")}
+            title={t("closePlayer")}
           >
             ✕
           </button>
@@ -130,8 +131,8 @@ export function SurahAudioPlayer({
           type="button"
           className={`surah-player-play${state.playing ? " is-playing" : ""}`}
           onClick={() => (state.playing ? onPause() : onResume())}
-          aria-label={state.playing ? "إيقاف مؤقت" : "تشغيل"}
-          title={state.playing ? "إيقاف مؤقت" : "تشغيل"}
+          aria-label={state.playing ? t("pause") : t("play")}
+          title={state.playing ? t("pause") : t("play")}
         >
           {state.playing ? <IconPause /> : <IconPlay />}
         </button>
@@ -145,7 +146,7 @@ export function SurahAudioPlayer({
             step={0.1}
             value={Math.min(state.currentTime, state.duration || 0)}
             onChange={(e) => onSeek(Number(e.target.value))}
-            aria-label="موضع التلاوة"
+            aria-label={t("seekAria")}
             dir="ltr"
           />
         ) : (
@@ -155,11 +156,11 @@ export function SurahAudioPlayer({
         )}
 
         <label className="surah-player-rate">
-          <span className="sr-only">السرعة</span>
+          <span className="sr-only">{t("speed")}</span>
           <select
             value={state.playbackRate}
             onChange={(e) => onRate(Number(e.target.value))}
-            aria-label="سرعة التلاوة"
+            aria-label={t("speed")}
           >
             {[0.75, 1, 1.25, 1.5, 1.75, 2].map((r) => (
               <option key={r} value={r}>

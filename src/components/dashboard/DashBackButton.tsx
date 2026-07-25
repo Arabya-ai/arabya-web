@@ -1,17 +1,22 @@
-import Link from "next/link";
+"use client";
+
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { DashIcon } from "@/components/dashboard/DashIcon";
 
 export function DashBackButton({
   href,
-  label = "رجوع",
+  label,
 }: {
   href: string;
   label?: string;
 }) {
+  const t = useTranslations("Account");
+
   return (
     <Link href={href} className="dash-back-btn">
       <DashIcon name="back" />
-      <span>{label}</span>
+      <span>{label ?? t("back")}</span>
     </Link>
   );
 }

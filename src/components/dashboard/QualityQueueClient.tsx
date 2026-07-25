@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import type { QualityQueueItem } from "@/lib/quality-scan";
 import { apiGet } from "@/lib/api-client";
@@ -11,6 +12,7 @@ export function QualityQueueClient({
   initialItems: QualityQueueItem[];
   autoScan?: boolean;
 }) {
+  const t = useTranslations("Studio");
   const [items, setItems] = useState(initialItems);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,15 +30,15 @@ export function QualityQueueClient({
         items?: QualityQueueItem[];
         error?: string;
       };
-      if (!res.ok || !data.ok) throw new Error(data.error || "فشل الفحص");
+      if (!res.ok || !data.ok) throw new Error(data.error || t("scanError"));
       setItems(data.items || []);
       setScanned(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "خطأ");
+      setError(err instanceof Error ? err.message : t("genericError"));
     } finally {
       setBusy(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (autoScan) void rescan();
@@ -51,29 +53,27 @@ export function QualityQueueClient({
           disabled={busy}
           onClick={() => void rescan()}
         >
-          {busy ? "جاري الفحص…" : scanned ? "إعادة الفحص الآن" : "تشغيل الفحص"}
+          {busy ? t("rescanBusy") : scanned ? t("rescanAgain") : t("runScan")}
         </button>
         <span className="dash-muted" style={{ margin: 0 }}>
-          العناصر: {items.length}
+          {t("itemCount", { count: items.length })}
         </span>
       </div>
       {error ? <p className="dash-banner dash-banner--warn">{error}</p> : null}
       {busy && !scanned ? (
         <section className="dash-card">
-          <p className="dash-muted">جاري فحص السور والإعراب وفهرس المصحف…</p>
+          <p className="dash-muted">{t("scanningLead")}</p>
         </section>
       ) : null}
       {!busy && scanned && items.length === 0 ? (
         <section className="dash-card">
-          <h2>لا مشكلات مكتشفة حاليًا</h2>
-          <p className="dash-muted">
-            اكتمل فحص السور والإعراب وفهرس المصحف دون أخطاء ظاهرة.
-          </p>
+          <h2>{t("noIssuesTitle")}</h2>
+          <p className="dash-muted">{t("noIssuesLead")}</p>
         </section>
       ) : null}
       {items.map((item) => (
         <article key={item.id} className="dash-card">
-          <p className="dash-kicker">أولوية: {item.priority}</p>
+          <p className="dash-kicker">{t("priority", { priority: item.priority })}</p>
           <h2>{item.title}</h2>
           <p className="dash-muted">{item.surahHint}</p>
           <p>{item.note}</p>
