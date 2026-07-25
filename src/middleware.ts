@@ -32,7 +32,7 @@ function resolveUiLocale(
 
 function isProtectedPath(pathname: string): boolean {
   const bare = stripLocalePrefix(pathname);
-  return /^(?:\/(?:account|studio|admin))(?:\/|$)/.test(bare);
+  return /^(?:\/(?:account|studio|admin|create))(?:\/|$)/.test(bare);
 }
 
 function isStaticOrApi(pathname: string): boolean {

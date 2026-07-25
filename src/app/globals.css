@@ -6707,3 +6707,116 @@ html[data-theme="dark"] .dash-emblem-face {
 html[data-theme="dark"] .dash-header-badge {
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
 }
+
+/* Create studio + pricing (additive; does not alter mushaf) */
+.create-hub-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.25rem 0 0;
+  display: grid;
+  gap: 1rem;
+}
+.create-hub-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+}
+.create-hub-card:hover {
+  border-color: color-mix(in srgb, var(--brand) 40%, var(--line));
+}
+.create-studio {
+  margin-top: 1rem;
+}
+.create-plan-badge {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.create-upsell,
+.create-upsell-block {
+  margin: 0.75rem 0 1rem;
+}
+.create-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+}
+@media (max-width: 900px) {
+  .create-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.create-controls,
+.create-controls--wide {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.create-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.92rem;
+}
+.create-controls select,
+.create-controls input[type="number"],
+.create-controls input[type="color"] {
+  min-height: 2.4rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0.35rem 0.55rem;
+}
+.create-check {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.5rem !important;
+}
+.create-preview-img {
+  width: 100%;
+  max-width: 28rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #0b1412;
+}
+.create-error {
+  color: #b91c1c;
+}
+.create-progress {
+  font-variant-numeric: tabular-nums;
+}
+.pricing-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  margin: 1.25rem 0;
+}
+.pricing-card {
+  padding: 1.15rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.pricing-card--plus {
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--line));
+}
+.pricing-card ul {
+  margin: 0.75rem 0 0;
+  padding-inline-start: 1.1rem;
+}
+.pricing-paypal-note {
+  margin-top: 1.25rem;
+  font-weight: 600;
+}
+.root-share-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}

@@ -102,4 +102,17 @@ test.describe("smoke", () => {
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
     await expect(page.locator("#prayer-h")).toContainText("Prayer times");
   });
+
+  test("pricing page renders Free and Plus plans", async ({ page }) => {
+    await gotoOk(page, "/en/pricing");
+    await expect(page.locator("h1")).toContainText(/Plans/i);
+    await expect(page.locator("#plan-free")).toBeVisible();
+    await expect(page.locator("#plan-plus")).toBeVisible();
+    await expect(page.locator(".pricing-paypal-note")).toContainText(/PayPal/i);
+  });
+
+  test("create image redirects guests to login", async ({ page }) => {
+    await page.goto("/en/create/image", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/login/i);
+  });
 });

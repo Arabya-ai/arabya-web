@@ -134,6 +134,18 @@ export default async function AyahIrabPage({ params }: Props) {
             label={t("shareLabel")}
             hint={t("shareHint")}
           />
+          <Link
+            href={`/create/image?s=${surahId}&v=${verseNumber}`}
+            className="nav-pill"
+          >
+            {t("createImage")}
+          </Link>
+          <Link
+            href={`/create/video?s=${surahId}&v=${verseNumber}`}
+            className="nav-pill"
+          >
+            {t("createVideo")}
+          </Link>
         </div>
       </header>
 

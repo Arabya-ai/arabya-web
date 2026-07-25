@@ -161,6 +161,8 @@ export function SiteFooter() {
             <Link href="/juz">{t("juz")}</Link>
             <Link href="/roots">{t("roots")}</Link>
             <Link href="/qiraat">{t("qiraat")}</Link>
+            <Link href="/create">{t("create")}</Link>
+            <Link href="/pricing">{t("pricing")}</Link>
             <Link href="/about">{t("about")}</Link>
             <Link href="/privacy">{t("privacy")}</Link>
           </nav>

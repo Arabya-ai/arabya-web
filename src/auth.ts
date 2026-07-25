@@ -6,6 +6,7 @@ import {
   resolveRoleFromEmail,
   type UserRole,
 } from "@/lib/roles";
+import { resolveUserPlan, type UserPlan } from "@/lib/plans";
 
 declare module "next-auth" {
   interface Session {
@@ -14,18 +15,21 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       role: UserRole;
+      plan: UserPlan;
     };
     error?: "Banned";
   }
 
   interface User {
     role?: UserRole;
+    plan?: UserPlan;
   }
 }
 
 declare module "@auth/core/jwt" {
   interface JWT {
     role?: UserRole;
+    plan?: UserPlan;
     roleFetchedAt?: number;
     banned?: boolean;
   }
@@ -93,7 +97,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (
         bare.startsWith("/account") ||
         bare.startsWith("/studio") ||
-        bare.startsWith("/admin")
+        bare.startsWith("/admin") ||
+        bare.startsWith("/create")
       ) {
         return !!session?.user;
       }
@@ -102,6 +107,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, trigger }) {
       if (!token.email) {
         token.role = "user";
+        token.plan = "free";
         token.banned = false;
         return token;
       }
@@ -129,6 +135,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.role = mergeRoleWithEnvAdmin(email, token.role as UserRole);
       }
 
+      token.plan = resolveUserPlan({
+        email,
+        role: token.role as UserRole,
+      });
+
       return token;
     },
     session({ session, token }) {
@@ -137,6 +148,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       if (session.user) {
         session.user.role = (token.role as UserRole) || "user";
+        session.user.plan = (token.plan as UserPlan) || "free";
       }
       return session;
     },

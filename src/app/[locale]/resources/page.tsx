@@ -28,6 +28,16 @@ export default async function ResourcesPage({ params }: Props) {
       <h1>{t("title")}</h1>
 
       <section className="resource-block">
+        <h2>{t("createTitle")}</h2>
+        <p>
+          {t.rich("createLead", {
+            create: (c) => <Link href="/create">{c}</Link>,
+            pricing: (c) => <Link href="/pricing">{c}</Link>,
+          })}
+        </p>
+      </section>
+
+      <section className="resource-block">
         <h2>{t("radioTitle")}</h2>
         <p>{t("radioLead")}</p>
         <p>

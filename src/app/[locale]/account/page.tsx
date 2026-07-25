@@ -13,6 +13,8 @@ import {
 } from "@/i18n/locale-params";
 import { isCloudSyncConfigured } from "@/lib/cloud-sync";
 import { canAccessAdmin, canAccessStudio } from "@/lib/roles";
+import { planLabel } from "@/lib/plans";
+import type { AppLocale } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +40,7 @@ export default async function AccountPage({ params }: Props) {
 
   const t = await getTranslations("Account");
   const role = user.role ?? "user";
+  const plan = user.plan ?? "free";
   const name = user.name || t("defaultName");
   const syncReady = isCloudSyncConfigured();
 
@@ -57,6 +60,14 @@ export default async function AccountPage({ params }: Props) {
           <h2>{t("personalTitle")}</h2>
           <p className="dash-muted" dir="ltr">
             {user.email}
+          </p>
+          <p>
+            {t("planLine", {
+              plan: planLabel(plan, locale as AppLocale),
+            })}{" "}
+            <Link href="/pricing">{t("viewPricing")}</Link>
+            {" · "}
+            <Link href="/create">{t("openCreate")}</Link>
           </p>
           <div className="account-grid account-grid--personal">
             <AccountPersonalData />
