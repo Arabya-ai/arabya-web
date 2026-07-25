@@ -1,10 +1,14 @@
 import { auth } from "@/auth";
+import { parsePexelsKeys, shouldRotatePexelsKey } from "@/lib/pexels-keys";
 
 export const runtime = "nodejs";
 
 /**
- * Server-side Pexels proxy.
- * Key: `X-Pexels-Key` from client settings, or `PEXELS_API_KEY` env.
+ * Server-side Pexels proxy with multi-key failover.
+ *
+ * Keys (tried in order; rotate on 401/403/429/402):
+ * 1. `X-Pexels-Key` header (from /studio/settings) — one or many
+ * 2. `PEXELS_API_KEY` and/or `PEXELS_API_KEYS` env (comma-separated OK)
  */
 export async function GET(request: Request) {
   const session = await auth();
@@ -19,10 +23,12 @@ export async function GET(request: Request) {
     return Response.json({ error: "missing_query" }, { status: 400 });
   }
 
-  const headerKey = request.headers.get("x-pexels-key")?.trim() || "";
-  const envKey = (process.env.PEXELS_API_KEY || "").trim();
-  const key = headerKey || envKey;
-  if (!key) {
+  const keys = parsePexelsKeys(
+    request.headers.get("x-pexels-key") ?? undefined,
+    process.env.PEXELS_API_KEY,
+    process.env.PEXELS_API_KEYS,
+  );
+  if (keys.length === 0) {
     return Response.json({ error: "missing_pexels_key" }, { status: 400 });
   }
 
@@ -45,32 +51,53 @@ export async function GET(request: Request) {
       ? `https://api.pexels.com/videos/search?${params}`
       : `https://api.pexels.com/v1/search?${params}`;
 
-  let upstream: Response;
-  try {
-    upstream = await fetch(url, {
-      headers: { Authorization: key },
-    });
-  } catch {
-    return Response.json({ error: "upstream_unreachable" }, { status: 502 });
+  let lastStatus = 0;
+  let lastDetail = "";
+
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    let upstream: Response;
+    try {
+      upstream = await fetch(url, {
+        headers: { Authorization: key },
+      });
+    } catch {
+      lastStatus = 502;
+      lastDetail = "upstream_unreachable";
+      continue;
+    }
+
+    const text = await upstream.text();
+    if (upstream.ok) {
+      return new Response(text, {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "private, max-age=120",
+          "X-Pexels-Key-Index": String(i),
+        },
+      });
+    }
+
+    lastStatus = upstream.status;
+    lastDetail = text.slice(0, 200);
+    if (!shouldRotatePexelsKey(upstream.status)) {
+      break;
+    }
   }
 
-  const text = await upstream.text();
-  if (!upstream.ok) {
-    return Response.json(
-      {
-        error: "pexels_http",
-        status: upstream.status,
-        detail: text.slice(0, 200),
-      },
-      { status: upstream.status === 401 || upstream.status === 403 ? 400 : 502 },
-    );
-  }
-
-  return new Response(text, {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json",
-      "Cache-Control": "private, max-age=120",
+  return Response.json(
+    {
+      error: "pexels_http",
+      status: lastStatus,
+      detail: lastDetail,
+      keysTried: keys.length,
     },
-  });
+    {
+      status:
+        lastStatus === 401 || lastStatus === 403 || lastStatus === 429
+          ? 400
+          : 502,
+    },
+  );
 }
