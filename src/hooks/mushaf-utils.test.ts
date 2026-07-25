@@ -43,6 +43,10 @@ describe("missingCacheKeys", () => {
     ).toEqual([2]);
     expect(missingCacheKeys([1], {}, "sadi")).toEqual([1]);
   });
+
+  it("treats null cache entries as already fetched (no refetch)", () => {
+    expect(missingCacheKeys([1, 2], { "sadi:1": null }, "sadi")).toEqual([2]);
+  });
 });
 
 describe("reciterHasWordSync", () => {

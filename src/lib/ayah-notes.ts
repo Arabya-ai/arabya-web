@@ -1,5 +1,7 @@
 /** Per-ayah study notes stored in localStorage. */
 
+import { STORAGE_KEYS } from "@/lib/storage-keys";
+
 export type AyahNote = {
   key: string;
   surahId: number;
@@ -8,7 +10,7 @@ export type AyahNote = {
   updatedAt: number;
 };
 
-const KEY = "arabya-ayah-notes";
+const KEY = STORAGE_KEYS.ayahNotes;
 const MAX = 300;
 
 export function readAyahNotes(): AyahNote[] {

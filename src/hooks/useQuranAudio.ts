@@ -7,6 +7,12 @@ import {
   wordAudioUrl,
   type VerseTiming,
 } from "@/lib/audio";
+import { apiGet } from "@/lib/api-client";
+import {
+  clearMediaSession,
+  setMediaSessionPaused,
+  setMediaSessionPlaying,
+} from "@/lib/media-session";
 import type { MushafPageContent } from "@/lib/mushaf";
 import type { WordRef } from "@/hooks/mushaf-utils";
 
@@ -104,6 +110,7 @@ export function useQuranAudio({
     surahStopRef.current = true;
     surahPausedRef.current = false;
     hardStopMedia(audioRef.current);
+    clearMediaSession();
     setAudioPlaying(false);
     setWbwPlaying(false);
     setSurahPlaying(false);
@@ -132,7 +139,7 @@ export function useQuranAudio({
     const reciter = getReciter(rid);
     if (!reciter.quranComChapterReciterId) return null;
     try {
-      const res = await fetch(`/api/audio-timings/${rid}/${surahId}`);
+      const res = await apiGet(`/api/audio-timings/${rid}/${surahId}`);
       if (!res.ok) return null;
       const data = (await res.json()) as {
         audioUrl: string;
@@ -162,10 +169,22 @@ export function useQuranAudio({
     if (!audioRef.current) audioRef.current = new Audio();
     const audio = audioRef.current;
     const times = Math.max(1, Math.min(10, repeatCount));
+    const reciter = getReciter(reciterId);
+    setMediaSessionPlaying(
+      {
+        title: `آية ${selected.verseKey || `${selected.surahId}:${selected.verseNumber}`}`,
+        artist: reciter.nameAr,
+      },
+      {
+        onPause: () => stopAllAudio(),
+        onStop: () => stopAllAudio(),
+      },
+    );
 
     const pack = await loadChapterTimings(selected.surahId, reciterId);
     if (ayahStopRef.current) {
       setAudioPlaying(false);
+      clearMediaSession();
       return;
     }
     const verseKey =
@@ -303,6 +322,7 @@ export function useQuranAudio({
     } finally {
       setAudioPlaying(false);
       setSyncHighlightPos(null);
+      clearMediaSession();
       if (!ayahStopRef.current && !failed) onStatusNote(null);
     }
   };
@@ -334,6 +354,17 @@ export function useQuranAudio({
     if (!audioRef.current) audioRef.current = new Audio();
     const audio = audioRef.current;
     const times = Math.max(1, Math.min(10, repeatCount));
+    const reciter = getReciter(reciterId);
+    setMediaSessionPlaying(
+      {
+        title: `كلمة بكلمة — ${selected.verseKey}`,
+        artist: reciter.nameAr,
+      },
+      {
+        onPause: () => stopAllAudio(),
+        onStop: () => stopAllAudio(),
+      },
+    );
 
     let failed = false;
     try {
@@ -375,6 +406,7 @@ export function useQuranAudio({
       onStatusNote("تعذّر تشغيل التلاوة كلمة بكلمة", 2000);
     } finally {
       setWbwPlaying(false);
+      clearMediaSession();
       if (!wbwStopRef.current && !failed) {
         onStatusNote(null);
       }
@@ -427,10 +459,36 @@ export function useQuranAudio({
     });
 
     onStatusNote(`تشغيل السورة من الآية ${start}…`);
+    const reciter = getReciter(reciterId);
+    setMediaSessionPlaying(
+      {
+        title: label,
+        artist: reciter.nameAr,
+      },
+      {
+        onPlay: () => {
+          surahPausedRef.current = false;
+          void audioRef.current?.play().catch(() => undefined);
+          setSurahPlayer((p) => ({ ...p, playing: true }));
+          setMediaSessionPlaying({
+            title: label,
+            artist: reciter.nameAr,
+          });
+        },
+        onPause: () => {
+          surahPausedRef.current = true;
+          audioRef.current?.pause();
+          setSurahPlayer((p) => ({ ...p, playing: false }));
+          setMediaSessionPaused();
+        },
+        onStop: () => stopAllAudio(),
+      },
+    );
 
     const pack = await loadChapterTimings(surahId, reciterId);
     if (surahStopRef.current) {
       setSurahPlaying(false);
+      clearMediaSession();
       return;
     }
 
@@ -579,8 +637,14 @@ export function useQuranAudio({
           ? { ...p, playing: false, active: true }
           : { ...emptyPlayer, pinned: false },
       );
+      if (!(pinnedRef.current || surahPausedRef.current)) {
+        clearMediaSession();
+      } else {
+        setMediaSessionPaused();
+      }
       if (!surahStopRef.current && !failed) onStatusNote(null);
       if (failed && !playedAny) {
+        clearMediaSession();
         setSurahPlayer(emptyPlayer);
       }
     }
@@ -590,6 +654,7 @@ export function useQuranAudio({
     surahPausedRef.current = true;
     audioRef.current?.pause();
     setSurahPlayer((p) => ({ ...p, playing: false }));
+    setMediaSessionPaused();
   };
 
   const resumeSurah = () => {
@@ -608,6 +673,11 @@ export function useQuranAudio({
     surahPausedRef.current = false;
     void audioRef.current?.play().catch(() => undefined);
     setSurahPlayer((p) => ({ ...p, playing: true }));
+    const meta = surahMetaRef.current;
+    setMediaSessionPlaying({
+      title: meta?.title || "سورة",
+      artist: getReciter(reciterId).nameAr,
+    });
   };
 
   const seekSurah = (time: number) => {

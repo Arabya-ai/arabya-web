@@ -113,8 +113,11 @@ export function useMushafPrefs(
       if (m) {
         const el = document.querySelector(`#s${m[1]}-v-${m[2]}`);
         if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
       }
     }
+    // Plain page open/turn: keep the mushaf at the top (not the study tabs below).
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [page.page]);
 
   useEffect(() => {

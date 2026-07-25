@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 
+import { STORAGE_KEYS } from "@/lib/storage-keys";
+
 type Theme = "light" | "dark";
 
-const THEME_KEY = "arabya-theme";
+const THEME_KEY = STORAGE_KEYS.theme;
 
 function applyTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;

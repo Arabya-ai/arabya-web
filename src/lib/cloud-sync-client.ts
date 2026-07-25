@@ -16,9 +16,11 @@ import {
   type StudyEntry,
 } from "@/lib/study-archive";
 
+import { STORAGE_KEYS } from "@/lib/storage-keys";
+
 export const CLOUD_SYNC_EVENT = "arabya-cloud-sync-needed";
-export const DATA_REV_KEY = "arabya-data-rev";
-const NOTES_KEY = "arabya-ayah-notes";
+export const DATA_REV_KEY = STORAGE_KEYS.dataRev;
+const NOTES_KEY = STORAGE_KEYS.ayahNotes;
 
 let suppressNotify = 0;
 

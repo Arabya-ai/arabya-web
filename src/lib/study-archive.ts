@@ -1,5 +1,7 @@
 /** حفظ جلسات الدراسة في الحساب (localStorage + مزامنة D1). */
 
+import { STORAGE_KEYS } from "@/lib/storage-keys";
+
 export type StudyEntry = {
   id: string;
   kind: "word" | "quick" | "ayah";
@@ -15,7 +17,7 @@ export type StudyEntry = {
   updatedAt: number;
 };
 
-const KEY = "arabya-study-archive-v1";
+const KEY = STORAGE_KEYS.studyArchive;
 const MAX = 200;
 
 function newId(): string {
@@ -39,7 +41,7 @@ export function writeStudyEntries(list: StudyEntry[]) {
   localStorage.setItem(KEY, JSON.stringify(list.slice(0, MAX)));
   window.dispatchEvent(new Event("arabya-study-updated"));
   try {
-    localStorage.setItem("arabya-data-rev", String(Date.now()));
+    localStorage.setItem(STORAGE_KEYS.dataRev, String(Date.now()));
     window.dispatchEvent(new Event("arabya-cloud-sync-needed"));
   } catch {
     /* ignore */

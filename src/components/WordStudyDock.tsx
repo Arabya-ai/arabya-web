@@ -23,7 +23,10 @@ import { formatFeatureLabels, formatPosLabels } from "@/lib/morph-labels";
 import { lexiconCardLines, narrativeIrab } from "@/lib/irab-narrative";
 import { upsertStudyEntry } from "@/lib/study-archive";
 import { nextTabIndex } from "@/lib/tablist";
-import { editionDisplayName } from "@/lib/translation-label";
+import {
+  editionDisplayName,
+  groupVerseEditionsByLang,
+} from "@/lib/translation-label";
 import { MeaningLangSwitch } from "@/components/MeaningLangSwitch";
 import type { MeaningLang } from "@/hooks/mushaf-utils";
 
@@ -41,6 +44,11 @@ type Props = {
   verseTranslation: string | null;
   verseTranslationStatus?: VerseTranslationStatus;
   tafsirSources?: TafsirSource[];
+  /** Shared with page-mode tafsir cache — avoids a second network fetch. */
+  ensureTafsirSurah: (
+    slug: string,
+    surahId: number,
+  ) => Promise<TafsirSurah | null>;
 };
 
 const LAYERS: { id: string; label: string; hint: string }[] = [
@@ -100,6 +108,7 @@ export function WordStudyDock({
   verseTranslation,
   verseTranslationStatus = "idle",
   tafsirSources = [],
+  ensureTafsirSurah,
 }: Props) {
   const [layer, setLayer] = useState("syntax");
   const [tafsirSlug, setTafsirSlug] = useState(tafsirSources[0]?.slug ?? "");
@@ -195,15 +204,16 @@ export function WordStudyDock({
     setTafsirText(null);
     (async () => {
       try {
-        const res = await fetch(`/api/tafsir/${tafsirSlug}/${surahId}`);
-        if (!res.ok) throw new Error("tafsir");
-        const data = (await res.json()) as TafsirSurah;
-        const hit = data.verses?.find((v) => v.verseNumber === verse);
-        if (!cancelled) {
-          setTafsirText(
-            hit?.text?.trim() || "لا يتوفر تفسير لهذه الآية في هذا المصدر.",
-          );
+        const data = await ensureTafsirSurah(tafsirSlug, surahId);
+        if (cancelled) return;
+        if (!data) {
+          setTafsirText("تعذّر تحميل التفسير.");
+          return;
         }
+        const hit = data.verses?.find((v) => v.verseNumber === verse);
+        setTafsirText(
+          hit?.text?.trim() || "لا يتوفر تفسير لهذه الآية في هذا المصدر.",
+        );
       } catch {
         if (!cancelled) setTafsirText("تعذّر تحميل التفسير.");
       } finally {
@@ -213,7 +223,12 @@ export function WordStudyDock({
     return () => {
       cancelled = true;
     };
-  }, [layer, tafsirSlug, verseKey]);
+  }, [layer, tafsirSlug, verseKey, ensureTafsirSurah]);
+
+  const editionGroups = useMemo(
+    () => groupVerseEditionsByLang(verseEditions),
+    [verseEditions],
+  );
 
   const { surahId: dockSurahId, verse: dockVerse } = useMemo(
     () => parseVerseKey(verseKey),
@@ -393,10 +408,14 @@ export function WordStudyDock({
                   onChange={(e) => onVerseEdition(e.target.value)}
                   aria-label="اختر ترجمة الآية"
                 >
-                  {verseEditions.map((e) => (
-                    <option key={e.slug} value={e.slug}>
-                      {editionDisplayName(e)}
-                    </option>
+                  {editionGroups.map((group) => (
+                    <optgroup key={group.lang} label={group.label}>
+                      {group.editions.map((e) => (
+                        <option key={e.slug} value={e.slug}>
+                          {editionDisplayName(e)}
+                        </option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
                 <p

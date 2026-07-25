@@ -1,5 +1,10 @@
 /** Local reading habit: daily goal, streak, khatm by unique pages (localStorage). */
 
+import {
+  readingHabitPagesKey,
+  STORAGE_KEYS,
+} from "@/lib/storage-keys";
+
 export type ReadingHabitState = {
   /** Target mushaf pages per calendar day */
   dailyGoalPages: number;
@@ -11,10 +16,10 @@ export type ReadingHabitState = {
   lastVisitDate: string | null;
 };
 
-const KEY = "arabya-reading-habit";
-const KHATM_PAGES_KEY = "arabya-reading-habit:khatm-pages";
+const KEY = STORAGE_KEYS.readingHabit;
+const KHATM_PAGES_KEY = STORAGE_KEYS.readingHabitKhatmPages;
 const TOTAL_PAGES = 604;
-export const LAST_MUSHAF_PAGE_KEY = "arabya-last-mushaf-page";
+export const LAST_MUSHAF_PAGE_KEY = STORAGE_KEYS.lastMushafPage;
 
 /** In-memory guard against Strict Mode double-invoke races in the same tick. */
 const sessionCounted = new Set<string>();
@@ -57,7 +62,7 @@ function uniquePages(raw: unknown): number[] {
 }
 
 function pagesTodayKey(day = todayKey()): string {
-  return `${KEY}:pages:${day}`;
+  return readingHabitPagesKey(day);
 }
 
 function readPagesToday(day = todayKey()): number[] {

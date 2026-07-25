@@ -19,6 +19,32 @@ type Props = {
 };
 
 /**
+ * Scroll a tab into the horizontal rail only — never scroll the page.
+ * (Element.scrollIntoView would jump the mushaf viewport to the tablist.)
+ */
+export function scrollTabIntoRail(
+  scroller: HTMLElement,
+  tab: HTMLElement,
+  behavior: ScrollBehavior = "smooth",
+): void {
+  const scrollerRect = scroller.getBoundingClientRect();
+  const tabRect = tab.getBoundingClientRect();
+  const pad = 8;
+  let delta = 0;
+  if (tabRect.left < scrollerRect.left + pad) {
+    delta = tabRect.left - scrollerRect.left - pad;
+  } else if (tabRect.right > scrollerRect.right - pad) {
+    delta = tabRect.right - scrollerRect.right + pad;
+  }
+  if (Math.abs(delta) < 1) return;
+  if (typeof scroller.scrollBy === "function") {
+    scroller.scrollBy({ left: delta, behavior });
+  } else {
+    scroller.scrollLeft += delta;
+  }
+}
+
+/**
  * Accessible RTL study-mode tablist (WAI-ARIA tabs + roving tabindex).
  * ArrowLeft moves to the next tab; ArrowRight to the previous; Home/End jump.
  * On narrow screens, scroll buttons appear when the rail overflows.
@@ -77,16 +103,9 @@ export function StudyModeTabs({
   useEffect(() => {
     const idx = modes.findIndex((m) => m.id === mode);
     const tab = idx >= 0 ? tabRefs.current[idx] : null;
-    if (tab && typeof tab.scrollIntoView === "function") {
-      try {
-        tab.scrollIntoView({
-          behavior: "smooth",
-          inline: "nearest",
-          block: "nearest",
-        });
-      } catch {
-        /* jsdom stubs may throw on option bags */
-      }
+    const scroller = scrollerRef.current;
+    if (tab && scroller) {
+      scrollTabIntoRail(scroller, tab, "smooth");
     }
     updateScrollState();
   }, [mode, modes, updateScrollState]);

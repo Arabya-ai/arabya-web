@@ -1,3 +1,5 @@
+import { STORAGE_KEYS } from "@/lib/storage-keys";
+
 export type Bookmark = {
   surahId: number;
   verse: number;
@@ -6,7 +8,7 @@ export type Bookmark = {
   savedAt: number;
 };
 
-const BOOKMARKS_KEY = "arabya-bookmarks";
+const BOOKMARKS_KEY = STORAGE_KEYS.bookmarks;
 
 function notify() {
   void import("@/lib/cloud-sync-client")

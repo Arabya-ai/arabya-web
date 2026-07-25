@@ -26,7 +26,7 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
     };
   }, [open]);
 
-  function go(href: string) {
+  function go() {
     return () => {
       setOpen(false);
       onNavigate?.();
@@ -58,19 +58,19 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
         خدماتنا
       </button>
       <div className="nav-dropdown-menu" role="menu">
-        <Link href="/juz" role="menuitem" onClick={go("/juz")}>
+        <Link href="/juz" role="menuitem" onClick={go()}>
           الأجزاء
         </Link>
-        <Link href="/roots" role="menuitem" onClick={go("/roots")}>
+        <Link href="/roots" role="menuitem" onClick={go()}>
           الجذور
         </Link>
-        <Link href="/qiraat" role="menuitem" onClick={go("/qiraat")}>
+        <Link href="/qiraat" role="menuitem" onClick={go()}>
           القراءات
         </Link>
-        <Link href="/asma" role="menuitem" onClick={go("/asma")}>
+        <Link href="/asma" role="menuitem" onClick={go()}>
           الأسماء الحسنى
         </Link>
-        <Link href="/study" role="menuitem" onClick={go("/study")}>
+        <Link href="/study" role="menuitem" onClick={go()}>
           دراسة سريعة
         </Link>
       </div>

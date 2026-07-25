@@ -7,8 +7,9 @@ import {
   pullMergeAndPush,
   pushLocalOnly,
 } from "@/lib/cloud-sync-client";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
-const SESSION_FLAG = "arabya-autosync-done";
+const SESSION_FLAG = STORAGE_KEYS.autosyncDone;
 
 /**
  * Silent background sync for signed-in users:

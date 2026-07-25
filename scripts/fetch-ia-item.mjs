@@ -78,7 +78,7 @@ async function main() {
     filesCount: Array.isArray(meta.files) ? meta.files.length : 0,
     reviewRequired: true,
     note:
-      "Local staging only. Do not copy into data/ unless rights allow redistribution in this project.",
+      "Local staging under incoming/. Review and import into data/ when ready (owner-directed).",
   };
 
   await writeFile(

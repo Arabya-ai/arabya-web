@@ -11,6 +11,7 @@ import {
   getNextPrayer,
   type PrayerTimings,
 } from "@/lib/next-prayer";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 type Timings = PrayerTimings;
 
@@ -27,7 +28,7 @@ type QiblaPayload = {
   directionLabel: string;
 };
 
-const CITY_KEY = "arabya-prayer-city";
+const CITY_KEY = STORAGE_KEYS.prayerCity;
 
 const LABELS: { key: keyof Timings; ar: string }[] = [
   { key: "fajr", ar: "الفجر" },

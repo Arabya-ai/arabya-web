@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { QualityQueueItem } from "@/lib/quality-scan";
+import { apiGet } from "@/lib/api-client";
 
 export function QualityQueueClient({
   initialItems,
@@ -15,11 +16,13 @@ export function QualityQueueClient({
   const [error, setError] = useState<string | null>(null);
   const [scanned, setScanned] = useState(initialItems.length > 0);
 
-  async function rescan() {
+  const rescan = useCallback(async () => {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch("/api/studio/quality-scan", { cache: "no-store" });
+      const res = await apiGet("/api/studio/quality-scan", {
+        cache: "no-store",
+      });
       const data = (await res.json()) as {
         ok?: boolean;
         items?: QualityQueueItem[];
@@ -33,12 +36,11 @@ export function QualityQueueClient({
     } finally {
       setBusy(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     if (autoScan) void rescan();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoScan]);
+  }, [autoScan, rescan]);
 
   return (
     <div className="dash-stack">

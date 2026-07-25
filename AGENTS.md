@@ -9,6 +9,8 @@
 - `npm run dev` — http://localhost:3000 (pages + local-JSON APIs)
 - `npm run lint` / `npm run test` / `npm run validate-data` / `npm run build`
 - Data-prep only (optional; hit Quran.com / Corpus): `fetch-data`, `fetch-tafsirs`, `fetch-translations`, `build-irab`, `build-mushaf-index`, `build-search-index`, `import-irab-book`
+- **Translations:** use `npm run fetch-translations` → `scripts/fetch-new-translations.mjs` (extends `data/translations/index.json`). Do **not** run `npm run fetch-translations-legacy` on production data — it can wipe the expanded edition index.
+- **Sync Worker:** do **not** add `"arabya-web": "file:../.."` under `workers/arabya-sync` — that junction breaks `next build` (Turbopack infinite loop). The worker is standalone.
 
 ### Product surface (beyond mushaf reader)
 | Route | Role |
@@ -23,6 +25,9 @@
 
 Study UI: `MushafPageStudio` + `StudyModeTabs` (keyboard-accessible RTL tabs) + `WordStudyDock` (morph/syntax/semantics/…). Do **not** show per-layer “المصدر: …” attribution chips in the dock (removed by product decision); keep footer/about GPL credit where legally needed.
 
+### Gotcha: Sync Worker must stay standalone
+Never add `"arabya-web": "file:../.."` to `workers/arabya-sync/package.json`. npm creates a junction back to the repo root and Turbopack then fails `next build` with an infinite symlink loop. If that junction reappears, delete `workers/arabya-sync/node_modules/arabya-web` (or reinstall the worker deps without the file dependency).
+
 ### Gotcha: do not run `next build` while `next dev` is running
 Both share `.next`. A concurrent build causes `Internal Server Error` with `ENOENT ... _buildManifest.js.tmp`. Fix: stop all `next` processes, `rm -rf .next`, restart `npm run dev`.
 
@@ -34,5 +39,5 @@ This repo uses `"overrides": { "postcss": "^8.5.10" }` to silence the advisory s
 ### Sanity check
 Open `/mushaf/1`, select a word, switch study tabs (الكلمات / الإعراب / تفاسير), confirm dock layers load. Run `npm run test` (Vitest) before merging.
 
-### Licensed irab books
-`/books` and `import-irab-book` are ready for **owner-supplied licensed files only**. Do not scrape competitor sites. Until files arrive, book entries stay `awaiting`.
+### Irab books
+`/books` and `import-irab-book` are ready for owner-supplied files and for import/scraping pipelines when the owner directs. Catalog entries may stay `awaiting` until content is imported.

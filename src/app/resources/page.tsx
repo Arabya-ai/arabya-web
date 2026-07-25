@@ -43,8 +43,7 @@ export default function ResourcesPage() {
       <section className="resource-block">
         <h2>تحميل مصاحف PDF</h2>
         <p>
-          نربط بمصادر عامة مرخّصة أو رسمية. لا نعيد رفع مصاحف محمية من مواقع
-          أخرى.
+          نربط بمصادر عامة أو رسمية لتنزيل المصاحف.
         </p>
         <ul>
           {PDF_LINKS.map((l) => (

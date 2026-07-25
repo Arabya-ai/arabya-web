@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { FavoritesLibrary } from "@/components/FavoritesLibrary";

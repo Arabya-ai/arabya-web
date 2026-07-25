@@ -7,11 +7,10 @@
 ### التعدد اللغوي والتطبيق المحمول
 - خطة i18n/موبايل: `docs/plans/i18n-and-mobile.md`
 - مراجعة المشروع وخارطة الطريق التنفيذية: `docs/plans/project-audit-and-roadmap.md`
+- سكربت ترجمات الآيات الآمن: `npm run fetch-translations` (الجديد). تجنّب `fetch-translations-legacy` لأنه قد يمسح الفهرس الموسَّع.
 
 ### البلاغة
-- إعادة طبقة «بلاغة» في `WordStudyDock` عند توفر مصادر مرخّصة.
-- لا scraping لمواقع منافسة ولا التفاف على حقوق الغير.
-
+- إعادة طبقة «بلاغة» في `WordStudyDock` عند توفر مصادر مناسبة.
 ### كتب الإعراب
 - مسار `/books` يعرض الفهرس (معظم المداخل `awaiting_license`).
 - `import-irab-book` + `import-from-incoming` + قناة IA المحلية — انظر `docs/platform/internet-archive.md`.

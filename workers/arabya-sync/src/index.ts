@@ -498,7 +498,7 @@ async function getUserDetail(db: D1Database, userId: string) {
   };
 }
 
-export default {
+const workerHandler = {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === "OPTIONS") {
       return json({ ok: true });
@@ -979,3 +979,5 @@ export default {
     return json({ ok: false, error: "not_found" }, 404);
   },
 };
+
+export default workerHandler;

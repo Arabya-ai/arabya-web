@@ -2,7 +2,9 @@
 
 import { useRouter } from "next/navigation";
 
-export const STUDY_QUERY_KEY = "arabya-study-query";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
+
+export const STUDY_QUERY_KEY = STORAGE_KEYS.studyQuery;
 
 type Props = {
   verseText: string;

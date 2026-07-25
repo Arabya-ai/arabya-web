@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { apiGet } from "@/lib/api-client";
 import type {
   TafsirSurah,
   VerseTranslationEdition,
@@ -48,6 +49,9 @@ export function useMushafStudyCache({
 
   const tafsirCacheRef = useRef(tafsirCache);
   const transCacheRef = useRef(transCache);
+  const tafsirInflightRef = useRef<
+    Record<string, Promise<TafsirSurah | null>>
+  >({});
   tafsirCacheRef.current = tafsirCache;
   transCacheRef.current = transCache;
 
@@ -69,6 +73,43 @@ export function useMushafStudyCache({
       ? mode
       : null;
 
+  /** Shared fetch — page panels and word dock use the same in-memory cache. */
+  const ensureTafsirSurah = useCallback(
+    async (slug: string, surahId: number): Promise<TafsirSurah | null> => {
+      const key = `${slug}:${surahId}`;
+      if (tafsirCacheRef.current[key] !== undefined) {
+        return tafsirCacheRef.current[key];
+      }
+      const inflight = tafsirInflightRef.current[key];
+      if (inflight) return inflight;
+
+      const promise = (async () => {
+        try {
+          const res = await apiGet(`/api/tafsir/${slug}/${surahId}`);
+          if (!res.ok) {
+            setTafsirCache((prev) => ({ ...prev, [key]: null }));
+            tafsirCacheRef.current = { ...tafsirCacheRef.current, [key]: null };
+            return null;
+          }
+          const data = (await res.json()) as TafsirSurah;
+          setTafsirCache((prev) => ({ ...prev, [key]: data }));
+          tafsirCacheRef.current = { ...tafsirCacheRef.current, [key]: data };
+          return data;
+        } catch {
+          setTafsirCache((prev) => ({ ...prev, [key]: null }));
+          tafsirCacheRef.current = { ...tafsirCacheRef.current, [key]: null };
+          return null;
+        } finally {
+          delete tafsirInflightRef.current[key];
+        }
+      })();
+
+      tafsirInflightRef.current[key] = promise;
+      return promise;
+    },
+    [],
+  );
+
   useEffect(() => {
     if (!activeTafsir) return;
 
@@ -87,24 +128,9 @@ export function useMushafStudyCache({
 
       setTafsirLoading(true);
       try {
-        const entries = await Promise.all(
-          toFetch.map(async (surahId) => {
-            try {
-              const res = await fetch(`/api/tafsir/${activeTafsir}/${surahId}`);
-              if (!res.ok) return [`${activeTafsir}:${surahId}`, null] as const;
-              const data = (await res.json()) as TafsirSurah;
-              return [`${activeTafsir}:${surahId}`, data] as const;
-            } catch {
-              return [`${activeTafsir}:${surahId}`, null] as const;
-            }
-          }),
+        await Promise.all(
+          toFetch.map((surahId) => ensureTafsirSurah(activeTafsir, surahId)),
         );
-        if (cancelled) return;
-        setTafsirCache((prev) => {
-          const next = { ...prev };
-          for (const [key, value] of entries) next[key] = value;
-          return next;
-        });
       } finally {
         if (!cancelled) setTafsirLoading(false);
       }
@@ -113,7 +139,7 @@ export function useMushafStudyCache({
     return () => {
       cancelled = true;
     };
-  }, [activeTafsir, page.page, surahIdsKey]);
+  }, [activeTafsir, page.page, surahIdsKey, ensureTafsirSurah]);
 
   useEffect(() => {
     if (!verseEdition || !verseEditions.length) return;
@@ -135,7 +161,7 @@ export function useMushafStudyCache({
         const entries = await Promise.all(
           toFetch.map(async (surahId) => {
             try {
-              const res = await fetch(
+              const res = await apiGet(
                 `/api/translation/${verseEdition}/${surahId}`,
               );
               if (!res.ok) return [`${verseEdition}:${surahId}`, null] as const;
@@ -209,5 +235,6 @@ export function useMushafStudyCache({
     tafsirLoading,
     selectedVerseTranslation,
     selectedVerseTranslationStatus,
+    ensureTafsirSurah,
   };
 }

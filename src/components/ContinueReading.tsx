@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
 
-const LAST_PAGE_KEY = "arabya-last-mushaf-page";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
+
+const LAST_PAGE_KEY = STORAGE_KEYS.lastMushafPage;
 
 export function ContinueReading() {
   const [page, setPage] = useState<number | null>(null);

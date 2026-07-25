@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   IrabSurah,
   IrabWord,
@@ -10,18 +9,15 @@ import type {
 } from "@/lib/types";
 import type { MushafPageContent } from "@/lib/mushaf";
 import { formatVerseKey, toArabicNumerals } from "@/lib/format";
-import { juzLabel } from "@/lib/juz";
-import { normalizeForHafsFont } from "@/lib/quran-text";
 import { isBookmarked, toggleBookmark } from "@/lib/bookmarks";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
-import { StudyModeTabs } from "@/components/StudyModeTabs";
 import { makeWordId } from "@/lib/word-id";
-import { RECITERS, reciterHasWordSync } from "@/lib/audio";
 import { narrativeIrab } from "@/lib/irab-narrative";
 import { WordStudyDock } from "@/components/WordStudyDock";
-import { SurahOrnamentTitle } from "@/components/SurahOrnamentTitle";
-import { ShareMenu } from "@/components/ShareMenu";
 import { SurahAudioPlayer } from "@/components/SurahAudioPlayer";
+import { MushafToolbar } from "@/components/mushaf/MushafToolbar";
+import { MushafPageFrame } from "@/components/mushaf/MushafPageFrame";
+import { MushafStudySheets } from "@/components/mushaf/MushafStudySheets";
 import { getAyahNote, saveAyahNote } from "@/lib/ayah-notes";
 import {
   buildMushafShareUrl,
@@ -31,12 +27,7 @@ import {
 import { useMushafPrefs } from "@/hooks/useMushafPrefs";
 import { useMushafStudyCache } from "@/hooks/useMushafStudyCache";
 import { useQuranAudio } from "@/hooks/useQuranAudio";
-import {
-  clampFontScale,
-  wordMeaning,
-  type WordRef,
-} from "@/hooks/mushaf-utils";
-import { MeaningLangSwitch } from "@/components/MeaningLangSwitch";
+import { clampFontScale, type WordRef } from "@/hooks/mushaf-utils";
 
 type Props = {
   page: MushafPageContent;
@@ -46,40 +37,6 @@ type Props = {
 };
 
 type Mode = "words" | "irab" | "meaning-table" | string;
-
-function ToolIcon({
-  name,
-}: {
-  name: "study" | "irab" | "root" | "listen" | "bookmark" | "share" | "words" | "ayah" | "surah";
-}) {
-  const paths: Record<string, string> = {
-    study: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v15H6.5A2.5 2.5 0 0 0 4 19.5V4.5A2.5 2.5 0 0 1 6.5 2Z",
-    irab: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h5",
-    root: "M12 22V8M12 8c0-3 2-5 5-5M12 8c0-3-2-5-5-5M7 14c2 0 4 1 5 3 1-2 3-3 5-3",
-    listen: "M11 5 6 9H2v6h4l5 4V5Zm7.07 1.93a8 8 0 0 1 0 10.14M15.54 8.46a5 5 0 0 1 0 7.07",
-    bookmark: "M19 21 12 16 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z",
-    share: "M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13",
-    words: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",
-    ayah: "M5 3l14 9-14 9V3z",
-    surah: "M9 18V5l12-2v13M6 18a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm12-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z",
-  };
-  return (
-    <svg
-      className="mtb-icon"
-      viewBox="0 0 24 24"
-      width="16"
-      height="16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d={paths[name]} />
-    </svg>
-  );
-}
 
 export function MushafPageStudio({
   page,
@@ -499,230 +456,26 @@ export function MushafPageStudio({
       className="studio"
       style={{ ["--mushaf-scale" as string]: String(prefs.fontScale) }}
     >
-      <div className="mushaf-toolbar" aria-label="أدوات المصحف">
-        <div className="mtb-group mtb-font font-scale" role="group" aria-label="حجم خط المصحف">
-          <button
-            type="button"
-            className="tool-btn"
-            onClick={() =>
-              prefs.setFontScale((s) =>
-                clampFontScale(s - prefs.FONT_SCALE_STEP),
-              )
-            }
-            disabled={!prefs.canShrink}
-            aria-label="تصغير الخط"
-            title="تصغير"
-          >
-            أ−
-          </button>
-          <label className="font-scale-field" htmlFor="mushaf-font-scale">
-            <span className="sr-only">نسبة حجم الخط</span>
-            <input
-              id="mushaf-font-scale"
-              name="mushaf-font-scale"
-              type="number"
-              inputMode="numeric"
-              min={Math.round(prefs.FONT_SCALE_MIN * 100)}
-              max={Math.round(prefs.FONT_SCALE_MAX * 100)}
-              step={Math.round(prefs.FONT_SCALE_STEP * 100)}
-              dir="ltr"
-              className="font-scale-input"
-              value={prefs.fontDraft}
-              onChange={(e) => prefs.setFontDraft(e.target.value)}
-              onBlur={prefs.commitFontDraft}
-              onClick={(e) => e.stopPropagation()}
-              onKeyDown={(e) => {
-                e.stopPropagation();
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  prefs.commitFontDraft();
-                  (e.target as HTMLInputElement).blur();
-                }
-              }}
-              onKeyUp={(e) => e.stopPropagation()}
-              aria-label="أدخل نسبة حجم الخط يدوياً"
-              title={`اكتب رقماً من ${Math.round(prefs.FONT_SCALE_MIN * 100)} إلى ${Math.round(prefs.FONT_SCALE_MAX * 100)} ثم Enter`}
-            />
-            <span className="font-scale-suffix" aria-hidden>
-              %
-            </span>
-          </label>
-          <button
-            type="button"
-            className="tool-btn"
-            onClick={() =>
-              prefs.setFontScale((s) =>
-                clampFontScale(s + prefs.FONT_SCALE_STEP),
-              )
-            }
-            disabled={!prefs.canGrow}
-            aria-label="تكبير الخط"
-            title="تكبير"
-          >
-            أ+
-          </button>
-        </div>
-
-        <div className="mtb-group mtb-study" role="group" aria-label="دراسة">
-          {studySurahId ? (
-            <Link
-              href={`/surah/${studySurahId}/read`}
-              className="tool-btn mtb-link"
-              title="دراسة السورة مع خيارات الإعراب والدراسة السريعة"
-            >
-              <ToolIcon name="study" />
-              <span>
-                <span className="mtb-full">دراسة السورة</span>
-                <span className="mtb-short">دراسة</span>
-              </span>
-            </Link>
-          ) : null}
-          {selected ? (
-            <Link
-              href={`/ayah/${selected.surahId}/${selected.verseNumber}`}
-              className="tool-btn mtb-link"
-              title="صفحة إعراب الآية كلمة بكلمة"
-            >
-              <ToolIcon name="irab" />
-              <span>
-                <span className="mtb-full">إعراب الآية</span>
-                <span className="mtb-short">إعراب</span>
-              </span>
-            </Link>
-          ) : null}
-          {selected?.morph?.root ? (
-            <Link
-              href={`/root/${encodeURIComponent(selected.morph.root)}`}
-              className="tool-btn mtb-link"
-              title="مواضع الجذر في القرآن"
-            >
-              <ToolIcon name="root" />
-              <span>الجذر</span>
-            </Link>
-          ) : null}
-        </div>
-
-        <div className="mtb-group mtb-listen" role="group" aria-label="استماع">
-          <span className="mtb-label" title="استماع">
-            <ToolIcon name="listen" />
-            <span className="mtb-label-text">استماع</span>
-          </span>
-          <label className="reciter-pick">
-            <span className="sr-only">القارئ</span>
-            <select
-              className="reciter-select"
-              value={prefs.reciterId}
-              onChange={(e) => {
-                prefs.persistReciterId(e.target.value);
-                audio.stopAllAudio();
-              }}
-              aria-label="اختر القارئ"
-              title="القارئ"
-              disabled={!selected && !studyBlock}
-            >
-              {RECITERS.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.nameAr}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="repeat-pick">
-            <span className="sr-only">تكرار التلاوة</span>
-            <select
-              className="reciter-select"
-              value={repeatCount}
-              onChange={(e) => setRepeatCount(Number(e.target.value))}
-              aria-label="عدد مرات التكرار (كلمات أو آية أو سورة)"
-              title="يُطبَّق التكرار على الكلمات والآية والسورة"
-              disabled={!selected && !studyBlock}
-            >
-              {[1, 2, 3, 5, 7, 10].map((n) => (
-                <option key={n} value={n}>
-                  ×{toArabicNumerals(n)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <span className="mtb-scope-label">يُطبَّق على</span>
-          <div className="mtb-scope" role="group" aria-label="يُطبَّق التكرار على كلمات أو آية أو سورة">
-            <button
-              type="button"
-              className={`tool-btn mtb-link ${audio.wbwPlaying ? "is-on" : ""}`}
-              onClick={() => void audio.playWordByWordAudio()}
-              aria-pressed={audio.wbwPlaying}
-              disabled={!selected}
-              title="تلاوة كلمة بكلمة — مع التكرار المحدد"
-            >
-              <ToolIcon name="words" />
-              <span>{audio.wbwPlaying ? "إيقاف" : "كلمات"}</span>
-            </button>
-            <button
-              type="button"
-              className={`tool-btn mtb-link ${audio.audioPlaying ? "is-on" : ""}`}
-              onClick={() => void audio.playAyahAudio()}
-              aria-pressed={audio.audioPlaying}
-              disabled={!selected}
-              title={
-                reciterHasWordSync(prefs.reciterId)
-                  ? "تلاوة الآية مع تمييز الكلمات"
-                  : "تلاوة الآية (تمييز الكلمات غير متاح لهذا القارئ — جرّب العفاسي)"
-              }
-            >
-              <ToolIcon name="ayah" />
-              <span>{audio.audioPlaying ? "إيقاف" : "آية"}</span>
-            </button>
-            <button
-              type="button"
-              className={`tool-btn mtb-link ${audio.surahPlaying ? "is-on" : ""}`}
-              onClick={() => {
-                if (!studyBlock) return;
-                void audio.playSurahAudio(
-                  studyBlock.surahId,
-                  studyBlock.meta.versesCount,
-                  selected?.verseNumber ?? 1,
-                  getSurahUthmaniTitle(studyBlock.surahId),
-                );
-              }}
-              aria-pressed={audio.surahPlaying}
-              disabled={!studyBlock}
-              title="تلاوة السورة كاملة مع مشغّل التحكم"
-            >
-              <ToolIcon name="surah" />
-              <span>{audio.surahPlaying ? "إيقاف" : "سورة"}</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="mtb-group mtb-actions" role="group" aria-label="إجراءات">
-          {selected ? (
-            <button
-              type="button"
-              className={`tool-btn mtb-link bookmark-btn ${bookmarked ? "is-on" : ""}`}
-              onClick={onToggleBookmark}
-              aria-pressed={bookmarked}
-            >
-              <ToolIcon name="bookmark" />
-              <span>
-                {bookmarked ? (
-                  "مفضّلة"
-                ) : (
-                  <>
-                    <span className="mtb-full">حفظ الآية</span>
-                    <span className="mtb-short">حفظ</span>
-                  </>
-                )}
-              </span>
-            </button>
-          ) : null}
-          <ShareMenu
-            targets={shareTargets}
-            label="مشاركة"
-            onStatus={flashShareNote}
-          />
-        </div>
-        {shareNote ? <span className="share-note">{shareNote}</span> : null}
-      </div>
+      <MushafToolbar
+        prefs={prefs}
+        studySurahId={studySurahId}
+        selected={selected}
+        studyBlock={studyBlock ?? null}
+        surahTitle={
+          studyBlock
+            ? getSurahUthmaniTitle(studyBlock.surahId)
+            : ""
+        }
+        repeatCount={repeatCount}
+        setRepeatCount={setRepeatCount}
+        bookmarked={bookmarked}
+        onToggleBookmark={onToggleBookmark}
+        shareTargets={shareTargets}
+        shareNote={shareNote}
+        onShareStatus={flashShareNote}
+        clampFontScale={clampFontScale}
+        audio={audio}
+      />
 
       <SurahAudioPlayer
         state={audio.surahPlayer}
@@ -734,115 +487,17 @@ export function MushafPageStudio({
         onClose={audio.closeSurahPlayer}
       />
 
-      <article className="mushaf-page" aria-label={`مصحف — صفحة ${page.page}`}>
-        <div className="mushaf-frame">
-          <header className="mushaf-banner">
-            <div className="mushaf-banner-top">
-              <p className="mushaf-madinah-label">مُصْحَفُ المَدِينَةِ</p>
-              <p className="mushaf-banner-meta">
-                {juzLabel(page.juz)} · صفحة {toArabicNumerals(page.page)} من{" "}
-                {toArabicNumerals(page.totalPages)}
-              </p>
-            </div>
-            {page.blocks.length === 1 ? (
-              <SurahOrnamentTitle
-                className="surah-ornament--full"
-                title={getSurahUthmaniTitle(page.blocks[0].surahId)}
-              />
-            ) : null}
-          </header>
-
-          {page.blocks.map((block) => (
-            <section key={block.surahId} className="mushaf-surah-block">
-              {page.blocks.length > 1 ? (
-                <SurahOrnamentTitle
-                  as="h2"
-                  className="surah-ornament--full surah-ornament--compact"
-                  title={getSurahUthmaniTitle(block.surahId)}
-                />
-              ) : null}
-
-              <div
-                className="mushaf-text"
-                aria-label="نص المصحف — اضغط أي كلمة"
-              >
-                {block.verses.map((verse) => (
-                  <span
-                    key={verse.verseKey}
-                    className="mushaf-ayah"
-                    id={`s${block.surahId}-v-${verse.verseNumber}`}
-                  >
-                    {verse.words.map((word, wi) => {
-                      const isActive =
-                        activeWord?.surahId === block.surahId &&
-                        activeWord?.verse === verse.verseNumber &&
-                        activeWord?.position === word.position;
-                      const isSync =
-                        audio.audioPlaying &&
-                        selected?.surahId === block.surahId &&
-                        selected?.verseNumber === verse.verseNumber &&
-                        audio.syncHighlightPos === word.position;
-                      const text = normalizeForHafsFont(word.text.trim());
-                      const isLast = wi === verse.words.length - 1;
-                      const button = (
-                        <button
-                          type="button"
-                          className={`mushaf-word ${isActive ? "is-selected" : ""} ${isSync ? "is-sync" : ""}`}
-                          aria-pressed={isActive}
-                          title={wordMeaning(word, prefs.meaningLang) || text}
-                          onClick={() =>
-                            selectWord(
-                              block.surahId,
-                              verse.verseNumber,
-                              word.position,
-                            )
-                          }
-                        >
-                          {text}
-                        </button>
-                      );
-                      if (isLast) {
-                        return (
-                          <span
-                            key={`${block.surahId}-${verse.verseNumber}-${word.position}`}
-                            className="ayah-tail"
-                          >
-                            {wi > 0 ? "\u00A0" : null}
-                            {button}
-                            <button
-                              type="button"
-                              className="ayah-end"
-                              title="مشاركة الآية"
-                              onClick={() =>
-                                shareAyah(block.surahId, verse.verseNumber)
-                              }
-                            >
-                              {toArabicNumerals(verse.verseNumber)}
-                            </button>
-                          </span>
-                        );
-                      }
-                      return (
-                        <span
-                          key={`${block.surahId}-${verse.verseNumber}-${word.position}`}
-                        >
-                          {wi > 0 ? "\u00A0" : null}
-                          {button}
-                        </span>
-                      );
-                    })}
-                  </span>
-                ))}
-              </div>
-            </section>
-          ))}
-
-          <p className="mushaf-hint">
-            اضغط أي كلمة للدراسة · من اللوحة: إعراب الآية / الجذر · رقم الآية
-            للمشاركة · ▶ للتلاوة · ←→ لتقليب الصفحات
-          </p>
-        </div>
-      </article>
+      <MushafPageFrame
+        page={page}
+        activeWord={activeWord}
+        meaningLang={prefs.meaningLang}
+        selectWord={selectWord}
+        shareAyah={(sid, vn) => void shareAyah(sid, vn)}
+        audioPlaying={audio.audioPlaying}
+        syncHighlightPos={audio.syncHighlightPos}
+        selectedSurahId={selected?.surahId ?? null}
+        selectedVerseNumber={selected?.verseNumber ?? null}
+      />
 
       {selected ? (
         <>
@@ -858,6 +513,7 @@ export function MushafPageStudio({
             verseTranslation={study.selectedVerseTranslation}
             verseTranslationStatus={study.selectedVerseTranslationStatus}
             tafsirSources={tafsirSources}
+            ensureTafsirSurah={study.ensureTafsirSurah}
           />
           <div className="ayah-note-panel">
             <label className="ayah-note-label" htmlFor="ayah-note">
@@ -888,218 +544,22 @@ export function MushafPageStudio({
         </>
       ) : null}
 
-      <p className="study-modes-hint">
-        <strong>أوضاع الصفحة</strong> أدناه (كلمات · إعراب · جدول معنى · تفاسير)
-        تعرض محتوى الصفحة كاملة.{" "}
-        <strong>طبقات الكلمة</strong> في اللوحة أعلاه تخص الكلمة المحددة فقط —
-        ومنها «تفسير الآية» للآية الحالية دون خلط مع تفسير الصفحة.
-      </p>
-      <StudyModeTabs
+      <MushafStudySheets
+        pageNumber={page.page}
         modes={modes}
         mode={mode}
         onModeChange={setMode}
-        panelId={`study-panel-${mode}`}
+        meaningLang={prefs.meaningLang}
+        onMeaningLang={prefs.setMeaningLang}
+        wordRows={wordRows}
+        selectedKey={selected?.key ?? null}
+        activeWord={activeWord}
+        selectWord={selectWord}
+        activeTafsir={study.activeTafsir}
+        tafsirSources={tafsirSources}
+        tafsirLoading={study.tafsirLoading}
+        tafsirRows={study.tafsirRows}
       />
-
-      {mode === "words" || mode === "irab" ? (
-        <section
-          className="study-sheet"
-          role="tabpanel"
-          id={`study-panel-${mode}`}
-          aria-labelledby={`study-tab-${mode}`}
-          tabIndex={0}
-        >
-          <h2>
-            {mode === "words"
-              ? `كلمات صفحة ${toArabicNumerals(page.page)}`
-              : `إعراب صفحة ${toArabicNumerals(page.page)}`}
-          </h2>
-
-          {mode === "words" ? (
-            <MeaningLangSwitch
-              value={prefs.meaningLang}
-              onChange={prefs.setMeaningLang}
-              idPrefix="page-words-meaning"
-              note="تغيير اللغة يحدّث عمود الترجمة في هذا الجدول، ويتزامن مع تبويب الترجمة في لوحة دراسة الكلمة."
-            />
-          ) : null}
-
-          <div className="table-wrap desktop-only">
-            <table className="study-table">
-              <thead>
-                <tr>
-                  <th>رقم</th>
-                  <th>الكلمة</th>
-                  <th>{mode === "irab" ? "الإعراب" : "الترجمة"}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {wordRows.map((row, idx) => {
-                  const open = selected?.key === row.key;
-                  return (
-                    <tr
-                      key={row.key}
-                      className={open ? "is-open" : undefined}
-                      onClick={() =>
-                        selectWord(
-                          row.surahId,
-                          row.verseNumber,
-                          row.word.position,
-                        )
-                      }
-                    >
-                      <td>{toArabicNumerals(idx + 1)}</td>
-                      <td className="cell-word">
-                        {normalizeForHafsFont(row.word.text)}
-                      </td>
-                      <td className="cell-meaning">
-                        {mode === "irab"
-                          ? row.irab
-                          : wordMeaning(row.word, prefs.meaningLang) || "—"}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="word-cards mobile-only">
-            {wordRows.map((row, idx) => {
-              const open = selected?.key === row.key;
-              return (
-                <button
-                  key={row.key}
-                  type="button"
-                  className={`word-card ${open ? "is-selected" : ""}`}
-                  onClick={() =>
-                    selectWord(row.surahId, row.verseNumber, row.word.position)
-                  }
-                >
-                  <span className="word-card-idx">
-                    {toArabicNumerals(idx + 1)}
-                  </span>
-                  <span className="word-card-ar">
-                    {normalizeForHafsFont(row.word.text)}
-                  </span>
-                  <span className="word-card-meta">
-                    {mode === "irab"
-                      ? row.irab
-                      : wordMeaning(row.word, prefs.meaningLang) || "—"}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-      ) : null}
-
-      {mode === "meaning-table" ? (
-        <section
-          className="study-sheet meaning-table-sheet"
-          role="tabpanel"
-          id={`study-panel-${mode}`}
-          aria-labelledby={`study-tab-${mode}`}
-          tabIndex={0}
-        >
-          <h2>جدول المعنى العربي — صفحة {toArabicNumerals(page.page)}</h2>
-          <p className="table-intro">
-            معنى دراسي للكلمة عند توفره؛ إن ظهر اسم المادة بين قوسين فهو بديل
-            صرفي وليس ترجمة.
-          </p>
-          <div className="meaning-table-grid">
-            {wordRows.map((row) => {
-              const open = selected?.key === row.key;
-              const glossAr = row.word.meaningAr?.trim();
-              const glossEn = row.word.meaning?.trim();
-              const lemmaFallback = row.morph?.lemma?.trim();
-              let glossNode: ReactNode;
-              if (glossAr) {
-                glossNode = glossAr;
-              } else if (glossEn) {
-                glossNode = glossEn;
-              } else if (lemmaFallback) {
-                glossNode = (
-                  <span className="meaning-table-fallback">
-                    ({lemmaFallback})
-                    <span className="meaning-table-fallback-tag">مادة</span>
-                  </span>
-                );
-              } else {
-                glossNode = "—";
-              }
-              return (
-                <button
-                  key={row.key}
-                  type="button"
-                  className={`meaning-table-row ${open ? "is-selected" : ""}`}
-                  onClick={() =>
-                    selectWord(row.surahId, row.verseNumber, row.word.position)
-                  }
-                >
-                  <span className="meaning-table-word">
-                    {normalizeForHafsFont(row.word.text)}
-                  </span>
-                  <span className="meaning-table-gloss">{glossNode}</span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-      ) : null}
-
-      {study.activeTafsir ? (
-        <section
-          className="study-sheet"
-          role="tabpanel"
-          id={`study-panel-${mode}`}
-          aria-labelledby={`study-tab-${mode}`}
-          tabIndex={0}
-        >
-          <h2>
-            {tafsirSources.find((s) => s.slug === study.activeTafsir)?.nameAr ??
-              "التفسير"}
-          </h2>
-          {study.tafsirLoading && !study.tafsirRows.length ? (
-            <p className="table-intro">جارٍ تحميل التفسير…</p>
-          ) : !study.tafsirRows.length ? (
-            <p className="table-intro">بيانات هذا التفسير غير متوفرة حاليًا.</p>
-          ) : (
-            <div className="tafsir-list">
-              {study.tafsirRows.map((v) => (
-                <article key={v.verseKey} className="tafsir-ayah">
-                  <header className="tafsir-head">
-                    <span className="ayah-badge">
-                      {formatVerseKey(v.verseKey)}
-                    </span>
-                    <div className="tafsir-words">
-                      {v.words.map((w) => {
-                        const isActive =
-                          activeWord?.surahId === v.surahId &&
-                          activeWord?.verse === v.verseNumber &&
-                          activeWord?.position === w.position;
-                        return (
-                          <button
-                            key={`${v.surahId}-${v.verseNumber}-${w.position}`}
-                            type="button"
-                            className={`mushaf-word inline ${isActive ? "is-selected" : ""}`}
-                            onClick={() =>
-                              selectWord(v.surahId, v.verseNumber, w.position)
-                            }
-                          >
-                            {normalizeForHafsFont(w.text)}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </header>
-                  <p className="tafsir-body">{v.text}</p>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
-      ) : null}
     </div>
   );
 }

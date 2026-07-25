@@ -37,7 +37,7 @@ export function DashboardShell({
   backLabel,
 }: DashboardShellProps) {
   const pathname = usePathname();
-  const nav = unifiedDashNav(role, userEmail);
+  const nav = unifiedDashNav(role);
   const [navOpen, setNavOpen] = useState(true);
   const [isCompact, setIsCompact] = useState(false);
 

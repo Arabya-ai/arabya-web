@@ -10,8 +10,5 @@
     "@cloudflare/workers-types": "^4.20250724.0",
     "typescript": "^5",
     "wrangler": "^4.26.0"
-  },
-  "dependencies": {
-    "arabya-web": "file:../.."
   }
 }

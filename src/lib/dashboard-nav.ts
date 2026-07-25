@@ -10,10 +10,7 @@ export type DashNavItem = {
 };
 
 /** قائمة موحّدة حسب الدور — تظهر كاملة في الحساب والاستوديو والإدارة. */
-export function unifiedDashNav(
-  role: UserRole,
-  _email?: string | null,
-): DashNavItem[] {
+export function unifiedDashNav(role: UserRole): DashNavItem[] {
   const items: DashNavItem[] = [
     { href: "/account", label: "نظرة عامة", icon: "home", group: "حسابي" },
     {
@@ -96,8 +93,10 @@ export function unifiedDashNav(
 /** @deprecated use unifiedDashNav */
 export function dashNavForRole(
   role: UserRole,
-  _area?: "account" | "studio" | "admin",
+  area?: "account" | "studio" | "admin",
   email?: string | null,
 ): DashNavItem[] {
-  return unifiedDashNav(role, email);
+  void area;
+  void email;
+  return unifiedDashNav(role);
 }
