@@ -58,8 +58,8 @@ export default function NewProject() {
       </div>
 
       <Card className="relative overflow-hidden border-accent/20 bg-card/50 backdrop-blur-sm shadow-deep">
-        <div className="pattern-stars absolute inset-0 opacity-20" />
-        <CardContent className="relative space-y-6 p-6 md:p-8">
+        <div className="pattern-stars pointer-events-none absolute inset-0 opacity-20" aria-hidden />
+        <CardContent className="relative z-10 space-y-6 p-6 md:p-8">
           {/* Title */}
           <div className="space-y-2">
             <Label htmlFor="title" className="flex items-center gap-2 text-accent">

@@ -75,7 +75,7 @@ export default function Dashboard() {
             className="group relative overflow-hidden border-accent/15 bg-card/50 backdrop-blur-sm hover-lift"
             style={{ animationDelay: `${i * 80}ms` }}
           >
-            <div className="pattern-stars absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="pattern-stars pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden />
             <CardContent className="relative flex items-center gap-4 p-5">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-accent/30 bg-gradient-to-br from-accent/10 to-transparent">
                 <s.icon className={`h-5 w-5 ${s.accent}`} />
@@ -106,8 +106,8 @@ export default function Dashboard() {
 
         {recent.length === 0 ? (
           <Card className="relative overflow-hidden border-dashed border-accent/30 bg-card/30">
-            <div className="pattern-mihrab absolute inset-0 opacity-20" />
-            <CardContent className="relative py-16 text-center">
+            <div className="pattern-mihrab pointer-events-none absolute inset-0 opacity-20" aria-hidden />
+            <CardContent className="relative z-10 py-16 text-center">
               <ArabesqueMedallion size={56} className="mx-auto mb-4 text-accent/50" />
               <p className="mb-1 font-display text-lg text-foreground">لم تبدأ بعد</p>
               <p className="mb-5 text-sm text-muted-foreground">أنشئ أول مشروع قرآني الآن</p>
@@ -129,7 +129,7 @@ export default function Dashboard() {
                   <Card className="relative overflow-hidden border-accent/15 bg-card/50 backdrop-blur-sm hover-lift cursor-pointer h-full">
                     <div className="relative h-28 overflow-hidden"
                       style={{ background: "linear-gradient(135deg, hsl(178 50% 18%) 0%, hsl(200 40% 8%) 100%)" }}>
-                      <div className="pattern-stars absolute inset-0 opacity-50" />
+                      <div className="pattern-stars pointer-events-none absolute inset-0 opacity-50" aria-hidden />
                       <div className="absolute inset-0 flex items-center justify-center">
                         <ArabesqueMedallion size={56} className="text-accent/60 group-hover:rotate-45 transition-transform duration-700" />
                       </div>

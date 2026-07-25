@@ -180,7 +180,7 @@ export default function Landing() {
                   style={{
                     background: "linear-gradient(180deg, hsl(200 50% 8%) 0%, hsl(178 50% 12%) 50%, hsl(200 50% 6%) 100%)",
                   }}>
-                  <div className="pattern-stars absolute inset-0 opacity-50" />
+                  <div className="pattern-stars pointer-events-none absolute inset-0 opacity-50" aria-hidden />
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-5 text-center">
                     <ArabesqueMedallion size={40} className="mb-4 text-accent animate-pulse-glow" />
                     <p className="font-quran text-xl leading-loose text-foreground" style={{ textShadow: "0 0 20px rgba(200,169,81,0.5)" }}>

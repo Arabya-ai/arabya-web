@@ -35,6 +35,7 @@ export default function CreateRootLayout({
 }) {
   return (
     <div
+      id="ayat-studio-root"
       className={`ayat-studio ${tajawal.variable} ${reemKufi.variable} ${amiriQuran.variable}`}
     >
       <StudioProviders>

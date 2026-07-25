@@ -220,10 +220,7 @@ export default function Editor() {
             <SelectContent className="max-h-72">
               {reciters.map((r) => (
                 <SelectItem key={r.id} value={r.id}>
-                  <span className="flex items-center gap-2">
-                    <span>{r.name}</span>
-                    <span className="text-[10px] text-muted-foreground">{r.style} · {r.bitrate}</span>
-                  </span>
+                  {r.name} — {r.style} · {r.bitrate}
                 </SelectItem>
               ))}
             </SelectContent>

@@ -85,7 +85,7 @@ export default function Projects() {
                     style={{ background: "linear-gradient(135deg, hsl(178 50% 18%) 0%, hsl(200 40% 8%) 100%)" }}
                     onClick={() => router.push(studioPath(`/editor/${p.id}`))}
                   >
-                    <div className="pattern-stars absolute inset-0 opacity-50" />
+                    <div className="pattern-stars pointer-events-none absolute inset-0 opacity-50" aria-hidden />
                     <ArabesqueMedallion size={70} className="relative text-accent/70 group-hover:rotate-45 transition-transform duration-700" />
                     <div className="absolute top-2 right-2 text-[10px] tracking-widest text-accent/60 px-2 py-0.5 rounded-full bg-background/40 border border-accent/20">
                       {p.ratio}

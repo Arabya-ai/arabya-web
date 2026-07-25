@@ -1,6 +1,8 @@
-/* Arabya Studio theme — scoped under .ayat-studio (Lovable dark gold/teal). */
+/* Arabya Studio theme — scoped under .ayat-studio (Lovable dark gold/teal).
+   `.ayat-studio-portal` carries the same tokens for Radix portals rendered outside the shell. */
 
-.ayat-studio {
+.ayat-studio,
+.ayat-studio-portal {
   /* HSL channels for shadcn utilities */
   --background: 200 35% 6%;
   --foreground: 42 35% 92%;
@@ -56,16 +58,23 @@
   --shadow-deep: 0 20px 60px -15px hsl(200 50% 2% / 0.7);
   --shadow-glow: 0 0 50px hsl(41 80% 60% / 0.25);
 
+  direction: rtl;
+  font-family: var(--font-tajawal), "Tajawal", system-ui, sans-serif;
+  font-feature-settings: "kern", "liga", "calt";
+  -webkit-font-smoothing: antialiased;
+}
+
+.ayat-studio {
   color: hsl(var(--foreground));
   background-color: hsl(var(--background));
   background-image: var(--gradient-aurora);
   background-attachment: fixed;
   min-height: 100vh;
   min-height: 100dvh;
-  font-family: var(--font-tajawal), "Tajawal", system-ui, sans-serif;
-  direction: rtl;
-  font-feature-settings: "kern", "liga", "calt";
-  -webkit-font-smoothing: antialiased;
+}
+
+.ayat-studio-portal {
+  color: hsl(var(--foreground));
 }
 
 .ayat-studio h1,
