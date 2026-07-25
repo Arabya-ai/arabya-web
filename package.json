@@ -11,6 +11,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "fetch-data": "node scripts/fetch-quran-data.mjs",
     "apply-qpc-text": "node scripts/apply-qpc-hafs-text.mjs",
     "build-irab": "node scripts/build-irab.mjs",
@@ -41,6 +43,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.62.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/react": "^16.3.2",
