@@ -34,12 +34,24 @@ export default function NewProject() {
       toast({ title: "اختر القارئ والسورة", variant: "destructive" });
       return;
     }
+    const start = Math.max(1, Number(ayahStart) || 1);
+    let end = Math.max(start, Number(ayahEnd) || start);
+    const maxAyah = selectedSurah?.ayahCount ?? end;
+    end = Math.min(end, maxAyah);
+    if (end - start + 1 > 40) {
+      toast({
+        title: "نطاق الآيات طويل",
+        description: "الحد الأقصى 40 آية لكل تصدير. قلّل النطاق ثم أنشئ المشروع.",
+        variant: "destructive",
+      });
+      return;
+    }
     const project = createDefaultProject({
       title: title.trim(),
       reciterId,
       surahId: Number(surahId),
-      ayahStart: Number(ayahStart) || 1,
-      ayahEnd: Number(ayahEnd) || Number(ayahStart) || 1,
+      ayahStart: start,
+      ayahEnd: end,
       ratio,
     });
     toast({ title: "تم إنشاء المشروع", description: "هيا نبدأ التصميم!" });

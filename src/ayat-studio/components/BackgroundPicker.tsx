@@ -11,7 +11,6 @@ import {
   pickBestVideoFile,
   type PexelsPhoto,
   type PexelsVideo,
-  getPexelsKey,
 } from "@/ayat-studio/lib/pexels";
 import { useToast } from "@/ayat-studio/hooks/use-toast";
 import { Link } from "@/i18n/navigation";
@@ -51,14 +50,6 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgOpacity = 
 
   const handleSearch = async (q: string) => {
     if (!q.trim()) return;
-    if (!getPexelsKey()) {
-      toast({
-        title: "أضِف مفتاح Pexels أولاً",
-        description: "اذهب إلى الإعدادات وأضِف مفتاح API مجاني من Pexels",
-        variant: "destructive",
-      });
-      return;
-    }
     setLoading(true);
     try {
       if (mediaKind === "image") {
@@ -80,10 +71,30 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgOpacity = 
   };
 
   const handleUpload = (file: File) => {
-    const url = URL.createObjectURL(file);
     const isVideo = file.type.startsWith("video/");
-    onChange({ bgType: "image", bgKind: isVideo ? "video" : "image", bgUrl: url });
-    toast({ title: isVideo ? "تم تعيين فيديو الخلفية" : "تم تعيين الخلفية" });
+    const maxBytes = isVideo ? 8 * 1024 * 1024 : 4 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      toast({
+        title: "الملف كبير جدًا",
+        description: isVideo ? "الحد لفيديو الخلفية 8 ميجابايت" : "الحد لصورة الخلفية 4 ميجابايت",
+        variant: "destructive",
+      });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = typeof reader.result === "string" ? reader.result : "";
+      if (!dataUrl) {
+        toast({ title: "تعذّر قراءة الملف", variant: "destructive" });
+        return;
+      }
+      onChange({ bgType: "image", bgKind: isVideo ? "video" : "image", bgUrl: dataUrl });
+      toast({ title: isVideo ? "تم تعيين فيديو الخلفية" : "تم تعيين الخلفية" });
+    };
+    reader.onerror = () => {
+      toast({ title: "تعذّر قراءة الملف", variant: "destructive" });
+    };
+    reader.readAsDataURL(file);
   };
 
   const handlePickVideo = (v: PexelsVideo) => {
@@ -166,20 +177,19 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgOpacity = 
 
       {tab === "search" && (
         <div className="space-y-2">
-          {!getPexelsKey() && (
-            <div className="rounded-md border border-accent/30 bg-accent/5 p-3 text-xs text-muted-foreground">
-              للبحث عن خلفيات احترافية، أضِف مفتاح Pexels API المجاني من{" "}
-              <Link href={studioPath("/settings")} className="text-accent underline">الإعدادات</Link>.{" "}
-              <a
-                href="https://www.pexels.com/api/new/"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-accent hover:underline"
-              >
-                احصل على مفتاح <ExternalLink className="h-3 w-3" />
-              </a>
-            </div>
-          )}
+          <div className="rounded-md border border-accent/20 bg-accent/5 p-3 text-[11px] text-muted-foreground leading-relaxed">
+            البحث يستخدم مفتاح السيرفر إن وُجد، أو مفتاحك من{" "}
+            <Link href={studioPath("/settings")} className="text-accent underline">الإعدادات</Link>
+            .{" "}
+            <a
+              href="https://www.pexels.com/api/new/"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 text-accent hover:underline"
+            >
+              مفتاح مجاني <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>
           <div className="flex gap-1.5">
             {kindBtn("image", <ImageIcon className="h-3 w-3" />, "صور")}
             {kindBtn("video", <Film className="h-3 w-3" />, "فيديوهات")}

@@ -90,6 +90,15 @@ export default function Editor() {
       });
       return;
     }
+    const span = Math.max(1, project.ayahEnd - project.ayahStart + 1);
+    if (span > 40) {
+      toast({
+        title: "نطاق الآيات طويل",
+        description: "الحد الأقصى 40 آية لكل تصدير فيديو.",
+        variant: "destructive",
+      });
+      return;
+    }
     setExporting(true);
     setProgress(0);
     update({ status: "جاري المعالجة" });
@@ -404,7 +413,7 @@ export default function Editor() {
           </Button>
           {!plusOk && (
             <p className="text-xs text-center text-accent/90">
-              فيديو MP4 لخطة بلس — الصورة PNG متاحة للجميع (بعلامة مائية للخطة المجانية).{" "}
+              فيديو MP4 لخطة بلس — الصورة PNG متاحة للجميع (علامة مائية + مقاس مربع 1:1 للمجاني).{" "}
               <Link href="/pricing" className="underline hover:text-accent">
                 عرض الأسعار
               </Link>
@@ -416,7 +425,7 @@ export default function Editor() {
             </div>
           )}
           <p className="text-xs text-muted-foreground text-center leading-relaxed">
-            الفيديو MP4 مع الصوت في المتصفح (Chrome/Edge). الصورة PNG من خادم عربية.
+            الفيديو MP4 مع الصوت في المتصفح (Chrome/Edge). الصورة PNG من خادم عربية. الحد الأقصى 40 آية لكل تصدير فيديو.
           </p>
         </EditorPanel>
         </div>

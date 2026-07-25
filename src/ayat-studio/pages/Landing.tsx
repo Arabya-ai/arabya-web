@@ -29,8 +29,8 @@ const features = [
   { icon: Mic2, title: "نخبة من القراء", desc: "أشهر الأصوات: العفاسي، السديس، الشاطري، المعيقلي وغيرهم" },
   { icon: Palette, title: "تنسيق احترافي", desc: "تحكم دقيق بالخطوط والألوان وموضع النص بطابع فاخر" },
   { icon: Layers, title: "خلفيات ساحرة", desc: "ارفع صورك أو استخدم الخلفيات الجاهزة للمساجد والطبيعة" },
-  { icon: Globe, title: "ترجمة وتفسير", desc: "أضف الترجمة الإنجليزية أو التفسير الميسر مع الآيات" },
-  { icon: Download, title: "تصدير MP4 بجودة 4K", desc: "ريلز عمودي، يوتيوب أفقي، أو مربع — جودة سينمائية" },
+  { icon: Globe, title: "ترجمة وتفسير", desc: "إعدادات جاهزة في المحرر — التفعيل الكامل في التصدير قريبًا" },
+  { icon: Download, title: "تصدير MP4 بجودة عالية", desc: "ريلز عمودي، يوتيوب أفقي، أو مربع — متاح مع عربية بلس" },
 ];
 
 const steps = [
@@ -97,7 +97,7 @@ export default function Landing() {
             <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
               صمّم فيديوهات قرآنية وريلز إسلامية بطابع فاخر ودقة سينمائية —
               <br className="hidden md:inline" />
-              بدون برامج مونتاج، بدون حساب، وبدون أي تكلفة.
+              بعد تسجيل الدخول، مباشرة من المتصفح بدون برامج مونتاج.
             </p>
 
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
@@ -118,12 +118,12 @@ export default function Landing() {
             <div className="mt-10 flex items-center justify-center gap-6 text-xs text-muted-foreground">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
-                مجاني بالكامل
+                استكشاف بعد تسجيل الدخول
               </div>
               <span className="text-accent/30">•</span>
-              <div>بدون تسجيل</div>
+              <div>PNG للجميع</div>
               <span className="text-accent/30">•</span>
-              <div className="hidden sm:block">تصدير MP4 + صوت</div>
+              <div className="hidden sm:block">MP4 مع عربية بلس</div>
             </div>
           </div>
         </div>
