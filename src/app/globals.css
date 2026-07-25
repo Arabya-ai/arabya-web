@@ -2431,8 +2431,11 @@ a.morph-chip:hover {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  margin-inline: -0.15rem;
-  padding: 0.35rem 0.15rem 0.35rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-inline: 0;
+  padding: 0.35rem 0;
   background: color-mix(in srgb, var(--bg) 94%, transparent);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--line);
@@ -2452,12 +2455,20 @@ html[data-theme="dark"] .mode-rail-wrap {
 
 .mode-rail {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.3rem;
   flex: 1 1 auto;
   min-width: 0;
+  max-width: 100%;
   padding: 0.15rem 0;
-  overflow: visible;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+
+.mode-rail::-webkit-scrollbar {
+  display: none;
 }
 
 .mode-rail-nav {
@@ -2473,6 +2484,10 @@ html[data-theme="dark"] .mode-rail-wrap {
   color: var(--brand-deep);
   cursor: pointer;
   padding: 0;
+}
+
+.mode-rail-wrap.has-overflow .mode-rail-nav {
+  display: inline-flex;
 }
 
 .mode-rail-nav:disabled {
@@ -2492,10 +2507,10 @@ html[data-theme="dark"] .mode-rail-wrap {
   background: var(--surface);
   color: var(--muted);
   border-radius: 999px;
-  padding: 0.45rem 0.8rem;
+  padding: 0.42rem 0.72rem;
   cursor: pointer;
   font-weight: 700;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   line-height: 1.25;
   transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
 }
@@ -2506,55 +2521,23 @@ html[data-theme="dark"] .mode-rail-wrap {
   border-color: transparent;
 }
 
+/* Desktop: slightly larger than mobile, still within the study sheet width */
 @media (min-width: 1024px) {
   .mode-rail-wrap {
-    padding: 0.45rem 0.2rem 0.5rem;
-    gap: 0.35rem;
+    padding: 0.4rem 0 0.45rem;
   }
 
   .mode-rail {
-    flex-wrap: nowrap;
-    overflow: visible;
-    justify-content: flex-start;
-    gap: 0.42rem;
-    padding: 0.2rem 0.1rem;
+    gap: 0.32rem;
   }
 
   .mode-chip {
-    padding: 0.52rem 0.95rem;
-    font-size: 0.9rem;
-    letter-spacing: 0.01em;
-  }
-}
-
-@media (min-width: 1280px) {
-  .mode-rail {
-    gap: 0.5rem;
-  }
-
-  .mode-chip {
-    padding: 0.58rem 1.1rem;
-    font-size: 0.95rem;
+    padding: 0.44rem 0.78rem;
+    font-size: 0.84rem;
   }
 }
 
 @media (max-width: 1023px) {
-  .mode-rail {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    scroll-behavior: smooth;
-  }
-
-  .mode-rail::-webkit-scrollbar {
-    display: none;
-  }
-
-  .mode-rail-wrap.has-overflow .mode-rail-nav {
-    display: inline-flex;
-  }
-
   .mode-chip {
     padding: 0.45rem 0.75rem;
     font-size: 0.82rem;
