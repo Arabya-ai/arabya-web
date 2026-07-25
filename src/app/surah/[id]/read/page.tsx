@@ -8,6 +8,10 @@ import { getSurahUthmaniTitle } from "@/lib/surah-names";
 import { getMushafIndex } from "@/lib/mushaf";
 import { SurahOrnamentTitle } from "@/components/SurahOrnamentTitle";
 import { StudyVerseButton } from "@/components/StudyVerseButton";
+import {
+  BASMALAH_UTHMANI,
+  surahHasBasmalah,
+} from "@/hooks/mushaf-utils";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -48,6 +52,11 @@ export default async function SurahReadPage({ params }: Props) {
 
       <header className="surah-read-head">
         <SurahOrnamentTitle title={getSurahUthmaniTitle(surahId)} />
+        {surahHasBasmalah(surahId) ? (
+          <p className="mushaf-basmalah mushaf-basmalah--read" lang="ar">
+            {normalizeForHafsFont(BASMALAH_UTHMANI)}
+          </p>
+        ) : null}
         <p>
           {meta.revelationLabel} · {toArabicNumerals(meta.versesCount)} آية ·{" "}
           {meta.juzLabel}

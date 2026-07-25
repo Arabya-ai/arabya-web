@@ -5,6 +5,25 @@ export type MeaningLang = "ar" | "en" | "id" | "ur";
 
 export type WordRef = { surahId: number; verse: number; position: number };
 
+/** Madinah Uthmani basmalah (QPC/Hafs style). */
+export const BASMALAH_UTHMANI = "بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ";
+
+/** Traditional mushaf: no basmalah before Al-Fatiha or At-Tawbah. */
+export function surahHasBasmalah(surahId: number): boolean {
+  return surahId !== 1 && surahId !== 9;
+}
+
+/** Show basmalah only on the page that contains the surah's first ayah. */
+export function shouldRenderBasmalah(
+  surahId: number,
+  verses: { verseNumber: number }[],
+): boolean {
+  return (
+    surahHasBasmalah(surahId) &&
+    verses.some((v) => v.verseNumber === 1)
+  );
+}
+
 /** @deprecated Prefer STORAGE_KEYS — kept for existing imports. */
 export const FONT_KEY = STORAGE_KEYS.mushafFontScale;
 export const LAST_PAGE_KEY = STORAGE_KEYS.lastMushafPage;

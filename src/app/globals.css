@@ -1229,6 +1229,24 @@ button.nav-pill {
   border-top: 1px dashed var(--mushaf-border);
 }
 
+.mushaf-basmalah {
+  margin: 0.35rem 0 0.85rem;
+  text-align: center;
+  font-family: "UthmanicHafs", var(--font-naskh), serif;
+  font-size: calc(
+    clamp(1.35rem, 3.2vw + 0.4rem, 1.95rem) * var(--mushaf-scale, 1)
+  );
+  line-height: 1.7;
+  color: var(--ink);
+  font-synthesis: none;
+  font-weight: 400;
+}
+
+.mushaf-basmalah--read {
+  margin: 0.75rem 0 0.35rem;
+  font-size: clamp(1.35rem, 3.2vw + 0.4rem, 1.85rem);
+}
+
 .mushaf-surah-inline {
   margin: 0 0 0.85rem;
 }

@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  BASMALAH_UTHMANI,
   clampFontScale,
   FONT_SCALE_MAX,
   FONT_SCALE_MIN,
+  shouldRenderBasmalah,
   wordMeaning,
 } from "@/hooks/mushaf-utils";
 import { missingCacheKeys } from "@/hooks/useMushafStudyCache";
@@ -33,6 +35,14 @@ describe("mushaf-utils", () => {
     expect(wordMeaning({ ...sampleWord, meaningAr: undefined }, "ar")).toBe(
       "praise",
     );
+  });
+
+  it("shows basmalah only at surah starts except Fatiha and Tawbah", () => {
+    expect(shouldRenderBasmalah(1, [{ verseNumber: 1 }])).toBe(false);
+    expect(shouldRenderBasmalah(9, [{ verseNumber: 1 }])).toBe(false);
+    expect(shouldRenderBasmalah(2, [{ verseNumber: 1 }])).toBe(true);
+    expect(shouldRenderBasmalah(2, [{ verseNumber: 5 }])).toBe(false);
+    expect(BASMALAH_UTHMANI).toContain("ٱللَّهِ");
   });
 });
 
