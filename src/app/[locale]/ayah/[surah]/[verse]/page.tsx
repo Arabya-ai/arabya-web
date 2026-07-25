@@ -7,7 +7,7 @@ import { getMushafIndex } from "@/lib/mushaf";
 import { formatVerseKey, getMushafPageHref, toArabicNumerals } from "@/lib/format";
 import { normalizeForHafsFont } from "@/lib/quran-text";
 import { narrativeIrab } from "@/lib/irab-narrative";
-import { getSurahUthmaniTitle } from "@/lib/surah-names";
+import { getSurahDisplayTitle } from "@/lib/surah-names";
 import { PageShareButton } from "@/components/PageShareButton";
 import { buildSocialMetadata } from "@/lib/og-meta";
 import { shareOgImageUrl } from "@/lib/share";
@@ -22,10 +22,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!Number.isInteger(sid) || !Number.isInteger(vid)) {
     return { title: t("metaFallback") };
   }
-  const surahTitle = getSurahUthmaniTitle(sid);
+  const surahTitle = getSurahDisplayTitle(sid, locale);
   const title = t("metaTitle", {
     surah: surahTitle,
-    verse: toArabicNumerals(vid),
+    verse: locale === "en" ? String(vid) : toArabicNumerals(vid),
   });
   const description = t("metaDescription", {
     key: formatVerseKey(`${sid}:${vid}`),
@@ -85,7 +85,7 @@ export default async function AyahIrabPage({ params }: Props) {
   const pageNum = ayah.page || (pageEntry ? Number(pageEntry) : null) ||
     mushaf.surahFirstPage[String(surahId)];
 
-  const surahTitle = getSurahUthmaniTitle(surahId);
+  const surahTitle = getSurahDisplayTitle(surahId, locale);
   const verseLabel =
     locale === "en" ? String(verseNumber) : toArabicNumerals(verseNumber);
 

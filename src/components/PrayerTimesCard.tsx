@@ -20,8 +20,12 @@ type Timings = PrayerTimings;
 
 type PrayerPayload = {
   timezone?: string | null;
-  gregorian: { ar: string | null; readable: string | null } | null;
-  hijri: { ar: string | null } | null;
+  gregorian: {
+    ar: string | null;
+    en?: string | null;
+    readable: string | null;
+  } | null;
+  hijri: { ar: string | null; en?: string | null } | null;
   timings: Timings;
 };
 
@@ -123,8 +127,16 @@ export function PrayerTimesCard() {
     ? formatCountdown(next.atMs - nowMs, locale)
     : null;
 
-  const hijri = data?.hijri?.ar;
-  const gregorian = data?.gregorian?.ar || data?.gregorian?.readable;
+  const hijri =
+    locale === "ar"
+      ? data?.hijri?.ar
+      : data?.hijri?.en || data?.hijri?.ar;
+  const gregorian =
+    locale === "ar"
+      ? data?.gregorian?.ar || data?.gregorian?.readable
+      : data?.gregorian?.en ||
+        data?.gregorian?.readable ||
+        data?.gregorian?.ar;
 
   const formatDegrees = (degrees: number) =>
     locale === "ar" ? toArabicNumerals(Math.round(degrees)) : String(Math.round(degrees));

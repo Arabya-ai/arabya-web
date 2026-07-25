@@ -1,13 +1,21 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { CLOUD_SYNC_EVENT } from "@/lib/cloud-sync-client";
 import { type Bookmark, readBookmarks, writeBookmarks } from "@/lib/bookmarks";
 import { type AyahNote, readAyahNotes, saveAyahNote } from "@/lib/ayah-notes";
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
-import { getSurahUthmaniTitle } from "@/lib/surah-names";
+import {
+  getSurahDisplayTitle,
+  getSurahEnglishName,
+  getSurahUthmaniTitle,
+} from "@/lib/surah-names";
+
+function formatCount(value: number, locale: string): string {
+  return locale === "ar" ? toArabicNumerals(value) : String(value);
+}
 
 function refresh() {
   return {
@@ -22,6 +30,7 @@ export function FavoritesLibrary({
   mode?: "full" | "preview";
 }) {
   const t = useTranslations("Favorites");
+  const locale = useLocale();
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [notes, setNotes] = useState<AyahNote[]>([]);
   const [filter, setFilter] = useState("");
@@ -46,9 +55,11 @@ export function FavoritesLibrary({
   const filteredBookmarks = useMemo(() => {
     if (!q) return bookmarks;
     return bookmarks.filter((b) => {
-      const title = getSurahUthmaniTitle(b.surahId);
+      const titleAr = getSurahUthmaniTitle(b.surahId);
+      const titleEn = getSurahEnglishName(b.surahId).toLowerCase();
       return (
-        title.includes(filter.trim()) ||
+        titleAr.includes(filter.trim()) ||
+        titleEn.includes(q) ||
         String(b.surahId).includes(q) ||
         String(b.verse).includes(q) ||
         String(b.page).includes(q)
@@ -59,9 +70,11 @@ export function FavoritesLibrary({
   const filteredNotes = useMemo(() => {
     if (!q) return notes;
     return notes.filter((n) => {
-      const title = getSurahUthmaniTitle(n.surahId);
+      const titleAr = getSurahUthmaniTitle(n.surahId);
+      const titleEn = getSurahEnglishName(n.surahId).toLowerCase();
       return (
-        title.includes(filter.trim()) ||
+        titleAr.includes(filter.trim()) ||
+        titleEn.includes(q) ||
         n.text.toLowerCase().includes(q) ||
         String(n.surahId).includes(q) ||
         String(n.verse).includes(q)
@@ -95,16 +108,16 @@ export function FavoritesLibrary({
         <div className="library-archive-hero">
           <div className="library-archive-stats">
             <div className="library-archive-stat">
-              <strong>{toArabicNumerals(bookmarks.length)}</strong>
+              <strong>{formatCount(bookmarks.length, locale)}</strong>
               <span>{t("statBookmarks")}</span>
             </div>
             <div className="library-archive-stat">
-              <strong>{toArabicNumerals(notes.length)}</strong>
+              <strong>{formatCount(notes.length, locale)}</strong>
               <span>{t("statNotes")}</span>
             </div>
             <div className="library-archive-stat">
               <strong>
-                {toArabicNumerals(bookmarks.length + notes.length)}
+                {formatCount(bookmarks.length + notes.length, locale)}
               </strong>
               <span>{t("statTotal")}</span>
             </div>
@@ -125,7 +138,7 @@ export function FavoritesLibrary({
           <h2 id="lib-bookmarks-h">
             {t("bookmarksTitle")}{" "}
             <span className="library-count">
-              ({toArabicNumerals(filteredBookmarks.length)})
+              ({formatCount(filteredBookmarks.length, locale)})
             </span>
           </h2>
           {mode === "preview" ? (
@@ -141,10 +154,10 @@ export function FavoritesLibrary({
                 <Link
                   href={`${getMushafPageHref(b.page)}#s${b.surahId}-v-${b.verse}`}
                 >
-                  {getSurahUthmaniTitle(b.surahId)} —{" "}
-                  {toArabicNumerals(b.verse)}
+                  {getSurahDisplayTitle(b.surahId, locale)} —{" "}
+                  {formatCount(b.verse, locale)}
                   <span className="library-meta">
-                    {t("pageLabel", { page: toArabicNumerals(b.page) })}
+                    {t("pageLabel", { page: formatCount(b.page, locale) })}
                   </span>
                 </Link>
                 {mode === "full" ? (
@@ -169,7 +182,7 @@ export function FavoritesLibrary({
           <h2 id="lib-notes-h">
             {t("notesTitle")}{" "}
             <span className="library-count">
-              ({toArabicNumerals(filteredNotes.length)})
+              ({formatCount(filteredNotes.length, locale)})
             </span>
           </h2>
           {mode === "preview" ? (
@@ -187,8 +200,8 @@ export function FavoritesLibrary({
                     href={`/ayah/${n.surahId}/${n.verse}`}
                     className="library-note-title"
                   >
-                    {getSurahUthmaniTitle(n.surahId)} —{" "}
-                    {toArabicNumerals(n.verse)}
+                    {getSurahDisplayTitle(n.surahId, locale)} —{" "}
+                    {formatCount(n.verse, locale)}
                   </Link>
                   <p className="library-note-body">{n.text}</p>
                 </div>

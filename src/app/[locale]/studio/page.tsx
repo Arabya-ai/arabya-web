@@ -56,6 +56,9 @@ export default async function StudioPage({ params }: Props) {
               {t("openMushaf")}
             </Link>
           </div>
+          <p className="dash-muted" style={{ marginTop: "0.75rem" }}>
+            {t("queueCoverageHint")}
+          </p>
         </section>
       </div>
     </DashboardShell>

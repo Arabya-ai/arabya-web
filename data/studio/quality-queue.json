@@ -1,1 +1,13 @@
-[]
+{
+  "generatedAt": "2026-07-25T18:28:46.620Z",
+  "coverage": {
+    "totalWords": 77429,
+    "wordsWithMeaningAr": 77429,
+    "meaningArPct": 100,
+    "irabSurahsPresent": 114,
+    "irabVerseAlignIssues": 0,
+    "irabMissingWordIds": 0,
+    "worstMeaningSurahs": []
+  },
+  "items": []
+}

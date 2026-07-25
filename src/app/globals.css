@@ -5764,6 +5764,57 @@ a.auth-btn--google {
   color: var(--brand-deep);
 }
 
+.quality-coverage-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+.quality-coverage-stat strong {
+  display: block;
+  font-family: var(--font-latin);
+  font-size: 1.5rem;
+  color: var(--brand-deep);
+}
+
+.quality-coverage-stat > span {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.92rem;
+}
+
+.quality-coverage-bar {
+  margin-top: 0.55rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--line) 80%, var(--surface));
+  overflow: hidden;
+}
+
+.quality-coverage-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--brand) 75%, var(--brand-deep));
+}
+
+.quality-worst {
+  margin-top: 1rem;
+}
+
+.quality-worst h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+}
+
+.quality-worst-list {
+  margin: 0;
+  padding-inline-start: 1.1rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
 .library-archive-filter {
   width: 100%;
   padding: 0.65rem 0.85rem;

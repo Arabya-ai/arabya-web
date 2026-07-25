@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { upsertStudyEntry } from "@/lib/study-archive";
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
+import { getSurahDisplayTitle } from "@/lib/surah-names";
 import { STUDY_QUERY_KEY } from "@/components/StudyVerseButton";
 
 type StudyWord = {
@@ -229,7 +230,8 @@ export function StudyAssistant() {
                 className="study-hit"
               >
                 <span className="study-hit-key">
-                  {h.nameAr} {formatCount(h.verse, locale)}
+                  {getSurahDisplayTitle(h.surahId, locale)}{" "}
+                  {formatCount(h.verse, locale)}
                 </span>
                 <span className="study-hit-text">{h.text}</span>
                 {h.explain ? (

@@ -14,7 +14,7 @@ import {
   getVerseTranslationEditions,
   sliceIrabToVerseNumbers,
 } from "@/lib/quran";
-import { getSurahUthmaniTitle } from "@/lib/surah-names";
+import { getSurahDisplayTitle } from "@/lib/surah-names";
 import { buildSocialMetadata } from "@/lib/og-meta";
 import { shareOgImageUrl, type ShareKind } from "@/lib/share";
 import { isAppLocale } from "@/i18n/routing";
@@ -80,7 +80,7 @@ export async function generateMetadata({
   let title =
     content.blocks.length === 1
       ? t("pageWithSurah", {
-          surah: getSurahUthmaniTitle(content.blocks[0].surahId),
+          surah: getSurahDisplayTitle(content.blocks[0].surahId, locale),
           page: pageLabel,
         })
       : t("pageOnly", { page: pageLabel });
@@ -102,11 +102,11 @@ export async function generateMetadata({
         .map((w) => w.text)
         .join(" ");
       const verseLabel = formatMetaNum(verseNumber!, locale);
-      title = `${getSurahUthmaniTitle(surahId!)} ${verseLabel}${t("brandSuffix")}`;
+      title = `${getSurahDisplayTitle(surahId!, locale)} ${verseLabel}${t("brandSuffix")}`;
       description = `${snippet}${verse.words.length > 10 ? " …" : ""}${t("ayahDescriptionSuffix")}`;
     }
   } else if (surahId && (kind === "surah" || kind === "listen-surah")) {
-    const surahTitle = getSurahUthmaniTitle(surahId);
+    const surahTitle = getSurahDisplayTitle(surahId, locale);
     title = `${surahTitle}${t("brandSuffix")}`;
     description = t("surahDescription", { surah: surahTitle });
   }

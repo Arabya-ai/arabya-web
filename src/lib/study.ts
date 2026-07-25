@@ -9,6 +9,7 @@ import { makeWordId } from "@/lib/word-id";
 import { shortIrabGlance } from "@/lib/irab-narrative";
 import { narrativeIrab } from "@/lib/irab-narrative";
 import { toArabicNumerals } from "@/lib/format";
+import { getSurahDisplayTitle } from "@/lib/surah-names";
 
 export type StudyWord = {
   wordId: string;
@@ -62,15 +63,16 @@ function scoreHit(
 
 function buildExplain(
   query: string,
-  hit: { nameAr: string; verse: number; text: string },
+  hit: { surahId: number; nameAr: string; verse: number; text: string },
   matched: StudyWord[],
   tafsirSnippet: string | null,
   locale: string,
 ): string {
+  const surahTitle = getSurahDisplayTitle(hit.surahId, locale);
   const parts: string[] = [];
   if (locale === "en") {
     parts.push(
-      `In ${hit.nameAr} ayah ${hit.verse}: «${clipText(hit.text, 90)}»`,
+      `In ${surahTitle} ayah ${hit.verse}: «${clipText(hit.text, 90)}»`,
     );
     if (matched.length) {
       const gloss = matched
@@ -89,7 +91,7 @@ function buildExplain(
     }
   } else {
     parts.push(
-      `في ${hit.nameAr} الآية ${hit.verse}: «${clipText(hit.text, 90)}»`,
+      `في ${surahTitle} الآية ${hit.verse}: «${clipText(hit.text, 90)}»`,
     );
     if (matched.length) {
       const gloss = matched
@@ -219,7 +221,7 @@ export async function runStudyQuery(
         ? [
             `Study results for «${q}»: ${countLabel} matching ayahs.`,
             hits[0]
-              ? `Closest match: ${hits[0].nameAr} ${hits[0].verse}.`
+              ? `Closest match: ${getSurahDisplayTitle(hits[0].surahId, "en")} ${hits[0].verse}.`
               : "",
             "Explanation uses Arabic word senses + short iʿrāb + an Al-Muyassar snippet — no language model.",
           ]
@@ -228,7 +230,7 @@ export async function runStudyQuery(
         : [
             `نتائج دراسية لـ«${q}»: ${countLabel} آية مطابقة.`,
             hits[0]
-              ? `أقرب مطابقة: ${hits[0].nameAr} ${hits[0].verse}.`
+              ? `أقرب مطابقة: ${getSurahDisplayTitle(hits[0].surahId, "ar")} ${hits[0].verse}.`
               : "",
             "الشرح مبني على المعنى العربي للكلمات + إعراب موجز + مقتطف من التفسير الميسّر — بلا نموذج لغوي.",
           ]

@@ -9,6 +9,26 @@ export type QualityQueueItem = {
   note: string;
 };
 
+export type QualityCoverage = {
+  totalWords: number;
+  wordsWithMeaningAr: number;
+  meaningArPct: number;
+  irabSurahsPresent: number;
+  irabVerseAlignIssues: number;
+  irabMissingWordIds: number;
+  worstMeaningSurahs: {
+    id: number;
+    missing: number;
+    total: number;
+    pct: number;
+  }[];
+};
+
+export type QualityScanResult = {
+  items: QualityQueueItem[];
+  coverage: QualityCoverage;
+};
+
 async function exists(p: string) {
   try {
     await access(p);
@@ -24,7 +44,7 @@ async function exists(p: string) {
  */
 export async function scanQualityIssues(
   dataRoot = path.join(process.cwd(), "data"),
-): Promise<QualityQueueItem[]> {
+): Promise<QualityScanResult> {
   const items: QualityQueueItem[] = [];
   let seq = 0;
   const push = (
@@ -43,6 +63,18 @@ export async function scanQualityIssues(
     });
   };
 
+  let totalWords = 0;
+  let wordsWithMeaningAr = 0;
+  let irabSurahsPresent = 0;
+  let irabVerseAlignIssues = 0;
+  let irabMissingWordIds = 0;
+  const meaningBySurah: {
+    id: number;
+    missing: number;
+    total: number;
+    pct: number;
+  }[] = [];
+
   for (let id = 1; id <= 114; id++) {
     const surahPath = path.join(dataRoot, "surahs", `${id}.json`);
     const irabPath = path.join(dataRoot, "irab", `${id}.json`);
@@ -54,6 +86,7 @@ export async function scanQualityIssues(
       push("high", `إعراب سورة ${id} مفقود`, `سورة ${id}`, "ملف irab غير موجود");
       continue;
     }
+    irabSurahsPresent += 1;
 
     const surah = JSON.parse(await readFile(surahPath, "utf8")) as {
       verses?: {
@@ -79,11 +112,13 @@ export async function scanQualityIssues(
     );
 
     let missingMeaning = 0;
+    let surahWordTotal = 0;
     let missingWordId = 0;
 
     for (const [vn, words] of surahVerses) {
       const iw = irabVerses.get(vn);
       if (!iw) {
+        irabVerseAlignIssues += 1;
         push(
           "high",
           `آية بلا إعراب`,
@@ -93,6 +128,7 @@ export async function scanQualityIssues(
         continue;
       }
       if (iw.length !== words.length) {
+        irabVerseAlignIssues += 1;
         push(
           "medium",
           `اختلاف عدد الكلمات`,
@@ -101,16 +137,36 @@ export async function scanQualityIssues(
         );
       }
       for (const w of words) {
-        if (!w.meaningAr) missingMeaning += 1;
+        surahWordTotal += 1;
+        totalWords += 1;
+        if (w.meaningAr) {
+          wordsWithMeaningAr += 1;
+        } else {
+          missingMeaning += 1;
+        }
       }
       for (const w of iw) {
-        if (!w.wordId) missingWordId += 1;
+        if (!w.wordId) {
+          missingWordId += 1;
+          irabMissingWordIds += 1;
+        }
       }
     }
 
+    if (surahWordTotal > 0) {
+      meaningBySurah.push({
+        id,
+        missing: missingMeaning,
+        total: surahWordTotal,
+        pct: Math.round((missingMeaning / surahWordTotal) * 1000) / 10,
+      });
+    }
+
     if (missingMeaning > 0) {
+      const missingPct =
+        surahWordTotal > 0 ? missingMeaning / surahWordTotal : 0;
       push(
-        "low",
+        missingPct > 0.3 ? "medium" : "low",
         `كلمات بلا meaningAr`,
         `سورة ${id}`,
         `${missingMeaning} كلمة بدون معنى عربي دراسي`,
@@ -149,5 +205,26 @@ export async function scanQualityIssues(
     }
   }
 
-  return items;
+  const meaningArPct =
+    totalWords > 0
+      ? Math.round((wordsWithMeaningAr / totalWords) * 1000) / 10
+      : 0;
+
+  const worstMeaningSurahs = meaningBySurah
+    .filter((s) => s.missing > 0)
+    .sort((a, b) => b.pct - a.pct || b.missing - a.missing)
+    .slice(0, 10);
+
+  return {
+    items,
+    coverage: {
+      totalWords,
+      wordsWithMeaningAr,
+      meaningArPct,
+      irabSurahsPresent,
+      irabVerseAlignIssues,
+      irabMissingWordIds,
+      worstMeaningSurahs,
+    },
+  };
 }

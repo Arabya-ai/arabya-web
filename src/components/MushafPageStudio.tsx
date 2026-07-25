@@ -11,7 +11,7 @@ import type {
 import type { MushafPageContent } from "@/lib/mushaf";
 import { formatVerseKey, toArabicNumerals } from "@/lib/format";
 import { isBookmarked, toggleBookmark } from "@/lib/bookmarks";
-import { getSurahUthmaniTitle } from "@/lib/surah-names";
+import { getSurahDisplayTitle } from "@/lib/surah-names";
 import { makeWordId } from "@/lib/word-id";
 import { narrativeIrab } from "@/lib/irab-narrative";
 import { orderTafsirSources, tafsirDisplayName } from "@/lib/tafsir-label";
@@ -259,7 +259,7 @@ export function MushafPageStudio({
         block.surahId,
         block.meta.versesCount,
         selected.verseNumber,
-        getSurahUthmaniTitle(block.surahId),
+        getSurahDisplayTitle(block.surahId, locale),
       );
     } else if (dl.listen === "ayah") {
       void audio.playAyahAudio();
@@ -345,7 +345,7 @@ export function MushafPageStudio({
 
     if (studyBlock) {
       const sid = studyBlock.surahId;
-      const surahTitle = getSurahUthmaniTitle(sid);
+      const surahTitle = getSurahDisplayTitle(sid, locale);
       targets.push({
         id: "surah",
         kind: "surah",
@@ -370,7 +370,7 @@ export function MushafPageStudio({
       );
       const ayahText = verse?.words.map((w) => w.text).join(" ") ?? "";
       const verseKey = `${selected.surahId}:${selected.verseNumber}`;
-      const surahTitle = getSurahUthmaniTitle(selected.surahId);
+      const surahTitle = getSurahDisplayTitle(selected.surahId, locale);
       const ayahLabel = `${surahTitle} ${formatPageNum(selected.verseNumber, locale)}`;
 
       targets.unshift({
@@ -493,7 +493,7 @@ export function MushafPageStudio({
         studyBlock={studyBlock ?? null}
         surahTitle={
           studyBlock
-            ? getSurahUthmaniTitle(studyBlock.surahId)
+            ? getSurahDisplayTitle(studyBlock.surahId, locale)
             : ""
         }
         repeatCount={repeatCount}

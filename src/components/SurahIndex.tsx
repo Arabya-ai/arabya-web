@@ -203,7 +203,8 @@ export function SurahIndex({
                     className="ayah-search-hit"
                   >
                     <span className="ayah-search-key">
-                      {h.nameAr} {formatCount(h.verse, locale)}
+                      {getSurahDisplayTitle(h.surahId, locale)}{" "}
+                      {formatCount(h.verse, locale)}
                     </span>
                     <span className="ayah-search-text">{h.text}</span>
                   </Link>

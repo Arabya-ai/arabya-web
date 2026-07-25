@@ -1,14 +1,18 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useMemo, useState } from "react";
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
-import { getSurahUthmaniTitle } from "@/lib/surah-names";
+import { getSurahDisplayTitle } from "@/lib/surah-names";
 import type { RootOccurrence } from "@/lib/types";
 
 const PREVIEW = 100;
 const STEP = 100;
+
+function formatCount(value: number, locale: string): string {
+  return locale === "ar" ? toArabicNumerals(value) : String(value);
+}
 
 export function RootOccurrencesList({
   root,
@@ -20,6 +24,7 @@ export function RootOccurrencesList({
   pageOf: Record<string, number>;
 }) {
   const t = useTranslations("Roots");
+  const locale = useLocale();
   const [visible, setVisible] = useState(
     Math.min(PREVIEW, occurrences.length),
   );
@@ -33,7 +38,7 @@ export function RootOccurrencesList({
   const canMore = remaining > 0;
   const totalPart =
     occurrences.length > shown.length
-      ? t("occTotalPart", { total: toArabicNumerals(occurrences.length) })
+      ? t("occTotalPart", { total: formatCount(occurrences.length, locale) })
       : "";
 
   return (
@@ -41,7 +46,7 @@ export function RootOccurrencesList({
       <div className="root-occ-toolbar">
         <p className="root-occ-count" aria-live="polite">
           {t("occShowing", {
-            shown: toArabicNumerals(shown.length),
+            shown: formatCount(shown.length, locale),
             totalPart,
             root,
           })}
@@ -55,7 +60,9 @@ export function RootOccurrencesList({
                 setVisible((n) => Math.min(n + STEP, occurrences.length))
               }
             >
-              {t("occMore", { count: toArabicNumerals(Math.min(STEP, remaining)) })}
+              {t("occMore", {
+                count: formatCount(Math.min(STEP, remaining), locale),
+              })}
             </button>
             <button
               type="button"
@@ -63,7 +70,7 @@ export function RootOccurrencesList({
               onClick={() => setVisible(occurrences.length)}
             >
               {t("occShowAll", {
-                count: toArabicNumerals(occurrences.length),
+                count: formatCount(occurrences.length, locale),
               })}
             </button>
           </div>
@@ -74,7 +81,7 @@ export function RootOccurrencesList({
             className="search-show-all search-show-all--muted"
             onClick={() => setVisible(PREVIEW)}
           >
-            {t("occShowFirst", { count: toArabicNumerals(PREVIEW) })}
+            {t("occShowFirst", { count: formatCount(PREVIEW, locale) })}
           </button>
         ) : null}
       </div>
@@ -89,8 +96,9 @@ export function RootOccurrencesList({
               >
                 <span className="root-surface">{o.surface}</span>
                 <span className="root-ref">
-                  {getSurahUthmaniTitle(o.surahId)}{" "}
-                  {toArabicNumerals(o.verse)}:{toArabicNumerals(o.position)}
+                  {getSurahDisplayTitle(o.surahId, locale)}{" "}
+                  {formatCount(o.verse, locale)}:
+                  {formatCount(o.position, locale)}
                   {o.lemma ? ` · ${o.lemma}` : ""}
                 </span>
               </Link>

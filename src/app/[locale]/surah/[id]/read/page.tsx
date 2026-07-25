@@ -5,7 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { getSurah, getSurahMeta } from "@/lib/quran";
 import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
 import { normalizeForHafsFont } from "@/lib/quran-text";
-import { getSurahUthmaniTitle } from "@/lib/surah-names";
+import { getSurahDisplayTitle, getSurahUthmaniTitle } from "@/lib/surah-names";
 import { getMushafIndex } from "@/lib/mushaf";
 import { SurahOrnamentTitle } from "@/components/SurahOrnamentTitle";
 import { StudyVerseButton } from "@/components/StudyVerseButton";
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const sid = Number(id);
   const t = await getTranslations({ locale, namespace: "Surah" });
   if (!Number.isInteger(sid)) return { title: t("metaFallback") };
-  const surahTitle = getSurahUthmaniTitle(sid);
+  const surahTitle = getSurahDisplayTitle(sid, locale);
   return {
     title: t("metaTitle", { surah: surahTitle }),
     description: t("metaDescription", { surah: surahTitle }),
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function SurahReadPage({ params }: Props) {
-  const { id } = await params;
+  const { locale, id } = await params;
   const t = await getTranslations("Surah");
   const tNav = await getTranslations("Nav");
   const surahId = Number(id);
@@ -43,6 +43,8 @@ export default async function SurahReadPage({ params }: Props) {
   if (!surah || !meta) notFound();
 
   const firstPage = mushaf.surahFirstPage[String(surahId)] ?? 1;
+  const verseCount =
+    locale === "en" ? String(meta.versesCount) : toArabicNumerals(meta.versesCount);
 
   return (
     <div className="shell page-block surah-read-page">
@@ -65,7 +67,7 @@ export default async function SurahReadPage({ params }: Props) {
         <p>
           {t("verseMeta", {
             revelation: meta.revelationLabel,
-            count: toArabicNumerals(meta.versesCount),
+            count: verseCount,
             juz: meta.juzLabel,
           })}
         </p>

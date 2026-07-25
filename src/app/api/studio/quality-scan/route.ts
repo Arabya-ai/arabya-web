@@ -13,8 +13,13 @@ export async function GET() {
     return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
   }
   try {
-    const items = await scanQualityIssues();
-    return NextResponse.json({ ok: true, items, total: items.length });
+    const { items, coverage } = await scanQualityIssues();
+    return NextResponse.json({
+      ok: true,
+      items,
+      coverage,
+      total: items.length,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "scan_failed";
     return NextResponse.json({ ok: false, error: message }, { status: 500 });
