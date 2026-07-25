@@ -1,8 +1,12 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { SurahPlayerState } from "@/hooks/useQuranAudio";
 import { toArabicNumerals } from "@/lib/format";
+
+function formatCount(value: number, locale: string): string {
+  return locale === "ar" ? toArabicNumerals(value) : String(value);
+}
 
 function formatTime(sec: number) {
   if (!Number.isFinite(sec) || sec < 0) return "0:00";
@@ -67,6 +71,7 @@ export function SurahAudioPlayer({
   onClose: () => void;
 }) {
   const t = useTranslations("Mushaf");
+  const locale = useLocale();
   if (!state.active) return null;
 
   const progress =
@@ -97,8 +102,8 @@ export function SurahAudioPlayer({
               {state.mode === "chapter"
                 ? `${formatTime(state.currentTime)} / ${formatTime(state.duration)}`
                 : t("playerVerseOf", {
-                  current: toArabicNumerals(state.verseIndex),
-                  total: toArabicNumerals(state.versesCount),
+                  current: formatCount(state.verseIndex, locale),
+                  total: formatCount(state.versesCount, locale),
                 })}
             </p>
           </div>

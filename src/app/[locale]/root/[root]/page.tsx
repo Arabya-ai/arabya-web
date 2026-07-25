@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     url: `/root/${encodeURIComponent(decoded)}?share=root`,
-    imageUrl: shareOgImageUrl({ kind: "root", root: decoded }),
+    imageUrl: shareOgImageUrl({ kind: "root", root: decoded, locale }),
     locale,
   });
   return {

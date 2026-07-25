@@ -38,6 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       kind: "irab",
       verse: `${sid}:${vid}`,
       surahId: sid,
+      locale,
     }),
     locale,
   });

@@ -1,7 +1,10 @@
 import { getMushafPage } from "@/lib/mushaf";
 import { getRootEntry, getSurah } from "@/lib/quran";
 import { toArabicNumerals } from "@/lib/format";
-import { getSurahUthmaniTitle } from "@/lib/surah-names";
+import {
+  getSurahEnglishName,
+  getSurahUthmaniTitle,
+} from "@/lib/surah-names";
 import { renderOgCardLatin } from "@/lib/og-card";
 import { renderOgCard } from "@/lib/og-card-arabic";
 import type { ShareKind } from "@/lib/share";
@@ -65,6 +68,7 @@ export async function GET(request: Request) {
   const verseKey = searchParams.get("v") || "";
   const surahIdParam = Number(searchParams.get("sid") || "0");
   const rootQ = searchParams.get("root") || "";
+  const preferEn = searchParams.get("locale") === "en";
   const verseMatch = verseKey.match(/^(\d{1,3}):(\d{1,3})$/);
 
   let title = "عربية";
@@ -90,7 +94,7 @@ export async function GET(request: Request) {
       const vid = Number(verseMatch[2]);
       title = `إعراب ${getSurahUthmaniTitle(sid)} ${toArabicNumerals(vid)}`;
       subtitle = "إعراب مفصّل كلمة بكلمة";
-      titleLatin = `Surah ${sid} · ayah ${vid}`;
+      titleLatin = `${getSurahEnglishName(sid)} · ayah ${vid}`;
       subtitleLatin = "Word-by-word iʿrāb";
       const content = await getSurah(sid);
       const ayah = content?.verses.find((v) => v.verseNumber === vid);
@@ -113,6 +117,7 @@ export async function GET(request: Request) {
         vid > 0
           ? block?.verses.find((x) => x.verseNumber === vid)
           : block?.verses[0];
+      const enName = getSurahEnglishName(sid);
 
       if (kind === "page") {
         title = `صفحة ${toArabicNumerals(pageNum)}`;
@@ -121,14 +126,17 @@ export async function GET(request: Request) {
             ? getSurahUthmaniTitle(content.blocks[0].surahId)
             : "مصحف المدينة";
         titleLatin = `Page ${pageNum}`;
-        subtitleLatin = `Surah ${sid}`;
+        subtitleLatin =
+          content?.blocks.length === 1
+            ? getSurahEnglishName(content.blocks[0].surahId)
+            : "Madinah Mushaf";
       } else if (kind === "surah" || kind === "listen-surah") {
         title = getSurahUthmaniTitle(sid);
         subtitle =
           kind === "listen-surah"
             ? "استمع لتلاوة السورة على عربية"
             : `دراسة السورة · صفحة ${toArabicNumerals(pageNum)}`;
-        titleLatin = `Surah ${sid}`;
+        titleLatin = enName;
         subtitleLatin =
           kind === "listen-surah" ? "Listen on Arabya" : `Page ${pageNum}`;
       } else if (
@@ -138,7 +146,7 @@ export async function GET(request: Request) {
         kind === "note"
       ) {
         title = `${getSurahUthmaniTitle(sid)} ${toArabicNumerals(vid || 1)}`;
-        titleLatin = `Surah ${sid} · ayah ${vid || 1}`;
+        titleLatin = `${enName} · ayah ${vid || 1}`;
         if (kind === "listen-ayah") {
           subtitle = "استمع للآية على عربية";
           subtitleLatin = "Listen ayah";
@@ -163,11 +171,24 @@ export async function GET(request: Request) {
         title = `صفحة ${toArabicNumerals(pageNum)}`;
         subtitle = getSurahUthmaniTitle(sid);
         titleLatin = `Page ${pageNum}`;
-        subtitleLatin = `Surah ${sid}`;
+        subtitleLatin = enName;
       }
     }
   } catch {
     /* keep defaults */
+  }
+
+  if (preferEn) {
+    try {
+      return await renderOgCardLatin({
+        eyebrow: kindEyebrowLatin(kind),
+        title: titleLatin,
+        subtitle: subtitleLatin,
+        footer: "arabyaai.com",
+      });
+    } catch {
+      /* fall through to Arabic card */
+    }
   }
 
   try {

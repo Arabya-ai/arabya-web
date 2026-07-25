@@ -221,7 +221,7 @@ export function MushafToolbar({
           >
             {[1, 2, 3, 5, 7, 10].map((n) => (
               <option key={n} value={n}>
-                ×{toArabicNumerals(n)}
+                ×{locale === "ar" ? toArabicNumerals(n) : String(n)}
               </option>
             ))}
           </select>

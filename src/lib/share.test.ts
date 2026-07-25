@@ -76,5 +76,14 @@ describe("share helpers", () => {
     expect(
       shareOgImageUrl({ kind: "ayah", page: 1, verse: "1:1", surahId: 1 }),
     ).toBe("/api/og?kind=ayah&page=1&v=1%3A1&sid=1");
+    expect(
+      shareOgImageUrl({
+        kind: "ayah",
+        page: 1,
+        verse: "1:1",
+        surahId: 1,
+        locale: "en",
+      }),
+    ).toBe("/api/og?kind=ayah&page=1&v=1%3A1&sid=1&locale=en");
   });
 });

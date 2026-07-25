@@ -146,6 +146,7 @@ export async function generateMetadata({
       page: pageNum,
       verse: v || undefined,
       surahId: surahId || undefined,
+      locale,
     }),
     imageAlt: title,
     locale,

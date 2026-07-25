@@ -1,34 +1,39 @@
 {
-  "updatedAt": "2026-07-24",
+  "updatedAt": "2026-07-25",
   "note": "الروايات الإضافية تُفعَّل بعد توفر بيانات مرخّصة فقط — لا نصوص وهمية.",
   "readings": [
     {
       "slug": "hafs",
       "nameAr": "حفص عن عاصم",
+      "nameEn": "Hafs from Asim",
       "status": "ready",
       "note": "النص المعتمد في المصحف (QPC المدينة)."
     },
     {
       "slug": "warsh",
       "nameAr": "ورش عن نافع",
+      "nameEn": "Warsh from Nafi",
       "status": "awaiting_license",
       "note": "بانتظار ملفات مرخّصة من المالك."
     },
     {
       "slug": "qalun",
       "nameAr": "قالون عن نافع",
+      "nameEn": "Qalun from Nafi",
       "status": "awaiting_license",
       "note": "بانتظار ملفات مرخّصة من المالك."
     },
     {
       "slug": "shubah",
       "nameAr": "شعبة عن عاصم",
+      "nameEn": "Shubah from Asim",
       "status": "awaiting_license",
       "note": "بانتظار ملفات مرخّصة من المالك."
     },
     {
       "slug": "tajweed-color",
       "nameAr": "مصحف التجويد الملون",
+      "nameEn": "Color-coded Tajweed mushaf",
       "status": "awaiting_license",
       "note": "عرض تجويدي ملون بعد ترخيص البيانات البصرية."
     }

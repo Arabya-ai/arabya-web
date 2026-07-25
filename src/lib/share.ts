@@ -165,13 +165,14 @@ export async function shareOrCopy(
   }
 }
 
-/** Dynamic Arabic OG image for a share kind. */
+/** Dynamic OG image for a share kind. */
 export function shareOgImageUrl(opts: {
   kind: ShareKind;
   page?: number;
   verse?: string;
   surahId?: number;
   root?: string;
+  locale?: string;
 }): string {
   const sp = new URLSearchParams();
   sp.set("kind", opts.kind);
@@ -179,5 +180,6 @@ export function shareOgImageUrl(opts: {
   if (opts.verse) sp.set("v", opts.verse);
   if (opts.surahId) sp.set("sid", String(opts.surahId));
   if (opts.root) sp.set("root", opts.root);
+  if (opts.locale === "en") sp.set("locale", "en");
   return `/api/og?${sp.toString()}`;
 }

@@ -32,7 +32,12 @@ import { tafsirDisplayName } from "@/lib/tafsir-label";
 import { MeaningLangSwitch } from "@/components/MeaningLangSwitch";
 import type { MeaningLang } from "@/hooks/mushaf-utils";
 
-export type VerseTranslationStatus = "idle" | "loading" | "ready" | "error" | "empty";
+export type VerseTranslationStatus =
+  | "idle"
+  | "loading"
+  | "ready"
+  | "error"
+  | "empty";
 
 type Props = {
   verseKey: string;
@@ -53,7 +58,17 @@ type Props = {
   ) => Promise<TafsirSurah | null>;
 };
 
-const LAYER_IDS = ["syntax", "morph", "translation", "tafsir"] as const;
+const LAYER_IDS = [
+  "syntax",
+  "morphology",
+  "semantics",
+  "lexicon",
+  "translation",
+  "rhetoric",
+  "tafsir",
+] as const;
+
+type LayerId = (typeof LAYER_IDS)[number];
 
 function wordMeaning(word: QuranWord, lang: MeaningLang): string {
   if (lang === "ar") return word.meaningAr || word.meaning || "";
@@ -62,16 +77,19 @@ function wordMeaning(word: QuranWord, lang: MeaningLang): string {
   return word.meaning || "";
 }
 
-function meaningSourceHint(lang: MeaningLang, t: ReturnType<typeof useTranslations>): string {
-  if (lang === "ar") {
-    return t("meaningSourceHintAr");
-  }
-  return t("meaningSourceHintOther");
-}
-
 function parseVerseKey(verseKey: string): { surahId: number; verse: number } {
   const [s, v] = verseKey.split(":").map(Number);
   return { surahId: s || 1, verse: v || 1 };
+}
+
+function layerHintKey(id: LayerId): string {
+  if (id === "morphology") return "morphologyHint";
+  if (id === "semantics") return "semanticsHint";
+  if (id === "lexicon") return "lexiconHint";
+  if (id === "rhetoric") return "rhetoricHint";
+  if (id === "syntax") return "syntaxHint";
+  if (id === "translation") return "translationHint";
+  return "tafsirHint";
 }
 
 export function WordStudyDock({
@@ -93,16 +111,9 @@ export function WordStudyDock({
   const layers = LAYER_IDS.map((id) => ({
     id,
     label: t(id),
-    hint:
-      id === "syntax"
-        ? t("syntaxHint")
-        : id === "morph"
-          ? t("morphHint")
-          : id === "translation"
-            ? t("translationHint")
-            : t("tafsirHint"),
+    hint: t(layerHintKey(id) as "syntaxHint"),
   }));
-  const [layer, setLayer] = useState("syntax");
+  const [layer, setLayer] = useState<LayerId>("syntax");
   const [tafsirSlug, setTafsirSlug] = useState(tafsirSources[0]?.slug ?? "");
   const [tafsirText, setTafsirText] = useState<string | null>(null);
   const [tafsirLoading, setTafsirLoading] = useState(false);
@@ -156,7 +167,11 @@ export function WordStudyDock({
     if (morph?.lemma) {
       chips.push({
         key: "lemma",
-        node: <span className="morph-chip">{t("morphLemmaChip", { lemma: morph.lemma })}</span>,
+        node: (
+          <span className="morph-chip">
+            {t("morphLemmaChip", { lemma: morph.lemma })}
+          </span>
+        ),
       });
     }
     if (posLabels) {
@@ -203,9 +218,7 @@ export function WordStudyDock({
           return;
         }
         const hit = data.verses?.find((v) => v.verseNumber === verse);
-        setTafsirText(
-          hit?.text?.trim() || t("tafsirEmpty"),
-        );
+        setTafsirText(hit?.text?.trim() || t("tafsirEmpty"));
       } catch {
         if (!cancelled) setTafsirText(t("tafsirLoadError"));
       } finally {
@@ -239,7 +252,10 @@ export function WordStudyDock({
   const panelId = `${baseId}-panel`;
 
   let verseTransBody: string;
-  if (verseTranslationStatus === "loading" || verseTranslationStatus === "idle") {
+  if (
+    verseTranslationStatus === "loading" ||
+    verseTranslationStatus === "idle"
+  ) {
     verseTransBody = t("loading");
   } else if (verseTranslationStatus === "error") {
     verseTransBody = t("verseTransError");
@@ -249,11 +265,15 @@ export function WordStudyDock({
     verseTransBody = t("verseTransEmpty");
   }
 
+  const activeHint = layers.find((l) => l.id === layer)?.hint;
+
   return (
     <section className="word-dock" aria-live="polite">
       <div className="word-dock-head">
         <span className="word-dock-key">{formatVerseKey(verseKey)}</span>
-        <p className="word-dock-ar" dir="rtl" lang="ar">{normalizeForHafsFont(word.text)}</p>
+        <p className="word-dock-ar" dir="rtl" lang="ar">
+          {normalizeForHafsFont(word.text)}
+        </p>
         {word.transliteration ? (
           <p className="word-dock-tr">{word.transliteration}</p>
         ) : null}
@@ -310,9 +330,7 @@ export function WordStudyDock({
         {layer === "syntax" ? (
           <>
             <h3>{t("wordIrabTitle")}</h3>
-            <p className="layer-hint">
-              {layers.find((l) => l.id === "syntax")?.hint}
-            </p>
+            <p className="layer-hint">{activeHint}</p>
             {hasMorphPayload && qacNarrative && qacNarrative !== "—" ? (
               <p className="layer-body">{qacNarrative}</p>
             ) : (
@@ -331,32 +349,55 @@ export function WordStudyDock({
           </>
         ) : null}
 
-        {layer === "morph" ? (
+        {layer === "morphology" ? (
           <>
-            <h3>{t("morphTitle")}</h3>
-            <p className="layer-hint">
-              {layers.find((l) => l.id === "morph")?.hint}
-            </p>
-            {morphChips.length || lexiconExtra.length ? (
-              <>
-                <div className="morph-facts morph-facts--inline">
-                  {morphChips.map((c) => (
-                    <span key={c.key}>{c.node}</span>
-                  ))}
-                </div>
-                {lexiconExtra.length ? (
-                  <ul className="lexicon-list">
-                    {lexiconExtra.map((line) => (
-                      <li key={line}>{line}</li>
-                    ))}
-                  </ul>
-                ) : null}
-              </>
+            <h3>{t("morphologyTitle")}</h3>
+            <p className="layer-hint">{activeHint}</p>
+            {morphChips.length ? (
+              <div className="morph-facts morph-facts--inline">
+                {morphChips.map((c) => (
+                  <span key={c.key}>{c.node}</span>
+                ))}
+              </div>
             ) : (
               <p className="layer-empty">
                 {t("noMorph")}
                 {morph?.root ? null : t("noMorphParticle")}
               </p>
+            )}
+          </>
+        ) : null}
+
+        {layer === "semantics" ? (
+          <>
+            <h3>{t("semanticsTitle")}</h3>
+            <p className="layer-hint">{activeHint}</p>
+            <MeaningLangSwitch
+              value={meaningLang}
+              onChange={onMeaningLang}
+              idPrefix="dock-meaning"
+              note={t("meaningLangNote")}
+            />
+            {sense ? (
+              <p className="word-sense">{sense}</p>
+            ) : (
+              <p className="layer-empty">{t("noWordTranslation")}</p>
+            )}
+          </>
+        ) : null}
+
+        {layer === "lexicon" ? (
+          <>
+            <h3>{t("lexiconTitle")}</h3>
+            <p className="layer-hint">{activeHint}</p>
+            {lexiconExtra.length ? (
+              <ul className="lexicon-list">
+                {lexiconExtra.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="layer-empty">{t("noLexicon")}</p>
             )}
             {morph?.root ? (
               <p>
@@ -373,29 +414,9 @@ export function WordStudyDock({
         {layer === "translation" ? (
           <>
             <h3>{t("translationTitle")}</h3>
-            <p className="layer-hint">
-              {layers.find((l) => l.id === "translation")?.hint}
-            </p>
-
-            <h4 className="layer-subhead">{t("wordTranslationSubhead")}</h4>
-            <p className="layer-hint layer-hint--tight">
-              {meaningSourceHint(meaningLang, t)}
-            </p>
-            <MeaningLangSwitch
-              value={meaningLang}
-              onChange={onMeaningLang}
-              idPrefix="dock-meaning"
-              note={t("meaningLangNote")}
-            />
-            {sense ? (
-              <p className="word-sense">{sense}</p>
-            ) : (
-              <p className="layer-empty">{t("noWordTranslation")}</p>
-            )}
-
+            <p className="layer-hint">{activeHint}</p>
             {verseEditions.length ? (
               <>
-                <h4 className="layer-subhead">{t("verseTranslationSubhead")}</h4>
                 <select
                   className="verse-trans-select"
                   value={verseEdition}
@@ -421,16 +442,24 @@ export function WordStudyDock({
                   {verseTransBody}
                 </p>
               </>
-            ) : null}
+            ) : (
+              <p className="layer-empty">{t("verseTransEmpty")}</p>
+            )}
+          </>
+        ) : null}
+
+        {layer === "rhetoric" ? (
+          <>
+            <h3>{t("rhetoricTitle")}</h3>
+            <p className="layer-hint">{activeHint}</p>
+            <p className="layer-empty">{t("rhetoricAwaiting")}</p>
           </>
         ) : null}
 
         {layer === "tafsir" ? (
           <>
             <h3>{t("tafsirTitle")}</h3>
-            <p className="layer-hint">
-              {layers.find((l) => l.id === "tafsir")?.hint}
-            </p>
+            <p className="layer-hint">{activeHint}</p>
             {tafsirSources.length ? (
               <>
                 <select
@@ -459,7 +488,8 @@ export function WordStudyDock({
                       ? "en"
                       : "ar"
                   }
-                >                  {tafsirLoading ? t("loading") : tafsirText || "—"}
+                >
+                  {tafsirLoading ? t("loading") : tafsirText || "—"}
                 </p>
               </>
             ) : (

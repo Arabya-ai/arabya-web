@@ -9,6 +9,7 @@ type Props = { params: Promise<{ locale: string }> };
 type Reading = {
   slug: string;
   nameAr: string;
+  nameEn?: string;
   status: "ready" | "awaiting_license";
   note: string;
 };
@@ -47,7 +48,11 @@ export default async function QiraatPage({ params }: Props) {
             className={r.status === "ready" ? "is-ready" : "is-pending"}
           >
             <div className="qiraat-row">
-              <strong>{r.nameAr}</strong>
+              <strong>
+                {locale === "en"
+                  ? r.nameEn?.trim() || r.nameAr
+                  : r.nameAr}
+              </strong>
               <span className="qiraat-status">
                 {r.status === "ready" ? t("statusReady") : t("statusPending")}
               </span>
