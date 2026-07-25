@@ -1,4 +1,4 @@
-const JUZ_LABELS: Record<number, string> = {
+const JUZ_LABELS_AR: Record<number, string> = {
   1: "الجزء الأول",
   2: "الجزء الثاني",
   3: "الجزء الثالث",
@@ -31,6 +31,39 @@ const JUZ_LABELS: Record<number, string> = {
   30: "الجزء الثلاثون",
 };
 
+const JUZ_LABELS_EN: Record<number, string> = {
+  1: "Juz 1",
+  2: "Juz 2",
+  3: "Juz 3",
+  4: "Juz 4",
+  5: "Juz 5",
+  6: "Juz 6",
+  7: "Juz 7",
+  8: "Juz 8",
+  9: "Juz 9",
+  10: "Juz 10",
+  11: "Juz 11",
+  12: "Juz 12",
+  13: "Juz 13",
+  14: "Juz 14",
+  15: "Juz 15",
+  16: "Juz 16",
+  17: "Juz 17",
+  18: "Juz 18",
+  19: "Juz 19",
+  20: "Juz 20",
+  21: "Juz 21",
+  22: "Juz 22",
+  23: "Juz 23",
+  24: "Juz 24",
+  25: "Juz 25",
+  26: "Juz 26",
+  27: "Juz 27",
+  28: "Juz 28",
+  29: "Juz 29",
+  30: "Juz 30",
+};
+
 /** Starting juz for each surah (1–114), matching common mushaf indexing. */
 export const SURAH_START_JUZ: number[] = [
   0, // placeholder for 1-index
@@ -42,8 +75,11 @@ export const SURAH_START_JUZ: number[] = [
   30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
 ];
 
-export function juzLabel(juz: number): string {
-  return JUZ_LABELS[juz] ?? `الجزء ${juz}`;
+export function juzLabel(juz: number, locale: string = "ar"): string {
+  if (locale === "en") {
+    return JUZ_LABELS_EN[juz] ?? `Juz ${juz}`;
+  }
+  return JUZ_LABELS_AR[juz] ?? `الجزء ${juz}`;
 }
 
 /** First Madinah mushaf page for each juz (1–30). */

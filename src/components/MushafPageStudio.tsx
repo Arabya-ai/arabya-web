@@ -107,12 +107,12 @@ export function MushafPageStudio({
               verseKey: verse.verseKey,
               word,
               morph: morph ?? null,
-              irab: narrativeIrab(morph ?? null),
+              irab: narrativeIrab(morph ?? null, locale),
             };
           }),
         ),
       ),
-    [page.blocks, irabWordMap],
+    [page.blocks, irabWordMap, locale],
   );
 
   const selected = useMemo(() => {

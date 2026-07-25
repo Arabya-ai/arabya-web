@@ -1,4 +1,14 @@
 {
+  "Meta": {
+    "defaultTitle": "Arabya | Quran word-by-word study",
+    "titleTemplate": "%s | Arabya",
+    "description": "Quran surah index with word study: meaning, iʿrāb, and multiple tafsirs — Arabya",
+    "ogDescription": "Study every Quranic word with iʿrāb and switchable tafsirs",
+    "siteName": "Arabya",
+    "manifestName": "Arabya — Quran word study",
+    "manifestShort": "Arabya",
+    "manifestDescription": "Madinah mushaf with word-level meaning, iʿrāb, and tafsirs"
+  },
   "Locale": {
     "label": "Language",
     "ar": "العربية",
@@ -343,6 +353,7 @@
       "title": "Open quick study for this ayah"
     },
     "frame": {
+      "madinah": "Madinah Mushaf",
       "pageAria": "Mushaf — page {page}",
       "pageOf": "Page {page} of {total}",
       "textAria": "Mushaf text — tap any word",

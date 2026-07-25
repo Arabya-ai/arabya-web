@@ -33,7 +33,10 @@ export default async function AsmaPage({ params }: Props) {
         <h1>{t("title")}</h1>
         <p>
           {t("pageIntro", {
-            count: toArabicNumerals(names.length || 99),
+            count:
+              locale === "en"
+                ? String(names.length || 99)
+                : toArabicNumerals(names.length || 99),
           })}
         </p>
       </header>
@@ -46,12 +49,20 @@ export default async function AsmaPage({ params }: Props) {
             <li key={n.number}>
               <Link href={`/asma/${n.number}`} className="asma-grid-link">
                 <span className="asma-grid-num">
-                  {toArabicNumerals(n.number)}
+                  {locale === "en"
+                    ? String(n.number)
+                    : toArabicNumerals(n.number)}
                 </span>
                 <span className="asma-grid-name">{n.nameAr}</span>
                 <span className="asma-grid-trans">{n.transliteration}</span>
-                {n.meaningAr ? (
-                  <span className="asma-grid-meaning">{n.meaningAr}</span>
+                {(locale === "en"
+                  ? n.meaningEn || n.meaningAr
+                  : n.meaningAr || n.meaningEn) ? (
+                  <span className="asma-grid-meaning">
+                    {locale === "en"
+                      ? n.meaningEn || n.meaningAr
+                      : n.meaningAr || n.meaningEn}
+                  </span>
                 ) : null}
               </Link>
             </li>

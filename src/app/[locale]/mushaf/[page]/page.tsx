@@ -148,6 +148,7 @@ export async function generateMetadata({
       surahId: surahId || undefined,
     }),
     imageAlt: title,
+    locale,
   });
 
   return {

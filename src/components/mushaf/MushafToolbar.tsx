@@ -1,7 +1,7 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { RECITERS } from "@/lib/audio";
+import { useLocale, useTranslations } from "next-intl";
+import { RECITERS, reciterDisplayName } from "@/lib/audio";
 import { toArabicNumerals } from "@/lib/format";
 import { ShareMenu } from "@/components/ShareMenu";
 import { MushafToolIcon } from "@/components/mushaf/MushafToolIcon";
@@ -73,6 +73,7 @@ export function MushafToolbar({
   clampFontScale,
   audio,
 }: Props) {
+  const locale = useLocale();
   const t = useTranslations("Mushaf.toolbar");
 
   return (
@@ -203,7 +204,7 @@ export function MushafToolbar({
           >
             {RECITERS.map((r) => (
               <option key={r.id} value={r.id}>
-                {r.nameAr}
+                {reciterDisplayName(r, locale)}
               </option>
             ))}
           </select>

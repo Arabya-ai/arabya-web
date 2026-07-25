@@ -38,5 +38,22 @@ describe("narrativeIrab", () => {
     const text = narrativeIrab(morph);
     expect(text.length).toBeGreaterThan(2);
     expect(text).not.toBe("—");
+    expect(text).toMatch(/مجرور|تصنيف/);
+  });
+
+  it("builds English prose when locale is en", () => {
+    const morph: IrabWord = {
+      position: 1,
+      wordId: "W:001:001:002",
+      segments: "N",
+      pos: ["N"],
+      features: ["GEN"],
+      surface: "ٱللَّهِ",
+      root: "اله",
+      lemma: "الله",
+      irab: "",
+    };
+    const text = narrativeIrab(morph, "en");
+    expect(text).toMatch(/genitive|Grammatical|Root/i);
   });
 });

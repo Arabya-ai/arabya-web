@@ -7,8 +7,14 @@ describe("juzLabel", () => {
     expect(juzLabel(30)).toBe("الجزء الثلاثون");
   });
 
+  it("returns English labels", () => {
+    expect(juzLabel(1, "en")).toBe("Juz 1");
+    expect(juzLabel(30, "en")).toBe("Juz 30");
+  });
+
   it("falls back to a generic label for unknown juz numbers", () => {
     expect(juzLabel(99)).toBe("الجزء 99");
+    expect(juzLabel(99, "en")).toBe("Juz 99");
   });
 });
 

@@ -39,6 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       verse: `${sid}:${vid}`,
       surahId: sid,
     }),
+    locale,
   });
   return {
     title,
@@ -48,7 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function AyahIrabPage({ params }: Props) {
-  const { surah, verse } = await params;
+  const { locale, surah, verse } = await params;
   const t = await getTranslations("Ayah");
   const tNav = await getTranslations("Nav");
   const surahId = Number(surah);
@@ -85,7 +86,8 @@ export default async function AyahIrabPage({ params }: Props) {
     mushaf.surahFirstPage[String(surahId)];
 
   const surahTitle = getSurahUthmaniTitle(surahId);
-  const verseLabel = toArabicNumerals(verseNumber);
+  const verseLabel =
+    locale === "en" ? String(verseNumber) : toArabicNumerals(verseNumber);
 
   return (
     <div className="shell page-block ayah-irab-page">
@@ -139,16 +141,20 @@ export default async function AyahIrabPage({ params }: Props) {
           .filter((w) => !w.charType || w.charType === "word")
           .map((w) => {
             const morph = irabVerse?.words.find((x) => x.position === w.position);
+            const sense =
+              locale === "en"
+                ? w.meaning || w.meaningAr || ""
+                : w.meaningAr || w.meaning || "";
             return (
               <li key={w.position} className="ayah-irab-item">
                 <span className="ayah-irab-word">
                   {normalizeForHafsFont(w.text)}
                 </span>
                 <span className="ayah-irab-detail">
-                  {narrativeIrab(morph ?? null)}
+                  {narrativeIrab(morph ?? null, locale)}
                 </span>
-                {w.meaningAr ? (
-                  <span className="ayah-irab-sense">{w.meaningAr}</span>
+                {sense ? (
+                  <span className="ayah-irab-sense">{sense}</span>
                 ) : null}
               </li>
             );

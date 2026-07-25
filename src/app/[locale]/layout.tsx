@@ -6,8 +6,9 @@ import {
   Noto_Naskh_Arabic,
   Plus_Jakarta_Sans,
 } from "next/font/google";
+import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, setRequestLocale } from "next-intl/server";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { AuthSessionProvider } from "@/components/AuthSessionProvider";
 import { CloudAutoSync } from "@/components/CloudAutoSync";
@@ -58,6 +59,43 @@ type Props = {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale: raw } = await params;
+  const locale: AppLocale = isAppLocale(raw) ? raw : "ar";
+  const t = await getTranslations({ locale, namespace: "Meta" });
+  const isEn = locale === "en";
+
+  return {
+    title: {
+      default: t("defaultTitle"),
+      template: t("titleTemplate"),
+    },
+    description: t("description"),
+    openGraph: {
+      title: t("defaultTitle"),
+      description: t("ogDescription"),
+      url: isEn ? "https://www.arabyaai.com/en" : "https://www.arabyaai.com",
+      siteName: t("siteName"),
+      locale: isEn ? "en_US" : "ar_AR",
+      type: "website",
+      images: [
+        {
+          url: "/opengraph-image",
+          width: 1200,
+          height: 630,
+          alt: "Arabya — عربية بذكاء",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: t("defaultTitle"),
+      description: t("ogDescription"),
+      images: ["/opengraph-image"],
+    },
+  };
+}
 
 export default async function LocaleLayout({ children, params }: Props) {
   const { locale: raw } = await params;

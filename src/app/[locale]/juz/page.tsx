@@ -32,10 +32,17 @@ export default async function JuzIndexPage({ params }: Props) {
               href={getMushafPageHref(JUZ_FIRST_PAGE[j])}
               className="juz-card"
             >
-              <span className="juz-num">{toArabicNumerals(j)}</span>
+              <span className="juz-num">
+                {locale === "en" ? String(j) : toArabicNumerals(j)}
+              </span>
               <span className="juz-name">{t(`labels.${j}` as "labels.1")}</span>
               <span className="juz-page">
-                {t("pageShort", { page: toArabicNumerals(JUZ_FIRST_PAGE[j]) })}
+                {t("pageShort", {
+                  page:
+                    locale === "en"
+                      ? String(JUZ_FIRST_PAGE[j])
+                      : toArabicNumerals(JUZ_FIRST_PAGE[j]),
+                })}
               </span>
             </Link>
           </li>

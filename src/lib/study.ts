@@ -65,27 +65,47 @@ function buildExplain(
   hit: { nameAr: string; verse: number; text: string },
   matched: StudyWord[],
   tafsirSnippet: string | null,
+  locale: string,
 ): string {
   const parts: string[] = [];
-  parts.push(
-    `في ${hit.nameAr} الآية ${hit.verse}: «${clipText(hit.text, 90)}»`,
-  );
-
-  if (matched.length) {
-    const gloss = matched
-      .slice(0, 4)
-      .map((w) => {
-        const sense = w.meaningAr || w.lemma || w.meaning || w.text;
-        return `${w.text} ← ${sense}`;
-      })
-      .join("؛ ");
-    parts.push(`كلمات مرتبطة بـ«${query}»: ${gloss}.`);
+  if (locale === "en") {
+    parts.push(
+      `In ${hit.nameAr} ayah ${hit.verse}: «${clipText(hit.text, 90)}»`,
+    );
+    if (matched.length) {
+      const gloss = matched
+        .slice(0, 4)
+        .map((w) => {
+          const sense = w.meaning || w.meaningAr || w.lemma || w.text;
+          return `${w.text} ← ${sense}`;
+        })
+        .join("; ");
+      parts.push(`Words linked to «${query}»: ${gloss}.`);
+    } else {
+      parts.push(`The phrase appears in the ayah text.`);
+    }
+    if (tafsirSnippet) {
+      parts.push(`From Al-Muyassar tafsir: ${clipText(tafsirSnippet, 140)}`);
+    }
   } else {
-    parts.push(`وردت العبارة ضمن نص الآية.`);
-  }
-
-  if (tafsirSnippet) {
-    parts.push(`من التفسير الميسّر: ${clipText(tafsirSnippet, 140)}`);
+    parts.push(
+      `في ${hit.nameAr} الآية ${hit.verse}: «${clipText(hit.text, 90)}»`,
+    );
+    if (matched.length) {
+      const gloss = matched
+        .slice(0, 4)
+        .map((w) => {
+          const sense = w.meaningAr || w.lemma || w.meaning || w.text;
+          return `${w.text} ← ${sense}`;
+        })
+        .join("؛ ");
+      parts.push(`كلمات مرتبطة بـ«${query}»: ${gloss}.`);
+    } else {
+      parts.push(`وردت العبارة ضمن نص الآية.`);
+    }
+    if (tafsirSnippet) {
+      parts.push(`من التفسير الميسّر: ${clipText(tafsirSnippet, 140)}`);
+    }
   }
 
   return parts.join(" ");
@@ -97,7 +117,7 @@ function buildExplain(
  */
 export async function runStudyQuery(
   query: string,
-  options: number | { limit?: number } = 10,
+  options: number | { limit?: number; locale?: string } = 10,
 ): Promise<{
   query: string;
   mode: string;
@@ -110,6 +130,12 @@ export async function runStudyQuery(
     typeof options === "number"
       ? options
       : Math.max(1, Math.min(options.limit ?? 10, 100));
+  const locale =
+    typeof options === "number"
+      ? "ar"
+      : options.locale === "en"
+        ? "en"
+        : "ar";
   const q = query.trim();
   const qNorm = normalizeArabicSearch(q);
   const { hits: rawHits, total } = await searchAyahs(q, {
@@ -156,7 +182,10 @@ export async function runStudyQuery(
             meaning: w.meaning,
             root: morph?.root ?? null,
             lemma: morph?.lemma ?? null,
-            irab: narrativeIrab(morph ?? null) || shortIrabGlance(morph ?? null) || null,
+            irab:
+              narrativeIrab(morph ?? null, locale) ||
+              shortIrabGlance(morph ?? null, locale) ||
+              null,
             matched: Boolean(matched),
           };
         }) ?? [];
@@ -164,7 +193,7 @@ export async function runStudyQuery(
     const matchedWords = words.filter((w) => w.matched);
     const hitTextNorm = ` ${normalizeArabicSearch(hit.text)} `;
     const score = scoreHit(qNorm, hitTextNorm, matchedWords.length, words.length);
-    const explain = buildExplain(q, hit, matchedWords, tafsirSnippet);
+    const explain = buildExplain(q, hit, matchedWords, tafsirSnippet, locale);
 
     enriched.push({
       ...hit,
@@ -180,23 +209,39 @@ export async function runStudyQuery(
   enriched.sort((a, b) => b.score - a.score);
   const hits = enriched.slice(0, limit);
 
+  const countLabel = locale === "en" ? String(total) : toArabicNumerals(total);
   const brief =
     hits.length === 0
-      ? `لم يُعثر على آيات مطابقة لـ«${q}» في الفهرس المحلي.`
-      : [
-          `نتائج دراسية لـ«${q}»: ${toArabicNumerals(total)} آية مطابقة.`,
-          hits[0]
-            ? `أقرب مطابقة: ${hits[0].nameAr} ${hits[0].verse}.`
-            : "",
-          "الشرح مبني على المعنى العربي للكلمات + إعراب موجز + مقتطف من التفسير الميسّر — بلا نموذج لغوي.",
-        ]
-          .filter(Boolean)
-          .join(" ");
+      ? locale === "en"
+        ? `No matching ayahs found for «${q}» in the local index.`
+        : `لم يُعثر على آيات مطابقة لـ«${q}» في الفهرس المحلي.`
+      : locale === "en"
+        ? [
+            `Study results for «${q}»: ${countLabel} matching ayahs.`,
+            hits[0]
+              ? `Closest match: ${hits[0].nameAr} ${hits[0].verse}.`
+              : "",
+            "Explanation uses Arabic word senses + short iʿrāb + an Al-Muyassar snippet — no language model.",
+          ]
+            .filter(Boolean)
+            .join(" ")
+        : [
+            `نتائج دراسية لـ«${q}»: ${countLabel} آية مطابقة.`,
+            hits[0]
+              ? `أقرب مطابقة: ${hits[0].nameAr} ${hits[0].verse}.`
+              : "",
+            "الشرح مبني على المعنى العربي للكلمات + إعراب موجز + مقتطف من التفسير الميسّر — بلا نموذج لغوي.",
+          ]
+            .filter(Boolean)
+            .join(" ");
 
   return {
     query: q,
     mode: "local-study-brief",
-    note: "استرجاع وشرح محلي من بيانات عربْية (معنى + صرف + الميسّر).",
+    note:
+      locale === "en"
+        ? "Local retrieval and explanation from Arabya data (sense + morphology + Al-Muyassar)."
+        : "استرجاع وشرح محلي من بيانات عربْية (معنى + صرف + الميسّر).",
     brief,
     hits,
     total,

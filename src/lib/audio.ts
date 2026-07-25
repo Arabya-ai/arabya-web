@@ -3,6 +3,7 @@
 export type Reciter = {
   id: string;
   nameAr: string;
+  nameEn: string;
   /** EveryAyah folder name */
   folder: string;
   /** Quran.com chapter_recitations id when sync timings are available */
@@ -13,32 +14,53 @@ export const RECITERS: Reciter[] = [
   {
     id: "alafasy",
     nameAr: "مشاري العفاسي",
+    nameEn: "Mishary Alafasy",
     folder: "Alafasy_128kbps",
     quranComChapterReciterId: 7,
   },
-  { id: "husary", nameAr: "محمود خليل الحصري", folder: "Husary_128kbps" },
+  {
+    id: "husary",
+    nameAr: "محمود خليل الحصري",
+    nameEn: "Mahmoud Khalil Al-Husary",
+    folder: "Husary_128kbps",
+  },
   {
     id: "minshawi",
     nameAr: "محمد صديق المنشاوي",
+    nameEn: "Muhammad Siddiq Al-Minshawi",
     folder: "Minshawy_Murattal_128kbps",
   },
   {
     id: "abdulbasit",
     nameAr: "عبد الباسط عبد الصمد",
+    nameEn: "Abdul Basit Abdus Samad",
     folder: "Abdul_Basit_Murattal_192kbps",
   },
   {
     id: "sudais",
     nameAr: "عبد الرحمن السديس",
+    nameEn: "Abdurrahman As-Sudais",
     folder: "Abdurrahmaan_As-Sudais_192kbps",
   },
-  { id: "ghamdi", nameAr: "سعد الغامدي", folder: "Ghamadi_40kbps" },
+  {
+    id: "ghamdi",
+    nameAr: "سعد الغامدي",
+    nameEn: "Saad Al-Ghamdi",
+    folder: "Ghamadi_40kbps",
+  },
 ];
 
 export const DEFAULT_RECITER_ID = "alafasy";
 
 export function getReciter(id: string | null | undefined): Reciter {
   return RECITERS.find((r) => r.id === id) ?? RECITERS[0];
+}
+
+export function reciterDisplayName(
+  reciter: Reciter,
+  locale: string = "ar",
+): string {
+  return locale === "en" ? reciter.nameEn : reciter.nameAr;
 }
 
 /** True when Quran.com chapter timings exist for word-highlight sync. */

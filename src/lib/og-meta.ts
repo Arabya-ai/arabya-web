@@ -27,7 +27,9 @@ export function buildSocialMetadata(opts: {
   url: string;
   imageUrl: string;
   imageAlt?: string;
+  locale?: string;
 }) {
+  const isEn = opts.locale === "en";
   const image = {
     url: opts.imageUrl,
     width: OG_IMAGE_SIZE.width,
@@ -39,8 +41,8 @@ export function buildSocialMetadata(opts: {
       title: opts.title,
       description: opts.description,
       url: opts.url,
-      siteName: "عربية",
-      locale: "ar_AR",
+      siteName: isEn ? "Arabya" : "عربية",
+      locale: isEn ? "en_US" : "ar_AR",
       type: "article" as const,
       images: [image],
     },

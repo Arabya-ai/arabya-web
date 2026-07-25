@@ -109,7 +109,7 @@ export function StudyAssistant() {
       setError(null);
       setSearched(true);
       try {
-        const params = new URLSearchParams({ q });
+        const params = new URLSearchParams({ q, locale });
         if (showAll) params.set("all", "1");
         else params.set("limit", String(PREVIEW_LIMIT));
         const res = await fetch(`/api/study?${params}`);
@@ -152,7 +152,7 @@ export function StudyAssistant() {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [query, showAll, kick, t]);
+  }, [query, showAll, kick, t, locale]);
 
   const runStudy = (e?: React.FormEvent) => {
     e?.preventDefault();

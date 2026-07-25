@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   ayahAudioUrl,
   getReciter,
+  reciterDisplayName,
   wordAudioUrl,
   type VerseTiming,
 } from "@/lib/audio";
@@ -15,6 +16,15 @@ import {
 } from "@/lib/media-session";
 import type { MushafPageContent } from "@/lib/mushaf";
 import type { WordRef } from "@/hooks/mushaf-utils";
+
+function uiLocale(): string {
+  if (typeof document === "undefined") return "ar";
+  return document.documentElement.lang === "en" ? "en" : "ar";
+}
+
+function reciterArtist(reciterId: string): string {
+  return reciterDisplayName(getReciter(reciterId), uiLocale());
+}
 
 type SelectedAyah = {
   surahId: number;
@@ -188,13 +198,12 @@ export function useQuranAudio({
     if (!audioRef.current) audioRef.current = new Audio();
     const audio = audioRef.current;
     const times = Math.max(1, Math.min(10, repeatCount));
-    const reciter = getReciter(reciterId);
     setMediaSessionPlaying(
       {
         title: tAudio("mediaSessionAyah", {
           verseKey: selected.verseKey || `${selected.surahId}:${selected.verseNumber}`,
         }),
-        artist: reciter.nameAr,
+        artist: reciterArtist(reciterId),
       },
       {
         onPause: () => stopAllAudio(),
@@ -373,11 +382,10 @@ export function useQuranAudio({
     if (!audioRef.current) audioRef.current = new Audio();
     const audio = audioRef.current;
     const times = Math.max(1, Math.min(10, repeatCount));
-    const reciter = getReciter(reciterId);
     setMediaSessionPlaying(
       {
         title: tAudio("mediaSessionWbw", { verseKey: selected.verseKey }),
-        artist: reciter.nameAr,
+        artist: reciterArtist(reciterId),
       },
       {
         onPause: () => stopAllAudio(),
@@ -478,11 +486,10 @@ export function useQuranAudio({
     });
 
     onStatusNote("surahPlayingFrom", { verse: start });
-    const reciter = getReciter(reciterId);
     setMediaSessionPlaying(
       {
         title: label,
-        artist: reciter.nameAr,
+        artist: reciterArtist(reciterId),
       },
       {
         onPlay: () => {
@@ -491,7 +498,7 @@ export function useQuranAudio({
           setSurahPlayer((p) => ({ ...p, playing: true }));
           setMediaSessionPlaying({
             title: label,
-            artist: reciter.nameAr,
+            artist: reciterArtist(reciterId),
           });
         },
         onPause: () => {
@@ -695,7 +702,7 @@ export function useQuranAudio({
     const meta = surahMetaRef.current;
     setMediaSessionPlaying({
       title: meta?.title || tAudio("mediaSessionSurahFallback"),
-      artist: getReciter(reciterId).nameAr,
+      artist: reciterArtist(reciterId),
     });
   };
 

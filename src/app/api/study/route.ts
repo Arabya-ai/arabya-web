@@ -10,10 +10,18 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const q = sanitizeSearchQuery(searchParams.get("q"));
   const mode = (searchParams.get("mode") ?? "local").trim().slice(0, 32);
+  const locale = searchParams.get("locale") === "en" ? "en" : "ar";
 
   if (!q) {
     return NextResponse.json(
-      { error: "أدخل حرفين على الأقل", hits: [], brief: "" },
+      {
+        error:
+          locale === "en"
+            ? "Enter at least two characters"
+            : "أدخل حرفين على الأقل",
+        hits: [],
+        brief: "",
+      },
       { status: 400 },
     );
   }
@@ -26,7 +34,7 @@ export async function GET(req: Request) {
       ? Math.min(Math.floor(rawLimit), 80)
       : 10;
 
-  const result = await runStudyQuery(q, { limit });
+  const result = await runStudyQuery(q, { limit, locale });
 
   const llmEnabled =
     process.env.ARABYA_LLM_ENABLED === "1" &&
@@ -40,7 +48,10 @@ export async function GET(req: Request) {
           mode: "local-study-brief",
           llm: {
             enabled: false,
-            note: "وضع LLM غير مفعّل. عيّن ARABYA_LLM_ENABLED=1 و ARABYA_LLM_API_KEY.",
+            note:
+              locale === "en"
+                ? "LLM mode is off. Set ARABYA_LLM_ENABLED=1 and ARABYA_LLM_API_KEY."
+                : "وضع LLM غير مفعّل. عيّن ARABYA_LLM_ENABLED=1 و ARABYA_LLM_API_KEY.",
           },
         },
         {
@@ -58,7 +69,10 @@ export async function GET(req: Request) {
         llm: {
           enabled: true,
           answer: null,
-          note: "المزوّد غير موصول بعد — الاسترجاع المحلي متاح أدناه مع استشهادات الآية.",
+          note:
+            locale === "en"
+              ? "Provider not wired yet — local retrieval with ayah citations is below."
+              : "المزوّد غير موصول بعد — الاسترجاع المحلي متاح أدناه مع استشهادات الآية.",
         },
       },
       {

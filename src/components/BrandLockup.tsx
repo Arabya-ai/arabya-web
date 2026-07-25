@@ -1,12 +1,17 @@
+"use client";
+
 import Image from "next/image";
+import { useLocale } from "next-intl";
 
 type BrandLockupProps = {
   size?: "header" | "footer";
 };
 
 export function BrandLockup({ size = "header" }: BrandLockupProps) {
+  const locale = useLocale();
   const isHeader = size === "header";
   const logoSize = isHeader ? 46 : 38;
+  const brandName = locale === "en" ? "Arabya" : "عربية";
 
   return (
     <span
@@ -29,8 +34,8 @@ export function BrandLockup({ size = "header" }: BrandLockupProps) {
       </span>
 
       <span className="brand-text">
-        <span className="brand-name" data-text="عربية">
-          عربية
+        <span className="brand-name" data-text={brandName}>
+          {brandName}
         </span>
       </span>
     </span>

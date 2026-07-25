@@ -123,8 +123,8 @@ export function WordStudyDock({
     });
   }, [verseKey, word]);
 
-  const qacNarrative = narrativeIrab(morph ?? null);
-  const lexicon = lexiconCardLines(morph ?? null);
+  const qacNarrative = narrativeIrab(morph ?? null, locale);
+  const lexicon = lexiconCardLines(morph ?? null, locale);
   const featureLabels = formatFeatureLabels(morph?.features, locale);
   const posLabels = formatPosLabels(morph?.pos, morph?.features, locale);
   const hasMorphPayload = Boolean(
