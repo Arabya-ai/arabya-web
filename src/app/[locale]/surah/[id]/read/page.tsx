@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getSurah, getSurahMeta } from "@/lib/quran";
-import { getMushafPageHref, toArabicNumerals } from "@/lib/format";
+import { formatCount, getMushafPageHref } from "@/lib/format";
 import { normalizeForHafsFont } from "@/lib/quran-text";
 import { getSurahDisplayTitle, getSurahUthmaniTitle } from "@/lib/surah-names";
 import { getMushafIndex } from "@/lib/mushaf";
@@ -13,6 +13,7 @@ import {
   BASMALAH_UTHMANI,
   surahHasBasmalah,
 } from "@/hooks/mushaf-utils";
+import { juzLabel } from "@/lib/juz";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
 
@@ -43,8 +44,14 @@ export default async function SurahReadPage({ params }: Props) {
   if (!surah || !meta) notFound();
 
   const firstPage = mushaf.surahFirstPage[String(surahId)] ?? 1;
-  const verseCount =
-    locale === "en" ? String(meta.versesCount) : toArabicNumerals(meta.versesCount);
+  const verseCount = formatCount(meta.versesCount, locale);
+  const revelation =
+    locale === "en"
+      ? meta.revelationPlace === "makkah"
+        ? "Meccan"
+        : "Medinan"
+      : meta.revelationLabel;
+  const juz = juzLabel(meta.juz, locale);
 
   return (
     <div className="shell page-block surah-read-page">
@@ -66,9 +73,9 @@ export default async function SurahReadPage({ params }: Props) {
         ) : null}
         <p>
           {t("verseMeta", {
-            revelation: meta.revelationLabel,
+            revelation,
             count: verseCount,
-            juz: meta.juzLabel,
+            juz,
           })}
         </p>
       </header>
@@ -88,7 +95,7 @@ export default async function SurahReadPage({ params }: Props) {
               <div className="surah-read-ayah-text" dir="rtl" lang="ar">
                 {verseText}
                 <span className="ayah-end-mark">
-                  {toArabicNumerals(v.verseNumber)}
+                  {formatCount(v.verseNumber, locale)}
                 </span>
               </div>
               <div className="surah-read-actions">

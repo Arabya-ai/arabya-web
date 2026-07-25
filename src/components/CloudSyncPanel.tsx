@@ -23,15 +23,40 @@ export function CloudSyncPanel() {
     );
   }, [t]);
 
+  function messageFor(
+    result: Awaited<ReturnType<typeof pullMergeAndPush>> | Awaited<ReturnType<typeof pushLocalOnly>>,
+  ): string {
+    switch (result.code) {
+      case "not_signed_in":
+        return t("statusNotSignedIn");
+      case "not_configured":
+        return t("statusNotConfigured");
+      case "pull_failed":
+        return t("statusPullFailed");
+      case "push_failed":
+        return t("statusPushFailed");
+      case "synced":
+        return t("statusSynced", {
+          bookmarks: "bookmarks" in result ? (result.bookmarks ?? 0) : 0,
+          notes: "notes" in result ? (result.notes ?? 0) : 0,
+          study: "study" in result ? (result.study ?? 0) : 0,
+        });
+      case "saved":
+        return t("statusSaved");
+      default:
+        return t("statusError");
+    }
+  }
+
   async function run(mode: "full" | "push") {
     setBusy(true);
     setStatus(mode === "full" ? t("statusFullSync") : t("statusPush"));
     try {
       const result =
         mode === "full" ? await pullMergeAndPush() : await pushLocalOnly();
-      setStatus(result.message);
-    } catch (err) {
-      setStatus(err instanceof Error ? err.message : t("statusError"));
+      setStatus(messageFor(result));
+    } catch {
+      setStatus(t("statusError"));
     } finally {
       setBusy(false);
     }

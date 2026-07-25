@@ -4,9 +4,11 @@ import path from "path";
 export type QualityQueueItem = {
   id: string;
   title: string;
+  titleEn: string;
   priority: "high" | "medium" | "low";
   surahHint: string;
   note: string;
+  noteEn: string;
 };
 
 export type QualityCoverage = {
@@ -50,16 +52,20 @@ export async function scanQualityIssues(
   const push = (
     priority: QualityQueueItem["priority"],
     title: string,
+    titleEn: string,
     surahHint: string,
     note: string,
+    noteEn: string,
   ) => {
     seq += 1;
     items.push({
       id: `qs_${seq}_${Date.now().toString(36)}`,
       title,
+      titleEn,
       priority,
       surahHint,
       note,
+      noteEn,
     });
   };
 
@@ -79,11 +85,25 @@ export async function scanQualityIssues(
     const surahPath = path.join(dataRoot, "surahs", `${id}.json`);
     const irabPath = path.join(dataRoot, "irab", `${id}.json`);
     if (!(await exists(surahPath))) {
-      push("high", `سورة ${id} مفقودة`, `سورة ${id}`, "ملف surahs غير موجود");
+      push(
+        "high",
+        `سورة ${id} مفقودة`,
+        `Surah ${id} missing`,
+        `سورة ${id}`,
+        "ملف surahs غير موجود",
+        "surahs file is missing",
+      );
       continue;
     }
     if (!(await exists(irabPath))) {
-      push("high", `إعراب سورة ${id} مفقود`, `سورة ${id}`, "ملف irab غير موجود");
+      push(
+        "high",
+        `إعراب سورة ${id} مفقود`,
+        `Iʿrāb for surah ${id} missing`,
+        `سورة ${id}`,
+        "ملف irab غير موجود",
+        "irab file is missing",
+      );
       continue;
     }
     irabSurahsPresent += 1;
@@ -122,8 +142,10 @@ export async function scanQualityIssues(
         push(
           "high",
           `آية بلا إعراب`,
+          `Ayah without iʿrāb`,
           `${id}:${vn}`,
           `سورة ${id} آية ${vn} غير موجودة في ملف الإعراب`,
+          `Surah ${id} ayah ${vn} is missing from the iʿrāb file`,
         );
         continue;
       }
@@ -132,8 +154,10 @@ export async function scanQualityIssues(
         push(
           "medium",
           `اختلاف عدد الكلمات`,
+          `Word count mismatch`,
           `${id}:${vn}`,
           `سورة=${words.length} · إعراب=${iw.length}`,
+          `surah=${words.length} · iʿrāb=${iw.length}`,
         );
       }
       for (const w of words) {
@@ -168,23 +192,34 @@ export async function scanQualityIssues(
       push(
         missingPct > 0.3 ? "medium" : "low",
         `كلمات بلا meaningAr`,
+        `Words without meaningAr`,
         `سورة ${id}`,
         `${missingMeaning} كلمة بدون معنى عربي دراسي`,
+        `${missingMeaning} words without Arabic study gloss`,
       );
     }
     if (missingWordId > 0) {
       push(
         "high",
         `كلمات إعراب بلا wordId`,
+        `Iʿrāb words without wordId`,
         `سورة ${id}`,
         `${missingWordId} كلمة في الإعراب بدون wordId`,
+        `${missingWordId} iʿrāb words missing wordId`,
       );
     }
   }
 
   const mushafPath = path.join(dataRoot, "mushaf-index.json");
   if (!(await exists(mushafPath))) {
-    push("high", "فهرس المصحف مفقود", "mushaf", "mushaf-index.json غير موجود");
+    push(
+      "high",
+      "فهرس المصحف مفقود",
+      "Mushaf index missing",
+      "mushaf",
+      "mushaf-index.json غير موجود",
+      "mushaf-index.json is missing",
+    );
   } else {
     const mushaf = JSON.parse(await readFile(mushafPath, "utf8")) as {
       totalPages?: number;
@@ -193,7 +228,9 @@ export async function scanQualityIssues(
       push(
         "high",
         "عدد صفحات المصحف غير 604",
+        "Mushaf page count is not 604",
         "mushaf",
+        `totalPages=${mushaf.totalPages}`,
         `totalPages=${mushaf.totalPages}`,
       );
     }
@@ -201,7 +238,14 @@ export async function scanQualityIssues(
 
   for (const name of ["search-index.json", "roots-index.json"] as const) {
     if (!(await exists(path.join(dataRoot, name)))) {
-      push("medium", `ملف فهرس مفقود`, name, `${name} غير موجود`);
+      push(
+        "medium",
+        `ملف فهرس مفقود`,
+        `Index file missing`,
+        name,
+        `${name} غير موجود`,
+        `${name} is missing`,
+      );
     }
   }
 

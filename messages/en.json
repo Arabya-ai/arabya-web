@@ -507,7 +507,13 @@
     "statusLocal": "Automatic: favorites, notes, and reading habit are saved to your account without buttons. (Local now: {bookmarks} favorites, {notes} notes)",
     "statusFullSync": "Full sync…",
     "statusPush": "Uploading…",
-    "statusError": "Sync failed"
+    "statusError": "Sync failed",
+    "statusNotSignedIn": "Sign in to sync.",
+    "statusNotConfigured": "Cloud sync is not configured on this deployment.",
+    "statusPullFailed": "Could not download cloud data.",
+    "statusPushFailed": "Could not upload to the cloud.",
+    "statusSynced": "Synced automatically ({bookmarks} favorites, {notes} notes, {study} studies).",
+    "statusSaved": "Changes saved to the cloud."
   },
   "Upgrade": {
     "title": "Request upgrade",

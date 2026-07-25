@@ -65,4 +65,41 @@ test.describe("smoke", () => {
     await expect(page.locator(".mushaf-page")).toHaveAttribute("lang", "ar");
     await expect(page.locator(".mushaf-word").first()).toBeVisible();
   });
+
+  test("clicking a mushaf word opens the study dock", async ({ page }) => {
+    await gotoOk(page, "/en/mushaf/1");
+    await expect(page.locator("button.mushaf-word").first()).toBeVisible({
+      timeout: 30_000,
+    });
+    await page.locator("button.mushaf-word").nth(2).click();
+    await expect(page.locator(".word-dock")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator(".word-dock-ar")).toBeVisible();
+    await expect(page.locator(".word-dock-key")).toHaveText(/^\d+:\d+$/);
+    await expect(page.locator(".word-dock [role='tab']").first()).toBeVisible();
+  });
+
+  test("home search returns ayah results", async ({ page }) => {
+    await gotoOk(page, "/en");
+    const search = page.locator(".index-search-simple input[type='search']");
+    await expect(search).toBeVisible();
+    await search.fill("الحمد");
+    await expect(page.locator("#ayah-search-h")).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(page.locator(".ayah-search-hit").first()).toBeVisible({
+      timeout: 20_000,
+    });
+  });
+
+  test("locale switcher moves Arabic home to English", async ({ page }) => {
+    await gotoOk(page, "/");
+    await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+    await page.locator(".nav .locale-switch-trigger").click();
+    await page
+      .locator(".nav .locale-switch-option", { hasText: "English" })
+      .click();
+    await expect(page).toHaveURL(/\/en\/?$/);
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(page.locator("#prayer-h")).toContainText("Prayer times");
+  });
 });

@@ -547,7 +547,9 @@ export function MushafPageStudio({
           />
           <div className="ayah-note-panel">
             <label className="ayah-note-label" htmlFor="ayah-note">
-              {tMushaf("noteLabel", { verse: formatVerseKey(selected.verseKey) })}
+              {tMushaf("noteLabel", {
+                verse: formatVerseKey(selected.verseKey, locale),
+              })}
             </label>
             <textarea
               id="ayah-note"

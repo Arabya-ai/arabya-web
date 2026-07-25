@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
 import { getRootsIndex } from "@/lib/quran";
-import { toArabicNumerals } from "@/lib/format";
+import { formatCount } from "@/lib/format";
 import { topRootsByCount } from "@/lib/roots";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -48,7 +48,7 @@ export default async function RootsIndexPage({ params }: Props) {
 
       <header className="roots-index-head">
         <h1>{t("title")}</h1>
-        <p>{t("intro", { count: toArabicNumerals(roots.length) })}</p>
+        <p>{t("intro", { count: formatCount(roots.length, locale) })}</p>
       </header>
 
       {top.length ? (
@@ -60,11 +60,11 @@ export default async function RootsIndexPage({ params }: Props) {
               <li key={r.root}>
                 <Link href={`/root/${encodeURIComponent(r.root)}`}>
                   <span className="roots-top-rank">
-                    {toArabicNumerals(i + 1)}
+                    {formatCount(i + 1, locale)}
                   </span>
                   <span className="roots-grid-root">{r.root}</span>
                   <span className="roots-grid-count">
-                    {toArabicNumerals(r.count)}
+                    {formatCount(r.count, locale)}
                   </span>
                 </Link>
               </li>
@@ -97,7 +97,7 @@ export default async function RootsIndexPage({ params }: Props) {
                   <Link href={`/root/${encodeURIComponent(r.root)}`}>
                     <span className="roots-grid-root">{r.root}</span>
                     <span className="roots-grid-count">
-                      {toArabicNumerals(r.count)}
+                      {formatCount(r.count, locale)}
                     </span>
                   </Link>
                 </li>

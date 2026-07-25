@@ -17,8 +17,20 @@ describe("toArabicNumerals", () => {
 });
 
 describe("formatVerseKey", () => {
-  it("formats a verse key with eastern numerals", () => {
+  it("formats a verse key with eastern numerals by default", () => {
     expect(formatVerseKey("1:7")).toBe("١:٧");
+  });
+
+  it("keeps latin digits for English locale", () => {
+    expect(formatVerseKey("1:7", "en")).toBe("1:7");
+  });
+});
+
+describe("formatCount", () => {
+  it("switches digits by locale", async () => {
+    const { formatCount } = await import("@/lib/format");
+    expect(formatCount(42, "ar")).toBe("٤٢");
+    expect(formatCount(42, "en")).toBe("42");
   });
 });
 

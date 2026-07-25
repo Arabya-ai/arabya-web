@@ -507,7 +507,13 @@
     "statusLocal": "تلقائي: تُحفظ المفضّلات والملاحظات وعادة القراءة على حسابك دون أزرار. (محليًا الآن: {bookmarks} مفضّلة، {notes} ملاحظة)",
     "statusFullSync": "مزامنة كاملة…",
     "statusPush": "رفع فوري…",
-    "statusError": "تعذّرت المزامنة"
+    "statusError": "تعذّرت المزامنة",
+    "statusNotSignedIn": "سجّل الدخول للمزامنة.",
+    "statusNotConfigured": "المزامنة السحابية غير مفعّلة في هذا النشر.",
+    "statusPullFailed": "تعذّر سحب البيانات من السحابة.",
+    "statusPushFailed": "تعذّر الرفع إلى السحابة.",
+    "statusSynced": "تمت المزامنة تلقائيًا ({bookmarks} مفضّلة، {notes} ملاحظة، {study} دراسة).",
+    "statusSaved": "تم حفظ التغييرات على السحابة."
   },
   "Upgrade": {
     "title": "طلب ترقية",

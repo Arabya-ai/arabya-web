@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getRootEntry } from "@/lib/quran";
-import { toArabicNumerals } from "@/lib/format";
+import { formatCount } from "@/lib/format";
 import { getMushafIndex } from "@/lib/mushaf";
 import { getLemmaSenseFile, summarizeRootLemmas } from "@/lib/roots";
 import { RootOccurrencesList } from "@/components/RootOccurrencesList";
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function RootPage({ params }: Props) {
-  const { root } = await params;
+  const { locale, root } = await params;
   const decoded = decodeURIComponent(root);
   const t = await getTranslations("Roots");
   const tNav = await getTranslations("Nav");
@@ -81,14 +81,14 @@ export default async function RootPage({ params }: Props) {
 
       <h1>{t("rootTitle", { root: entry.root })}</h1>
       <p className="root-meta">
-        {t("occurrences", { count: toArabicNumerals(entry.count) })}
+        {t("occurrences", { count: formatCount(entry.count, locale) })}
       </p>
       <div className="root-share-row">
         <PageShareButton
           title={t("shareTitle", { root: entry.root })}
           text={t("shareText", {
             root: entry.root,
-            count: toArabicNumerals(entry.count),
+            count: formatCount(entry.count, locale),
           })}
           path={`/root/${encodeURIComponent(entry.root)}?share=root`}
           kind="root"
@@ -106,7 +106,7 @@ export default async function RootPage({ params }: Props) {
               <li key={L.lemma}>
                 <span className="root-lemma-form">{L.lemma}</span>
                 <span className="root-lemma-count">
-                  {toArabicNumerals(L.count)}
+                  {formatCount(L.count, locale)}
                 </span>
                 {L.sense ? (
                   <span className="root-lemma-sense">
@@ -122,7 +122,7 @@ export default async function RootPage({ params }: Props) {
           {lemmas.length > 40 ? (
             <p className="root-lemmas-more">
               {t("lemmasMore", {
-                count: toArabicNumerals(lemmas.length - 40),
+                count: formatCount(lemmas.length - 40, locale),
               })}
             </p>
           ) : null}

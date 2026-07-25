@@ -151,9 +151,9 @@ export function QualityQueueClient({
       {items.map((item) => (
         <article key={item.id} className="dash-card">
           <p className="dash-kicker">{t("priority", { priority: item.priority })}</p>
-          <h2>{item.title}</h2>
+          <h2>{locale === "en" ? item.titleEn || item.title : item.title}</h2>
           <p className="dash-muted">{item.surahHint}</p>
-          <p>{item.note}</p>
+          <p>{locale === "en" ? item.noteEn || item.note : item.note}</p>
         </article>
       ))}
     </div>

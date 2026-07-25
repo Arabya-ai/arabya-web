@@ -158,18 +158,26 @@ export function mergeCloudAndLocal(cloud: {
 
 export async function pullMergeAndPush(): Promise<{
   ok: boolean;
-  message: string;
+  code:
+    | "not_signed_in"
+    | "not_configured"
+    | "pull_failed"
+    | "push_failed"
+    | "synced";
+  bookmarks?: number;
+  notes?: number;
+  study?: number;
 }> {
   const pullRes = await fetch("/api/sync", { method: "GET", cache: "no-store" });
   const pullData = await pullRes.json();
   if (pullRes.status === 401) {
-    return { ok: false, message: "not_signed_in" };
+    return { ok: false, code: "not_signed_in" };
   }
   if (pullRes.status === 503) {
-    return { ok: false, message: "not_configured" };
+    return { ok: false, code: "not_configured" };
   }
   if (!pullRes.ok || !pullData.ok) {
-    throw new Error(pullData.message || pullData.error || "فشل السحب");
+    return { ok: false, code: "pull_failed" };
   }
 
   const merged = mergeCloudAndLocal(pullData);
@@ -190,17 +198,27 @@ export async function pullMergeAndPush(): Promise<{
   });
   const pushData = await pushRes.json();
   if (!pushRes.ok || !pushData.ok) {
-    throw new Error(pushData.message || pushData.error || "فشل الرفع");
+    return { ok: false, code: "push_failed" };
   }
 
   applyCloudToLocal(pushData);
   return {
     ok: true,
-    message: `تمت المزامنة تلقائيًا (${pushData.bookmarks?.length ?? 0} مفضّلة، ${pushData.notes?.length ?? 0} ملاحظة، ${pushData.study?.length ?? 0} دراسة).`,
+    code: "synced",
+    bookmarks: pushData.bookmarks?.length ?? 0,
+    notes: pushData.notes?.length ?? 0,
+    study: pushData.study?.length ?? 0,
   };
 }
 
-export async function pushLocalOnly(): Promise<{ ok: boolean; message: string }> {
+export async function pushLocalOnly(): Promise<{
+  ok: boolean;
+  code:
+    | "not_signed_in"
+    | "not_configured"
+    | "push_failed"
+    | "saved";
+}> {
   const payload = collectLocalSyncPayload();
   const res = await fetch("/api/sync", {
     method: "PUT",
@@ -208,11 +226,11 @@ export async function pushLocalOnly(): Promise<{ ok: boolean; message: string }>
     body: JSON.stringify(payload),
   });
   const data = await res.json();
-  if (res.status === 401) return { ok: false, message: "not_signed_in" };
-  if (res.status === 503) return { ok: false, message: "not_configured" };
+  if (res.status === 401) return { ok: false, code: "not_signed_in" };
+  if (res.status === 503) return { ok: false, code: "not_configured" };
   if (!res.ok || !data.ok) {
-    throw new Error(data.message || data.error || "فشل الرفع");
+    return { ok: false, code: "push_failed" };
   }
   applyCloudToLocal(data);
-  return { ok: true, message: "تم حفظ التغييرات على السحابة." };
+  return { ok: true, code: "saved" };
 }

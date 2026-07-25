@@ -270,7 +270,7 @@ export function WordStudyDock({
   return (
     <section className="word-dock" aria-live="polite">
       <div className="word-dock-head">
-        <span className="word-dock-key">{formatVerseKey(verseKey)}</span>
+        <span className="word-dock-key">{formatVerseKey(verseKey, locale)}</span>
         <p className="word-dock-ar" dir="rtl" lang="ar">
           {normalizeForHafsFont(word.text)}
         </p>

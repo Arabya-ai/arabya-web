@@ -263,7 +263,7 @@ export function MushafStudySheets({
                 <article key={v.verseKey} className="tafsir-ayah">
                   <header className="tafsir-head">
                     <span className="ayah-badge">
-                      {formatVerseKey(v.verseKey)}
+                      {formatVerseKey(v.verseKey, locale)}
                     </span>
                     <div className="tafsir-words">
                       {v.words.map((w) => {

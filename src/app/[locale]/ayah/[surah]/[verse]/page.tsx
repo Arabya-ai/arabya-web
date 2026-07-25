@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     verse: locale === "en" ? String(vid) : toArabicNumerals(vid),
   });
   const description = t("metaDescription", {
-    key: formatVerseKey(`${sid}:${vid}`),
+    key: formatVerseKey(`${sid}:${vid}`, locale),
   });
   const social = buildSocialMetadata({
     title,
