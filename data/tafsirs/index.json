@@ -3,6 +3,8 @@
     {
       "slug": "sadi",
       "nameAr": "تفسير السعدي",
+      "nameEn": "Tafsir As-Sa'di",
+      "lang": "ar",
       "resourceId": 91,
       "api": "https://api.quran.com",
       "source": "Quran.com",
@@ -11,6 +13,8 @@
     {
       "slug": "muyassar",
       "nameAr": "التفسير الميسر",
+      "nameEn": "At-Tafsir Al-Muyassar",
+      "lang": "ar",
       "resourceId": 16,
       "api": "https://api.quran.com",
       "source": "Quran.com",
@@ -19,6 +23,8 @@
     {
       "slug": "ibn-kathir",
       "nameAr": "تفسير ابن كثير",
+      "nameEn": "Tafsir Ibn Kathir (Arabic)",
+      "lang": "ar",
       "resourceId": 14,
       "api": "https://api.quran.com",
       "source": "Quran.com",
@@ -27,6 +33,8 @@
     {
       "slug": "qurtubi",
       "nameAr": "تفسير القرطبي",
+      "nameEn": "Tafsir Al-Qurtubi",
+      "lang": "ar",
       "resourceId": 90,
       "api": "https://api.quran.com",
       "source": "Quran.com",
@@ -35,7 +43,39 @@
     {
       "slug": "baghawi",
       "nameAr": "تفسير البغوي",
+      "nameEn": "Tafsir Al-Baghawi",
+      "lang": "ar",
       "resourceId": 94,
+      "api": "https://api.quran.com",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "en-ibn-kathir",
+      "nameAr": "تفسير ابن كثير (مختصر إنجليزي)",
+      "nameEn": "Ibn Kathir (Abridged)",
+      "lang": "en",
+      "resourceId": 169,
+      "api": "https://api.quran.com",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "en-maarif-ul-quran",
+      "nameAr": "معارف القرآن",
+      "nameEn": "Ma'arif al-Qur'an",
+      "lang": "en",
+      "resourceId": 168,
+      "api": "https://api.quran.com",
+      "source": "Quran.com",
+      "sourceUrl": "https://api.quran.com"
+    },
+    {
+      "slug": "en-tazkirul-quran",
+      "nameAr": "تذكير القرآن",
+      "nameEn": "Tazkirul Quran",
+      "lang": "en",
+      "resourceId": 817,
       "api": "https://api.quran.com",
       "source": "Quran.com",
       "sourceUrl": "https://api.quran.com"

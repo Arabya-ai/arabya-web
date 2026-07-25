@@ -99,6 +99,9 @@ export type TafsirSurah = {
 export type TafsirSource = {
   slug: string;
   nameAr: string;
+  nameEn?: string;
+  /** UI language of the tafsir body: Arabic editions vs English editions. */
+  lang?: "ar" | "en";
   resourceId: number;
   api?: string;
   source?: string;

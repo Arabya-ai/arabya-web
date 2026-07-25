@@ -67,8 +67,12 @@ export function AsmaAlHusnaCard() {
           <p className="asma-number">{numberLabel}</p>
           <p className="asma-name">{today.nameAr}</p>
           <p className="asma-trans">{today.transliteration}</p>
-          {today.meaningEn && locale === "en" ? (
-            <p className="asma-meaning">{today.meaningEn}</p>
+          {locale === "en" ? (
+            today.meaningEn ? (
+              <p className="asma-meaning">{today.meaningEn}</p>
+            ) : today.meaningAr ? (
+              <p className="asma-meaning">{today.meaningAr}</p>
+            ) : null
           ) : today.meaningAr ? (
             <p className="asma-meaning">{today.meaningAr}</p>
           ) : today.meaningEn ? (

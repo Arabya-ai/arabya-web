@@ -28,6 +28,7 @@ import {
   editionDisplayName,
   groupVerseEditionsByLang,
 } from "@/lib/translation-label";
+import { tafsirDisplayName } from "@/lib/tafsir-label";
 import { MeaningLangSwitch } from "@/components/MeaningLangSwitch";
 import type { MeaningLang } from "@/hooks/mushaf-utils";
 
@@ -440,12 +441,25 @@ export function WordStudyDock({
                 >
                   {tafsirSources.map((s) => (
                     <option key={s.slug} value={s.slug}>
-                      {s.nameAr}
+                      {tafsirDisplayName(s, locale)}
                     </option>
                   ))}
                 </select>
-                <p className="tafsir-dock-body" dir="rtl">
-                  {tafsirLoading ? t("loading") : tafsirText || "—"}
+                <p
+                  className="tafsir-dock-body"
+                  dir={
+                    tafsirSources.find((s) => s.slug === tafsirSlug)?.lang ===
+                    "en"
+                      ? "ltr"
+                      : "rtl"
+                  }
+                  lang={
+                    tafsirSources.find((s) => s.slug === tafsirSlug)?.lang ===
+                    "en"
+                      ? "en"
+                      : "ar"
+                  }
+                >                  {tafsirLoading ? t("loading") : tafsirText || "—"}
                 </p>
               </>
             ) : (

@@ -22,7 +22,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!entry) return { title: t("detailMetaFallback") };
   const description =
     locale === "en"
-      ? entry.meaningEn || entry.detailsEn || entry.meaningAr || entry.explanationAr
+      ? entry.meaningEn ||
+        entry.explanationEn ||
+        entry.detailsEn ||
+        entry.meaningAr
       : entry.meaningAr || entry.explanationAr || entry.meaningEn;
   return {
     title: t("detailMetaTitle", { name: entry.nameAr }),
@@ -47,9 +50,19 @@ export default async function AsmaDetailPage({ params }: Props) {
 
   const prev = num > 1 ? num - 1 : null;
   const next = num < 99 ? num + 1 : null;
-  const detailsEn = entry.detailsEn ? plainEn(entry.detailsEn) : "";
   const isEn = locale === "en";
-  const numberLabel = isEn ? String(entry.number) : toArabicNumerals(entry.number);
+  const numberLabel = isEn
+    ? String(entry.number)
+    : toArabicNumerals(entry.number);
+  const meaningPrimary = isEn ? entry.meaningEn : entry.meaningAr;
+  const meaningSecondary = isEn ? entry.meaningAr : entry.meaningEn;
+  const explPrimary = isEn
+    ? entry.explanationEn || plainEn(entry.detailsEn)
+    : entry.explanationAr;
+  const explSecondary = isEn
+    ? entry.explanationAr
+    : entry.explanationEn ||
+      (entry.detailsEn ? plainEn(entry.detailsEn) : "");
 
   return (
     <div className="shell page-block asma-detail">
@@ -70,64 +83,54 @@ export default async function AsmaDetailPage({ params }: Props) {
 
       <section className="asma-detail-card" aria-labelledby="asma-meaning">
         <h2 id="asma-meaning">{t("meaningHeading")}</h2>
-        {isEn ? (
-          <>
-            {entry.meaningEn ? (
-              <p className="asma-bilingual-en" lang="en" dir="ltr">
-                {entry.meaningEn}
-              </p>
-            ) : null}
-            {entry.meaningAr ? (
-              <p className="asma-bilingual-ar">{entry.meaningAr}</p>
-            ) : null}
-          </>
-        ) : (
-          <>
-            {entry.meaningAr ? (
-              <p className="asma-bilingual-ar">{entry.meaningAr}</p>
-            ) : null}
-            {entry.meaningEn ? (
-              <p className="asma-bilingual-en" lang="en" dir="ltr">
-                {entry.meaningEn}
-              </p>
-            ) : null}
-          </>
-        )}
+        {meaningPrimary ? (
+          <p
+            className={isEn ? "asma-bilingual-en" : "asma-bilingual-ar"}
+            lang={isEn ? "en" : "ar"}
+            dir={isEn ? "ltr" : "rtl"}
+          >
+            {meaningPrimary}
+          </p>
+        ) : null}
+        {meaningSecondary ? (
+          <p
+            className={isEn ? "asma-bilingual-ar" : "asma-bilingual-en"}
+            lang={isEn ? "ar" : "en"}
+            dir={isEn ? "rtl" : "ltr"}
+          >
+            {meaningSecondary}
+          </p>
+        ) : null}
       </section>
 
       <section className="asma-detail-card" aria-labelledby="asma-expl">
         <h2 id="asma-expl">{t("explHeading")}</h2>
-        {isEn ? (
-          <>
-            {detailsEn ? (
-              <p
-                className="asma-bilingual-en asma-detail-en-body"
-                lang="en"
-                dir="ltr"
-              >
-                {detailsEn}
-              </p>
-            ) : null}
-            {entry.explanationAr ? (
-              <p className="asma-bilingual-ar">{entry.explanationAr}</p>
-            ) : null}
-          </>
-        ) : (
-          <>
-            {entry.explanationAr ? (
-              <p className="asma-bilingual-ar">{entry.explanationAr}</p>
-            ) : null}
-            {detailsEn ? (
-              <p
-                className="asma-bilingual-en asma-detail-en-body"
-                lang="en"
-                dir="ltr"
-              >
-                {detailsEn}
-              </p>
-            ) : null}
-          </>
-        )}
+        {explPrimary ? (
+          <p
+            className={
+              isEn
+                ? "asma-bilingual-en asma-detail-en-body"
+                : "asma-bilingual-ar"
+            }
+            lang={isEn ? "en" : "ar"}
+            dir={isEn ? "ltr" : "rtl"}
+          >
+            {explPrimary}
+          </p>
+        ) : null}
+        {explSecondary && explSecondary !== explPrimary ? (
+          <p
+            className={
+              isEn
+                ? "asma-bilingual-ar"
+                : "asma-bilingual-en asma-detail-en-body"
+            }
+            lang={isEn ? "ar" : "en"}
+            dir={isEn ? "rtl" : "ltr"}
+          >
+            {explSecondary}
+          </p>
+        ) : null}
       </section>
 
       <nav className="asma-detail-pager" aria-label={t("pagerAria")}>

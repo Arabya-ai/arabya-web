@@ -18,6 +18,7 @@
     "build-lemma-sense-ar": "node scripts/build-lemma-sense-ar.mjs",
     "build-meaning-ar": "node scripts/build-lemma-sense-ar.mjs && node scripts/build-meaning-ar.mjs",
     "fetch-tafsirs": "node scripts/fetch-tafsirs.mjs",
+    "fetch-tafsirs-en": "node scripts/fetch-tafsirs-en.mjs",
     "fetch-translations": "node scripts/fetch-new-translations.mjs",
     "fetch-translations-legacy": "node scripts/fetch-translations.mjs",
     "fetch-new-translations": "node scripts/fetch-new-translations.mjs",

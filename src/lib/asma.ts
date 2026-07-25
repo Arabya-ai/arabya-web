@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { getAsmaAr } from "@/lib/asma-meanings-ar";
+import { getAsmaEn } from "@/lib/asma-meanings-en";
 
 export type AsmaEntry = {
   number: number;
@@ -8,7 +9,11 @@ export type AsmaEntry = {
   transliteration: string;
   meaningAr: string;
   explanationAr: string;
+  /** Curated short English meaning (preferred for UI). */
   meaningEn: string;
+  /** Curated short English explanation (preferred for UI). */
+  explanationEn: string;
+  /** Longer English details from the JSON source (optional secondary). */
   detailsEn: string;
 };
 
@@ -33,13 +38,15 @@ export async function getAsmaNames(): Promise<AsmaEntry[]> {
   cache = (raw.names ?? [])
     .map((n) => {
       const ar = getAsmaAr(n.number);
+      const en = getAsmaEn(n.number);
       return {
         number: n.number,
         nameAr: n.nameAr,
         transliteration: n.transliteration,
         meaningAr: ar?.meaningAr || n.meaningAr || "",
         explanationAr: ar?.explanationAr || n.explanationAr || "",
-        meaningEn: n.meaningEn || "",
+        meaningEn: en?.meaningEn || n.meaningEn || "",
+        explanationEn: en?.explanationEn || "",
         detailsEn: n.detailsEn || "",
       };
     })

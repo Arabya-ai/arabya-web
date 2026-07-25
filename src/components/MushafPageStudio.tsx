@@ -14,6 +14,7 @@ import { isBookmarked, toggleBookmark } from "@/lib/bookmarks";
 import { getSurahUthmaniTitle } from "@/lib/surah-names";
 import { makeWordId } from "@/lib/word-id";
 import { narrativeIrab } from "@/lib/irab-narrative";
+import { orderTafsirSources, tafsirDisplayName } from "@/lib/tafsir-label";
 import { WordStudyDock } from "@/components/WordStudyDock";
 import { SurahAudioPlayer } from "@/components/SurahAudioPlayer";
 import { MushafToolbar } from "@/components/mushaf/MushafToolbar";
@@ -62,11 +63,16 @@ export function MushafPageStudio({
       { id: "irab", label: tModes("irab") },
       { id: "meaning-table", label: tModes("meaningTable") },
     ];
-    for (const s of tafsirSources) {
-      list.push({ id: s.slug, label: s.nameAr });
+    for (const s of orderTafsirSources(tafsirSources, locale)) {
+      list.push({ id: s.slug, label: tafsirDisplayName(s, locale) });
     }
     return list;
-  }, [tafsirSources, tModes]);
+  }, [tafsirSources, tModes, locale]);
+
+  const orderedTafsirSources = useMemo(
+    () => orderTafsirSources(tafsirSources, locale),
+    [tafsirSources, locale],
+  );
 
   const [mode, setMode] = useState<Mode>("words");
   const [activeWord, setActiveWord] = useState<WordRef | null>(null);
@@ -536,7 +542,7 @@ export function MushafPageStudio({
             onVerseEdition={prefs.setVerseEdition}
             verseTranslation={study.selectedVerseTranslation}
             verseTranslationStatus={study.selectedVerseTranslationStatus}
-            tafsirSources={tafsirSources}
+            tafsirSources={orderedTafsirSources}
             ensureTafsirSurah={study.ensureTafsirSurah}
           />
           <div className="ayah-note-panel">
@@ -580,7 +586,7 @@ export function MushafPageStudio({
         activeWord={activeWord}
         selectWord={selectWord}
         activeTafsir={study.activeTafsir}
-        tafsirSources={tafsirSources}
+        tafsirSources={orderedTafsirSources}
         tafsirLoading={study.tafsirLoading}
         tafsirRows={study.tafsirRows}
       />
