@@ -83,6 +83,14 @@ function wordMeaning(word: QuranWord, lang: MeaningLang): string {
   return word.meaning || "";
 }
 
+/** quran-words scrapes often wrap senses in markdown-ish backticks. */
+function cleanSenseText(text: string): string {
+  return String(text || "")
+    .replace(/`+/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function parseVerseKey(verseKey: string): { surahId: number; verse: number } {
   const [s, v] = verseKey.split(":").map(Number);
   return { surahId: s || 1, verse: v || 1 };
@@ -138,10 +146,13 @@ export function WordStudyDock({
       surahId,
       verse,
       wordIndex: word.position,
-      snippet: wordMeaning(word, "ar") || undefined,
+      snippet:
+        cleanSenseText(senseEntry?.sense || "") ||
+        wordMeaning(word, "ar") ||
+        undefined,
       href: `/ayah/${surahId}/${verse}`,
     });
-  }, [verseKey, word]);
+  }, [verseKey, word, senseEntry?.sense]);
 
   const qacNarrative = narrativeIrab(morph ?? null, locale);
   const lexicon = lexiconCardLines(morph ?? null, locale);
@@ -205,7 +216,7 @@ export function WordStudyDock({
     return lexicon.filter((line) => !shown.has(line));
   }, [lexicon, morph, posLabels, t]);
 
-  const richSenseAr = senseEntry?.sense?.trim() || "";
+  const richSenseAr = cleanSenseText(senseEntry?.sense || "");
   const etymologyText = lexiconText?.trim() || "";
 
   useEffect(() => {
