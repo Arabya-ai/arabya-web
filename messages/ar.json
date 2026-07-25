@@ -293,6 +293,8 @@
     "stats": "لوحة الإحصائيات",
     "favorites": "المفضّلات",
     "study": "دراسة",
+    "create": "إنشاء",
+    "pricing": "الخطط",
     "upgrade": "طلب ترقية",
     "studio": "الاستوديو",
     "queue": "طابور الجودة",
@@ -442,6 +444,8 @@
   "WordDock": {
     "linksAria": "روابط الدراسة",
     "fullIrab": "إعراب الآية كاملة",
+    "createImage": "إنشاء صورة",
+    "createVideo": "إنشاء فيديو",
     "rootLink": "جذر «{root}»",
     "layersAria": "طبقات تحليل الكلمة",
     "syntax": "نحو",

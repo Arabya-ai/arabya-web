@@ -78,7 +78,7 @@ export async function GET(request: Request) {
     locale,
   });
 
-  return new Response(png, {
+  return new Response(new Uint8Array(png), {
     headers: {
       "Content-Type": "image/png",
       "Cache-Control": "private, no-store",

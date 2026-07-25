@@ -293,6 +293,8 @@
     "stats": "Stats",
     "favorites": "Favorites",
     "study": "Study",
+    "create": "Create",
+    "pricing": "Plans",
     "upgrade": "Request upgrade",
     "studio": "Studio",
     "queue": "Quality queue",
@@ -442,6 +444,8 @@
   "WordDock": {
     "linksAria": "Study links",
     "fullIrab": "Full ayah iʿrāb",
+    "createImage": "Create image",
+    "createVideo": "Create video",
     "rootLink": "Root “{root}”",
     "layersAria": "Word analysis layers",
     "syntax": "Syntax",

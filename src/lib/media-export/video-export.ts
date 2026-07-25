@@ -432,5 +432,5 @@ export async function exportProjectToVideo(opts: {
   const target = muxer.target as ArrayBufferTarget;
   await audioCtx.close();
   onProgress?.(100, "done");
-  return new Blob([target.buffer], { type: "video/mp4" });
+  return new Blob([new Uint8Array(target.buffer)], { type: "video/mp4" });
 }

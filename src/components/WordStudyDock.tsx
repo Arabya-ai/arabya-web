@@ -292,6 +292,22 @@ export function WordStudyDock({
               {t("rootLink", { root: morph.root })}
             </Link>
           ) : null}
+          {dockSurahId && dockVerse ? (
+            <>
+              <Link
+                href={`/create/image?s=${dockSurahId}&v=${dockVerse}`}
+                className="word-dock-link"
+              >
+                {t("createImage")}
+              </Link>
+              <Link
+                href={`/create/video?s=${dockSurahId}&v=${dockVerse}`}
+                className="word-dock-link"
+              >
+                {t("createVideo")}
+              </Link>
+            </>
+          ) : null}
         </nav>
       </div>
 
