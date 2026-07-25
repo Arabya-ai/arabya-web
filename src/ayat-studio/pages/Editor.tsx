@@ -202,16 +202,17 @@ export default function Editor() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-4 h-[calc(100vh-5rem)]">
+    <div className="flex min-h-0 flex-col gap-3 md:gap-4 xl:h-[calc(100dvh-5.5rem)] xl:flex-row xl:items-stretch">
       {/* Settings Panels */}
-      <div className="w-full lg:w-96 shrink-0 overflow-y-auto rounded-2xl border border-accent/20 bg-card/60 backdrop-blur-md shadow-deep">
-        <div className="px-4 py-4 border-b border-accent/15 flex items-center justify-between bg-gradient-to-l from-accent/5 to-transparent">
+      <div className="order-2 flex max-h-[min(52vh,28rem)] w-full shrink-0 flex-col overflow-hidden rounded-2xl border border-accent/20 bg-card/60 shadow-deep backdrop-blur-md sm:max-h-[min(56vh,32rem)] xl:order-1 xl:max-h-none xl:w-[min(100%,22rem)] xl:min-w-[18rem] 2xl:w-96">
+        <div className="flex shrink-0 items-center justify-between border-b border-accent/15 bg-gradient-to-l from-accent/5 to-transparent px-3 py-3 sm:px-4 sm:py-4">
           <div className="min-w-0 flex-1">
             <p className="text-[10px] tracking-widest uppercase text-accent/70">المشروع</p>
-            <h2 className="font-display font-semibold text-foreground truncate">{project.title}</h2>
+            <h2 className="truncate font-display font-semibold text-foreground">{project.title}</h2>
           </div>
-          <Save className="h-4 w-4 text-accent shrink-0" />
+          <Save className="h-4 w-4 shrink-0 text-accent" />
         </div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
 
         <EditorPanel title="القارئ والسورة" icon={BookOpen} defaultOpen>
           <Select value={project.reciterId} onValueChange={(v) => update({ reciterId: v })}>
@@ -421,17 +422,21 @@ export default function Editor() {
             الفيديو MP4 مع الصوت في المتصفح (Chrome/Edge). الصورة PNG من خادم عربية.
           </p>
         </EditorPanel>
+        </div>
       </div>
 
       {/* Preview Area */}
-      <div className="flex-1 flex flex-col items-center justify-center rounded-2xl border border-accent/20 bg-card/30 backdrop-blur-md p-4 overflow-hidden relative">
-        <div className="pattern-mihrab absolute inset-0 opacity-20" />
-        <div className="mb-3 text-xs tracking-widest uppercase text-accent/70 relative">معاينة مباشرة</div>
+      <div className="relative order-1 flex min-h-[min(58vh,36rem)] flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl border border-accent/20 bg-card/30 p-3 backdrop-blur-md sm:min-h-[min(60vh,40rem)] sm:p-4 xl:order-2 xl:min-h-0">
+        <div className="pattern-mihrab pointer-events-none absolute inset-0 opacity-20" />
+        <div className="relative mb-2 text-xs tracking-widest uppercase text-accent/70 sm:mb-3">
+          معاينة مباشرة
+        </div>
         <div
-          className={`${previewAspect} w-full max-w-xs rounded-2xl shadow-deep relative overflow-hidden flex flex-col border border-accent/30`}
+          className={`${previewAspect} relative flex w-full max-w-[min(100%,20rem)] flex-col overflow-hidden rounded-2xl border border-accent/30 shadow-deep sm:max-w-xs`}
           style={{
-            maxHeight: "70vh",
-            background: "linear-gradient(180deg, hsl(178 50% 18%) 0%, hsl(200 50% 8%) 100%)",
+            maxHeight: "min(70vh, 36rem)",
+            background:
+              "linear-gradient(180deg, hsl(178 50% 18%) 0%, hsl(200 50% 8%) 100%)",
           }}
         >
           {project.bgUrl && project.bgKind !== "video" && (

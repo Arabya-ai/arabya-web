@@ -366,3 +366,22 @@
     transparent
   );
 }
+
+/* Studio shell — prevent sidebar/content overlap (Tailwind v4 + RTL) */
+.ayat-studio-shell {
+  --sidebar-width: 16rem;
+  --sidebar-width-icon: 3.25rem;
+}
+
+.ayat-studio-shell > [data-slot="sidebar-gap"],
+.ayat-studio-shell .group.peer > div:first-child {
+  flex-shrink: 0;
+}
+
+@media (max-width: 1023px) {
+  .ayat-studio .container {
+    width: 100%;
+    max-width: 100%;
+    padding-inline: 1rem;
+  }
+}

@@ -54,22 +54,22 @@ export default function Landing() {
 
       {/* Navbar */}
       <nav className="sticky top-0 z-50 border-b border-accent/10 bg-background/70 backdrop-blur-xl">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href={studioPath("/")} className="flex items-center gap-3 group">
-            <ArabesqueMedallion size={36} className="text-accent transition-transform group-hover:rotate-45 duration-700" />
-            <div className="flex flex-col leading-none">
-              <span className="font-display text-lg font-bold text-foreground">عربية ستوديو</span>
-              <span className="text-[10px] text-accent/70 tracking-widest">ARABYA • STUDIO</span>
+        <div className="container mx-auto flex h-14 items-center justify-between gap-2 px-3 sm:h-16 sm:px-4">
+          <Link href={studioPath("/")} className="flex min-w-0 items-center gap-2 sm:gap-3 group">
+            <ArabesqueMedallion size={32} className="shrink-0 text-accent transition-transform group-hover:rotate-45 duration-700 sm:h-9" />
+            <div className="flex min-w-0 flex-col leading-none">
+              <span className="truncate font-display text-base font-bold text-foreground sm:text-lg">عربية ستوديو</span>
+              <span className="hidden text-[10px] tracking-widest text-accent/70 sm:inline">ARABYA • STUDIO</span>
             </div>
           </Link>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" asChild className="hidden sm:inline-flex">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+            <Button variant="ghost" asChild className="hidden md:inline-flex">
               <a href="#features">المميزات</a>
             </Button>
-            <Button variant="ghost" asChild className="hidden sm:inline-flex">
+            <Button variant="ghost" asChild className="hidden md:inline-flex">
               <a href="#faq">الأسئلة</a>
             </Button>
-            <Button variant="hero" asChild>
+            <Button variant="hero" asChild size="sm" className="sm:h-10 sm:px-5">
               <Link href={studioPath("/dashboard")}>
                 <Wand2 className="h-4 w-4" />
                 ادخل الاستوديو

@@ -34,8 +34,12 @@ export function AppSidebar() {
   const showEditorTools = canAccessStudio(session?.user?.role ?? "user");
 
   return (
-    <Sidebar collapsible="icon" side="right" className="border-l border-sidebar-border">
-      <SidebarContent className="bg-sidebar relative overflow-hidden">
+    <Sidebar
+      collapsible="icon"
+      side="right"
+      className="border-sidebar-border border-l"
+    >
+      <SidebarContent className="relative overflow-x-hidden overflow-y-auto bg-sidebar">
         <div className="pattern-stars absolute inset-0 opacity-40 pointer-events-none" />
 
         {/* Logo */}

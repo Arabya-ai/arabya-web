@@ -47,7 +47,7 @@ export default function NewProject() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto w-full max-w-3xl px-1 sm:px-0">
       <div className="mb-8 text-center">
         <ArabesqueMedallion size={56} className="mx-auto mb-4 text-accent animate-pulse-glow" />
         <p className="mb-2 text-xs tracking-[0.3em] uppercase text-accent">بداية جديدة</p>
