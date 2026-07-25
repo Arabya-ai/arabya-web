@@ -149,3 +149,19 @@ export type RootsIndex = {
   note?: string;
   roots: RootEntry[];
 };
+
+/** Slim per-word sense from quran-words.com (semantics + lexicon key). */
+export type WordSenseEntry = {
+  sense: string | null;
+  lexiconKey: string | null;
+  url?: string | null;
+};
+
+export type WordSensesSurah = {
+  id: number;
+  source: string;
+  sourceLabel?: string;
+  sourceUrl?: string;
+  wordCount: number;
+  words: Record<string, WordSenseEntry>;
+};

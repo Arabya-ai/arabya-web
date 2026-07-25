@@ -42,6 +42,9 @@ yarn-error.log*
 # local acquisition staging (Internet Archive / owner drops)
 /incoming/
 
+# local scrape cache for quran-words import/fetch
+/.cache/
+
 # vercel
 .vercel
 
