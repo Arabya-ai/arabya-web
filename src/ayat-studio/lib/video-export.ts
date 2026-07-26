@@ -488,6 +488,11 @@ function resolveExportLayer(
   return map?.[ayah] || "";
 }
 
+/** Canvas only accepts ltr|rtl|inherit — not CSS "auto". */
+function canvasTextDirection(text: string): CanvasDirection {
+  return /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/.test(text) ? "rtl" : "ltr";
+}
+
 async function resampleBuffer(
   ctx: AudioContext,
   buffer: AudioBuffer,
@@ -744,7 +749,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
     );
     ctx.fillStyle = project.translationTextColor || "#f0e6d0";
     ctx.font = `${tSize}px "IBM Plex Sans Arabic", sans-serif`;
-    ctx.direction = "auto" as CanvasDirection;
+    ctx.direction = canvasTextDirection(translationText);
     ctx.shadowColor = "rgba(0,0,0,0.7)";
     ctx.shadowBlur = 10;
     const used = wrapTextLines(
@@ -768,7 +773,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
       tafsirText.length > 360 ? `${tafsirText.slice(0, 360)}…` : tafsirText;
     ctx.fillStyle = project.tafsirTextColor || "#d4c4a8";
     ctx.font = `${tSize}px "IBM Plex Sans Arabic", sans-serif`;
-    ctx.direction = "auto" as CanvasDirection;
+    ctx.direction = canvasTextDirection(clipped);
     ctx.shadowColor = "rgba(0,0,0,0.7)";
     ctx.shadowBlur = 8;
     wrapTextLines(
@@ -887,8 +892,13 @@ async function fetchAsObjectUrl(src: string): Promise<{ url: string; revoke: () 
   if (src.startsWith("data:") || src.startsWith("blob:")) {
     return { url: src, revoke: () => undefined };
   }
+  // Same-origin paths can be used directly by <video>/<img> (avoids CSP blob friction).
+  // Still buffer remote/proxied media so canvas export is not CORS-tainted.
+  if (src.startsWith("/") && !src.startsWith("//")) {
+    return { url: src, revoke: () => undefined };
+  }
   const res = await fetch(src, {
-    credentials: src.startsWith("/") ? "same-origin" : "omit",
+    credentials: "omit",
   });
   if (!res.ok) {
     throw new Error(`فشل جلب الوسائط (${res.status})`);
