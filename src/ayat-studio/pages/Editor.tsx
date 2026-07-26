@@ -12,7 +12,7 @@ import { Switch } from "@/ayat-studio/components/ui/switch";
 import { reciters, surahs, aspectRatios, transitions, visualizers } from "@/ayat-studio/lib/quran-data";
 import {
   BookOpen, Image as ImageIcon, Languages, Type, Music, Download,
-  ChevronDown, Loader2, Save, Sparkles, AudioLines,
+  ChevronDown, ChevronLeft, ChevronRight, Loader2, Save, Sparkles, AudioLines,
 } from "lucide-react";
 import { getProject, saveProject, type StoredProject } from "@/ayat-studio/lib/projects-store";
 import { exportProjectToVideo, downloadBlob } from "@/ayat-studio/lib/video-export";
@@ -24,6 +24,8 @@ import { useSession } from "next-auth/react";
 import { canCreateVideo } from "@/lib/plans";
 import { Link } from "@/i18n/navigation";
 import { studioMediaUrl } from "@/ayat-studio/lib/media-url";
+import { fetchAyahs, type AyahData } from "@/ayat-studio/lib/quran-api";
+import { clampAyahPreviewIndex } from "@/ayat-studio/lib/studio-preview";
 
 function EditorPanel({ title, icon: Icon, children, defaultOpen = false }: { title: string; icon: any; children: React.ReactNode; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -56,6 +58,10 @@ export default function Editor() {
   const [exportingPng, setExportingPng] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressLabel, setProgressLabel] = useState("");
+  const [previewAyahs, setPreviewAyahs] = useState<AyahData[]>([]);
+  const [previewAyahIndex, setPreviewAyahIndex] = useState(0);
+  const [ayahsLoading, setAyahsLoading] = useState(false);
+  const [ayahsError, setAyahsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -67,6 +73,36 @@ export default function Editor() {
     }
     setProject(p);
   }, [id, router, toast]);
+
+  useEffect(() => {
+    if (!project) return;
+    let cancelled = false;
+    const load = async () => {
+      setAyahsLoading(true);
+      setAyahsError(null);
+      try {
+        const ayahs = await fetchAyahs(
+          project.surahId,
+          project.ayahStart,
+          project.ayahEnd,
+          project.reciterId,
+        );
+        if (cancelled) return;
+        setPreviewAyahs(ayahs);
+        setPreviewAyahIndex(0);
+      } catch (e: unknown) {
+        if (cancelled) return;
+        setPreviewAyahs([]);
+        setAyahsError(e instanceof Error ? e.message : "فشل جلب الآيات");
+      } finally {
+        if (!cancelled) setAyahsLoading(false);
+      }
+    };
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [project?.surahId, project?.ayahStart, project?.ayahEnd, project?.reciterId]);
 
   if (!project) {
     return <div className="flex h-64 items-center justify-center text-muted-foreground">جاري التحميل...</div>;
@@ -90,6 +126,8 @@ export default function Editor() {
   const selectedSurah = surahs.find((s) => s.id === project.surahId);
   const selectedReciter = reciters.find((r) => r.id === project.reciterId);
   const previewAspect = project.ratio === "9:16" ? "aspect-[9/16]" : project.ratio === "1:1" ? "aspect-square" : "aspect-video";
+  const currentPreviewAyah =
+    previewAyahs[clampAyahPreviewIndex(previewAyahIndex, previewAyahs.length)] || null;
 
   const handleExport = async () => {
     if (!plusOk) {
@@ -251,11 +289,35 @@ export default function Editor() {
           <div className="grid grid-cols-2 gap-2">
             <div>
               <Label className="text-xs text-accent">من آية</Label>
-              <Input type="number" value={project.ayahStart} onChange={(e) => update({ ayahStart: Number(e.target.value) || 1 })} min="1" className="bg-background/50 border-accent/20 text-center" />
+              <Input
+                type="number"
+                value={project.ayahStart}
+                onChange={(e) => {
+                  const start = Math.max(1, Number(e.target.value) || 1);
+                  const end = Math.max(start, project.ayahEnd);
+                  const cappedEnd =
+                    end - start + 1 > 40 ? start + 39 : end;
+                  update({ ayahStart: start, ayahEnd: cappedEnd });
+                }}
+                min="1"
+                className="bg-background/50 border-accent/20 text-center"
+              />
             </div>
             <div>
               <Label className="text-xs text-accent">إلى آية</Label>
-              <Input type="number" value={project.ayahEnd} onChange={(e) => update({ ayahEnd: Number(e.target.value) || 1 })} max={selectedSurah?.ayahCount} className="bg-background/50 border-accent/20 text-center" />
+              <Input
+                type="number"
+                value={project.ayahEnd}
+                onChange={(e) => {
+                  const end = Math.max(1, Number(e.target.value) || 1);
+                  const start = Math.min(project.ayahStart, end);
+                  const cappedEnd =
+                    end - start + 1 > 40 ? start + 39 : Math.max(start, end);
+                  update({ ayahStart: start, ayahEnd: cappedEnd });
+                }}
+                max={selectedSurah?.ayahCount}
+                className="bg-background/50 border-accent/20 text-center"
+              />
             </div>
           </div>
         </EditorPanel>
@@ -505,31 +567,82 @@ export default function Editor() {
             style={{ background: "#000", opacity: project.overlayOpacity / 100 }}
           />
 
-          <div className={`relative z-[3] flex-1 flex flex-col p-6 ${
+          <div className={`relative z-[3] flex min-h-0 flex-1 flex-col p-4 sm:p-6 ${
             project.overlayPosition === "top" ? "justify-start" :
             project.overlayPosition === "bottom" ? "justify-end" :
             "justify-center"
           }`}>
             <div className="text-center">
               <p className="mb-3 text-xs tracking-widest" style={{ color: "#C8A951" }}>
-                {selectedSurah?.name} · الآيات {project.ayahStart}-{project.ayahEnd}
+                {selectedSurah?.name} ·{" "}
+                {currentPreviewAyah
+                  ? `آية ${currentPreviewAyah.numberInSurah}`
+                  : `الآيات ${project.ayahStart}-${project.ayahEnd}`}
               </p>
-              <p className="font-quran leading-loose mb-4" style={{ fontSize: `${Math.min(project.fontSize * 0.5, 28)}px`, color: project.textColor, textShadow: "0 2px 12px rgba(0,0,0,0.8)" }}>
-                بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
-              </p>
-              {project.translationEnabled && (
-                <p className="text-sm italic" style={{ color: "rgba(255,255,255,0.75)" }}>
-                  In the name of Allah, the Most Gracious, the Most Merciful.
+              {ayahsLoading ? (
+                <p className="flex items-center justify-center gap-2 text-sm text-white/70">
+                  <Loader2 className="h-4 w-4 animate-spin" /> جاري تحميل نص الآيات…
                 </p>
+              ) : ayahsError ? (
+                <p className="text-sm text-red-300">{ayahsError}</p>
+              ) : currentPreviewAyah ? (
+                <p
+                  className="font-quran leading-loose mb-3"
+                  style={{
+                    fontSize: `${Math.min(project.fontSize * 0.45, 26)}px`,
+                    color: project.textColor,
+                    textShadow: "0 2px 12px rgba(0,0,0,0.8)",
+                  }}
+                >
+                  {currentPreviewAyah.text}
+                </p>
+              ) : (
+                <p className="text-sm text-white/60">لا يوجد نص للعرض</p>
+              )}
+              {previewAyahs.length > 1 && (
+                <div className="mt-2 flex items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    className="rounded-full border border-white/20 bg-black/30 p-1 text-white/80 hover:bg-black/50"
+                    onClick={() =>
+                      setPreviewAyahIndex((i) =>
+                        clampAyahPreviewIndex(i - 1, previewAyahs.length),
+                      )
+                    }
+                    aria-label="الآية السابقة"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                  <span className="text-[10px] tabular-nums text-white/60">
+                    {previewAyahIndex + 1} / {previewAyahs.length}
+                  </span>
+                  <button
+                    type="button"
+                    className="rounded-full border border-white/20 bg-black/30 p-1 text-white/80 hover:bg-black/50"
+                    onClick={() =>
+                      setPreviewAyahIndex((i) =>
+                        clampAyahPreviewIndex(i + 1, previewAyahs.length),
+                      )
+                    }
+                    aria-label="الآية التالية"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                </div>
               )}
             </div>
           </div>
 
-          <div className="relative z-10 flex items-center justify-between px-4 pb-12">
+          <div className="relative z-[3] flex items-center justify-between px-4 pb-12">
             <span className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>{selectedReciter?.name}</span>
           </div>
 
-          <AudioPreviewPlayer project={project} />
+          <AudioPreviewPlayer
+            project={project}
+            onAyahIndexChange={(idx) =>
+              setPreviewAyahIndex(clampAyahPreviewIndex(idx, previewAyahs.length))
+            }
+          />
         </div>
       </div>
     </div>

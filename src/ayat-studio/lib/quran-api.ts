@@ -27,6 +27,7 @@ async function fetchSurahText(
 ) {
   const res = await fetch(
     `/api/create/ayahs?s=${surahId}&from=${ayahStart}&to=${ayahEnd}`,
+    { credentials: "same-origin" },
   );
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));

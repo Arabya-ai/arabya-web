@@ -1,0 +1,59 @@
+import { describe, expect, it } from "vitest";
+import { pickBestVideoFile, type PexelsVideo } from "@/ayat-studio/lib/pexels";
+import {
+  isAllowedStudioMediaUrl,
+  studioMediaUrl,
+} from "@/ayat-studio/lib/media-url";
+import {
+  ayahIndexAtTime,
+  clampAyahPreviewIndex,
+} from "@/ayat-studio/lib/studio-preview";
+
+describe("studio ayah preview helpers", () => {
+  it("clamps preview index", () => {
+    expect(clampAyahPreviewIndex(-1, 3)).toBe(0);
+    expect(clampAyahPreviewIndex(9, 3)).toBe(2);
+    expect(clampAyahPreviewIndex(1, 0)).toBe(0);
+  });
+
+  it("maps playback time to ayah segment", () => {
+    const segs = [
+      { start: 0, end: 2 },
+      { start: 2, end: 5 },
+      { start: 5, end: 8 },
+    ];
+    expect(ayahIndexAtTime(segs, 0.5)).toBe(0);
+    expect(ayahIndexAtTime(segs, 2.1)).toBe(1);
+    expect(ayahIndexAtTime(segs, 7.9)).toBe(2);
+    expect(ayahIndexAtTime(segs, 99)).toBe(2);
+  });
+});
+
+describe("pexels video pick for studio", () => {
+  it("selects vimeo external mp4 for portrait projects", () => {
+    const video = {
+      id: 1,
+      width: 1080,
+      height: 1920,
+      duration: 12,
+      url: "",
+      image: "https://images.pexels.com/x.jpg",
+      user: { name: "a", url: "" },
+      video_pictures: [],
+      video_files: [
+        {
+          id: 1,
+          quality: "hd",
+          file_type: "video/mp4",
+          width: 1080,
+          height: 1920,
+          link: "https://player.vimeo.com/external/1.hd.mp4?s=x",
+        },
+      ],
+    } as PexelsVideo;
+    const file = pickBestVideoFile(video, "portrait");
+    expect(file?.link).toContain("player.vimeo.com");
+    expect(isAllowedStudioMediaUrl(file!.link)).toBe(true);
+    expect(studioMediaUrl(file!.link)).toContain("/api/studio/media");
+  });
+});

@@ -4,16 +4,19 @@ import { Play, Pause, Volume2, VolumeX, Loader2 } from "lucide-react";
 import { fetchAyahs, fetchAndDecodeAudio } from "@/ayat-studio/lib/quran-api";
 import type { StoredProject } from "@/ayat-studio/lib/projects-store";
 import { drawVisualizer, type VisualizerType } from "@/ayat-studio/lib/visualizer";
+import { ayahIndexAtTime } from "@/ayat-studio/lib/studio-preview";
 
 interface Props {
   project: StoredProject;
+  /** Fires while playing so the preview can show the matching ayah text. */
+  onAyahIndexChange?: (index: number) => void;
 }
 
 /**
  * Live preview audio player with reactive visualizer overlay.
  * Loads audio lazily on first play, then renders visualizer onto an absolutely-positioned canvas.
  */
-export function AudioPreviewPlayer({ project }: Props) {
+export function AudioPreviewPlayer({ project, onAyahIndexChange }: Props) {
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -32,6 +35,10 @@ export function AudioPreviewPlayer({ project }: Props) {
   const startedAtSecRef = useRef(0);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
+  const segmentsRef = useRef<{ start: number; end: number }[]>([]);
+  const lastAyahIndexRef = useRef(-1);
+  const onAyahIndexChangeRef = useRef(onAyahIndexChange);
+  onAyahIndexChangeRef.current = onAyahIndexChange;
 
   const reciterId = project.reciterId;
   const surahId = project.surahId;
@@ -43,6 +50,8 @@ export function AudioPreviewPlayer({ project }: Props) {
     stop();
     setReady(false);
     bufferRef.current = null;
+    segmentsRef.current = [];
+    lastAyahIndexRef.current = -1;
     setProgress(0);
     setDuration(0);
   }, [reciterId, surahId, ayahStart, ayahEnd]);
@@ -62,8 +71,9 @@ export function AudioPreviewPlayer({ project }: Props) {
       const ctx = ctxRef.current ?? new (window.AudioContext || (window as any).webkitAudioContext)();
       ctxRef.current = ctx;
       const ayahs = await fetchAyahs(surahId, ayahStart, ayahEnd, reciterId);
-      const { buffer } = await fetchAndDecodeAudio(ayahs, ctx);
+      const { buffer, segments } = await fetchAndDecodeAudio(ayahs, ctx);
       bufferRef.current = buffer;
+      segmentsRef.current = segments.map((s) => ({ start: s.start, end: s.end }));
       setDuration(buffer.duration);
       setReady(true);
       return buffer;
@@ -72,6 +82,14 @@ export function AudioPreviewPlayer({ project }: Props) {
       throw e;
     } finally {
       setLoading(false);
+    }
+  };
+
+  const emitAyahIndex = (timeSec: number) => {
+    const idx = ayahIndexAtTime(segmentsRef.current, timeSec);
+    if (idx !== lastAyahIndexRef.current) {
+      lastAyahIndexRef.current = idx;
+      onAyahIndexChangeRef.current?.(idx);
     }
   };
 
@@ -85,6 +103,7 @@ export function AudioPreviewPlayer({ project }: Props) {
     analyser.getByteFrequencyData(data as any);
     const elapsed = ctx.currentTime - startTimeRef.current + startedAtSecRef.current;
     setProgress(Math.min(elapsed / (bufferRef.current?.duration || 1), 1));
+    emitAyahIndex(elapsed);
 
     drawVisualizer({
       canvas,
@@ -130,6 +149,7 @@ export function AudioPreviewPlayer({ project }: Props) {
       startedAtSecRef.current = 0;
       source.start(0);
       setPlaying(true);
+      emitAyahIndex(0);
       rafRef.current = requestAnimationFrame(renderLoop);
 
       source.onended = () => setPlaying(false);
@@ -159,7 +179,6 @@ export function AudioPreviewPlayer({ project }: Props) {
 
   return (
     <>
-      {/* Visualizer canvas overlay */}
       {(project.visualizer ?? "bars") !== "none" && (
         <canvas
           ref={canvasRef}
@@ -169,9 +188,9 @@ export function AudioPreviewPlayer({ project }: Props) {
         />
       )}
 
-      {/* Controls */}
       <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-accent/30 bg-background/70 px-3 py-1.5 backdrop-blur-md">
         <button
+          type="button"
           onClick={playing ? stop : play}
           disabled={loading}
           className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-accent-foreground hover:scale-110 transition"
@@ -185,7 +204,7 @@ export function AudioPreviewPlayer({ project }: Props) {
         <span className="text-[10px] tabular-nums text-muted-foreground">
           {ready ? `${Math.floor(progress * duration)}s / ${Math.floor(duration)}s` : "—"}
         </span>
-        <button onClick={toggleMute} className="text-muted-foreground hover:text-accent transition" aria-label={muted ? "تشغيل الصوت" : "كتم الصوت"}>
+        <button type="button" onClick={toggleMute} className="text-muted-foreground hover:text-accent transition" aria-label={muted ? "تشغيل الصوت" : "كتم الصوت"}>
           {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
         </button>
       </div>
