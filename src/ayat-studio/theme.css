@@ -54,8 +54,6 @@
   font-family: var(--font-tajawal), "Tajawal", system-ui, sans-serif;
   font-feature-settings: "kern", "liga", "calt";
   -webkit-font-smoothing: antialiased;
-  font-size: 1.0625rem;
-  line-height: 1.65;
 }
 
 html[data-theme="dark"] .ayat-studio,
@@ -100,8 +98,6 @@ html[data-theme="dark"] .ayat-studio-portal {
   --shadow-gold: 0 10px 40px -10px hsl(41 75% 58% / 0.35);
   --shadow-deep: 0 20px 60px -15px hsl(168 50% 2% / 0.7);
   --shadow-glow: 0 0 50px hsl(173 80% 45% / 0.2);
-  font-size: 1rem;
-  line-height: 1.6;
 }
 
 /* Let Arabya body paint the page background (same day/night as the rest of the site). */
@@ -472,7 +468,7 @@ html[data-theme="dark"] .arabya-mark-icon {
   }
 }
 
-/* Clearer base type in light studio surfaces — do not override display headings */
+/* Clearer base type — do not override display headings */
 .ayat-studio :where(p, li, label, button, input, select, textarea) {
   letter-spacing: 0.01em;
 }

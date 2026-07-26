@@ -34,17 +34,17 @@ const features = [
 
 const steps = [
   {
-    num: "٠١",
+    num: "١",
     title: "اختر التلاوة",
     desc: "حدد السورة والآيات والقارئ المفضل لديك",
   },
   {
-    num: "٠٢",
+    num: "٢",
     title: "صمّم اللوحة",
     desc: "اختر الخلفية والخط والألوان لتعكس روح الآية",
   },
   {
-    num: "٠٣",
+    num: "٣",
     title: "صدّر وانشر",
     desc: "حمّل الفيديو بصيغة MP4 جاهز للنشر مباشرة",
   },
@@ -84,7 +84,6 @@ export default function Landing() {
             <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/5 px-5 py-2 text-sm text-accent shadow-glow">
               <Moon className="h-4 w-4" />
               <span className="font-medium">استوديو متكامل لإنتاج المحتوى القرآني</span>
-              <StarOrnament className="h-3 w-3" />
             </div>
 
             <h1 className="mb-8 font-display text-5xl font-bold leading-[1.15] tracking-tight md:text-7xl lg:text-8xl">
@@ -131,7 +130,7 @@ export default function Landing() {
             <div className="grid md:grid-cols-[280px_1fr]">
               {/* Side panel */}
               <div className="border-l border-accent/10 bg-background/40 p-5">
-                <div className="mb-4 text-xs font-medium uppercase tracking-wider text-accent/70">إعدادات اللوحة</div>
+                <div className="mb-4 text-sm font-medium tracking-wider text-accent">إعدادات اللوحة</div>
                 <div className="space-y-2.5">
                   {[
                     { label: "القارئ", value: "مشاري العفاسي" },
@@ -140,7 +139,7 @@ export default function Landing() {
                     { label: "الخلفية", value: "مسجد ليلي" },
                     { label: "المقاس", value: "9:16 ريلز" },
                   ].map((item) => (
-                    <div key={item.label} className="flex items-center justify-between rounded-lg border border-border/40 bg-card/50 px-3 py-2 text-xs">
+                    <div key={item.label} className="flex items-center justify-between rounded-lg border border-border/40 bg-card/50 px-3 py-2.5 text-sm">
                       <span className="text-muted-foreground">{item.label}</span>
                       <span className="font-medium text-foreground">{item.value}</span>
                     </div>
@@ -162,14 +161,18 @@ export default function Landing() {
                   }}>
                   <div className="pattern-stars pointer-events-none absolute inset-0 opacity-50" aria-hidden />
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-5 text-center">
-                    <ArabesqueMedallion size={40} className="mb-4 text-accent animate-pulse-glow" />
-                    <p className="font-quran text-xl leading-loose text-foreground" style={{ textShadow: "0 0 20px rgba(200,169,81,0.5)" }}>
+                    <p
+                      className="font-quran text-xl leading-loose text-white md:text-2xl"
+                      style={{ textShadow: "0 2px 18px rgba(0,0,0,0.65)" }}
+                    >
                       الرَّحْمَٰنُ
                       <br />
                       عَلَّمَ ٱلْقُرْءَانَ
                     </p>
-                    <div className="mt-4 h-px w-12 bg-gradient-to-r from-transparent via-accent to-transparent" />
-                    <p className="mt-2 text-[10px] tracking-widest text-accent/80">سورة الرحمن • ١-٢</p>
+                    <div className="mt-4 h-px w-12 bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+                    <p className="mt-2 text-xs tracking-widest text-white/80">
+                      سورة الرحمن • ١-٢
+                    </p>
                   </div>
                   {/* Bottom progress bar */}
                   <div className="absolute bottom-3 left-3 right-3">
@@ -202,7 +205,7 @@ export default function Landing() {
             <h2 className="mb-4 font-display text-4xl font-bold text-foreground md:text-5xl">
               أدوات صُنعت <span className="text-gradient-gold">بإتقان</span>
             </h2>
-            <p className="mx-auto max-w-xl text-muted-foreground">
+            <p className="mx-auto max-w-xl text-base text-muted-foreground md:text-lg">
               كل ما تحتاجه لإنتاج فيديو قرآني فاخر — في مكان واحد، وبتجربة سلسة
             </p>
           </div>
@@ -219,8 +222,8 @@ export default function Landing() {
                   <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/30 bg-gradient-to-br from-accent/15 to-transparent shadow-glow">
                     <f.icon className="h-6 w-6 text-accent" />
                   </div>
-                  <h3 className="mb-2 font-display text-lg font-semibold text-foreground">{f.title}</h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
+                  <h3 className="mb-2 font-display text-xl font-semibold text-foreground">{f.title}</h3>
+                  <p className="text-base leading-relaxed text-muted-foreground">{f.desc}</p>
                   <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-gradient-to-r from-transparent via-accent to-transparent transition-all duration-500 group-hover:w-full" />
                 </CardContent>
               </Card>
@@ -231,55 +234,40 @@ export default function Landing() {
 
       <OrnamentDivider />
 
-      {/* How it works — editorial steps, no brand mark or icons */}
-      <section
-        className="relative overflow-hidden py-20 md:py-28"
-        aria-labelledby="studio-steps-heading"
-      >
+      {/* How it works — card steps, no brand logos */}
+      <section className="relative py-24" aria-labelledby="studio-steps-heading">
         <div className="container relative mx-auto px-4">
-          <header className="mx-auto mb-14 max-w-2xl text-center md:mb-16">
-            <p className="mb-3 text-xs font-medium tracking-[0.35em] text-accent">
+          <div className="mb-16 text-center">
+            <p className="mb-3 text-xs font-medium uppercase tracking-[0.3em] text-accent">
               الخطوات
             </p>
             <h2
               id="studio-steps-heading"
-              className="font-display text-3xl font-bold leading-tight text-foreground sm:text-4xl md:text-5xl"
+              className="mb-4 font-display text-4xl font-bold text-foreground md:text-5xl"
             >
               ثلاث خطوات إلى{" "}
               <span className="text-gradient-gold">التحفة</span>
             </h2>
-          </header>
+          </div>
 
-          <ol className="relative mx-auto grid max-w-5xl list-none gap-0 p-0 md:grid-cols-3">
-            {/* Desktop connector behind step markers */}
-            <div
-              className="pointer-events-none absolute inset-x-[12%] top-7 hidden h-px bg-gradient-to-l from-transparent via-accent/35 to-transparent md:block"
-              aria-hidden
-            />
-
-            {steps.map((s, i) => (
-              <li
+          <div className="mx-auto grid max-w-5xl gap-5 md:grid-cols-3 md:gap-6">
+            {steps.map((s) => (
+              <article
                 key={s.num}
-                className={`relative flex flex-col px-4 py-8 text-center md:px-6 md:py-2 ${
-                  i < steps.length - 1
-                    ? "border-b border-border/50 md:border-b-0"
-                    : ""
-                }`}
+                className="relative flex flex-col items-center rounded-3xl border border-border/80 bg-card px-6 py-10 text-center shadow-sm md:px-8 md:py-12"
               >
-                <div className="relative z-[1] mx-auto mb-7 flex h-14 w-14 items-center justify-center rounded-full border border-accent/40 bg-card shadow-[0_0_0_6px_hsl(var(--background))]">
-                  <span className="font-display text-lg font-bold tracking-wide text-accent">
-                    {s.num}
-                  </span>
-                </div>
-                <h3 className="mb-3 font-display text-xl font-semibold text-foreground md:text-2xl">
+                <span className="mb-6 font-display text-5xl font-bold leading-none text-accent md:text-6xl">
+                  {s.num}
+                </span>
+                <h3 className="mb-3 font-display text-2xl font-semibold text-foreground">
                   {s.title}
                 </h3>
-                <p className="mx-auto max-w-[17rem] text-sm leading-relaxed text-muted-foreground md:text-[0.95rem]">
+                <p className="max-w-[18rem] text-base leading-relaxed text-muted-foreground md:text-lg">
                   {s.desc}
                 </p>
-              </li>
+              </article>
             ))}
-          </ol>
+          </div>
         </div>
       </section>
 
@@ -311,7 +299,7 @@ export default function Landing() {
               <details key={i} className="group rounded-2xl border border-accent/15 bg-card/40 backdrop-blur-sm transition-all hover:border-accent/30 open:border-accent/40 open:shadow-glow">
                 <summary className="flex cursor-pointer items-center justify-between gap-4 px-6 py-5 font-medium text-foreground">
                   <span className="flex items-center gap-3">
-                    <StarOrnament className="h-3 w-3 text-accent" />
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden />
                     {faq.q}
                   </span>
                   <ChevronDown className="h-4 w-4 text-accent transition-transform duration-300 group-open:rotate-180" />
