@@ -1138,9 +1138,9 @@ export default function Editor() {
         <div className="relative z-[1] mb-2 shrink-0 text-center text-[11px] tracking-widest uppercase text-accent/80 sm:mb-3 sm:text-xs">
           معاينة مباشرة
         </div>
-        <div className="studio-live-preview__stage relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center p-1">
+        <div className="studio-live-preview__stage relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center p-1 pb-12">
           <div
-            className={`${previewAspect} studio-live-preview__frame relative flex flex-col overflow-hidden rounded-2xl border border-primary/35 shadow-deep`}
+            className={`${previewAspect} studio-live-preview__frame relative flex flex-col overflow-visible rounded-2xl border border-primary/35 shadow-deep`}
             style={{
               /* Shrink width when height caps so the whole frame (media) stays on screen */
               width: `min(20rem, 100%, calc(min(70vh, 36rem) * ${previewAr}))`,
@@ -1152,6 +1152,7 @@ export default function Editor() {
                 "linear-gradient(180deg, hsl(178 50% 18%) 0%, hsl(200 50% 8%) 100%)",
             }}
           >
+          <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl">
           {project.bgUrl && previewBgKind !== "video" && previewMedia.src && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -1205,6 +1206,7 @@ export default function Editor() {
           {(project.brandSignature ?? true) && (
             <div className="pointer-events-none absolute inset-2 z-[6] rounded-xl border border-[hsl(var(--accent)/0.4)]" />
           )}
+          </div>
 
           <div
             className={`relative z-[3] flex min-h-0 flex-1 flex-col p-4 sm:p-6 ${
@@ -1316,26 +1318,43 @@ export default function Editor() {
           </div>
 
           {!ayahOnly && (
-            <div className="relative z-[3] flex items-center justify-between px-4 pb-12">
+            <div className="relative z-[3] flex items-end justify-between gap-2 px-3 pb-3 pt-1 sm:px-4">
               <span
-                className="text-xs"
+                className="max-w-[45%] truncate text-[10px] sm:text-xs"
                 style={{ color: "rgba(255,255,255,0.5)" }}
               >
                 {selectedReciter?.name}
               </span>
               {(project.brandSignature ?? true) && (
-                <span
-                  className="text-[10px] tracking-widest sm:text-xs"
-                  style={{ color: "hsl(var(--accent) / 0.7)" }}
+                <div
+                  className="flex max-w-[55%] items-center gap-1.5"
+                  aria-label="عربية ستوديو"
                 >
-                  عربية
-                </span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/brand/arabya-mark-square.png"
+                    alt=""
+                    width={22}
+                    height={22}
+                    className="h-[22px] w-[22px] shrink-0 rounded-[5px] object-cover shadow-sm"
+                    draggable={false}
+                  />
+                  <div className="flex min-w-0 flex-col gap-0.5 text-start">
+                    <span className="font-display text-[10px] font-bold leading-none text-white sm:text-[11px]">
+                      عربية ستوديو
+                    </span>
+                    <span className="text-[7px] font-medium leading-none tracking-[0.18em] text-white/70 sm:text-[8px]">
+                      ARABYA • STUDIO
+                    </span>
+                  </div>
+                </div>
               )}
             </div>
           )}
 
           <AudioPreviewPlayer
             project={project}
+            controlsDock="below"
             onAyahIndexChange={(idx) =>
               setPreviewAyahIndex(
                 clampAyahPreviewIndex(idx, previewAyahs.length),

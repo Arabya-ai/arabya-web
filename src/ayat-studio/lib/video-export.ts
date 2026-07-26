@@ -805,9 +805,12 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
     const pad = Math.round(width * 0.02);
     ctx.strokeRect(pad, pad, width - pad * 2, height - pad * 2);
     ctx.fillStyle = "rgba(200,169,81,0.55)";
-    ctx.font = `${Math.round(width * 0.018)}px "IBM Plex Sans Arabic", sans-serif`;
+    ctx.font = `bold ${Math.round(width * 0.02)}px "Reem Kufi", "IBM Plex Sans Arabic", sans-serif`;
     ctx.textAlign = "left";
-    ctx.fillText("عربية", pad * 1.4, height - pad * 1.6);
+    ctx.fillText("عربية ستوديو", pad * 1.4, height - pad * 1.6);
+    ctx.font = `${Math.round(width * 0.012)}px "IBM Plex Sans Arabic", sans-serif`;
+    ctx.fillStyle = "rgba(255,255,255,0.45)";
+    ctx.fillText("ARABYA • STUDIO", pad * 1.4, height - pad * 0.85);
   }
 
   const barW = width * 0.7;

@@ -10,13 +10,22 @@ interface Props {
   project: StoredProject;
   /** Fires while playing so the preview can show the matching ayah text. */
   onAyahIndexChange?: (index: number) => void;
+  /**
+   * `overlay` — transport sits on the video (legacy).
+   * `below` — transport sits just under the frame so the video stays fully visible.
+   */
+  controlsDock?: "overlay" | "below";
 }
 
 /**
  * Live preview audio player with reactive visualizer overlay.
  * Loads audio lazily on first play, then renders visualizer onto an absolutely-positioned canvas.
  */
-export function AudioPreviewPlayer({ project, onAyahIndexChange }: Props) {
+export function AudioPreviewPlayer({
+  project,
+  onAyahIndexChange,
+  controlsDock = "below",
+}: Props) {
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -261,29 +270,55 @@ export function AudioPreviewPlayer({ project, onAyahIndexChange }: Props) {
         />
       )}
 
-      <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-accent/30 bg-background/70 px-3 py-1.5 backdrop-blur-md">
+      <div
+        className={
+          controlsDock === "below"
+            ? "absolute left-1/2 top-full z-20 mt-2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-accent/30 bg-background/85 px-3 py-1.5 shadow-md backdrop-blur-md"
+            : "absolute bottom-2 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-accent/30 bg-background/70 px-3 py-1.5 backdrop-blur-md"
+        }
+      >
         <button
           type="button"
           onClick={playing ? pause : play}
           disabled={loading}
-          className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-accent-foreground hover:scale-110 transition"
+          className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-accent-foreground transition hover:scale-110"
           aria-label={playing ? "إيقاف" : "تشغيل"}
         >
-          {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : playing ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5 ml-0.5" />}
+          {loading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : playing ? (
+            <Pause className="h-3.5 w-3.5" />
+          ) : (
+            <Play className="ml-0.5 h-3.5 w-3.5" />
+          )}
         </button>
         <div className="h-1 w-24 overflow-hidden rounded-full bg-muted/60">
-          <div className="h-full bg-accent transition-all" style={{ width: `${progress * 100}%` }} />
+          <div
+            className="h-full bg-accent transition-all"
+            style={{ width: `${progress * 100}%` }}
+          />
         </div>
         <span className="text-[10px] tabular-nums text-muted-foreground">
-          {ready ? `${Math.floor(progress * duration)}s / ${Math.floor(duration)}s` : "—"}
+          {ready
+            ? `${Math.floor(progress * duration)}s / ${Math.floor(duration)}s`
+            : "—"}
         </span>
-        <button type="button" onClick={toggleMute} className="text-muted-foreground hover:text-accent transition" aria-label={muted ? "تشغيل الصوت" : "كتم الصوت"}>
-          {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+        <button
+          type="button"
+          onClick={toggleMute}
+          className="text-muted-foreground transition hover:text-accent"
+          aria-label={muted ? "تشغيل الصوت" : "كتم الصوت"}
+        >
+          {muted ? (
+            <VolumeX className="h-3.5 w-3.5" />
+          ) : (
+            <Volume2 className="h-3.5 w-3.5" />
+          )}
         </button>
       </div>
 
       {error && (
-        <div className="absolute top-2 left-1/2 z-20 -translate-x-1/2 rounded-md bg-destructive/90 px-3 py-1 text-[10px] text-destructive-foreground">
+        <div className="absolute left-1/2 top-2 z-20 -translate-x-1/2 rounded-md bg-destructive/90 px-3 py-1 text-[10px] text-destructive-foreground">
           {error}
         </div>
       )}
