@@ -104,6 +104,18 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgOpacity = 
       return;
     }
     onChange({ bgType: "url", bgKind: "video", bgUrl: file.link });
+    toast({
+      title: "تم تعيين فيديو الخلفية",
+      description: "ستظهر في المعاينة ويُدمَج عند تصدير MP4.",
+    });
+  };
+
+  const handlePickPhoto = (url: string, photographer: string) => {
+    onChange({ bgType: "url", bgKind: "image", bgUrl: url });
+    toast({
+      title: "تم تعيين صورة الخلفية",
+      description: photographer ? `من ${photographer}` : "ستظهر في المعاينة والتصدير.",
+    });
   };
 
   const tabBtn = (id: Tab, icon: React.ReactNode, label: string) => (
@@ -229,7 +241,7 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgOpacity = 
                 return (
                   <button
                     key={p.id}
-                    onClick={() => onChange({ bgType: "url", bgKind: "image", bgUrl: url })}
+                    onClick={() => handlePickPhoto(url, p.photographer)}
                     className={`group relative aspect-square overflow-hidden rounded transition-all ${
                       selected ? "ring-2 ring-accent shadow-gold" : "hover:ring-1 hover:ring-accent/40"
                     }`}

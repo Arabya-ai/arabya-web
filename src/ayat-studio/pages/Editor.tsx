@@ -23,6 +23,7 @@ import { AudioPreviewPlayer } from "@/ayat-studio/components/AudioPreviewPlayer"
 import { useSession } from "next-auth/react";
 import { canCreateVideo } from "@/lib/plans";
 import { Link } from "@/i18n/navigation";
+import { studioMediaUrl } from "@/ayat-studio/lib/media-url";
 
 function EditorPanel({ title, icon: Icon, children, defaultOpen = false }: { title: string; icon: any; children: React.ReactNode; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -74,7 +75,16 @@ export default function Editor() {
   const update = (patch: Partial<StoredProject>) => {
     const next = { ...project, ...patch };
     setProject(next);
-    saveProject(next);
+    try {
+      saveProject(next);
+    } catch (err) {
+      console.warn("saveProject failed", err);
+      toast({
+        title: "تعذّر حفظ المشروع محليًا",
+        description: "قد تكون مساحة التخزين ممتلئة. الخلفية تظهر في هذه الجلسة.",
+        variant: "destructive",
+      });
+    }
   };
 
   const selectedSurah = surahs.find((s) => s.id === project.surahId);
@@ -446,26 +456,46 @@ export default function Editor() {
           }}
         >
           {project.bgUrl && project.bgKind !== "video" && (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={project.bgUrl}
+              key={project.bgUrl}
+              src={studioMediaUrl(project.bgUrl)}
               alt=""
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover"
               style={{ opacity: (project.bgOpacity ?? 100) / 100 }}
+              onError={() =>
+                toast({
+                  title: "تعذّر عرض صورة الخلفية",
+                  description: "جرّب صورة أخرى أو ارفع ملفًا من جهازك.",
+                  variant: "destructive",
+                })
+              }
             />
           )}
           {project.bgUrl && project.bgKind === "video" && (
             <video
               key={project.bgUrl}
-              src={project.bgUrl}
+              src={studioMediaUrl(project.bgUrl)}
               autoPlay
               muted
               loop
               playsInline
-              className="absolute inset-0 w-full h-full object-cover"
+              preload="auto"
+              className="absolute inset-0 h-full w-full object-cover"
               style={{ opacity: (project.bgOpacity ?? 100) / 100 }}
+              onError={() =>
+                toast({
+                  title: "تعذّر تشغيل فيديو الخلفية",
+                  description: "جرّب فيديو آخر أو ارفع ملفًا من جهازك.",
+                  variant: "destructive",
+                })
+              }
             />
           )}
-          <div className="absolute inset-0" style={{ background: "#000", opacity: project.overlayOpacity / 100 }} />
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{ background: "#000", opacity: project.overlayOpacity / 100 }}
+          />
 
           <div className={`relative z-10 flex-1 flex flex-col p-6 ${
             project.overlayPosition === "top" ? "justify-start" :

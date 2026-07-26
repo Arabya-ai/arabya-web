@@ -4,6 +4,7 @@ import type { StoredProject } from "./projects-store";
 import { reciters, surahs, aspectRatios } from "./quran-data";
 import { fetchAyahs, fetchAndDecodeAudio } from "./quran-api";
 import { drawVisualizer, type VisualizerType } from "./visualizer";
+import { studioMediaUrl } from "./media-url";
 
 interface ExportOptions {
   project: StoredProject;
@@ -40,14 +41,24 @@ export async function exportProjectToVideo({
   let bgVideoDuration = 0;
   if (isVideoBg) {
     try {
-      bgVideo = await loadVideo(project.bgUrl);
+      bgVideo = await loadVideo(studioMediaUrl(project.bgUrl));
       bgVideoDuration = isFinite(bgVideo.duration) && bgVideo.duration > 0 ? bgVideo.duration : 0;
     } catch (e) {
-      console.warn("Failed to load background video, falling back to gradient:", e);
-      bgVideo = null;
+      console.warn("Failed to load background video:", e);
+      throw new Error(
+        "تعذّر تحميل فيديو الخلفية. حدّث الصفحة وحاول مجددًا، أو ارفع ملفًا من جهازك.",
+      );
     }
   } else if ((project.bgType === "image" || project.bgType === "url") && project.bgUrl) {
-    bgImage = await loadImage(project.bgUrl).catch(() => null);
+    bgImage = await loadImage(studioMediaUrl(project.bgUrl)).catch((e) => {
+      console.warn("Failed to load background image:", e);
+      return null;
+    });
+    if (!bgImage) {
+      throw new Error(
+        "تعذّر تحميل صورة الخلفية. حدّث الصفحة وحاول مجددًا، أو ارفع ملفًا من جهازك.",
+      );
+    }
   }
 
   const surah = surahs.find((s) => s.id === project.surahId);
@@ -457,12 +468,27 @@ function wrapText(
   trimmed.forEach((line, i) => ctx.fillText(line, x, startY + i * lineHeight));
 }
 
+function shouldUseCorsAnonymous(src: string): boolean {
+  if (!src || src.startsWith("data:") || src.startsWith("blob:") || src.startsWith("/")) {
+    return false;
+  }
+  try {
+    if (typeof window === "undefined") return true;
+    return new URL(src, window.location.href).origin !== window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = "anonymous";
+    // Never set anonymous CORS on same-origin proxy URLs — that drops auth cookies.
+    if (shouldUseCorsAnonymous(src)) {
+      img.crossOrigin = "anonymous";
+    }
     img.onload = () => resolve(img);
-    img.onerror = reject;
+    img.onerror = () => reject(new Error("فشل تحميل صورة الخلفية"));
     img.src = src;
   });
 }
@@ -481,20 +507,36 @@ export function downloadBlob(blob: Blob, filename: string) {
 function loadVideo(src: string): Promise<HTMLVideoElement> {
   return new Promise((resolve, reject) => {
     const v = document.createElement("video");
-    v.crossOrigin = "anonymous";
+    if (shouldUseCorsAnonymous(src)) {
+      v.crossOrigin = "anonymous";
+    }
     v.muted = true;
     v.playsInline = true;
     v.preload = "auto";
-    v.src = src;
-    const onReady = () => {
-      v.removeEventListener("loadeddata", onReady);
-      v.removeEventListener("canplaythrough", onReady);
+    let settled = false;
+    const succeed = () => {
+      if (settled) return;
+      settled = true;
       resolve(v);
     };
-    v.addEventListener("loadeddata", onReady, { once: true });
-    v.addEventListener("canplaythrough", onReady, { once: true });
-    v.addEventListener("error", () => reject(new Error("فشل تحميل فيديو الخلفية")), { once: true });
-    try { v.load(); } catch {}
+    const fail = () => {
+      if (settled) return;
+      settled = true;
+      reject(new Error("فشل تحميل فيديو الخلفية"));
+    };
+    v.addEventListener("loadeddata", succeed, { once: true });
+    v.addEventListener("canplay", succeed, { once: true });
+    v.addEventListener("error", fail, { once: true });
+    v.src = src;
+    try {
+      v.load();
+    } catch {
+      fail();
+    }
+    setTimeout(() => {
+      if (!settled && v.readyState >= 2) succeed();
+      else if (!settled) fail();
+    }, 15000);
   });
 }
 

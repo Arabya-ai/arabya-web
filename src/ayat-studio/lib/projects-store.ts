@@ -66,7 +66,21 @@ export function saveProject(project: StoredProject): void {
   const idx = projects.findIndex((p) => p.id === project.id);
   if (idx >= 0) projects[idx] = project;
   else projects.unshift(project);
-  localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+  try {
+    localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+  } catch (err) {
+    // Quota exceeded — try saving without heavy data-URL backgrounds for siblings.
+    const slim = projects.map((p) =>
+      p.id === project.id && p.bgUrl?.startsWith("data:") && p.bgUrl.length > 200_000
+        ? { ...p, bgUrl: "", bgType: "none" as const }
+        : p,
+    );
+    try {
+      localStorage.setItem(PROJECTS_KEY, JSON.stringify(slim));
+    } catch {
+      throw err;
+    }
+  }
 }
 
 export function deleteProject(id: string): void {
