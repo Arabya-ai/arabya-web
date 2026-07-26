@@ -45,7 +45,7 @@ type ProgressPayload = {
   habit: unknown;
 };
 
-type UserRole = "user" | "editor" | "admin";
+type UserRole = "member" | "creator" | "editor" | "admin";
 
 function json(data: unknown, status = 200): Response {
   return Response.json(data, {
@@ -99,8 +99,9 @@ function newId(prefix: string): string {
 }
 
 function normalizeRole(role: unknown): UserRole {
-  if (role === "admin" || role === "editor" || role === "user") return role;
-  return "user";
+  if (role === "admin" || role === "editor" || role === "creator") return role;
+  if (role === "member" || role === "user") return "member";
+  return "member";
 }
 
 function isSuperAdmin(email: string): boolean {
@@ -118,7 +119,7 @@ async function upsertUserProfile(
   email: string,
   name: string | null,
   image: string | null,
-  fallbackRole: UserRole = "user",
+  fallbackRole: UserRole = "member",
 ): Promise<{ id: string; role: UserRole; status: string }> {
   const id = userIdFromEmail(email);
   const now = Date.now();
@@ -367,13 +368,15 @@ async function adminStats(db: D1Database) {
          COUNT(*) as totalUsers,
          SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END) as admins,
          SUM(CASE WHEN role = 'editor' THEN 1 ELSE 0 END) as editors,
-         SUM(CASE WHEN role = 'user' THEN 1 ELSE 0 END) as users
+         SUM(CASE WHEN role = 'creator' THEN 1 ELSE 0 END) as creators,
+         SUM(CASE WHEN role IN ('user', 'member') THEN 1 ELSE 0 END) as users
        FROM users`,
     )
     .first<{
       totalUsers: number;
       admins: number;
       editors: number;
+      creators: number;
       users: number;
     }>();
 
@@ -402,6 +405,7 @@ async function adminStats(db: D1Database) {
     totalUsers: Number(totals?.totalUsers || 0),
     admins: Number(totals?.admins || 0),
     editors: Number(totals?.editors || 0),
+    creators: Number(totals?.creators || 0),
     users: Number(totals?.users || 0),
     pendingRoleRequests: Number(pending?.c || 0),
     activeLast7Days: Number(recent?.c || 0),
@@ -427,9 +431,19 @@ async function listUsers(
     sql += ` AND (email LIKE ? OR IFNULL(name, '') LIKE ? OR IFNULL(uid, '') LIKE ? OR id LIKE ?)`;
     binds.push(`%${needle}%`, `%${needle}%`, `%${needle}%`, `%${needle}%`);
   }
-  if (role === "user" || role === "editor" || role === "admin") {
-    sql += ` AND role = ?`;
-    binds.push(role);
+  if (
+    role === "member" ||
+    role === "user" ||
+    role === "creator" ||
+    role === "editor" ||
+    role === "admin"
+  ) {
+    if (role === "member" || role === "user") {
+      sql += ` AND role IN ('member', 'user')`;
+    } else {
+      sql += ` AND role = ?`;
+      binds.push(role);
+    }
   }
   sql += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;
   binds.push(limit, offset);
@@ -439,23 +453,24 @@ async function listUsers(
     .bind(...binds)
     .all();
 
+  const roleFilter =
+    role === "member" || role === "user"
+      ? ` AND role IN ('member', 'user')`
+      : role === "creator" || role === "editor" || role === "admin"
+        ? ` AND role = ?`
+        : "";
+
   const countSql = needle
-    ? `SELECT COUNT(*) as c FROM users WHERE (email LIKE ? OR IFNULL(name, '') LIKE ? OR IFNULL(uid, '') LIKE ? OR id LIKE ?)${
-        role === "user" || role === "editor" || role === "admin"
-          ? " AND role = ?"
-          : ""
-      }`
+    ? `SELECT COUNT(*) as c FROM users WHERE (email LIKE ? OR IFNULL(name, '') LIKE ? OR IFNULL(uid, '') LIKE ? OR id LIKE ?)${roleFilter}`
     : `SELECT COUNT(*) as c FROM users${
-        role === "user" || role === "editor" || role === "admin"
-          ? " WHERE role = ?"
-          : ""
+        roleFilter ? ` WHERE ${roleFilter.replace(/^ AND /, "")}` : ""
       }`;
 
   const countBinds: (string | number)[] = [];
   if (needle) {
     countBinds.push(`%${needle}%`, `%${needle}%`, `%${needle}%`, `%${needle}%`);
   }
-  if (role === "user" || role === "editor" || role === "admin") {
+  if (role === "creator" || role === "editor" || role === "admin") {
     countBinds.push(role);
   }
   const total = await db
@@ -536,7 +551,7 @@ const workerHandler = {
         .bind(userIdFromEmail(email))
         .first<{ role: string; status: string }>();
       if (row?.status === "banned") {
-        return json({ ok: true, role: "user", banned: true });
+        return json({ ok: true, role: "member", banned: true });
       }
       const ensureAdmin =
         body.ensureAdmin === true || isProtectedAdmin(email, env);
@@ -550,7 +565,7 @@ const workerHandler = {
       const info = await getUserRole(env.DB, email);
       return json({
         ok: true,
-        role: info?.role ?? "user",
+        role: info?.role ?? "member",
         banned: info?.status === "banned",
       });
     }
@@ -561,7 +576,7 @@ const workerHandler = {
 
       const ensureAdmin =
         body.ensureAdmin === true || isProtectedAdmin(email, env);
-      const fallbackRole: UserRole = ensureAdmin ? "admin" : "user";
+      const fallbackRole: UserRole = ensureAdmin ? "admin" : "member";
       const { id: userId, role, status } = await upsertUserProfile(
         env.DB,
         email,
@@ -634,7 +649,7 @@ const workerHandler = {
         const info = await getUserRole(env.DB, email);
         const targetRole =
           String(body.targetRole || "editor") === "admin" ? "admin" : "editor";
-        if (targetRole === "editor" && info?.role !== "user") {
+        if (targetRole === "editor" && info?.role !== "member") {
           return badRequest("already_elevated");
         }
         if (targetRole === "admin" && info?.role !== "editor") {

@@ -106,7 +106,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async jwt({ token, trigger }) {
       if (!token.email) {
-        token.role = "user";
+        token.role = "member";
         token.plan = "free";
         token.banned = false;
         return token;
@@ -124,7 +124,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const status = await fetchCloudRoleStatus(email);
         token.banned = status.banned;
         if (status.banned) {
-          token.role = "user";
+          token.role = "member";
         } else {
           token.role = mergeRoleWithEnvAdmin(email, status.role);
         }
@@ -147,7 +147,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.error = "Banned";
       }
       if (session.user) {
-        session.user.role = (token.role as UserRole) || "user";
+        session.user.role = (token.role as UserRole) || "member";
         session.user.plan = (token.plan as UserPlan) || "free";
       }
       return session;

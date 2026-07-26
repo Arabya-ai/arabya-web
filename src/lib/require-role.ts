@@ -10,7 +10,7 @@ export async function requireSession() {
   return {
     session,
     email: session.user.email,
-    role: (session.user.role ?? "user") as UserRole,
+    role: (session.user.role ?? "member") as UserRole,
     name: session.user.name,
     image: session.user.image,
   };

@@ -5,6 +5,11 @@ import { reciters, surahs, aspectRatios } from "./quran-data";
 import { fetchAyahs, fetchAndDecodeAudio } from "./quran-api";
 import { drawVisualizer, type VisualizerType } from "./visualizer";
 import { studioMediaUrl } from "./media-url";
+import {
+  brandLockupAnchor,
+  normalizeBrandPosition,
+  type BrandPosition,
+} from "./brand-position";
 
 interface ExportOptions {
   project: StoredProject;
@@ -72,7 +77,9 @@ export async function exportProjectToVideo({
   };
 
   let watermarkImg: HTMLImageElement | null = null;
-  if (watermark) {
+  const needBrandMark =
+    watermark || project.brandSignature !== false;
+  if (needBrandMark) {
     try {
       const loaded = await loadImageBuffered("/brand/arabya-mark-square.png");
       revokes.push(loaded.revoke);
@@ -387,7 +394,9 @@ export async function exportProjectToPng(
       project.bgKind === "video" &&
       !!project.bgUrl;
 
-    if (watermark) {
+    const needBrandMark =
+      watermark || project.brandSignature !== false;
+    if (needBrandMark) {
       try {
         const loaded = await loadImageBuffered("/brand/arabya-mark-square.png");
         revokes.push(loaded.revoke);
@@ -799,18 +808,20 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
     ctx.fillText(reciterName, width / 2, height - height * 0.04);
   }
 
-  if (project.brandSignature !== false) {
+  const forceBrand = showWatermark;
+  const showBrandLockup = forceBrand || project.brandSignature !== false;
+  if (showBrandLockup) {
     ctx.strokeStyle = "rgba(200,169,81,0.4)";
     ctx.lineWidth = Math.max(2, width * 0.003);
-    const pad = Math.round(width * 0.02);
-    ctx.strokeRect(pad, pad, width - pad * 2, height - pad * 2);
-    ctx.fillStyle = "rgba(200,169,81,0.55)";
-    ctx.font = `bold ${Math.round(width * 0.02)}px "Reem Kufi", "IBM Plex Sans Arabic", sans-serif`;
-    ctx.textAlign = "left";
-    ctx.fillText("عربية ستوديو", pad * 1.4, height - pad * 1.6);
-    ctx.font = `${Math.round(width * 0.012)}px "IBM Plex Sans Arabic", sans-serif`;
-    ctx.fillStyle = "rgba(255,255,255,0.45)";
-    ctx.fillText("ARABYA • STUDIO", pad * 1.4, height - pad * 0.85);
+    const framePad = Math.round(width * 0.02);
+    ctx.strokeRect(framePad, framePad, width - framePad * 2, height - framePad * 2);
+    drawBrandLockup(ctx, {
+      width,
+      height,
+      position: normalizeBrandPosition(project.brandPosition),
+      markImg: watermarkImg,
+      required: forceBrand,
+    });
   }
 
   const barW = width * 0.7;
@@ -821,22 +832,86 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   ctx.fillRect(barX, barY, barW, barH);
   ctx.fillStyle = "rgba(200, 169, 81, 0.95)";
   ctx.fillRect(barX, barY, barW * progress, barH);
+}
 
-  if (showWatermark) {
-    const mark = Math.max(28, Math.round(width * 0.055));
-    const pad = Math.round(width * 0.03);
-    ctx.save();
-    ctx.globalAlpha = 0.42;
-    if (watermarkImg && watermarkImg.width > 0) {
-      ctx.drawImage(watermarkImg, width - pad - mark, pad, mark, mark);
-    } else {
-      ctx.fillStyle = "rgba(200,169,81,0.9)";
-      ctx.font = `bold ${Math.round(mark * 0.45)}px "IBM Plex Sans Arabic", sans-serif`;
-      ctx.textAlign = "right";
-      ctx.fillText("عربية", width - pad, pad + mark * 0.65);
-    }
-    ctx.restore();
+/** Draw Arabya mark + «عربية ستوديو» / ARABYA • STUDIO at the chosen corner/edge. */
+function drawBrandLockup(
+  ctx: CanvasRenderingContext2D,
+  opts: {
+    width: number;
+    height: number;
+    position: BrandPosition;
+    markImg?: HTMLImageElement | null;
+    required?: boolean;
+  },
+) {
+  const { width, height, position, markImg, required } = opts;
+  const pad = Math.round(width * 0.028);
+  const mark = Math.max(28, Math.round(width * 0.052));
+  const gap = Math.round(mark * 0.22);
+  const titleSize = Math.max(14, Math.round(width * 0.022));
+  const subSize = Math.max(9, Math.round(width * 0.012));
+  const textW = Math.round(width * 0.22);
+  const boxW = mark + gap + textW;
+  const boxH = Math.max(mark, titleSize + subSize + 8);
+  const { x, y } = brandLockupAnchor(position, width, height, boxW, boxH, pad);
+
+  ctx.save();
+  ctx.globalAlpha = required ? 0.92 : 0.88;
+  ctx.shadowColor = "rgba(0,0,0,0.55)";
+  ctx.shadowBlur = Math.max(4, width * 0.006);
+  ctx.shadowOffsetY = 1;
+
+  const markX = x;
+  const markY = y + Math.round((boxH - mark) / 2);
+  if (markImg && markImg.width > 0) {
+    // Rounded plate behind mark (matches preview icon chrome)
+    const r = mark * 0.22;
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    roundRectPath(ctx, markX, markY, mark, mark, r);
+    ctx.fill();
+    ctx.drawImage(markImg, markX, markY, mark, mark);
+  } else {
+    ctx.fillStyle = "rgba(200,169,81,0.95)";
+    ctx.fillRect(markX, markY, mark, mark);
   }
+
+  const textX = markX + mark + gap;
+  const titleY = y + Math.round(boxH * 0.42);
+  const subY = y + Math.round(boxH * 0.78);
+
+  ctx.direction = "rtl";
+  ctx.textAlign = "right";
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `bold ${titleSize}px "Reem Kufi", "IBM Plex Sans Arabic", sans-serif`;
+  // RTL: right edge of text block at textX + textW
+  ctx.fillText("عربية ستوديو", textX + textW, titleY, textW);
+
+  ctx.direction = "ltr";
+  ctx.textAlign = "left";
+  ctx.fillStyle = "rgba(255,255,255,0.78)";
+  ctx.font = `${subSize}px "IBM Plex Sans Arabic", "Tajawal", sans-serif`;
+  ctx.fillText("ARABYA • STUDIO", textX, subY, textW);
+
+  ctx.restore();
+}
+
+function roundRectPath(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+) {
+  const radius = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.arcTo(x + w, y, x + w, y + h, radius);
+  ctx.arcTo(x + w, y + h, x, y + h, radius);
+  ctx.arcTo(x, y + h, x, y, radius);
+  ctx.arcTo(x, y, x + w, y, radius);
+  ctx.closePath();
 }
 
 function wrapText(

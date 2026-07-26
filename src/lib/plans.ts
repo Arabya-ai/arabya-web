@@ -1,4 +1,9 @@
-import { isEnvAdminEmail, isSuperAdminEmail, type UserRole } from "@/lib/roles";
+import {
+  canExportStudioWithoutBrand,
+  isEnvAdminEmail,
+  isSuperAdminEmail,
+  type UserRole,
+} from "@/lib/roles";
 
 export type UserPlan = "free" | "plus";
 
@@ -35,7 +40,7 @@ export function normalizeUserPlan(value: unknown): UserPlan {
 
 /**
  * Resolve billing plan without PayPal yet.
- * Order: cloud plus → owner emails → ARABYA_PLUS_EMAILS → admin/editor → free.
+ * Order: cloud plus → owner emails → ARABYA_PLUS_EMAILS → admin/editor/creator → free.
  */
 export function resolveUserPlan(opts: {
   email?: string | null;
@@ -51,7 +56,13 @@ export function resolveUserPlan(opts: {
   const allow =
     opts.plusEmails ?? parsePlusEmails(process.env.ARABYA_PLUS_EMAILS);
   if (email && allow.includes(email)) return "plus";
-  if (opts.role === "admin" || opts.role === "editor") return "plus";
+  if (
+    opts.role === "admin" ||
+    opts.role === "editor" ||
+    opts.role === "creator"
+  ) {
+    return "plus";
+  }
   if (email && isEnvAdminEmail(email)) return "plus";
   return "free";
 }
@@ -72,13 +83,32 @@ export function canCreateVideo(plan: UserPlan): boolean {
   return plan === "plus";
 }
 
-/** Logged-in users can export studio video; free gets watermark. */
+/** Logged-in users can export studio video; members get required brand lockup. */
 export function canExportStudioMp4(_plan: UserPlan): boolean {
   return true;
 }
 
-export function studioExportNeedsWatermark(plan: UserPlan): boolean {
-  return plan !== "plus";
+/**
+ * Member (free) must export with Arabya brand lockup.
+ * Creator / editor / admin / super-admin may export without it.
+ */
+export function studioExportNeedsWatermark(
+  planOrOpts:
+    | UserPlan
+    | {
+        plan?: UserPlan;
+        role?: UserRole | null;
+        email?: string | null;
+      },
+): boolean {
+  if (typeof planOrOpts === "string") {
+    return planOrOpts !== "plus";
+  }
+  if (canExportStudioWithoutBrand(planOrOpts.role ?? null, planOrOpts.email)) {
+    return false;
+  }
+  if (planOrOpts.plan === "plus") return false;
+  return true;
 }
 
 /** Max ayah span for normal Plus exports. Super-admin has no cap. */

@@ -28,8 +28,8 @@ export function RoleRequestPanel({
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
-  const canRequestEditor = role === "user";
-  const canRequestAdmin = role === "editor";
+  const canRequestEditor = role === "member";
+  const canRequestAdmin = role === "editor" || role === "creator";
   const canRequest = canRequestEditor || canRequestAdmin;
 
   useEffect(() => {

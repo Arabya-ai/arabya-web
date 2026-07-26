@@ -51,7 +51,10 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
 
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
 
-  async function setUserRole(id: string, next: "user" | "editor" | "admin") {
+  async function setUserRole(
+    id: string,
+    next: UserRole,
+  ) {
     if (next === "admin" && !isSuperAdmin) {
       setError(t("adminOnlyPromote"));
       return;
@@ -61,7 +64,10 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
       const res = await fetch(`/api/admin/users/${encodeURIComponent(id)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: next }),
+        body: JSON.stringify({
+          role: next,
+          reason: "admin_upgrade_select",
+        }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok || !data.ok) throw new Error(data.error || t("updateError"));
@@ -173,41 +179,34 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
 
   function Actions({ u }: { u: AdminUserRow }) {
     const busy = busyId === u.id;
-    if (u.role === "admin") {
+    const currentRole = (u.role === "user" ? "member" : u.role) as UserRole;
+    if (currentRole === "admin" && !isSuperAdmin) {
       return <span className="users-actions-locked">{t("protected")}</span>;
     }
     return (
       <div className="users-actions">
-        {u.role !== "editor" ? (
-          <button
-            type="button"
-            className="users-action users-action--primary"
-            disabled={busy}
-            onClick={() => void setUserRole(u.id, "editor")}
-          >
-            {t("promote")}
-          </button>
-        ) : null}
-        {u.role === "editor" && isSuperAdmin ? (
-          <button
-            type="button"
-            className="users-action users-action--primary"
-            disabled={busy}
-            onClick={() => void setUserRole(u.id, "admin")}
-          >
-            {t("makeAdmin")}
-          </button>
-        ) : null}
-        {u.role === "editor" ? (
-          <button
-            type="button"
-            className="users-action"
-            disabled={busy}
-            onClick={() => void setUserRole(u.id, "user")}
-          >
-            {t("demote")}
-          </button>
-        ) : null}
+        <label className="sr-only" htmlFor={`role-${u.id}`}>
+          {t("filterRoleAria")}
+        </label>
+        <select
+          id={`role-${u.id}`}
+          className="users-action users-action--primary"
+          disabled={busy || (currentRole === "admin" && !isSuperAdmin)}
+          value={currentRole}
+          onChange={(e) => {
+            const next = e.target.value as UserRole;
+            if (next === currentRole) return;
+            void setUserRole(u.id, next);
+          }}
+          title={t("promote")}
+        >
+          <option value="member">{tRoles("member")}</option>
+          <option value="creator">{tRoles("creator")}</option>
+          <option value="editor">{tRoles("editor")}</option>
+          {isSuperAdmin ? (
+            <option value="admin">{tRoles("admin")}</option>
+          ) : null}
+        </select>
         <button
           type="button"
           className="users-action"
@@ -258,7 +257,8 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
           aria-label={t("filterRoleAria")}
         >
           <option value="">{t("allRoles")}</option>
-          <option value="user">{tRoles("user")}</option>
+          <option value="member">{tRoles("member")}</option>
+          <option value="creator">{tRoles("creator")}</option>
           <option value="editor">{tRoles("editor")}</option>
           <option value="admin">{tRoles("admin")}</option>
         </select>
@@ -308,7 +308,11 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
                   <UserIdentity u={u} />
                 </td>
                 <td>
-                  <RoleBadge role={(u.role as UserRole) || "user"} />
+                  <RoleBadge
+                    role={
+                      (u.role === "user" ? "member" : u.role) as UserRole
+                    }
+                  />
                 </td>
                 <td>
                   <StatusBadge status={u.status} />
@@ -334,7 +338,11 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
             >
               <UserIdentity u={u} />
               <div className="users-card-meta">
-                <RoleBadge role={(u.role as UserRole) || "user"} />
+                <RoleBadge
+                  role={
+                    (u.role === "user" ? "member" : u.role) as UserRole
+                  }
+                />
                 <StatusBadge status={u.status} />
               </div>
               <Actions u={u} />

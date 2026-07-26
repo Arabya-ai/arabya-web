@@ -25,10 +25,18 @@ export async function PATCH(request: Request, ctx: Ctx) {
   } catch {
     return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
   }
-  if (body.role !== "user" && body.role !== "editor" && body.role !== "admin") {
+  if (
+    body.role !== "member" &&
+    body.role !== "user" &&
+    body.role !== "creator" &&
+    body.role !== "editor" &&
+    body.role !== "admin"
+  ) {
     return NextResponse.json({ ok: false, error: "invalid_role" }, { status: 400 });
   }
-  if (body.role === "admin" && !canApproveAdminRole(gate.email)) {
+  const role =
+    body.role === "user" ? "member" : (body.role as "member" | "creator" | "editor" | "admin");
+  if (role === "admin" && !canApproveAdminRole(gate.email)) {
     return NextResponse.json(
       { ok: false, error: "super_admin_required" },
       { status: 403 },
@@ -38,7 +46,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
     const data = await adminSetRole(
       gate.email,
       decodeURIComponent(id),
-      body.role,
+      role,
       body.reason,
     );
     return NextResponse.json({ ok: true, ...data });

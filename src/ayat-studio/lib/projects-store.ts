@@ -74,6 +74,17 @@ export interface StoredProject {
   previewShowAyahNumbers?: boolean;
   /** Subtle Arabya signature frame on export/preview for unique composition. */
   brandSignature?: boolean;
+  /** Where the Arabya lockup (mark + title) sits in preview/export. */
+  brandPosition?:
+    | "top-left"
+    | "top-center"
+    | "top-right"
+    | "center-left"
+    | "center"
+    | "center-right"
+    | "bottom-left"
+    | "bottom-center"
+    | "bottom-right";
   softVignette?: boolean;
 }
 
@@ -200,6 +211,7 @@ export function createDefaultProject(input: {
     previewShowNavBar: true,
     previewShowAyahNumbers: true,
     brandSignature: true,
+    brandPosition: "bottom-left",
     softVignette: true,
   };
   saveProject(project);

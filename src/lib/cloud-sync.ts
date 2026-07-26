@@ -22,6 +22,7 @@ export type AdminStats = {
   totalUsers: number;
   admins: number;
   editors: number;
+  creators?: number;
   users: number;
   pendingRoleRequests: number;
   activeLast7Days: number;
@@ -35,7 +36,7 @@ export type AdminUserRow = {
   email: string;
   name: string | null;
   image: string | null;
-  role: UserRole;
+  role: UserRole | "user";
   status: string;
   lastSeenAt: number | null;
   createdAt: number;
@@ -299,12 +300,18 @@ export async function adminGetUser(actorEmail: string, userId: string) {
 export async function adminSetRole(
   actorEmail: string,
   userId: string,
-  role: "user" | "editor" | "admin",
+  role: UserRole | "user",
   reason?: string,
 ) {
+  const normalized = role === "user" ? "member" : role;
   return callWorker<{ role: string; fromRole?: string }>(
     "/v1/admin/set-role",
-    { actorEmail, userId, role, reason: reason || "" },
+    {
+      actorEmail,
+      userId,
+      role: normalized,
+      reason: reason || "",
+    },
   );
 }
 

@@ -742,7 +742,10 @@
   "Roles": {
     "admin": "مدير",
     "editor": "محرر",
-    "user": "مشترك"
+    "creator": "مؤلف",
+    "member": "مسجل",
+    "user": "مسجل",
+    "superAdmin": "سوبر أدمن"
   },
   "About": {
     "metaTitle": "عن عربية",

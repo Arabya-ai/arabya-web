@@ -742,7 +742,10 @@
   "Roles": {
     "admin": "Admin",
     "editor": "Editor",
-    "user": "Member"
+    "creator": "Creator",
+    "member": "Member",
+    "user": "Member",
+    "superAdmin": "Super Admin"
   },
   "About": {
     "metaTitle": "About Arabya",

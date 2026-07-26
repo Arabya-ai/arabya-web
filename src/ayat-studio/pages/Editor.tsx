@@ -38,6 +38,7 @@ import {
   Save,
   Sparkles,
   AudioLines,
+  MapPin,
 } from "lucide-react";
 import {
   getProject,
@@ -61,6 +62,17 @@ import {
   canExportUnlimitedStudioAyahs,
   STUDIO_MAX_AYAHS,
 } from "@/lib/plans";
+import {
+  canExportStudioWithoutBrand,
+  type UserRole,
+} from "@/lib/roles";
+import {
+  BRAND_POSITION_LABELS_AR,
+  BRAND_POSITION_PAD,
+  brandPositionClass,
+  normalizeBrandPosition,
+  type BrandPosition,
+} from "@/ayat-studio/lib/brand-position";
 import { Link } from "@/i18n/navigation";
 import { useStudioPreviewSrc } from "@/ayat-studio/hooks/use-studio-preview-src";
 import { ArabyaMarkIcon } from "@/ayat-studio/components/IslamicDecor";
@@ -146,8 +158,17 @@ export default function Editor() {
   const { toast } = useToast();
   const { data: session } = useSession();
   const plan = session?.user?.plan ?? "free";
+  const role = (session?.user?.role as UserRole | undefined) ?? "member";
   const canExportMp4 = canExportStudioMp4(plan);
-  const needsWatermark = studioExportNeedsWatermark(plan);
+  const canOmitBrand = canExportStudioWithoutBrand(
+    role,
+    session?.user?.email,
+  );
+  const needsWatermark = studioExportNeedsWatermark({
+    plan,
+    role,
+    email: session?.user?.email,
+  });
   const unlimitedAyahs = canExportUnlimitedStudioAyahs(session?.user?.email);
   const maxAyahSpan = unlimitedAyahs ? 9999 : STUDIO_MAX_AYAHS;
 
@@ -183,6 +204,7 @@ export default function Editor() {
       previewShowAyahNumbers: p.previewShowAyahNumbers ?? true,
       previewShowAyahOnly: p.previewShowAyahOnly ?? false,
       brandSignature: p.brandSignature ?? true,
+      brandPosition: normalizeBrandPosition(p.brandPosition),
       softVignette: p.softVignette ?? true,
       translationSlug: p.translationSlug || "saheeh-en",
       tafsirSlug: p.tafsirSlug || "muyassar",
@@ -463,8 +485,12 @@ export default function Editor() {
     });
 
     try {
+      const exportProject =
+        needsWatermark
+          ? { ...project, brandSignature: true as const }
+          : project;
       const blob = await exportProjectToVideo({
-        project,
+        project: exportProject,
         translationMap: project.translationEnabled ? translationMap : null,
         tafsirMap: project.tafsirEnabled ? tafsirMap : null,
         watermark: needsWatermark,
@@ -491,8 +517,8 @@ export default function Editor() {
       toast({
         title: "تم التصدير بنجاح",
         description: needsWatermark
-          ? "تم تنزيل الفيديو مع علامة عربية (الخطة المجانية)."
-          : "تم تنزيل الفيديو بدون علامة مائية.",
+          ? "تم تنزيل الفيديو مع شعار عربية ستوديو (إلزامي للمسجّلين)."
+          : "تم تنزيل الفيديو بدون شعار.",
       });
     } catch (err: unknown) {
       saveExport({
@@ -526,7 +552,11 @@ export default function Editor() {
             "صورة PNG للخطة المجانية قد تُصدَّر بمقاس مربع مع علامة مائية.",
         });
       }
-      const blob = await exportProjectToPng(project, {
+      const exportProject =
+        needsWatermark
+          ? { ...project, brandSignature: true as const }
+          : project;
+      const blob = await exportProjectToPng(exportProject, {
         translationMap: project.translationEnabled ? translationMap : null,
         tafsirMap: project.tafsirEnabled ? tafsirMap : null,
         watermark: needsWatermark,
@@ -740,12 +770,78 @@ export default function Editor() {
                 />
               </div>
             </div>
-            <div className="flex items-center justify-between gap-2">
-              <Label className="text-xs">إطار توقيع عربية</Label>
-              <Switch
-                checked={project.brandSignature ?? true}
-                onCheckedChange={(v) => update({ brandSignature: v })}
-              />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <Label className="text-xs">شعار عربية ستوديو</Label>
+                <Switch
+                  checked={
+                    needsWatermark
+                      ? true
+                      : (project.brandSignature ?? true)
+                  }
+                  disabled={needsWatermark}
+                  onCheckedChange={(v) => {
+                    if (needsWatermark) return;
+                    update({ brandSignature: v });
+                  }}
+                />
+              </div>
+              {needsWatermark ? (
+                <p className="text-[10px] leading-relaxed text-muted-foreground">
+                  حساب مسجّل: الشعار إلزامي عند التصدير ولا يمكن إخفاؤه.
+                </p>
+              ) : canOmitBrand ? (
+                <p className="text-[10px] leading-relaxed text-muted-foreground">
+                  يمكنك إخفاء الشعار عند التصدير (مؤلف / محرر / مدير).
+                </p>
+              ) : null}
+              {(needsWatermark || (project.brandSignature ?? true)) && (
+                <div className="space-y-1.5 rounded-lg border border-accent/20 bg-background/40 p-2">
+                  <Label className="flex items-center gap-1 text-[11px] text-accent">
+                    <MapPin className="h-3 w-3" />
+                    موضع الشعار:{" "}
+                    {
+                      BRAND_POSITION_LABELS_AR[
+                        normalizeBrandPosition(project.brandPosition)
+                      ]
+                    }
+                  </Label>
+                  <div
+                    dir="ltr"
+                    className="mx-auto grid w-[7.5rem] grid-cols-3 gap-1"
+                    role="group"
+                    aria-label="موضع شعار عربية"
+                  >
+                    {BRAND_POSITION_PAD.map((pos) => {
+                      const active =
+                        normalizeBrandPosition(project.brandPosition) === pos;
+                      return (
+                        <button
+                          key={pos}
+                          type="button"
+                          title={BRAND_POSITION_LABELS_AR[pos]}
+                          aria-label={BRAND_POSITION_LABELS_AR[pos]}
+                          aria-pressed={active}
+                          onClick={() =>
+                            update({ brandPosition: pos as BrandPosition })
+                          }
+                          className={`flex h-7 items-center justify-center rounded-md border text-[9px] transition ${
+                            active
+                              ? "border-accent bg-accent/25 text-accent shadow-glow"
+                              : "border-border/60 bg-card/50 text-muted-foreground hover:border-accent/40 hover:text-accent"
+                          }`}
+                        >
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${
+                              active ? "bg-accent" : "bg-muted-foreground/50"
+                            }`}
+                          />
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="flex items-center justify-between gap-2">
               <Label className="text-xs">ظلال vignette ناعمة</Label>
@@ -1321,27 +1417,31 @@ export default function Editor() {
           {!ayahOnly && (
             <div className="relative z-[3] flex items-end justify-between gap-2 px-3 pb-3 pt-1 sm:px-4">
               <span
-                className="max-w-[45%] truncate text-[10px] sm:text-xs"
+                className="max-w-[70%] truncate text-[10px] sm:text-xs"
                 style={{ color: "rgba(255,255,255,0.5)" }}
               >
                 {selectedReciter?.name}
               </span>
-              {(project.brandSignature ?? true) && (
-                <div
-                  className="flex max-w-[55%] items-center gap-1.5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.65)]"
-                  aria-label="عربية ستوديو"
-                >
-                  <ArabyaMarkIcon size={22} className="shrink-0" />
-                  <div className="flex min-w-0 flex-col gap-0.5 text-start">
-                    <span className="font-display text-[10px] font-bold leading-none text-white sm:text-[11px]">
-                      عربية ستوديو
-                    </span>
-                    <span className="text-[7px] font-medium leading-none tracking-[0.18em] text-white/75 sm:text-[8px]">
-                      ARABYA • STUDIO
-                    </span>
-                  </div>
-                </div>
-              )}
+            </div>
+          )}
+
+          {(needsWatermark || (project.brandSignature ?? true)) && (
+            <div
+              dir="ltr"
+              className={`pointer-events-none absolute z-[8] flex items-center gap-1.5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.65)] ${brandPositionClass(
+                normalizeBrandPosition(project.brandPosition),
+              )}`}
+              aria-label="عربية ستوديو"
+            >
+              <ArabyaMarkIcon size={22} className="shrink-0" />
+              <div className="flex min-w-0 flex-col gap-0.5 text-start">
+                <span className="font-display text-[10px] font-bold leading-none text-white sm:text-[11px]">
+                  عربية ستوديو
+                </span>
+                <span className="text-[7px] font-medium leading-none tracking-[0.18em] text-white/75 sm:text-[8px]">
+                  ARABYA • STUDIO
+                </span>
+              </div>
             </div>
           )}
 

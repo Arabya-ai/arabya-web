@@ -83,7 +83,11 @@ export function DashboardShell({
             <span className="dash-role">
               <DashIcon
                 name={
-                  role === "admin" ? "shield" : role === "editor" ? "studio" : "spark"
+                  role === "admin"
+                    ? "shield"
+                    : role === "editor" || role === "creator"
+                      ? "studio"
+                      : "spark"
                 }
               />
               {tRoles(role)}            </span>

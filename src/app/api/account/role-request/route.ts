@@ -48,8 +48,14 @@ export async function POST(request: Request) {
   if (gate.role === "admin") {
     return NextResponse.json({ ok: false, error: "already_admin" }, { status: 400 });
   }
-  if (targetRole === "editor" && gate.role !== "user") {
+  if (targetRole === "editor" && gate.role !== "member") {
     return NextResponse.json({ ok: false, error: "already_elevated" }, { status: 400 });
+  }
+  if (targetRole === "admin" && gate.role !== "editor") {
+    return NextResponse.json(
+      { ok: false, error: "editor_required_for_admin_request" },
+      { status: 400 },
+    );
   }
 
   try {

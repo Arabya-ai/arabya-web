@@ -6,24 +6,26 @@ import {
   imageSizeForAspect,
   normalizeUserPlan,
   resolveUserPlan,
+  studioExportNeedsWatermark,
 } from "@/lib/plans";
 
 describe("resolveUserPlan", () => {
   it("defaults to free", () => {
-    expect(resolveUserPlan({ email: "a@b.com", role: "user" })).toBe("free");
+    expect(resolveUserPlan({ email: "a@b.com", role: "member" })).toBe("free");
   });
 
   it("honors cloud plus", () => {
     expect(
       resolveUserPlan({
         email: "a@b.com",
-        role: "user",
+        role: "member",
         cloudPlan: "plus",
       }),
     ).toBe("plus");
   });
 
-  it("grants plus to editors and admins", () => {
+  it("grants plus to creators, editors and admins", () => {
+    expect(resolveUserPlan({ email: "c@x.com", role: "creator" })).toBe("plus");
     expect(resolveUserPlan({ email: "e@x.com", role: "editor" })).toBe("plus");
     expect(resolveUserPlan({ email: "a@x.com", role: "admin" })).toBe("plus");
   });
@@ -32,7 +34,7 @@ describe("resolveUserPlan", () => {
     expect(
       resolveUserPlan({
         email: "vip@example.com",
-        role: "user",
+        role: "member",
         plusEmails: ["vip@example.com"],
       }),
     ).toBe("plus");
@@ -40,10 +42,10 @@ describe("resolveUserPlan", () => {
 
   it("grants plus to owner emails", () => {
     expect(
-      resolveUserPlan({ email: "egywebdev@gmail.com", role: "user" }),
+      resolveUserPlan({ email: "egywebdev@gmail.com", role: "member" }),
     ).toBe("plus");
     expect(
-      resolveUserPlan({ email: "arabyaaicom@gmail.com", role: "user" }),
+      resolveUserPlan({ email: "arabyaaicom@gmail.com", role: "member" }),
     ).toBe("plus");
   });
 });
@@ -56,14 +58,25 @@ describe("entitlements", () => {
     expect(canCreateVideo("plus")).toBe(true);
   });
 
-  it("allows studio MP4 for free with watermark flag", async () => {
-    const { canExportStudioMp4, studioExportNeedsWatermark } = await import(
-      "@/lib/plans"
-    );
-    expect(canExportStudioMp4("free")).toBe(true);
-    expect(canExportStudioMp4("plus")).toBe(true);
+  it("requires brand lockup for members; not for elevated roles", () => {
     expect(studioExportNeedsWatermark("free")).toBe(true);
     expect(studioExportNeedsWatermark("plus")).toBe(false);
+    expect(
+      studioExportNeedsWatermark({ plan: "free", role: "member" }),
+    ).toBe(true);
+    expect(
+      studioExportNeedsWatermark({ plan: "free", role: "creator" }),
+    ).toBe(false);
+    expect(
+      studioExportNeedsWatermark({ plan: "free", role: "editor" }),
+    ).toBe(false);
+    expect(
+      studioExportNeedsWatermark({
+        plan: "free",
+        role: "member",
+        email: "egywebdev@gmail.com",
+      }),
+    ).toBe(false);
   });
 
   it("maps aspects to pixel sizes", () => {

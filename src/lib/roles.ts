@@ -1,4 +1,7 @@
-export type UserRole = "user" | "editor" | "admin";
+export type UserRole = "member" | "creator" | "editor" | "admin";
+
+/** Legacy DB value still accepted on read. */
+export type LegacyUserRole = UserRole | "user";
 
 /** سوبر أدمن فقط — الموافقة على ترقية مدير */
 export const SUPER_ADMIN_EMAILS = [
@@ -31,48 +34,73 @@ export function isEnvAdminEmail(
 }
 
 /**
- * Fallback when D1 is unavailable: env/super admins → admin, else user.
- * Editor is never assigned here — only via admin approval in D1.
+ * Fallback when D1 is unavailable: env/super admins → admin, else member.
+ * Creator/editor are never assigned here — only via admin approval in D1.
  */
 export function resolveRoleFromEmail(
   email: string | null | undefined,
   adminEmails = parseAdminEmails(process.env.ARABYA_ADMIN_EMAILS),
 ): UserRole {
-  if (!email) return "user";
+  if (!email) return "member";
   if (isEnvAdminEmail(email, adminEmails)) return "admin";
-  return "user";
+  return "member";
 }
 
 /** Merge D1 role with immutable env-admin override. */
 export function mergeRoleWithEnvAdmin(
   email: string | null | undefined,
-  cloudRole: UserRole | null | undefined,
+  cloudRole: UserRole | LegacyUserRole | null | undefined,
   adminEmails = parseAdminEmails(process.env.ARABYA_ADMIN_EMAILS),
 ): UserRole {
   if (isEnvAdminEmail(email, adminEmails)) return "admin";
-  if (cloudRole === "admin" || cloudRole === "editor" || cloudRole === "user") {
-    return cloudRole;
-  }
-  return "user";
+  return normalizeUserRole(cloudRole);
 }
 
 export type AppLocale = "ar" | "en";
 
 const ROLE_LABELS: Record<AppLocale, Record<UserRole, string>> = {
-  ar: { admin: "مدير", editor: "محرر", user: "مشترك" },
-  en: { admin: "Admin", editor: "Editor", user: "Member" },
+  ar: {
+    admin: "مدير",
+    editor: "محرر",
+    creator: "مؤلف",
+    member: "مسجل",
+  },
+  en: {
+    admin: "Admin",
+    editor: "Editor",
+    creator: "Creator",
+    member: "Member",
+  },
 };
 
 export function roleLabel(role: UserRole, locale: AppLocale = "ar"): string {
-  return ROLE_LABELS[locale][role] ?? ROLE_LABELS[locale].user;
+  return ROLE_LABELS[locale][role] ?? ROLE_LABELS[locale].member;
 }
 
+/** All signed-in roles may use Studio; brand rules differ by role. */
 export function canAccessStudio(role: UserRole): boolean {
-  return role === "editor" || role === "admin";
+  return (
+    role === "member" ||
+    role === "creator" ||
+    role === "editor" ||
+    role === "admin"
+  );
 }
 
 export function canAccessAdmin(role: UserRole): boolean {
   return role === "admin";
+}
+
+/**
+ * Export without Arabya brand lockup / watermark.
+ * Super admin, admin, editor, creator — yes. Member — no.
+ */
+export function canExportStudioWithoutBrand(
+  role: UserRole | null | undefined,
+  email?: string | null,
+): boolean {
+  if (isSuperAdminEmail(email)) return true;
+  return role === "admin" || role === "editor" || role === "creator";
 }
 
 /** ترقية إلى مدير — موافقة السوبر أدمن فقط */
@@ -81,6 +109,18 @@ export function canApproveAdminRole(email: string | null | undefined): boolean {
 }
 
 export function normalizeUserRole(value: unknown): UserRole {
-  if (value === "admin" || value === "editor" || value === "user") return value;
-  return "user";
+  if (value === "admin" || value === "editor" || value === "creator") {
+    return value;
+  }
+  // Legacy "user" → member
+  if (value === "member" || value === "user") return "member";
+  return "member";
 }
+
+/** Roles an admin may assign (admin requires super-admin actor). */
+export const ASSIGNABLE_ROLES: UserRole[] = [
+  "member",
+  "creator",
+  "editor",
+  "admin",
+];
