@@ -100,8 +100,7 @@ export function PreferencesMenu({ className = "", compact = true }: Props) {
   const uid = useId();
   const langLabelId = `${uid}-lang`;
   const themeLabelId = `${uid}-theme`;
-  const { open, setOpen, toggle, openOnHover, closeOnLeave } =
-    useDismissibleOpen(rootRef, { closeOnPointerLeave: true });
+  const { open, setOpen, toggle } = useDismissibleOpen(rootRef);
 
   const [theme, setTheme] = useState<Theme>("light");
   const [themeReady, setThemeReady] = useState(false);
@@ -135,8 +134,6 @@ export function PreferencesMenu({ className = "", compact = true }: Props) {
     <div
       className={`prefs-menu ${open ? "is-open" : ""} ${compact ? "prefs-menu--compact" : ""} ${className}`.trim()}
       ref={rootRef}
-      onPointerEnter={openOnHover}
-      onPointerLeave={closeOnLeave}
     >
       <button
         type="button"
@@ -146,7 +143,10 @@ export function PreferencesMenu({ className = "", compact = true }: Props) {
         aria-controls={`${uid}-panel`}
         aria-label={t("open")}
         title={t("open")}
-        onClick={toggle}
+        onClick={(e) => {
+          e.stopPropagation();
+          toggle();
+        }}
       >
         <PrefsIcon />
         <span className="prefs-menu-trigger-badge" aria-hidden>

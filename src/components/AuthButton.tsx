@@ -11,8 +11,7 @@ export function AuthButton() {
   const locale = useLocale();
   const { data, status } = useSession();
   const rootRef = useRef<HTMLDivElement>(null);
-  const { open, setOpen, toggle, openOnHover, closeOnLeave } =
-    useDismissibleOpen(rootRef, { closeOnPointerLeave: true });
+  const { open, setOpen, toggle } = useDismissibleOpen(rootRef);
 
   if (status === "loading") {
     return (
@@ -27,15 +26,16 @@ export function AuthButton() {
       <div
         className={`nav-dropdown ${open ? "is-open" : ""}`}
         ref={rootRef}
-        onPointerEnter={openOnHover}
-        onPointerLeave={closeOnLeave}
       >
         <button
           type="button"
           className="auth-btn auth-btn--account nav-dropdown-trigger"
           aria-expanded={open}
           aria-haspopup="menu"
-          onClick={toggle}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggle();
+          }}
         >
           {data.user.image ? (
             // eslint-disable-next-line @next/next/no-img-element

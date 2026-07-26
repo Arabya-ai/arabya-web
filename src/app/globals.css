@@ -3653,9 +3653,10 @@ html[data-theme="dark"] .arabya-footer-panel {
   position: absolute;
   inset-inline-end: 0;
   inset-inline-start: auto;
-  top: calc(100% + 0.35rem);
+  top: 100%;
   min-width: 12.5rem;
   padding: 0.55rem;
+  margin-top: 0.25rem;
   border-radius: 14px;
   border: 1px solid color-mix(in srgb, var(--brand) 18%, var(--line));
   background: var(--surface);

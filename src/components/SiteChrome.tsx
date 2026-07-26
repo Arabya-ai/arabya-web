@@ -22,8 +22,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
   const t = useTranslations("Nav");
   const rootRef = useRef<HTMLDivElement>(null);
-  const { open, setOpen, toggle, openOnHover, closeOnLeave } =
-    useDismissibleOpen(rootRef, { closeOnPointerLeave: true });
+  const { open, setOpen, toggle } = useDismissibleOpen(rootRef);
 
   function go() {
     return () => {
@@ -36,15 +35,16 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
     <div
       className={`nav-dropdown ${open ? "is-open" : ""}`}
       ref={rootRef}
-      onPointerEnter={openOnHover}
-      onPointerLeave={closeOnLeave}
     >
       <button
         type="button"
         className="nav-dropdown-trigger nav-link-btn"
         aria-expanded={open}
         aria-haspopup="menu"
-        onClick={toggle}
+        onClick={(e) => {
+          e.stopPropagation();
+          toggle();
+        }}
       >
         {t("services")}
       </button>
