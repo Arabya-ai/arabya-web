@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { AuthButton } from "@/components/AuthButton";
 import { BrandLockup } from "@/components/BrandLockup";
-import { LocaleSwitcher } from "@/components/LocaleSwitcher";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { PreferencesMenu } from "@/components/PreferencesMenu";
 import { Link } from "@/i18n/navigation";
 
 /** Site chrome for all pages including Arabya Studio (header + footer). */
@@ -135,8 +134,8 @@ export function SiteHeader() {
         </Link>
 
         <div className="header-actions">
-          <div className="header-locale" aria-hidden={open ? true : undefined}>
-            <LocaleSwitcher compact />
+          <div className="header-prefs" aria-hidden={open ? true : undefined}>
+            <PreferencesMenu compact />
           </div>
           <button
             type="button"
@@ -164,11 +163,10 @@ export function SiteHeader() {
           <Link href="/privacy" onClick={() => setOpen(false)}>
             {t("privacy")}
           </Link>
-          <div className="nav-locale-row">
-            <LocaleSwitcher compact />
-          </div>
           <AuthButton />
-          <ThemeToggle />
+          <div className="nav-prefs-slot">
+            <PreferencesMenu compact />
+          </div>
         </nav>
       </div>
     </header>
@@ -192,20 +190,21 @@ export function SiteFooter() {
             <BrandLockup size="footer" />
           </Link>
 
-          <nav className="arabya-footer-menu" aria-label={t("footerNav")}>
-            <Link href="/">{t("home")}</Link>
-            <Link href="/mushaf/1">{t("mushaf")}</Link>
-            <Link href="/juz">{t("juz")}</Link>
-            <Link href="/roots">{t("roots")}</Link>
-            <Link href="/qiraat">{t("qiraat")}</Link>
-            <Link href="/studio">{t("studio")}</Link>
-            <Link href="/pricing">{t("pricing")}</Link>
-            <Link href="/about">{t("about")}</Link>
-            <Link href="/privacy">{t("privacy")}</Link>
-          </nav>
-
-          <div className="arabya-footer-locale">
-            <LocaleSwitcher compact />
+          <div className="arabya-footer-nav-row">
+            <nav className="arabya-footer-menu" aria-label={t("footerNav")}>
+              <Link href="/">{t("home")}</Link>
+              <Link href="/mushaf/1">{t("mushaf")}</Link>
+              <Link href="/juz">{t("juz")}</Link>
+              <Link href="/roots">{t("roots")}</Link>
+              <Link href="/qiraat">{t("qiraat")}</Link>
+              <Link href="/studio">{t("studio")}</Link>
+              <Link href="/pricing">{t("pricing")}</Link>
+              <Link href="/about">{t("about")}</Link>
+              <Link href="/privacy">{t("privacy")}</Link>
+            </nav>
+            <div className="arabya-footer-prefs">
+              <PreferencesMenu compact />
+            </div>
           </div>
 
           <p className="arabya-footer-credit" suppressHydrationWarning>

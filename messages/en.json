@@ -15,6 +15,12 @@
     "en": "English",
     "switchTo": "Change language"
   },
+  "Preferences": {
+    "label": "Preferences",
+    "open": "Preferences — language and appearance",
+    "language": "Language",
+    "appearance": "Appearance"
+  },
   "Nav": {
     "home": "Home",
     "services": "Services",

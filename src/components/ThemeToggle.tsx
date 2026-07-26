@@ -3,21 +3,12 @@
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 
-import { STORAGE_KEYS } from "@/lib/storage-keys";
-
-type Theme = "light" | "dark";
-
-const THEME_KEY = STORAGE_KEYS.theme;
-
-function applyTheme(theme: Theme) {
-  const root = document.documentElement;
-  root.dataset.theme = theme;
-  root.style.colorScheme = theme;
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) {
-    meta.setAttribute("content", theme === "dark" ? "#071110" : "#0f766e");
-  }
-}
+import {
+  applyTheme,
+  persistTheme,
+  readStoredTheme,
+  type Theme,
+} from "@/lib/theme";
 
 function SunIcon() {
   return (
@@ -40,27 +31,16 @@ function MoonIcon() {
   );
 }
 
+/** Standalone theme control — prefer PreferencesMenu in site chrome. */
 export function ThemeToggle() {
   const t = useTranslations("Theme");
   const [theme, setTheme] = useState<Theme>("light");
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(THEME_KEY) as Theme | null;
-      const prefersDark =
-        window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ?? false;
-      const next: Theme =
-        saved === "dark" || saved === "light"
-          ? saved
-          : prefersDark
-            ? "dark"
-            : "light";
-      setTheme(next);
-      applyTheme(next);
-    } catch {
-      applyTheme("light");
-    }
+    const next = readStoredTheme();
+    setTheme(next);
+    applyTheme(next);
     setReady(true);
   }, []);
 
@@ -68,11 +48,7 @@ export function ThemeToggle() {
     setTheme((prev) => {
       const next: Theme = prev === "dark" ? "light" : "dark";
       applyTheme(next);
-      try {
-        localStorage.setItem(THEME_KEY, next);
-      } catch {
-        /* ignore */
-      }
+      persistTheme(next);
       return next;
     });
   }, []);

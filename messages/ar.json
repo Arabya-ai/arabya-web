@@ -15,6 +15,12 @@
     "en": "English",
     "switchTo": "تغيير اللغة"
   },
+  "Preferences": {
+    "label": "التفضيلات",
+    "open": "التفضيلات — اللغة والمظهر",
+    "language": "اللغة",
+    "appearance": "المظهر"
+  },
   "Nav": {
     "home": "الرئيسية",
     "services": "خدماتنا",
