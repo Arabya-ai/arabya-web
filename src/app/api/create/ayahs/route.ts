@@ -22,9 +22,15 @@ export async function GET(request: Request) {
   const surah = await getSurah(sid);
   if (!surah) return Response.json({ error: "not_found" }, { status: 404 });
 
-  const start = Math.max(1, from);
-  const end = Math.min(surah.versesCount, Math.max(start, to));
-  if (end - start > 40) {
+  const start = Math.min(
+    surah.versesCount,
+    Math.max(1, Number.isFinite(from) ? from : 1),
+  );
+  const end = Math.min(
+    surah.versesCount,
+    Math.max(start, Number.isFinite(to) ? to : start),
+  );
+  if (end - start + 1 > 40) {
     return Response.json({ error: "range_too_long" }, { status: 400 });
   }
 
@@ -35,6 +41,10 @@ export async function GET(request: Request) {
       .filter((w) => !w.charType || w.charType === "word")
       .map((w) => normalizeForHafsFont(w.text))
       .join(" ");
+  }
+
+  if (Object.keys(ayahs).length === 0) {
+    return Response.json({ error: "empty_range" }, { status: 400 });
   }
 
   return Response.json({

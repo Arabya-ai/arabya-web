@@ -71,17 +71,23 @@ export function saveProject(project: StoredProject): void {
   try {
     localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
   } catch (err) {
-    // Quota exceeded — try saving without heavy data-URL backgrounds for siblings.
-    const slim = projects.map((p) =>
-      p.id === project.id && p.bgUrl?.startsWith("data:") && p.bgUrl.length > 200_000
-        ? { ...p, bgUrl: "", bgType: "none" as const }
+    // Quota exceeded — slim other projects' heavy data-URLs first, keep current bg.
+    const slimOthers = projects.map((p) =>
+      p.id !== project.id && p.bgUrl?.startsWith("data:") && p.bgUrl.length > 100_000
+        ? { ...p, bgUrl: "", bgPoster: "", bgType: "none" as const, bgKind: "image" as const }
         : p,
     );
     try {
-      localStorage.setItem(PROJECTS_KEY, JSON.stringify(slim));
+      localStorage.setItem(PROJECTS_KEY, JSON.stringify(slimOthers));
+      return;
     } catch {
-      throw err;
+      /* fall through */
     }
+    const quotaError = new Error(
+      "مساحة التخزين المحلي ممتلئة. احذف مشاريع قديمة أو استخدم خلفية من Pexels بدل رفع ملف كبير.",
+    );
+    (quotaError as Error & { cause?: unknown }).cause = err;
+    throw quotaError;
   }
 }
 

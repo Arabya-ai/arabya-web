@@ -33,6 +33,7 @@ export function AudioPreviewPlayer({ project, onAyahIndexChange }: Props) {
   const dataRef = useRef<Uint8Array | null>(null);
   const startTimeRef = useRef(0);
   const startedAtSecRef = useRef(0);
+  const ignoreEndedRef = useRef(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const segmentsRef = useRef<{ start: number; end: number }[]>([]);
@@ -145,28 +146,62 @@ export function AudioPreviewPlayer({ project, onAyahIndexChange }: Props) {
       analyserRef.current = analyser;
       dataRef.current = data;
 
+      const offset = Math.min(
+        Math.max(0, startedAtSecRef.current),
+        Math.max(0, buffer.duration - 0.05),
+      );
       startTimeRef.current = ctx.currentTime;
-      startedAtSecRef.current = 0;
-      source.start(0);
+      source.start(0, offset);
       setPlaying(true);
-      emitAyahIndex(0);
+      emitAyahIndex(offset);
       rafRef.current = requestAnimationFrame(renderLoop);
 
-      source.onended = () => setPlaying(false);
+      source.onended = () => {
+        if (ignoreEndedRef.current) {
+          ignoreEndedRef.current = false;
+          setPlaying(false);
+          return;
+        }
+        startedAtSecRef.current = 0;
+        setProgress(0);
+        setPlaying(false);
+      };
     } catch {
       // error already surfaced
     }
   };
 
-  const stop = () => {
+  const pause = () => {
+    const ctx = ctxRef.current;
+    if (ctx && playing) {
+      startedAtSecRef.current =
+        ctx.currentTime - startTimeRef.current + startedAtSecRef.current;
+    }
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     rafRef.current = null;
+    ignoreEndedRef.current = true;
     try {
       sourceRef.current?.stop();
     } catch {}
     sourceRef.current?.disconnect();
     sourceRef.current = null;
     setPlaying(false);
+  };
+
+  const stop = () => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+    ignoreEndedRef.current = true;
+    try {
+      sourceRef.current?.stop();
+    } catch {}
+    sourceRef.current?.disconnect();
+    sourceRef.current = null;
+    startedAtSecRef.current = 0;
+    setProgress(0);
+    setPlaying(false);
+    lastAyahIndexRef.current = -1;
+    onAyahIndexChangeRef.current?.(0);
   };
 
   const toggleMute = () => {
@@ -191,7 +226,7 @@ export function AudioPreviewPlayer({ project, onAyahIndexChange }: Props) {
       <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-accent/30 bg-background/70 px-3 py-1.5 backdrop-blur-md">
         <button
           type="button"
-          onClick={playing ? stop : play}
+          onClick={playing ? pause : play}
           disabled={loading}
           className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-accent-foreground hover:scale-110 transition"
           aria-label={playing ? "إيقاف" : "تشغيل"}

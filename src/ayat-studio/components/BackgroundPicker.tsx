@@ -15,6 +15,7 @@ import {
 import { useToast } from "@/ayat-studio/hooks/use-toast";
 import { Link } from "@/i18n/navigation";
 import { studioPath } from "@/ayat-studio/lib/studio-paths";
+import { studioMediaUrl, isAllowedStudioMediaUrl } from "@/ayat-studio/lib/media-url";
 
 type Tab = "upload" | "url" | "search";
 type MediaKind = "image" | "video";
@@ -198,12 +199,25 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "
             {kindBtn("video", <Film className="h-3 w-3" />, "فيديو")}
           </div>
           <Input
-            placeholder={mediaKind === "video" ? "https://example.com/bg.mp4" : "https://example.com/bg.jpg"}
+            placeholder={mediaKind === "video" ? "https://… (Pexels فقط) أو ارفع ملفًا" : "https://images.pexels.com/… أو ارفع ملفًا"}
             dir="ltr"
             className="text-left bg-background/50 border-accent/20"
             value={bgType === "url" ? bgUrl : ""}
-            onChange={(e) => onChange({ bgType: "url", bgKind: mediaKind, bgUrl: e.target.value, bgPoster: "" })}
+            onChange={(e) => {
+              const value = e.target.value.trim();
+              if (value && value.startsWith("http") && !isAllowedStudioMediaUrl(value)) {
+                toast({
+                  title: "رابط غير مدعوم",
+                  description: "للتصدير الموثوق استخدم بحث Pexels أو ارفع ملفًا من جهازك.",
+                  variant: "destructive",
+                });
+              }
+              onChange({ bgType: "url", bgKind: mediaKind, bgUrl: e.target.value, bgPoster: "" });
+            }}
           />
+          <p className="text-[10px] text-muted-foreground">
+            الروابط الخارجية العامة قد تفشل في التصدير بسبب الحماية. الأفضل: بحث Pexels أو رفع ملف.
+          </p>
         </div>
       )}
 
@@ -267,7 +281,7 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "
                     }`}
                     title={`${p.alt || "خلفية"} — ${p.photographer}`}
                   >
-                    <img src={p.src.medium} alt={p.alt} loading="lazy" className="h-full w-full object-cover" />
+                    <img src={studioMediaUrl(p.src.medium)} alt={p.alt} loading="lazy" className="h-full w-full object-cover" />
                   </button>
                 );
               })}
@@ -291,7 +305,7 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "
                     }`}
                     title={file ? `${v.user.name} · ${v.duration}s — اضغط للإضافة` : "ملف غير متاح"}
                   >
-                    <img src={v.image} alt="" loading="lazy" className="h-full w-full object-cover" />
+                    <img src={studioMediaUrl(v.image)} alt="" loading="lazy" className="h-full w-full object-cover" />
                     <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[9px] text-white inline-flex items-center gap-1">
                       <Film className="h-2.5 w-2.5" /> {v.duration}s
                     </span>
@@ -324,7 +338,7 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "
           {(bgPoster || (bgKind === "image" && bgUrl)) && (
             <div className="overflow-hidden rounded-md border border-accent/30">
               <img
-                src={bgPoster || bgUrl}
+                src={studioMediaUrl(bgPoster || bgUrl)}
                 alt=""
                 className="h-20 w-full object-cover"
               />

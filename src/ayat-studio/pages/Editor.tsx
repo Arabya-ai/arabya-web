@@ -15,7 +15,7 @@ import {
   ChevronDown, ChevronLeft, ChevronRight, Loader2, Save, Sparkles, AudioLines,
 } from "lucide-react";
 import { getProject, saveProject, type StoredProject } from "@/ayat-studio/lib/projects-store";
-import { exportProjectToVideo, downloadBlob } from "@/ayat-studio/lib/video-export";
+import { exportProjectToVideo, exportProjectToPng, downloadBlob } from "@/ayat-studio/lib/video-export";
 import { saveExport } from "@/ayat-studio/lib/projects-store";
 import { useToast } from "@/ayat-studio/hooks/use-toast";
 import { BackgroundPicker } from "@/ayat-studio/components/BackgroundPicker";
@@ -117,7 +117,10 @@ export default function Editor() {
       console.warn("saveProject failed", err);
       toast({
         title: "تعذّر حفظ المشروع محليًا",
-        description: "قد تكون مساحة التخزين ممتلئة. الخلفية تظهر في هذه الجلسة.",
+        description:
+          err instanceof Error
+            ? err.message
+            : "قد تكون مساحة التخزين ممتلئة. احذف مشاريع قديمة أو استخدم خلفية Pexels.",
         variant: "destructive",
       });
     }
@@ -214,39 +217,15 @@ export default function Editor() {
   const handleExportPng = async () => {
     setExportingPng(true);
     try {
-      const aspect =
-        project.ratio === "9:16" || project.ratio === "16:9" || project.ratio === "1:1"
-          ? project.ratio
-          : "1:1";
-      const q = new URLSearchParams({
-        s: String(project.surahId),
-        v: String(project.ayahStart),
-        aspect,
-      });
-      if (project.bgUrl && project.bgKind !== "video" && project.bgUrl.startsWith("#")) {
-        q.set("bg", project.bgUrl);
+      if (!plusOk && project.ratio !== "1:1") {
+        toast({
+          title: "ملاحظة للخطة المجانية",
+          description: "صورة PNG للخطة المجانية تُصدَّر بمقاس مربع مع علامة مائية من واجهة المعاينة.",
+        });
       }
-      const res = await fetch(`/api/create/image?${q}`, {
-        credentials: "same-origin",
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(
-          err.error === "plus_required"
-            ? "مقاسات/خلفيات الصورة المتقدمة تتطلب بلس"
-            : err.error === "auth_required"
-              ? "يلزم تسجيل الدخول"
-              : "فشل إنشاء الصورة",
-        );
-      }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${project.title || "ayah"}-${project.ayahStart}.png`;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast({ title: "تم تنزيل الصورة", description: `آية ${project.ayahStart} بصيغة PNG` });
+      const blob = await exportProjectToPng(project);
+      downloadBlob(blob, `${project.title || "ayah"}-${project.ayahStart}.png`);
+      toast({ title: "تم تنزيل الصورة", description: `آية ${project.ayahStart} بصيغة PNG مع الخلفية` });
     } catch (err: any) {
       toast({
         title: "فشل تصدير الصورة",
@@ -282,9 +261,20 @@ export default function Editor() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={project.surahId.toString()} onValueChange={(v) => update({ surahId: Number(v) })}>
+          <Select
+            value={project.surahId.toString()}
+            onValueChange={(v) => {
+              const sid = Number(v);
+              const meta = surahs.find((s) => s.id === sid);
+              const max = meta?.ayahCount ?? 1;
+              const start = Math.min(Math.max(1, project.ayahStart), max);
+              let end = Math.min(Math.max(start, project.ayahEnd), max);
+              if (end - start + 1 > 40) end = Math.min(max, start + 39);
+              update({ surahId: sid, ayahStart: start, ayahEnd: end });
+            }}
+          >
             <SelectTrigger className="bg-background/50 border-accent/20"><SelectValue /></SelectTrigger>
-            <SelectContent>{surahs.map((s) => <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>)}</SelectContent>
+            <SelectContent className="max-h-72">{surahs.map((s) => <SelectItem key={s.id} value={s.id.toString()}>{s.id}. {s.name}</SelectItem>)}</SelectContent>
           </Select>
           <div className="grid grid-cols-2 gap-2">
             <div>
@@ -390,14 +380,9 @@ export default function Editor() {
         </EditorPanel>
 
         <EditorPanel title="الترجمة والتفسير" icon={Languages}>
-          <div className="flex items-center justify-between">
-            <Label>إظهار الترجمة</Label>
-            <Switch checked={project.translationEnabled} onCheckedChange={(v) => update({ translationEnabled: v })} />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label>إظهار التفسير</Label>
-            <Switch checked={project.tafsirEnabled} onCheckedChange={(v) => update({ tafsirEnabled: v })} />
-          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            إظهار الترجمة والتفسير داخل الفيديو قيد التطوير وسيُفعَّل قريبًا. حاليًا يُصدَّر نص الآيات العربي مع الصوت والخلفية.
+          </p>
         </EditorPanel>
 
         <EditorPanel title="تنسيق النص" icon={Type}>

@@ -38,7 +38,9 @@ async function fetchSurahText(
           ? "يلزم تسجيل الدخول"
           : err.error === "range_too_long"
             ? "نطاق الآيات طويل جدًا (الحد 40 آية لكل تصدير)"
-            : "فشل جلب نص الآيات",
+            : err.error === "empty_range"
+              ? "نطاق الآيات غير صالح لهذه السورة"
+              : "فشل جلب نص الآيات",
     );
   }
   const json = await res.json();
@@ -90,6 +92,10 @@ export async function fetchAndDecodeAudio(
     numberInSurah: number;
   }[];
 }> {
+  if (ayahs.length === 0) {
+    throw new Error("لا توجد آيات في النطاق المحدد. راجع رقم السورة والآيات.");
+  }
+
   const buffers = await Promise.all(
     ayahs.map(async (a) => {
       let res: Response;
