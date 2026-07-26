@@ -472,16 +472,9 @@ html[data-theme="dark"] .arabya-mark-icon {
   }
 }
 
-/* Clearer type in light studio surfaces */
+/* Clearer base type in light studio surfaces — do not override display headings */
 .ayat-studio :where(p, li, label, button, input, select, textarea) {
   letter-spacing: 0.01em;
-}
-
-.ayat-studio h1 {
-  font-size: clamp(1.75rem, 4vw, 2.75rem);
-}
-.ayat-studio h2 {
-  font-size: clamp(1.35rem, 3vw, 1.85rem);
 }
 
 /* Live preview — equal-height companion to controls; gentle motion; viewport-aware */
