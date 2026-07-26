@@ -10,7 +10,7 @@ type BrandLockupProps = {
 export function BrandLockup({ size = "header" }: BrandLockupProps) {
   const locale = useLocale();
   const isHeader = size === "header";
-  const logoSize = isHeader ? 46 : 38;
+  const logoSize = 46;
   const brandName = locale === "en" ? "Arabya" : "عربية";
 
   return (

@@ -245,11 +245,6 @@ html[data-theme="dark"] .site-header {
   transform-style: preserve-3d;
 }
 
-.brand-lockup--footer .brand-emblem {
-  width: 2.55rem;
-  height: 2.55rem;
-}
-
 .brand-emblem-shadow {
   position: absolute;
   inset: 14% 10% -4% 12%;
