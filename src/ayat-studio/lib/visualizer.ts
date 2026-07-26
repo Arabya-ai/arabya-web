@@ -8,7 +8,13 @@ export type VisualizerType =
   | "mirror"
   | "aurora"
   | "spectrum"
-  | "ripple";
+  | "ripple"
+  | "orb"
+  | "helix"
+  | "lattice"
+  | "pulse"
+  | "constellation"
+  | "comet";
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const m = hex.replace("#", "");
@@ -24,6 +30,8 @@ interface DrawArgs {
   color: string;
   intensity: number;
   clear?: boolean;
+  /** Optional phase for animated advanced effects. */
+  time?: number;
 }
 
 export function drawVisualizer({
@@ -33,6 +41,7 @@ export function drawVisualizer({
   color,
   intensity,
   clear = true,
+  time = 0,
 }: DrawArgs) {
   if (type === "none") return;
   const ctx = canvas.getContext("2d");
@@ -46,6 +55,8 @@ export function drawVisualizer({
   const { r, g, b } = hexToRgb(color);
   const rgba = (a: number) => `rgba(${r},${g},${b},${a})`;
   const boost = 0.35 + intensity;
+  const energy =
+    data.reduce((s, v) => s + v, 0) / Math.max(1, data.length) / 255;
 
   if (type === "bars") {
     const bars = Math.min(48, data.length);
@@ -200,8 +211,6 @@ export function drawVisualizer({
   if (type === "ripple") {
     const cx = w / 2;
     const cy = h * 0.55;
-    const energy =
-      data.reduce((s, v) => s + v, 0) / Math.max(1, data.length) / 255;
     for (let i = 0; i < 6; i++) {
       const rr = Math.min(w, h) * (0.08 + i * 0.07) * (0.7 + energy * boost);
       ctx.beginPath();
@@ -209,6 +218,175 @@ export function drawVisualizer({
       ctx.strokeStyle = rgba(0.45 - i * 0.06);
       ctx.lineWidth = Math.max(1, w * 0.002);
       ctx.stroke();
+    }
+    ctx.restore();
+    return;
+  }
+
+  if (type === "orb") {
+    const cx = w / 2;
+    const cy = h * 0.58;
+    const base = Math.min(w, h) * 0.16 * (0.85 + energy * boost);
+    const grd = ctx.createRadialGradient(cx, cy, base * 0.15, cx, cy, base * 1.6);
+    grd.addColorStop(0, rgba(0.85));
+    grd.addColorStop(0.45, rgba(0.35));
+    grd.addColorStop(1, rgba(0));
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(cx, cy, base * 1.6, 0, Math.PI * 2);
+    ctx.fill();
+    const segs = 48;
+    ctx.strokeStyle = rgba(0.7);
+    ctx.lineWidth = Math.max(1.5, w * 0.002);
+    ctx.beginPath();
+    for (let i = 0; i <= segs; i++) {
+      const idx = Math.floor((i / segs) * data.length);
+      const v = data[idx] / 255;
+      const a = (i / segs) * Math.PI * 2 + time * 2;
+      const rr = base * (0.7 + v * 0.55 * boost);
+      const x = cx + Math.cos(a) * rr;
+      const y = cy + Math.sin(a) * rr * 0.72;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+    return;
+  }
+
+  if (type === "helix") {
+    const cx = w / 2;
+    const mid = h * 0.62;
+    const amp = w * 0.22 * boost;
+    for (let strand = 0; strand < 2; strand++) {
+      ctx.beginPath();
+      ctx.strokeStyle = rgba(0.55 + strand * 0.25);
+      ctx.lineWidth = Math.max(2, w * 0.003);
+      ctx.shadowColor = rgba(0.4);
+      ctx.shadowBlur = 12;
+      for (let i = 0; i < 80; i++) {
+        const t = i / 79;
+        const idx = Math.floor(t * (data.length - 1));
+        const v = data[idx] / 255;
+        const phase = t * Math.PI * 6 + time * 3 + strand * Math.PI;
+        const x = cx + Math.sin(phase) * amp * (0.4 + v);
+        const y = mid - h * 0.28 + t * h * 0.42;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+    return;
+  }
+
+  if (type === "lattice") {
+    const cols = 14;
+    const rows = 8;
+    const padX = w * 0.08;
+    const padY = h * 0.55;
+    const cellW = (w - padX * 2) / cols;
+    const cellH = (h * 0.32) / rows;
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const idx = (row * cols + col) % data.length;
+        const v = data[idx] / 255;
+        const x = padX + col * cellW + cellW / 2;
+        const y = padY + row * cellH + cellH / 2;
+        const size = Math.max(1, v * Math.min(cellW, cellH) * 0.45 * boost);
+        ctx.fillStyle = rgba(0.2 + v * 0.75);
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+    return;
+  }
+
+  if (type === "pulse") {
+    const cy = h * 0.78;
+    ctx.strokeStyle = rgba(0.9);
+    ctx.lineWidth = Math.max(2.5, w * 0.004);
+    ctx.shadowColor = rgba(0.55);
+    ctx.shadowBlur = 16;
+    ctx.beginPath();
+    const steps = 120;
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const idx = Math.floor(t * (data.length - 1));
+      const v = (data[idx] - 128) / 128;
+      const beat =
+        Math.sin(t * Math.PI * 8 + time * 6) * energy * h * 0.06 * boost;
+      const x = w * 0.08 + t * w * 0.84;
+      const y = cy + v * h * 0.05 * boost + beat;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.restore();
+    return;
+  }
+
+  if (type === "constellation") {
+    const count = 36;
+    const pts: { x: number; y: number; v: number }[] = [];
+    for (let i = 0; i < count; i++) {
+      const v = data[(i * 5) % data.length] / 255;
+      const a = (i / count) * Math.PI * 2 + time;
+      const dist = Math.min(w, h) * (0.1 + v * 0.32 * boost);
+      pts.push({
+        x: w / 2 + Math.cos(a) * dist,
+        y: h * 0.55 + Math.sin(a) * dist * 0.7,
+        v,
+      });
+    }
+    ctx.strokeStyle = rgba(0.35);
+    ctx.lineWidth = 1;
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i + 1; j < pts.length; j++) {
+        const dx = pts[i].x - pts[j].x;
+        const dy = pts[i].y - pts[j].y;
+        const d = Math.hypot(dx, dy);
+        if (d < Math.min(w, h) * 0.18) {
+          ctx.globalAlpha = 0.35 * (1 - d / (Math.min(w, h) * 0.18));
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x, pts[i].y);
+          ctx.lineTo(pts[j].x, pts[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+    for (const p of pts) {
+      ctx.fillStyle = rgba(0.4 + p.v * 0.6);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 1.5 + p.v * 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+    return;
+  }
+
+  if (type === "comet") {
+    const trail = 28;
+    const pathY = h * 0.72;
+    for (let i = 0; i < trail; i++) {
+      const t = i / (trail - 1);
+      const idx = Math.floor(t * (data.length - 1));
+      const v = data[idx] / 255;
+      const x = w * (0.08 + t * 0.84);
+      const y =
+        pathY +
+        Math.sin(t * Math.PI * 3 + time * 4) * h * 0.04 * boost +
+        (v - 0.5) * h * 0.03;
+      const size =
+        (1 - t) * Math.min(w, h) * 0.012 * (0.5 + energy * boost);
+      ctx.fillStyle = rgba(0.15 + (1 - t) * 0.75);
+      ctx.beginPath();
+      ctx.arc(x, y, Math.max(1, size), 0, Math.PI * 2);
+      ctx.fill();
     }
     ctx.restore();
     return;

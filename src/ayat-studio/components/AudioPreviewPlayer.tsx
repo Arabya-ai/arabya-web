@@ -151,6 +151,7 @@ export function AudioPreviewPlayer({
       type: (p.visualizer || "bars") as VisualizerType,
       color: p.visualizerColor || "#C8A951",
       intensity: (p.visualizerIntensity ?? 60) / 100,
+      time: elapsed,
     });
 
     if (elapsed >= dur) {
@@ -268,6 +269,61 @@ export function AudioPreviewPlayer({
           width={400}
           height={700}
         />
+      )}
+
+      {(project.progressBarStyle ?? "none") !== "none" && (
+        <div
+          className="pointer-events-none absolute inset-x-[15%] bottom-[7%] z-[6]"
+          aria-hidden
+        >
+          {(project.progressBarStyle ?? "none") === "dots" ? (
+            <div className="flex items-center justify-between gap-0.5">
+              {Array.from({ length: 24 }).map((_, i) => {
+                const active = i / 24 <= progress;
+                return (
+                  <span
+                    key={i}
+                    className="rounded-full"
+                    style={{
+                      width: active ? 5 : 3,
+                      height: active ? 5 : 3,
+                      background: active
+                        ? project.progressBarColor || "#C8A951"
+                        : "rgba(255,255,255,0.25)",
+                    }}
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <div
+              className={`w-full overflow-hidden bg-white/20 ${
+                (project.progressBarStyle ?? "none") === "pill"
+                  ? "h-2 rounded-full"
+                  : "h-1 rounded-sm"
+              }`}
+              style={
+                (project.progressBarStyle ?? "none") === "glow"
+                  ? {
+                      boxShadow: `0 0 10px ${project.progressBarColor || "#C8A951"}`,
+                    }
+                  : undefined
+              }
+            >
+              <div
+                className={`h-full transition-all ${
+                  (project.progressBarStyle ?? "none") === "pill"
+                    ? "rounded-full"
+                    : ""
+                }`}
+                style={{
+                  width: `${progress * 100}%`,
+                  background: project.progressBarColor || "#C8A951",
+                }}
+              />
+            </div>
+          )}
+        </div>
       )}
 
       <div

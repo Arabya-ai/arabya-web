@@ -10,6 +10,21 @@ import {
   normalizeBrandPosition,
   type BrandPosition,
 } from "./brand-position";
+import {
+  frameAyahFontPx,
+  frameBrandMarkPx,
+  frameBrandPadPx,
+  frameBrandSubPx,
+  frameBrandTitlePx,
+  frameReciterFontPx,
+  frameSurahLabelPx,
+  frameTafsirFontPx,
+  frameTranslationFontPx,
+  normalizeProgressBarStyle,
+  normalizeReciterPosition,
+  reciterTextAlign,
+  reciterX,
+} from "./frame-layout";
 
 interface ExportOptions {
   project: StoredProject;
@@ -320,6 +335,7 @@ export async function exportProjectToVideo({
           color: visualizerColor,
           intensity: visualizerIntensity,
           clear: false,
+          time: timeSec,
         });
       }
 
@@ -730,7 +746,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
 
   if (!ayahOnly) {
     ctx.fillStyle = "rgba(200, 169, 81, 0.95)";
-    ctx.font = `${Math.round(width * 0.025)}px "IBM Plex Sans Arabic", sans-serif`;
+    ctx.font = `${frameSurahLabelPx(width)}px "IBM Plex Sans Arabic", sans-serif`;
     ctx.textAlign = "center";
     ctx.fillText(
       showNumbers ? `${surahName} · آية ${ayahNumber}` : surahName,
@@ -740,7 +756,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   }
 
   ctx.fillStyle = project.textColor;
-  const fontPx = Math.round((project.fontSize / 48) * width * 0.06);
+  const fontPx = frameAyahFontPx(project.fontSize, width);
   ctx.font = `bold ${fontPx}px "Amiri", "Scheherazade New", serif`;
   ctx.textAlign = "center";
   ctx.direction = "rtl";
@@ -753,8 +769,9 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
 
   let nextY = yCenter + fontPx * 1.8;
   if (translationText) {
-    const tSize = Math.round(
-      ((project.translationFontSize ?? 22) / 22) * width * 0.028,
+    const tSize = frameTranslationFontPx(
+      project.translationFontSize ?? 22,
+      width,
     );
     ctx.fillStyle = project.translationTextColor || "#f0e6d0";
     ctx.font = `${tSize}px "IBM Plex Sans Arabic", sans-serif`;
@@ -775,9 +792,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   }
 
   if (tafsirText) {
-    const tSize = Math.round(
-      ((project.tafsirFontSize ?? 18) / 18) * width * 0.022,
-    );
+    const tSize = frameTafsirFontPx(project.tafsirFontSize ?? 18, width);
     const clipped =
       tafsirText.length > 360 ? `${tafsirText.slice(0, 360)}…` : tafsirText;
     ctx.fillStyle = project.tafsirTextColor || "#d4c4a8";
@@ -800,12 +815,17 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   ctx.restore();
   if ((ctx as any).filter) (ctx as any).filter = "none";
 
-  if (!ayahOnly) {
+  const reciterPos = normalizeReciterPosition(project.reciterPosition);
+  if (!ayahOnly && reciterPos !== "hidden") {
     ctx.fillStyle = "rgba(255,255,255,0.55)";
-    ctx.font = `${Math.round(width * 0.022)}px "IBM Plex Sans Arabic", sans-serif`;
+    ctx.font = `${frameReciterFontPx(width)}px "IBM Plex Sans Arabic", sans-serif`;
     ctx.direction = "rtl";
-    ctx.textAlign = "center";
-    ctx.fillText(reciterName, width / 2, height - height * 0.04);
+    ctx.textAlign = reciterTextAlign(reciterPos);
+    ctx.fillText(
+      reciterName,
+      reciterX(reciterPos, width),
+      height - height * 0.035,
+    );
   }
 
   const forceBrand = showWatermark;
@@ -824,14 +844,13 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
     });
   }
 
-  const barW = width * 0.7;
-  const barH = Math.max(3, height * 0.005);
-  const barX = (width - barW) / 2;
-  const barY = height - height * 0.07;
-  ctx.fillStyle = "rgba(255,255,255,0.2)";
-  ctx.fillRect(barX, barY, barW, barH);
-  ctx.fillStyle = "rgba(200, 169, 81, 0.95)";
-  ctx.fillRect(barX, barY, barW * progress, barH);
+  drawProgressBar(ctx, {
+    width,
+    height,
+    progress,
+    style: normalizeProgressBarStyle(project.progressBarStyle),
+    color: project.progressBarColor || "#C8A951",
+  });
 }
 
 /** Draw Arabya mark + «عربية ستوديو» / ARABYA • STUDIO at the chosen corner/edge. */
@@ -846,18 +865,18 @@ function drawBrandLockup(
   },
 ) {
   const { width, height, position, markImg, required } = opts;
-  const pad = Math.round(width * 0.028);
-  const mark = Math.max(28, Math.round(width * 0.052));
+  const pad = frameBrandPadPx(width);
+  const mark = frameBrandMarkPx(width);
   const gap = Math.round(mark * 0.22);
-  const titleSize = Math.max(14, Math.round(width * 0.022));
-  const subSize = Math.max(9, Math.round(width * 0.012));
-  const textW = Math.round(width * 0.22);
+  const titleSize = frameBrandTitlePx(width);
+  const subSize = frameBrandSubPx(width);
+  const textW = Math.round(width * 0.28);
   const boxW = mark + gap + textW;
-  const boxH = Math.max(mark, titleSize + subSize + 8);
+  const boxH = Math.max(mark, titleSize + subSize + 10);
   const { x, y } = brandLockupAnchor(position, width, height, boxW, boxH, pad);
 
   ctx.save();
-  ctx.globalAlpha = required ? 0.92 : 0.88;
+  ctx.globalAlpha = required ? 0.95 : 0.92;
   ctx.shadowColor = "rgba(0,0,0,0.55)";
   ctx.shadowBlur = Math.max(4, width * 0.006);
   ctx.shadowOffsetY = 1;
@@ -865,10 +884,9 @@ function drawBrandLockup(
   const markX = x;
   const markY = y + Math.round((boxH - mark) / 2);
   if (markImg && markImg.width > 0) {
-    // Rounded plate behind mark (matches preview icon chrome)
-    const r = mark * 0.22;
+    const radius = mark * 0.22;
     ctx.fillStyle = "rgba(255,255,255,0.92)";
-    roundRectPath(ctx, markX, markY, mark, mark, r);
+    roundRectPath(ctx, markX, markY, mark, mark, radius);
     ctx.fill();
     ctx.drawImage(markImg, markX, markY, mark, mark);
   } else {
@@ -884,7 +902,6 @@ function drawBrandLockup(
   ctx.textAlign = "right";
   ctx.fillStyle = "#ffffff";
   ctx.font = `bold ${titleSize}px "Reem Kufi", "IBM Plex Sans Arabic", sans-serif`;
-  // RTL: right edge of text block at textX + textW
   ctx.fillText("عربية ستوديو", textX + textW, titleY, textW);
 
   ctx.direction = "ltr";
@@ -894,6 +911,69 @@ function drawBrandLockup(
   ctx.fillText("ARABYA • STUDIO", textX, subY, textW);
 
   ctx.restore();
+}
+
+function drawProgressBar(
+  ctx: CanvasRenderingContext2D,
+  opts: {
+    width: number;
+    height: number;
+    progress: number;
+    style: ReturnType<typeof normalizeProgressBarStyle>;
+    color: string;
+  },
+) {
+  const { width, height, progress, style, color } = opts;
+  if (style === "none") return;
+  const p = Math.max(0, Math.min(1, progress));
+  const barW = width * 0.7;
+  const barX = (width - barW) / 2;
+  const barY = height - height * 0.07;
+  const hex = color.replace("#", "");
+  const full = hex.length === 3 ? hex.split("").map((c) => c + c).join("") : hex;
+  const num = parseInt(full, 16) || 0xc8a951;
+  const r = (num >> 16) & 255;
+  const g = (num >> 8) & 255;
+  const b = num & 255;
+  const fill = `rgba(${r},${g},${b},0.95)`;
+  const track = "rgba(255,255,255,0.2)";
+
+  if (style === "dots") {
+    const count = 24;
+    for (let i = 0; i < count; i++) {
+      const active = i / count <= p;
+      const x = barX + (i + 0.5) * (barW / count);
+      ctx.fillStyle = active ? fill : track;
+      ctx.beginPath();
+      ctx.arc(x, barY + 3, active ? 3.5 : 2.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    return;
+  }
+
+  const barH =
+    style === "pill"
+      ? Math.max(8, height * 0.01)
+      : Math.max(3, height * 0.005);
+
+  if (style === "glow") {
+    ctx.shadowColor = fill;
+    ctx.shadowBlur = Math.max(8, width * 0.01);
+  }
+
+  ctx.fillStyle = track;
+  if (style === "pill") {
+    roundRectPath(ctx, barX, barY, barW, barH, barH / 2);
+    ctx.fill();
+    ctx.fillStyle = fill;
+    roundRectPath(ctx, barX, barY, Math.max(barH, barW * p), barH, barH / 2);
+    ctx.fill();
+  } else {
+    ctx.fillRect(barX, barY, barW, barH);
+    ctx.fillStyle = fill;
+    ctx.fillRect(barX, barY, barW * p, barH);
+  }
+  ctx.shadowBlur = 0;
 }
 
 function roundRectPath(

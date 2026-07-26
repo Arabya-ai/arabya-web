@@ -23,7 +23,13 @@ export type VisualizerId =
   | "mirror"
   | "aurora"
   | "spectrum"
-  | "ripple";
+  | "ripple"
+  | "orb"
+  | "helix"
+  | "lattice"
+  | "pulse"
+  | "constellation"
+  | "comet";
 
 export interface StoredProject {
   id: string;
@@ -86,6 +92,15 @@ export interface StoredProject {
     | "bottom-center"
     | "bottom-right";
   softVignette?: boolean;
+  /** Reciter name placement (or hidden). Default bottom-left to match preview. */
+  reciterPosition?:
+    | "hidden"
+    | "bottom-left"
+    | "bottom-center"
+    | "bottom-right";
+  /** In-frame progress bar — off by default so export matches preview. */
+  progressBarStyle?: "none" | "line" | "pill" | "glow" | "dots";
+  progressBarColor?: string;
 }
 
 export interface StoredExport {
@@ -213,6 +228,9 @@ export function createDefaultProject(input: {
     brandSignature: true,
     brandPosition: "bottom-left",
     softVignette: true,
+    reciterPosition: "bottom-left",
+    progressBarStyle: "none",
+    progressBarColor: "#C8A951",
   };
   saveProject(project);
   return project;

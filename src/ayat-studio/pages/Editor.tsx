@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { studioPath } from "@/ayat-studio/lib/studio-paths";
@@ -78,6 +78,24 @@ import {
   normalizeBrandPosition,
   type BrandPosition,
 } from "@/ayat-studio/lib/brand-position";
+import {
+  frameAyahFontPx,
+  frameBrandMarkPx,
+  frameBrandSubPx,
+  frameBrandTitlePx,
+  frameReciterFontPx,
+  frameSurahLabelPx,
+  frameTafsirFontPx,
+  frameTranslationFontPx,
+  normalizeProgressBarStyle,
+  normalizeReciterPosition,
+  PROGRESS_BAR_STYLES,
+  RECITER_POSITION_LABELS_AR,
+  RECITER_POSITIONS,
+  reciterJustifyClass,
+  type ProgressBarStyle,
+  type ReciterPosition,
+} from "@/ayat-studio/lib/frame-layout";
 import { Link } from "@/i18n/navigation";
 import { useStudioPreviewSrc } from "@/ayat-studio/hooks/use-studio-preview-src";
 import { ArabyaMarkIcon } from "@/ayat-studio/components/IslamicDecor";
@@ -201,6 +219,21 @@ export default function Editor() {
   const [translationMap, setTranslationMap] = useState<Record<number, string> | null>(null);
   const [tafsirMap, setTafsirMap] = useState<Record<number, string> | null>(null);
   const [layersLoading, setLayersLoading] = useState(false);
+  const previewFrameRef = useRef<HTMLDivElement>(null);
+  const [frameWidth, setFrameWidth] = useState(320);
+
+  useEffect(() => {
+    const el = previewFrameRef.current;
+    if (!el) return;
+    const measure = () => {
+      const w = el.clientWidth;
+      if (w > 0) setFrameWidth(w);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [project?.ratio, project?.id]);
 
   useEffect(() => {
     if (!id) return;
@@ -221,6 +254,9 @@ export default function Editor() {
       brandSignature: p.brandSignature ?? true,
       brandPosition: normalizeBrandPosition(p.brandPosition),
       softVignette: p.softVignette ?? true,
+      reciterPosition: normalizeReciterPosition(p.reciterPosition),
+      progressBarStyle: normalizeProgressBarStyle(p.progressBarStyle),
+      progressBarColor: p.progressBarColor || "#C8A951",
       translationSlug: p.translationSlug || "saheeh-en",
       tafsirSlug: p.tafsirSlug || "muyassar",
       translationFontSize: p.translationFontSize ?? 22,
@@ -882,6 +918,56 @@ export default function Editor() {
                 onCheckedChange={(v) => update({ softVignette: v })}
               />
             </div>
+            <div className="space-y-2 rounded-lg border border-accent/15 bg-background/30 p-3">
+              <Label className="text-xs text-accent">اسم القارئ</Label>
+              <Select
+                value={normalizeReciterPosition(project.reciterPosition)}
+                onValueChange={(v) =>
+                  update({ reciterPosition: v as ReciterPosition })
+                }
+              >
+                <SelectTrigger className="bg-background/50 border-accent/20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {RECITER_POSITIONS.map((pos) => (
+                    <SelectItem key={pos} value={pos}>
+                      {RECITER_POSITION_LABELS_AR[pos]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2 rounded-lg border border-accent/15 bg-background/30 p-3">
+              <Label className="text-xs text-accent">شريط التقدم داخل الإطار</Label>
+              <Select
+                value={normalizeProgressBarStyle(project.progressBarStyle)}
+                onValueChange={(v) =>
+                  update({ progressBarStyle: v as ProgressBarStyle })
+                }
+              >
+                <SelectTrigger className="bg-background/50 border-accent/20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PROGRESS_BAR_STYLES.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {normalizeProgressBarStyle(project.progressBarStyle) !== "none" && (
+                <ColorPickerField
+                  label="لون شريط التقدم"
+                  value={project.progressBarColor || "#C8A951"}
+                  onChange={(hex) => update({ progressBarColor: hex })}
+                />
+              )}
+              <p className="text-[10px] leading-relaxed text-muted-foreground">
+                الافتراضي: بدون شريط — ليطابق المعاينة. فعّله ليظهر في المعاينة والتصدير معًا.
+              </p>
+            </div>
           </EditorPanel>
 
           <EditorPanel title="مؤثرات الصوت المرئية" icon={AudioLines}>
@@ -1275,6 +1361,7 @@ export default function Editor() {
         </div>
         <div className="studio-live-preview__stage relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center p-1 pb-12">
           <div
+            ref={previewFrameRef}
             className={`${previewAspect} studio-live-preview__frame relative flex flex-col overflow-visible rounded-2xl border border-primary/35 shadow-deep`}
             style={{
               /* Shrink width when height caps so the whole frame (media) stays on screen */
@@ -1359,8 +1446,11 @@ export default function Editor() {
             >
               {!ayahOnly && (
                 <p
-                  className="mb-3 text-xs tracking-widest sm:text-sm"
-                  style={{ color: "hsl(var(--accent))" }}
+                  className="mb-3 tracking-widest"
+                  style={{
+                    color: "hsl(var(--accent))",
+                    fontSize: `${frameSurahLabelPx(frameWidth)}px`,
+                  }}
                 >
                   {selectedSurah?.name}
                   {showNumbers
@@ -1378,7 +1468,7 @@ export default function Editor() {
                 <p
                   className="font-quran leading-loose mb-2"
                   style={{
-                    fontSize: `${Math.min(project.fontSize * 0.52, 30)}px`,
+                    fontSize: `${frameAyahFontPx(project.fontSize, frameWidth)}px`,
                     color: project.textColor,
                     textShadow: "0 2px 12px rgba(0,0,0,0.8)",
                   }}
@@ -1392,7 +1482,10 @@ export default function Editor() {
                 <p
                   className="mb-2 leading-relaxed"
                   style={{
-                    fontSize: `${Math.min((project.translationFontSize ?? 22) * 0.62, 17)}px`,
+                    fontSize: `${frameTranslationFontPx(
+                      project.translationFontSize ?? 22,
+                      frameWidth,
+                    )}px`,
                     color: project.translationTextColor || "#f0e6d0",
                     textShadow: "0 1px 8px rgba(0,0,0,0.7)",
                   }}
@@ -1405,7 +1498,10 @@ export default function Editor() {
                 <p
                   className="mb-2 leading-relaxed opacity-95"
                   style={{
-                    fontSize: `${Math.min((project.tafsirFontSize ?? 18) * 0.58, 15)}px`,
+                    fontSize: `${frameTafsirFontPx(
+                      project.tafsirFontSize ?? 18,
+                      frameWidth,
+                    )}px`,
                     color: project.tafsirTextColor || "#d4c4a8",
                     textShadow: "0 1px 8px rgba(0,0,0,0.7)",
                   }}
@@ -1452,31 +1548,50 @@ export default function Editor() {
             </div>
           </div>
 
-          {!ayahOnly && (
-            <div className="relative z-[3] flex items-end justify-between gap-2 px-3 pb-3 pt-1 sm:px-4">
-              <span
-                className="max-w-[70%] truncate text-[10px] sm:text-xs"
-                style={{ color: "rgba(255,255,255,0.5)" }}
+          {!ayahOnly &&
+            normalizeReciterPosition(project.reciterPosition) !== "hidden" && (
+              <div
+                dir="ltr"
+                className={`relative z-[3] flex items-end gap-2 px-3 pb-3 pt-1 sm:px-4 ${reciterJustifyClass(
+                  normalizeReciterPosition(project.reciterPosition),
+                )}`}
               >
-                {selectedReciter?.name}
-              </span>
-            </div>
-          )}
+                <span
+                  className="max-w-[80%] truncate"
+                  style={{
+                    color: "rgba(255,255,255,0.55)",
+                    fontSize: `${frameReciterFontPx(frameWidth)}px`,
+                  }}
+                >
+                  {selectedReciter?.name}
+                </span>
+              </div>
+            )}
 
           {(needsWatermark || (project.brandSignature ?? true)) && (
             <div
               dir="ltr"
-              className={`pointer-events-none absolute z-[8] flex items-center gap-1.5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.65)] ${brandPositionClass(
+              className={`pointer-events-none absolute z-[8] flex items-center drop-shadow-[0_1px_3px_rgba(0,0,0,0.65)] ${brandPositionClass(
                 normalizeBrandPosition(project.brandPosition),
               )}`}
+              style={{ gap: Math.max(4, frameBrandMarkPx(frameWidth) * 0.18) }}
               aria-label="عربية ستوديو"
             >
-              <ArabyaMarkIcon size={22} className="shrink-0" />
+              <ArabyaMarkIcon
+                size={frameBrandMarkPx(frameWidth)}
+                className="shrink-0"
+              />
               <div className="flex min-w-0 flex-col gap-0.5 text-start">
-                <span className="font-display text-[10px] font-bold leading-none text-white sm:text-[11px]">
+                <span
+                  className="font-display font-bold leading-none text-white"
+                  style={{ fontSize: `${frameBrandTitlePx(frameWidth)}px` }}
+                >
                   عربية ستوديو
                 </span>
-                <span className="text-[7px] font-medium leading-none tracking-[0.18em] text-white/75 sm:text-[8px]">
+                <span
+                  className="font-medium leading-none tracking-[0.18em] text-white/75"
+                  style={{ fontSize: `${frameBrandSubPx(frameWidth)}px` }}
+                >
                   ARABYA • STUDIO
                 </span>
               </div>

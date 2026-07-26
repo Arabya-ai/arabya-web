@@ -253,6 +253,12 @@ export const visualizers = [
   { id: "aurora", label: "شفق صوتي" },
   { id: "spectrum", label: "طيف حلقي" },
   { id: "ripple", label: "تموجات مركزية" },
+  { id: "orb", label: "كرة طاقة" },
+  { id: "helix", label: "حلزون مزدوج" },
+  { id: "lattice", label: "شبكة نبضية" },
+  { id: "pulse", label: "نبض قلبي" },
+  { id: "constellation", label: "كوكبة نجمية" },
+  { id: "comet", label: "مذنّب صوتي" },
 ] as const;
 export type VisualizerId = typeof visualizers[number]["id"];
 
