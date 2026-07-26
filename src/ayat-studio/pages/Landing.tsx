@@ -87,12 +87,12 @@ export default function Landing() {
               <StarOrnament className="h-3 w-3" />
             </div>
 
-            <h1 className="mb-8 font-display text-4xl font-bold leading-[1.2] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl">
+            <h1 className="mb-8 font-display text-5xl font-bold leading-[1.15] tracking-tight md:text-7xl lg:text-8xl">
               <span className="block text-foreground/90">حوّل التلاوة إلى</span>
               <span className="block text-shimmer mt-2">تحفة بصرية</span>
             </h1>
 
-            <p className="mx-auto mb-10 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg md:text-xl">
+            <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
               صمّم فيديوهات قرآنية وريلز إسلامية بطابع فاخر ودقة سينمائية —
               <br className="hidden md:inline" />
               بعد تسجيل الدخول، مباشرة من المتصفح بدون برامج مونتاج.
@@ -231,14 +231,13 @@ export default function Landing() {
 
       <OrnamentDivider />
 
-      {/* How it works — editorial steps, no brand mark */}
-      <section className="relative overflow-hidden py-20 md:py-28" aria-labelledby="studio-steps-heading">
-        <div
-          className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gradient-to-l from-transparent via-accent/20 to-transparent md:top-[11.5rem] md:translate-y-0"
-          aria-hidden
-        />
+      {/* How it works — editorial steps, no brand mark or icons */}
+      <section
+        className="relative overflow-hidden py-20 md:py-28"
+        aria-labelledby="studio-steps-heading"
+      >
         <div className="container relative mx-auto px-4">
-          <header className="mx-auto mb-14 max-w-2xl text-center md:mb-20">
+          <header className="mx-auto mb-14 max-w-2xl text-center md:mb-16">
             <p className="mb-3 text-xs font-medium tracking-[0.35em] text-accent">
               الخطوات
             </p>
@@ -249,33 +248,33 @@ export default function Landing() {
               ثلاث خطوات إلى{" "}
               <span className="text-gradient-gold">التحفة</span>
             </h2>
-            <div
-              className="mx-auto mt-6 h-px w-16 bg-gradient-to-l from-transparent via-accent/50 to-transparent"
-              aria-hidden
-            />
           </header>
 
-          <ol className="mx-auto grid max-w-5xl list-none gap-10 p-0 md:grid-cols-3 md:gap-6 lg:gap-10">
+          <ol className="relative mx-auto grid max-w-5xl list-none gap-0 p-0 md:grid-cols-3">
+            {/* Desktop connector behind step markers */}
+            <div
+              className="pointer-events-none absolute inset-x-[12%] top-7 hidden h-px bg-gradient-to-l from-transparent via-accent/35 to-transparent md:block"
+              aria-hidden
+            />
+
             {steps.map((s, i) => (
-              <li key={s.num} className="relative flex flex-col items-center text-center">
-                <div className="relative z-[1] mb-6 flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full border border-accent/35 bg-background/80 shadow-[0_0_0_8px_hsl(var(--background))] backdrop-blur-sm md:mb-8">
-                  <span
-                    className="font-display text-3xl font-bold leading-none text-gradient-gold"
-                    aria-hidden
-                  >
+              <li
+                key={s.num}
+                className={`relative flex flex-col px-4 py-8 text-center md:px-6 md:py-2 ${
+                  i < steps.length - 1
+                    ? "border-b border-border/50 md:border-b-0"
+                    : ""
+                }`}
+              >
+                <div className="relative z-[1] mx-auto mb-7 flex h-14 w-14 items-center justify-center rounded-full border border-accent/40 bg-card shadow-[0_0_0_6px_hsl(var(--background))]">
+                  <span className="font-display text-lg font-bold tracking-wide text-accent">
                     {s.num}
                   </span>
-                  <span className="sr-only">الخطوة {i + 1}</span>
                 </div>
-
-                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border/60 bg-card/50 text-accent">
-                  <s.icon className="h-5 w-5" aria-hidden />
-                </div>
-
-                <h3 className="mb-2.5 font-display text-xl font-semibold text-foreground md:text-2xl">
+                <h3 className="mb-3 font-display text-xl font-semibold text-foreground md:text-2xl">
                   {s.title}
                 </h3>
-                <p className="max-w-[16rem] text-sm leading-relaxed text-muted-foreground md:text-[0.95rem]">
+                <p className="mx-auto max-w-[17rem] text-sm leading-relaxed text-muted-foreground md:text-[0.95rem]">
                   {s.desc}
                 </p>
               </li>
