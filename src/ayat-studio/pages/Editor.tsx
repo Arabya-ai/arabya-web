@@ -79,19 +79,26 @@ import {
   type BrandPosition,
 } from "@/ayat-studio/lib/brand-position";
 import {
+  BRAND_LOCKUP_SUB,
+  BRAND_LOCKUP_TITLE,
+  DEFAULT_SURAH_LABEL_COLOR,
+  DEFAULT_SURAH_LABEL_FONT_SIZE,
   frameAyahFontPx,
   frameBrandMarkPx,
   frameBrandSubPx,
   frameBrandTitlePx,
   frameReciterFontPx,
+  frameSurahLabelGapPx,
   frameSurahLabelPx,
   frameTafsirFontPx,
   frameTranslationFontPx,
   normalizeProgressBarStyle,
   normalizeReciterPosition,
+  normalizeSurahLabelFont,
   PROGRESS_BAR_STYLES,
   RECITER_POSITION_LABELS_AR,
   RECITER_POSITIONS,
+  SURAH_LABEL_FONTS,
   reciterJustifyClass,
   type ProgressBarStyle,
   type ReciterPosition,
@@ -221,13 +228,16 @@ export default function Editor() {
   const [layersLoading, setLayersLoading] = useState(false);
   const previewFrameRef = useRef<HTMLDivElement>(null);
   const [frameWidth, setFrameWidth] = useState(320);
+  const [frameHeight, setFrameHeight] = useState(568);
 
   useEffect(() => {
     const el = previewFrameRef.current;
     if (!el) return;
     const measure = () => {
       const w = el.clientWidth;
+      const h = el.clientHeight;
       if (w > 0) setFrameWidth(w);
+      if (h > 0) setFrameHeight(h);
     };
     measure();
     const ro = new ResizeObserver(measure);
@@ -263,6 +273,9 @@ export default function Editor() {
       translationTextColor: p.translationTextColor || "#f0e6d0",
       tafsirFontSize: p.tafsirFontSize ?? 18,
       tafsirTextColor: p.tafsirTextColor || "#d4c4a8",
+      surahLabelFontSize: p.surahLabelFontSize ?? DEFAULT_SURAH_LABEL_FONT_SIZE,
+      surahLabelTextColor: p.surahLabelTextColor || DEFAULT_SURAH_LABEL_COLOR,
+      surahLabelFontFamily: normalizeSurahLabelFont(p.surahLabelFontFamily),
       playbackRate: p.playbackRate ?? 1,
       softNormalize: p.softNormalize ?? true,
       pauseBetweenAyahsMs: p.pauseBetweenAyahsMs ?? 0,
@@ -1123,6 +1136,44 @@ export default function Editor() {
               onChange={(hex) => update({ textColor: hex })}
             />
             <div className="border-t border-accent/10 pt-3 space-y-3">
+              <p className="text-[11px] text-accent/90 font-medium">تسمية السورة والآية</p>
+              <div>
+                <Label className="text-xs text-accent">
+                  حجم التسمية: {project.surahLabelFontSize ?? DEFAULT_SURAH_LABEL_FONT_SIZE}px
+                </Label>
+                <Slider
+                  value={[project.surahLabelFontSize ?? DEFAULT_SURAH_LABEL_FONT_SIZE]}
+                  onValueChange={([v]) => update({ surahLabelFontSize: v })}
+                  min={10}
+                  max={36}
+                  step={1}
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-accent">نوع خط التسمية</Label>
+                <Select
+                  value={normalizeSurahLabelFont(project.surahLabelFontFamily)}
+                  onValueChange={(v) => update({ surahLabelFontFamily: v })}
+                >
+                  <SelectTrigger className="bg-background/50 border-accent/20">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SURAH_LABEL_FONTS.map((f) => (
+                      <SelectItem key={f.id} value={f.id}>
+                        {f.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <ColorPickerField
+                label="لون التسمية"
+                value={project.surahLabelTextColor || DEFAULT_SURAH_LABEL_COLOR}
+                onChange={(hex) => update({ surahLabelTextColor: hex })}
+              />
+            </div>
+            <div className="border-t border-accent/10 pt-3 space-y-3">
               <p className="text-[11px] text-accent/90 font-medium">نص الترجمة</p>
               <div>
                 <Label className="text-xs text-accent">
@@ -1446,10 +1497,25 @@ export default function Editor() {
             >
               {!ayahOnly && (
                 <p
-                  className="mb-3 tracking-widest"
+                  className="tracking-widest"
                   style={{
-                    color: "hsl(var(--accent))",
-                    fontSize: `${frameSurahLabelPx(frameWidth)}px`,
+                    color:
+                      project.surahLabelTextColor || DEFAULT_SURAH_LABEL_COLOR,
+                    fontSize: `${frameSurahLabelPx(
+                      project.surahLabelFontSize ?? DEFAULT_SURAH_LABEL_FONT_SIZE,
+                      frameWidth,
+                    )}px`,
+                    fontFamily: `"${normalizeSurahLabelFont(
+                      project.surahLabelFontFamily,
+                    )}", "IBM Plex Sans Arabic", sans-serif`,
+                    marginBottom: `${frameSurahLabelGapPx(
+                      frameSurahLabelPx(
+                        project.surahLabelFontSize ??
+                          DEFAULT_SURAH_LABEL_FONT_SIZE,
+                        frameWidth,
+                      ),
+                      frameHeight,
+                    )}px`,
                   }}
                 >
                   {selectedSurah?.name}
@@ -1466,10 +1532,11 @@ export default function Editor() {
                 <p className="text-sm text-red-300 sm:text-base">{ayahsError}</p>
               ) : currentPreviewAyah ? (
                 <p
-                  className="font-quran leading-loose mb-2"
+                  className="font-quran mb-2"
                   style={{
                     fontSize: `${frameAyahFontPx(project.fontSize, frameWidth)}px`,
                     color: project.textColor,
+                    lineHeight: 1.95,
                     textShadow: "0 2px 12px rgba(0,0,0,0.8)",
                   }}
                 >
@@ -1571,30 +1638,44 @@ export default function Editor() {
           {(needsWatermark || (project.brandSignature ?? true)) && (
             <div
               dir="ltr"
-              className={`pointer-events-none absolute z-[8] flex items-center drop-shadow-[0_1px_3px_rgba(0,0,0,0.65)] ${brandPositionClass(
+              className={`pointer-events-none absolute z-[8] flex items-center rounded-[18%] px-2 py-1.5 shadow-[0_4px_16px_rgba(0,0,0,0.28)] ${brandPositionClass(
                 normalizeBrandPosition(project.brandPosition),
               )}`}
-              style={{ gap: Math.max(4, frameBrandMarkPx(frameWidth) * 0.18) }}
+              style={{
+                gap: Math.max(6, frameBrandMarkPx(frameWidth) * 0.22),
+                background: "rgba(248, 250, 252, 0.94)",
+                border: "1px solid rgba(10, 22, 40, 0.08)",
+              }}
               aria-label="عربية ستوديو"
             >
-              <ArabyaMarkIcon
-                size={frameBrandMarkPx(frameWidth)}
-                className="shrink-0"
-              />
-              <div className="flex min-w-0 flex-col gap-0.5 text-start">
+              <div
+                dir="rtl"
+                className="flex min-w-0 flex-col items-end gap-0.5 text-end"
+              >
                 <span
-                  className="font-display font-bold leading-none text-white"
-                  style={{ fontSize: `${frameBrandTitlePx(frameWidth)}px` }}
+                  className="font-display font-bold leading-none"
+                  style={{
+                    fontSize: `${frameBrandTitlePx(frameWidth)}px`,
+                    color: BRAND_LOCKUP_TITLE,
+                  }}
                 >
                   عربية ستوديو
                 </span>
                 <span
-                  className="font-medium leading-none tracking-[0.18em] text-white/75"
-                  style={{ fontSize: `${frameBrandSubPx(frameWidth)}px` }}
+                  dir="ltr"
+                  className="font-medium leading-none tracking-[0.16em]"
+                  style={{
+                    fontSize: `${frameBrandSubPx(frameWidth)}px`,
+                    color: BRAND_LOCKUP_SUB,
+                  }}
                 >
                   ARABYA • STUDIO
                 </span>
               </div>
+              <ArabyaMarkIcon
+                size={frameBrandMarkPx(frameWidth)}
+                className="arabya-mark-icon--frame shrink-0"
+              />
             </div>
           )}
 

@@ -11,17 +11,26 @@ import {
   type BrandPosition,
 } from "./brand-position";
 import {
+  BRAND_LOCKUP_PLATE,
+  BRAND_LOCKUP_PLATE_BORDER,
+  BRAND_LOCKUP_SUB,
+  BRAND_LOCKUP_TITLE,
+  DEFAULT_SURAH_LABEL_COLOR,
+  DEFAULT_SURAH_LABEL_FONT_SIZE,
   frameAyahFontPx,
+  frameAyahLineHeightPx,
   frameBrandMarkPx,
   frameBrandPadPx,
   frameBrandSubPx,
   frameBrandTitlePx,
   frameReciterFontPx,
+  frameSurahLabelGapPx,
   frameSurahLabelPx,
   frameTafsirFontPx,
   frameTranslationFontPx,
   normalizeProgressBarStyle,
   normalizeReciterPosition,
+  normalizeSurahLabelFont,
   reciterTextAlign,
   reciterX,
 } from "./frame-layout";
@@ -744,19 +753,44 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   const showNumbers = project.previewShowAyahNumbers !== false;
   const ayahOnly = project.previewShowAyahOnly === true;
 
+  ctx.fillStyle = project.textColor;
+  const fontPx = frameAyahFontPx(project.fontSize, width);
+  const lineH = frameAyahLineHeightPx(fontPx);
+  ctx.font = `bold ${fontPx}px "Amiri", "Scheherazade New", serif`;
+  ctx.textAlign = "center";
+  ctx.direction = "rtl";
+
+  const ayahMaxW = width * 0.85;
+  const ayahLineCount = countWrapLines(ctx, ayahText, ayahMaxW, 6);
+  const ayahTopY = yCenter - ((ayahLineCount - 1) / 2) * lineH;
+
   if (!ayahOnly) {
-    ctx.fillStyle = "rgba(200, 169, 81, 0.95)";
-    ctx.font = `${frameSurahLabelPx(width)}px "IBM Plex Sans Arabic", sans-serif`;
+    const labelSize = frameSurahLabelPx(
+      project.surahLabelFontSize ?? DEFAULT_SURAH_LABEL_FONT_SIZE,
+      width,
+    );
+    const labelFont = normalizeSurahLabelFont(project.surahLabelFontFamily);
+    const labelGap = frameSurahLabelGapPx(labelSize, height);
+    const labelY = Math.max(
+      height * 0.06 + labelSize,
+      ayahTopY - labelGap,
+    );
+    ctx.fillStyle =
+      project.surahLabelTextColor || DEFAULT_SURAH_LABEL_COLOR;
+    ctx.font = `${labelSize}px "${labelFont}", "IBM Plex Sans Arabic", sans-serif`;
     ctx.textAlign = "center";
+    ctx.direction = "rtl";
+    ctx.shadowColor = "rgba(0,0,0,0.55)";
+    ctx.shadowBlur = Math.max(4, width * 0.004);
     ctx.fillText(
       showNumbers ? `${surahName} · آية ${ayahNumber}` : surahName,
       width / 2,
-      yCenter - height * 0.16,
+      labelY,
     );
+    ctx.shadowBlur = 0;
   }
 
   ctx.fillStyle = project.textColor;
-  const fontPx = frameAyahFontPx(project.fontSize, width);
   ctx.font = `bold ${fontPx}px "Amiri", "Scheherazade New", serif`;
   ctx.textAlign = "center";
   ctx.direction = "rtl";
@@ -764,10 +798,10 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
     ? "rgba(200,169,81,0.9)"
     : "rgba(0,0,0,0.8)";
   ctx.shadowBlur = glow || 16;
-  wrapText(ctx, ayahText, width / 2, yCenter, width * 0.85, fontPx * 1.55);
+  wrapText(ctx, ayahText, width / 2, yCenter, ayahMaxW, lineH);
   ctx.shadowBlur = 0;
 
-  let nextY = yCenter + fontPx * 1.8;
+  let nextY = yCenter + ((ayahLineCount - 1) / 2) * lineH + fontPx * 1.15;
   if (translationText) {
     const tSize = frameTranslationFontPx(
       project.translationFontSize ?? 22,
@@ -853,7 +887,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   });
 }
 
-/** Draw Arabya mark + «عربية ستوديو» / ARABYA • STUDIO at the chosen corner/edge. */
+/** Draw Arabya lockup: frosted plate · Arabic + English left · mark on the right (RTL). */
 function drawBrandLockup(
   ctx: CanvasRenderingContext2D,
   opts: {
@@ -867,48 +901,74 @@ function drawBrandLockup(
   const { width, height, position, markImg, required } = opts;
   const pad = frameBrandPadPx(width);
   const mark = frameBrandMarkPx(width);
-  const gap = Math.round(mark * 0.22);
+  const gap = Math.round(mark * 0.28);
   const titleSize = frameBrandTitlePx(width);
   const subSize = frameBrandSubPx(width);
-  const textW = Math.round(width * 0.28);
+  const textW = Math.round(width * 0.3);
   const boxW = mark + gap + textW;
-  const boxH = Math.max(mark, titleSize + subSize + 10);
+  const boxH = Math.max(mark, titleSize + subSize + Math.round(mark * 0.28));
   const { x, y } = brandLockupAnchor(position, width, height, boxW, boxH, pad);
 
   ctx.save();
-  ctx.globalAlpha = required ? 0.95 : 0.92;
-  ctx.shadowColor = "rgba(0,0,0,0.55)";
-  ctx.shadowBlur = Math.max(4, width * 0.006);
-  ctx.shadowOffsetY = 1;
+  ctx.globalAlpha = required ? 0.97 : 0.95;
+  ctx.shadowColor = "rgba(0,0,0,0.35)";
+  ctx.shadowBlur = Math.max(6, width * 0.007);
+  ctx.shadowOffsetY = 2;
 
-  const markX = x;
+  const platePadX = Math.round(mark * 0.22);
+  const platePadY = Math.round(mark * 0.16);
+  const plateR = Math.round(mark * 0.28);
+  ctx.fillStyle = BRAND_LOCKUP_PLATE;
+  roundRectPath(
+    ctx,
+    x - platePadX,
+    y - platePadY,
+    boxW + platePadX * 2,
+    boxH + platePadY * 2,
+    plateR,
+  );
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = BRAND_LOCKUP_PLATE_BORDER;
+  ctx.lineWidth = Math.max(1, width * 0.0015);
+  ctx.stroke();
+
+  // Mark on the RIGHT (RTL lockup, matches official brand sheet).
+  const markX = x + boxW - mark;
   const markY = y + Math.round((boxH - mark) / 2);
+  const markRadius = mark * 0.22;
+  ctx.fillStyle = "#ffffff";
+  roundRectPath(ctx, markX, markY, mark, mark, markRadius);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(10,22,40,0.1)";
+  ctx.lineWidth = Math.max(1, width * 0.0012);
+  ctx.stroke();
   if (markImg && markImg.width > 0) {
-    const radius = mark * 0.22;
-    ctx.fillStyle = "rgba(255,255,255,0.92)";
-    roundRectPath(ctx, markX, markY, mark, mark, radius);
-    ctx.fill();
+    ctx.save();
+    roundRectPath(ctx, markX, markY, mark, mark, markRadius);
+    ctx.clip();
     ctx.drawImage(markImg, markX, markY, mark, mark);
+    ctx.restore();
   } else {
-    ctx.fillStyle = "rgba(200,169,81,0.95)";
-    ctx.fillRect(markX, markY, mark, mark);
+    ctx.fillStyle = BRAND_LOCKUP_TITLE;
+    ctx.fillRect(markX + mark * 0.2, markY + mark * 0.2, mark * 0.6, mark * 0.6);
   }
 
-  const textX = markX + mark + gap;
+  const textRight = markX - gap;
   const titleY = y + Math.round(boxH * 0.42);
   const subY = y + Math.round(boxH * 0.78);
 
   ctx.direction = "rtl";
   ctx.textAlign = "right";
-  ctx.fillStyle = "#ffffff";
-  ctx.font = `bold ${titleSize}px "Reem Kufi", "IBM Plex Sans Arabic", sans-serif`;
-  ctx.fillText("عربية ستوديو", textX + textW, titleY, textW);
+  ctx.fillStyle = BRAND_LOCKUP_TITLE;
+  ctx.font = `700 ${titleSize}px "Reem Kufi", "IBM Plex Sans Arabic", sans-serif`;
+  ctx.fillText("عربية ستوديو", textRight, titleY, textW);
 
   ctx.direction = "ltr";
-  ctx.textAlign = "left";
-  ctx.fillStyle = "rgba(255,255,255,0.78)";
-  ctx.font = `${subSize}px "IBM Plex Sans Arabic", "Tajawal", sans-serif`;
-  ctx.fillText("ARABYA • STUDIO", textX, subY, textW);
+  ctx.textAlign = "right";
+  ctx.fillStyle = BRAND_LOCKUP_SUB;
+  ctx.font = `500 ${subSize}px "IBM Plex Sans Arabic", "Tajawal", sans-serif`;
+  ctx.fillText("ARABYA • STUDIO", textRight, subY, textW);
 
   ctx.restore();
 }
@@ -1003,6 +1063,28 @@ function wrapText(
   lineHeight: number,
 ) {
   wrapTextLines(ctx, text, x, y, maxWidth, lineHeight, 6);
+}
+
+function countWrapLines(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  maxLines: number,
+): number {
+  const words = text.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let current = "";
+  for (const w of words) {
+    const test = current ? `${current} ${w}` : w;
+    if (ctx.measureText(test).width > maxWidth && current) {
+      lines.push(current);
+      current = w;
+    } else {
+      current = test;
+    }
+  }
+  if (current) lines.push(current);
+  return Math.max(1, Math.min(lines.length, maxLines));
 }
 
 function wrapTextLines(

@@ -18,8 +18,56 @@ export function frameTafsirFontPx(fontSize: number, frameW: number): number {
   return Math.max(9, Math.round((fontSize / 18) * frameW * 0.022));
 }
 
-export function frameSurahLabelPx(frameW: number): number {
-  return Math.max(10, Math.round(frameW * 0.025));
+/** Logical default for surah/ayah meta label size slider. */
+export const DEFAULT_SURAH_LABEL_FONT_SIZE = 16;
+
+export const SURAH_LABEL_FONTS = [
+  { id: "IBM Plex Sans Arabic", label: "IBM Plex Sans Arabic" },
+  { id: "Reem Kufi", label: "Reem Kufi" },
+  { id: "Amiri", label: "Amiri" },
+  { id: "Tajawal", label: "Tajawal" },
+] as const;
+
+export type SurahLabelFontId = (typeof SURAH_LABEL_FONTS)[number]["id"];
+
+export const DEFAULT_SURAH_LABEL_FONT: SurahLabelFontId =
+  "IBM Plex Sans Arabic";
+export const DEFAULT_SURAH_LABEL_COLOR = "#C8A951";
+
+/** Brand lockup colors matching the official Arabya Studio mark. */
+export const BRAND_LOCKUP_TITLE = "#0A1628";
+export const BRAND_LOCKUP_SUB = "#5B6B82";
+export const BRAND_LOCKUP_PLATE = "rgba(248, 250, 252, 0.94)";
+export const BRAND_LOCKUP_PLATE_BORDER = "rgba(10, 22, 40, 0.08)";
+
+export function frameSurahLabelPx(
+  fontSize: number,
+  frameW: number,
+): number {
+  return Math.max(
+    10,
+    Math.round((fontSize / DEFAULT_SURAH_LABEL_FONT_SIZE) * frameW * 0.025),
+  );
+}
+
+/** Line height for Quran ayah — room for tashkeel so lines do not collide. */
+export function frameAyahLineHeightPx(fontPx: number): number {
+  return Math.round(fontPx * 1.95);
+}
+
+/** Gap between surah meta label baseline and the top of the ayah block. */
+export function frameSurahLabelGapPx(labelPx: number, frameH: number): number {
+  return Math.max(Math.round(labelPx * 1.35), Math.round(frameH * 0.032));
+}
+
+export function normalizeSurahLabelFont(value: unknown): SurahLabelFontId {
+  if (
+    typeof value === "string" &&
+    SURAH_LABEL_FONTS.some((f) => f.id === value)
+  ) {
+    return value as SurahLabelFontId;
+  }
+  return DEFAULT_SURAH_LABEL_FONT;
 }
 
 export function frameReciterFontPx(frameW: number): number {

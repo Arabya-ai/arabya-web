@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   frameAyahFontPx,
+  frameAyahLineHeightPx,
   frameBrandMarkPx,
+  frameSurahLabelGapPx,
+  frameSurahLabelPx,
   normalizeProgressBarStyle,
   normalizeReciterPosition,
   reciterX,
@@ -11,6 +14,19 @@ describe("frame-layout", () => {
   it("scales ayah font with frame width using export formula", () => {
     expect(frameAyahFontPx(48, 1080)).toBe(Math.round(1080 * 0.06));
     expect(frameAyahFontPx(48, 320)).toBe(Math.round(320 * 0.06));
+  });
+
+  it("scales surah label with project font size", () => {
+    expect(frameSurahLabelPx(16, 1080)).toBe(Math.round(1080 * 0.025));
+    expect(frameSurahLabelPx(32, 1080)).toBe(Math.round(2 * 1080 * 0.025));
+  });
+
+  it("gives ayah lines room for tashkeel", () => {
+    expect(frameAyahLineHeightPx(48)).toBe(Math.round(48 * 1.95));
+  });
+
+  it("keeps a clear gap under the surah label", () => {
+    expect(frameSurahLabelGapPx(20, 1920)).toBeGreaterThanOrEqual(27);
   });
 
   it("keeps brand mark proportional", () => {

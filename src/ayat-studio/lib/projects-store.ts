@@ -54,6 +54,10 @@ export interface StoredProject {
   /** Ayah (Quran) typography — immutable text source. */
   fontSize: number;
   textColor: string;
+  /** Surah name + ayah number meta label above the verse. */
+  surahLabelFontSize?: number;
+  surahLabelTextColor?: string;
+  surahLabelFontFamily?: string;
   translationFontSize?: number;
   translationTextColor?: string;
   tafsirFontSize?: number;
@@ -202,6 +206,9 @@ export function createDefaultProject(input: {
     tafsirOverrides: {},
     fontSize: 48,
     textColor: "#ffffff",
+    surahLabelFontSize: 16,
+    surahLabelTextColor: "#C8A951",
+    surahLabelFontFamily: "IBM Plex Sans Arabic",
     translationFontSize: 22,
     translationTextColor: "#f0e6d0",
     tafsirFontSize: 18,
