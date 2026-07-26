@@ -19,7 +19,7 @@ const contentSecurityPolicy = [
   "img-src 'self' data: blob: https:",
   // blob: Studio preview/export; https: Pexels/Vimeo CDN fallbacks for <video>
   "media-src 'self' blob: data: https:",
-  "connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com https://api.quran.com https://accounts.google.com https://images.pexels.com https://videos.pexels.com https://player.vimeo.com",
+  "connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com https://api.quran.com https://accounts.google.com https://images.pexels.com https://videos.pexels.com https://player.vimeo.com https://cdn.pixabay.com https://pixabay.com https://i.vimeocdn.com",
   "upgrade-insecure-requests",
 ].join("; ");
 

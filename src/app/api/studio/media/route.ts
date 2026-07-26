@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import {
   isAllowedStudioMediaRedirect,
   isAllowedStudioMediaUrl,
+  studioMediaReferer,
 } from "@/ayat-studio/lib/media-url";
 
 export const runtime = "nodejs";
@@ -10,7 +11,7 @@ export const maxDuration = 60;
 const MAX_REDIRECTS = 6;
 
 /**
- * Authenticated media proxy for Pexels images and Vimeo-hosted Pexels videos.
+ * Authenticated media proxy for Pexels / Pixabay (and related CDNs).
  * Forwards Range requests so video seeking works during MP4 export.
  */
 export async function GET(request: Request) {
@@ -34,7 +35,7 @@ export async function GET(request: Request) {
         Accept: "*/*",
         "User-Agent":
           "Mozilla/5.0 (compatible; ArabyaStudio/1.0; +https://www.arabyaai.com)",
-        Referer: "https://www.pexels.com/",
+        Referer: studioMediaReferer(current),
       };
       if (range) headers.Range = range;
       upstream = await fetch(current, { redirect: "manual", headers });

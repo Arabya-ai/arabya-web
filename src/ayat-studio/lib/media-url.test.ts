@@ -40,6 +40,22 @@ describe("studioMediaUrl", () => {
   it("rejects non-allowlisted hosts as initial URLs", () => {
     expect(isAllowedStudioMediaUrl("https://evil.example/a.mp4")).toBe(false);
   });
+
+  it("proxies Pixabay CDN https URLs", () => {
+    const src = "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_1280.jpg";
+    expect(isAllowedStudioMediaUrl(src)).toBe(true);
+    expect(studioMediaUrl(src)).toBe(
+      `/api/studio/media?url=${encodeURIComponent(src)}`,
+    );
+  });
+
+  it("allows Pixabay video poster hosts", () => {
+    expect(
+      isAllowedStudioMediaUrl(
+        "https://i.vimeocdn.com/video/123456789_640x360.jpg",
+      ),
+    ).toBe(true);
+  });
 });
 
 describe("pickBestVideoFile", () => {

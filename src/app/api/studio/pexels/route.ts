@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { parsePexelsKeys, shouldRotatePexelsKey } from "@/lib/pexels-keys";
+import { parseApiKeys, shouldRotateApiKey } from "@/lib/api-keys";
 
 export const runtime = "nodejs";
 
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     return Response.json({ error: "missing_query" }, { status: 400 });
   }
 
-  const keys = parsePexelsKeys(
+  const keys = parseApiKeys(
     request.headers.get("x-pexels-key") ?? undefined,
     process.env.PEXELS_API_KEY,
     process.env.PEXELS_API_KEYS,
@@ -81,7 +81,7 @@ export async function GET(request: Request) {
 
     lastStatus = upstream.status;
     lastDetail = text.slice(0, 200);
-    if (!shouldRotatePexelsKey(upstream.status)) {
+    if (!shouldRotateApiKey(upstream.status)) {
       break;
     }
   }

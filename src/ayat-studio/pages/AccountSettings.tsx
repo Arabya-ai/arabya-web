@@ -11,6 +11,7 @@ import { User, Globe, Clock, AlertTriangle, KeyRound, Eye, EyeOff, ExternalLink 
 
 const PREFS_KEY = "ayat_prefs";
 export const PEXELS_KEY_STORAGE = "ayat_pexels_api_key";
+export const PIXABAY_KEY_STORAGE = "ayat_pixabay_api_key";
 
 interface Prefs {
   name: string;
@@ -23,7 +24,9 @@ const defaultPrefs: Prefs = { name: "", language: "ar", timezone: "Asia/Riyadh" 
 export default function AccountSettings() {
   const [prefs, setPrefs] = useState<Prefs>(defaultPrefs);
   const [pexelsKey, setPexelsKey] = useState("");
-  const [showKey, setShowKey] = useState(false);
+  const [pixabayKey, setPixabayKey] = useState("");
+  const [showPexelsKey, setShowPexelsKey] = useState(false);
+  const [showPixabayKey, setShowPixabayKey] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -32,13 +35,17 @@ export default function AccountSettings() {
       if (stored) setPrefs({ ...defaultPrefs, ...stored });
     } catch {}
     setPexelsKey(localStorage.getItem(PEXELS_KEY_STORAGE) || "");
+    setPixabayKey(localStorage.getItem(PIXABAY_KEY_STORAGE) || "");
   }, []);
 
   const handleSave = () => {
     localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
-    const trimmed = pexelsKey.trim();
-    if (trimmed) localStorage.setItem(PEXELS_KEY_STORAGE, trimmed);
+    const pexels = pexelsKey.trim();
+    if (pexels) localStorage.setItem(PEXELS_KEY_STORAGE, pexels);
     else localStorage.removeItem(PEXELS_KEY_STORAGE);
+    const pixabay = pixabayKey.trim();
+    if (pixabay) localStorage.setItem(PIXABAY_KEY_STORAGE, pixabay);
+    else localStorage.removeItem(PIXABAY_KEY_STORAGE);
     toast({ title: "تم الحفظ", description: "تم تحديث الإعدادات بنجاح" });
   };
 
@@ -124,12 +131,12 @@ export default function AccountSettings() {
             مفاتيح API
           </h2>
         </CardHeader>
-        <CardContent className="space-y-4 p-6">
+        <CardContent className="space-y-6 p-6">
           <div className="space-y-2">
-            <Label className="text-accent">مفتاح Pexels API (للبحث عن الخلفيات)</Label>
+            <Label className="text-accent">مفتاح Pexels API</Label>
             <div className="relative">
               <Input
-                type={showKey ? "text" : "password"}
+                type={showPexelsKey ? "text" : "password"}
                 value={pexelsKey}
                 onChange={(e) => setPexelsKey(e.target.value)}
                 placeholder="563492ad6f917000010000..."
@@ -138,17 +145,16 @@ export default function AccountSettings() {
               />
               <button
                 type="button"
-                onClick={() => setShowKey((s) => !s)}
+                onClick={() => setShowPexelsKey((s) => !s)}
                 className="absolute left-2 top-1/2 -translate-y-1/2 rounded p-1.5 text-muted-foreground hover:text-accent transition"
-                aria-label={showKey ? "إخفاء" : "إظهار"}
+                aria-label={showPexelsKey ? "إخفاء" : "إظهار"}
               >
-                {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showPexelsKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              يُستخدم المفتاح عبر خادم عربية (`/api/studio/pexels`) للبحث في صور/فيديوهات Pexels من المحرر.
-              يُحفظ محليًا في متصفحك ويُرسل فقط إلى خادمنا عند البحث (لا يُخزَّن في قاعدة البيانات).
-              يمكن للمالك أيضًا ضبط المتغير <code className="text-accent">PEXELS_API_KEY</code> على Vercel بدل إدخال المفتاح هنا.
+              يُستخدم عبر خادم عربية (`/api/studio/pexels`). يمكن ضبط{" "}
+              <code className="text-accent">PEXELS_API_KEY</code> على Vercel بدل إدخاله هنا.
             </p>
             <a
               href="https://www.pexels.com/api/new/"
@@ -157,6 +163,41 @@ export default function AccountSettings() {
               className="inline-flex items-center gap-1.5 text-xs text-accent hover:underline"
             >
               احصل على مفتاح مجاني من Pexels
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>
+
+          <div className="space-y-2 border-t border-border/30 pt-4">
+            <Label className="text-accent">مفتاح Pixabay API</Label>
+            <div className="relative">
+              <Input
+                type={showPixabayKey ? "text" : "password"}
+                value={pixabayKey}
+                onChange={(e) => setPixabayKey(e.target.value)}
+                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                className="h-11 bg-background/50 border-accent/20 pl-10"
+                dir="ltr"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPixabayKey((s) => !s)}
+                className="absolute left-2 top-1/2 -translate-y-1/2 rounded p-1.5 text-muted-foreground hover:text-accent transition"
+                aria-label={showPixabayKey ? "إخفاء" : "إظهار"}
+              >
+                {showPixabayKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              منفصل عن Pexels تمامًا (`/api/studio/pixabay`). يمكن ضبط{" "}
+              <code className="text-accent">PIXABAY_API_KEY</code> على Vercel بدل إدخاله هنا.
+            </p>
+            <a
+              href="https://pixabay.com/service/about/api/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs text-accent hover:underline"
+            >
+              احصل على مفتاح مجاني من Pixabay
               <ExternalLink className="h-3 w-3" />
             </a>
           </div>

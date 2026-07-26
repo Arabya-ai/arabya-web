@@ -17,13 +17,13 @@
 1. سجّل الدخول (المالك بلس تلقائيًا عبر البريد المضمّن أو `ARABYA_PLUS_EMAILS`).
 2. افتح **الاستوديو** من الهيدر/الفوتر أو `/studio`.
 3. مشروع جديد → المحرر → تصدير MP4 (بلس، Chrome/Edge، ≤ 40 آية) أو PNG.
-4. خلفيات Pexels:
-   - على Vercel: `PEXELS_API_KEY` = مفتاح أو عدة مفصولة بفاصلة (يكفي وحده)
-   - و/أو `PEXELS_API_KEYS`
-   - و/أو مفتاح في `/studio/settings`
+4. خلفيات Pexels / Pixabay:
+   - على Vercel: `PEXELS_API_KEY` و/أو `PIXABAY_API_KEY` (مفتاح أو عدة مفصولة بفاصلة)
+   - و/أو `PEXELS_API_KEYS` / `PIXABAY_API_KEYS`
+   - و/أو مفتاح في `/studio/settings` (كل خدمة بمفتاحها المنفصل)
    عند 401/403/429 يجرّب الخادم المفتاح التالي تلقائيًا.
 
-الصوت عبر `/api/create/audio` والخلفيات عبر `/api/studio/pexels` (يتطلبان تسجيل الدخول).
+الصوت عبر `/api/create/audio` والخلفيات عبر `/api/studio/pexels` و`/api/studio/pixabay` (يتطلبان تسجيل الدخول).
 
 `/create` يحوّل تلقائيًا إلى `/studio`.
 

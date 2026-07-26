@@ -12,11 +12,22 @@ import {
   type PexelsPhoto,
   type PexelsVideo,
 } from "@/ayat-studio/lib/pexels";
+import {
+  searchPixabayPhotos,
+  searchPixabayVideos,
+  pickBestPixabayVideoFile,
+  type PixabayPhoto,
+  type PixabayVideo,
+} from "@/ayat-studio/lib/pixabay";
 import { useToast } from "@/ayat-studio/hooks/use-toast";
 import { studioMediaUrl, isAllowedStudioMediaUrl } from "@/ayat-studio/lib/media-url";
 
 type Tab = "upload" | "url" | "search";
 type MediaKind = "image" | "video";
+type StockProvider = "pexels" | "pixabay";
+
+type StockPhoto = PexelsPhoto | PixabayPhoto;
+type StockVideo = PexelsVideo | PixabayVideo;
 
 interface Patch {
   bgType?: "none" | "image" | "url";
@@ -41,32 +52,49 @@ const SUGGESTIONS = ["mosque", "nature", "mountains", "sky", "stars night", "cal
 export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "", bgOpacity = 100, ratio, onChange }: Props) {
   const [tab, setTab] = useState<Tab>("upload");
   const [mediaKind, setMediaKind] = useState<MediaKind>(bgKind);
+  const [provider, setProvider] = useState<StockProvider>("pexels");
   const [query, setQuery] = useState("mosque");
-  const [photos, setPhotos] = useState<PexelsPhoto[]>([]);
-  const [videos, setVideos] = useState<PexelsVideo[]>([]);
+  const [photos, setPhotos] = useState<StockPhoto[]>([]);
+  const [videos, setVideos] = useState<StockVideo[]>([]);
   const [loading, setLoading] = useState(false);
   const [applyingId, setApplyingId] = useState<number | null>(null);
   const { toast } = useToast();
 
   const orientation = ratio === "9:16" ? "portrait" : ratio === "1:1" ? "square" : "landscape";
+  const providerLabel = provider === "pexels" ? "Pexels" : "Pixabay";
+
+  const clearResults = () => {
+    setPhotos([]);
+    setVideos([]);
+  };
 
   const handleSearch = async (q: string) => {
     if (!q.trim()) return;
     setLoading(true);
     try {
       if (mediaKind === "image") {
-        const res = await searchPexelsPhotos(q, { perPage: 18, orientation });
+        const res =
+          provider === "pexels"
+            ? await searchPexelsPhotos(q, { perPage: 18, orientation })
+            : await searchPixabayPhotos(q, { perPage: 18, orientation });
         setPhotos(res.photos);
         setVideos([]);
         if (res.photos.length === 0) toast({ title: "لا توجد نتائج", description: q });
       } else {
-        const res = await searchPexelsVideos(q, { perPage: 12, orientation });
+        const res =
+          provider === "pexels"
+            ? await searchPexelsVideos(q, { perPage: 12, orientation })
+            : await searchPixabayVideos(q, { perPage: 12, orientation });
         setVideos(res.videos);
         setPhotos([]);
         if (res.videos.length === 0) toast({ title: "لا توجد فيديوهات", description: q });
       }
-    } catch (e: any) {
-      toast({ title: "فشل البحث", description: e?.message || "خطأ غير معروف", variant: "destructive" });
+    } catch (e: unknown) {
+      toast({
+        title: "فشل البحث",
+        description: e instanceof Error ? e.message : "خطأ غير معروف",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -104,8 +132,15 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "
     reader.readAsDataURL(file);
   };
 
-  const handlePickVideo = async (v: PexelsVideo) => {
-    const file = pickBestVideoFile(v, orientation);
+  const pickVideoFile = (v: StockVideo) => {
+    if (provider === "pixabay") {
+      return pickBestPixabayVideoFile(v as PixabayVideo, orientation);
+    }
+    return pickBestVideoFile(v as PexelsVideo, orientation);
+  };
+
+  const handlePickVideo = async (v: StockVideo) => {
+    const file = pickVideoFile(v);
     if (!file?.link) {
       toast({
         title: "ملف فيديو غير متاح",
@@ -196,8 +231,7 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "
       type="button"
       onClick={() => {
         setMediaKind(id);
-        setPhotos([]);
-        setVideos([]);
+        clearResults();
       }}
       className={`flex-1 inline-flex items-center justify-center gap-1.5 rounded-md text-[11px] font-medium h-8 px-2 transition-all ${
         mediaKind === id
@@ -206,6 +240,23 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "
       }`}
     >
       {icon} {label}
+    </button>
+  );
+
+  const providerBtn = (id: StockProvider, label: string) => (
+    <button
+      type="button"
+      onClick={() => {
+        setProvider(id);
+        clearResults();
+      }}
+      className={`flex-1 inline-flex items-center justify-center rounded-md text-[11px] font-medium h-8 px-2 transition-all ${
+        provider === id
+          ? "bg-accent/20 text-accent border border-accent/40"
+          : "border border-accent/15 bg-background/30 text-muted-foreground hover:text-accent"
+      }`}
+    >
+      {label}
     </button>
   );
 
@@ -237,7 +288,11 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "
             {kindBtn("video", <Film className="h-3 w-3" />, "فيديو")}
           </div>
           <Input
-            placeholder={mediaKind === "video" ? "https://… (Pexels فقط) أو ارفع ملفًا" : "https://images.pexels.com/… أو ارفع ملفًا"}
+            placeholder={
+              mediaKind === "video"
+                ? "https://… (Pexels / Pixabay) أو ارفع ملفًا"
+                : "https://images.pexels.com/… أو cdn.pixabay.com/…"
+            }
             dir="ltr"
             className="text-left bg-background/50 border-accent/20"
             value={bgType === "url" ? bgUrl : ""}
@@ -246,7 +301,7 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "
               if (value && value.startsWith("http") && !isAllowedStudioMediaUrl(value)) {
                 toast({
                   title: "رابط غير مدعوم",
-                  description: "للتصدير الموثوق استخدم بحث Pexels أو ارفع ملفًا من جهازك.",
+                  description: "للتصدير الموثوق استخدم بحث Pexels/Pixabay أو ارفع ملفًا من جهازك.",
                   variant: "destructive",
                 });
               }
@@ -254,13 +309,17 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "
             }}
           />
           <p className="text-[10px] text-muted-foreground">
-            الروابط الخارجية العامة قد تفشل في التصدير بسبب الحماية. الأفضل: بحث Pexels أو رفع ملف.
+            الروابط الخارجية العامة قد تفشل في التصدير بسبب الحماية. الأفضل: بحث Pexels/Pixabay أو رفع ملف.
           </p>
         </div>
       )}
 
       {tab === "search" && (
         <div className="space-y-2">
+          <div className="flex gap-1.5">
+            {providerBtn("pexels", "Pexels")}
+            {providerBtn("pixabay", "Pixabay")}
+          </div>
           <div className="flex gap-1.5">
             {kindBtn("image", <ImageIcon className="h-3 w-3" />, "صور")}
             {kindBtn("video", <Film className="h-3 w-3" />, "فيديوهات")}
@@ -281,6 +340,7 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "
             {SUGGESTIONS.map((s) => (
               <button
                 key={s}
+                type="button"
                 onClick={() => {
                   setQuery(s);
                   handleSearch(s);
@@ -295,11 +355,17 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "
           {mediaKind === "image" && photos.length > 0 && (
             <div className="grid max-h-72 grid-cols-3 gap-1.5 overflow-y-auto rounded-md border border-accent/15 bg-background/30 p-1.5">
               {photos.map((p) => {
-                const url = orientation === "portrait" ? p.src.portrait : orientation === "landscape" ? p.src.landscape : p.src.medium;
+                const url =
+                  orientation === "portrait"
+                    ? p.src.portrait
+                    : orientation === "landscape"
+                      ? p.src.landscape
+                      : p.src.medium;
                 const selected = bgUrl === url;
                 return (
                   <button
-                    key={p.id}
+                    key={`${provider}-${p.id}`}
+                    type="button"
                     onClick={() => handlePickPhoto(url, p.photographer)}
                     className={`group relative aspect-square overflow-hidden rounded transition-all ${
                       selected ? "ring-2 ring-accent shadow-gold" : "hover:ring-1 hover:ring-accent/40"
@@ -316,12 +382,12 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "
           {mediaKind === "video" && videos.length > 0 && (
             <div className="grid max-h-72 grid-cols-2 gap-1.5 overflow-y-auto rounded-md border border-accent/15 bg-background/30 p-1.5">
               {videos.map((v) => {
-                const file = pickBestVideoFile(v, orientation);
+                const file = pickVideoFile(v);
                 const selected = !!file && bgUrl === file.link;
                 const busy = applyingId === v.id;
                 return (
                   <button
-                    key={v.id}
+                    key={`${provider}-${v.id}`}
                     type="button"
                     disabled={!file || busy}
                     onClick={() => handlePickVideo(v)}
@@ -352,7 +418,7 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "
 
           {(photos.length > 0 || videos.length > 0) && (
             <p className="text-[10px] text-muted-foreground text-center">
-              اضغط على صورة/فيديو لإضافته كخلفية للمشروع — المحتوى من Pexels.
+              اضغط على صورة/فيديو لإضافته كخلفية — المحتوى من {providerLabel}.
             </p>
           )}
         </div>
