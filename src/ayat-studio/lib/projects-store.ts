@@ -15,6 +15,8 @@ export interface StoredProject {
   /** Whether the bgUrl points to an image (default) or a video file (mp4). */
   bgKind?: "image" | "video";
   bgUrl: string;
+  /** Optional poster/thumbnail for video backgrounds (e.g. Pexels preview image). */
+  bgPoster?: string;
   bgOpacity?: number; // 0..100 — opacity of background media itself
   translationEnabled: boolean;
   tafsirEnabled: boolean;
@@ -121,6 +123,7 @@ export function createDefaultProject(input: {
     bgType: "none",
     bgKind: "image",
     bgUrl: "",
+    bgPoster: "",
     bgOpacity: 100,
     translationEnabled: true,
     tafsirEnabled: false,

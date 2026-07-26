@@ -1,19 +1,38 @@
-/** Same-origin media proxy helpers for Pexels (and similar) backgrounds. */
+/** Same-origin media proxy helpers for Pexels (and Vimeo-hosted Pexels videos). */
 
-const PROXY_HOST_SUFFIXES = [".pexels.com"] as const;
+const PEXELS_SUFFIX = ".pexels.com";
 
-export function isProxiedMediaHost(hostname: string): boolean {
-  const host = hostname.toLowerCase();
-  return PROXY_HOST_SUFFIXES.some(
-    (suffix) => host === suffix.slice(1) || host.endsWith(suffix),
-  );
-}
-
+/** Hosts allowed as the *starting* URL (user-facing / from API). */
 export function isAllowedStudioMediaUrl(raw: string): boolean {
   try {
     const u = new URL(raw);
     if (u.protocol !== "https:") return false;
-    return isProxiedMediaHost(u.hostname);
+    const host = u.hostname.toLowerCase();
+    if (host === "pexels.com" || host.endsWith(PEXELS_SUFFIX)) return true;
+    // Pexels API serves video files via Vimeo player URLs.
+    if (host === "player.vimeo.com" && u.pathname.includes("/external/")) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Redirect targets after a trusted start URL (Vimeo → Akamai/CDN).
+ * Only https; never used as an initial user-supplied URL by itself.
+ */
+export function isAllowedStudioMediaRedirect(raw: string): boolean {
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== "https:") return false;
+    if (isAllowedStudioMediaUrl(raw)) return true;
+    const host = u.hostname.toLowerCase();
+    if (host.endsWith(".vimeocdn.com")) return true;
+    if (host.endsWith(".akamaized.net")) return true;
+    if (host.endsWith(".vimeo.com")) return true;
+    // Newer Pexels CDN paths
+    if (host === "videos.pexels.com" || host.endsWith(".pexels.com")) return true;
+    return false;
   } catch {
     return false;
   }

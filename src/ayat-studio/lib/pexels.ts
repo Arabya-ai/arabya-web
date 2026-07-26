@@ -131,20 +131,42 @@ export function pickBestVideoFile(
   video: PexelsVideo,
   orientation: "landscape" | "portrait" | "square",
 ): PexelsVideoFile | null {
-  const mp4s = video.video_files.filter((f) => f.file_type === "video/mp4" && f.link);
+  const files = Array.isArray(video.video_files) ? video.video_files : [];
+  const isMp4 = (f: PexelsVideoFile) => {
+    const type = (f.file_type || "").toLowerCase();
+    const link = (f.link || "").toLowerCase();
+    if (!f.link) return false;
+    if (type.includes("hls") || link.includes(".m3u8")) return false;
+    if (type.includes("mp4")) return true;
+    if (link.includes(".mp4")) return true;
+    // Pexels Vimeo external links often omit file_type but are progressive mp4.
+    if (link.includes("player.vimeo.com/external/")) return true;
+    if (link.includes("videos.pexels.com/video-files/")) return true;
+    return false;
+  };
+
+  const mp4s = files.filter(isMp4);
   if (mp4s.length === 0) return null;
+
   const wantPortrait = orientation === "portrait";
-  const matchOrient = (f: PexelsVideoFile) =>
-    wantPortrait ? f.height >= f.width : f.width >= f.height;
+  const matchOrient = (f: PexelsVideoFile) => {
+    if (!f.width || !f.height) return true;
+    return wantPortrait ? f.height >= f.width : f.width >= f.height;
+  };
   const candidates = mp4s.filter(matchOrient);
   const pool = candidates.length > 0 ? candidates : mp4s;
+
   const sorted = [...pool].sort((a, b) => {
-    const longA = Math.max(a.width, a.height);
-    const longB = Math.max(b.width, b.height);
-    const aOk = longA <= 1920 ? 0 : 1;
-    const bOk = longB <= 1920 ? 0 : 1;
-    if (aOk !== bOk) return aOk - bOk;
-    return aOk === 0 ? longB - longA : longA - longB;
+    const longA = Math.max(a.width || 0, a.height || 0) || 9999;
+    const longB = Math.max(b.width || 0, b.height || 0) || 9999;
+    // Prefer mid quality (≤1080) for reliable proxy + encode; then largest under cap.
+    const score = (long: number) => {
+      if (long <= 0) return 5000;
+      if (long <= 1080) return 1000 - long; // prefer closer to 1080
+      if (long <= 1920) return 2000 + long;
+      return 3000 + long;
+    };
+    return score(longA) - score(longB);
   });
   return sorted[0] || null;
 }

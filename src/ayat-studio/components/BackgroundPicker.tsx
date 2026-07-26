@@ -23,6 +23,7 @@ interface Patch {
   bgType?: "none" | "image" | "url";
   bgKind?: MediaKind;
   bgUrl?: string;
+  bgPoster?: string;
   bgOpacity?: number;
 }
 
@@ -30,6 +31,7 @@ interface Props {
   bgType: "none" | "image" | "url";
   bgKind?: MediaKind;
   bgUrl: string;
+  bgPoster?: string;
   bgOpacity?: number;
   ratio: string;
   onChange: (patch: Patch) => void;
@@ -37,13 +39,14 @@ interface Props {
 
 const SUGGESTIONS = ["mosque", "nature", "mountains", "sky", "stars night", "calm sea", "forest sunrise", "desert"];
 
-export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgOpacity = 100, ratio, onChange }: Props) {
+export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "", bgOpacity = 100, ratio, onChange }: Props) {
   const [tab, setTab] = useState<Tab>("upload");
   const [mediaKind, setMediaKind] = useState<MediaKind>(bgKind);
   const [query, setQuery] = useState("mosque");
   const [photos, setPhotos] = useState<PexelsPhoto[]>([]);
   const [videos, setVideos] = useState<PexelsVideo[]>([]);
   const [loading, setLoading] = useState(false);
+  const [applyingId, setApplyingId] = useState<number | null>(null);
   const { toast } = useToast();
 
   const orientation = ratio === "9:16" ? "portrait" : ratio === "1:1" ? "square" : "landscape";
@@ -88,7 +91,12 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgOpacity = 
         toast({ title: "تعذّر قراءة الملف", variant: "destructive" });
         return;
       }
-      onChange({ bgType: "image", bgKind: isVideo ? "video" : "image", bgUrl: dataUrl });
+      onChange({
+        bgType: "image",
+        bgKind: isVideo ? "video" : "image",
+        bgUrl: dataUrl,
+        bgPoster: "",
+      });
       toast({ title: isVideo ? "تم تعيين فيديو الخلفية" : "تم تعيين الخلفية" });
     };
     reader.onerror = () => {
@@ -99,21 +107,33 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgOpacity = 
 
   const handlePickVideo = (v: PexelsVideo) => {
     const file = pickBestVideoFile(v, orientation);
-    if (!file) {
-      toast({ title: "ملف فيديو غير متاح", variant: "destructive" });
+    if (!file?.link) {
+      toast({
+        title: "ملف فيديو غير متاح",
+        description: "جرّب نتيجة أخرى من البحث.",
+        variant: "destructive",
+      });
       return;
     }
-    onChange({ bgType: "url", bgKind: "video", bgUrl: file.link });
-    toast({
-      title: "تم تعيين فيديو الخلفية",
-      description: "ستظهر في المعاينة ويُدمَج عند تصدير MP4.",
+    setApplyingId(v.id);
+    onChange({
+      bgType: "url",
+      bgKind: "video",
+      bgUrl: file.link,
+      bgPoster: v.image || "",
     });
+    toast({
+      title: "تم إضافة الفيديو للمشروع",
+      description: "يظهر في المعاينة (يسار/أعلى) ويُدمَج مع الآيات عند تصدير MP4.",
+    });
+    // Brief UI feedback on the tile
+    window.setTimeout(() => setApplyingId(null), 400);
   };
 
   const handlePickPhoto = (url: string, photographer: string) => {
-    onChange({ bgType: "url", bgKind: "image", bgUrl: url });
+    onChange({ bgType: "url", bgKind: "image", bgUrl: url, bgPoster: "" });
     toast({
-      title: "تم تعيين صورة الخلفية",
+      title: "تم إضافة الصورة للمشروع",
       description: photographer ? `من ${photographer}` : "ستظهر في المعاينة والتصدير.",
     });
   };
@@ -182,7 +202,7 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgOpacity = 
             dir="ltr"
             className="text-left bg-background/50 border-accent/20"
             value={bgType === "url" ? bgUrl : ""}
-            onChange={(e) => onChange({ bgType: "url", bgKind: mediaKind, bgUrl: e.target.value })}
+            onChange={(e) => onChange({ bgType: "url", bgKind: mediaKind, bgUrl: e.target.value, bgPoster: "" })}
           />
         </div>
       )}
@@ -258,20 +278,33 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgOpacity = 
             <div className="grid max-h-72 grid-cols-2 gap-1.5 overflow-y-auto rounded-md border border-accent/15 bg-background/30 p-1.5">
               {videos.map((v) => {
                 const file = pickBestVideoFile(v, orientation);
-                const selected = file && bgUrl === file.link;
+                const selected = !!file && bgUrl === file.link;
+                const busy = applyingId === v.id;
                 return (
                   <button
                     key={v.id}
+                    type="button"
+                    disabled={!file || busy}
                     onClick={() => handlePickVideo(v)}
-                    className={`group relative aspect-video overflow-hidden rounded transition-all ${
+                    className={`group relative aspect-video overflow-hidden rounded transition-all disabled:opacity-60 ${
                       selected ? "ring-2 ring-accent shadow-gold" : "hover:ring-1 hover:ring-accent/40"
                     }`}
-                    title={`${v.user.name} · ${v.duration}s`}
+                    title={file ? `${v.user.name} · ${v.duration}s — اضغط للإضافة` : "ملف غير متاح"}
                   >
                     <img src={v.image} alt="" loading="lazy" className="h-full w-full object-cover" />
                     <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[9px] text-white inline-flex items-center gap-1">
                       <Film className="h-2.5 w-2.5" /> {v.duration}s
                     </span>
+                    {busy && (
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/50">
+                        <Loader2 className="h-5 w-5 animate-spin text-accent" />
+                      </span>
+                    )}
+                    {selected && !busy && (
+                      <span className="absolute top-1 right-1 rounded bg-accent px-1.5 py-0.5 text-[9px] font-medium text-accent-foreground">
+                        مُضاف
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -279,13 +312,27 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgOpacity = 
           )}
 
           {(photos.length > 0 || videos.length > 0) && (
-            <p className="text-[10px] text-muted-foreground text-center">المحتوى مقدم من Pexels — صانعو المحتوى مذكورون عند التحويم.</p>
+            <p className="text-[10px] text-muted-foreground text-center">
+              اضغط على صورة/فيديو لإضافته كخلفية للمشروع — المحتوى من Pexels.
+            </p>
           )}
         </div>
       )}
 
       {bgType !== "none" && bgUrl && (
         <>
+          {(bgPoster || (bgKind === "image" && bgUrl)) && (
+            <div className="overflow-hidden rounded-md border border-accent/30">
+              <img
+                src={bgPoster || bgUrl}
+                alt=""
+                className="h-20 w-full object-cover"
+              />
+              <p className="bg-accent/10 px-2 py-1 text-[10px] text-accent">
+                {bgKind === "video" ? "فيديو الخلفية مُضاف للمشروع" : "صورة الخلفية مُضافة للمشروع"}
+              </p>
+            </div>
+          )}
           <div className="space-y-1.5 pt-2 border-t border-accent/15">
             <Label className="text-xs text-accent">
               شفافية {bgKind === "video" ? "الفيديو" : "الصورة"}: {bgOpacity}%
@@ -302,7 +349,7 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgOpacity = 
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onChange({ bgType: "none", bgKind: "image", bgUrl: "" })}
+            onClick={() => onChange({ bgType: "none", bgKind: "image", bgUrl: "", bgPoster: "" })}
             className="text-destructive w-full"
           >
             <Trash2 className="h-3.5 w-3.5" /> إزالة الخلفية

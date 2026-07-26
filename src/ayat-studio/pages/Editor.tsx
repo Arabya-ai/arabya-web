@@ -265,6 +265,7 @@ export default function Editor() {
             bgType={project.bgType}
             bgKind={project.bgKind}
             bgUrl={project.bgUrl}
+            bgPoster={project.bgPoster}
             bgOpacity={project.bgOpacity ?? 100}
             ratio={project.ratio}
             onChange={(p) => update(p)}
@@ -461,7 +462,7 @@ export default function Editor() {
               key={project.bgUrl}
               src={studioMediaUrl(project.bgUrl)}
               alt=""
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 z-[1] h-full w-full object-cover"
               style={{ opacity: (project.bgOpacity ?? 100) / 100 }}
               onError={() =>
                 toast({
@@ -476,13 +477,20 @@ export default function Editor() {
             <video
               key={project.bgUrl}
               src={studioMediaUrl(project.bgUrl)}
+              poster={project.bgPoster ? studioMediaUrl(project.bgPoster) : undefined}
               autoPlay
               muted
               loop
               playsInline
               preload="auto"
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 z-[1] h-full w-full object-cover"
               style={{ opacity: (project.bgOpacity ?? 100) / 100 }}
+              onLoadedData={(e) => {
+                const el = e.currentTarget;
+                el.play().catch(() => {
+                  /* autoplay policies — muted should usually allow */
+                });
+              }}
               onError={() =>
                 toast({
                   title: "تعذّر تشغيل فيديو الخلفية",
@@ -493,11 +501,11 @@ export default function Editor() {
             />
           )}
           <div
-            className="pointer-events-none absolute inset-0"
+            className="pointer-events-none absolute inset-0 z-[2]"
             style={{ background: "#000", opacity: project.overlayOpacity / 100 }}
           />
 
-          <div className={`relative z-10 flex-1 flex flex-col p-6 ${
+          <div className={`relative z-[3] flex-1 flex flex-col p-6 ${
             project.overlayPosition === "top" ? "justify-start" :
             project.overlayPosition === "bottom" ? "justify-end" :
             "justify-center"

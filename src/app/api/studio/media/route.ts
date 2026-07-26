@@ -1,13 +1,16 @@
 import { auth } from "@/auth";
-import { isAllowedStudioMediaUrl } from "@/ayat-studio/lib/media-url";
+import {
+  isAllowedStudioMediaRedirect,
+  isAllowedStudioMediaUrl,
+} from "@/ayat-studio/lib/media-url";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-const MAX_REDIRECTS = 4;
+const MAX_REDIRECTS = 6;
 
 /**
- * Authenticated media proxy for Pexels CDN assets.
+ * Authenticated media proxy for Pexels images and Vimeo-hosted Pexels videos.
  * Same-origin URLs let the editor preview and WebCodecs canvas use backgrounds without CORS failures.
  */
 export async function GET(request: Request) {
@@ -29,7 +32,10 @@ export async function GET(request: Request) {
         redirect: "manual",
         headers: {
           Accept: "*/*",
-          "User-Agent": "ArabyaStudioMediaProxy/1.0",
+          // Vimeo/Pexels often require a browser-like UA for /external/ mp4 links.
+          "User-Agent":
+            "Mozilla/5.0 (compatible; ArabyaStudio/1.0; +https://www.arabyaai.com)",
+          Referer: "https://www.pexels.com/",
         },
       });
     } catch {
@@ -42,8 +48,11 @@ export async function GET(request: Request) {
         return Response.json({ error: "redirect_missing" }, { status: 502 });
       }
       const next = new URL(loc, current).href;
-      if (!isAllowedStudioMediaUrl(next)) {
-        return Response.json({ error: "redirect_blocked" }, { status: 400 });
+      if (!isAllowedStudioMediaRedirect(next)) {
+        return Response.json(
+          { error: "redirect_blocked", host: new URL(next).hostname },
+          { status: 400 },
+        );
       }
       current = next;
       continue;
