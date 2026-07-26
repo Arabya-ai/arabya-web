@@ -1212,9 +1212,9 @@ export default function Editor() {
             </Button>
             {needsWatermark && (
               <p className="text-xs text-center text-accent/90 leading-relaxed">
-                الخطة المجانية: تصدير MP4 مع علامة عربية شفافة أعلى اليمين.{" "}
+                المسجّلون: تصدير MP4 مع شعار عربية ستوديو.{" "}
                 <Link href="/pricing" className="underline hover:text-accent">
-                  أزل العلامة مع بلس
+                  المؤلف/المحرر/المدير يمكنهم التصدير بلا شعار
                 </Link>
               </p>
             )}
