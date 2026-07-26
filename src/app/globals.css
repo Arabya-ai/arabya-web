@@ -228,17 +228,13 @@ html[data-theme="dark"] .site-header {
 .brand-lockup {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.55rem;
   min-width: 0;
   perspective: 700px;
 }
 
 .brand-lockup--footer {
   justify-content: flex-start;
-}
-
-.brand-lockup--footer .brand-text {
-  border-inline-start-color: color-mix(in srgb, var(--brand) 22%, transparent);
 }
 
 .brand-emblem {
@@ -332,8 +328,8 @@ html[data-theme="dark"] .site-header {
   display: flex;
   align-items: center;
   min-width: 0;
-  padding-inline-start: 0.85rem;
-  border-inline-start: 1px solid color-mix(in srgb, var(--brand) 28%, transparent);
+  padding-inline-start: 0;
+  border-inline-start: none;
 }
 
 /*
@@ -345,8 +341,8 @@ html[data-theme="dark"] .site-header {
   display: inline-block;
   font-family: var(--font-reem-kufi), "Reem Kufi", sans-serif;
   font-weight: 700;
-  font-size: clamp(1.7rem, 3vw, 2.05rem);
-  line-height: 1.4;
+  font-size: clamp(2rem, 3.4vw, 2.4rem);
+  line-height: 1.15;
   letter-spacing: -0.01em;
   white-space: nowrap;
   /* Readable if gradient-clip is unsupported */
@@ -388,7 +384,7 @@ html[data-theme="dark"] .site-header {
 }
 
 .brand-lockup--footer .brand-name {
-  font-size: 1.4rem;
+  font-size: 1.85rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
