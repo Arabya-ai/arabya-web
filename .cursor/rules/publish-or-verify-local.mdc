@@ -1,0 +1,13 @@
+---
+description: After meaningful changes, always publish to main or verify local works
+alwaysApply: true
+---
+
+# Publish or verify local
+
+After finishing meaningful product/code changes in this repo:
+
+1. **Prefer publish:** commit (when the user asked or when continuing an agreed ship), push to `main`, confirm CI is green, and briefly confirm production (`https://www.arabyaai.com`) responds for the touched surface when practical.
+2. **If not publishing yet:** start or reuse `npm run dev`, then verify the changed routes/APIs on localhost (at least HTTP 200 / no crash) before ending the turn.
+3. Do not leave the user with “fixed locally, unshipped” unless they explicitly asked to skip deploy.
+4. Tell the user which of the two was done (pushed commit SHA + CI, or local URL/port checked).
