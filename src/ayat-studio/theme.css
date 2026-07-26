@@ -3,60 +3,60 @@
 
 .ayat-studio,
 .ayat-studio-portal {
-  /* HSL channels for shadcn utilities */
-  --background: 200 35% 6%;
-  --foreground: 42 35% 92%;
-  --card: 200 30% 9%;
-  --card-foreground: 42 35% 92%;
-  --popover: 200 32% 8%;
-  --popover-foreground: 42 35% 92%;
-  --primary: 178 65% 42%;
-  --primary-foreground: 200 40% 6%;
-  --primary-glow: 178 80% 55%;
-  --secondary: 200 25% 14%;
-  --secondary-foreground: 42 30% 88%;
-  --muted: 200 22% 12%;
-  --muted-foreground: 42 15% 65%;
+  /* Align with Arabya dark night palette (teal-black) + studio gold accent */
+  --background: 168 45% 5%;
+  --foreground: 150 25% 94%;
+  --card: 168 30% 9%;
+  --card-foreground: 150 25% 94%;
+  --popover: 168 32% 8%;
+  --popover-foreground: 150 25% 94%;
+  --primary: 173 70% 42%;
+  --primary-foreground: 168 40% 6%;
+  --primary-glow: 173 80% 55%;
+  --secondary: 168 25% 14%;
+  --secondary-foreground: 150 20% 88%;
+  --muted: 168 22% 12%;
+  --muted-foreground: 150 12% 62%;
   --accent: 41 75% 58%;
-  --accent-foreground: 200 40% 8%;
+  --accent-foreground: 168 40% 8%;
   --accent-glow: 45 90% 68%;
   --destructive: 0 65% 55%;
   --destructive-foreground: 0 0% 100%;
-  --border: 200 25% 16%;
-  --input: 200 25% 14%;
-  --ring: 41 75% 58%;
+  --border: 168 22% 16%;
+  --input: 168 25% 14%;
+  --ring: 173 70% 42%;
   --radius: 0.875rem;
-  --sidebar-background: 200 35% 5%;
-  --sidebar-foreground: 42 30% 85%;
+  --sidebar-background: 168 40% 4%;
+  --sidebar-foreground: 150 20% 88%;
   --sidebar-primary: 41 75% 58%;
-  --sidebar-primary-foreground: 200 40% 6%;
-  --sidebar-accent: 200 28% 11%;
-  --sidebar-accent-foreground: 42 35% 92%;
-  --sidebar-border: 200 25% 13%;
-  --sidebar-ring: 41 75% 58%;
+  --sidebar-primary-foreground: 168 40% 6%;
+  --sidebar-accent: 168 28% 10%;
+  --sidebar-accent-foreground: 150 25% 94%;
+  --sidebar-border: 168 22% 12%;
+  --sidebar-ring: 173 70% 42%;
   --gold: 41 75% 58%;
-  --gold-foreground: 200 40% 8%;
+  --gold-foreground: 168 40% 8%;
   --gold-deep: 38 70% 45%;
 
-  /* Override Arabya shell tokens inside studio */
-  --bg: hsl(200 35% 6%);
-  --ink: hsl(42 35% 92%);
+  /* Match Arabya shell dark tokens */
+  --bg: #071110;
+  --ink: #eef6f2;
 
-  --gradient-night: linear-gradient(180deg, hsl(200 40% 8%) 0%, hsl(195 45% 4%) 100%);
+  --gradient-night: linear-gradient(180deg, #0d1c19 0%, #071110 100%);
   --gradient-gold: linear-gradient(135deg, hsl(45 85% 65%) 0%, hsl(38 70% 45%) 100%);
-  --gradient-teal: linear-gradient(135deg, hsl(178 65% 42%) 0%, hsl(190 70% 30%) 100%);
+  --gradient-teal: linear-gradient(135deg, hsl(173 70% 42%) 0%, hsl(168 55% 28%) 100%);
   --gradient-royal: linear-gradient(
     135deg,
-    hsl(200 40% 8%) 0%,
-    hsl(178 50% 18%) 50%,
-    hsl(200 40% 8%) 100%
+    #071110 0%,
+    #0f2924 50%,
+    #071110 100%
   );
   --gradient-aurora:
-    radial-gradient(ellipse at top, hsl(178 60% 25% / 0.45), transparent 60%),
-    radial-gradient(ellipse at bottom, hsl(41 60% 25% / 0.25), transparent 60%);
+    radial-gradient(1200px 500px at 80% -10%, rgba(45, 212, 191, 0.12), transparent 55%),
+    radial-gradient(900px 400px at 0% 0%, rgba(20, 184, 166, 0.08), transparent 50%);
   --shadow-gold: 0 10px 40px -10px hsl(41 75% 58% / 0.35);
-  --shadow-deep: 0 20px 60px -15px hsl(200 50% 2% / 0.7);
-  --shadow-glow: 0 0 50px hsl(41 80% 60% / 0.25);
+  --shadow-deep: 0 20px 60px -15px hsl(168 50% 2% / 0.7);
+  --shadow-glow: 0 0 50px hsl(173 80% 45% / 0.2);
 
   direction: rtl;
   font-family: var(--font-tajawal), "Tajawal", system-ui, sans-serif;
@@ -66,11 +66,10 @@
 
 .ayat-studio {
   color: hsl(var(--foreground));
-  background-color: hsl(var(--background));
+  background-color: var(--bg);
   background-image: var(--gradient-aurora);
   background-attachment: fixed;
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 100%;
 }
 
 .ayat-studio-portal {

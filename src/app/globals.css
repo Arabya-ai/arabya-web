@@ -123,6 +123,25 @@ body {
   transition: background-color 220ms ease, color 220ms ease;
 }
 
+/* Studio display fonts for portal titles/descriptions only — never mushaf/Quran */
+.dash-shell h1,
+.dash-shell h2,
+.dash-kicker,
+.hero-title,
+.pricing-page h1,
+.pricing-page h2,
+.portal-display,
+.brand-name {
+  font-family: var(--font-reem-kufi), var(--font-cairo), "Segoe UI", sans-serif;
+}
+
+.dash-shell p,
+.dash-shell .dash-subtitle,
+.pricing-page p,
+.portal-copy {
+  font-family: var(--font-tajawal), var(--font-plex-ar), "Segoe UI", sans-serif;
+}
+
 img,
 svg,
 video,

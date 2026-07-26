@@ -11,6 +11,8 @@ interface ExportOptions {
   onProgress?: (pct: number, label?: string) => void;
   translationMap?: Record<number, string> | null;
   tafsirMap?: Record<number, string> | null;
+  /** Free-plan Arabya mark (top-right, semi-transparent). */
+  watermark?: boolean;
 }
 
 export async function exportProjectToVideo({
@@ -18,6 +20,7 @@ export async function exportProjectToVideo({
   onProgress,
   translationMap = null,
   tafsirMap = null,
+  watermark = false,
 }: ExportOptions): Promise<Blob> {
   if (typeof VideoEncoder === "undefined" || typeof AudioEncoder === "undefined") {
     throw new Error("متصفحك لا يدعم تصدير MP4. الرجاء استخدام Chrome أو Edge الحديث.");
@@ -67,6 +70,17 @@ export async function exportProjectToVideo({
       }
     }
   };
+
+  let watermarkImg: HTMLImageElement | null = null;
+  if (watermark) {
+    try {
+      const loaded = await loadImageBuffered("/brand/arabya-mark-square.png");
+      revokes.push(loaded.revoke);
+      watermarkImg = loaded.image;
+    } catch {
+      /* text fallback in drawFrame */
+    }
+  }
 
   const isVideoBg =
     (project.bgType === "image" || project.bgType === "url") &&
@@ -287,6 +301,8 @@ export async function exportProjectToVideo({
         enterProgress,
         exitProgress,
         kenburnsT: timeSec / totalDuration,
+        watermarkImg,
+        showWatermark: watermark,
       });
 
       if (visualizer !== "none") {
@@ -344,10 +360,12 @@ export async function exportProjectToPng(
   layers?: {
     translationMap?: Record<number, string> | null;
     tafsirMap?: Record<number, string> | null;
+    watermark?: boolean;
   },
 ): Promise<Blob> {
   const translationMap = layers?.translationMap ?? null;
   const tafsirMap = layers?.tafsirMap ?? null;
+  const watermark = layers?.watermark ?? false;
   const ratio = aspectRatios.find((r) => r.id === project.ratio) || aspectRatios[0];
   const width = ratio.width;
   const height = ratio.height;
@@ -363,10 +381,21 @@ export async function exportProjectToPng(
   try {
     let bgImage: HTMLImageElement | null = null;
     let bgVideo: HTMLVideoElement | null = null;
+    let watermarkImg: HTMLImageElement | null = null;
     const isVideoBg =
       (project.bgType === "image" || project.bgType === "url") &&
       project.bgKind === "video" &&
       !!project.bgUrl;
+
+    if (watermark) {
+      try {
+        const loaded = await loadImageBuffered("/brand/arabya-mark-square.png");
+        revokes.push(loaded.revoke);
+        watermarkImg = loaded.image;
+      } catch {
+        /* fallback text */
+      }
+    }
 
     if (isVideoBg) {
       const loaded = await loadVideoBuffered(studioMediaUrl(project.bgUrl));
@@ -427,6 +456,8 @@ export async function exportProjectToPng(
       enterProgress: 1,
       exitProgress: 1,
       kenburnsT: 0,
+      watermarkImg,
+      showWatermark: watermark,
     });
 
     return await new Promise<Blob>((resolve, reject) => {
@@ -536,6 +567,8 @@ interface DrawFrameOpts {
   enterProgress: number;
   exitProgress: number;
   kenburnsT: number;
+  watermarkImg?: HTMLImageElement | null;
+  showWatermark?: boolean;
 }
 
 function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
@@ -556,6 +589,8 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
     enterProgress,
     exitProgress,
     kenburnsT,
+    watermarkImg = null,
+    showWatermark = false,
   } = opts;
 
   const bgSource: CanvasImageSource | null =
@@ -778,6 +813,22 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   ctx.fillRect(barX, barY, barW, barH);
   ctx.fillStyle = "rgba(200, 169, 81, 0.95)";
   ctx.fillRect(barX, barY, barW * progress, barH);
+
+  if (showWatermark) {
+    const mark = Math.max(28, Math.round(width * 0.055));
+    const pad = Math.round(width * 0.03);
+    ctx.save();
+    ctx.globalAlpha = 0.42;
+    if (watermarkImg && watermarkImg.width > 0) {
+      ctx.drawImage(watermarkImg, width - pad - mark, pad, mark, mark);
+    } else {
+      ctx.fillStyle = "rgba(200,169,81,0.9)";
+      ctx.font = `bold ${Math.round(mark * 0.45)}px "IBM Plex Sans Arabic", sans-serif`;
+      ctx.textAlign = "right";
+      ctx.fillText("عربية", width - pad, pad + mark * 0.65);
+    }
+    ctx.restore();
+  }
 }
 
 function wrapText(

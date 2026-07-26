@@ -12,17 +12,8 @@ export function studioPath(path: string): string {
   return `${STUDIO_BASE}${p}`;
 }
 
-/** Immersive Arabya Studio chrome (no site header/footer). */
+/** Legacy helper — Studio now uses site header/footer; kept for callers. */
 export function isAyatStudioPath(pathname: string): boolean {
-  const bare = pathname.startsWith("/en/")
-    ? pathname.slice(3)
-    : pathname === "/en"
-      ? "/"
-      : pathname;
-  if (bare === "/create" || bare.startsWith("/create/")) return true;
-  if (bare === "/studio") return true;
-  if (bare.startsWith("/studio/queue") || bare.startsWith("/studio/sources")) {
-    return false;
-  }
-  return bare.startsWith("/studio/");
+  void pathname;
+  return false;
 }

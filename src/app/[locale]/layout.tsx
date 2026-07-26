@@ -5,6 +5,8 @@ import {
   IBM_Plex_Sans_Arabic,
   Noto_Naskh_Arabic,
   Plus_Jakarta_Sans,
+  Reem_Kufi,
+  Tajawal,
 } from "next/font/google";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
@@ -49,6 +51,20 @@ const amiri = Amiri({
   variable: "--font-amiri",
   subsets: ["arabic", "latin"],
   weight: ["400", "700"],
+});
+
+const tajawal = Tajawal({
+  variable: "--font-tajawal",
+  subsets: ["arabic", "latin"],
+  weight: ["400", "500", "700", "800"],
+  display: "swap",
+});
+
+const reemKufi = Reem_Kufi({
+  variable: "--font-reem-kufi",
+  subsets: ["arabic", "latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export function generateStaticParams() {
@@ -117,7 +133,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         />
       </head>
       <body
-        className={`${cairo.variable} ${plexArabic.variable} ${jakarta.variable} ${naskh.variable} ${amiri.variable} antialiased`}
+        className={`${cairo.variable} ${plexArabic.variable} ${jakarta.variable} ${naskh.variable} ${amiri.variable} ${tajawal.variable} ${reemKufi.variable} antialiased`}
       >
         <NextIntlClientProvider messages={messages}>
           <SyncUiLocaleFromPath />

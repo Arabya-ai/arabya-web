@@ -260,6 +260,7 @@
     "shortcuts": "Shortcuts",
     "studio": "Studio",
     "qualityQueue": "Quality queue",
+    "editHub": "Edit",
     "admin": "Admin",
     "study": "Study",
     "favorites": "Favorites",
@@ -299,6 +300,7 @@
     "pricing": "Plans",
     "upgrade": "Request upgrade",
     "studio": "Studio",
+    "edit": "Edit",
     "queue": "Quality queue",
     "sources": "Sources",
     "adminStats": "Platform stats",
@@ -307,6 +309,7 @@
     "audit": "Role audit",
     "settings": "Settings",
     "groupAccount": "Account",
+    "groupEdit": "Edit",
     "groupStudio": "Studio",
     "groupAdmin": "Admin"
   },
@@ -562,6 +565,18 @@
     "noNotes": "No notes yet.",
     "editNotes": "Edit notes",
     "updatedAt": "Last updated: {date}"
+  },
+  "EditHub": {
+    "metaTitle": "Edit",
+    "kicker": "Edit",
+    "title": "Editing tools",
+    "subtitle": "Quality queue and sources — separate from the video studio.",
+    "intro": "These tools are for editors and admins to review data quality and import sources. Video production stays in Studio.",
+    "queue": "Quality queue",
+    "sources": "Sources",
+    "openStudio": "Open Studio",
+    "backAccount": "Back to account",
+    "backEdit": "Back to Edit"
   },
   "Studio": {
     "metaEditorTitle": "Editor studio",

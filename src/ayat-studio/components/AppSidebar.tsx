@@ -1,10 +1,9 @@
 "use client";
-import { Home, FolderOpen, Plus, History, Settings, ListChecks } from "lucide-react";
+import { Home, FolderOpen, Plus, History, Settings } from "lucide-react";
+import Image from "next/image";
 import { NavLink } from "@/ayat-studio/components/NavLink";
 import { Link, usePathname } from "@/i18n/navigation";
 import { studioPath } from "@/ayat-studio/lib/studio-paths";
-import { useSession } from "next-auth/react";
-import { canAccessStudio } from "@/lib/roles";
 import {
   Sidebar,
   SidebarContent,
@@ -16,7 +15,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/ayat-studio/components/ui/sidebar";
-import { ArabesqueMedallion } from "@/ayat-studio/components/IslamicDecor";
 
 const items = [
   { title: "الرئيسية", url: "/dashboard", icon: Home },
@@ -30,8 +28,6 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = usePathname();
-  const { data: session } = useSession();
-  const showEditorTools = canAccessStudio(session?.user?.role ?? "user");
 
   return (
     <Sidebar
@@ -40,21 +36,29 @@ export function AppSidebar() {
       className="border-sidebar-border border-l"
     >
       <SidebarContent className="relative overflow-x-hidden overflow-y-auto bg-sidebar">
-        <div className="pattern-stars absolute inset-0 opacity-40 pointer-events-none" />
+        <div className="pattern-stars absolute inset-0 opacity-30 pointer-events-none" />
 
-        {/* Logo */}
         <Link
-          href={studioPath("/")}
+          href="/"
           className="relative flex items-center gap-3 border-b border-sidebar-border px-4 py-5 hover:bg-sidebar-accent/30 transition-colors group"
+          title="الصفحة الرئيسية — عربية"
         >
-          <ArabesqueMedallion
-            size={collapsed ? 28 : 36}
-            className="text-accent shrink-0 transition-transform group-hover:rotate-45 duration-700"
+          <Image
+            src="/brand/arabya-mark-square.png"
+            alt="عربية"
+            width={collapsed ? 28 : 36}
+            height={collapsed ? 28 : 36}
+            className="shrink-0 rounded-md"
+            unoptimized
           />
           {!collapsed && (
-            <div className="flex flex-col leading-none">
-              <span className="font-display font-bold text-sidebar-foreground">عربية ستوديو</span>
-              <span className="text-[9px] tracking-widest text-accent/70">ARABYA • STUDIO</span>
+            <div className="flex min-w-0 flex-col gap-1.5">
+              <span className="font-display font-bold leading-tight text-sidebar-foreground">
+                عربية ستوديو
+              </span>
+              <span className="text-[9px] leading-none tracking-widest text-accent/70">
+                ARABYA • STUDIO
+              </span>
             </div>
           )}
         </Link>
@@ -82,7 +86,9 @@ export function AppSidebar() {
                     >
                       <NavLink to={item.url} end>
                         <item.icon className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span className="font-medium">{item.title}</span>}
+                        {!collapsed && (
+                          <span className="font-medium">{item.title}</span>
+                        )}
                         {isActive && !collapsed && (
                           <span className="absolute left-2 h-1.5 w-1.5 rounded-full bg-accent shadow-glow" />
                         )}
@@ -95,51 +101,28 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {showEditorTools ? (
-          <SidebarGroup className="relative pt-2">
-            {!collapsed && (
-              <SidebarGroupLabel className="text-[10px] font-medium uppercase tracking-[0.2em] text-accent/70 px-3">
-                أدوات المحرر
-              </SidebarGroupLabel>
-            )}
-            <SidebarGroupContent>
-              <SidebarMenu className="gap-1 px-2">
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname.startsWith("/studio/queue")}
-                    className="rounded-lg text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-accent border border-transparent"
-                  >
-                    <Link href="/studio/queue">
-                      <ListChecks className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span className="font-medium">طابور الجودة</span>}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname.startsWith("/studio/sources")}
-                    className="rounded-lg text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-accent border border-transparent"
-                  >
-                    <Link href="/studio/sources">
-                      <FolderOpen className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span className="font-medium">المصادر</span>}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ) : null}
-
-        {/* Footer ornament */}
         {!collapsed && (
           <div className="mt-auto p-4 relative">
-            <div className="rounded-xl border border-accent/20 bg-card/40 p-4 text-center">
-              <p className="font-quran text-sm leading-relaxed text-accent/90">﴿ ٱقْرَأْ ﴾</p>
-              <p className="mt-1 text-[10px] tracking-widest text-muted-foreground">سورة العلق</p>
-            </div>
+            <Link
+              href="/"
+              className="flex flex-col items-center gap-2 rounded-xl border border-accent/20 bg-card/40 p-4 text-center transition hover:border-accent/40 hover:bg-accent/5"
+              title="الصفحة الرئيسية — عربية"
+            >
+              <Image
+                src="/brand/arabya-mark-square.png"
+                alt="عربية"
+                width={48}
+                height={48}
+                className="rounded-lg"
+                unoptimized
+              />
+              <span className="text-xs font-display font-semibold text-sidebar-foreground">
+                عربية
+              </span>
+              <span className="text-[10px] tracking-widest text-muted-foreground">
+                الصفحة الرئيسية
+              </span>
+            </Link>
           </div>
         )}
       </SidebarContent>

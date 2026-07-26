@@ -56,6 +56,16 @@ describe("entitlements", () => {
     expect(canCreateVideo("plus")).toBe(true);
   });
 
+  it("allows studio MP4 for free with watermark flag", async () => {
+    const { canExportStudioMp4, studioExportNeedsWatermark } = await import(
+      "@/lib/plans"
+    );
+    expect(canExportStudioMp4("free")).toBe(true);
+    expect(canExportStudioMp4("plus")).toBe(true);
+    expect(studioExportNeedsWatermark("free")).toBe(true);
+    expect(studioExportNeedsWatermark("plus")).toBe(false);
+  });
+
   it("maps aspects to pixel sizes", () => {
     expect(FREE_IMAGE_ASPECT).toBe("1:1");
     expect(imageSizeForAspect("1:1")).toEqual({ width: 1080, height: 1080 });

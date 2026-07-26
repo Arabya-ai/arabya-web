@@ -72,6 +72,15 @@ export function canCreateVideo(plan: UserPlan): boolean {
   return plan === "plus";
 }
 
+/** Logged-in users can export studio video; free gets watermark. */
+export function canExportStudioMp4(_plan: UserPlan): boolean {
+  return true;
+}
+
+export function studioExportNeedsWatermark(plan: UserPlan): boolean {
+  return plan !== "plus";
+}
+
 /** Max ayah span for normal Plus exports. Super-admin has no cap. */
 export const STUDIO_MAX_AYAHS = 40;
 

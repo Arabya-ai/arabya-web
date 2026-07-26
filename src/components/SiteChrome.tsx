@@ -6,13 +6,10 @@ import { AuthButton } from "@/components/AuthButton";
 import { BrandLockup } from "@/components/BrandLockup";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Link, usePathname } from "@/i18n/navigation";
-import { isAyatStudioPath } from "@/ayat-studio/lib/studio-paths";
+import { Link } from "@/i18n/navigation";
 
-/** Immersive Ayat Studio — hide Arabya site chrome on /studio (and legacy /create). */
+/** Site chrome for all pages including Arabya Studio (header + footer). */
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  if (isAyatStudioPath(pathname)) return <>{children}</>;
   return (
     <>
       <SiteHeader />

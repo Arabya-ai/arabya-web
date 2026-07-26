@@ -56,7 +56,8 @@ import { AudioPreviewPlayer } from "@/ayat-studio/components/AudioPreviewPlayer"
 import { ColorPickerField } from "@/ayat-studio/components/ColorPickerField";
 import { useSession } from "next-auth/react";
 import {
-  canCreateVideo,
+  canExportStudioMp4,
+  studioExportNeedsWatermark,
   canExportUnlimitedStudioAyahs,
   STUDIO_MAX_AYAHS,
 } from "@/lib/plans";
@@ -144,7 +145,8 @@ export default function Editor() {
   const { toast } = useToast();
   const { data: session } = useSession();
   const plan = session?.user?.plan ?? "free";
-  const plusOk = canCreateVideo(plan);
+  const canExportMp4 = canExportStudioMp4(plan);
+  const needsWatermark = studioExportNeedsWatermark(plan);
   const unlimitedAyahs = canExportUnlimitedStudioAyahs(session?.user?.email);
   const maxAyahSpan = unlimitedAyahs ? 9999 : STUDIO_MAX_AYAHS;
 
@@ -385,10 +387,10 @@ export default function Editor() {
   };
 
   const handleExport = async () => {
-    if (!plusOk) {
+    if (!canExportMp4) {
       toast({
-        title: "يتطلب عربية بلس",
-        description: "تصدير MP4 متاح لمشتركي بلس. يمكنك استكشاف المحرر مجانًا.",
+        title: "يلزم تسجيل الدخول",
+        description: "سجّل الدخول لتصدير الفيديو.",
         variant: "destructive",
       });
       return;
@@ -430,6 +432,7 @@ export default function Editor() {
         project,
         translationMap: project.translationEnabled ? translationMap : null,
         tafsirMap: project.tafsirEnabled ? tafsirMap : null,
+        watermark: needsWatermark,
         onProgress: (pct, label) => {
           setProgress(pct);
           if (label) setProgressLabel(label);
@@ -450,7 +453,12 @@ export default function Editor() {
         videoUrl: url,
       });
       update({ status: "مكتمل" });
-      toast({ title: "تم التصدير بنجاح", description: "تم تنزيل الفيديو MP4" });
+      toast({
+        title: "تم التصدير بنجاح",
+        description: needsWatermark
+          ? "تم تنزيل الفيديو مع علامة عربية (الخطة المجانية)."
+          : "تم تنزيل الفيديو بدون علامة مائية.",
+      });
     } catch (err: unknown) {
       saveExport({
         id: exportId,
@@ -476,16 +484,17 @@ export default function Editor() {
   const handleExportPng = async () => {
     setExportingPng(true);
     try {
-      if (!plusOk && project.ratio !== "1:1") {
+      if (needsWatermark && project.ratio !== "1:1") {
         toast({
           title: "ملاحظة للخطة المجانية",
           description:
-            "صورة PNG للخطة المجانية تُصدَّر بمقاس مربع مع علامة مائية من واجهة المعاينة.",
+            "صورة PNG للخطة المجانية قد تُصدَّر بمقاس مربع مع علامة مائية.",
         });
       }
       const blob = await exportProjectToPng(project, {
         translationMap: project.translationEnabled ? translationMap : null,
         tafsirMap: project.tafsirEnabled ? tafsirMap : null,
+        watermark: needsWatermark,
       });
       downloadBlob(
         blob,
@@ -1062,11 +1071,11 @@ export default function Editor() {
                 </>
               )}
             </Button>
-            {!plusOk && (
-              <p className="text-xs text-center text-accent/90">
-                فيديو MP4 لخطة بلس — PNG متاح للجميع.{" "}
+            {needsWatermark && (
+              <p className="text-xs text-center text-accent/90 leading-relaxed">
+                الخطة المجانية: تصدير MP4 مع علامة عربية شفافة أعلى اليمين.{" "}
                 <Link href="/pricing" className="underline hover:text-accent">
-                  عرض الأسعار
+                  أزل العلامة مع بلس
                 </Link>
               </p>
             )}

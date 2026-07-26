@@ -10,7 +10,6 @@ import {
   Music,
   Globe,
   ChevronDown,
-  Play,
   BookOpen,
   Moon,
   Wand2,
@@ -18,7 +17,6 @@ import {
   ScrollText,
 } from "lucide-react";
 import {
-  IslamicBackdrop,
   ArabesqueMedallion,
   OrnamentDivider,
   StarOrnament,
@@ -30,7 +28,7 @@ const features = [
   { icon: Palette, title: "تنسيق احترافي", desc: "تحكم دقيق بالخطوط والألوان وموضع النص بطابع فاخر" },
   { icon: Layers, title: "خلفيات ساحرة", desc: "ارفع صورك أو استخدم الخلفيات الجاهزة للمساجد والطبيعة" },
   { icon: Globe, title: "ترجمة وتفسير", desc: "إعدادات جاهزة في المحرر — التفعيل الكامل في التصدير قريبًا" },
-  { icon: Download, title: "تصدير MP4 بجودة عالية", desc: "ريلز عمودي، يوتيوب أفقي، أو مربع — متاح مع عربية بلس" },
+  { icon: Download, title: "تصدير MP4 بجودة عالية", desc: "ريلز وقصص ومنصات التواصل — مجاني مع علامة عربية، وبدون علامة لخطة بلس" },
 ];
 
 const steps = [
@@ -40,48 +38,39 @@ const steps = [
 ];
 
 const faqs = [
-  { q: "هل المنصة مجانية بالكامل؟", a: "يمكنك استكشاف الاستوديو بعد تسجيل الدخول. تصدير MP4 متاح لخطة عربية بلس — انظر صفحة الأسعار." },
-  { q: "ما المقاسات المدعومة؟", a: "ندعم الريلز (٩:١٦) للتيك توك وإنستجرام، يوتيوب الأفقي (١٦:٩)، والمربع (١:١) للمنشورات." },
-  { q: "هل يمكنني رفع خلفيات خاصة بي؟", a: "بالتأكيد، يمكنك رفع أي صورة من جهازك أو استخدام رابط مباشر لاستخدامه كخلفية." },
-  { q: "هل الصوت ينزل مع الفيديو؟", a: "نعم — يتم تحميل صوت التلاوة مباشرة من مصادر معتمدة ودمجه مع الفيديو في ملف MP4 واحد." },
-  { q: "كم يستغرق التصدير؟", a: "عادة من ١-٣ دقائق حسب طول التلاوة والجودة. يتم التصدير في Chrome أو Edge." },
+  { q: "هل المنصة مجانية بالكامل؟", a: "نعم بعد تسجيل الدخول يمكنك استخدام الاستوديو وتصدير MP4. الخطة المجانية تضيف علامة عربية شفافة أعلى يمين الفيديو؛ خطة بلس تصدّر بدون علامة." },
+  { q: "ما المقاسات المدعومة؟", a: "ريلز وشورتس (٩:١٦)، منشور عمودي (٤:٥)، مربع (١:١)، يوتيوب أفقي (١٦:٩)، وغيرها." },
+  { q: "هل يمكنني رفع خلفيات خاصة بي؟", a: "بالتأكيد، يمكنك رفع أي صورة من جهازك أو البحث في Pexels أو استخدام رابط مدعوم." },
+  { q: "هل الصوت ينزل مع الفيديو؟", a: "نعم — يتم دمج صوت التلاوة مع الفيديو في ملف MP4 واحد داخل المتصفح." },
+  { q: "كم يستغرق التصدير؟", a: "عادة من ١–٣ دقائق حسب طول التلاوة والجودة. يُفضَّل Chrome أو Edge لترميز MP4." },
 ];
 
 export default function Landing() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      <IslamicBackdrop />
-
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 border-b border-accent/10 bg-background/70 backdrop-blur-xl">
-        <div className="container mx-auto flex h-14 items-center justify-between gap-2 px-3 sm:h-16 sm:px-4">
-          <Link href={studioPath("/")} className="flex min-w-0 items-center gap-2 sm:gap-3 group">
-            <ArabesqueMedallion size={32} className="shrink-0 text-accent transition-transform group-hover:rotate-45 duration-700 sm:h-9" />
-            <div className="flex min-w-0 flex-col leading-none">
-              <span className="truncate font-display text-base font-bold text-foreground sm:text-lg">عربية ستوديو</span>
-              <span className="hidden text-[10px] tracking-widest text-accent/70 sm:inline">ARABYA • STUDIO</span>
-            </div>
-          </Link>
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-            <Button variant="ghost" asChild className="hidden md:inline-flex">
-              <a href="#features">المميزات</a>
-            </Button>
-            <Button variant="ghost" asChild className="hidden md:inline-flex">
-              <a href="#faq">الأسئلة</a>
-            </Button>
-            <Button variant="hero" asChild size="sm" className="sm:h-10 sm:px-5">
-              <Link href={studioPath("/dashboard")}>
-                <Wand2 className="h-4 w-4" />
-                ادخل الاستوديو
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </nav>
-
+    <div className="relative min-h-[70vh] overflow-hidden bg-transparent text-foreground">
       {/* Hero */}
-      <section className="relative overflow-hidden pt-20 pb-28 md:pt-32 md:pb-40">
+      <section className="relative overflow-hidden pt-12 pb-20 md:pt-16 md:pb-28">
         <div className="container relative mx-auto px-4 text-center">
+          <div className="mx-auto mb-8 flex flex-col items-center gap-3 sm:gap-4">
+            <Link href="/" className="group inline-flex flex-col items-center gap-3" title="الصفحة الرئيسية">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/brand/arabya-mark-square.png"
+                alt="عربية"
+                width={56}
+                height={56}
+                className="rounded-xl transition group-hover:scale-105"
+              />
+              <div className="flex flex-col items-center gap-1.5">
+                <span className="font-display text-xl font-bold text-foreground sm:text-2xl">
+                  عربية ستوديو
+                </span>
+                <span className="text-[10px] tracking-[0.22em] text-accent/70">
+                  ARABYA • STUDIO
+                </span>
+              </div>
+            </Link>
+          </div>
           <div className="mx-auto max-w-4xl animate-fade-in">
             <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/5 px-5 py-2 text-sm text-accent shadow-glow">
               <Moon className="h-4 w-4" />
@@ -100,41 +89,23 @@ export default function Landing() {
               بعد تسجيل الدخول، مباشرة من المتصفح بدون برامج مونتاج.
             </p>
 
-            <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <Button variant="hero" size="lg" className="min-w-[200px]" asChild>
-                <Link href={studioPath("/projects/new")}>
-                  <Play className="h-5 w-5" />
-                  ابدأ الإبداع الآن
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Button variant="hero" asChild size="lg">
+                <Link href={studioPath("/dashboard")}>
+                  <Wand2 className="h-4 w-4" />
+                  ادخل الاستوديو
                 </Link>
               </Button>
-              <Button variant="royal" size="lg" className="min-w-[200px]" asChild>
-                <a href="#features">
-                  اكتشف المميزات
-                  <ChevronDown className="h-4 w-4" />
-                </a>
+              <Button variant="outline" asChild size="lg">
+                <a href="#features">المميزات</a>
               </Button>
-            </div>
-
-            <div className="mt-10 flex items-center justify-center gap-6 text-xs text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-accent animate-pulse" />
-                استكشاف بعد تسجيل الدخول
-              </div>
-              <span className="text-accent/30">•</span>
-              <div>PNG للجميع</div>
-              <span className="text-accent/30">•</span>
-              <div className="hidden sm:block">MP4 مع عربية بلس</div>
             </div>
           </div>
         </div>
-
-        {/* Decorative arches */}
-        <ArabesqueMedallion size={160} className="absolute -left-20 top-32 text-accent/10 animate-float hidden lg:block" />
-        <ArabesqueMedallion size={120} className="absolute -right-12 bottom-20 text-accent/10 animate-float hidden lg:block" />
       </section>
 
       {/* Showcase / Mock preview */}
-      <section className="container relative mx-auto px-4 -mt-12 pb-24">
+      <section className="container relative mx-auto px-4 -mt-4 pb-24">
         <div className="mx-auto max-w-5xl">
           <div className="glass-card rounded-3xl overflow-hidden shadow-deep border-gold animate-scale-in">
             {/* Window chrome */}
@@ -319,18 +290,17 @@ export default function Landing() {
       </section>
 
       {/* CTA */}
-      <section className="relative py-24">
+      <section className="relative py-20">
         <div className="container relative mx-auto px-4">
-          <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl gradient-night border-gold p-12 md:p-16 text-center shadow-deep">
+          <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl gradient-night border-gold p-10 md:p-14 text-center shadow-deep">
             <div className="pattern-mihrab absolute inset-0 opacity-30" />
-            <div className="aurora-orb h-72 w-72 top-0 right-0" style={{ background: "hsl(41 75% 50% / 0.4)" }} />
             <div className="relative">
-              <ArabesqueMedallion size={56} className="mx-auto mb-5 text-accent animate-pulse-glow" />
-              <h2 className="mb-4 font-display text-3xl font-bold text-foreground md:text-5xl">
+              <ArabesqueMedallion size={48} className="mx-auto mb-5 text-accent animate-pulse-glow" />
+              <h2 className="mb-4 font-display text-3xl font-bold text-foreground md:text-4xl">
                 ابدأ تحفتك <span className="text-gradient-gold">الآن</span>
               </h2>
               <p className="mb-8 text-muted-foreground">
-                مجاني تماماً، بدون تسجيل، ويعمل مباشرة في متصفحك
+                سجّل دخولك مجانًا وصدّر فيديوهاتك — مع علامة عربية في الخطة المجانية
               </p>
               <Button variant="hero" size="lg" className="min-w-[220px]" asChild>
                 <Link href={studioPath("/projects/new")}>
@@ -342,29 +312,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="relative border-t border-accent/15 py-12">
-        <div className="container relative mx-auto px-4">
-          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-            <div className="flex items-center gap-3">
-              <ArabesqueMedallion size={32} className="text-accent" />
-              <div>
-                <div className="font-display font-bold text-foreground">عربية ستوديو</div>
-                <div className="text-[10px] tracking-widest text-accent/70">ARABYA • STUDIO</div>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} عربية ستوديو — صُنع بحب لخدمة كتاب الله
-            </p>
-            <div className="flex gap-4 text-xs text-muted-foreground">
-              <a href="#features" className="hover:text-accent transition-colors">المميزات</a>
-              <a href="#faq" className="hover:text-accent transition-colors">الأسئلة</a>
-              <Link href={studioPath("/dashboard")} className="hover:text-accent transition-colors">الاستوديو</Link>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

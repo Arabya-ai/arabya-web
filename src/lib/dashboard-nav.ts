@@ -39,16 +39,22 @@ export function unifiedDashNav(role: UserRole): DashNavItem[] {
   if (canAccessStudio(role)) {
     items.push(
       {
-        href: "/studio/queue",
-        label: "queue",
-        icon: "queue",
-        group: "groupStudio",
+        href: "/account/edit",
+        label: "edit",
+        icon: "spark",
+        group: "groupEdit",
       },
       {
-        href: "/studio/sources",
+        href: "/account/edit/queue",
+        label: "queue",
+        icon: "queue",
+        group: "groupEdit",
+      },
+      {
+        href: "/account/edit/sources",
         label: "sources",
         icon: "sources",
-        group: "groupStudio",
+        group: "groupEdit",
       },
     );
   }

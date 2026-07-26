@@ -88,7 +88,12 @@ export default async function AccountPage({ params }: Props) {
               </Link>
             ) : null}
             {canAccessStudio(role) ? (
-              <Link href="/studio/queue" className="account-panel-link">
+              <Link href="/account/edit" className="account-panel-link">
+                {t("editHub")}
+              </Link>
+            ) : null}
+            {canAccessStudio(role) ? (
+              <Link href="/account/edit/queue" className="account-panel-link">
                 {t("qualityQueue")}
               </Link>
             ) : null}
