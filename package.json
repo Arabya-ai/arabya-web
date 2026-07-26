@@ -30,7 +30,12 @@
     "build-quality-queue": "node scripts/build-quality-queue.mjs",
     "import-irab-book": "node scripts/import-irab-book.mjs",
     "fetch-ia-item": "node scripts/fetch-ia-item.mjs",
-    "import-from-incoming": "node scripts/import-from-incoming.mjs"
+    "import-from-incoming": "node scripts/import-from-incoming.mjs",
+    "fetch-quran-words": "node scripts/fetch-quran-words.mjs",
+    "import-quran-words": "node scripts/import-quran-words.mjs",
+    "import-quran-words-tafseer": "node scripts/import-quran-words-tafseer-json.mjs",
+    "build-word-senses-from-cache": "node scripts/build-word-senses-from-cache.mjs",
+    "attach-lexicon-by-root": "node scripts/attach-lexicon-by-root.mjs"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.20",

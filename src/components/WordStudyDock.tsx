@@ -17,6 +17,7 @@ import type {
   TafsirSource,
   TafsirSurah,
   VerseTranslationEdition,
+  WordSenseEntry,
 } from "@/lib/types";
 import { formatVerseKey } from "@/lib/format";
 import { normalizeForHafsFont } from "@/lib/quran-text";
@@ -42,7 +43,12 @@ export type VerseTranslationStatus =
 type Props = {
   verseKey: string;
   word: QuranWord;
+  wordId?: string;
   morph: IrabWord | null | undefined;
+  /** Rich Arabic sense from quran-words.com when available. */
+  senseEntry?: WordSenseEntry | null;
+  /** Etymology / lexicon prose resolved for senseEntry.lexiconKey. */
+  lexiconText?: string | null;
   meaningLang: MeaningLang;
   onMeaningLang: (lang: MeaningLang) => void;
   verseEditions: VerseTranslationEdition[];
@@ -77,6 +83,14 @@ function wordMeaning(word: QuranWord, lang: MeaningLang): string {
   return word.meaning || "";
 }
 
+/** quran-words scrapes often wrap senses in markdown-ish backticks. */
+function cleanSenseText(text: string): string {
+  return String(text || "")
+    .replace(/`+/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function parseVerseKey(verseKey: string): { surahId: number; verse: number } {
   const [s, v] = verseKey.split(":").map(Number);
   return { surahId: s || 1, verse: v || 1 };
@@ -96,6 +110,8 @@ export function WordStudyDock({
   verseKey,
   word,
   morph,
+  senseEntry = null,
+  lexiconText = null,
   meaningLang,
   onMeaningLang,
   verseEditions,
@@ -130,10 +146,13 @@ export function WordStudyDock({
       surahId,
       verse,
       wordIndex: word.position,
-      snippet: wordMeaning(word, "ar") || undefined,
+      snippet:
+        cleanSenseText(senseEntry?.sense || "") ||
+        wordMeaning(word, "ar") ||
+        undefined,
       href: `/ayah/${surahId}/${verse}`,
     });
-  }, [verseKey, word]);
+  }, [verseKey, word, senseEntry?.sense]);
 
   const qacNarrative = narrativeIrab(morph ?? null, locale);
   const lexicon = lexiconCardLines(morph ?? null, locale);
@@ -197,6 +216,9 @@ export function WordStudyDock({
     return lexicon.filter((line) => !shown.has(line));
   }, [lexicon, morph, posLabels, t]);
 
+  const richSenseAr = cleanSenseText(senseEntry?.sense || "");
+  const etymologyText = lexiconText?.trim() || "";
+
   useEffect(() => {
     if (tafsirSources.length && !tafsirSlug) {
       setTafsirSlug(tafsirSources[0].slug);
@@ -248,7 +270,9 @@ export function WordStudyDock({
     tabRefs.current[next]?.focus();
   };
 
-  const sense = wordMeaning(word, meaningLang);
+  const fallbackSense = wordMeaning(word, meaningLang);
+  const sense =
+    meaningLang === "ar" && richSenseAr ? richSenseAr : fallbackSense;
   const panelId = `${baseId}-panel`;
 
   let verseTransBody: string;
@@ -395,10 +419,17 @@ export function WordStudyDock({
               note={t("meaningLangNote")}
             />
             {sense ? (
-              <p className="word-sense">{sense}</p>
+              <p className="word-sense" dir="auto" lang={meaningLang === "ar" ? "ar" : undefined}>
+                {sense}
+              </p>
             ) : (
               <p className="layer-empty">{t("noWordTranslation")}</p>
             )}
+            {meaningLang === "ar" && richSenseAr && fallbackSense && fallbackSense !== richSenseAr ? (
+              <p className="layer-hint word-sense-fallback" dir="rtl" lang="ar">
+                {t("shortGlossLabel")}: {fallbackSense}
+              </p>
+            ) : null}
           </>
         ) : null}
 
@@ -406,15 +437,21 @@ export function WordStudyDock({
           <>
             <h3>{t("lexiconTitle")}</h3>
             <p className="layer-hint">{activeHint}</p>
+            {etymologyText ? (
+              <p className="layer-body lexicon-etymology" dir="rtl" lang="ar">
+                {etymologyText}
+              </p>
+            ) : null}
             {lexiconExtra.length ? (
               <ul className="lexicon-list">
                 {lexiconExtra.map((line) => (
                   <li key={line}>{line}</li>
                 ))}
               </ul>
-            ) : (
+            ) : null}
+            {!etymologyText && !lexiconExtra.length ? (
               <p className="layer-empty">{t("noLexicon")}</p>
-            )}
+            ) : null}
             {morph?.root ? (
               <p>
                 <Link href={`/root/${encodeURIComponent(morph.root)}`}>

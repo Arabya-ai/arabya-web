@@ -7,6 +7,7 @@ import type {
   IrabWord,
   TafsirSource,
   VerseTranslationEdition,
+  WordSensesSurah,
 } from "@/lib/types";
 import type { MushafPageContent } from "@/lib/mushaf";
 import { formatVerseKey, toArabicNumerals } from "@/lib/format";
@@ -34,6 +35,8 @@ import { clampFontScale, type WordRef } from "@/hooks/mushaf-utils";
 type Props = {
   page: MushafPageContent;
   irabBySurah: Record<number, IrabSurah | null>;
+  sensesBySurah?: Record<number, WordSensesSurah | null>;
+  lexiconByKey?: Record<string, string>;
   tafsirSources: TafsirSource[];
   verseEditions: VerseTranslationEdition[];
 };
@@ -47,6 +50,8 @@ function formatPageNum(page: number, locale: string): string {
 export function MushafPageStudio({
   page,
   irabBySurah,
+  sensesBySurah = {},
+  lexiconByKey = {},
   tafsirSources,
   verseEditions,
 }: Props) {
@@ -534,7 +539,17 @@ export function MushafPageStudio({
           <WordStudyDock
             verseKey={selected.verseKey}
             word={selected.word}
+            wordId={selected.wordId}
             morph={selected.morph}
+            senseEntry={
+              sensesBySurah[selected.surahId]?.words[selected.wordId] ?? null
+            }
+            lexiconText={(() => {
+              const key =
+                sensesBySurah[selected.surahId]?.words[selected.wordId]
+                  ?.lexiconKey ?? null;
+              return key ? (lexiconByKey[key] ?? null) : null;
+            })()}
             meaningLang={prefs.meaningLang}
             onMeaningLang={prefs.setMeaningLang}
             verseEditions={verseEditions}
