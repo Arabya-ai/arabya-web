@@ -12,7 +12,7 @@ import {
   resolveLocale,
 } from "@/i18n/locale-params";
 import { isCloudSyncConfigured } from "@/lib/cloud-sync";
-import { canAccessAdmin, canAccessStudio } from "@/lib/roles";
+import { canAccessAdmin, canAccessEditorialTools } from "@/lib/roles";
 import { planLabel } from "@/lib/plans";
 import type { AppLocale } from "@/lib/plans";
 
@@ -87,12 +87,12 @@ export default async function AccountPage({ params }: Props) {
                 {t("admin")}
               </Link>
             ) : null}
-            {canAccessStudio(role) ? (
+            {canAccessEditorialTools(role) ? (
               <Link href="/account/edit" className="account-panel-link">
                 {t("editHub")}
               </Link>
             ) : null}
-            {canAccessStudio(role) ? (
+            {canAccessEditorialTools(role) ? (
               <Link href="/account/edit/queue" className="account-panel-link">
                 {t("qualityQueue")}
               </Link>

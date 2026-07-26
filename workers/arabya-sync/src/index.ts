@@ -792,11 +792,25 @@ const workerHandler = {
       const targetId = userIdFromEmail(String(body.userId || body.email || ""));
       const toRole = normalizeRole(body.role);
       if (!targetId) return badRequest("user_required");
-      if (toRole === "admin" && !isSuperAdmin(actorEmail)) {
-        return forbidden("super_admin_required_for_admin_role");
+      if (!isSuperAdmin(actorEmail)) {
+        return forbidden("super_admin_required");
+      }
+      // admin rank is super-admin emails only — no promotion of others
+      if (toRole === "admin" && !isSuperAdmin(targetId)) {
+        return forbidden("admin_reserved_for_super_admin");
       }
       if (isProtectedAdmin(targetId, env) && toRole !== "admin") {
         return forbidden("cannot_change_protected_admin");
+      }
+      if (isSuperAdmin(targetId) && toRole !== "admin") {
+        return forbidden("cannot_demote_super_admin");
+      }
+      // Prevent self-demotion away from admin
+      if (
+        userIdFromEmail(actorEmail) === targetId &&
+        toRole !== "admin"
+      ) {
+        return forbidden("cannot_demote_self");
       }
 
       const existing = await env.DB.prepare(
@@ -937,10 +951,12 @@ const workerHandler = {
         if (!req) return json({ ok: false, error: "not_found" }, 404);
         if (req.status !== "pending") return badRequest("not_pending");
 
-        const toRole = req.targetRole === "admin" ? "admin" : "editor";
-        if (toRole === "admin" && !isSuperAdmin(actorEmail)) {
-          return forbidden("super_admin_required_for_admin_role");
+        // Self-service never grants admin. Reject-only for legacy admin requests.
+        if (req.targetRole === "admin" && decision === "approved") {
+          return forbidden("admin_not_requestable");
         }
+        const toRole: UserRole =
+          req.targetRole === "creator" ? "creator" : "editor";
 
         const now = Date.now();
         const note = String(body.reviewNote || "").trim().slice(0, 500);

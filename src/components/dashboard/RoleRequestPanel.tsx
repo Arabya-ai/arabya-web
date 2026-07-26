@@ -21,16 +21,12 @@ export function RoleRequestPanel({
   const tRoles = useTranslations("Roles");
   const [request, setRequest] = useState<RequestState>(null);
   const [message, setMessage] = useState("");
-  const [targetRole, setTargetRole] = useState<"editor" | "admin">(
-    role === "editor" ? "admin" : "editor",
-  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
-  const canRequestEditor = role === "member";
-  const canRequestAdmin = role === "editor" || role === "creator";
-  const canRequest = canRequestEditor || canRequestAdmin;
+  /** Members may request editor (Plus). Admin rank is never self-requestable. */
+  const canRequest = role === "member";
 
   useEffect(() => {
     let cancelled = false;
@@ -60,11 +56,10 @@ export function RoleRequestPanel({
     setBusy(true);
     setError(null);
     try {
-      const roleToSend = canRequestAdmin ? targetRole : "editor";
       const res = await fetch("/api/account/role-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, targetRole: roleToSend }),
+        body: JSON.stringify({ message, targetRole: "editor" }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string; id?: string };
       if (!res.ok || !data.ok) {
@@ -74,7 +69,7 @@ export function RoleRequestPanel({
         id: data.id || "",
         status: "pending",
         message,
-        targetRole: roleToSend,
+        targetRole: "editor",
       });
       setMessage("");
     } catch (err) {
@@ -116,19 +111,7 @@ export function RoleRequestPanel({
         <p className="dash-banner dash-banner--ok">{t("approved")}</p>
       ) : (
         <form className="dash-form" onSubmit={submit}>
-          {canRequestAdmin ? (
-            <label>
-              {t("upgradeType")}
-              <select
-                value={targetRole}
-                onChange={(e) => setTargetRole(e.target.value as "editor" | "admin")}
-              >
-                <option value="admin">{t("toAdmin")}</option>
-              </select>
-            </label>
-          ) : (
-            <p className="dash-muted">{t("requestEditor")}</p>
-          )}
+          <p className="dash-muted">{t("requestEditor")}</p>
           <label>
             {t("messageLabel")}
             <textarea

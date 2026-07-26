@@ -740,7 +740,7 @@
     "genericError": "Error"
   },
   "Roles": {
-    "admin": "Admin",
+    "admin": "Super Admin",
     "editor": "Editor",
     "creator": "Creator",
     "member": "Member",

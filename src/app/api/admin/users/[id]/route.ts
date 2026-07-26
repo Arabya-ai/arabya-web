@@ -2,10 +2,15 @@ import { NextResponse } from "next/server";
 import {
   adminBanUser,
   adminDeleteUser,
+  adminGetUser,
   adminSetRole,
   isCloudSyncConfigured,
 } from "@/lib/cloud-sync";
-import { canApproveAdminRole } from "@/lib/roles";
+import {
+  canApproveAdminRole,
+  canAssignRole,
+  normalizeUserRole,
+} from "@/lib/roles";
 import { requireAdmin } from "@/lib/require-role";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +22,12 @@ export async function PATCH(request: Request, ctx: Ctx) {
   if ("error" in gate) return gate.error;
   if (!isCloudSyncConfigured()) {
     return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
+  }
+  if (!canApproveAdminRole(gate.email)) {
+    return NextResponse.json(
+      { ok: false, error: "super_admin_required" },
+      { status: 403 },
+    );
   }
   const { id } = await ctx.params;
   let body: { role?: string; reason?: string };
@@ -34,14 +45,31 @@ export async function PATCH(request: Request, ctx: Ctx) {
   ) {
     return NextResponse.json({ ok: false, error: "invalid_role" }, { status: 400 });
   }
-  const role =
-    body.role === "user" ? "member" : (body.role as "member" | "creator" | "editor" | "admin");
-  if (role === "admin" && !canApproveAdminRole(gate.email)) {
+  const role = normalizeUserRole(body.role === "user" ? "member" : body.role);
+
+  let targetEmail: string | null = null;
+  let targetCurrentRole = normalizeUserRole(null);
+  try {
+    const current = await adminGetUser(gate.email, decodeURIComponent(id));
+    targetEmail = current.user?.email ?? null;
+    targetCurrentRole = normalizeUserRole(current.user?.role);
+  } catch {
+    /* proceed; worker will still validate */
+  }
+
+  if (
+    !canAssignRole(gate.email, role, {
+      targetCurrentRole,
+      targetEmail,
+      actorEmail: gate.email,
+    })
+  ) {
     return NextResponse.json(
-      { ok: false, error: "super_admin_required" },
+      { ok: false, error: "role_assign_forbidden" },
       { status: 403 },
     );
   }
+
   try {
     const data = await adminSetRole(
       gate.email,

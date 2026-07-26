@@ -40,22 +40,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
   }
 
-  const targetRole =
-    body.targetRole === "admin" && gate.role === "editor"
-      ? "admin"
-      : "editor";
+  // Admin (super admin) is never self-requestable — only member → editor
+  if (body.targetRole === "admin") {
+    return NextResponse.json(
+      { ok: false, error: "admin_not_requestable" },
+      { status: 403 },
+    );
+  }
+  const targetRole = "editor";
 
   if (gate.role === "admin") {
     return NextResponse.json({ ok: false, error: "already_admin" }, { status: 400 });
   }
-  if (targetRole === "editor" && gate.role !== "member") {
+  if (gate.role !== "member") {
     return NextResponse.json({ ok: false, error: "already_elevated" }, { status: 400 });
-  }
-  if (targetRole === "admin" && gate.role !== "editor") {
-    return NextResponse.json(
-      { ok: false, error: "editor_required_for_admin_request" },
-      { status: 400 },
-    );
   }
 
   try {

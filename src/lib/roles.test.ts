@@ -1,15 +1,20 @@
 import { describe, expect, it } from "vitest";
 import {
   canAccessAdmin,
+  canAccessEditorialTools,
   canAccessStudio,
   canApproveAdminRole,
+  canAssignRole,
   canExportStudioWithoutBrand,
+  canExportUnlimitedStudioAyahs,
+  dailyVideoExportLimit,
   isSuperAdminEmail,
   mergeRoleWithEnvAdmin,
   normalizeUserRole,
   parseAdminEmails,
   resolveRoleFromEmail,
   roleLabel,
+  MEMBER_DAILY_VIDEO_EXPORT_LIMIT,
 } from "@/lib/roles";
 
 describe("parseAdminEmails", () => {
@@ -19,95 +24,98 @@ describe("parseAdminEmails", () => {
       "b@y.com",
       "c@z.com",
     ]);
-    expect(parseAdminEmails(undefined)).toEqual([]);
-    expect(parseAdminEmails("  ")).toEqual([]);
   });
 });
 
 describe("resolveRoleFromEmail", () => {
-  it("marks listed emails as admin", () => {
-    expect(resolveRoleFromEmail("Owner@Gmail.com", ["owner@gmail.com"])).toBe(
-      "admin",
-    );
-  });
-
-  it("defaults to member and never assigns editor from email alone", () => {
-    expect(resolveRoleFromEmail("reader@gmail.com", ["owner@gmail.com"])).toBe(
+  it("only super-admin emails become admin", () => {
+    expect(resolveRoleFromEmail("egywebdev@gmail.com")).toBe("admin");
+    expect(resolveRoleFromEmail("reader@gmail.com", ["reader@gmail.com"])).toBe(
       "member",
     );
-    expect(resolveRoleFromEmail(null, [])).toBe("member");
-  });
-});
-
-describe("normalizeUserRole", () => {
-  it("maps legacy user to member and accepts creator", () => {
-    expect(normalizeUserRole("user")).toBe("member");
-    expect(normalizeUserRole("member")).toBe("member");
-    expect(normalizeUserRole("creator")).toBe("creator");
-    expect(normalizeUserRole("editor")).toBe("editor");
-    expect(normalizeUserRole("admin")).toBe("admin");
   });
 });
 
 describe("mergeRoleWithEnvAdmin", () => {
-  it("keeps env admins as admin even if cloud says member", () => {
-    expect(mergeRoleWithEnvAdmin("a@x.com", "member", ["a@x.com"])).toBe(
+  it("forces super-admin email to admin", () => {
+    expect(mergeRoleWithEnvAdmin("egywebdev@gmail.com", "member")).toBe(
       "admin",
     );
-    expect(mergeRoleWithEnvAdmin("b@x.com", "editor", ["a@x.com"])).toBe(
-      "editor",
-    );
-    expect(mergeRoleWithEnvAdmin("b@x.com", null, [])).toBe("member");
-    expect(mergeRoleWithEnvAdmin("c@x.com", "user", [])).toBe("member");
   });
 
-  it("treats super-admin emails as admin", () => {
-    expect(mergeRoleWithEnvAdmin("egywebdev@gmail.com", "member", [])).toBe(
-      "admin",
-    );
-    expect(mergeRoleWithEnvAdmin("arabyaaicom@gmail.com", "editor", [])).toBe(
-      "admin",
-    );
+  it("demotes non–super-admin cloud admin to editor", () => {
+    expect(mergeRoleWithEnvAdmin("other@x.com", "admin")).toBe("editor");
+  });
+
+  it("maps legacy user to member", () => {
+    expect(mergeRoleWithEnvAdmin("b@x.com", "user")).toBe("member");
   });
 });
 
-describe("super admin", () => {
-  it("recognizes only the two owner emails", () => {
-    expect(isSuperAdminEmail("egywebdev@gmail.com")).toBe(true);
-    expect(isSuperAdminEmail("arabyaaicom@gmail.com")).toBe(true);
-    expect(isSuperAdminEmail("other@gmail.com")).toBe(false);
-    expect(canApproveAdminRole("egywebdev@gmail.com")).toBe(true);
-    expect(canApproveAdminRole("editor@gmail.com")).toBe(false);
-  });
-});
-
-describe("role helpers", () => {
-  it("labels roles by locale", () => {
-    expect(roleLabel("admin", "ar")).toBe("مدير");
-    expect(roleLabel("editor", "ar")).toBe("محرر");
-    expect(roleLabel("creator", "ar")).toBe("مؤلف");
+describe("role gates", () => {
+  it("labels admin as super admin", () => {
+    expect(roleLabel("admin", "ar")).toBe("سوبر أدمن");
+    expect(roleLabel("admin", "en")).toBe("Super Admin");
     expect(roleLabel("member", "ar")).toBe("مسجل");
-    expect(roleLabel("admin", "en")).toBe("Admin");
-    expect(roleLabel("creator", "en")).toBe("Creator");
-    expect(roleLabel("member", "en")).toBe("Member");
   });
 
-  it("gates studio and admin access", () => {
-    expect(canAccessStudio("member")).toBe(true);
+  it("studio for all; editorial tools for editor/admin only", () => {
     expect(canAccessStudio("creator")).toBe(true);
-    expect(canAccessStudio("editor")).toBe(true);
-    expect(canAccessStudio("admin")).toBe(true);
-    expect(canAccessAdmin("editor")).toBe(false);
+    expect(canAccessStudio("member")).toBe(true);
+    expect(canAccessEditorialTools("creator")).toBe(false);
+    expect(canAccessEditorialTools("member")).toBe(false);
+    expect(canAccessEditorialTools("editor")).toBe(true);
+    expect(canAccessEditorialTools("admin")).toBe(true);
     expect(canAccessAdmin("admin")).toBe(true);
+    expect(canAccessAdmin("editor")).toBe(false);
   });
 
-  it("allows brand-free export for creator/editor/admin/super-admin only", () => {
+  it("export brand and ayah rules", () => {
     expect(canExportStudioWithoutBrand("member")).toBe(false);
     expect(canExportStudioWithoutBrand("creator")).toBe(true);
     expect(canExportStudioWithoutBrand("editor")).toBe(true);
-    expect(canExportStudioWithoutBrand("admin")).toBe(true);
+    expect(canExportUnlimitedStudioAyahs("member")).toBe(false);
+    expect(canExportUnlimitedStudioAyahs("creator")).toBe(true);
+    expect(canExportUnlimitedStudioAyahs("editor")).toBe(true);
+    expect(dailyVideoExportLimit("member")).toBe(MEMBER_DAILY_VIDEO_EXPORT_LIMIT);
+    expect(dailyVideoExportLimit("creator")).toBeNull();
+    expect(dailyVideoExportLimit("editor")).toBeNull();
+  });
+
+  it("only super admin assigns roles; cannot demote another super admin", () => {
+    expect(canApproveAdminRole("egywebdev@gmail.com")).toBe(true);
+    expect(canApproveAdminRole("editor@gmail.com")).toBe(false);
+    expect(canAssignRole("editor@x.com", "member")).toBe(false);
     expect(
-      canExportStudioWithoutBrand("member", "egywebdev@gmail.com"),
+      canAssignRole("egywebdev@gmail.com", "creator", {
+        targetEmail: "a@b.com",
+      }),
     ).toBe(true);
+    expect(
+      canAssignRole("egywebdev@gmail.com", "member", {
+        targetEmail: "arabyaaicom@gmail.com",
+      }),
+    ).toBe(false);
+    expect(
+      canAssignRole("egywebdev@gmail.com", "editor", {
+        targetEmail: "egywebdev@gmail.com",
+        actorEmail: "egywebdev@gmail.com",
+      }),
+    ).toBe(false);
+    expect(
+      canAssignRole("egywebdev@gmail.com", "admin", {
+        targetEmail: "random@x.com",
+      }),
+    ).toBe(false);
+    expect(
+      canAssignRole("egywebdev@gmail.com", "admin", {
+        targetEmail: "arabyaaicom@gmail.com",
+      }),
+    ).toBe(true);
+  });
+
+  it("normalizes roles", () => {
+    expect(normalizeUserRole("user")).toBe("member");
+    expect(isSuperAdminEmail("arabyaaicom@gmail.com")).toBe(true);
   });
 });

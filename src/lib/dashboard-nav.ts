@@ -1,5 +1,8 @@
 import type { UserRole } from "@/lib/roles";
-import { canAccessAdmin, canAccessStudio } from "@/lib/roles";
+import {
+  canAccessAdmin,
+  canAccessEditorialTools,
+} from "@/lib/roles";
 import type { DashIconName } from "@/components/dashboard/DashIcon";
 
 export type DashNavItem = {
@@ -36,7 +39,7 @@ export function unifiedDashNav(role: UserRole): DashNavItem[] {
     },
   ];
 
-  if (canAccessStudio(role)) {
+  if (canAccessEditorialTools(role)) {
     items.push(
       {
         href: "/account/edit",

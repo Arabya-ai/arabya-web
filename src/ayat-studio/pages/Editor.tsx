@@ -64,8 +64,13 @@ import {
 } from "@/lib/plans";
 import {
   canExportStudioWithoutBrand,
+  MEMBER_DAILY_VIDEO_EXPORT_LIMIT,
   type UserRole,
 } from "@/lib/roles";
+import {
+  getVideoExportQuota,
+  recordSuccessfulVideoExport,
+} from "@/ayat-studio/lib/export-quota";
 import {
   BRAND_POSITION_LABELS_AR,
   BRAND_POSITION_PAD,
@@ -169,8 +174,18 @@ export default function Editor() {
     role,
     email: session?.user?.email,
   });
-  const unlimitedAyahs = canExportUnlimitedStudioAyahs(session?.user?.email);
+  const unlimitedAyahs = canExportUnlimitedStudioAyahs(
+    role,
+    session?.user?.email,
+  );
   const maxAyahSpan = unlimitedAyahs ? 9999 : STUDIO_MAX_AYAHS;
+  const [videoQuota, setVideoQuota] = useState(() =>
+    getVideoExportQuota(role, session?.user?.email ?? null),
+  );
+
+  useEffect(() => {
+    setVideoQuota(getVideoExportQuota(role, session?.user?.email ?? null));
+  }, [role, session?.user?.email]);
 
   const [project, setProject] = useState<StoredProject | null>(null);
   const [exporting, setExporting] = useState(false);
@@ -452,6 +467,16 @@ export default function Editor() {
       });
       return;
     }
+    const quotaNow = getVideoExportQuota(role, session?.user?.email ?? null);
+    if (quotaNow.blocked) {
+      toast({
+        title: "تم استهلاك الحد اليومي",
+        description: `الخطة المجانية تسمح بـ ${MEMBER_DAILY_VIDEO_EXPORT_LIMIT} فيديوهات ناجحة يوميًا. حاول مجددًا غدًا.`,
+        variant: "destructive",
+      });
+      setVideoQuota(quotaNow);
+      return;
+    }
     const span = Math.max(1, project.ayahEnd - project.ayahStart + 1);
     if (!unlimitedAyahs && span > STUDIO_MAX_AYAHS) {
       toast({
@@ -514,10 +539,17 @@ export default function Editor() {
         videoUrl: url,
       });
       update({ status: "مكتمل" });
+      const after = recordSuccessfulVideoExport(
+        role,
+        session?.user?.email ?? null,
+      );
+      setVideoQuota(after);
       toast({
         title: "تم التصدير بنجاح",
         description: needsWatermark
-          ? "تم تنزيل الفيديو مع شعار عربية ستوديو (إلزامي للمسجّلين)."
+          ? after.limit != null
+            ? `تم التنزيل مع الشعار · متبقٍ اليوم ${after.remaining} من ${after.limit}`
+            : "تم تنزيل الفيديو مع شعار عربية ستوديو (إلزامي للمسجّلين)."
           : "تم تنزيل الفيديو بدون شعار.",
       });
     } catch (err: unknown) {
@@ -692,11 +724,11 @@ export default function Editor() {
             </div>
             {unlimitedAyahs ? (
               <p className="text-xs text-accent/80">
-                حساب سوبر أدمن: تصدير بدون حد لعدد الآيات أو السورة كاملة.
+                حسابك: تصدير بدون حد لعدد الآيات أو السورة كاملة.
               </p>
             ) : (
               <p className="text-xs text-muted-foreground">
-                حد التصدير {STUDIO_MAX_AYAHS} آية لكل فيديو.
+                حد التصدير {STUDIO_MAX_AYAHS} آية لكل فيديو (خطة مجانية).
               </p>
             )}
           </EditorPanel>
@@ -1180,7 +1212,7 @@ export default function Editor() {
               size="lg"
               className="w-full"
               onClick={handleExport}
-              disabled={exporting || exportingPng}
+              disabled={exporting || exportingPng || videoQuota.blocked}
             >
               {exporting ? (
                 <>
@@ -1212,10 +1244,16 @@ export default function Editor() {
             </Button>
             {needsWatermark && (
               <p className="text-xs text-center text-accent/90 leading-relaxed">
-                المسجّلون: تصدير MP4 مع شعار عربية ستوديو.{" "}
-                <Link href="/pricing" className="underline hover:text-accent">
-                  المؤلف/المحرر/المدير يمكنهم التصدير بلا شعار
-                </Link>
+                المسجّلون: تصدير MP4 مع شعار عربية ستوديو
+                {videoQuota.limit != null
+                  ? ` · ${videoQuota.used}/${videoQuota.limit} اليوم`
+                  : ""}
+                . المؤلف/المحرر/السوبر أدمن بلا شعار إلزامي وبلا حد يومي.
+              </p>
+            )}
+            {videoQuota.blocked && (
+              <p className="text-xs text-center text-destructive leading-relaxed">
+                وصلت لحد {MEMBER_DAILY_VIDEO_EXPORT_LIMIT} فيديوهات اليوم. يعود العدد غدًا.
               </p>
             )}
             {exporting && (

@@ -7,7 +7,7 @@ import {
   redirectLocalized,
   resolveLocale,
 } from "@/i18n/locale-params";
-import { canAccessStudio } from "@/lib/roles";
+import { canAccessEditorialTools } from "@/lib/roles";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +23,7 @@ export default async function AccountEditHubPage({ params }: Props) {
   const locale = await resolveLocale(params);
   const session = await auth();
   if (!session?.user) redirectLocalized("/login", locale);
-  if (!canAccessStudio(session.user.role)) {
+  if (!canAccessEditorialTools(session.user.role)) {
     redirectLocalized("/account", locale);
   }
 

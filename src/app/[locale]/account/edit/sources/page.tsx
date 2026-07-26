@@ -7,7 +7,7 @@ import {
 import { auth } from "@/auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SourcesUploadPanel } from "@/components/dashboard/SourcesUploadPanel";
-import { canAccessStudio } from "@/lib/roles";
+import { canAccessEditorialTools } from "@/lib/roles";
 import { isCloudSyncConfigured } from "@/lib/cloud-sync";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +27,7 @@ export default async function AccountEditSourcesPage({ params }: Props) {
 
   const session = await auth();
   if (!session?.user) redirectLocalized("/login", locale);
-  if (!canAccessStudio(session.user.role)) redirectLocalized("/account", locale);
+  if (!canAccessEditorialTools(session.user.role)) redirectLocalized("/account", locale);
 
   return (
     <DashboardShell

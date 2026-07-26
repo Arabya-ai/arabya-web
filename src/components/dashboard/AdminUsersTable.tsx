@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useCallback, useEffect, useState } from "react";
 import type { AdminUserRow } from "@/lib/cloud-sync";
-import type { UserRole } from "@/lib/roles";
+import { isSuperAdminEmail, type UserRole } from "@/lib/roles";
 
 export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   const t = useTranslations("Admin");
@@ -203,7 +203,7 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
           <option value="member">{tRoles("member")}</option>
           <option value="creator">{tRoles("creator")}</option>
           <option value="editor">{tRoles("editor")}</option>
-          {isSuperAdmin ? (
+          {isSuperAdmin && isSuperAdminEmail(u.email) ? (
             <option value="admin">{tRoles("admin")}</option>
           ) : null}
         </select>

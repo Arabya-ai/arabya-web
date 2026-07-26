@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireSession } from "@/lib/require-role";
-import { canAccessStudio } from "@/lib/roles";
+import { canAccessEditorialTools } from "@/lib/roles";
 import { scanQualityIssues } from "@/lib/quality-scan";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +9,7 @@ export const maxDuration = 60;
 export async function GET() {
   const gate = await requireSession();
   if ("error" in gate) return gate.error;
-  if (!canAccessStudio(gate.role)) {
+  if (!canAccessEditorialTools(gate.role)) {
     return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
   }
   try {

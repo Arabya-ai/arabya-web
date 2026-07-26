@@ -34,7 +34,10 @@ export async function GET(request: Request) {
     surah.versesCount,
     Math.max(start, Number.isFinite(to) ? to : start),
   );
-  const unlimited = canExportUnlimitedStudioAyahs(session.user.email);
+  const unlimited = canExportUnlimitedStudioAyahs(
+    (session.user.role as "member" | "creator" | "editor" | "admin") || "member",
+    session.user.email,
+  );
   if (!unlimited && end - start + 1 > STUDIO_MAX_AYAHS) {
     return Response.json({ error: "range_too_long" }, { status: 400 });
   }

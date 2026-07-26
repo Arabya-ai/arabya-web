@@ -6,7 +6,7 @@ import {
 } from "@/i18n/locale-params";
 import { auth } from "@/auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { canAccessStudio } from "@/lib/roles";
+import { canAccessEditorialTools } from "@/lib/roles";
 import { QualityQueueClient } from "@/components/dashboard/QualityQueueClient";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +26,7 @@ export default async function AccountEditQueuePage({ params }: Props) {
 
   const session = await auth();
   if (!session?.user) redirectLocalized("/login", locale);
-  if (!canAccessStudio(session.user.role)) redirectLocalized("/account", locale);
+  if (!canAccessEditorialTools(session.user.role)) redirectLocalized("/account", locale);
 
   return (
     <DashboardShell
