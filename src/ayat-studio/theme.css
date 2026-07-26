@@ -487,8 +487,8 @@ html[data-theme="dark"] .arabya-mark-icon {
   flex-shrink: 0;
 }
 
-.studio-live-preview__frame img,
-.studio-live-preview__frame video {
+.studio-live-preview__media img,
+.studio-live-preview__media video {
   position: absolute;
   inset: 0;
   z-index: 1;

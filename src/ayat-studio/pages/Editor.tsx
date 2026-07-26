@@ -63,6 +63,7 @@ import {
 } from "@/lib/plans";
 import { Link } from "@/i18n/navigation";
 import { useStudioPreviewSrc } from "@/ayat-studio/hooks/use-studio-preview-src";
+import { ArabyaMarkIcon } from "@/ayat-studio/components/IslamicDecor";
 import { fetchAyahs, type AyahData } from "@/ayat-studio/lib/quran-api";
 import { clampAyahPreviewIndex } from "@/ayat-studio/lib/studio-preview";
 import {
@@ -1152,7 +1153,7 @@ export default function Editor() {
                 "linear-gradient(180deg, hsl(178 50% 18%) 0%, hsl(200 50% 8%) 100%)",
             }}
           >
-          <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl">
+          <div className="studio-live-preview__media pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl">
           {project.bgUrl && previewBgKind !== "video" && previewMedia.src && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -1327,23 +1328,15 @@ export default function Editor() {
               </span>
               {(project.brandSignature ?? true) && (
                 <div
-                  className="flex max-w-[55%] items-center gap-1.5"
+                  className="flex max-w-[55%] items-center gap-1.5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.65)]"
                   aria-label="عربية ستوديو"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/brand/arabya-mark-square.png"
-                    alt=""
-                    width={22}
-                    height={22}
-                    className="h-[22px] w-[22px] shrink-0 rounded-[5px] object-cover shadow-sm"
-                    draggable={false}
-                  />
+                  <ArabyaMarkIcon size={22} className="shrink-0" />
                   <div className="flex min-w-0 flex-col gap-0.5 text-start">
                     <span className="font-display text-[10px] font-bold leading-none text-white sm:text-[11px]">
                       عربية ستوديو
                     </span>
-                    <span className="text-[7px] font-medium leading-none tracking-[0.18em] text-white/70 sm:text-[8px]">
+                    <span className="text-[7px] font-medium leading-none tracking-[0.18em] text-white/75 sm:text-[8px]">
                       ARABYA • STUDIO
                     </span>
                   </div>
