@@ -484,14 +484,14 @@ html[data-theme="dark"] .arabya-mark-icon {
   font-size: clamp(1.35rem, 3vw, 1.85rem);
 }
 
-/* Live preview — sticky on large screens, gentle motion, viewport-aware */
+/* Live preview — equal-height companion to controls; gentle motion; viewport-aware */
 .studio-live-preview {
   position: relative;
 }
 
 .studio-live-preview__frame {
-  width: min(100%, 20rem);
-  max-height: min(68vh, 36rem);
+  width: min(100%, 18.5rem);
+  max-height: min(62vh, 34rem);
   animation: studio-preview-float 7s ease-in-out infinite;
   will-change: transform;
 }
@@ -514,21 +514,20 @@ html[data-theme="dark"] .arabya-mark-icon {
 
 @media (min-width: 1024px) {
   .studio-live-preview {
-    position: sticky;
-    top: calc(var(--arabya-header-height, 4.5rem) + 3.25rem);
-    align-self: flex-start;
-    max-height: calc(100dvh - var(--arabya-header-height, 4.5rem) - 5rem);
+    position: relative;
+    top: auto;
+    max-height: none;
   }
 
   .studio-live-preview__frame {
-    width: min(100%, 22rem);
-    max-height: min(72vh, 40rem);
+    width: min(100%, 20rem);
+    max-height: calc(100% - 2.75rem);
   }
 }
 
 @media (min-width: 1536px) {
   .studio-live-preview__frame {
-    width: min(100%, 24rem);
+    width: min(100%, 22rem);
   }
 }
 
@@ -552,8 +551,8 @@ html[data-theme="dark"] .arabya-mark-icon {
 
 @media (max-width: 639px) {
   .studio-live-preview__frame {
-    width: min(100%, 17.5rem);
-    max-height: min(58vh, 28rem);
+    width: min(100%, 16.5rem);
+    max-height: min(54vh, 26rem);
   }
 
   .ayat-studio-shell .animate-fade-in {

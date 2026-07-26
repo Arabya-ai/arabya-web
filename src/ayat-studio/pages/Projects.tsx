@@ -87,7 +87,7 @@ export default function Projects() {
                   >
                     <div className="pattern-stars pointer-events-none absolute inset-0 opacity-50" aria-hidden />
                     <ArabesqueMedallion size={70} className="relative text-accent/70" />
-                    <div className="absolute top-2 right-2 text-[10px] tracking-widest text-accent/60 px-2 py-0.5 rounded-full bg-background/40 border border-accent/20">
+                    <div className="absolute top-2 right-2 rounded-full border border-white/30 bg-black/50 px-2 py-0.5 text-[10px] font-semibold tracking-widest text-white">
                       {p.ratio}
                     </div>
                   </div>

@@ -386,6 +386,25 @@ export default function Editor() {
     }
   };
 
+  const handleManualSave = () => {
+    try {
+      saveProject(project);
+      toast({
+        title: "تم الحفظ",
+        description: "حُفظت إعدادات المشروع على هذا الجهاز.",
+      });
+    } catch (err) {
+      toast({
+        title: "تعذّر الحفظ",
+        description:
+          err instanceof Error
+            ? err.message
+            : "قد تكون مساحة التخزين ممتلئة.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleExport = async () => {
     if (!canExportMp4) {
       toast({
@@ -522,7 +541,7 @@ export default function Editor() {
   const transDur = project.transitionDuration ?? 0.6;
 
   return (
-    <div className="studio-editor flex min-h-0 flex-col gap-3 sm:gap-4 lg:flex-row lg:items-start xl:min-h-[calc(100dvh-var(--arabya-header-height,4.5rem)-11rem)]">
+    <div className="studio-editor flex min-h-0 flex-col gap-3 sm:gap-4 lg:h-[calc(100dvh-var(--arabya-header-height,4.5rem)-11rem)] lg:flex-row lg:items-stretch">
       <style>{`
         @keyframes studio-fade { from { opacity: 0.15 } to { opacity: 1 } }
         @keyframes studio-slide { from { transform: translateX(28px); opacity: 0.2 } to { transform: none; opacity: 1 } }
@@ -534,8 +553,8 @@ export default function Editor() {
         @keyframes studio-kenburns { from { transform: scale(1) } to { transform: scale(1.06) } }
       `}</style>
 
-      <div className="studio-editor-controls order-2 flex max-h-[min(48vh,26rem)] w-full shrink-0 flex-col overflow-hidden rounded-2xl border border-border/70 bg-card/70 shadow-deep backdrop-blur-md sm:max-h-[min(52vh,30rem)] lg:order-1 lg:max-h-[calc(100dvh-var(--arabya-header-height,4.5rem)-8rem)] lg:w-[min(100%,21rem)] lg:min-w-[17rem] xl:w-[min(100%,22rem)] 2xl:w-96">
-        <div className="flex shrink-0 items-center justify-between border-b border-border/60 bg-gradient-to-l from-primary/5 to-transparent px-3 py-3 sm:px-4 sm:py-4">
+      <div className="studio-editor-controls order-2 flex max-h-[min(48vh,26rem)] w-full shrink-0 flex-col overflow-hidden rounded-2xl border border-border/70 bg-card/70 shadow-deep backdrop-blur-md sm:max-h-[min(52vh,30rem)] lg:order-1 lg:h-full lg:max-h-none lg:w-[min(100%,21rem)] lg:min-w-[17rem] xl:w-[min(100%,22rem)] 2xl:w-96">
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border/60 bg-gradient-to-l from-primary/5 to-transparent px-3 py-3 sm:px-4 sm:py-4">
           <div className="min-w-0 flex-1">
             <p className="text-[11px] tracking-widest uppercase text-accent/80 sm:text-xs">
               المشروع
@@ -544,7 +563,15 @@ export default function Editor() {
               {project.title}
             </h2>
           </div>
-          <Save className="h-4 w-4 shrink-0 text-accent" />
+          <button
+            type="button"
+            onClick={handleManualSave}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-accent/30 text-accent transition hover:bg-accent/10 hover:border-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="حفظ المشروع"
+            title="حفظ المشروع"
+          >
+            <Save className="h-4 w-4" />
+          </button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <EditorPanel title="القارئ والسورة" icon={BookOpen} defaultOpen>
@@ -1091,13 +1118,14 @@ export default function Editor() {
         </div>
       </div>
 
-      <div className="studio-live-preview relative order-1 flex min-h-[min(52vh,32rem)] w-full flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl border border-border/70 bg-card/40 p-3 backdrop-blur-md sm:min-h-[min(56vh,36rem)] sm:p-4 lg:order-2 lg:min-h-0 lg:flex-none lg:w-[min(100%,26rem)] xl:w-[min(100%,28rem)]">
+      <div className="studio-live-preview relative order-1 flex min-h-[min(52vh,32rem)] w-full flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl border border-border/70 bg-card/40 p-3 backdrop-blur-md sm:min-h-[min(56vh,36rem)] sm:p-4 lg:order-2 lg:h-full lg:min-h-0 lg:flex-1 lg:p-5">
         <div className="pattern-mihrab pointer-events-none absolute inset-0 opacity-20" />
-        <div className="relative mb-2 text-[11px] tracking-widest uppercase text-accent/80 sm:mb-3 sm:text-xs">
+        <div className="relative z-[1] mb-2 shrink-0 text-center text-[11px] tracking-widest uppercase text-accent/80 sm:mb-3 sm:text-xs">
           معاينة مباشرة
         </div>
+        <div className="relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center">
         <div
-          className={`${previewAspect} studio-live-preview__frame relative flex flex-col overflow-hidden rounded-2xl border border-primary/35 shadow-deep`}
+          className={`${previewAspect} studio-live-preview__frame relative mx-auto flex flex-col overflow-hidden rounded-2xl border border-primary/35 shadow-deep`}
           style={{
             background:
               "linear-gradient(180deg, hsl(178 50% 18%) 0%, hsl(200 50% 8%) 100%)",
@@ -1287,6 +1315,7 @@ export default function Editor() {
               )
             }
           />
+        </div>
         </div>
       </div>
     </div>
