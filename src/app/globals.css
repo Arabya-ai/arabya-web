@@ -132,8 +132,7 @@ body {
 .hero-title,
 .pricing-page h1,
 .pricing-page h2,
-.portal-display,
-.brand-name {
+.portal-display {
   font-family: var(--font-reem-kufi), var(--font-cairo), "Segoe UI", sans-serif;
 }
 
@@ -176,7 +175,6 @@ input {
 .chip-name,
 .chip-tip strong,
 .surah-card-name,
-.brand-name,
 .surah-ornament-text,
 .home-title-block h1,
 .surah-read-head h1,
@@ -339,16 +337,17 @@ html[data-theme="dark"] .site-header {
 }
 
 /*
-  Wordmark: Uthmani + logo palette.
-  Professional = restraint: gradient face, one quiet depth plane, no gimmicks.
-  Single React text node; depth via ::before only.
+  Wordmark: Reem Kufi (same as Studio display) + existing logo palette.
+  Depth via ::before only — colors unchanged.
 */
 .brand-name {
   position: relative;
   display: inline-block;
+  font-family: var(--font-reem-kufi), "Reem Kufi", sans-serif;
+  font-weight: 700;
   font-size: clamp(1.7rem, 3vw, 2.05rem);
   line-height: 1.4;
-  letter-spacing: 0;
+  letter-spacing: -0.01em;
   white-space: nowrap;
   /* Readable if gradient-clip is unsupported */
   color: #0f766e;
