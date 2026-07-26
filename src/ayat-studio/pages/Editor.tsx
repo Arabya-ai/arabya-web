@@ -62,7 +62,7 @@ import {
   STUDIO_MAX_AYAHS,
 } from "@/lib/plans";
 import { Link } from "@/i18n/navigation";
-import { studioMediaUrl } from "@/ayat-studio/lib/media-url";
+import { useStudioPreviewSrc } from "@/ayat-studio/hooks/use-studio-preview-src";
 import { fetchAyahs, type AyahData } from "@/ayat-studio/lib/quran-api";
 import { clampAyahPreviewIndex } from "@/ayat-studio/lib/studio-preview";
 import {
@@ -175,6 +175,9 @@ export default function Editor() {
     }
     setProject({
       ...p,
+      bgKind: p.bgKind === "video" ? "video" : "image",
+      bgPoster: p.bgPoster || "",
+      bgOpacity: p.bgOpacity ?? 100,
       previewShowNavBar: p.previewShowNavBar ?? true,
       previewShowAyahNumbers: p.previewShowAyahNumbers ?? true,
       previewShowAyahOnly: p.previewShowAyahOnly ?? false,
@@ -190,7 +193,9 @@ export default function Editor() {
       softNormalize: p.softNormalize ?? true,
       pauseBetweenAyahsMs: p.pauseBetweenAyahsMs ?? 0,
     });
-  }, [id, router, toast]);
+    // Only re-load when the project id changes — not when toast identity changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional
+  }, [id]);
 
   useEffect(() => {
     let cancelled = false;
@@ -324,6 +329,13 @@ export default function Editor() {
     tafsirMap,
     currentPreviewAyah,
   ]);
+
+  const previewBgKind = project?.bgKind === "video" ? "video" : "image";
+  const previewMedia = useStudioPreviewSrc(
+    project?.bgUrl,
+    project?.bgPoster,
+    previewBgKind,
+  );
 
   if (!project) {
     return (
@@ -1140,25 +1152,21 @@ export default function Editor() {
                 "linear-gradient(180deg, hsl(178 50% 18%) 0%, hsl(200 50% 8%) 100%)",
             }}
           >
-          {project.bgUrl && project.bgKind !== "video" && (
+          {project.bgUrl && previewBgKind !== "video" && previewMedia.src && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              key={project.bgUrl}
-              src={studioMediaUrl(project.bgUrl)}
+              key={previewMedia.src}
+              src={previewMedia.src}
               alt=""
               className="absolute inset-0 z-[1] h-full w-full object-cover"
               style={{ opacity: (project.bgOpacity ?? 100) / 100 }}
             />
           )}
-          {project.bgUrl && project.bgKind === "video" && (
+          {project.bgUrl && previewBgKind === "video" && previewMedia.src && (
             <video
-              key={project.bgUrl}
-              src={studioMediaUrl(project.bgUrl)}
-              poster={
-                project.bgPoster
-                  ? studioMediaUrl(project.bgPoster)
-                  : undefined
-              }
+              key={previewMedia.src}
+              src={previewMedia.src}
+              poster={previewMedia.poster || undefined}
               autoPlay
               muted
               loop
@@ -1170,6 +1178,16 @@ export default function Editor() {
                 e.currentTarget.play().catch(() => undefined);
               }}
             />
+          )}
+          {project.bgUrl && previewMedia.loading && (
+            <div className="absolute inset-0 z-[1] flex items-center justify-center bg-black/35">
+              <Loader2 className="h-6 w-6 animate-spin text-accent" />
+            </div>
+          )}
+          {project.bgUrl && previewMedia.error && !previewMedia.loading && (
+            <div className="absolute inset-x-3 top-3 z-[5] rounded-md border border-destructive/40 bg-black/70 px-2 py-1.5 text-center text-[10px] text-red-200">
+              {previewMedia.error}
+            </div>
           )}
           <div
             className="pointer-events-none absolute inset-0 z-[2]"

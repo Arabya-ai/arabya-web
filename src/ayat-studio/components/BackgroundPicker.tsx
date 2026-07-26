@@ -104,7 +104,7 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "
     reader.readAsDataURL(file);
   };
 
-  const handlePickVideo = (v: PexelsVideo) => {
+  const handlePickVideo = async (v: PexelsVideo) => {
     const file = pickBestVideoFile(v, orientation);
     if (!file?.link) {
       toast({
@@ -115,26 +115,66 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "
       return;
     }
     setApplyingId(v.id);
-    onChange({
-      bgType: "url",
-      bgKind: "video",
+    const patch = {
+      bgType: "url" as const,
+      bgKind: "video" as const,
       bgUrl: file.link,
       bgPoster: v.image || "",
-    });
-    toast({
-      title: "تم إضافة الفيديو للمشروع",
-      description: "يظهر في المعاينة (يسار/أعلى) ويُدمَج مع الآيات عند تصدير MP4.",
-    });
-    // Brief UI feedback on the tile
-    window.setTimeout(() => setApplyingId(null), 400);
+    };
+    onChange(patch);
+    try {
+      const res = await fetch(studioMediaUrl(file.link), {
+        credentials: "same-origin",
+        method: "GET",
+        headers: { Range: "bytes=0-1023" },
+      });
+      if (!res.ok && res.status !== 206) {
+        throw new Error(
+          res.status === 401
+            ? "يلزم تسجيل الدخول"
+            : `فشل تحميل الفيديو (${res.status})`,
+        );
+      }
+      toast({
+        title: "تم إضافة الفيديو للمشروع",
+        description: "يظهر الآن في المعاينة المباشرة ويُدمَج عند تصدير MP4.",
+      });
+    } catch (e: unknown) {
+      toast({
+        title: "الفيديو أُضيف لكن التحميل فشل",
+        description: e instanceof Error ? e.message : "حدّث الصفحة وحاول مجددًا",
+        variant: "destructive",
+      });
+    } finally {
+      setApplyingId(null);
+    }
   };
 
-  const handlePickPhoto = (url: string, photographer: string) => {
+  const handlePickPhoto = async (url: string, photographer: string) => {
+    if (!url) return;
     onChange({ bgType: "url", bgKind: "image", bgUrl: url, bgPoster: "" });
-    toast({
-      title: "تم إضافة الصورة للمشروع",
-      description: photographer ? `من ${photographer}` : "ستظهر في المعاينة والتصدير.",
-    });
+    try {
+      const res = await fetch(studioMediaUrl(url), { credentials: "same-origin" });
+      if (!res.ok) {
+        throw new Error(
+          res.status === 401
+            ? "يلزم تسجيل الدخول"
+            : `فشل تحميل الصورة (${res.status})`,
+        );
+      }
+      toast({
+        title: "تم إضافة الصورة للمشروع",
+        description: photographer
+          ? `من ${photographer} — تظهر في المعاينة المباشرة`
+          : "ستظهر في المعاينة المباشرة والتصدير.",
+      });
+    } catch (e: unknown) {
+      toast({
+        title: "الصورة أُضيفت لكن التحميل فشل",
+        description: e instanceof Error ? e.message : "حدّث الصفحة وحاول مجددًا",
+        variant: "destructive",
+      });
+    }
   };
 
   const tabBtn = (id: Tab, icon: React.ReactNode, label: string) => (
