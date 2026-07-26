@@ -522,7 +522,7 @@ export default function Editor() {
   const transDur = project.transitionDuration ?? 0.6;
 
   return (
-    <div className="flex min-h-0 flex-col gap-3 md:gap-4 xl:h-[calc(100dvh-5.5rem)] xl:flex-row xl:items-stretch">
+    <div className="flex min-h-0 flex-col gap-3 md:gap-4 xl:min-h-[calc(100dvh-14rem)] xl:flex-row xl:items-stretch">
       <style>{`
         @keyframes studio-fade { from { opacity: 0.15 } to { opacity: 1 } }
         @keyframes studio-slide { from { transform: translateX(28px); opacity: 0.2 } to { transform: none; opacity: 1 } }

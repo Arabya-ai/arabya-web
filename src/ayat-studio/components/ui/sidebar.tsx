@@ -117,7 +117,10 @@ const SidebarProvider = React.forwardRef<
        ...style,
       } as React.CSSProperties
      }
-     className={cn("group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar", className)}
+     className={cn(
+      "group/sidebar-wrapper flex w-full items-stretch has-[[data-variant=inset]]:bg-sidebar",
+      className,
+     )}
      ref={ref}
      {...props}
     >
@@ -171,22 +174,21 @@ const Sidebar = React.forwardRef<
   );
  }
 
- return (
+  return (
   <div
    ref={ref}
-   // On desktop (>= lg) show fixed sidebar; below that use Sheet (see useIsMobile).
-  className="group peer hidden text-sidebar-foreground lg:block"
+   // Contained in the studio shell (not viewport-fixed) so site footer stays clear.
+   className="group peer relative hidden self-stretch text-sidebar-foreground lg:block"
    data-state={state}
    data-collapsible={state === "collapsed" ? collapsible : ""}
    data-variant={variant}
    data-side={side}
   >
-   {/* This is what handles the sidebar gap on desktop */}
+   {/* Reserves horizontal space; height follows the shell / inset sibling */}
    <div
     className={cn(
-     "relative h-svh w-[var(--sidebar-width)] shrink-0 bg-transparent transition-[width] duration-200 ease-linear",
+     "relative h-full min-h-full w-[var(--sidebar-width)] shrink-0 bg-transparent transition-[width] duration-200 ease-linear",
      "group-data-[collapsible=offcanvas]:w-0",
-     "",
      variant === "floating" || variant === "inset"
       ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_1rem)]"
       : "group-data-[collapsible=icon]:w-[var(--sidebar-width-icon)]",
@@ -194,11 +196,9 @@ const Sidebar = React.forwardRef<
    />
    <div
     className={cn(
-     "fixed inset-y-0 z-20 hidden h-svh w-[var(--sidebar-width)] transition-[left,right,width] duration-200 ease-linear lg:flex",
-     side === "left"
-      ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
-      : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
-     // Adjust the padding for floating and inset variants.
+     "absolute inset-y-0 z-20 hidden h-full w-[var(--sidebar-width)] transition-[width] duration-200 ease-linear lg:flex",
+     side === "left" ? "left-0" : "right-0",
+     "group-data-[collapsible=offcanvas]:hidden",
      variant === "floating" || variant === "inset"
       ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_1rem_+2px)]"
       : "group-data-[collapsible=icon]:w-[var(--sidebar-width-icon)] group-data-[side=left]:border-r group-data-[side=right]:border-l",
@@ -208,7 +208,7 @@ const Sidebar = React.forwardRef<
    >
     <div
      data-sidebar="sidebar"
-     className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
+     className="flex h-full max-h-full w-full flex-col overflow-hidden bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
     >
      {children}
     </div>
@@ -276,8 +276,8 @@ const SidebarInset = React.forwardRef<HTMLDivElement, React.ComponentProps<"main
   <main
    ref={ref}
    className={cn(
-    "relative flex min-h-svh flex-1 flex-col bg-background",
-    "peer-data-[variant=inset]:min-h-[calc(100svh-1rem)] md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow",
+    "relative flex min-h-0 flex-1 flex-col bg-background",
+    "peer-data-[variant=inset]:min-h-0 md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow",
     className,
    )}
    {...props}

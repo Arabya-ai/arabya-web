@@ -2676,6 +2676,8 @@ html[data-theme="dark"] .mode-rail-wrap {
 }
 
 .site-footer {
+  position: relative;
+  z-index: 40;
   margin-top: 1.75rem;
   padding: 1rem 0 calc(1.1rem + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--line);

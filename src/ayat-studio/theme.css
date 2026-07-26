@@ -375,15 +375,29 @@
   );
 }
 
-/* Studio shell — prevent sidebar/content overlap (Tailwind v4 + RTL) */
+/* Studio shell — sidebar contained in <main>, never over site footer */
 .ayat-studio-shell {
   --sidebar-width: 16rem;
   --sidebar-width-icon: 3.25rem;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.ayat-studio-shell > .group.peer {
+  align-self: stretch;
 }
 
 .ayat-studio-shell > [data-slot="sidebar-gap"],
 .ayat-studio-shell .group.peer > div:first-child {
   flex-shrink: 0;
+  height: 100%;
+  min-height: 100%;
+}
+
+/* Root studio wrapper: fill main only, not the viewport past the footer */
+#ayat-studio-root.ayat-studio {
+  min-height: 0;
+  background-attachment: scroll;
 }
 
 @media (max-width: 1023px) {

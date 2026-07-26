@@ -15,10 +15,10 @@ export default function DashboardLayout({
   return (
     <SidebarProvider
       defaultOpen
-      className="ayat-studio-shell relative min-h-[min(100dvh,100%)] w-full overflow-x-hidden"
+      className="ayat-studio-shell relative min-h-0 w-full overflow-x-hidden xl:min-h-[calc(100dvh-12rem)]"
     >
       <AppSidebar />
-      <SidebarInset className="relative z-0 min-w-0 max-w-full overflow-x-hidden bg-transparent">
+      <SidebarInset className="relative z-0 min-h-0 min-w-0 max-w-full overflow-x-hidden bg-transparent">
         <header className="sticky top-0 z-30 flex h-12 shrink-0 items-center gap-3 border-b border-accent/10 bg-background/75 px-3 backdrop-blur-xl sm:h-14 sm:px-4">
           <SidebarTrigger className="shrink-0 text-accent hover:bg-accent/10" />
           <span className="truncate text-xs tracking-widest text-accent/60">
