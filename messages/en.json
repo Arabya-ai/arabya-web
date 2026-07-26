@@ -755,102 +755,106 @@
   },
   "About": {
     "metaTitle": "About Arabya",
-    "metaDescription": "Arabya is a word-by-word Quran study platform: mushaf, iʿrāb, roots, tafsirs, translations, quick study, and daily tools — with open, attributed sources.",
+    "metaDescription": "Arabya is a free word-by-word Quran study platform: mushaf, iʿrāb, roots, tafsirs, translations, and Studio — with attributed sources.",
+    "kicker": "An Arabic platform for Quran study",
     "title": "About Arabya",
-    "lead": "<brand>Arabya</brand> is an Arabic (RTL) platform for studying the Quranic text <strong>word by word</strong>: grammar, morphology, lexicon, semantics, translation, and tafsir — with clear attribution for every data layer. The site is published at <siteLink>www.arabyaai.com</siteLink>.",
+    "lead": "<brand>Arabya</brand> is a platform for studying the Quranic text <strong>word by word</strong>: grammar, morphology, lexicon, semantics, translation, and tafsir — with clear attribution for every data layer. Published at <siteLink>www.arabyaai.com</siteLink>.",
+    "freeNote": "Everything on Arabya is free for everyone — open access to the mushaf, study tools, and Studio.",
+    "ctaMushaf": "Open the mushaf",
+    "ctaStudio": "Arabya Studio",
+    "ctaPrivacy": "Privacy policy",
     "sections": {
-      "vision": {
-        "title": "Vision",
-        "p0": "Arabya is not merely “mushaf + tafsir.” It is the core of a word-level Arabic text analysis engine applied today to the Quran, and later — after Quran layers are complete — to hadith, then poetry and heritage. Every analysis layer needs an explicit source."
+      "pillars": {
+        "title": "What we offer",
+        "intro": "We focus on understanding each word in context — not only flipping pages.",
+        "p0Title": "Word by word",
+        "p0": "Every mushaf word can be studied: iʿrāb, root, meaning, translation, and tafsir when sources are available.",
+        "p1Title": "Attributed sources",
+        "p1": "Every data layer is shown with its source — we do not mix opinions without labeling them.",
+        "p2Title": "Full Arabic experience",
+        "p2": "An Arabic (RTL) interface from the index to the mushaf to daily study tools.",
+        "p3Title": "Open to everyone",
+        "p3": "Reading, study, and Studio creation are available without fees."
       },
       "features": {
-        "title": "What you find on the site today",
+        "title": "What you find today",
         "readingTitle": "Reading & mushaf",
-        "reading0": "<indexLink>Surah index</indexLink> with instant search in ayah text and roots, local favorites, and last-read tracking.",
-        "reading1": "<mushafLink>Madinah mushaf</mushafLink> (pages 1–604) with word-by-word display, font scaling, sharing, favorites, and night mode.",
-        "reading2": "<juzLink>Thirty juz index</juzLink> and full surah reading with study and iʿrāb links.",
-        "reading3": "Ayah and word recitation (EveryAyah / approved audio sources in the UI) with reciter choice and ayah repeat where available.",
+        "r0": "<indexLink>Surah index</indexLink> with search in ayah text and roots, favorites, and last-read tracking.",
+        "r1": "<mushafLink>Madinah mushaf</mushafLink> (pages 1–604) with word-by-word display, font scaling, sharing, and light/dark mode.",
+        "r2": "<juzLink>Thirty juz index</juzLink> and surah reading with study and iʿrāb links.",
+        "r3": "Ayah and word recitation with reciter choice and ayah repeat where available.",
         "studyTitle": "Word & ayah study",
-        "study0": "Word study dock in the mushaf with layers: <strong>iʿrāb</strong> · <strong>lexicon/morphology & root</strong> · <strong>translation & semantics</strong> · <strong>tafsir</strong>.",
-        "study1": "<ayahLink>Ayah iʿrāb</ayahLink> page word by word.",
-        "study2": "<studyLink>Quick study</studyLink> on the home page and a dedicated page: instant query with local summary and related occurrences (meaning + morphology + easy tafsir).",
-        "rootsTitle": "Roots & lexicon",
-        "roots0": "<rootsLink>Morphological roots index</rootsLink> (1,651 roots from the Quranic Arabic Corpus) with a path through the most frequent roots.",
-        "roots1": "Each root page: source, lemmas and Arabic glosses when available, and all Quran occurrences linked to the mushaf.",
-        "portalTitle": "Portal & tools",
-        "portal0": "<asmaLink>The Beautiful Names</asmaLink>: daily card, index, and detail pages with Arabic and English meaning and explanation.",
-        "portal1": "Prayer times and qibla (with next-prayer countdown) and daily reading habit (daily goal, streak, khatm progress) on the home page.",
-        "portal2": "<booksLink>Iʿrāb books</booksLink> — structure is ready; content appears after licensed files are supplied by rights holders.",
-        "portal3": "<resourcesLink>Resources</resourcesLink> and public links, plus a qiraʾat hub (Ḥafṣ primarily in the current phase)."
+        "s0": "Word study dock: <strong>iʿrāb</strong> · <strong>lexicon, morphology & root</strong> · <strong>translation & semantics</strong> · <strong>tafsir</strong>.",
+        "s1": "<ayahLink>Ayah iʿrāb</ayahLink> page word by word.",
+        "s2": "<studyLink>Quick study</studyLink> and a <rootsLink>roots index</rootsLink> with every occurrence in the Quran.",
+        "toolsTitle": "Portal tools",
+        "t0": "<asmaLink>The Beautiful Names</asmaLink>, prayer times and qibla, and daily reading habit on the home page.",
+        "t1": "<studioLink>Arabya Studio</studioLink> to create ayah images and videos with backgrounds and export.",
+        "t2": "<booksLink>Iʿrāb books</booksLink> and <resourcesLink>resources</resourcesLink> — updated when licensed sources are available."
       },
       "sources": {
         "title": "Data sources",
         "intro": "We rely on open or licensed sources with attribution:",
-        "qurancom": "<qLink>Quran.com</qLink> — QPC Ḥafṣ text, ayah translations, word-by-word glosses (English and others), and tafsirs used in the UI.",
+        "qurancom": "<qLink>Quran.com</qLink> — QPC Hafṣ text, ayah translations, word-by-word glosses, and tafsirs used in the UI.",
         "corpus": "<cLink>Quranic Arabic Corpus</cLink> — organized morphology, iʿrāb, and roots (GPL with attribution).",
-        "lemma": "Local Arabic lemma senses for Arabya (<code>lemma-sense-ar</code>) for short study glosses — not a republication of protected dictionary books or sites.",
-        "asmaData": "Beautiful Names content and attributed Arabic meanings in project data.",
-        "gitFirst": "Static Quran content is managed <strong>Git-first</strong> (JSON files in the repo) so it stays transparent and traceable with every release."
+        "lemma": "Local Arabic lemma senses for Arabya (<code>lemma-sense-ar</code>) for short study glosses.",
+        "asmaData": "Beautiful Names content and attributed meanings in project data.",
+        "gitFirst": "Static Quran content is managed <strong>Git-first</strong> so it stays transparent and traceable."
       },
-      "tech": {
-        "title": "Technology & hosting",
-        "stack": "Frontend: Next.js and TypeScript, full Arabic experience (RTL).",
-        "repo": "Repository: <ghLink>Arabya-ai/arabya-web</ghLink>.",
-        "hosting": "Hosted on Vercel at the current domain arabyaai.com."
-      },
-      "roadmap": {
-        "title": "Intentionally deferred",
-        "r0": "Rhetoric layer and multi-opinion Claims when additional licensed sources are available.",
-        "r1": "Classic iʿrāb books and dictionaries after written licensing.",
-        "r2": "Cloud accounts and cross-device sync (D1 planned later).",
-        "r3": "Hadith, heritage, and poetry hubs — after Quran word layers are solid in the UI.",
-        "r4": "The arabya.ai domain after the core product is ready on arabyaai.com."
+      "next": {
+        "title": "What we are working on",
+        "intro": "We deepen Quran word layers in the UI before expanding other hubs.",
+        "n0": "Richer semantics and rhetoric layers when attributed sources are available.",
+        "n1": "Classic iʿrāb books and dictionaries after written licensing from rights holders.",
+        "n2": "Later hubs (such as hadith and heritage) after the Quran word foundation is solid in the UI."
       },
       "contact": {
         "title": "Contact",
-        "body": "For technical questions or suggestions: the <ghOrgLink>Arabya-ai</ghOrgLink> organization on GitHub. See also our <privacyLink>privacy policy</privacyLink>."
+        "body": "For questions or suggestions: the <ghOrgLink>Arabya-ai</ghOrgLink> organization on GitHub. See also our <privacyLink>privacy policy</privacyLink>."
       }
     }
   },
   "Privacy": {
     "metaTitle": "Privacy policy",
-    "metaDescription": "Arabya privacy policy: optional account, cloud sync, local data, and your choices.",
+    "metaDescription": "How Arabya protects your privacy: browse without an account, optional sync, and what stays local or in the cloud.",
+    "kicker": "Clarity first",
     "title": "Privacy policy",
-    "updated": "23 July 2026",
+    "updated": "27 July 2026",
     "updatedLabel": "Last updated: {date}",
-    "lead": "<brand>Arabya</brand> (the same service on arabyaai.com, arabya.website, arabya.org, and arabya.ai) respects your privacy. Browsing and mushaf study are available <strong>without an account</strong>. Google sign-in is optional to sync your data across devices. We do not sell personal data.",
+    "lead": "<brand>Arabya</brand> respects your privacy. You can read the mushaf and study <strong>without an account</strong>. Google sign-in is optional to sync your data across devices. We do not sell personal data. Everything on Arabya is free for everyone.",
     "sections": {
       "summary": {
         "title": "Quick summary",
-        "s0": "No sign-in is required to read and study.",
-        "s1": "Without an account: favorites, notes, and reading habit stay <strong>on your device only</strong> (localStorage).",
-        "s2": "With a Google account: that data may sync to cloud storage tied to your email so it appears on your other devices.",
-        "s3": "Aggregated usage stats may be recorded via standard hosting/analytics tools (such as Vercel Analytics)."
+        "s0": "No sign-in is required to read, study, or use Studio.",
+        "s1": "Without an account: favorites, notes, and reading habit stay <strong>on your device only</strong>.",
+        "s2": "With a Google account: that data may sync to cloud storage tied to your email.",
+        "s3": "Everything on Arabya is free for everyone.",
+        "s4": "Aggregated usage stats may be recorded via hosting tools (such as Vercel Analytics)."
       },
       "accounts": {
         "title": "Optional account (Google)",
-        "p0": "When you choose “Sign in,” we use Google to verify your identity. We typically receive: name, email, and profile photo. We use these to show your account and role (member / editor / admin) — not for advertising.",
-        "p1": "Your session is managed via secure technical cookies from the auth provider (Auth.js). You can sign out anytime from “My account.”"
+        "p0": "When you sign in we typically receive name, email, and profile photo to show your account and manage the session — not for advertising.",
+        "p1": "The session uses technical cookies (Auth.js). You can sign out anytime from <accountLink>My account</accountLink>."
       },
       "sync": {
         "title": "Cloud sync",
-        "p0": "When sync is enabled for a signed-in account, a copy of the following personal data is stored on cloud infrastructure (currently Cloudflare D1 via a protected sync worker):",
+        "p0": "When sync is enabled for a signed-in account, a copy is stored of:",
         "i0": "Favorites and last mushaf page / reading progress.",
         "i1": "Reading habit (goal, streak, khatm progress).",
         "i2": "Ayah notes.",
-        "p1": "Purpose: restore your data when you change device or browser after sign-in. Visitors without an account do not upload personal data to this store. Public Quran content is served from site files, not as your personal file."
+        "p1": "Purpose: restore your data on another device after sign-in. Visitors without an account do not upload personal data."
       },
       "local": {
         "title": "What stays on your device",
-        "p0": "Even with an account, a local copy remains in the browser for speed, plus UI settings (night mode, font size, gloss language, translation edition, reciter…). You can clear site data from browser settings."
+        "p0": "A local copy for speed, plus UI settings (appearance, font size, gloss language, translation, reciter…). You can clear site data from browser settings."
       },
       "server": {
         "title": "Hosting & providers",
-        "site": "<strong>Site:</strong> hosted on Vercel; technical logs may include IP addresses or user-agent strings for security and diagnostics.",
-        "sync": "<strong>Sync:</strong> processed via Cloudflare (Workers / D1) when using an account.",
-        "login": "<strong>Sign-in:</strong> via Google; see Google’s privacy policy as well.",
-        "analytics": "<strong>Analytics:</strong> <vaLink>Vercel Analytics</vaLink> for aggregated visits and performance.",
-        "media": "<strong>External media:</strong> recitation files or some helper services may load from third-party servers when played."
+        "site": "<strong>Site:</strong> Vercel — technical logs may include IP addresses or user-agent strings for security and diagnostics.",
+        "sync": "<strong>Sync:</strong> Cloudflare (Workers / D1) when using an account.",
+        "login": "<strong>Sign-in:</strong> via Google — see Google privacy policy as well.",
+        "analytics": "<strong>Analytics:</strong> <vaLink>Vercel Analytics</vaLink> for aggregated visits.",
+        "media": "<strong>Media:</strong> recitation files may load from third-party servers when played."
       },
       "cookies": {
         "title": "Cookies",
@@ -858,13 +862,13 @@
       },
       "rights": {
         "title": "Your rights & choices",
-        "r0": "Browse without an account.",
+        "r0": "Browse and study without an account.",
         "r1": "Sign out and clear local storage from the browser.",
-        "r2": "Request inquiry or deletion of account data tied to your email via the <ghOrgLink>Arabya-ai</ghOrgLink> organization on GitHub."
+        "r2": "Request inquiry or deletion of account data via <ghOrgLink>Arabya-ai</ghOrgLink> on GitHub."
       },
       "changes": {
         "title": "Policy changes",
-        "p0": "We update this page when major features change. The “Last updated” date above reflects the current version. For more: <aboutLink>About Arabya</aboutLink>."
+        "p0": "We update this page when major features change. The Last updated date above reflects the current version. For more: <aboutLink>About Arabya</aboutLink>."
       }
     }
   },
@@ -979,7 +983,7 @@
     "metaDescription": "Radio, mushaf PDFs, and public links to serve the Book of Allah",
     "title": "Resources",
     "createTitle": "Create ayah media",
-    "createLead": "Signed-in tools to export ayah <create>images and videos</create>. Plans and PayPal notes: <pricing>Pricing</pricing>.",
+    "createLead": "Create ayah images and videos in <create>Arabya Studio</create> — free for everyone.",
     "radioTitle": "Quran radio",
     "radioLead": "Live stream from Cairo Quran Radio (external link — we do not host audio):",
     "radioPlay": "Play stream",
@@ -995,7 +999,7 @@
     "apiAudio": "Word-by-word recitation timings — Quran.com via <code>/api/audio-timings</code>",
     "apiStudy": "Local search & study — <code>/api/search</code> and <code>/api/study</code>",
     "qiraatTitle": "Riwāyāt & color tajwīd",
-    "qiraatSoon": "Multiple riwāyāt (Warsh, Qālūn…) and color tajwīd mushaf activate when licensed QPC data is available — see <link>Qiraʾat</link>.",
+    "qiraatSoon": "Multi-riwayah layers and color-coded tajwid mushaf are in progress and will appear when licensed data is ready.",
     "backIndex": "Back to index"
   },
   "Hadith": {

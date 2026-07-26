@@ -32,7 +32,6 @@ export default async function ResourcesPage({ params }: Props) {
         <p>
           {t.rich("createLead", {
             create: (c) => <Link href="/studio">{c}</Link>,
-            pricing: (c) => <Link href="/pricing">{c}</Link>,
           })}
         </p>
       </section>
@@ -83,11 +82,7 @@ export default async function ResourcesPage({ params }: Props) {
 
       <section className="resource-block">
         <h2>{t("qiraatTitle")}</h2>
-        <p className="layer-soon">
-          {t.rich("qiraatSoon", {
-            link: (c) => <Link href="/qiraat">{c}</Link>,
-          })}
-        </p>
+        <p className="layer-soon">{t("qiraatSoon")}</p>
       </section>
 
       <p>

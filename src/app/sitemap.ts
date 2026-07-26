@@ -16,7 +16,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/juz`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${base}/books`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/resources`, changeFrequency: "monthly", priority: 0.6 },
-    { url: `${base}/qiraat`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/hadith`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${base}/heritage`, changeFrequency: "yearly", priority: 0.3 },
   ];

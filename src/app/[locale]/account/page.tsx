@@ -40,7 +40,6 @@ export default async function AccountPage({ params }: Props) {
 
   const t = await getTranslations("Account");
   const role = user.role ?? "user";
-  const plan = user.plan ?? "free";
   const name = user.name || t("defaultName");
   const syncReady = isCloudSyncConfigured();
 
@@ -63,9 +62,8 @@ export default async function AccountPage({ params }: Props) {
           </p>
           <p>
             {t("planLine", {
-              plan: planLabel(plan, locale as AppLocale),
-            })}{" "}
-            <Link href="/pricing">{t("viewPricing")}</Link>
+              plan: planLabel("free", locale as AppLocale),
+            })}
             {" · "}
             <Link href="/studio">{t("openCreate")}</Link>
           </p>

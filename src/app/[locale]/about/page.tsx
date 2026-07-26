@@ -7,7 +7,7 @@ import { resolveLocale } from "@/i18n/locale-params";
 type Props = { params: Promise<{ locale: string }> };
 
 const richTags = {
-  brand: (c: ReactNode) => <strong>{c}</strong>,
+  brand: (c: ReactNode) => <strong className="info-em">{c}</strong>,
   strong: (c: ReactNode) => <strong>{c}</strong>,
   siteLink: (c: ReactNode) => (
     <a href="https://www.arabyaai.com" rel="noreferrer">
@@ -21,6 +21,7 @@ const richTags = {
   studyLink: (c: ReactNode) => <Link href="/study">{c}</Link>,
   rootsLink: (c: ReactNode) => <Link href="/roots">{c}</Link>,
   asmaLink: (c: ReactNode) => <Link href="/asma">{c}</Link>,
+  studioLink: (c: ReactNode) => <Link href="/studio">{c}</Link>,
   booksLink: (c: ReactNode) => <Link href="/books">{c}</Link>,
   resourcesLink: (c: ReactNode) => <Link href="/resources">{c}</Link>,
   qLink: (c: ReactNode) => (
@@ -64,85 +65,114 @@ export default async function AboutPage({ params }: Props) {
   const locale = await resolveLocale(params);
   const t = await getTranslations({ locale, namespace: "About" });
 
+  const pillars = ["p0", "p1", "p2", "p3"] as const;
+  const reading = ["r0", "r1", "r2", "r3"] as const;
+  const study = ["s0", "s1", "s2"] as const;
+  const tools = ["t0", "t1", "t2"] as const;
+  const sources = ["qurancom", "corpus", "lemma", "asmaData"] as const;
+  const nextItems = ["n0", "n1", "n2"] as const;
+
   return (
-    <div className="shell privacy-page page-block legal-page">
-      <h1>{t("title")}</h1>
-      <p className="legal-lead">{t.rich("lead", richTags)}</p>
+    <div className="info-page">
+      <div className="shell info-page-shell">
+        <header className="info-hero">
+          <p className="info-kicker">{t("kicker")}</p>
+          <h1 className="info-title portal-display">{t("title")}</h1>
+          <p className="info-lead">{t.rich("lead", richTags)}</p>
+          <p className="info-free-note">{t("freeNote")}</p>
+          <div className="info-hero-actions">
+            <Link href="/mushaf/1" className="info-btn info-btn--primary">
+              {t("ctaMushaf")}
+            </Link>
+            <Link href="/studio" className="info-btn info-btn--ghost">
+              {t("ctaStudio")}
+            </Link>
+            <Link href="/privacy" className="info-btn info-btn--ghost">
+              {t("ctaPrivacy")}
+            </Link>
+          </div>
+        </header>
 
-      <section aria-labelledby="about-vision">
-        <h2 id="about-vision">{t("sections.vision.title")}</h2>
-        <p>{t("sections.vision.p0")}</p>
-      </section>
+        <section className="info-section" aria-labelledby="about-pillars">
+          <h2 id="about-pillars" className="info-section-title">
+            {t("sections.pillars.title")}
+          </h2>
+          <p className="info-section-lead">{t("sections.pillars.intro")}</p>
+          <ul className="info-pillars">
+            {pillars.map((key) => (
+              <li key={key} className="info-pillar">
+                <h3>{t(`sections.pillars.${key}Title`)}</h3>
+                <p>{t(`sections.pillars.${key}`)}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
 
-      <section aria-labelledby="about-features">
-        <h2 id="about-features">{t("sections.features.title")}</h2>
+        <section className="info-section" aria-labelledby="about-features">
+          <h2 id="about-features" className="info-section-title">
+            {t("sections.features.title")}
+          </h2>
 
-        <h3>{t("sections.features.readingTitle")}</h3>
-        <ul>
-          <li>{t.rich("sections.features.reading0", richTags)}</li>
-          <li>{t.rich("sections.features.reading1", richTags)}</li>
-          <li>{t.rich("sections.features.reading2", richTags)}</li>
-          <li>{t("sections.features.reading3")}</li>
-        </ul>
+          <div className="info-feature-block">
+            <h3>{t("sections.features.readingTitle")}</h3>
+            <ul className="info-list">
+              {reading.map((key) => (
+                <li key={key}>{t.rich(`sections.features.${key}`, richTags)}</li>
+              ))}
+            </ul>
+          </div>
 
-        <h3>{t("sections.features.studyTitle")}</h3>
-        <ul>
-          <li>{t.rich("sections.features.study0", richTags)}</li>
-          <li>{t.rich("sections.features.study1", richTags)}</li>
-          <li>{t.rich("sections.features.study2", richTags)}</li>
-        </ul>
+          <div className="info-feature-block">
+            <h3>{t("sections.features.studyTitle")}</h3>
+            <ul className="info-list">
+              {study.map((key) => (
+                <li key={key}>{t.rich(`sections.features.${key}`, richTags)}</li>
+              ))}
+            </ul>
+          </div>
 
-        <h3>{t("sections.features.rootsTitle")}</h3>
-        <ul>
-          <li>{t.rich("sections.features.roots0", richTags)}</li>
-          <li>{t("sections.features.roots1")}</li>
-        </ul>
+          <div className="info-feature-block">
+            <h3>{t("sections.features.toolsTitle")}</h3>
+            <ul className="info-list">
+              {tools.map((key) => (
+                <li key={key}>{t.rich(`sections.features.${key}`, richTags)}</li>
+              ))}
+            </ul>
+          </div>
+        </section>
 
-        <h3>{t("sections.features.portalTitle")}</h3>
-        <ul>
-          <li>{t.rich("sections.features.portal0", richTags)}</li>
-          <li>{t("sections.features.portal1")}</li>
-          <li>{t.rich("sections.features.portal2", richTags)}</li>
-          <li>{t.rich("sections.features.portal3", richTags)}</li>
-        </ul>
-      </section>
+        <section className="info-section" aria-labelledby="about-sources">
+          <h2 id="about-sources" className="info-section-title">
+            {t("sections.sources.title")}
+          </h2>
+          <p className="info-section-lead">{t("sections.sources.intro")}</p>
+          <ul className="info-list">
+            {sources.map((key) => (
+              <li key={key}>{t.rich(`sections.sources.${key}`, richTags)}</li>
+            ))}
+          </ul>
+          <p className="info-note">{t.rich("sections.sources.gitFirst", richTags)}</p>
+        </section>
 
-      <section aria-labelledby="about-sources">
-        <h2 id="about-sources">{t("sections.sources.title")}</h2>
-        <p>{t("sections.sources.intro")}</p>
-        <ul>
-          <li>{t.rich("sections.sources.qurancom", richTags)}</li>
-          <li>{t.rich("sections.sources.corpus", richTags)}</li>
-          <li>{t.rich("sections.sources.lemma", richTags)}</li>
-          <li>{t("sections.sources.asmaData")}</li>
-        </ul>
-        <p>{t.rich("sections.sources.gitFirst", richTags)}</p>
-      </section>
+        <section className="info-section" aria-labelledby="about-next">
+          <h2 id="about-next" className="info-section-title">
+            {t("sections.next.title")}
+          </h2>
+          <p className="info-section-lead">{t("sections.next.intro")}</p>
+          <ul className="info-list">
+            {nextItems.map((key) => (
+              <li key={key}>{t(`sections.next.${key}`)}</li>
+            ))}
+          </ul>
+        </section>
 
-      <section aria-labelledby="about-tech">
-        <h2 id="about-tech">{t("sections.tech.title")}</h2>
-        <ul>
-          <li>{t("sections.tech.stack")}</li>
-          <li>{t.rich("sections.tech.repo", richTags)}</li>
-          <li>{t("sections.tech.hosting")}</li>
-        </ul>
-      </section>
-
-      <section aria-labelledby="about-roadmap">
-        <h2 id="about-roadmap">{t("sections.roadmap.title")}</h2>
-        <ul>
-          <li>{t("sections.roadmap.r0")}</li>
-          <li>{t("sections.roadmap.r1")}</li>
-          <li>{t("sections.roadmap.r2")}</li>
-          <li>{t("sections.roadmap.r3")}</li>
-          <li>{t("sections.roadmap.r4")}</li>
-        </ul>
-      </section>
-
-      <section aria-labelledby="about-contact">
-        <h2 id="about-contact">{t("sections.contact.title")}</h2>
-        <p>{t.rich("sections.contact.body", richTags)}</p>
-      </section>
+        <section className="info-section info-section--contact" aria-labelledby="about-contact">
+          <h2 id="about-contact" className="info-section-title">
+            {t("sections.contact.title")}
+          </h2>
+          <p>{t.rich("sections.contact.body", richTags)}</p>
+        </section>
+      </div>
     </div>
   );
 }

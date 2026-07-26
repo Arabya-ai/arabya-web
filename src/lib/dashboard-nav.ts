@@ -30,7 +30,6 @@ export function unifiedDashNav(role: UserRole): DashNavItem[] {
     },
     { href: "/account/study", label: "study", icon: "book", group: "groupAccount" },
     { href: "/studio", label: "studio", icon: "spark", group: "groupAccount" },
-    { href: "/pricing", label: "pricing", icon: "upgrade", group: "groupAccount" },
     {
       href: "/account#role-request",
       label: "upgrade",

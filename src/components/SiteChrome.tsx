@@ -77,9 +77,6 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
         <Link href="/roots" role="menuitem" onClick={go()}>
           {t("roots")}
         </Link>
-        <Link href="/qiraat" role="menuitem" onClick={go()}>
-          {t("qiraat")}
-        </Link>
         <Link href="/asma" role="menuitem" onClick={go()}>
           {t("asma")}
         </Link>
@@ -88,9 +85,6 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
         </Link>
         <Link href="/studio" role="menuitem" onClick={go()}>
           {t("studio")}
-        </Link>
-        <Link href="/pricing" role="menuitem" onClick={go()}>
-          {t("pricing")}
         </Link>
       </div>
     </div>
@@ -196,9 +190,7 @@ export function SiteFooter() {
               <Link href="/mushaf/1">{t("mushaf")}</Link>
               <Link href="/juz">{t("juz")}</Link>
               <Link href="/roots">{t("roots")}</Link>
-              <Link href="/qiraat">{t("qiraat")}</Link>
               <Link href="/studio">{t("studio")}</Link>
-              <Link href="/pricing">{t("pricing")}</Link>
               <Link href="/about">{t("about")}</Link>
               <Link href="/privacy">{t("privacy")}</Link>
             </nav>
