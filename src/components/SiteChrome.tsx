@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { AuthButton } from "@/components/AuthButton";
 import { BrandLockup } from "@/components/BrandLockup";
 import { PreferencesMenu } from "@/components/PreferencesMenu";
+import { useDismissibleOpen } from "@/hooks/useDismissibleOpen";
 import { Link } from "@/i18n/navigation";
 
 /** Site chrome for all pages including Arabya Studio (header + footer). */
@@ -20,24 +21,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
 function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
   const t = useTranslations("Nav");
-  const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function onDoc(e: MouseEvent) {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    }
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("mousedown", onDoc);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDoc);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
+  const { open, setOpen, toggle, openOnHover, closeOnLeave } =
+    useDismissibleOpen(rootRef, { closeOnPointerLeave: true });
 
   function go() {
     return () => {
@@ -50,27 +36,19 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
     <div
       className={`nav-dropdown ${open ? "is-open" : ""}`}
       ref={rootRef}
-      onMouseEnter={() => {
-        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-          setOpen(true);
-        }
-      }}
-      onMouseLeave={() => {
-        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-          setOpen(false);
-        }
-      }}
+      onPointerEnter={openOnHover}
+      onPointerLeave={closeOnLeave}
     >
       <button
         type="button"
         className="nav-dropdown-trigger nav-link-btn"
         aria-expanded={open}
         aria-haspopup="menu"
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggle}
       >
         {t("services")}
       </button>
-      <div className="nav-dropdown-menu" role="menu">
+      <div className="nav-dropdown-menu" role="menu" hidden={!open}>
         <Link href="/juz" role="menuitem" onClick={go()}>
           {t("juz")}
         </Link>
@@ -93,8 +71,10 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
 
 export function SiteHeader() {
   const t = useTranslations("Nav");
-  const [open, setOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const el = headerRef.current;
@@ -115,6 +95,37 @@ export function SiteHeader() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+
+    function onPointerDown(e: PointerEvent) {
+      const target = e.target as Node;
+      if (navRef.current?.contains(target)) return;
+      if (toggleRef.current?.contains(target)) return;
+      setOpen(false);
+    }
+
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+
+    document.addEventListener("pointerdown", onPointerDown, true);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 901px)");
+    function onChange() {
+      if (mq.matches) setOpen(false);
+    }
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
   return (
     <header className="site-header" ref={headerRef}>
       <div className="shell header-inner">
@@ -128,10 +139,11 @@ export function SiteHeader() {
         </Link>
 
         <div className="header-actions">
-          <div className="header-prefs" aria-hidden={open ? true : undefined}>
+          <div className="header-prefs">
             <PreferencesMenu compact />
           </div>
           <button
+            ref={toggleRef}
             type="button"
             className="menu-toggle"
             aria-expanded={open}
@@ -144,6 +156,7 @@ export function SiteHeader() {
 
         <nav
           id="main-nav"
+          ref={navRef}
           className={`nav ${open ? "is-open" : ""}`}
           aria-label={t("mainNav")}
         >

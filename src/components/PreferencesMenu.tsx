@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { persistUiLocale } from "@/components/LocaleSwitcher";
+import { useDismissibleOpen } from "@/hooks/useDismissibleOpen";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import {
   defaultLocale,
@@ -86,6 +87,7 @@ type Props = {
 
 /**
  * Single preferences control: language + light/dark theme.
+ * Visibility is driven only by React `is-open` (no CSS focus-within trap).
  */
 export function PreferencesMenu({ className = "", compact = true }: Props) {
   const t = useTranslations("Preferences");
@@ -94,10 +96,15 @@ export function PreferencesMenu({ className = "", compact = true }: Props) {
   const locale = useLocale() as AppLocale;
   const router = useRouter();
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const uid = useId();
+  const langLabelId = `${uid}-lang`;
+  const themeLabelId = `${uid}-theme`;
+  const { open, setOpen, toggle, openOnHover, closeOnLeave } =
+    useDismissibleOpen(rootRef, { closeOnPointerLeave: true });
+
   const [theme, setTheme] = useState<Theme>("light");
   const [themeReady, setThemeReady] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const next = readStoredTheme();
@@ -105,22 +112,6 @@ export function PreferencesMenu({ className = "", compact = true }: Props) {
     applyTheme(next);
     setThemeReady(true);
   }, []);
-
-  useEffect(() => {
-    if (!open) return;
-    function onDoc(e: MouseEvent) {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    }
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("mousedown", onDoc);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDoc);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
 
   const selectLocale = (next: AppLocale) => {
     if (!isAppLocale(next) || next === locale) {
@@ -142,27 +133,20 @@ export function PreferencesMenu({ className = "", compact = true }: Props) {
 
   return (
     <div
-      className={`nav-dropdown prefs-menu ${open ? "is-open" : ""} ${compact ? "prefs-menu--compact" : ""} ${className}`.trim()}
+      className={`prefs-menu ${open ? "is-open" : ""} ${compact ? "prefs-menu--compact" : ""} ${className}`.trim()}
       ref={rootRef}
-      onMouseEnter={() => {
-        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-          setOpen(true);
-        }
-      }}
-      onMouseLeave={() => {
-        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-          setOpen(false);
-        }
-      }}
+      onPointerEnter={openOnHover}
+      onPointerLeave={closeOnLeave}
     >
       <button
         type="button"
-        className="prefs-menu-trigger nav-dropdown-trigger"
+        className="prefs-menu-trigger"
         aria-expanded={open}
         aria-haspopup="menu"
+        aria-controls={`${uid}-panel`}
         aria-label={t("open")}
         title={t("open")}
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggle}
       >
         <PrefsIcon />
         <span className="prefs-menu-trigger-badge" aria-hidden>
@@ -175,14 +159,19 @@ export function PreferencesMenu({ className = "", compact = true }: Props) {
         )}
       </button>
 
-      <div className="nav-dropdown-menu prefs-menu-panel" role="menu">
-        <p className="prefs-menu-section-label" id="prefs-lang-label">
+      <div
+        id={`${uid}-panel`}
+        className="prefs-menu-panel"
+        role="menu"
+        hidden={!open}
+      >
+        <p className="prefs-menu-section-label" id={langLabelId}>
           {t("language")}
         </p>
         <div
           className="prefs-menu-options"
           role="group"
-          aria-labelledby="prefs-lang-label"
+          aria-labelledby={langLabelId}
         >
           {locales.map((code) => {
             const active = currentLocale === code;
@@ -205,13 +194,13 @@ export function PreferencesMenu({ className = "", compact = true }: Props) {
           })}
         </div>
 
-        <p className="prefs-menu-section-label" id="prefs-theme-label">
+        <p className="prefs-menu-section-label" id={themeLabelId}>
           {t("appearance")}
         </p>
         <div
           className="prefs-menu-options"
           role="group"
-          aria-labelledby="prefs-theme-label"
+          aria-labelledby={themeLabelId}
         >
           <button
             type="button"

@@ -503,13 +503,8 @@ html[data-theme="dark"] .site-header {
   gap: 0.15rem;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .nav-dropdown:hover > .nav-dropdown-menu,
-  .nav-dropdown:focus-within > .nav-dropdown-menu {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-  }
+.nav-dropdown-menu[hidden] {
+  display: none !important;
 }
 
 .nav-dropdown-menu a,
@@ -3428,8 +3423,8 @@ html[data-theme="dark"] .arabya-footer-panel {
     width: 100%;
   }
 
-  .header-prefs .nav-dropdown-menu,
-  .arabya-footer-prefs .nav-dropdown-menu {
+  .header-prefs .prefs-menu-panel,
+  .arabya-footer-prefs .prefs-menu-panel {
     position: absolute;
     inset-inline-end: 0;
     inset-inline-start: auto;
@@ -3654,10 +3649,28 @@ html[data-theme="dark"] .arabya-footer-panel {
 }
 
 .prefs-menu-panel {
+  display: none;
+  position: absolute;
+  inset-inline-end: 0;
+  inset-inline-start: auto;
+  top: calc(100% + 0.35rem);
   min-width: 12.5rem;
   padding: 0.55rem;
-  display: grid;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--brand) 18%, var(--line));
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  z-index: 90;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.35rem;
+}
+
+.prefs-menu.is-open > .prefs-menu-panel {
+  display: grid;
+}
+
+.prefs-menu-panel[hidden] {
+  display: none !important;
 }
 
 .prefs-menu-section-label {

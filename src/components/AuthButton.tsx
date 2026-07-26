@@ -1,32 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { signOut, useSession } from "next-auth/react";
+import { useDismissibleOpen } from "@/hooks/useDismissibleOpen";
 import { Link } from "@/i18n/navigation";
 
 export function AuthButton() {
   const t = useTranslations("Auth");
   const locale = useLocale();
   const { data, status } = useSession();
-  const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function onDoc(e: MouseEvent) {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    }
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("mousedown", onDoc);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDoc);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
+  const { open, setOpen, toggle, openOnHover, closeOnLeave } =
+    useDismissibleOpen(rootRef, { closeOnPointerLeave: true });
 
   if (status === "loading") {
     return (
@@ -41,23 +27,15 @@ export function AuthButton() {
       <div
         className={`nav-dropdown ${open ? "is-open" : ""}`}
         ref={rootRef}
-        onMouseEnter={() => {
-          if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-            setOpen(true);
-          }
-        }}
-        onMouseLeave={() => {
-          if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-            setOpen(false);
-          }
-        }}
+        onPointerEnter={openOnHover}
+        onPointerLeave={closeOnLeave}
       >
         <button
           type="button"
           className="auth-btn auth-btn--account nav-dropdown-trigger"
           aria-expanded={open}
           aria-haspopup="menu"
-          onClick={() => setOpen((v) => !v)}
+          onClick={toggle}
         >
           {data.user.image ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -71,7 +49,7 @@ export function AuthButton() {
           ) : null}
           <span>{t("account")}</span>
         </button>
-        <div className="nav-dropdown-menu" role="menu">
+        <div className="nav-dropdown-menu" role="menu" hidden={!open}>
           <Link href="/account" role="menuitem" onClick={() => setOpen(false)}>
             {t("dashboard")}
           </Link>
