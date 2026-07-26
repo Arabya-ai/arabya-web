@@ -473,54 +473,30 @@ html[data-theme="dark"] .arabya-mark-icon {
   letter-spacing: 0.01em;
 }
 
-/* Live preview — equal-height companion to controls; gentle motion; viewport-aware */
+/* Live preview — stage fills card; frame size set inline from aspect ratio */
 .studio-live-preview {
   position: relative;
 }
 
+.studio-live-preview__stage {
+  min-height: 0;
+}
+
 .studio-live-preview__frame {
-  width: min(100%, 18.5rem);
-  max-height: min(62vh, 34rem);
-  animation: studio-preview-float 7s ease-in-out infinite;
-  will-change: transform;
+  display: flex;
+  flex-shrink: 0;
 }
 
-@keyframes studio-preview-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
+.studio-live-preview__frame > img,
+.studio-live-preview__frame > video {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .studio-live-preview__frame {
-    animation: none;
-  }
-}
-
-@media (min-width: 1024px) {
-  .studio-live-preview {
-    position: relative;
-    top: auto;
-    max-height: none;
-  }
-
-  .studio-live-preview__frame {
-    width: min(100%, 20rem);
-    max-height: calc(100% - 2.75rem);
-  }
-}
-
-@media (min-width: 1536px) {
-  .studio-live-preview__frame {
-    width: min(100%, 22rem);
-  }
-}
-
-/* Short / landscape phones & tablets */
 @media (max-height: 520px) and (orientation: landscape) {
   .studio-editor-controls {
     max-height: min(48vh, 18rem) !important;
@@ -530,20 +506,9 @@ html[data-theme="dark"] .arabya-mark-icon {
     min-height: 0 !important;
     padding-block: 0.5rem !important;
   }
-
-  .studio-live-preview__frame {
-    width: min(42vw, 14rem);
-    max-height: min(78vh, 18rem);
-    animation: none;
-  }
 }
 
 @media (max-width: 639px) {
-  .studio-live-preview__frame {
-    width: min(100%, 16.5rem);
-    max-height: min(54vh, 26rem);
-  }
-
   .ayat-studio-shell .animate-fade-in {
     padding-inline: 0.65rem;
   }

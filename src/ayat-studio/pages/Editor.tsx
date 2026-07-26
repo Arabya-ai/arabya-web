@@ -361,6 +361,9 @@ export default function Editor() {
   const selectedSurah = surahs.find((s) => s.id === project.surahId);
   const selectedReciter = reciters.find((r) => r.id === project.reciterId);
   const previewAspect = previewAspectClass(project.ratio);
+  const previewRatioMeta =
+    aspectRatios.find((r) => r.id === project.ratio) ?? aspectRatios[0];
+  const previewAr = previewRatioMeta.width / previewRatioMeta.height;
   const ayahNum = currentPreviewAyah?.numberInSurah ?? project.ayahStart;
 
   const setOverride = (
@@ -1118,19 +1121,25 @@ export default function Editor() {
         </div>
       </div>
 
-      <div className="studio-live-preview relative order-1 flex min-h-[min(52vh,32rem)] w-full flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl border border-border/70 bg-card/40 p-3 backdrop-blur-md sm:min-h-[min(56vh,36rem)] sm:p-4 lg:order-2 lg:h-full lg:min-h-0 lg:flex-1 lg:p-5">
-        <div className="pattern-mihrab pointer-events-none absolute inset-0 opacity-20" />
+      <div className="studio-live-preview relative order-1 flex min-h-[min(52vh,32rem)] w-full flex-1 flex-col items-center justify-center overflow-visible rounded-2xl border border-border/70 bg-card/40 p-3 backdrop-blur-md sm:min-h-[min(56vh,36rem)] sm:p-4 lg:order-2 lg:h-full lg:min-h-0 lg:flex-1 lg:p-5">
+        <div className="pattern-mihrab pointer-events-none absolute inset-0 overflow-hidden rounded-2xl opacity-20" />
         <div className="relative z-[1] mb-2 shrink-0 text-center text-[11px] tracking-widest uppercase text-accent/80 sm:mb-3 sm:text-xs">
           معاينة مباشرة
         </div>
-        <div className="relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center">
-        <div
-          className={`${previewAspect} studio-live-preview__frame relative mx-auto flex flex-col overflow-hidden rounded-2xl border border-primary/35 shadow-deep`}
-          style={{
-            background:
-              "linear-gradient(180deg, hsl(178 50% 18%) 0%, hsl(200 50% 8%) 100%)",
-          }}
-        >
+        <div className="studio-live-preview__stage relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center p-1">
+          <div
+            className={`${previewAspect} studio-live-preview__frame relative flex flex-col overflow-hidden rounded-2xl border border-primary/35 shadow-deep`}
+            style={{
+              /* Shrink width when height caps so the whole frame (media) stays on screen */
+              width: `min(20rem, 100%, calc(min(70vh, 36rem) * ${previewAr}))`,
+              maxWidth: "100%",
+              height: "auto",
+              maxHeight: "min(70vh, 36rem)",
+              aspectRatio: `${previewRatioMeta.width} / ${previewRatioMeta.height}`,
+              background:
+                "linear-gradient(180deg, hsl(178 50% 18%) 0%, hsl(200 50% 8%) 100%)",
+            }}
+          >
           {project.bgUrl && project.bgKind !== "video" && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
