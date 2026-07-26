@@ -206,10 +206,10 @@ export function SiteFooter() {
               <Link href="/studio">{t("studio")}</Link>
               <Link href="/about">{t("about")}</Link>
               <Link href="/privacy">{t("privacy")}</Link>
+              <span className="arabya-footer-prefs">
+                <PreferencesMenu compact dropUp />
+              </span>
             </nav>
-            <div className="arabya-footer-prefs">
-              <PreferencesMenu compact />
-            </div>
           </div>
 
           <p className="arabya-footer-credit" suppressHydrationWarning>

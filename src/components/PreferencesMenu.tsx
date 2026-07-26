@@ -83,13 +83,19 @@ type Props = {
   className?: string;
   /** Icon-only trigger for chrome bars */
   compact?: boolean;
+  /** Open the panel upward (footer). */
+  dropUp?: boolean;
 };
 
 /**
  * Single preferences control: language + light/dark theme.
  * Visibility is driven only by React `is-open` (no CSS focus-within trap).
  */
-export function PreferencesMenu({ className = "", compact = true }: Props) {
+export function PreferencesMenu({
+  className = "",
+  compact = true,
+  dropUp = false,
+}: Props) {
   const t = useTranslations("Preferences");
   const tLocale = useTranslations("Locale");
   const tTheme = useTranslations("Theme");
@@ -132,7 +138,7 @@ export function PreferencesMenu({ className = "", compact = true }: Props) {
 
   return (
     <div
-      className={`prefs-menu ${open ? "is-open" : ""} ${compact ? "prefs-menu--compact" : ""} ${className}`.trim()}
+      className={`prefs-menu ${open ? "is-open" : ""} ${compact ? "prefs-menu--compact" : ""} ${dropUp ? "prefs-menu--dropup" : ""} ${className}`.trim()}
       ref={rootRef}
     >
       <button
