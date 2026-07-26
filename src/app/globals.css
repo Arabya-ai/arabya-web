@@ -15,6 +15,8 @@
 }
 
 :root {
+  /* Sticky site header height — updated live from SiteHeader ResizeObserver */
+  --arabya-header-height: 4.5rem;
   --bg: #f3f7f5;
   --bg-accent: #e7efeb;
   --surface: #ffffff;

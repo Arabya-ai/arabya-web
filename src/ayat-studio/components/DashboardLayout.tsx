@@ -19,7 +19,8 @@ export default function DashboardLayout({
     >
       <AppSidebar />
       <SidebarInset className="relative z-0 min-h-0 min-w-0 max-w-full overflow-x-hidden bg-transparent">
-        <header className="sticky top-0 z-30 flex h-12 shrink-0 items-center gap-3 border-b border-accent/10 bg-background/75 px-3 backdrop-blur-xl sm:h-14 sm:px-4">
+        {/* Stick below Arabya site header (z-50) so the studio bar stays visible */}
+        <header className="sticky z-40 flex h-12 shrink-0 items-center gap-3 border-b border-accent/10 bg-background/90 px-3 backdrop-blur-xl sm:h-14 sm:px-4 top-[var(--arabya-header-height)]">
           <SidebarTrigger className="shrink-0 text-accent hover:bg-accent/10" />
           <span className="truncate text-xs tracking-widest text-accent/60">
             الاستوديو

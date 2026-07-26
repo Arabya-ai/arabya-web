@@ -101,9 +101,29 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
 export function SiteHeader() {
   const t = useTranslations("Nav");
   const [open, setOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+
+    const syncHeight = () => {
+      document.documentElement.style.setProperty(
+        "--arabya-header-height",
+        `${el.offsetHeight}px`,
+      );
+    };
+    syncHeight();
+
+    const ro = new ResizeObserver(syncHeight);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+    };
+  }, []);
 
   return (
-    <header className="site-header">
+    <header className="site-header" ref={headerRef}>
       <div className="shell header-inner">
         <Link
           href="/"
