@@ -1,9 +1,63 @@
-/* Arabya Studio theme — scoped under .ayat-studio (Lovable dark gold/teal).
-   `.ayat-studio-portal` carries the same tokens for Radix portals rendered outside the shell. */
+/* Arabya Studio theme — scoped under .ayat-studio / .ayat-studio-portal.
+   Follows html[data-theme] so day/night matches the rest of Arabya. */
 
 .ayat-studio,
 .ayat-studio-portal {
-  /* Align with Arabya dark night palette (teal-black) + studio gold accent */
+  /* Shared chrome */
+  --radius: 0.875rem;
+  --gold: 41 75% 52%;
+  --gold-foreground: 168 40% 8%;
+  --gold-deep: 38 70% 42%;
+  --accent: 41 75% 48%;
+  --accent-foreground: 168 40% 8%;
+  --accent-glow: 45 85% 58%;
+  --destructive: 0 65% 48%;
+  --destructive-foreground: 0 0% 100%;
+  --ring: 173 70% 36%;
+  --gradient-gold: linear-gradient(135deg, hsl(45 85% 58%) 0%, hsl(38 70% 42%) 100%);
+  --gradient-teal: linear-gradient(135deg, hsl(173 70% 40%) 0%, hsl(168 55% 28%) 100%);
+
+  /* Light (default) — same palette as Arabya shell */
+  --background: 150 23% 96%;
+  --foreground: 215 28% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 215 28% 12%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 215 28% 12%;
+  --primary: 173 72% 34%;
+  --primary-foreground: 0 0% 100%;
+  --primary-glow: 173 70% 42%;
+  --secondary: 168 22% 94%;
+  --secondary-foreground: 215 20% 22%;
+  --muted: 168 18% 93%;
+  --muted-foreground: 200 10% 40%;
+  --border: 168 16% 86%;
+  --input: 168 16% 90%;
+  --sidebar-background: 150 20% 98%;
+  --sidebar-foreground: 215 28% 14%;
+  --sidebar-primary: 41 75% 48%;
+  --sidebar-primary-foreground: 168 40% 8%;
+  --sidebar-accent: 168 22% 94%;
+  --sidebar-accent-foreground: 215 28% 12%;
+  --sidebar-border: 168 16% 88%;
+  --sidebar-ring: 173 72% 34%;
+  --bg: #f3f7f5;
+  --ink: #0f172a;
+  --gradient-night: linear-gradient(180deg, #f8fbf9 0%, #f3f7f5 100%);
+  --gradient-royal: linear-gradient(135deg, #f3f7f5 0%, #e7efeb 50%, #f3f7f5 100%);
+  --gradient-aurora: none;
+  --shadow-gold: 0 10px 36px -12px hsl(41 75% 48% / 0.28);
+  --shadow-deep: 0 16px 40px -18px hsl(168 30% 20% / 0.18);
+  --shadow-glow: 0 0 40px hsl(173 70% 40% / 0.12);
+
+  direction: rtl;
+  font-family: var(--font-tajawal), "Tajawal", system-ui, sans-serif;
+  font-feature-settings: "kern", "liga", "calt";
+  -webkit-font-smoothing: antialiased;
+}
+
+html[data-theme="dark"] .ayat-studio,
+html[data-theme="dark"] .ayat-studio-portal {
   --background: 168 45% 5%;
   --foreground: 150 25% 94%;
   --card: 168 30% 9%;
@@ -20,12 +74,9 @@
   --accent: 41 75% 58%;
   --accent-foreground: 168 40% 8%;
   --accent-glow: 45 90% 68%;
-  --destructive: 0 65% 55%;
-  --destructive-foreground: 0 0% 100%;
   --border: 168 22% 16%;
   --input: 168 25% 14%;
   --ring: 173 70% 42%;
-  --radius: 0.875rem;
   --sidebar-background: 168 40% 4%;
   --sidebar-foreground: 150 20% 88%;
   --sidebar-primary: 41 75% 58%;
@@ -35,45 +86,51 @@
   --sidebar-border: 168 22% 12%;
   --sidebar-ring: 173 70% 42%;
   --gold: 41 75% 58%;
-  --gold-foreground: 168 40% 8%;
   --gold-deep: 38 70% 45%;
-
-  /* Match Arabya shell dark tokens */
   --bg: #071110;
   --ink: #eef6f2;
-
   --gradient-night: linear-gradient(180deg, #0d1c19 0%, #071110 100%);
-  --gradient-gold: linear-gradient(135deg, hsl(45 85% 65%) 0%, hsl(38 70% 45%) 100%);
-  --gradient-teal: linear-gradient(135deg, hsl(173 70% 42%) 0%, hsl(168 55% 28%) 100%);
-  --gradient-royal: linear-gradient(
-    135deg,
-    #071110 0%,
-    #0f2924 50%,
-    #071110 100%
-  );
-  --gradient-aurora:
-    radial-gradient(1200px 500px at 80% -10%, rgba(45, 212, 191, 0.12), transparent 55%),
-    radial-gradient(900px 400px at 0% 0%, rgba(20, 184, 166, 0.08), transparent 50%);
+  --gradient-royal: linear-gradient(135deg, #071110 0%, #0f2924 50%, #071110 100%);
+  --gradient-aurora: none;
   --shadow-gold: 0 10px 40px -10px hsl(41 75% 58% / 0.35);
   --shadow-deep: 0 20px 60px -15px hsl(168 50% 2% / 0.7);
   --shadow-glow: 0 0 50px hsl(173 80% 45% / 0.2);
-
-  direction: rtl;
-  font-family: var(--font-tajawal), "Tajawal", system-ui, sans-serif;
-  font-feature-settings: "kern", "liga", "calt";
-  -webkit-font-smoothing: antialiased;
 }
 
+/* Let Arabya body paint the page background (same day/night as the rest of the site). */
 .ayat-studio {
   color: hsl(var(--foreground));
-  background-color: var(--bg);
-  background-image: var(--gradient-aurora);
-  background-attachment: fixed;
+  background-color: transparent;
+  background-image: none;
   min-height: 100%;
 }
 
 .ayat-studio-portal {
   color: hsl(var(--foreground));
+}
+
+/* Professional brand mark used instead of star medallions */
+.arabya-mark-icon {
+  border-radius: 22%;
+  background:
+    linear-gradient(155deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
+  box-shadow:
+    0 1px 0 hsl(var(--foreground) / 0.06) inset,
+    0 8px 22px -10px hsl(173 70% 30% / 0.35),
+    0 0 0 1px hsl(var(--primary) / 0.22);
+  overflow: hidden;
+}
+
+.arabya-mark-icon__img {
+  border-radius: inherit;
+}
+
+html[data-theme="dark"] .arabya-mark-icon {
+  background: linear-gradient(155deg, #16332e 0%, #0f2924 48%, #0c221e 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 10px 28px -12px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(45, 212, 191, 0.28);
 }
 
 .ayat-studio h1,

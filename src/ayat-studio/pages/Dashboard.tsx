@@ -131,7 +131,7 @@ export default function Dashboard() {
                       style={{ background: "linear-gradient(135deg, hsl(178 50% 18%) 0%, hsl(200 40% 8%) 100%)" }}>
                       <div className="pattern-stars pointer-events-none absolute inset-0 opacity-50" aria-hidden />
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <ArabesqueMedallion size={56} className="text-accent/60 group-hover:rotate-45 transition-transform duration-700" />
+                        <ArabesqueMedallion size={56} className="text-accent/60" />
                       </div>
                     </div>
                     <CardContent className="p-4">

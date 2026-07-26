@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import {
   ArabesqueMedallion,
+  ArabyaMarkIcon,
   OrnamentDivider,
   StarOrnament,
 } from "@/ayat-studio/components/IslamicDecor";
@@ -53,13 +54,9 @@ export default function Landing() {
         <div className="container relative mx-auto px-4 text-center">
           <div className="mx-auto mb-8 flex flex-col items-center gap-3 sm:gap-4">
             <Link href="/" className="group inline-flex flex-col items-center gap-3" title="الصفحة الرئيسية">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/brand/arabya-mark-square.png"
-                alt="عربية"
-                width={56}
-                height={56}
-                className="rounded-xl transition group-hover:scale-105"
+              <ArabyaMarkIcon
+                size={56}
+                className="transition group-hover:scale-105"
               />
               <div className="flex flex-col items-center gap-1.5">
                 <span className="font-display text-xl font-bold text-foreground sm:text-2xl">
@@ -237,9 +234,11 @@ export default function Landing() {
             <div className="hidden md:block absolute top-10 right-[16%] left-[16%] h-px bg-gradient-to-l from-transparent via-accent/30 to-transparent" />
             {steps.map((s, i) => (
               <div key={i} className="relative text-center">
-                <div className="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center">
-                  <ArabesqueMedallion size={80} className="absolute inset-0 text-accent/40" />
-                  <span className="relative font-display text-3xl font-bold text-gradient-gold">{s.num}</span>
+                <div className="relative mx-auto mb-5 flex flex-col items-center gap-3">
+                  <ArabyaMarkIcon size={40} className="opacity-90" />
+                  <span className="font-display text-3xl font-bold text-gradient-gold">
+                    {s.num}
+                  </span>
                 </div>
                 <h3 className="mb-2 font-display text-xl font-semibold text-foreground">{s.title}</h3>
                 <p className="mx-auto max-w-xs text-sm leading-relaxed text-muted-foreground">{s.desc}</p>

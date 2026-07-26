@@ -48,7 +48,7 @@ export function AppSidebar() {
             alt="عربية"
             width={collapsed ? 28 : 36}
             height={collapsed ? 28 : 36}
-            className="shrink-0 rounded-md"
+            className="arabya-mark-icon shrink-0"
             unoptimized
           />
           {!collapsed && (
@@ -113,7 +113,7 @@ export function AppSidebar() {
                 alt="عربية"
                 width={48}
                 height={48}
-                className="rounded-lg"
+                className="arabya-mark-icon"
                 unoptimized
               />
               <span className="text-xs font-display font-semibold text-sidebar-foreground">

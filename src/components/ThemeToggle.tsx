@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { STORAGE_KEYS } from "@/lib/storage-keys";
 
@@ -10,7 +10,9 @@ type Theme = "light" | "dark";
 const THEME_KEY = STORAGE_KEYS.theme;
 
 function applyTheme(theme: Theme) {
-  document.documentElement.dataset.theme = theme;
+  const root = document.documentElement;
+  root.dataset.theme = theme;
+  root.style.colorScheme = theme;
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) {
     meta.setAttribute("content", theme === "dark" ? "#071110" : "#0f766e");
@@ -62,16 +64,18 @@ export function ThemeToggle() {
     setReady(true);
   }, []);
 
-  const toggle = () => {
-    const next: Theme = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    applyTheme(next);
-    try {
-      localStorage.setItem(THEME_KEY, next);
-    } catch {
-      /* ignore */
-    }
-  };
+  const toggle = useCallback(() => {
+    setTheme((prev) => {
+      const next: Theme = prev === "dark" ? "light" : "dark";
+      applyTheme(next);
+      try {
+        localStorage.setItem(THEME_KEY, next);
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }, []);
 
   if (!ready) {
     return (
