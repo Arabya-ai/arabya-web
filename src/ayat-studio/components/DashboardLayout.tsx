@@ -27,7 +27,7 @@ export default function DashboardLayout({
           </span>
         </header>
         <div className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
-          <div className="relative mx-auto w-full max-w-[1600px] flex-1 animate-fade-in p-3 sm:p-4 md:p-5 lg:p-6">
+          <div className="relative mx-auto w-full max-w-[1600px] flex-1 animate-fade-in p-2.5 sm:p-4 md:p-5 lg:p-6">
             {children}
           </div>
         </div>

@@ -5,19 +5,11 @@
 .ayat-studio-portal {
   /* Shared chrome */
   --radius: 0.875rem;
-  --gold: 41 75% 52%;
-  --gold-foreground: 168 40% 8%;
-  --gold-deep: 38 70% 42%;
-  --accent: 41 75% 48%;
-  --accent-foreground: 168 40% 8%;
-  --accent-glow: 45 85% 58%;
   --destructive: 0 65% 48%;
   --destructive-foreground: 0 0% 100%;
-  --ring: 173 70% 36%;
-  --gradient-gold: linear-gradient(135deg, hsl(45 85% 58%) 0%, hsl(38 70% 42%) 100%);
-  --gradient-teal: linear-gradient(135deg, hsl(173 70% 40%) 0%, hsl(168 55% 28%) 100%);
+  --gradient-teal: linear-gradient(135deg, hsl(173 72% 38%) 0%, hsl(168 65% 28%) 100%);
 
-  /* Light (default) — same palette as Arabya shell */
+  /* Light (default) — Arabya teal/green accents (no gold) + clearer type */
   --background: 150 23% 96%;
   --foreground: 215 28% 12%;
   --card: 0 0% 100%;
@@ -30,30 +22,40 @@
   --secondary: 168 22% 94%;
   --secondary-foreground: 215 20% 22%;
   --muted: 168 18% 93%;
-  --muted-foreground: 200 10% 40%;
+  --muted-foreground: 200 12% 36%;
+  --accent: 173 72% 32%;
+  --accent-foreground: 0 0% 100%;
+  --accent-glow: 173 70% 44%;
   --border: 168 16% 86%;
   --input: 168 16% 90%;
+  --ring: 173 72% 34%;
+  --gold: 173 72% 34%;
+  --gold-foreground: 0 0% 100%;
+  --gold-deep: 168 65% 28%;
   --sidebar-background: 150 20% 98%;
   --sidebar-foreground: 215 28% 14%;
-  --sidebar-primary: 41 75% 48%;
-  --sidebar-primary-foreground: 168 40% 8%;
+  --sidebar-primary: 173 72% 34%;
+  --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 168 22% 94%;
   --sidebar-accent-foreground: 215 28% 12%;
   --sidebar-border: 168 16% 88%;
   --sidebar-ring: 173 72% 34%;
   --bg: #f3f7f5;
   --ink: #0f172a;
+  --gradient-gold: linear-gradient(135deg, #14b8a6 0%, #0f766e 100%);
   --gradient-night: linear-gradient(180deg, #f8fbf9 0%, #f3f7f5 100%);
   --gradient-royal: linear-gradient(135deg, #f3f7f5 0%, #e7efeb 50%, #f3f7f5 100%);
   --gradient-aurora: none;
-  --shadow-gold: 0 10px 36px -12px hsl(41 75% 48% / 0.28);
+  --shadow-gold: 0 10px 36px -12px hsl(173 72% 34% / 0.28);
   --shadow-deep: 0 16px 40px -18px hsl(168 30% 20% / 0.18);
-  --shadow-glow: 0 0 40px hsl(173 70% 40% / 0.12);
+  --shadow-glow: 0 0 40px hsl(173 70% 40% / 0.14);
 
   direction: rtl;
   font-family: var(--font-tajawal), "Tajawal", system-ui, sans-serif;
   font-feature-settings: "kern", "liga", "calt";
   -webkit-font-smoothing: antialiased;
+  font-size: 1.0625rem;
+  line-height: 1.65;
 }
 
 html[data-theme="dark"] .ayat-studio,
@@ -77,6 +79,9 @@ html[data-theme="dark"] .ayat-studio-portal {
   --border: 168 22% 16%;
   --input: 168 25% 14%;
   --ring: 173 70% 42%;
+  --gold: 41 75% 58%;
+  --gold-foreground: 168 40% 8%;
+  --gold-deep: 38 70% 45%;
   --sidebar-background: 168 40% 4%;
   --sidebar-foreground: 150 20% 88%;
   --sidebar-primary: 41 75% 58%;
@@ -85,16 +90,18 @@ html[data-theme="dark"] .ayat-studio-portal {
   --sidebar-accent-foreground: 150 25% 94%;
   --sidebar-border: 168 22% 12%;
   --sidebar-ring: 173 70% 42%;
-  --gold: 41 75% 58%;
-  --gold-deep: 38 70% 45%;
   --bg: #071110;
   --ink: #eef6f2;
+  --gradient-gold: linear-gradient(135deg, hsl(45 85% 65%) 0%, hsl(38 70% 45%) 100%);
+  --gradient-teal: linear-gradient(135deg, hsl(173 70% 42%) 0%, hsl(168 55% 28%) 100%);
   --gradient-night: linear-gradient(180deg, #0d1c19 0%, #071110 100%);
   --gradient-royal: linear-gradient(135deg, #071110 0%, #0f2924 50%, #071110 100%);
   --gradient-aurora: none;
   --shadow-gold: 0 10px 40px -10px hsl(41 75% 58% / 0.35);
   --shadow-deep: 0 20px 60px -15px hsl(168 50% 2% / 0.7);
   --shadow-glow: 0 0 50px hsl(173 80% 45% / 0.2);
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
 /* Let Arabya body paint the page background (same day/night as the rest of the site). */
@@ -463,4 +470,110 @@ html[data-theme="dark"] .arabya-mark-icon {
     max-width: 100%;
     padding-inline: 1rem;
   }
+}
+
+/* Clearer type in light studio surfaces */
+.ayat-studio :where(p, li, label, button, input, select, textarea) {
+  letter-spacing: 0.01em;
+}
+
+.ayat-studio h1 {
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+}
+.ayat-studio h2 {
+  font-size: clamp(1.35rem, 3vw, 1.85rem);
+}
+
+/* Live preview — sticky on large screens, gentle motion, viewport-aware */
+.studio-live-preview {
+  position: relative;
+}
+
+.studio-live-preview__frame {
+  width: min(100%, 20rem);
+  max-height: min(68vh, 36rem);
+  animation: studio-preview-float 7s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes studio-preview-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-live-preview__frame {
+    animation: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .studio-live-preview {
+    position: sticky;
+    top: calc(var(--arabya-header-height, 4.5rem) + 3.25rem);
+    align-self: flex-start;
+    max-height: calc(100dvh - var(--arabya-header-height, 4.5rem) - 5rem);
+  }
+
+  .studio-live-preview__frame {
+    width: min(100%, 22rem);
+    max-height: min(72vh, 40rem);
+  }
+}
+
+@media (min-width: 1536px) {
+  .studio-live-preview__frame {
+    width: min(100%, 24rem);
+  }
+}
+
+/* Short / landscape phones & tablets */
+@media (max-height: 520px) and (orientation: landscape) {
+  .studio-editor-controls {
+    max-height: min(48vh, 18rem) !important;
+  }
+
+  .studio-live-preview {
+    min-height: 0 !important;
+    padding-block: 0.5rem !important;
+  }
+
+  .studio-live-preview__frame {
+    width: min(42vw, 14rem);
+    max-height: min(78vh, 18rem);
+    animation: none;
+  }
+}
+
+@media (max-width: 639px) {
+  .studio-live-preview__frame {
+    width: min(100%, 17.5rem);
+    max-height: min(58vh, 28rem);
+  }
+
+  .ayat-studio-shell .animate-fade-in {
+    padding-inline: 0.65rem;
+  }
+}
+
+/* Arabya-brand CTA (matches site auth primary buttons) */
+.ayat-studio .btn-arabya {
+  background: var(--brand-deep);
+  color: #fff;
+  border: 1px solid var(--brand-deep);
+  box-shadow: 0 8px 24px -12px color-mix(in srgb, var(--brand-deep) 55%, transparent);
+}
+.ayat-studio .btn-arabya:hover {
+  background: color-mix(in srgb, var(--brand-deep) 88%, #000);
+  border-color: color-mix(in srgb, var(--brand-deep) 88%, #000);
+  color: #fff;
+  filter: none;
+}
+.ayat-studio .btn-arabya:disabled {
+  opacity: 0.55;
 }

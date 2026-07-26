@@ -522,7 +522,7 @@ export default function Editor() {
   const transDur = project.transitionDuration ?? 0.6;
 
   return (
-    <div className="flex min-h-0 flex-col gap-3 md:gap-4 xl:min-h-[calc(100dvh-14rem)] xl:flex-row xl:items-stretch">
+    <div className="studio-editor flex min-h-0 flex-col gap-3 sm:gap-4 lg:flex-row lg:items-start xl:min-h-[calc(100dvh-var(--arabya-header-height,4.5rem)-11rem)]">
       <style>{`
         @keyframes studio-fade { from { opacity: 0.15 } to { opacity: 1 } }
         @keyframes studio-slide { from { transform: translateX(28px); opacity: 0.2 } to { transform: none; opacity: 1 } }
@@ -534,13 +534,13 @@ export default function Editor() {
         @keyframes studio-kenburns { from { transform: scale(1) } to { transform: scale(1.06) } }
       `}</style>
 
-      <div className="order-2 flex max-h-[min(52vh,28rem)] w-full shrink-0 flex-col overflow-hidden rounded-2xl border border-accent/20 bg-card/60 shadow-deep backdrop-blur-md sm:max-h-[min(56vh,32rem)] xl:order-1 xl:max-h-none xl:w-[min(100%,22rem)] xl:min-w-[18rem] 2xl:w-96">
-        <div className="flex shrink-0 items-center justify-between border-b border-accent/15 bg-gradient-to-l from-accent/5 to-transparent px-3 py-3 sm:px-4 sm:py-4">
+      <div className="studio-editor-controls order-2 flex max-h-[min(48vh,26rem)] w-full shrink-0 flex-col overflow-hidden rounded-2xl border border-border/70 bg-card/70 shadow-deep backdrop-blur-md sm:max-h-[min(52vh,30rem)] lg:order-1 lg:max-h-[calc(100dvh-var(--arabya-header-height,4.5rem)-8rem)] lg:w-[min(100%,21rem)] lg:min-w-[17rem] xl:w-[min(100%,22rem)] 2xl:w-96">
+        <div className="flex shrink-0 items-center justify-between border-b border-border/60 bg-gradient-to-l from-primary/5 to-transparent px-3 py-3 sm:px-4 sm:py-4">
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] tracking-widest uppercase text-accent/70">
+            <p className="text-[11px] tracking-widest uppercase text-accent/80 sm:text-xs">
               المشروع
             </p>
-            <h2 className="truncate font-display font-semibold text-foreground">
+            <h2 className="truncate font-display text-base font-semibold text-foreground sm:text-lg">
               {project.title}
             </h2>
           </div>
@@ -618,11 +618,11 @@ export default function Editor() {
               </div>
             </div>
             {unlimitedAyahs ? (
-              <p className="text-[10px] text-accent/80">
+              <p className="text-xs text-accent/80">
                 حساب سوبر أدمن: تصدير بدون حد لعدد الآيات أو السورة كاملة.
               </p>
             ) : (
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 حد التصدير {STUDIO_MAX_AYAHS} آية لكل فيديو.
               </p>
             )}
@@ -1037,7 +1037,7 @@ export default function Editor() {
               </Select>
             </div>
             <Button
-              variant="hero"
+              variant="arabya"
               size="lg"
               className="w-full"
               onClick={handleExport}
@@ -1082,7 +1082,7 @@ export default function Editor() {
             {exporting && (
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                 <div
-                  className="h-full gradient-gold transition-all"
+                  className="h-full gradient-primary transition-all"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -1091,15 +1091,14 @@ export default function Editor() {
         </div>
       </div>
 
-      <div className="relative order-1 flex min-h-[min(58vh,36rem)] flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl border border-accent/20 bg-card/30 p-3 backdrop-blur-md sm:min-h-[min(60vh,40rem)] sm:p-4 xl:order-2 xl:min-h-0">
+      <div className="studio-live-preview relative order-1 flex min-h-[min(52vh,32rem)] w-full flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl border border-border/70 bg-card/40 p-3 backdrop-blur-md sm:min-h-[min(56vh,36rem)] sm:p-4 lg:order-2 lg:min-h-0 lg:flex-none lg:w-[min(100%,26rem)] xl:w-[min(100%,28rem)]">
         <div className="pattern-mihrab pointer-events-none absolute inset-0 opacity-20" />
-        <div className="relative mb-2 text-xs tracking-widest uppercase text-accent/70 sm:mb-3">
+        <div className="relative mb-2 text-[11px] tracking-widest uppercase text-accent/80 sm:mb-3 sm:text-xs">
           معاينة مباشرة
         </div>
         <div
-          className={`${previewAspect} relative flex w-full max-w-[min(100%,20rem)] flex-col overflow-hidden rounded-2xl border border-accent/30 shadow-deep sm:max-w-xs`}
+          className={`${previewAspect} studio-live-preview__frame relative flex flex-col overflow-hidden rounded-2xl border border-primary/35 shadow-deep`}
           style={{
-            maxHeight: "min(70vh, 36rem)",
             background:
               "linear-gradient(180deg, hsl(178 50% 18%) 0%, hsl(200 50% 8%) 100%)",
           }}
@@ -1149,7 +1148,7 @@ export default function Editor() {
             />
           )}
           {(project.brandSignature ?? true) && (
-            <div className="pointer-events-none absolute inset-2 z-[6] rounded-xl border border-[rgba(200,169,81,0.35)]" />
+            <div className="pointer-events-none absolute inset-2 z-[6] rounded-xl border border-[hsl(var(--accent)/0.4)]" />
           )}
 
           <div
@@ -1168,8 +1167,8 @@ export default function Editor() {
             >
               {!ayahOnly && (
                 <p
-                  className="mb-3 text-xs tracking-widest"
-                  style={{ color: "#C8A951" }}
+                  className="mb-3 text-xs tracking-widest sm:text-sm"
+                  style={{ color: "hsl(var(--accent))" }}
                 >
                   {selectedSurah?.name}
                   {showNumbers
@@ -1178,16 +1177,16 @@ export default function Editor() {
                 </p>
               )}
               {ayahsLoading ? (
-                <p className="flex items-center justify-center gap-2 text-sm text-white/70">
+                <p className="flex items-center justify-center gap-2 text-sm text-white/70 sm:text-base">
                   <Loader2 className="h-4 w-4 animate-spin" /> جاري تحميل نص الآيات…
                 </p>
               ) : ayahsError ? (
-                <p className="text-sm text-red-300">{ayahsError}</p>
+                <p className="text-sm text-red-300 sm:text-base">{ayahsError}</p>
               ) : currentPreviewAyah ? (
                 <p
                   className="font-quran leading-loose mb-2"
                   style={{
-                    fontSize: `${Math.min(project.fontSize * 0.45, 26)}px`,
+                    fontSize: `${Math.min(project.fontSize * 0.52, 30)}px`,
                     color: project.textColor,
                     textShadow: "0 2px 12px rgba(0,0,0,0.8)",
                   }}
@@ -1195,13 +1194,13 @@ export default function Editor() {
                   {currentPreviewAyah.text}
                 </p>
               ) : (
-                <p className="text-sm text-white/60">لا يوجد نص للعرض</p>
+                <p className="text-sm text-white/60 sm:text-base">لا يوجد نص للعرض</p>
               )}
               {project.translationEnabled && translationText ? (
                 <p
                   className="mb-2 leading-relaxed"
                   style={{
-                    fontSize: `${Math.min((project.translationFontSize ?? 22) * 0.55, 15)}px`,
+                    fontSize: `${Math.min((project.translationFontSize ?? 22) * 0.62, 17)}px`,
                     color: project.translationTextColor || "#f0e6d0",
                     textShadow: "0 1px 8px rgba(0,0,0,0.7)",
                   }}
@@ -1214,7 +1213,7 @@ export default function Editor() {
                 <p
                   className="mb-2 leading-relaxed opacity-95"
                   style={{
-                    fontSize: `${Math.min((project.tafsirFontSize ?? 18) * 0.5, 13)}px`,
+                    fontSize: `${Math.min((project.tafsirFontSize ?? 18) * 0.58, 15)}px`,
                     color: project.tafsirTextColor || "#d4c4a8",
                     textShadow: "0 1px 8px rgba(0,0,0,0.7)",
                   }}
@@ -1271,8 +1270,8 @@ export default function Editor() {
               </span>
               {(project.brandSignature ?? true) && (
                 <span
-                  className="text-[10px] tracking-widest"
-                  style={{ color: "rgba(200,169,81,0.55)" }}
+                  className="text-[10px] tracking-widest sm:text-xs"
+                  style={{ color: "hsl(var(--accent) / 0.7)" }}
                 >
                   عربية
                 </span>

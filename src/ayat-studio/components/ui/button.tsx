@@ -15,13 +15,15 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-accent/30 bg-card/40 backdrop-blur-sm text-foreground hover:bg-accent/10 hover:border-accent/60 hover:text-accent",
+          "border border-primary/35 bg-card/40 backdrop-blur-sm text-foreground hover:bg-primary/10 hover:border-primary/60 hover:text-primary",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border/40",
         ghost: "hover:bg-accent/10 hover:text-accent",
         link: "text-accent underline-offset-4 hover:underline",
-        hero: "gradient-gold text-accent-foreground font-semibold shadow-gold hover:shadow-glow hover:brightness-110 active:scale-[0.98]",
-        gold: "gradient-gold text-accent-foreground shadow-gold hover:shadow-glow hover:brightness-110 font-semibold",
+        /** Primary Arabya CTA — same teal as site auth buttons */
+        hero: "btn-arabya font-semibold active:scale-[0.98]",
+        gold: "btn-arabya font-semibold active:scale-[0.98]",
+        arabya: "btn-arabya font-semibold active:scale-[0.98]",
         royal:
           "bg-card border border-accent/40 text-accent hover:bg-accent/10 hover:border-accent backdrop-blur-md font-medium",
       },

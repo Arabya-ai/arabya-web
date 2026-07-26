@@ -75,12 +75,12 @@ export default function Landing() {
               <StarOrnament className="h-3 w-3" />
             </div>
 
-            <h1 className="mb-8 font-display text-5xl font-bold leading-[1.15] tracking-tight md:text-7xl lg:text-8xl">
+            <h1 className="mb-8 font-display text-4xl font-bold leading-[1.2] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl">
               <span className="block text-foreground/90">حوّل التلاوة إلى</span>
               <span className="block text-shimmer mt-2">تحفة بصرية</span>
             </h1>
 
-            <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
+            <p className="mx-auto mb-10 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg md:text-xl">
               صمّم فيديوهات قرآنية وريلز إسلامية بطابع فاخر ودقة سينمائية —
               <br className="hidden md:inline" />
               بعد تسجيل الدخول، مباشرة من المتصفح بدون برامج مونتاج.
