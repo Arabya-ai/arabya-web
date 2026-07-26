@@ -1,4 +1,4 @@
-import { isEnvAdminEmail, type UserRole } from "@/lib/roles";
+import { isEnvAdminEmail, isSuperAdminEmail, type UserRole } from "@/lib/roles";
 
 export type UserPlan = "free" | "plus";
 
@@ -70,6 +70,15 @@ export function canCreatePremiumImage(plan: UserPlan): boolean {
 
 export function canCreateVideo(plan: UserPlan): boolean {
   return plan === "plus";
+}
+
+/** Max ayah span for normal Plus exports. Super-admin has no cap. */
+export const STUDIO_MAX_AYAHS = 40;
+
+export function canExportUnlimitedStudioAyahs(
+  email: string | null | undefined,
+): boolean {
+  return isSuperAdminEmail(email);
 }
 
 export type ImageAspect = "1:1" | "9:16" | "16:9";

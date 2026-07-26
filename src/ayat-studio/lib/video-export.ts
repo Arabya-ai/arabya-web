@@ -9,11 +9,15 @@ import { studioMediaUrl } from "./media-url";
 interface ExportOptions {
   project: StoredProject;
   onProgress?: (pct: number, label?: string) => void;
+  translationMap?: Record<number, string> | null;
+  tafsirMap?: Record<number, string> | null;
 }
 
 export async function exportProjectToVideo({
   project,
   onProgress,
+  translationMap = null,
+  tafsirMap = null,
 }: ExportOptions): Promise<Blob> {
   if (typeof VideoEncoder === "undefined" || typeof AudioEncoder === "undefined") {
     throw new Error("متصفحك لا يدعم تصدير MP4. الرجاء استخدام Chrome أو Edge الحديث.");
@@ -30,7 +34,25 @@ export async function exportProjectToVideo({
   if (ayahs.length === 0) throw new Error("لم يتم العثور على آيات");
 
   const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-  const { buffer: audioBuffer, segments } = await fetchAndDecodeAudio(ayahs, audioCtx);
+  const { buffer: rawAudio, segments: rawSegments } = await fetchAndDecodeAudio(
+    ayahs,
+    audioCtx,
+    {
+      pauseBetweenAyahsMs: project.pauseBetweenAyahsMs ?? 0,
+      softNormalize: project.softNormalize ?? true,
+    },
+  );
+  const rate = Math.max(0.75, Math.min(1.25, project.playbackRate ?? 1));
+  const audioBuffer =
+    rate === 1 ? rawAudio : await resampleBuffer(audioCtx, rawAudio, rate);
+  const segments =
+    rate === 1
+      ? rawSegments
+      : rawSegments.map((s) => ({
+          ...s,
+          start: s.start / rate,
+          end: s.end / rate,
+        }));
   const audioSampleRate = audioBuffer.sampleRate;
   const totalDuration = audioBuffer.duration;
   onProgress?.(8, "تحضير الخلفية...");
@@ -119,10 +141,10 @@ export async function exportProjectToVideo({
       height,
       bitrate:
         project.quality === "ultra"
-          ? 10_000_000
+          ? 16_000_000
           : project.quality === "standard"
-            ? 2_500_000
-            : 5_000_000,
+            ? 4_000_000
+            : 8_000_000,
       framerate: fps,
       avc: { format: "avc" },
     };
@@ -154,7 +176,7 @@ export async function exportProjectToVideo({
       codec: "mp4a.40.2",
       numberOfChannels: 2,
       sampleRate: audioSampleRate,
-      bitrate: 128_000,
+      bitrate: 192_000,
     });
 
     onProgress?.(15, "ترميز الفيديو والصوت...");
@@ -241,6 +263,22 @@ export async function exportProjectToVideo({
         bgVideo,
         project,
         ayahText: currentSegment.text,
+        translationText: project.translationEnabled
+          ? resolveExportLayer(
+              translationMap,
+              project.translationOverrides,
+              project.surahId,
+              currentSegment.numberInSurah,
+            )
+          : "",
+        tafsirText: project.tafsirEnabled
+          ? resolveExportLayer(
+              tafsirMap,
+              project.tafsirOverrides,
+              project.surahId,
+              currentSegment.numberInSurah,
+            )
+          : "",
         surahName: surah?.name || "",
         ayahNumber: currentSegment.numberInSurah,
         reciterName: reciter?.name || "",
@@ -301,7 +339,15 @@ export async function exportProjectToVideo({
 }
 
 /** One-frame PNG matching studio preview (ayah + background). */
-export async function exportProjectToPng(project: StoredProject): Promise<Blob> {
+export async function exportProjectToPng(
+  project: StoredProject,
+  layers?: {
+    translationMap?: Record<number, string> | null;
+    tafsirMap?: Record<number, string> | null;
+  },
+): Promise<Blob> {
+  const translationMap = layers?.translationMap ?? null;
+  const tafsirMap = layers?.tafsirMap ?? null;
   const ratio = aspectRatios.find((r) => r.id === project.ratio) || aspectRatios[0];
   const width = ratio.width;
   const height = ratio.height;
@@ -357,6 +403,22 @@ export async function exportProjectToPng(project: StoredProject): Promise<Blob> 
       bgVideo,
       project,
       ayahText: ayah.text,
+      translationText: project.translationEnabled
+        ? resolveExportLayer(
+            translationMap,
+            project.translationOverrides,
+            project.surahId,
+            ayah.numberInSurah,
+          )
+        : "",
+      tafsirText: project.tafsirEnabled
+        ? resolveExportLayer(
+            tafsirMap,
+            project.tafsirOverrides,
+            project.surahId,
+            ayah.numberInSurah,
+          )
+        : "",
       surahName: surah?.name || "",
       ayahNumber: ayah.numberInSurah,
       reciterName: reciter?.name || "",
@@ -382,6 +444,35 @@ export async function exportProjectToPng(project: StoredProject): Promise<Blob> 
       }
     }
   }
+}
+
+function resolveExportLayer(
+  map: Record<number, string> | null | undefined,
+  overrides: Record<string, string> | undefined,
+  surahId: number,
+  ayah: number,
+): string {
+  const key = `${surahId}:${ayah}`;
+  if (overrides?.[key]) return overrides[key];
+  return map?.[ayah] || "";
+}
+
+async function resampleBuffer(
+  ctx: AudioContext,
+  buffer: AudioBuffer,
+  rate: number,
+): Promise<AudioBuffer> {
+  const offline = new OfflineAudioContext(
+    buffer.numberOfChannels,
+    Math.ceil(buffer.length / rate),
+    buffer.sampleRate,
+  );
+  const src = offline.createBufferSource();
+  src.buffer = buffer;
+  src.playbackRate.value = rate;
+  src.connect(offline.destination);
+  src.start(0);
+  return offline.startRendering();
 }
 
 /**
@@ -435,31 +526,50 @@ interface DrawFrameOpts {
   bgVideo?: HTMLVideoElement | null;
   project: StoredProject;
   ayahText: string;
+  translationText?: string;
+  tafsirText?: string;
   surahName: string;
   ayahNumber: number;
   reciterName: string;
   progress: number;
   transition: string;
-  enterProgress: number; // 0..1 within transition window
+  enterProgress: number;
   exitProgress: number;
-  kenburnsT: number; // 0..1 across full video for Ken Burns slow zoom
+  kenburnsT: number;
 }
 
 function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   const {
-    width, height, bgImage, bgVideo, project, ayahText, surahName, ayahNumber, reciterName, progress,
-    transition, enterProgress, exitProgress, kenburnsT,
+    width,
+    height,
+    bgImage,
+    bgVideo,
+    project,
+    ayahText,
+    translationText = "",
+    tafsirText = "",
+    surahName,
+    ayahNumber,
+    reciterName,
+    progress,
+    transition,
+    enterProgress,
+    exitProgress,
+    kenburnsT,
   } = opts;
 
-  // Background — image OR video, with optional Ken Burns slow zoom
-  const bgSource: CanvasImageSource | null = bgVideo && bgVideo.videoWidth > 0
-    ? bgVideo
-    : bgImage;
-  const bgW = bgVideo && bgVideo.videoWidth > 0 ? bgVideo.videoWidth : bgImage?.width ?? 0;
-  const bgH = bgVideo && bgVideo.videoHeight > 0 ? bgVideo.videoHeight : bgImage?.height ?? 0;
+  const bgSource: CanvasImageSource | null =
+    bgVideo && bgVideo.videoWidth > 0 ? bgVideo : bgImage;
+  const bgW =
+    bgVideo && bgVideo.videoWidth > 0
+      ? bgVideo.videoWidth
+      : (bgImage?.width ?? 0);
+  const bgH =
+    bgVideo && bgVideo.videoHeight > 0
+      ? bgVideo.videoHeight
+      : (bgImage?.height ?? 0);
 
   if (bgSource && bgW > 0 && bgH > 0) {
-    // Always paint a base gradient so reduced bg opacity reveals it instead of black
     const grad = ctx.createLinearGradient(0, 0, 0, height);
     grad.addColorStop(0, `hsl(168, 70%, 18%)`);
     grad.addColorStop(1, `hsl(168, 60%, 8%)`);
@@ -468,11 +578,18 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
 
     const ir = bgW / bgH;
     const cr = width / height;
-    let dw = width, dh = height, dx = 0, dy = 0;
+    let dw = width,
+      dh = height,
+      dx = 0,
+      dy = 0;
     if (ir > cr) {
-      dh = height; dw = height * ir; dx = (width - dw) / 2;
+      dh = height;
+      dw = height * ir;
+      dx = (width - dw) / 2;
     } else {
-      dw = width; dh = width / ir; dy = (height - dh) / 2;
+      dw = width;
+      dh = width / ir;
+      dy = (height - dh) / 2;
     }
     const bgAlpha = Math.max(0, Math.min(1, (project.bgOpacity ?? 100) / 100));
     ctx.save();
@@ -497,32 +614,35 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
     ctx.fillRect(0, 0, width, height);
   }
 
-  // Dark overlay
   ctx.fillStyle = `rgba(0, 0, 0, ${project.overlayOpacity / 100})`;
   ctx.fillRect(0, 0, width, height);
 
-  // Vignette
-  const vg = ctx.createRadialGradient(
-    width / 2, height / 2, Math.min(width, height) * 0.3,
-    width / 2, height / 2, Math.max(width, height) * 0.7
-  );
-  vg.addColorStop(0, "rgba(0,0,0,0)");
-  vg.addColorStop(1, "rgba(0,0,0,0.5)");
-  ctx.fillStyle = vg;
-  ctx.fillRect(0, 0, width, height);
+  if (project.softVignette !== false) {
+    const vg = ctx.createRadialGradient(
+      width / 2,
+      height / 2,
+      Math.min(width, height) * 0.3,
+      width / 2,
+      height / 2,
+      Math.max(width, height) * 0.7,
+    );
+    vg.addColorStop(0, "rgba(0,0,0,0)");
+    vg.addColorStop(1, "rgba(0,0,0,0.55)");
+    ctx.fillStyle = vg;
+    ctx.fillRect(0, 0, width, height);
+  }
 
-  // === Apply transition transforms to the text layer ===
   const fadeAlpha = Math.min(enterProgress, exitProgress);
   let offsetX = 0;
   let offsetY = 0;
   let scale = 1;
   let blurPx = 0;
+  let glow = 0;
 
   switch (transition) {
     case "slide": {
-      const slideIn = (1 - enterProgress) * width * 0.15;
-      const slideOut = (1 - exitProgress) * -width * 0.15;
-      offsetX = slideIn + slideOut;
+      offsetX =
+        (1 - enterProgress) * width * 0.15 + (1 - exitProgress) * -width * 0.15;
       break;
     }
     case "zoom":
@@ -531,9 +651,15 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
     case "blur":
       blurPx = (1 - enterProgress) * 12 + (1 - exitProgress) * 12;
       break;
-    case "fade":
-    case "kenburns":
-    case "none":
+    case "wipe":
+      offsetX = (1 - enterProgress) * width * 0.35;
+      break;
+    case "rise":
+      offsetY = (1 - enterProgress) * height * 0.08;
+      break;
+    case "glow":
+      glow = (1 - fadeAlpha) * 28;
+      break;
     default:
       break;
   }
@@ -541,43 +667,109 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   ctx.save();
   ctx.globalAlpha = transition === "none" ? 1 : Math.max(0.05, fadeAlpha);
   if (blurPx > 0) (ctx as any).filter = `blur(${blurPx.toFixed(1)}px)`;
-  ctx.translate(width / 2 + offsetX, 0);
+  ctx.translate(width / 2 + offsetX, offsetY);
   ctx.scale(scale, scale);
   ctx.translate(-width / 2, 0);
 
   let yCenter: number;
-  if (project.overlayPosition === "top") yCenter = height * 0.25;
-  else if (project.overlayPosition === "bottom") yCenter = height * 0.72;
-  else yCenter = height * 0.5;
+  if (project.overlayPosition === "top") yCenter = height * 0.22;
+  else if (project.overlayPosition === "bottom") yCenter = height * 0.62;
+  else yCenter = height * 0.42;
 
-  // Surah label
-  ctx.fillStyle = "rgba(200, 169, 81, 0.95)";
-  ctx.font = `${Math.round(width * 0.025)}px "IBM Plex Sans Arabic", sans-serif`;
-  ctx.textAlign = "center";
-  ctx.fillText(`${surahName} · آية ${ayahNumber}`, width / 2, yCenter - height * 0.22);
+  const showNumbers = project.previewShowAyahNumbers !== false;
+  const ayahOnly = project.previewShowAyahOnly === true;
 
-  // Quran text
+  if (!ayahOnly) {
+    ctx.fillStyle = "rgba(200, 169, 81, 0.95)";
+    ctx.font = `${Math.round(width * 0.025)}px "IBM Plex Sans Arabic", sans-serif`;
+    ctx.textAlign = "center";
+    ctx.fillText(
+      showNumbers ? `${surahName} · آية ${ayahNumber}` : surahName,
+      width / 2,
+      yCenter - height * 0.16,
+    );
+  }
+
   ctx.fillStyle = project.textColor;
   const fontPx = Math.round((project.fontSize / 48) * width * 0.06);
   ctx.font = `bold ${fontPx}px "Amiri", "Scheherazade New", serif`;
   ctx.textAlign = "center";
   ctx.direction = "rtl";
-  ctx.shadowColor = "rgba(0,0,0,0.8)";
-  ctx.shadowBlur = 16;
-  wrapText(ctx, ayahText, width / 2, yCenter, width * 0.85, fontPx * 1.6);
+  ctx.shadowColor = glow
+    ? "rgba(200,169,81,0.9)"
+    : "rgba(0,0,0,0.8)";
+  ctx.shadowBlur = glow || 16;
+  wrapText(ctx, ayahText, width / 2, yCenter, width * 0.85, fontPx * 1.55);
   ctx.shadowBlur = 0;
+
+  let nextY = yCenter + fontPx * 1.8;
+  if (translationText) {
+    const tSize = Math.round(
+      ((project.translationFontSize ?? 22) / 22) * width * 0.028,
+    );
+    ctx.fillStyle = project.translationTextColor || "#f0e6d0";
+    ctx.font = `${tSize}px "IBM Plex Sans Arabic", sans-serif`;
+    ctx.direction = "auto" as CanvasDirection;
+    ctx.shadowColor = "rgba(0,0,0,0.7)";
+    ctx.shadowBlur = 10;
+    const used = wrapTextLines(
+      ctx,
+      translationText,
+      width / 2,
+      nextY,
+      width * 0.82,
+      tSize * 1.45,
+      4,
+    );
+    nextY += used * tSize * 1.45 + tSize * 0.4;
+    ctx.shadowBlur = 0;
+  }
+
+  if (tafsirText) {
+    const tSize = Math.round(
+      ((project.tafsirFontSize ?? 18) / 18) * width * 0.022,
+    );
+    const clipped =
+      tafsirText.length > 360 ? `${tafsirText.slice(0, 360)}…` : tafsirText;
+    ctx.fillStyle = project.tafsirTextColor || "#d4c4a8";
+    ctx.font = `${tSize}px "IBM Plex Sans Arabic", sans-serif`;
+    ctx.direction = "auto" as CanvasDirection;
+    ctx.shadowColor = "rgba(0,0,0,0.7)";
+    ctx.shadowBlur = 8;
+    wrapTextLines(
+      ctx,
+      clipped,
+      width / 2,
+      nextY,
+      width * 0.82,
+      tSize * 1.4,
+      5,
+    );
+    ctx.shadowBlur = 0;
+  }
 
   ctx.restore();
   if ((ctx as any).filter) (ctx as any).filter = "none";
 
-  // Reciter footer (no transition)
-  ctx.fillStyle = "rgba(255,255,255,0.55)";
-  ctx.font = `${Math.round(width * 0.022)}px "IBM Plex Sans Arabic", sans-serif`;
-  ctx.direction = "rtl";
-  ctx.textAlign = "center";
-  ctx.fillText(reciterName, width / 2, height - height * 0.04);
+  if (!ayahOnly) {
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.font = `${Math.round(width * 0.022)}px "IBM Plex Sans Arabic", sans-serif`;
+    ctx.direction = "rtl";
+    ctx.textAlign = "center";
+    ctx.fillText(reciterName, width / 2, height - height * 0.04);
+  }
 
-  // Progress bar
+  if (project.brandSignature !== false) {
+    ctx.strokeStyle = "rgba(200,169,81,0.4)";
+    ctx.lineWidth = Math.max(2, width * 0.003);
+    const pad = Math.round(width * 0.02);
+    ctx.strokeRect(pad, pad, width - pad * 2, height - pad * 2);
+    ctx.fillStyle = "rgba(200,169,81,0.55)";
+    ctx.font = `${Math.round(width * 0.018)}px "IBM Plex Sans Arabic", sans-serif`;
+    ctx.textAlign = "left";
+    ctx.fillText("عربية", pad * 1.4, height - pad * 1.6);
+  }
+
   const barW = width * 0.7;
   const barH = Math.max(3, height * 0.005);
   const barX = (width - barW) / 2;
@@ -594,9 +786,21 @@ function wrapText(
   x: number,
   y: number,
   maxWidth: number,
-  lineHeight: number
+  lineHeight: number,
 ) {
-  const words = text.split(" ");
+  wrapTextLines(ctx, text, x, y, maxWidth, lineHeight, 6);
+}
+
+function wrapTextLines(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number,
+  maxLines: number,
+): number {
+  const words = text.split(/\s+/).filter(Boolean);
   const lines: string[] = [];
   let current = "";
   for (const w of words) {
@@ -609,12 +813,11 @@ function wrapText(
     }
   }
   if (current) lines.push(current);
-
-  const maxLines = 6;
   const trimmed = lines.slice(0, maxLines);
   const total = trimmed.length;
   const startY = y - ((total - 1) / 2) * lineHeight;
   trimmed.forEach((line, i) => ctx.fillText(line, x, startY + i * lineHeight));
+  return total;
 }
 
 function shouldUseCorsAnonymous(src: string): boolean {

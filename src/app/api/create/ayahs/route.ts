@@ -1,6 +1,10 @@
 import { auth } from "@/auth";
 import { getSurah } from "@/lib/quran";
 import { normalizeForHafsFont } from "@/lib/quran-text";
+import {
+  STUDIO_MAX_AYAHS,
+  canExportUnlimitedStudioAyahs,
+} from "@/lib/plans";
 
 export const runtime = "nodejs";
 
@@ -30,7 +34,8 @@ export async function GET(request: Request) {
     surah.versesCount,
     Math.max(start, Number.isFinite(to) ? to : start),
   );
-  if (end - start + 1 > 40) {
+  const unlimited = canExportUnlimitedStudioAyahs(session.user.email);
+  if (!unlimited && end - start + 1 > STUDIO_MAX_AYAHS) {
     return Response.json({ error: "range_too_long" }, { status: 400 });
   }
 

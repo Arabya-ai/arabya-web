@@ -175,10 +175,60 @@ export const surahs = [
 ];
 
 export const aspectRatios = [
-  { id: "9:16", label: "9:16 ريلز", width: 1080, height: 1920 },
-  { id: "16:9", label: "16:9 يوتيوب", width: 1920, height: 1080 },
-  { id: "1:1", label: "1:1 مربع", width: 1080, height: 1080 },
+  {
+    id: "9:16",
+    label: "ريلز إنستغرام / فيسبوك / يوتيوب شورتس / تيك توك (9:16)",
+    width: 1080,
+    height: 1920,
+  },
+  {
+    id: "4:5",
+    label: "منشور إنستغرام / فيسبوك عمودي (4:5)",
+    width: 1080,
+    height: 1350,
+  },
+  {
+    id: "2:3",
+    label: "بينترست / ستوري طويل (2:3)",
+    width: 1080,
+    height: 1620,
+  },
+  {
+    id: "1:1",
+    label: "مربع فيسبوك / لينكدإن / X (1:1)",
+    width: 1080,
+    height: 1080,
+  },
+  {
+    id: "16:9",
+    label: "يوتيوب أفقي / X / لينكدإن (16:9)",
+    width: 1920,
+    height: 1080,
+  },
+  {
+    id: "21:9",
+    label: "سينمائي عريض (21:9)",
+    width: 2560,
+    height: 1080,
+  },
 ];
+
+export function previewAspectClass(ratioId: string): string {
+  switch (ratioId) {
+    case "9:16":
+      return "aspect-[9/16]";
+    case "4:5":
+      return "aspect-[4/5]";
+    case "2:3":
+      return "aspect-[2/3]";
+    case "1:1":
+      return "aspect-square";
+    case "21:9":
+      return "aspect-[21/9]";
+    default:
+      return "aspect-video";
+  }
+}
 
 export const transitions = [
   { id: "none", label: "بدون انتقال" },
@@ -187,6 +237,9 @@ export const transitions = [
   { id: "zoom", label: "تكبير سينمائي" },
   { id: "blur", label: "ضباب نوراني" },
   { id: "kenburns", label: "كين بيرنز" },
+  { id: "wipe", label: "مسح ضوئي" },
+  { id: "rise", label: "صعود هادئ" },
+  { id: "glow", label: "توهج ذهبي" },
 ] as const;
 export type TransitionId = typeof transitions[number]["id"];
 
@@ -196,6 +249,10 @@ export const visualizers = [
   { id: "wave", label: "موجة صوتية" },
   { id: "circle", label: "نبضة دائرية" },
   { id: "particles", label: "جسيمات نورانية" },
+  { id: "mirror", label: "مرآة طيفية" },
+  { id: "aurora", label: "شفق صوتي" },
+  { id: "spectrum", label: "طيف حلقي" },
+  { id: "ripple", label: "تموجات مركزية" },
 ] as const;
 export type VisualizerId = typeof visualizers[number]["id"];
 

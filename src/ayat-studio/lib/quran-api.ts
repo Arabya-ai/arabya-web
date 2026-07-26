@@ -83,6 +83,7 @@ function networkErrorMessage(err: unknown, ayah?: number): string {
 export async function fetchAndDecodeAudio(
   ayahs: AyahData[],
   audioCtx: AudioContext,
+  opts?: { pauseBetweenAyahsMs?: number; softNormalize?: boolean },
 ): Promise<{
   buffer: AudioBuffer;
   segments: {
@@ -95,6 +96,9 @@ export async function fetchAndDecodeAudio(
   if (ayahs.length === 0) {
     throw new Error("لا توجد آيات في النطاق المحدد. راجع رقم السورة والآيات.");
   }
+
+  const gapMs = Math.max(0, opts?.pauseBetweenAyahsMs ?? 0);
+  const gapSamples = Math.floor((gapMs / 1000) * audioCtx.sampleRate);
 
   const buffers = await Promise.all(
     ayahs.map(async (a) => {
@@ -122,7 +126,10 @@ export async function fetchAndDecodeAudio(
 
   const sampleRate = buffers[0].sampleRate;
   const channels = Math.max(...buffers.map((b) => b.numberOfChannels));
-  const totalLength = buffers.reduce((s, b) => s + b.length, 0);
+  const gapAtRate = Math.floor((gapMs / 1000) * sampleRate);
+  const totalLength =
+    buffers.reduce((s, b) => s + b.length, 0) +
+    gapAtRate * Math.max(0, buffers.length - 1);
   const out = audioCtx.createBuffer(channels, totalLength, sampleRate);
 
   const segments: {
@@ -146,7 +153,29 @@ export async function fetchAndDecodeAudio(
       text: ayahs[i].text,
       numberInSurah: ayahs[i].numberInSurah,
     });
+    if (i < buffers.length - 1 && gapAtRate > 0) {
+      offset += gapAtRate;
+    }
   });
 
+  if (opts?.softNormalize !== false) {
+    let peak = 0;
+    for (let ch = 0; ch < channels; ch++) {
+      const data = out.getChannelData(ch);
+      for (let i = 0; i < data.length; i++) {
+        const a = Math.abs(data[i]);
+        if (a > peak) peak = a;
+      }
+    }
+    if (peak > 0.001 && peak < 0.95) {
+      const g = 0.95 / peak;
+      for (let ch = 0; ch < channels; ch++) {
+        const data = out.getChannelData(ch);
+        for (let i = 0; i < data.length; i++) data[i] *= g;
+      }
+    }
+  }
+
+  void gapSamples;
   return { buffer: out, segments };
 }

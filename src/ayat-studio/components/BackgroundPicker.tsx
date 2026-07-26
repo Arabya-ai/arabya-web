@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Upload, Link as LinkIcon, Search, Loader2, Trash2, ExternalLink, Image as ImageIcon, Film } from "lucide-react";
+import { Upload, Link as LinkIcon, Search, Loader2, Trash2, Image as ImageIcon, Film } from "lucide-react";
 import { Button } from "@/ayat-studio/components/ui/button";
 import { Input } from "@/ayat-studio/components/ui/input";
 import { Label } from "@/ayat-studio/components/ui/label";
@@ -13,8 +13,6 @@ import {
   type PexelsVideo,
 } from "@/ayat-studio/lib/pexels";
 import { useToast } from "@/ayat-studio/hooks/use-toast";
-import { Link } from "@/i18n/navigation";
-import { studioPath } from "@/ayat-studio/lib/studio-paths";
 import { studioMediaUrl, isAllowedStudioMediaUrl } from "@/ayat-studio/lib/media-url";
 
 type Tab = "upload" | "url" | "search";
@@ -223,19 +221,6 @@ export function BackgroundPicker({ bgType, bgKind = "image", bgUrl, bgPoster = "
 
       {tab === "search" && (
         <div className="space-y-2">
-          <div className="rounded-md border border-accent/20 bg-accent/5 p-3 text-[11px] text-muted-foreground leading-relaxed">
-            البحث يستخدم مفتاح السيرفر إن وُجد، أو مفتاحك من{" "}
-            <Link href={studioPath("/settings")} className="text-accent underline">الإعدادات</Link>
-            .{" "}
-            <a
-              href="https://www.pexels.com/api/new/"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 text-accent hover:underline"
-            >
-              مفتاح مجاني <ExternalLink className="h-3 w-3" />
-            </a>
-          </div>
           <div className="flex gap-1.5">
             {kindBtn("image", <ImageIcon className="h-3 w-3" />, "صور")}
             {kindBtn("video", <Film className="h-3 w-3" />, "فيديوهات")}

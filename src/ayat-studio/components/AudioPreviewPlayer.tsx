@@ -46,6 +46,32 @@ export function AudioPreviewPlayer({ project, onAyahIndexChange }: Props) {
   const ayahStart = project.ayahStart;
   const ayahEnd = project.ayahEnd;
 
+  const projectRef = useRef(project);
+  projectRef.current = project;
+  const rateRef = useRef(project.playbackRate ?? 1);
+  rateRef.current = project.playbackRate ?? 1;
+
+  useEffect(() => {
+    if (gainRef.current) {
+      gainRef.current.gain.value = muted
+        ? 0
+        : (project.volume ?? 80) / 100;
+    }
+  }, [project.volume, muted]);
+
+  useEffect(() => {
+    if (sourceRef.current) {
+      try {
+        sourceRef.current.playbackRate.value = Math.max(
+          0.75,
+          Math.min(1.25, project.playbackRate ?? 1),
+        );
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [project.playbackRate]);
+
   // Reset when source changes
   useEffect(() => {
     stop();
@@ -99,22 +125,26 @@ export function AudioPreviewPlayer({ project, onAyahIndexChange }: Props) {
     const analyser = analyserRef.current;
     const data = dataRef.current;
     const ctx = ctxRef.current;
+    const p = projectRef.current;
     if (!canvas || !analyser || !data || !ctx) return;
 
     analyser.getByteFrequencyData(data as any);
-    const elapsed = ctx.currentTime - startTimeRef.current + startedAtSecRef.current;
-    setProgress(Math.min(elapsed / (bufferRef.current?.duration || 1), 1));
+    const rate = Math.max(0.75, Math.min(1.25, rateRef.current || 1));
+    const elapsed =
+      (ctx.currentTime - startTimeRef.current) * rate + startedAtSecRef.current;
+    const dur = bufferRef.current?.duration || 1;
+    setProgress(Math.min(elapsed / dur, 1));
     emitAyahIndex(elapsed);
 
     drawVisualizer({
       canvas,
       data,
-      type: (project.visualizer || "bars") as VisualizerType,
-      color: project.visualizerColor || "#C8A951",
-      intensity: (project.visualizerIntensity ?? 60) / 100,
+      type: (p.visualizer || "bars") as VisualizerType,
+      color: p.visualizerColor || "#C8A951",
+      intensity: (p.visualizerIntensity ?? 60) / 100,
     });
 
-    if (elapsed >= (bufferRef.current?.duration || 0)) {
+    if (elapsed >= dur) {
       stop();
       return;
     }
@@ -131,7 +161,7 @@ export function AudioPreviewPlayer({ project, onAyahIndexChange }: Props) {
       source.buffer = buffer;
 
       const gain = ctx.createGain();
-      gain.gain.value = muted ? 0 : (project.volume ?? 80) / 100;
+      gain.gain.value = muted ? 0 : (projectRef.current.volume ?? 80) / 100;
 
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 256;
@@ -140,6 +170,12 @@ export function AudioPreviewPlayer({ project, onAyahIndexChange }: Props) {
       source.connect(gain);
       gain.connect(analyser);
       analyser.connect(ctx.destination);
+
+      const rate = Math.max(
+        0.75,
+        Math.min(1.25, projectRef.current.playbackRate ?? 1),
+      );
+      source.playbackRate.value = rate;
 
       sourceRef.current = source;
       gainRef.current = gain;
@@ -174,8 +210,10 @@ export function AudioPreviewPlayer({ project, onAyahIndexChange }: Props) {
   const pause = () => {
     const ctx = ctxRef.current;
     if (ctx && playing) {
+      const rate = Math.max(0.75, Math.min(1.25, rateRef.current || 1));
       startedAtSecRef.current =
-        ctx.currentTime - startTimeRef.current + startedAtSecRef.current;
+        (ctx.currentTime - startTimeRef.current) * rate +
+        startedAtSecRef.current;
     }
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     rafRef.current = null;

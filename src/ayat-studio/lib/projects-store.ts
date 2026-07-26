@@ -3,6 +3,28 @@
 const PROJECTS_KEY = "ayat_projects";
 const EXPORTS_KEY = "ayat_exports";
 
+export type TransitionId =
+  | "none"
+  | "fade"
+  | "slide"
+  | "zoom"
+  | "blur"
+  | "kenburns"
+  | "wipe"
+  | "rise"
+  | "glow";
+
+export type VisualizerId =
+  | "none"
+  | "bars"
+  | "wave"
+  | "circle"
+  | "particles"
+  | "mirror"
+  | "aurora"
+  | "spectrum"
+  | "ripple";
+
 export interface StoredProject {
   id: string;
   title: string;
@@ -12,31 +34,47 @@ export interface StoredProject {
   ayahEnd: number;
   ratio: string;
   bgType: "none" | "image" | "url";
-  /** Whether the bgUrl points to an image (default) or a video file (mp4). */
   bgKind?: "image" | "video";
   bgUrl: string;
-  /** Optional poster/thumbnail for video backgrounds (e.g. Pexels preview image). */
   bgPoster?: string;
-  bgOpacity?: number; // 0..100 — opacity of background media itself
+  bgOpacity?: number;
   translationEnabled: boolean;
   tafsirEnabled: boolean;
+  translationSlug?: string;
+  tafsirSlug?: string;
+  /** Manual edits keyed by `${surahId}:${ayah}` — never for Quran Arabic text. */
+  translationOverrides?: Record<string, string>;
+  tafsirOverrides?: Record<string, string>;
+  /** Ayah (Quran) typography — immutable text source. */
   fontSize: number;
   textColor: string;
+  translationFontSize?: number;
+  translationTextColor?: string;
+  tafsirFontSize?: number;
+  tafsirTextColor?: string;
   overlayPosition: "top" | "center" | "bottom";
   overlayOpacity: number;
   volume: number;
   fadeIn: boolean;
   fadeOut: boolean;
+  playbackRate?: number;
+  softNormalize?: boolean;
+  pauseBetweenAyahsMs?: number;
   quality: "standard" | "high" | "ultra";
   status: "مسودة" | "مكتمل" | "جاري المعالجة" | "فشل";
   createdAt: string;
-  // New: visual transitions between ayahs
-  transition?: "none" | "fade" | "slide" | "zoom" | "blur" | "kenburns";
-  transitionDuration?: number; // seconds
-  // New: audio reactive visualizer
-  visualizer?: "none" | "bars" | "wave" | "circle" | "particles";
+  transition?: TransitionId;
+  transitionDuration?: number;
+  visualizer?: VisualizerId;
   visualizerColor?: string;
-  visualizerIntensity?: number; // 0..100
+  visualizerIntensity?: number;
+  /** Preview chrome: ayah text only (hide surah/reciter chrome). */
+  previewShowAyahOnly?: boolean;
+  previewShowNavBar?: boolean;
+  previewShowAyahNumbers?: boolean;
+  /** Subtle Arabya signature frame on export/preview for unique composition. */
+  brandSignature?: boolean;
+  softVignette?: boolean;
 }
 
 export interface StoredExport {
@@ -48,7 +86,7 @@ export interface StoredExport {
   status: "قيد الانتظار" | "جاري المعالجة" | "مكتمل" | "فشل";
   date: string;
   size: string;
-  videoUrl?: string; // object URL for downloading
+  videoUrl?: string;
 }
 
 export function getProjects(): StoredProject[] {
@@ -71,7 +109,6 @@ export function saveProject(project: StoredProject): void {
   try {
     localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
   } catch (err) {
-    // Quota exceeded — slim other projects' heavy data-URLs first, keep current bg.
     const slimOthers = projects.map((p) =>
       p.id !== project.id && p.bgUrl?.startsWith("data:") && p.bgUrl.length > 100_000
         ? { ...p, bgUrl: "", bgPoster: "", bgType: "none" as const, bgKind: "image" as const }
@@ -131,15 +168,26 @@ export function createDefaultProject(input: {
     bgUrl: "",
     bgPoster: "",
     bgOpacity: 100,
-    translationEnabled: true,
+    translationEnabled: false,
     tafsirEnabled: false,
+    translationSlug: "saheeh-en",
+    tafsirSlug: "muyassar",
+    translationOverrides: {},
+    tafsirOverrides: {},
     fontSize: 48,
     textColor: "#ffffff",
+    translationFontSize: 22,
+    translationTextColor: "#f0e6d0",
+    tafsirFontSize: 18,
+    tafsirTextColor: "#d4c4a8",
     overlayPosition: "center",
     overlayOpacity: 40,
     volume: 80,
     fadeIn: true,
     fadeOut: true,
+    playbackRate: 1,
+    softNormalize: true,
+    pauseBetweenAyahsMs: 0,
     quality: "high",
     status: "مسودة",
     createdAt: new Date().toISOString(),
@@ -148,12 +196,16 @@ export function createDefaultProject(input: {
     visualizer: "bars",
     visualizerColor: "#C8A951",
     visualizerIntensity: 60,
+    previewShowAyahOnly: false,
+    previewShowNavBar: true,
+    previewShowAyahNumbers: true,
+    brandSignature: true,
+    softVignette: true,
   };
   saveProject(project);
   return project;
 }
 
-// Exports
 export function getExports(): StoredExport[] {
   try {
     return JSON.parse(localStorage.getItem(EXPORTS_KEY) || "[]");
@@ -167,13 +219,10 @@ export function saveExport(exp: StoredExport): void {
   const idx = list.findIndex((e) => e.id === exp.id);
   if (idx >= 0) list[idx] = exp;
   else list.unshift(exp);
-  // Persist metadata only (object URLs cannot be persisted across reloads)
-  // We still save them in current session memory map separately
   localStorage.setItem(
     EXPORTS_KEY,
-    JSON.stringify(list.map(({ videoUrl, ...rest }) => rest))
+    JSON.stringify(list.map(({ videoUrl, ...rest }) => rest)),
   );
-  // Keep videoUrl in session map
   if (exp.videoUrl) sessionVideoUrls.set(exp.id, exp.videoUrl);
 }
 
