@@ -34,11 +34,8 @@ export const DEFAULT_SURAH_LABEL_FONT: SurahLabelFontId =
   "IBM Plex Sans Arabic";
 export const DEFAULT_SURAH_LABEL_COLOR = "#C8A951";
 
-/** Brand lockup colors matching the official Arabya Studio mark. */
-export const BRAND_LOCKUP_TITLE = "#0A1628";
-export const BRAND_LOCKUP_SUB = "#5B6B82";
-export const BRAND_LOCKUP_PLATE = "rgba(248, 250, 252, 0.94)";
-export const BRAND_LOCKUP_PLATE_BORDER = "rgba(10, 22, 40, 0.08)";
+export const BRAND_LOCKUP_AR = "عربية ستوديو";
+export const BRAND_LOCKUP_EN = "ARABYA • STUDIO";
 
 export function frameSurahLabelPx(
   fontSize: number,

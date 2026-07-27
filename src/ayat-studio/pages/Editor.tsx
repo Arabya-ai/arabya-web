@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { studioPath } from "@/ayat-studio/lib/studio-paths";
@@ -79,8 +79,8 @@ import {
   type BrandPosition,
 } from "@/ayat-studio/lib/brand-position";
 import {
-  BRAND_LOCKUP_SUB,
-  BRAND_LOCKUP_TITLE,
+  BRAND_LOCKUP_AR,
+  BRAND_LOCKUP_EN,
   DEFAULT_SURAH_LABEL_COLOR,
   DEFAULT_SURAH_LABEL_FONT_SIZE,
   frameAyahFontPx,
@@ -116,6 +116,56 @@ import {
   resolveLayerText,
   type StudioEdition,
 } from "@/ayat-studio/lib/studio-layers";
+
+function BrandLockupLabels({
+  titlePx,
+  subPx,
+}: {
+  titlePx: number;
+  subPx: number;
+}) {
+  const enRef = useRef<HTMLSpanElement>(null);
+  const arRef = useRef<HTMLSpanElement>(null);
+  const [fit, setFit] = useState({ scaleX: 1, enW: 0 });
+
+  useLayoutEffect(() => {
+    const en = enRef.current?.offsetWidth ?? 0;
+    const ar = arRef.current?.offsetWidth ?? 0;
+    setFit({
+      scaleX: en > 0 && ar > 0 ? en / ar : 1,
+      enW: en,
+    });
+  }, [titlePx, subPx]);
+
+  return (
+    <div className="flex min-w-0 flex-col gap-0.5 text-start">
+      <div
+        className="overflow-visible"
+        style={{ width: fit.enW > 0 ? fit.enW : undefined }}
+      >
+        <span
+          ref={arRef}
+          className="font-display font-bold leading-none text-white whitespace-nowrap"
+          style={{
+            fontSize: `${titlePx}px`,
+            display: "inline-block",
+            transform: `scaleX(${fit.scaleX})`,
+            transformOrigin: "left center",
+          }}
+        >
+          {BRAND_LOCKUP_AR}
+        </span>
+      </div>
+      <span
+        ref={enRef}
+        className="font-medium leading-none tracking-[0.18em] text-white/75 whitespace-nowrap"
+        style={{ fontSize: `${subPx}px` }}
+      >
+        {BRAND_LOCKUP_EN}
+      </span>
+    </div>
+  );
+}
 
 function EditorPanel({
   title,
@@ -1638,43 +1688,19 @@ export default function Editor() {
           {(needsWatermark || (project.brandSignature ?? true)) && (
             <div
               dir="ltr"
-              className={`pointer-events-none absolute z-[8] flex items-center rounded-[18%] px-2 py-1.5 shadow-[0_4px_16px_rgba(0,0,0,0.28)] ${brandPositionClass(
+              className={`pointer-events-none absolute z-[8] flex items-center drop-shadow-[0_1px_3px_rgba(0,0,0,0.65)] ${brandPositionClass(
                 normalizeBrandPosition(project.brandPosition),
               )}`}
-              style={{
-                gap: Math.max(6, frameBrandMarkPx(frameWidth) * 0.22),
-                background: "rgba(248, 250, 252, 0.94)",
-                border: "1px solid rgba(10, 22, 40, 0.08)",
-              }}
+              style={{ gap: Math.max(4, frameBrandMarkPx(frameWidth) * 0.18) }}
               aria-label="عربية ستوديو"
             >
-              <div
-                dir="rtl"
-                className="flex min-w-0 flex-col items-end gap-0.5 text-end"
-              >
-                <span
-                  className="font-display font-bold leading-none"
-                  style={{
-                    fontSize: `${frameBrandTitlePx(frameWidth)}px`,
-                    color: BRAND_LOCKUP_TITLE,
-                  }}
-                >
-                  عربية ستوديو
-                </span>
-                <span
-                  dir="ltr"
-                  className="font-medium leading-none tracking-[0.16em]"
-                  style={{
-                    fontSize: `${frameBrandSubPx(frameWidth)}px`,
-                    color: BRAND_LOCKUP_SUB,
-                  }}
-                >
-                  ARABYA • STUDIO
-                </span>
-              </div>
               <ArabyaMarkIcon
                 size={frameBrandMarkPx(frameWidth)}
-                className="arabya-mark-icon--frame shrink-0"
+                className="shrink-0"
+              />
+              <BrandLockupLabels
+                titlePx={frameBrandTitlePx(frameWidth)}
+                subPx={frameBrandSubPx(frameWidth)}
               />
             </div>
           )}

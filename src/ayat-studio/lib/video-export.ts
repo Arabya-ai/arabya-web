@@ -11,10 +11,8 @@ import {
   type BrandPosition,
 } from "./brand-position";
 import {
-  BRAND_LOCKUP_PLATE,
-  BRAND_LOCKUP_PLATE_BORDER,
-  BRAND_LOCKUP_SUB,
-  BRAND_LOCKUP_TITLE,
+  BRAND_LOCKUP_AR,
+  BRAND_LOCKUP_EN,
   DEFAULT_SURAH_LABEL_COLOR,
   DEFAULT_SURAH_LABEL_FONT_SIZE,
   frameAyahFontPx,
@@ -887,7 +885,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   });
 }
 
-/** Draw Arabya lockup: frosted plate · Arabic + English left · mark on the right (RTL). */
+/** Draw Arabya mark + title/subtitle; Arabic title width matches English line. */
 function drawBrandLockup(
   ctx: CanvasRenderingContext2D,
   opts: {
@@ -901,74 +899,52 @@ function drawBrandLockup(
   const { width, height, position, markImg, required } = opts;
   const pad = frameBrandPadPx(width);
   const mark = frameBrandMarkPx(width);
-  const gap = Math.round(mark * 0.28);
+  const gap = Math.round(mark * 0.22);
   const titleSize = frameBrandTitlePx(width);
   const subSize = frameBrandSubPx(width);
-  const textW = Math.round(width * 0.3);
-  const boxW = mark + gap + textW;
-  const boxH = Math.max(mark, titleSize + subSize + Math.round(mark * 0.28));
-  const { x, y } = brandLockupAnchor(position, width, height, boxW, boxH, pad);
 
   ctx.save();
-  ctx.globalAlpha = required ? 0.97 : 0.95;
-  ctx.shadowColor = "rgba(0,0,0,0.35)";
-  ctx.shadowBlur = Math.max(6, width * 0.007);
-  ctx.shadowOffsetY = 2;
+  ctx.font = `${subSize}px "IBM Plex Sans Arabic", "Tajawal", sans-serif`;
+  const engW = Math.max(1, ctx.measureText(BRAND_LOCKUP_EN).width);
+  const textW = Math.ceil(engW);
+  const boxW = mark + gap + textW;
+  const boxH = Math.max(mark, titleSize + subSize + 10);
+  const { x, y } = brandLockupAnchor(position, width, height, boxW, boxH, pad);
 
-  const platePadX = Math.round(mark * 0.22);
-  const platePadY = Math.round(mark * 0.16);
-  const plateR = Math.round(mark * 0.28);
-  ctx.fillStyle = BRAND_LOCKUP_PLATE;
-  roundRectPath(
-    ctx,
-    x - platePadX,
-    y - platePadY,
-    boxW + platePadX * 2,
-    boxH + platePadY * 2,
-    plateR,
-  );
-  ctx.fill();
-  ctx.shadowBlur = 0;
-  ctx.strokeStyle = BRAND_LOCKUP_PLATE_BORDER;
-  ctx.lineWidth = Math.max(1, width * 0.0015);
-  ctx.stroke();
+  ctx.globalAlpha = required ? 0.95 : 0.92;
+  ctx.shadowColor = "rgba(0,0,0,0.55)";
+  ctx.shadowBlur = Math.max(4, width * 0.006);
+  ctx.shadowOffsetY = 1;
 
-  // Mark on the RIGHT (RTL lockup, matches official brand sheet).
-  const markX = x + boxW - mark;
+  const markX = x;
   const markY = y + Math.round((boxH - mark) / 2);
-  const markRadius = mark * 0.22;
-  ctx.fillStyle = "#ffffff";
-  roundRectPath(ctx, markX, markY, mark, mark, markRadius);
-  ctx.fill();
-  ctx.strokeStyle = "rgba(10,22,40,0.1)";
-  ctx.lineWidth = Math.max(1, width * 0.0012);
-  ctx.stroke();
   if (markImg && markImg.width > 0) {
-    ctx.save();
-    roundRectPath(ctx, markX, markY, mark, mark, markRadius);
-    ctx.clip();
+    const radius = mark * 0.22;
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    roundRectPath(ctx, markX, markY, mark, mark, radius);
+    ctx.fill();
     ctx.drawImage(markImg, markX, markY, mark, mark);
-    ctx.restore();
   } else {
-    ctx.fillStyle = BRAND_LOCKUP_TITLE;
-    ctx.fillRect(markX + mark * 0.2, markY + mark * 0.2, mark * 0.6, mark * 0.6);
+    ctx.fillStyle = "rgba(200,169,81,0.95)";
+    ctx.fillRect(markX, markY, mark, mark);
   }
 
-  const textRight = markX - gap;
+  const textX = markX + mark + gap;
   const titleY = y + Math.round(boxH * 0.42);
   const subY = y + Math.round(boxH * 0.78);
 
+  // Fit Arabic into the same horizontal span as the English line.
   ctx.direction = "rtl";
   ctx.textAlign = "right";
-  ctx.fillStyle = BRAND_LOCKUP_TITLE;
-  ctx.font = `700 ${titleSize}px "Reem Kufi", "IBM Plex Sans Arabic", sans-serif`;
-  ctx.fillText("عربية ستوديو", textRight, titleY, textW);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `bold ${titleSize}px "Reem Kufi", "IBM Plex Sans Arabic", sans-serif`;
+  ctx.fillText(BRAND_LOCKUP_AR, textX + textW, titleY, textW);
 
   ctx.direction = "ltr";
-  ctx.textAlign = "right";
-  ctx.fillStyle = BRAND_LOCKUP_SUB;
-  ctx.font = `500 ${subSize}px "IBM Plex Sans Arabic", "Tajawal", sans-serif`;
-  ctx.fillText("ARABYA • STUDIO", textRight, subY, textW);
+  ctx.textAlign = "left";
+  ctx.fillStyle = "rgba(255,255,255,0.78)";
+  ctx.font = `${subSize}px "IBM Plex Sans Arabic", "Tajawal", sans-serif`;
+  ctx.fillText(BRAND_LOCKUP_EN, textX, subY);
 
   ctx.restore();
 }
