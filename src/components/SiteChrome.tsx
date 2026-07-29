@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { AuthButton } from "@/components/AuthButton";
 import { BrandLockup } from "@/components/BrandLockup";
+import { InstallAppPrompt } from "@/components/InstallAppPrompt";
 import { PreferencesMenu } from "@/components/PreferencesMenu";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { useDismissibleOpen } from "@/hooks/useDismissibleOpen";
 import { Link } from "@/i18n/navigation";
 
@@ -12,9 +14,11 @@ import { Link } from "@/i18n/navigation";
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <>
+      <ServiceWorkerRegister />
       <SiteHeader />
       <main>{children}</main>
       <SiteFooter />
+      <InstallAppPrompt />
     </>
   );
 }

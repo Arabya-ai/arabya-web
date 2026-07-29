@@ -18,9 +18,8 @@ export function readStoredTheme(): Theme {
   try {
     const saved = localStorage.getItem(THEME_KEY);
     if (saved === "dark" || saved === "light") return saved;
-    const prefersDark =
-      window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ?? false;
-    return prefersDark ? "dark" : "light";
+    // First visit: always light (do not follow OS dark preference).
+    return "light";
   } catch {
     return "light";
   }

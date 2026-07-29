@@ -7236,3 +7236,131 @@ html[data-theme="dark"] .dash-header-badge {
   gap: 0.5rem;
   align-items: center;
 }
+
+/* PWA install prompt (Android + iOS guidance) */
+.install-app-prompt {
+  position: fixed;
+  inset-inline: 0.75rem;
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  z-index: 80;
+  pointer-events: none;
+}
+
+.install-app-prompt__inner {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  max-width: 28rem;
+  margin-inline: auto;
+  padding: 0.85rem 0.9rem;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--brand) 28%, var(--line));
+  background: color-mix(in srgb, var(--surface) 92%, var(--brand) 8%);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.install-app-prompt__icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #fff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand) 18%, transparent);
+}
+
+.install-app-prompt__copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.install-app-prompt__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.install-app-prompt__desc {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.install-app-prompt__steps {
+  margin: 0.45rem 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--brand-deep);
+}
+
+.install-app-prompt__share {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex-shrink: 0;
+}
+
+.install-app-prompt__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.install-app-prompt__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.7rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.install-app-prompt__cta svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.install-app-prompt__dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.install-app-prompt__dismiss:hover,
+.install-app-prompt__dismiss:focus-visible {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--brand) 12%, transparent);
+}
+
+.install-app-prompt__dismiss svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+@media (max-width: 420px) {
+  .install-app-prompt__inner {
+    padding: 0.75rem;
+  }
+}
+

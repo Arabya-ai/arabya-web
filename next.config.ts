@@ -14,6 +14,7 @@ const contentSecurityPolicy = [
   "object-src 'none'",
   "form-action 'self' https://accounts.google.com",
   "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com",
+  "worker-src 'self' blob:",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
   "img-src 'self' data: blob: https:",

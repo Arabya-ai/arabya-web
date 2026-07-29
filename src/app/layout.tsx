@@ -3,11 +3,21 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.arabyaai.com"),
+  applicationName: "Arabya",
+  appleWebApp: {
+    capable: true,
+    title: "Arabya",
+    statusBarStyle: "default",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
       { url: "/brand/favicon-32.png", type: "image/png", sizes: "32x32" },
-      { url: "/brand/arabya-mark-square.png", type: "image/png", sizes: "512x512" },
+      { url: "/brand/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/brand/icon-512.png", type: "image/png", sizes: "512x512" },
     ],
     apple: [
       {

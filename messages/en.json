@@ -21,6 +21,14 @@
     "language": "Language",
     "appearance": "Appearance"
   },
+  "Install": {
+    "title": "Install Arabya",
+    "androidHint": "Add Arabya as an app for quick access without opening the browser each time.",
+    "iosHint": "On iPhone, add Arabya from Safari’s share menu.",
+    "iosSteps": "Share → Add to Home Screen",
+    "install": "Install",
+    "dismiss": "Dismiss"
+  },
   "Nav": {
     "home": "Home",
     "services": "Services",

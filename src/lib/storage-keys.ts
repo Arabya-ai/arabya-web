@@ -23,6 +23,7 @@ export const STORAGE_KEYS = {
   uiLocale: "arabya-ui-locale",
   studyQuery: "arabya-study-query",
   autosyncDone: "arabya-autosync-done",
+  installPromptDismissed: "arabya-install-dismissed",
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];
