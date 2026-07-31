@@ -1025,6 +1025,13 @@ html[data-theme="dark"] .site-header {
   padding-top: 0.35rem;
 }
 
+/* Desktop (shell ~920px): 6 cards per row — not 7 */
+@media (min-width: 900px) {
+  .surah-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
 .surah-grid-section h2 {
   margin: 0 0 0.95rem;
   text-align: center;
