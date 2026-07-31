@@ -62,10 +62,12 @@ export default async function AccountPage({ params }: Props) {
           </p>
           <p>
             {t("planLine", {
-              plan: planLabel("free", locale as AppLocale),
+              plan: planLabel(user.plan ?? "free", locale as AppLocale),
             })}
             {" · "}
-            <Link href="/studio">{t("openCreate")}</Link>
+            <Link href="/create">{t("openCreate")}</Link>
+            {" · "}
+            <Link href="/pricing">{t("viewPricing")}</Link>
           </p>
           <div className="account-grid account-grid--personal">
             <AccountPersonalData />

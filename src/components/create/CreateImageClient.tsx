@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import {
+  canCreatePremiumImage,
   FREE_IMAGE_ASPECT,
   PLUS_IMAGE_ASPECTS,
   type ImageAspect,
@@ -27,7 +28,7 @@ export function CreateImageClient({
 }) {
   const t = useTranslations("Create");
   const locale = useLocale();
-  const premium = plan === "plus";
+  const premium = canCreatePremiumImage(plan);
   const [surahId, setSurahId] = useState(initialSurah);
   const [verse, setVerse] = useState(initialVerse);
   const [aspect, setAspect] = useState<ImageAspect>(FREE_IMAGE_ASPECT);
@@ -85,7 +86,14 @@ export function CreateImageClient({
   return (
     <div className="create-studio">
       <p className="create-plan-badge">
-        {t("planLabel", { plan: plan === "plus" ? t("planPlus") : t("planFree") })}
+        {t("planLabel", {
+          plan:
+            plan === "plus"
+              ? t("planPlus")
+              : plan === "pro"
+                ? t("planPro")
+                : t("planFree"),
+        })}
       </p>
       {!premium ? (
         <p className="create-upsell">

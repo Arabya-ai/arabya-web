@@ -1,14 +1,20 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useCallback, useEffect, useState } from "react";
 import type { AdminUserRow } from "@/lib/cloud-sync";
+import {
+  planLabel,
+  resolveUserPlan,
+  type AppLocale,
+} from "@/lib/plans";
 import { isSuperAdminEmail, type UserRole } from "@/lib/roles";
 
 export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   const t = useTranslations("Admin");
   const tRoles = useTranslations("Roles");
+  const locale = useLocale() as AppLocale;
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [total, setTotal] = useState(0);
   const [q, setQ] = useState("");
@@ -177,6 +183,16 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
     );
   }
 
+  function PlanBadge({ u }: { u: AdminUserRow }) {
+    const role = (u.role === "user" ? "member" : u.role) as UserRole;
+    const plan = resolveUserPlan({ email: u.email, role });
+    return (
+      <span className={`users-badge users-badge--plan-${plan}`}>
+        {planLabel(plan, locale)}
+      </span>
+    );
+  }
+
   function Actions({ u }: { u: AdminUserRow }) {
     const busy = busyId === u.id;
     const currentRole = (u.role === "user" ? "member" : u.role) as UserRole;
@@ -290,6 +306,7 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
       </form>
 
       {error ? <p className="dash-banner dash-banner--warn">{error}</p> : null}
+      <p className="dash-muted">{t("planEnvHint")}</p>
 
       <div className="users-table-shell">
         <table className="users-table">
@@ -297,6 +314,7 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
             <tr>
               <th scope="col">{t("colUser")}</th>
               <th scope="col">{t("colRole")}</th>
+              <th scope="col">{t("colPlan")}</th>
               <th scope="col">{t("colStatus")}</th>
               <th scope="col">{t("colActions")}</th>
             </tr>
@@ -313,6 +331,9 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
                       (u.role === "user" ? "member" : u.role) as UserRole
                     }
                   />
+                </td>
+                <td>
+                  <PlanBadge u={u} />
                 </td>
                 <td>
                   <StatusBadge status={u.status} />
@@ -343,6 +364,7 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
                     (u.role === "user" ? "member" : u.role) as UserRole
                   }
                 />
+                <PlanBadge u={u} />
                 <StatusBadge status={u.status} />
               </div>
               <Actions u={u} />

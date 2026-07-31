@@ -24,7 +24,7 @@ export default async function PricingPage({ params }: Props) {
         <Link href="/" className="nav-pill">
           {tNav("index")}
         </Link>
-        <Link href="/studio" className="nav-pill">
+        <Link href="/create" className="nav-pill">
           {t("createHub")}
         </Link>
       </nav>

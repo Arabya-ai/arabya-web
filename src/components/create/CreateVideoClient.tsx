@@ -10,8 +10,12 @@ import {
   supportsWebCodecsExport,
   type CreateVideoProject,
 } from "@/lib/media-export/video-export";
-import type { ImageAspect, UserPlan } from "@/lib/plans";
-import { PLUS_IMAGE_ASPECTS } from "@/lib/plans";
+import {
+  canCreateVideo,
+  PLUS_IMAGE_ASPECTS,
+  type ImageAspect,
+  type UserPlan,
+} from "@/lib/plans";
 
 export function CreateVideoClient({
   plan,
@@ -26,7 +30,7 @@ export function CreateVideoClient({
 }) {
   const t = useTranslations("Create");
   const locale = useLocale();
-  const plus = plan === "plus";
+  const plus = canCreateVideo(plan);
   const [surahId, setSurahId] = useState(initialSurah);
   const [from, setFrom] = useState(initialVerse);
   const [to, setTo] = useState(initialVerse);

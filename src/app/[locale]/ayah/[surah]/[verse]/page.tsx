@@ -135,13 +135,13 @@ export default async function AyahIrabPage({ params }: Props) {
             hint={t("shareHint")}
           />
           <Link
-            href="/studio/projects/new"
+            href={`/create/image?s=${surahId}&v=${verseNumber}`}
             className="nav-pill"
           >
             {t("createImage")}
           </Link>
           <Link
-            href="/studio/projects/new"
+            href={`/create/video?s=${surahId}&v=${verseNumber}`}
             className="nav-pill"
           >
             {t("createVideo")}
