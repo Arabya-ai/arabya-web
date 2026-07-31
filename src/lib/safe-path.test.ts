@@ -5,6 +5,9 @@ describe("safeInternalPath", () => {
   it("allows relative app paths", () => {
     expect(safeInternalPath("/studio")).toBe("/studio");
     expect(safeInternalPath("/en/account")).toBe("/en/account");
+    expect(safeInternalPath("/en/create/image?s=1&v=1")).toBe(
+      "/en/create/image?s=1&v=1",
+    );
   });
 
   it("rejects open redirects", () => {

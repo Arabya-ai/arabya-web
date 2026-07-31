@@ -84,9 +84,12 @@ export default auth((req) => {
 
   if (isProtectedPath(pathname) && !req.auth) {
     const locale = resolveUiLocale(pathname, preferred);
+    const returnTo = `${pathname}${request.nextUrl.search}`;
     const url = request.nextUrl.clone();
     url.pathname = withLocalePrefix("/login", locale);
-    url.searchParams.set("callbackUrl", pathname);
+    // Drop original query (e.g. ?s=&v=) so only callbackUrl carries the return path.
+    url.search = "";
+    url.searchParams.set("callbackUrl", returnTo);
     return NextResponse.redirect(url);
   }
 
