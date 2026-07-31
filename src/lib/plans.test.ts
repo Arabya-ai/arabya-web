@@ -28,6 +28,8 @@ describe("entitlements", () => {
   it("gates premium image and video", () => {
     expect(canCreatePremiumImage("free")).toBe(false);
     expect(canCreatePremiumImage("pro")).toBe(true);
+    expect(canCreateVideo("free")).toBe(false);
+    expect(canCreateVideo("pro")).toBe(true);
     expect(canCreateVideo("plus")).toBe(true);
   });
 

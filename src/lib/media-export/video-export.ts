@@ -3,7 +3,7 @@
  * Uses Arabya reciters + QPC ayah text passed in — no alquran.cloud.
  */
 import { Muxer, ArrayBufferTarget } from "mp4-muxer";
-import { ayahAudioUrl, getReciter, reciterDisplayName } from "@/lib/audio";
+import { getReciter, reciterDisplayName } from "@/lib/audio";
 import {
   drawVisualizer,
   type VisualizerType,
@@ -36,6 +36,21 @@ export type AyahMedia = {
   audioUrl: string;
 };
 
+/** Same-origin EveryAyah proxy (CSP/CORS-safe). */
+export function proxiedAyahAudioUrl(
+  surahId: number,
+  ayahInSurah: number,
+  reciterId: string,
+): string {
+  const folder = getReciter(reciterId).folder;
+  const q = new URLSearchParams({
+    folder,
+    s: String(surahId),
+    v: String(ayahInSurah),
+  });
+  return `/api/create/audio?${q.toString()}`;
+}
+
 export function buildAyahMedia(project: CreateVideoProject): AyahMedia[] {
   const out: AyahMedia[] = [];
   for (let n = project.ayahStart; n <= project.ayahEnd; n++) {
@@ -44,7 +59,8 @@ export function buildAyahMedia(project: CreateVideoProject): AyahMedia[] {
     out.push({
       numberInSurah: n,
       text,
-      audioUrl: ayahAudioUrl(project.surahId, n, project.reciterId),
+      // Prefer same-origin proxy; keep direct URL helper for tests/docs only.
+      audioUrl: proxiedAyahAudioUrl(project.surahId, n, project.reciterId),
     });
   }
   return out;
@@ -64,7 +80,10 @@ async function fetchAndDecodeAudio(
 }> {
   const buffers = await Promise.all(
     ayahs.map(async (a) => {
-      const res = await fetch(a.audioUrl, { mode: "cors" });
+      const res = await fetch(a.audioUrl, {
+        mode: "cors",
+        credentials: "same-origin",
+      });
       if (!res.ok) {
         throw new Error(`audio_http_${a.numberInSurah}_${res.status}`);
       }

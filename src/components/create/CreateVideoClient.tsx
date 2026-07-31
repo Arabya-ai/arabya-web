@@ -12,6 +12,7 @@ import {
 } from "@/lib/media-export/video-export";
 import {
   canCreateVideo,
+  CREATE_VIDEO_MAX_AYAHS,
   PLUS_IMAGE_ASPECTS,
   type ImageAspect,
   type UserPlan,
@@ -75,7 +76,10 @@ export function CreateVideoClient({
     setProgress(0);
     try {
       const start = Math.min(from, to);
-      const end = Math.max(from, to);
+      let end = Math.max(from, to);
+      if (end - start + 1 > CREATE_VIDEO_MAX_AYAHS) {
+        end = start + CREATE_VIDEO_MAX_AYAHS - 1;
+      }
       const res = await fetch(
         `/api/create/ayahs?s=${surahId}&from=${start}&to=${end}`,
       );
@@ -126,7 +130,16 @@ export function CreateVideoClient({
 
   return (
     <div className="create-studio">
-      <p className="create-plan-badge">{t("planLabel", { plan: t("planPlus") })}</p>
+      <p className="create-plan-badge">
+        {t("planLabel", {
+          plan:
+            plan === "plus"
+              ? t("planPlus")
+              : plan === "pro"
+                ? t("planPro")
+                : t("planFree"),
+        })}
+      </p>
       <div className="create-controls create-controls--wide">
         <label>
           {t("surah")}

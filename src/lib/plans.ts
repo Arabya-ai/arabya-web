@@ -83,6 +83,7 @@ export function canCreateVideo(plan: UserPlan): boolean {
 
 /** Logged-in users can export studio video; members get required brand + daily cap. */
 export function canExportStudioMp4(_plan: UserPlan): boolean {
+  void _plan;
   return true;
 }
 
@@ -109,8 +110,11 @@ export function studioExportNeedsWatermark(
   return true;
 }
 
-/** Max ayah span for member (free) exports. */
+/** Max ayah span for member (free) studio exports. */
 export const STUDIO_MAX_AYAHS = 40;
+
+/** Max ayah span for light `/create/video` exports (keeps browser encode light). */
+export const CREATE_VIDEO_MAX_AYAHS = 20;
 
 export function canExportUnlimitedStudioAyahs(
   role?: UserRole | null,

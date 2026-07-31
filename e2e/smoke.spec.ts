@@ -94,9 +94,10 @@ test.describe("smoke", () => {
   test("locale switcher moves Arabic home to English", async ({ page }) => {
     await gotoOk(page, "/");
     await expect(page.locator("html")).toHaveAttribute("lang", "ar");
-    await page.locator(".nav .locale-switch-trigger").click();
+    // Language lives in the preferences menu (not a standalone locale dropdown).
+    await page.locator(".nav .prefs-menu-trigger").click();
     await page
-      .locator(".nav .locale-switch-option", { hasText: "English" })
+      .locator(".nav .prefs-menu-option", { hasText: "English" })
       .click();
     await expect(page).toHaveURL(/\/en\/?$/);
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
