@@ -11,12 +11,13 @@ import {
   isGoogleAuthConfigured,
   signIn,
 } from "@/auth";
+import { safeInternalPath } from "@/lib/safe-path";
 
 export const dynamic = "force-dynamic";
 
 type Props = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ error?: string; diag?: string }>;
+  searchParams: Promise<{ error?: string; diag?: string; callbackUrl?: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -55,11 +56,13 @@ export default async function LoginPage({ params, searchParams }: Props) {
   if (session?.user) redirectLocalized("/account", locale);
 
   const t = await getTranslations("Auth");
-  const { error, diag } = await searchParams;
+  const { error, diag, callbackUrl } = await searchParams;
   const ready = isGoogleAuthConfigured();
   const errorText = errorMessage(error, t);
   const showDiag = diag === "1" || Boolean(error);
   const diagnostics = showDiag ? getAuthEnvDiagnostics() : null;
+  const defaultAfterLogin = locale === "en" ? "/en/account" : "/account";
+  const redirectTo = safeInternalPath(callbackUrl, defaultAfterLogin);
 
   return (
     <div className="shell page-block auth-page">
@@ -96,7 +99,7 @@ export default async function LoginPage({ params, searchParams }: Props) {
             action={async () => {
               "use server";
               await signIn("google", {
-                redirectTo: locale === "en" ? "/en/account" : "/account",
+                redirectTo,
               });
             }}
           >

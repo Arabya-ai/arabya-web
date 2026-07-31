@@ -30,9 +30,7 @@ describe("parseAdminEmails", () => {
 describe("resolveRoleFromEmail", () => {
   it("only super-admin emails become admin", () => {
     expect(resolveRoleFromEmail("egywebdev@gmail.com")).toBe("admin");
-    expect(resolveRoleFromEmail("reader@gmail.com", ["reader@gmail.com"])).toBe(
-      "member",
-    );
+    expect(resolveRoleFromEmail("reader@gmail.com")).toBe("member");
   });
 });
 

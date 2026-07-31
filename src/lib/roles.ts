@@ -29,7 +29,6 @@ export function isSuperAdminEmail(email: string | null | undefined): boolean {
 /** @deprecated Prefer isSuperAdminEmail — admin rank is super-admin only. */
 export function isEnvAdminEmail(
   email: string | null | undefined,
-  _adminEmails = parseAdminEmails(process.env.ARABYA_ADMIN_EMAILS),
 ): boolean {
   return isSuperAdminEmail(email);
 }
@@ -40,7 +39,6 @@ export function isEnvAdminEmail(
  */
 export function resolveRoleFromEmail(
   email: string | null | undefined,
-  _adminEmails = parseAdminEmails(process.env.ARABYA_ADMIN_EMAILS),
 ): UserRole {
   if (!email) return "member";
   if (isSuperAdminEmail(email)) return "admin";
@@ -54,7 +52,6 @@ export function resolveRoleFromEmail(
 export function mergeRoleWithEnvAdmin(
   email: string | null | undefined,
   cloudRole: UserRole | LegacyUserRole | null | undefined,
-  _adminEmails = parseAdminEmails(process.env.ARABYA_ADMIN_EMAILS),
 ): UserRole {
   if (isSuperAdminEmail(email)) return "admin";
   const role = normalizeUserRole(cloudRole);
