@@ -91,17 +91,7 @@ async function main() {
   await writeAny(32, "favicon-32.png");
   await writeMaskable(512, "icon-maskable-512.png");
   await writeMaskable(192, "icon-maskable-192.png");
-
-  // Keep square mark for in-app UI, but upsample from master for sharper UI use.
-  await sharp(source)
-    .resize(512, 512, {
-      fit: "contain",
-      background: { r: 255, g: 255, b: 255, alpha: 1 },
-      kernel: sharp.kernel.lanczos3,
-    })
-    .png({ compressionLevel: 1, adaptiveFiltering: true })
-    .toFile(path.join(brand, "arabya-mark-square.png"));
-  console.log("updated arabya-mark-square.png from master");
+  // Do not overwrite arabya-mark-square.png — used at full visual weight in header/footer.
 }
 
 main().catch((err) => {
