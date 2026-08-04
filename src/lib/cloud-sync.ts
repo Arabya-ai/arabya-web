@@ -68,12 +68,21 @@ export function cloudSyncEnvStatus(): {
   hasSyncSecret: boolean;
   d1Enabled: boolean;
   d1Raw: string;
+  syncHost: string | null;
 } {
+  const urlRaw = (process.env.ARABYA_SYNC_URL || "").trim();
+  let syncHost: string | null = null;
+  try {
+    if (urlRaw) syncHost = new URL(urlRaw).host;
+  } catch {
+    syncHost = "invalid_url";
+  }
   return {
-    hasSyncUrl: Boolean(process.env.ARABYA_SYNC_URL?.trim()),
+    hasSyncUrl: Boolean(urlRaw),
     hasSyncSecret: Boolean(process.env.ARABYA_SYNC_SECRET?.trim()),
     d1Enabled: d1EnabledFlag(),
     d1Raw: (process.env.ARABYA_D1_ENABLED || "").trim().slice(0, 16),
+    syncHost,
   };
 }
 
@@ -83,11 +92,11 @@ export function isCloudSyncConfigured(): boolean {
 }
 
 function syncBaseUrl(): string {
-  return (process.env.ARABYA_SYNC_URL || "").replace(/\/$/, "");
+  return (process.env.ARABYA_SYNC_URL || "").trim().replace(/\/$/, "");
 }
 
 function syncSecret(): string {
-  return process.env.ARABYA_SYNC_SECRET || "";
+  return (process.env.ARABYA_SYNC_SECRET || "").trim();
 }
 
 async function callWorker<T extends Record<string, unknown>>(
@@ -108,11 +117,16 @@ async function callWorker<T extends Record<string, unknown>>(
     cache: "no-store",
   });
 
-  const data = (await res.json()) as T & {
+  let data: T & {
     ok?: boolean;
     error?: string;
     message?: string;
   };
+  try {
+    data = (await res.json()) as typeof data;
+  } catch {
+    throw new Error(`sync_bad_json_${res.status}`);
+  }
 
   if (!res.ok || data.ok === false) {
     throw new Error(data.message || data.error || `sync_http_${res.status}`);
@@ -400,6 +414,28 @@ export async function fetchCloudSiteAppearance(): Promise<CloudSiteAppearance | 
     return data.appearance ?? null;
   } catch {
     return null;
+  }
+}
+
+/** Like fetchCloudSiteAppearance but returns a safe error code when cloud fails. */
+export async function fetchCloudSiteAppearanceDetailed(): Promise<{
+  appearance: CloudSiteAppearance | null;
+  error: string | null;
+}> {
+  if (!isCloudSyncConfigured()) {
+    return { appearance: null, error: "not_configured" };
+  }
+  try {
+    const data = await callWorker<{ appearance?: CloudSiteAppearance }>(
+      "/v1/site-appearance",
+      { action: "get" },
+    );
+    return { appearance: data.appearance ?? null, error: null };
+  } catch (err) {
+    return {
+      appearance: null,
+      error: err instanceof Error ? err.message.slice(0, 80) : "fetch_failed",
+    };
   }
 }
 

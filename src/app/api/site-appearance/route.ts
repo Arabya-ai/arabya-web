@@ -16,6 +16,7 @@ export async function GET() {
         cloudReachable: state.cloudReachable,
         source: state.source,
         env: state.env,
+        cloudError: state.cloudError,
       },
       {
         headers: {

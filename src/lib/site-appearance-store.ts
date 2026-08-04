@@ -1,6 +1,6 @@
 import { unstable_cache, revalidateTag } from "next/cache";
 import {
-  fetchCloudSiteAppearance,
+  fetchCloudSiteAppearanceDetailed,
   isCloudSyncConfigured,
   cloudSyncEnvStatus,
   adminGetSiteAppearance,
@@ -25,6 +25,7 @@ export type SiteAppearanceLoadState = {
   cloudReachable: boolean;
   source: "cloud" | "file";
   env: ReturnType<typeof cloudSyncEnvStatus>;
+  cloudError: string | null;
 };
 
 async function loadSiteAppearanceUncached(): Promise<SiteAppearanceLoadState> {
@@ -38,10 +39,12 @@ async function loadSiteAppearanceUncached(): Promise<SiteAppearanceLoadState> {
       cloudReachable: false,
       source: "file",
       env,
+      cloudError: "not_configured",
     };
   }
 
-  const cloud = await fetchCloudSiteAppearance();
+  const { appearance: cloud, error: cloudError } =
+    await fetchCloudSiteAppearanceDetailed();
   if (!cloud) {
     return {
       appearance: file,
@@ -49,6 +52,7 @@ async function loadSiteAppearanceUncached(): Promise<SiteAppearanceLoadState> {
       cloudReachable: false,
       source: "file",
       env,
+      cloudError: cloudError || "empty_cloud",
     };
   }
 
@@ -60,6 +64,7 @@ async function loadSiteAppearanceUncached(): Promise<SiteAppearanceLoadState> {
       cloudReachable: true,
       source: "file",
       env,
+      cloudError: null,
     };
   }
 
@@ -72,12 +77,13 @@ async function loadSiteAppearanceUncached(): Promise<SiteAppearanceLoadState> {
     cloudReachable: true,
     source: "cloud",
     env,
+    cloudError: null,
   };
 }
 
 export const getSiteAppearanceState = unstable_cache(
   loadSiteAppearanceUncached,
-  ["site-appearance-state-v3"],
+  ["site-appearance-state-v4"],
   { tags: [APPEARANCE_TAG], revalidate: 15 },
 );
 
