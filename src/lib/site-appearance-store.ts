@@ -18,27 +18,47 @@ import type { AppLocale } from "@/i18n/routing";
 
 const APPEARANCE_TAG = "site-appearance";
 
-async function loadSiteAppearanceUncached(): Promise<SiteAppearance> {
+async function loadSiteAppearanceUncached(): Promise<{
+  appearance: SiteAppearance;
+  syncConfigured: boolean;
+  cloudReachable: boolean;
+}> {
   const file = await readSiteAppearanceFile();
-  if (!isCloudSyncConfigured()) return file;
+  const syncConfigured = isCloudSyncConfigured();
+  if (!syncConfigured) {
+    return { appearance: file, syncConfigured, cloudReachable: false };
+  }
 
   const cloud = await fetchCloudSiteAppearance();
-  if (!cloud) return file;
+  if (!cloud) {
+    return { appearance: file, syncConfigured, cloudReachable: false };
+  }
 
   // Cloud defaults (no updatedAt) must not override the repo/file seed.
-  if (!cloud.updatedAt) return file;
+  if (!cloud.updatedAt) {
+    return { appearance: file, syncConfigured, cloudReachable: true };
+  }
 
-  return normalizeSiteAppearance({
-    ...file,
-    ...cloud,
-  });
+  return {
+    appearance: normalizeSiteAppearance({
+      ...file,
+      ...cloud,
+    }),
+    syncConfigured,
+    cloudReachable: true,
+  };
 }
 
-export const getSiteAppearance = unstable_cache(
+export const getSiteAppearanceState = unstable_cache(
   loadSiteAppearanceUncached,
-  ["site-appearance-v1"],
-  { tags: [APPEARANCE_TAG], revalidate: 60 },
+  ["site-appearance-state-v2"],
+  { tags: [APPEARANCE_TAG], revalidate: 30 },
 );
+
+export async function getSiteAppearance(): Promise<SiteAppearance> {
+  const cached = await getSiteAppearanceState();
+  return cached.appearance;
+}
 
 export async function getFooterCredit(
   locale: AppLocale | string,

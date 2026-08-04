@@ -1,17 +1,23 @@
 import { NextResponse } from "next/server";
-import { getSiteAppearance } from "@/lib/site-appearance-store";
+import { getSiteAppearanceState } from "@/lib/site-appearance-store";
 
 export const dynamic = "force-dynamic";
 
 /** Public read of site chrome appearance (footer credit templates). */
 export async function GET() {
   try {
-    const appearance = await getSiteAppearance();
+    const state = await getSiteAppearanceState();
     return NextResponse.json(
-      { ok: true, appearance },
+      {
+        ok: true,
+        appearance: state.appearance,
+        syncConfigured: state.syncConfigured,
+        cloudReachable: state.cloudReachable,
+        source: state.appearance.updatedAt ? "cloud" : "file",
+      },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+          "Cache-Control": "public, s-maxage=30, stale-while-revalidate=120",
         },
       },
     );

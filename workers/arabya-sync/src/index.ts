@@ -854,6 +854,17 @@ const workerHandler = {
       return badRequest("unknown_action");
     }
 
+    // Public (secret-auth) site chrome settings — must stay before the admin gate.
+    if (url.pathname === "/v1/site-appearance") {
+      await ensureSiteSettingsTable(env.DB);
+      const action = String(body.action || "get");
+      if (action === "get") {
+        const appearance = await readSiteAppearance(env.DB);
+        return json({ ok: true, appearance });
+      }
+      return badRequest("unknown_action");
+    }
+
     // --- Admin APIs (Next.js must verify admin before calling) ---
     const actorEmail = String(body.actorEmail || "")
       .trim()
@@ -1108,29 +1119,7 @@ const workerHandler = {
       return json({ ok: true, entries: rows.results ?? [] });
     }
 
-    if (url.pathname === "/v1/site-appearance") {
-      await ensureSiteSettingsTable(env.DB);
-      const action = String(body.action || "get");
-      if (action === "get") {
-        const appearance = await readSiteAppearance(env.DB);
-        return json({ ok: true, appearance });
-      }
-      return badRequest("unknown_action");
-    }
-
     if (url.pathname === "/v1/admin/site-appearance") {
-      const actorEmail = String(body.actorEmail || "")
-        .trim()
-        .toLowerCase();
-      if (!actorEmail.includes("@")) return badRequest("actor_required");
-      const actorInfo = await getUserRole(env.DB, actorEmail);
-      if (
-        actorInfo?.role !== "admin" &&
-        !isProtectedAdmin(actorEmail, env)
-      ) {
-        return forbidden("admin_required");
-      }
-
       await ensureSiteSettingsTable(env.DB);
       const action = String(body.action || "get");
       if (action === "get") {
