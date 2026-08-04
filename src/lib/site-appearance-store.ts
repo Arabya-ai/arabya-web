@@ -25,6 +25,9 @@ async function loadSiteAppearanceUncached(): Promise<SiteAppearance> {
   const cloud = await fetchCloudSiteAppearance();
   if (!cloud) return file;
 
+  // Cloud defaults (no updatedAt) must not override the repo/file seed.
+  if (!cloud.updatedAt) return file;
+
   return normalizeSiteAppearance({
     ...file,
     ...cloud,
