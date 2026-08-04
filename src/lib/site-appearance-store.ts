@@ -2,6 +2,7 @@ import { unstable_cache, revalidateTag } from "next/cache";
 import {
   fetchCloudSiteAppearance,
   isCloudSyncConfigured,
+  cloudSyncEnvStatus,
   adminGetSiteAppearance,
   adminSetSiteAppearance,
 } from "@/lib/cloud-sync";
@@ -18,25 +19,48 @@ import type { AppLocale } from "@/i18n/routing";
 
 const APPEARANCE_TAG = "site-appearance";
 
-async function loadSiteAppearanceUncached(): Promise<{
+export type SiteAppearanceLoadState = {
   appearance: SiteAppearance;
   syncConfigured: boolean;
   cloudReachable: boolean;
-}> {
+  source: "cloud" | "file";
+  env: ReturnType<typeof cloudSyncEnvStatus>;
+};
+
+async function loadSiteAppearanceUncached(): Promise<SiteAppearanceLoadState> {
   const file = await readSiteAppearanceFile();
+  const env = cloudSyncEnvStatus();
   const syncConfigured = isCloudSyncConfigured();
   if (!syncConfigured) {
-    return { appearance: file, syncConfigured, cloudReachable: false };
+    return {
+      appearance: file,
+      syncConfigured,
+      cloudReachable: false,
+      source: "file",
+      env,
+    };
   }
 
   const cloud = await fetchCloudSiteAppearance();
   if (!cloud) {
-    return { appearance: file, syncConfigured, cloudReachable: false };
+    return {
+      appearance: file,
+      syncConfigured,
+      cloudReachable: false,
+      source: "file",
+      env,
+    };
   }
 
   // Cloud defaults (no updatedAt) must not override the repo/file seed.
   if (!cloud.updatedAt) {
-    return { appearance: file, syncConfigured, cloudReachable: true };
+    return {
+      appearance: file,
+      syncConfigured,
+      cloudReachable: true,
+      source: "file",
+      env,
+    };
   }
 
   return {
@@ -46,13 +70,15 @@ async function loadSiteAppearanceUncached(): Promise<{
     }),
     syncConfigured,
     cloudReachable: true,
+    source: "cloud",
+    env,
   };
 }
 
 export const getSiteAppearanceState = unstable_cache(
   loadSiteAppearanceUncached,
-  ["site-appearance-state-v2"],
-  { tags: [APPEARANCE_TAG], revalidate: 30 },
+  ["site-appearance-state-v3"],
+  { tags: [APPEARANCE_TAG], revalidate: 15 },
 );
 
 export async function getSiteAppearance(): Promise<SiteAppearance> {

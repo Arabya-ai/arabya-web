@@ -36,6 +36,14 @@ describe("isCloudSyncConfigured", () => {
     process.env.ARABYA_D1_ENABLED = "1";
     expect(isCloudSyncConfigured()).toBe(true);
   });
+
+  it("accepts common truthy D1 flags", () => {
+    snapshotEnv();
+    process.env.ARABYA_SYNC_URL = "https://sync.example.com";
+    process.env.ARABYA_SYNC_SECRET = "secret";
+    process.env.ARABYA_D1_ENABLED = "true";
+    expect(isCloudSyncConfigured()).toBe(true);
+  });
 });
 
 describe("cloud sync storage keys stay aligned", () => {

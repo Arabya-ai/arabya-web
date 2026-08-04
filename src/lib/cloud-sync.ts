@@ -57,12 +57,29 @@ export type RoleRequestRow = {
   image?: string | null;
 };
 
+function d1EnabledFlag(): boolean {
+  const raw = (process.env.ARABYA_D1_ENABLED || "").trim().toLowerCase();
+  return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
+}
+
+/** Safe (non-secret) snapshot of which sync env vars are present. */
+export function cloudSyncEnvStatus(): {
+  hasSyncUrl: boolean;
+  hasSyncSecret: boolean;
+  d1Enabled: boolean;
+  d1Raw: string;
+} {
+  return {
+    hasSyncUrl: Boolean(process.env.ARABYA_SYNC_URL?.trim()),
+    hasSyncSecret: Boolean(process.env.ARABYA_SYNC_SECRET?.trim()),
+    d1Enabled: d1EnabledFlag(),
+    d1Raw: (process.env.ARABYA_D1_ENABLED || "").trim().slice(0, 16),
+  };
+}
+
 export function isCloudSyncConfigured(): boolean {
-  return Boolean(
-    process.env.ARABYA_SYNC_URL?.trim() &&
-      process.env.ARABYA_SYNC_SECRET?.trim() &&
-      process.env.ARABYA_D1_ENABLED === "1",
-  );
+  const env = cloudSyncEnvStatus();
+  return env.hasSyncUrl && env.hasSyncSecret && env.d1Enabled;
 }
 
 function syncBaseUrl(): string {
