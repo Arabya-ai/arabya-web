@@ -365,3 +365,45 @@ export async function adminListAudit(actorEmail: string) {
     }>;
   }>("/v1/admin/audit", { actorEmail });
 }
+
+export type CloudSiteAppearance = {
+  footerCreditAr: string;
+  footerCreditEn: string;
+  updatedAt?: number | null;
+  updatedBy?: string | null;
+};
+
+export async function fetchCloudSiteAppearance(): Promise<CloudSiteAppearance | null> {
+  if (!isCloudSyncConfigured()) return null;
+  try {
+    const data = await callWorker<{ appearance?: CloudSiteAppearance }>(
+      "/v1/site-appearance",
+      { action: "get" },
+    );
+    return data.appearance ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function adminGetSiteAppearance(actorEmail: string) {
+  return callWorker<{ appearance: CloudSiteAppearance }>(
+    "/v1/admin/site-appearance",
+    { actorEmail, action: "get" },
+  );
+}
+
+export async function adminSetSiteAppearance(
+  actorEmail: string,
+  input: { footerCreditAr: string; footerCreditEn: string },
+) {
+  return callWorker<{ appearance: CloudSiteAppearance }>(
+    "/v1/admin/site-appearance",
+    {
+      actorEmail,
+      action: "set",
+      footerCreditAr: input.footerCreditAr,
+      footerCreditEn: input.footerCreditEn,
+    },
+  );
+}

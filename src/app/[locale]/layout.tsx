@@ -22,6 +22,7 @@ import {
   locales,
   type AppLocale,
 } from "@/i18n/routing";
+import { getFooterCredit } from "@/lib/site-appearance-store";
 
 const cairo = Cairo({
   variable: "--font-cairo",
@@ -121,6 +122,7 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   const messages = await getMessages();
   const dir = localeDirection(locale);
+  const footerCredit = await getFooterCredit(locale);
 
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
@@ -139,7 +141,7 @@ export default async function LocaleLayout({ children, params }: Props) {
           <SyncUiLocaleFromPath />
           <AuthSessionProvider>
             <CloudAutoSync />
-            <AppShell>{children}</AppShell>
+            <AppShell footerCredit={footerCredit}>{children}</AppShell>
           </AuthSessionProvider>
         </NextIntlClientProvider>
         <Analytics />

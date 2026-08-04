@@ -513,6 +513,107 @@ async function getUserDetail(db: D1Database, userId: string) {
   };
 }
 
+const SITE_APPEARANCE_KEY = "appearance";
+
+type SiteAppearanceRow = {
+  footerCreditAr: string;
+  footerCreditEn: string;
+  updatedAt?: number | null;
+  updatedBy?: string | null;
+};
+
+const DEFAULT_APPEARANCE: SiteAppearanceRow = {
+  footerCreditAr: "© {year} منصة عربية · جميع الحقوق محفوظة لكل مسلم",
+  footerCreditEn: "© {year} Arabya · All rights reserved for every Muslim",
+};
+
+function sanitizeCreditText(raw: string, fallback: string): string {
+  const text = raw.replace(/\s+/g, " ").trim();
+  if (!text) return fallback;
+  return text.slice(0, 240);
+}
+
+async function ensureSiteSettingsTable(db: D1Database): Promise<void> {
+  await db
+    .prepare(
+      `CREATE TABLE IF NOT EXISTS site_settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        updated_at INTEGER NOT NULL,
+        updated_by TEXT
+      )`,
+    )
+    .run();
+}
+
+async function readSiteAppearance(db: D1Database): Promise<SiteAppearanceRow> {
+  try {
+    const row = await db
+      .prepare(
+        `SELECT value, updated_at as updatedAt, updated_by as updatedBy
+         FROM site_settings WHERE key = ?`,
+      )
+      .bind(SITE_APPEARANCE_KEY)
+      .first<{ value: string; updatedAt: number; updatedBy: string | null }>();
+    if (!row?.value) return { ...DEFAULT_APPEARANCE };
+    const parsed = JSON.parse(row.value) as Partial<SiteAppearanceRow>;
+    return {
+      footerCreditAr: sanitizeCreditText(
+        String(parsed.footerCreditAr || ""),
+        DEFAULT_APPEARANCE.footerCreditAr,
+      ),
+      footerCreditEn: sanitizeCreditText(
+        String(parsed.footerCreditEn || ""),
+        DEFAULT_APPEARANCE.footerCreditEn,
+      ),
+      updatedAt: row.updatedAt ?? null,
+      updatedBy: row.updatedBy ?? null,
+    };
+  } catch {
+    return { ...DEFAULT_APPEARANCE };
+  }
+}
+
+async function writeSiteAppearance(
+  db: D1Database,
+  input: { footerCreditAr: string; footerCreditEn: string },
+  actorEmail: string,
+): Promise<SiteAppearanceRow> {
+  const now = Date.now();
+  const appearance: SiteAppearanceRow = {
+    footerCreditAr: sanitizeCreditText(
+      input.footerCreditAr,
+      DEFAULT_APPEARANCE.footerCreditAr,
+    ),
+    footerCreditEn: sanitizeCreditText(
+      input.footerCreditEn,
+      DEFAULT_APPEARANCE.footerCreditEn,
+    ),
+    updatedAt: now,
+    updatedBy: actorEmail,
+  };
+  await db
+    .prepare(
+      `INSERT INTO site_settings (key, value, updated_at, updated_by)
+       VALUES (?, ?, ?, ?)
+       ON CONFLICT(key) DO UPDATE SET
+         value = excluded.value,
+         updated_at = excluded.updated_at,
+         updated_by = excluded.updated_by`,
+    )
+    .bind(
+      SITE_APPEARANCE_KEY,
+      JSON.stringify({
+        footerCreditAr: appearance.footerCreditAr,
+        footerCreditEn: appearance.footerCreditEn,
+      }),
+      now,
+      actorEmail,
+    )
+    .run();
+  return appearance;
+}
+
 const workerHandler = {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === "OPTIONS") {
@@ -1005,6 +1106,51 @@ const workerHandler = {
          FROM role_audit ORDER BY created_at DESC LIMIT 100`,
       ).all();
       return json({ ok: true, entries: rows.results ?? [] });
+    }
+
+    if (url.pathname === "/v1/site-appearance") {
+      await ensureSiteSettingsTable(env.DB);
+      const action = String(body.action || "get");
+      if (action === "get") {
+        const appearance = await readSiteAppearance(env.DB);
+        return json({ ok: true, appearance });
+      }
+      return badRequest("unknown_action");
+    }
+
+    if (url.pathname === "/v1/admin/site-appearance") {
+      const actorEmail = String(body.actorEmail || "")
+        .trim()
+        .toLowerCase();
+      if (!actorEmail.includes("@")) return badRequest("actor_required");
+      const actorInfo = await getUserRole(env.DB, actorEmail);
+      if (
+        actorInfo?.role !== "admin" &&
+        !isProtectedAdmin(actorEmail, env)
+      ) {
+        return forbidden("admin_required");
+      }
+
+      await ensureSiteSettingsTable(env.DB);
+      const action = String(body.action || "get");
+      if (action === "get") {
+        return json({
+          ok: true,
+          appearance: await readSiteAppearance(env.DB),
+        });
+      }
+      if (action === "set") {
+        const appearance = await writeSiteAppearance(
+          env.DB,
+          {
+            footerCreditAr: String(body.footerCreditAr || ""),
+            footerCreditEn: String(body.footerCreditEn || ""),
+          },
+          actorEmail,
+        );
+        return json({ ok: true, appearance });
+      }
+      return badRequest("unknown_action");
     }
 
     return json({ ok: false, error: "not_found" }, 404);

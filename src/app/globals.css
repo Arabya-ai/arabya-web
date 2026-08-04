@@ -2753,6 +2753,65 @@ html[data-theme="dark"] .mode-rail-wrap {
   text-wrap: pretty;
 }
 
+.admin-settings-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.25rem;
+}
+
+.admin-settings-tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--brand) 18%, var(--line));
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.admin-settings-tab:hover,
+.admin-settings-tab:focus-visible {
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--line));
+  color: var(--brand-deep);
+}
+
+.admin-settings-tab.is-active {
+  background: color-mix(in srgb, var(--brand) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--brand) 40%, var(--line));
+  color: var(--brand-deep);
+}
+
+.appearance-form .appearance-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.appearance-form textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--brand) 18%, var(--line));
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0.7rem 0.85rem;
+  font: inherit;
+  resize: vertical;
+  min-height: 4.5rem;
+}
+
+.appearance-form textarea:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--brand) 55%, transparent);
+  outline-offset: 1px;
+}
+
+.appearance-preview {
+  font-size: 0.85rem;
+}
+
 @media (max-width: 480px) {
   .arabya-footer-panel {
     padding: 0.85rem 0 0.7rem;

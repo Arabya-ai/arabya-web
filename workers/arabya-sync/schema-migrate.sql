@@ -35,6 +35,13 @@ CREATE TABLE IF NOT EXISTS source_uploads (
 
 CREATE INDEX IF NOT EXISTS idx_source_uploads_created ON source_uploads(created_at);
 
+CREATE TABLE IF NOT EXISTS site_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
+  updated_at INTEGER NOT NULL,
+  updated_by TEXT
+);
+
 -- Legacy (already applied on production — kept for fresh DBs via schema.sql)
 -- ALTER TABLE users ADD COLUMN status TEXT NOT NULL DEFAULT 'active';
 -- ALTER TABLE users ADD COLUMN last_seen_at INTEGER;

@@ -11,13 +11,19 @@ import { useDismissibleOpen } from "@/hooks/useDismissibleOpen";
 import { Link } from "@/i18n/navigation";
 
 /** Site chrome for all pages including Arabya Studio (header + footer). */
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({
+  children,
+  footerCredit,
+}: {
+  children: React.ReactNode;
+  footerCredit: string;
+}) {
   return (
     <>
       <ServiceWorkerRegister />
       <SiteHeader />
       <main>{children}</main>
-      <SiteFooter />
+      <SiteFooter credit={footerCredit} />
       <InstallAppPrompt />
     </>
   );
@@ -184,10 +190,8 @@ export function SiteHeader() {
   );
 }
 
-export function SiteFooter() {
+export function SiteFooter({ credit }: { credit: string }) {
   const t = useTranslations("Nav");
-  const tFooter = useTranslations("Footer");
-  const year = new Date().getFullYear();
 
   return (
     <footer className="site-footer">
@@ -216,9 +220,7 @@ export function SiteFooter() {
             </nav>
           </div>
 
-          <p className="arabya-footer-credit" suppressHydrationWarning>
-            {tFooter("credit", { year })}
-          </p>
+          <p className="arabya-footer-credit">{credit}</p>
         </div>
       </div>
     </footer>
