@@ -331,7 +331,6 @@ export default function Editor() {
       pauseBetweenAyahsMs: p.pauseBetweenAyahsMs ?? 0,
     });
     // Only re-load when the project id changes — not when toast identity changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional
   }, [id]);
 
   useEffect(() => {
@@ -1477,7 +1476,6 @@ export default function Editor() {
           >
           <div className="studio-live-preview__media pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl">
           {project.bgUrl && previewBgKind !== "video" && previewMedia.src && (
-            // eslint-disable-next-line @next/next/no-img-element
             <img
               key={previewMedia.src}
               src={previewMedia.src}

@@ -100,6 +100,8 @@ export function InstallAppPrompt() {
   return (
     <div className="install-app-prompt" role="dialog" aria-label={t("title")}>
       <div className="install-app-prompt__inner">
+        {/* Local static PWA icon; next/image adds little benefit in this toast. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/brand/icon-192.png"
           alt=""

@@ -60,7 +60,6 @@ export function ArabyaMarkIcon({
       style={{ width: size, height: size }}
       aria-hidden
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/brand/arabya-mark-square.png"
         alt=""
