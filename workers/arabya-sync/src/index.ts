@@ -47,14 +47,28 @@ type ProgressPayload = {
 
 type UserRole = "member" | "creator" | "editor" | "admin";
 
-function json(data: unknown, status = 200): Response {
+const ALLOWED_ORIGINS = new Set([
+  "https://www.arabyaai.com",
+  "https://arabyaai.com",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+]);
+
+function corsHeaders(request?: Request): Record<string, string> {
+  const origin = request?.headers.get("Origin") || "";
+  const allow = ALLOWED_ORIGINS.has(origin) ? origin : "https://www.arabyaai.com";
+  return {
+    "Access-Control-Allow-Origin": allow,
+    "Access-Control-Allow-Headers": "Authorization, Content-Type",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    Vary: "Origin",
+  };
+}
+
+function json(data: unknown, status = 200, request?: Request): Response {
   return Response.json(data, {
     status,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "Authorization, Content-Type",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    },
+    headers: corsHeaders(request),
   });
 }
 
@@ -73,7 +87,15 @@ function badRequest(message: string): Response {
 function authorize(request: Request, env: Env): boolean {
   const header = request.headers.get("Authorization") || "";
   const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
-  return Boolean(env.ARABYA_SYNC_SECRET) && token === env.ARABYA_SYNC_SECRET;
+  const secret = (env.ARABYA_SYNC_SECRET || "").trim();
+  if (!secret || !token) return false;
+  if (token.length !== secret.length) return false;
+  // Constant-time-ish compare (Workers lack Node crypto.timingSafeEqual).
+  let diff = 0;
+  for (let i = 0; i < token.length; i += 1) {
+    diff |= token.charCodeAt(i) ^ secret.charCodeAt(i);
+  }
+  return diff === 0;
 }
 
 function userIdFromEmail(email: string): string {
@@ -617,7 +639,7 @@ async function writeSiteAppearance(
 const workerHandler = {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (request.method === "OPTIONS") {
-      return json({ ok: true });
+      return json({ ok: true }, 200, request);
     }
 
     const url = new URL(request.url);
@@ -654,9 +676,8 @@ const workerHandler = {
       if (row?.status === "banned") {
         return json({ ok: true, role: "member", banned: true });
       }
-      const ensureAdmin =
-        body.ensureAdmin === true || isProtectedAdmin(email, env);
-      if (ensureAdmin) {
+      // Never trust body.ensureAdmin — only server-side allowlists.
+      if (isProtectedAdmin(email, env)) {
         await upsertUserProfile(env.DB, email, null, null, "admin");
         await env.DB.prepare(`UPDATE users SET role = 'admin' WHERE id = ?`)
           .bind(userIdFromEmail(email))
@@ -675,8 +696,8 @@ const workerHandler = {
     if (url.pathname === "/v1/pull" || url.pathname === "/v1/push") {
       if (!email || !email.includes("@")) return badRequest("email_required");
 
-      const ensureAdmin =
-        body.ensureAdmin === true || isProtectedAdmin(email, env);
+      // Never trust body.ensureAdmin — only server-side allowlists.
+      const ensureAdmin = isProtectedAdmin(email, env);
       const fallbackRole: UserRole = ensureAdmin ? "admin" : "member";
       const { id: userId, role, status } = await upsertUserProfile(
         env.DB,
@@ -694,9 +715,7 @@ const workerHandler = {
         await env.DB.prepare(`UPDATE users SET role = 'admin' WHERE id = ?`)
           .bind(userId)
           .run();
-        if (role !== "admin") {
-          await writeAudit(env.DB, userId, email, role, "admin", "ensure_admin");
-        }
+        await writeAudit(env.DB, userId, email, role, "admin", "ensure_admin");
       }
 
       if (url.pathname === "/v1/pull") {

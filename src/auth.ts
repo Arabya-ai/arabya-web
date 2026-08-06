@@ -122,13 +122,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       if (shouldRefresh) {
         const status = await fetchCloudRoleStatus(email);
-        token.banned = status.banned;
-        if (status.banned) {
-          token.role = "member";
+        if (status.unreachable) {
+          // Keep prior banned/role when Worker is down — never clear a ban on error.
+          if (!token.role) {
+            token.role = resolveRoleFromEmail(email);
+          } else {
+            token.role = mergeRoleWithEnvAdmin(email, token.role as UserRole);
+          }
         } else {
-          token.role = mergeRoleWithEnvAdmin(email, status.role);
+          token.banned = status.banned;
+          if (status.banned) {
+            token.role = "member";
+          } else {
+            token.role = mergeRoleWithEnvAdmin(email, status.role);
+          }
+          token.roleFetchedAt = now;
         }
-        token.roleFetchedAt = now;
       } else if (!token.role) {
         token.role = resolveRoleFromEmail(email);
       } else {

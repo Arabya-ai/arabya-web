@@ -53,7 +53,9 @@ export default async function LoginPage({ params, searchParams }: Props) {
   const locale = await resolveLocale(params);
 
   const session = await auth();
-  if (session?.user) redirectLocalized("/account", locale);
+  if (session?.user && session.error !== "Banned") {
+    redirectLocalized("/account", locale);
+  }
 
   const t = await getTranslations("Auth");
   const { error, diag, callbackUrl } = await searchParams;

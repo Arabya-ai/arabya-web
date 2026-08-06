@@ -12,15 +12,10 @@ export async function GET() {
       {
         ok: true,
         appearance: state.appearance,
-        syncConfigured: state.syncConfigured,
-        cloudReachable: state.cloudReachable,
-        source: state.source,
-        env: state.env,
-        cloudError: state.cloudError,
       },
       {
         headers: {
-          "Cache-Control": "no-store, max-age=0",
+          "Cache-Control": "public, s-maxage=30, stale-while-revalidate=120",
         },
       },
     );

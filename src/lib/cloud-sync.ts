@@ -150,7 +150,7 @@ function profileBody(user: {
 
 export async function fetchCloudRoleStatus(
   email: string,
-): Promise<{ role: UserRole | null; banned: boolean }> {
+): Promise<{ role: UserRole | null; banned: boolean; unreachable?: boolean }> {
   if (!isCloudSyncConfigured()) return { role: null, banned: false };
   try {
     const data = await callWorker<{ role?: UserRole; banned?: boolean }>(
@@ -162,7 +162,8 @@ export async function fetchCloudRoleStatus(
       banned: data.banned === true,
     };
   } catch {
-    return { role: null, banned: false };
+    // Do not invent "not banned" — callers must keep prior token state.
+    return { role: null, banned: false, unreachable: true };
   }
 }
 

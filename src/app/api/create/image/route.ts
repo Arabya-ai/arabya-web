@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { getSurah, getVerseTranslation } from "@/lib/quran";
+import { getSurah, getVerseTranslation, getVerseTranslationEditions } from "@/lib/quran";
 import { getSurahDisplayTitle } from "@/lib/surah-names";
 import { renderCreateAyahPng } from "@/lib/create-ayah-image";
 import {
@@ -20,17 +20,24 @@ function parseAspect(raw: string | null, plan: UserPlan): ImageAspect {
   return FREE_IMAGE_ASPECT;
 }
 
+function isSafeEditionSlug(slug: string): boolean {
+  return /^[a-z0-9][a-z0-9._-]{0,80}$/i.test(slug) && !slug.includes("..");
+}
+
 export async function GET(request: Request) {
   const session = await auth();
   if (!session?.user) {
     return Response.json({ error: "auth_required" }, { status: 401 });
+  }
+  if (session.error === "Banned") {
+    return Response.json({ error: "banned" }, { status: 403 });
   }
   const plan = session.user.plan ?? "free";
   const { searchParams } = new URL(request.url);
   const sid = Number(searchParams.get("s") || "0");
   const vid = Number(searchParams.get("v") || "0");
   const locale = searchParams.get("locale") === "en" ? "en" : "ar";
-  const edition = searchParams.get("edition") || "";
+  const edition = (searchParams.get("edition") || "").trim();
   const wantTr = searchParams.get("tr") === "1";
   const bg = searchParams.get("bg") || "";
 
@@ -50,39 +57,51 @@ export async function GET(request: Request) {
     return Response.json({ error: "plus_required" }, { status: 403 });
   }
 
-  const surah = await getSurah(sid);
-  if (!surah) return Response.json({ error: "not_found" }, { status: 404 });
-  const ayah = surah.verses.find((x) => x.verseNumber === vid);
-  if (!ayah) return Response.json({ error: "not_found" }, { status: 404 });
+  try {
+    const surah = await getSurah(sid);
+    if (!surah) return Response.json({ error: "not_found" }, { status: 404 });
+    const ayah = surah.verses.find((x) => x.verseNumber === vid);
+    if (!ayah) return Response.json({ error: "not_found" }, { status: 404 });
 
-  const ayahText = ayah.words
-    .filter((w) => !w.charType || w.charType === "word")
-    .map((w) => normalizeForHafsFont(w.text))
-    .join(" ");
+    const ayahText = ayah.words
+      .filter((w) => !w.charType || w.charType === "word")
+      .map((w) => normalizeForHafsFont(w.text))
+      .join(" ");
 
-  let translation = "";
-  if (wantTr && edition) {
-    const file = await getVerseTranslation(edition, sid);
-    translation =
-      file?.verses.find((x) => x.verseNumber === vid)?.text?.trim() || "";
+    let translation = "";
+    if (wantTr && edition) {
+      if (!isSafeEditionSlug(edition)) {
+        return Response.json({ error: "bad_edition" }, { status: 400 });
+      }
+      const editions = await getVerseTranslationEditions();
+      const allowed = editions.some((e) => e.slug === edition);
+      if (!allowed) {
+        return Response.json({ error: "bad_edition" }, { status: 400 });
+      }
+      const file = await getVerseTranslation(edition, sid);
+      translation =
+        file?.verses.find((x) => x.verseNumber === vid)?.text?.trim() || "";
+    }
+
+    const png = await renderCreateAyahPng({
+      aspect,
+      surahTitle: getSurahDisplayTitle(sid, locale),
+      verseLabel: String(vid),
+      ayahText,
+      translation: translation || undefined,
+      watermark: !premium,
+      backgroundColor: premium && bg.startsWith("#") ? bg : undefined,
+      locale,
+    });
+
+    return new Response(new Uint8Array(png), {
+      headers: {
+        "Content-Type": "image/png",
+        "Cache-Control": "private, no-store",
+        "Content-Disposition": `attachment; filename="arabya-${sid}-${vid}.png"`,
+      },
+    });
+  } catch {
+    return Response.json({ error: "render_failed" }, { status: 500 });
   }
-
-  const png = await renderCreateAyahPng({
-    aspect,
-    surahTitle: getSurahDisplayTitle(sid, locale),
-    verseLabel: String(vid),
-    ayahText,
-    translation: translation || undefined,
-    watermark: !premium,
-    backgroundColor: premium && bg.startsWith("#") ? bg : undefined,
-    locale,
-  });
-
-  return new Response(new Uint8Array(png), {
-    headers: {
-      "Content-Type": "image/png",
-      "Cache-Control": "private, no-store",
-      "Content-Disposition": `attachment; filename="arabya-${sid}-${vid}.png"`,
-    },
-  });
 }

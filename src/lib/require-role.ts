@@ -7,6 +7,9 @@ export async function requireSession() {
   if (!session?.user?.email) {
     return { error: NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 }) };
   }
+  if (session.error === "Banned") {
+    return { error: NextResponse.json({ ok: false, error: "banned" }, { status: 403 }) };
+  }
   return {
     session,
     email: session.user.email,
