@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { SurahIndex } from "@/components/SurahIndex";
 import { ContinueReading } from "@/components/ContinueReading";
 import { ReadingHabitCard } from "@/components/ReadingHabitCard";
@@ -20,9 +21,17 @@ export default async function HomePage() {
     <div className="shell home-simple">
       <StudyHashRedirect />
       <header className="home-title-block">
+        <p className="home-brand-word" aria-hidden="true">
+          {t("brandWord")}
+        </p>
         <h1>{t("title")}</h1>
-        <p>{t("subtitle")}</p>
-        <ContinueReading />
+        <p className="home-lead">{t("subtitle")}</p>
+        <div className="home-cta-row">
+          <Link href="/mushaf/1" className="home-cta home-cta--primary">
+            {t("openMushaf")}
+          </Link>
+          <ContinueReading />
+        </div>
       </header>
       <SurahIndex
         surahs={surahs}

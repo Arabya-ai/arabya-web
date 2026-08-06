@@ -58,8 +58,10 @@
     "pricing": "Plans"
   },
   "Home": {
+    "brandWord": "Arabya",
     "title": "Quran index",
     "subtitle": "Choose a surah to open the mushaf and study its words",
+    "openMushaf": "Open the mushaf",
     "continueReading": "Continue reading from page {page}"
   },
   "Theme": {

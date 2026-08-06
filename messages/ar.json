@@ -58,8 +58,10 @@
     "pricing": "الخطط"
   },
   "Home": {
+    "brandWord": "عربية",
     "title": "فهرس القرآن الكريم",
     "subtitle": "اختر سورة لقراءة المصحف ودراسة كلماتها",
+    "openMushaf": "افتح المصحف",
     "continueReading": "متابعة القراءة من الصفحة {page}"
   },
   "Theme": {
