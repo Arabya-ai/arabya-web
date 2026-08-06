@@ -66,14 +66,24 @@ export function getAuthEnvDiagnostics() {
 
 const ROLE_REFRESH_MS = 5 * 60 * 1000;
 
+const googleReady = isGoogleAuthConfigured();
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  secret: env("AUTH_SECRET"),
-  providers: [
-    Google({
-      clientId: env("AUTH_GOOGLE_ID"),
-      clientSecret: env("AUTH_GOOGLE_SECRET"),
-    }),
-  ],
+  // Auth.js requires a secret; missing one makes every /api/auth/* return 500
+  // and the browser shows ClientFetchError. Prefer AUTH_SECRET from env.
+  secret:
+    env("AUTH_SECRET") ||
+    (process.env.NODE_ENV !== "production"
+      ? "arabya-local-dev-only-not-for-production"
+      : undefined),
+  providers: googleReady
+    ? [
+        Google({
+          clientId: env("AUTH_GOOGLE_ID")!,
+          clientSecret: env("AUTH_GOOGLE_SECRET")!,
+        }),
+      ]
+    : [],
   trustHost: true,
   pages: {
     signIn: "/login",
