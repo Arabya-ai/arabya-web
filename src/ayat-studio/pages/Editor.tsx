@@ -81,6 +81,7 @@ import {
 import {
   BRAND_LOCKUP_AR,
   BRAND_LOCKUP_EN,
+  BRAND_SITE_HOST,
   DEFAULT_SURAH_LABEL_COLOR,
   DEFAULT_SURAH_LABEL_FONT_SIZE,
   frameAyahFontPx,
@@ -162,6 +163,12 @@ function BrandLockupLabels({
         style={{ fontSize: `${subPx}px` }}
       >
         {BRAND_LOCKUP_EN}
+      </span>
+      <span
+        className="font-medium leading-none tracking-wide text-teal-200/95 whitespace-nowrap"
+        style={{ fontSize: `${Math.max(10, Math.round(subPx * 0.92))}px` }}
+      >
+        {BRAND_SITE_HOST}
       </span>
     </div>
   );

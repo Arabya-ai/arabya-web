@@ -36,6 +36,7 @@ export const DEFAULT_SURAH_LABEL_COLOR = "#C8A951";
 
 export const BRAND_LOCKUP_AR = "عربية ستوديو";
 export const BRAND_LOCKUP_EN = "ARABYA • STUDIO";
+export const BRAND_SITE_HOST = "arabyaai.com";
 
 export function frameSurahLabelPx(
   fontSize: number,

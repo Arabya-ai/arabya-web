@@ -13,6 +13,7 @@ import {
 import {
   BRAND_LOCKUP_AR,
   BRAND_LOCKUP_EN,
+  BRAND_SITE_HOST,
   DEFAULT_SURAH_LABEL_COLOR,
   DEFAULT_SURAH_LABEL_FONT_SIZE,
   frameAyahFontPx,
@@ -343,6 +344,17 @@ export async function exportProjectToVideo({
           intensity: visualizerIntensity,
           clear: false,
           time: timeSec,
+        });
+      }
+
+      // Re-draw brand after visualizer so bars/wave never cover mark + URL.
+      if (watermark || project.brandSignature !== false) {
+        drawBrandLockup(ctx, {
+          width,
+          height,
+          position: normalizeBrandPosition(project.brandPosition),
+          markImg: watermarkImg,
+          required: watermark,
         });
       }
 
@@ -885,7 +897,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   });
 }
 
-/** Draw Arabya mark + title/subtitle; Arabic title width matches English line. */
+/** Draw Arabya mark + title/subtitle/URL; Arabic title width matches English line. */
 function drawBrandLockup(
   ctx: CanvasRenderingContext2D,
   opts: {
@@ -902,13 +914,16 @@ function drawBrandLockup(
   const gap = Math.round(mark * 0.22);
   const titleSize = frameBrandTitlePx(width);
   const subSize = frameBrandSubPx(width);
+  const urlSize = Math.max(10, Math.round(subSize * 0.92));
 
   ctx.save();
   ctx.font = `${subSize}px "IBM Plex Sans Arabic", "Tajawal", sans-serif`;
   const engW = Math.max(1, ctx.measureText(BRAND_LOCKUP_EN).width);
-  const textW = Math.ceil(engW);
+  ctx.font = `${urlSize}px "IBM Plex Sans Arabic", "Tajawal", sans-serif`;
+  const urlW = Math.max(1, ctx.measureText(BRAND_SITE_HOST).width);
+  const textW = Math.ceil(Math.max(engW, urlW));
   const boxW = mark + gap + textW;
-  const boxH = Math.max(mark, titleSize + subSize + 10);
+  const boxH = Math.max(mark, titleSize + subSize + urlSize + 14);
   const { x, y } = brandLockupAnchor(position, width, height, boxW, boxH, pad);
 
   ctx.globalAlpha = required ? 0.95 : 0.92;
@@ -930,8 +945,9 @@ function drawBrandLockup(
   }
 
   const textX = markX + mark + gap;
-  const titleY = y + Math.round(boxH * 0.42);
-  const subY = y + Math.round(boxH * 0.78);
+  const titleY = y + Math.round(boxH * 0.32);
+  const subY = y + Math.round(boxH * 0.58);
+  const urlY = y + Math.round(boxH * 0.86);
 
   // Fit Arabic into the same horizontal span as the English line.
   ctx.direction = "rtl";
@@ -945,6 +961,10 @@ function drawBrandLockup(
   ctx.fillStyle = "rgba(255,255,255,0.78)";
   ctx.font = `${subSize}px "IBM Plex Sans Arabic", "Tajawal", sans-serif`;
   ctx.fillText(BRAND_LOCKUP_EN, textX, subY);
+
+  ctx.fillStyle = "rgba(153,246,228,0.95)";
+  ctx.font = `${urlSize}px "IBM Plex Sans Arabic", "Tajawal", sans-serif`;
+  ctx.fillText(BRAND_SITE_HOST, textX, urlY);
 
   ctx.restore();
 }

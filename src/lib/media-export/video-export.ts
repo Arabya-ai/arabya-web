@@ -5,6 +5,12 @@
 import { Muxer, ArrayBufferTarget } from "mp4-muxer";
 import { getReciter, reciterDisplayName } from "@/lib/audio";
 import {
+  ARABYA_MARK_PUBLIC_PATH,
+  ARABYA_SITE_HOST,
+  arabyaBrandName,
+  drawArabyaExportBrand,
+} from "@/lib/brand-export";
+import {
   drawVisualizer,
   type VisualizerType,
 } from "@/lib/media-export/visualizer";
@@ -194,8 +200,16 @@ function drawFrame(
     progress: number;
   },
 ) {
-  const { width, height, bgImage, project, ayahText, ayahNumber, reciterName, progress } =
-    opts;
+  const {
+    width,
+    height,
+    bgImage,
+    project,
+    ayahText,
+    ayahNumber,
+    reciterName,
+    progress,
+  } = opts;
   if (bgImage) {
     const ir = bgImage.width / bgImage.height;
     const cr = width / height;
@@ -248,12 +262,13 @@ function drawFrame(
 
   ctx.fillStyle = "rgba(255,255,255,0.55)";
   ctx.font = `${Math.round(width * 0.022)}px sans-serif`;
-  ctx.fillText(reciterName, width / 2, height - height * 0.04);
+  ctx.textAlign = "center";
+  ctx.fillText(reciterName, width / 2, height - height * 0.11);
 
   const barW = width * 0.7;
   const barH = Math.max(3, height * 0.005);
   const barX = (width - barW) / 2;
-  const barY = height - height * 0.07;
+  const barY = height - height * 0.085;
   ctx.fillStyle = "rgba(255,255,255,0.2)";
   ctx.fillRect(barX, barY, barW, barH);
   ctx.fillStyle = "rgba(153,246,228,0.95)";
@@ -317,6 +332,8 @@ export async function exportProjectToVideo(opts: {
   if (project.bgUrl) {
     bgImage = await loadImage(project.bgUrl).catch(() => null);
   }
+
+  const brandMark = await loadImage(ARABYA_MARK_PUBLIC_PATH).catch(() => null);
 
   const reciter = getReciter(project.reciterId);
   const reciterName = reciterDisplayName(reciter, project.locale || "ar");
@@ -427,6 +444,17 @@ export async function exportProjectToVideo(opts: {
         clear: false,
       });
     }
+
+    // Always brand mushaf/create video exports after overlays: mark + name + site URL.
+    drawArabyaExportBrand(ctx, {
+      width,
+      height,
+      markImg: brandMark,
+      locale: project.locale,
+      required: true,
+      title: arabyaBrandName(project.locale),
+      subtitle: ARABYA_SITE_HOST,
+    });
 
     const videoFrame = new VideoFrame(canvas, {
       timestamp: Math.round((frame / fps) * 1_000_000),
