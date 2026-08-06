@@ -1,4 +1,4 @@
-import { readFile, mkdir, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
@@ -35,9 +35,6 @@ describe("renderCreateAyahPng branding", () => {
       path.join(process.cwd(), "public/brand/arabya-mark-square.png"),
     );
     expect(png.byteLength).toBeGreaterThan(mark.byteLength / 4);
-
-    await mkdir("/opt/cursor/artifacts", { recursive: true });
-    await writeFile("/opt/cursor/artifacts/export-brand-test.png", png);
   });
 
   it("always includes brand even without free watermark flag", async () => {
