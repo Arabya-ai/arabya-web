@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
+import {
+  studioCreateFromAyahHref,
+  studioPath,
+} from "@/ayat-studio/lib/studio-paths";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -35,15 +39,37 @@ export default async function CreateHubPage({ params }: Props) {
       <p className="dash-muted">{t("hubLead")}</p>
       <ul className="create-hub-list">
         <li>
-          <Link href="/create/image" className="create-hub-card">
+          <Link
+            href={studioCreateFromAyahHref({
+              surahId: 1,
+              verse: 1,
+              kind: "image",
+              auto: false,
+            })}
+            className="create-hub-card"
+          >
             <strong>{t("imageTitle")}</strong>
             <span>{t("imageLead")}</span>
           </Link>
         </li>
         <li>
-          <Link href="/create/video" className="create-hub-card">
+          <Link
+            href={studioCreateFromAyahHref({
+              surahId: 1,
+              verse: 1,
+              kind: "video",
+              auto: false,
+            })}
+            className="create-hub-card"
+          >
             <strong>{t("videoTitle")}</strong>
             <span>{t("videoLead")}</span>
+          </Link>
+        </li>
+        <li>
+          <Link href={studioPath("/projects/new")} className="create-hub-card">
+            <strong>{tNav("studio")}</strong>
+            <span>{t("hubLead")}</span>
           </Link>
         </li>
       </ul>

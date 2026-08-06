@@ -32,6 +32,7 @@ import {
 import { tafsirDisplayName } from "@/lib/tafsir-label";
 import { MeaningLangSwitch } from "@/components/MeaningLangSwitch";
 import type { MeaningLang } from "@/hooks/mushaf-utils";
+import { studioCreateFromAyahHref } from "@/ayat-studio/lib/studio-paths";
 
 export type VerseTranslationStatus =
   | "idle"
@@ -319,13 +320,21 @@ export function WordStudyDock({
           {dockSurahId && dockVerse ? (
             <>
               <Link
-                href={`/create/image?s=${dockSurahId}&v=${dockVerse}`}
+                href={studioCreateFromAyahHref({
+                  surahId: dockSurahId,
+                  verse: dockVerse,
+                  kind: "image",
+                })}
                 className="word-dock-link"
               >
                 {t("createImage")}
               </Link>
               <Link
-                href={`/create/video?s=${dockSurahId}&v=${dockVerse}`}
+                href={studioCreateFromAyahHref({
+                  surahId: dockSurahId,
+                  verse: dockVerse,
+                  kind: "video",
+                })}
                 className="word-dock-link"
               >
                 {t("createVideo")}

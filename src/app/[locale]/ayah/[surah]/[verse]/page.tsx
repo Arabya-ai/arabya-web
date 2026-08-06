@@ -11,6 +11,7 @@ import { getSurahDisplayTitle } from "@/lib/surah-names";
 import { PageShareButton } from "@/components/PageShareButton";
 import { buildSocialMetadata } from "@/lib/og-meta";
 import { shareOgImageUrl } from "@/lib/share";
+import { studioCreateFromAyahHref } from "@/ayat-studio/lib/studio-paths";
 
 type Props = { params: Promise<{ locale: string; surah: string; verse: string }> };
 
@@ -135,13 +136,21 @@ export default async function AyahIrabPage({ params }: Props) {
             hint={t("shareHint")}
           />
           <Link
-            href={`/create/image?s=${surahId}&v=${verseNumber}`}
+            href={studioCreateFromAyahHref({
+              surahId,
+              verse: verseNumber,
+              kind: "image",
+            })}
             className="nav-pill"
           >
             {t("createImage")}
           </Link>
           <Link
-            href={`/create/video?s=${surahId}&v=${verseNumber}`}
+            href={studioCreateFromAyahHref({
+              surahId,
+              verse: verseNumber,
+              kind: "video",
+            })}
             className="nav-pill"
           >
             {t("createVideo")}

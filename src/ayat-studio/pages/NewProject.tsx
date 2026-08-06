@@ -6,15 +6,26 @@ import { Label } from "@/ayat-studio/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ayat-studio/components/ui/select";
 import { useRouter } from "@/i18n/navigation";
 import { studioPath } from "@/ayat-studio/lib/studio-paths";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { reciters, surahs, aspectRatios } from "@/ayat-studio/lib/quran-data";
 import { createDefaultProject } from "@/ayat-studio/lib/projects-store";
 import { useToast } from "@/ayat-studio/hooks/use-toast";
 import { ArabesqueMedallion } from "@/ayat-studio/components/IslamicDecor";
 import { BookOpen, Mic2, Film, Sparkles, ArrowLeft } from "lucide-react";
 
+function parseAyahQuery(rawS: string | null, rawV: string | null) {
+  const sid = Number(rawS);
+  if (!Number.isInteger(sid) || sid < 1 || sid > 114) return null;
+  const surah = surahs.find((s) => s.id === sid);
+  const max = surah?.ayahCount ?? 286;
+  const verse = Math.min(max, Math.max(1, Number(rawV) || 1));
+  return { sid, verse, surah };
+}
+
 export default function NewProject() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [reciterId, setReciterId] = useState("Alafasy_128kbps");
@@ -22,8 +33,70 @@ export default function NewProject() {
   const [ayahStart, setAyahStart] = useState("1");
   const [ayahEnd, setAyahEnd] = useState("13");
   const [ratio, setRatio] = useState("9:16");
+  const [bootstrapping, setBootstrapping] = useState(
+    () => searchParams.get("auto") === "1" && !!searchParams.get("s"),
+  );
+  const autoStarted = useRef(false);
 
   const selectedSurah = surahs.find((s) => s.id.toString() === surahId);
+
+  useEffect(() => {
+    const parsed = parseAyahQuery(searchParams.get("s"), searchParams.get("v"));
+    if (!parsed) return;
+
+    const kind = searchParams.get("kind") === "image" ? "image" : "video";
+    const wantAuto = searchParams.get("auto") === "1";
+    const nextTitle = parsed.surah
+      ? `${parsed.surah.name} · ${parsed.verse}`
+      : `سورة ${parsed.sid} · ${parsed.verse}`;
+    const nextRatio = kind === "image" ? "1:1" : "9:16";
+
+    setSurahId(String(parsed.sid));
+    setAyahStart(String(parsed.verse));
+    setAyahEnd(String(parsed.verse));
+    setTitle(nextTitle);
+    setRatio(nextRatio);
+
+    if (!wantAuto || autoStarted.current) return;
+    autoStarted.current = true;
+    setBootstrapping(true);
+
+    const dedupeKey = `arabya-studio-boot:${parsed.sid}:${parsed.verse}:${kind}`;
+    try {
+      const existingId =
+        typeof sessionStorage !== "undefined"
+          ? sessionStorage.getItem(dedupeKey)
+          : null;
+      if (existingId) {
+        router.replace(studioPath(`/editor/${existingId}`));
+        return;
+      }
+    } catch {
+      /* ignore */
+    }
+
+    const project = createDefaultProject({
+      title: nextTitle,
+      reciterId: "Alafasy_128kbps",
+      surahId: parsed.sid,
+      ayahStart: parsed.verse,
+      ayahEnd: parsed.verse,
+      ratio: nextRatio,
+    });
+    try {
+      sessionStorage.setItem(dedupeKey, project.id);
+    } catch {
+      /* ignore */
+    }
+    toast({
+      title: "تم فتح الاستوديو",
+      description:
+        kind === "image"
+          ? "يمكنك تصدير صورة PNG من المحرر."
+          : "يمكنك تعديل التلاوة ثم تصدير الفيديو.",
+    });
+    router.replace(studioPath(`/editor/${project.id}`));
+  }, [searchParams, router, toast]);
 
   const handleCreate = () => {
     if (!title.trim()) {
@@ -60,7 +133,15 @@ export default function NewProject() {
 
   return (
     <div className="mx-auto w-full max-w-3xl px-1 sm:px-0">
-      <div className="mb-8 text-center">
+      {bootstrapping ? (
+        <div className="mb-8 flex min-h-[40vh] flex-col items-center justify-center gap-3 text-center">
+          <ArabesqueMedallion size={48} className="text-accent animate-pulse-glow" />
+          <p className="text-sm text-muted-foreground">
+            جاري فتح الاستوديو على الآية المحددة…
+          </p>
+        </div>
+      ) : null}
+      <div className={`mb-8 text-center${bootstrapping ? " hidden" : ""}`}>
         <ArabesqueMedallion size={56} className="mx-auto mb-4 text-accent animate-pulse-glow" />
         <p className="mb-2 text-xs tracking-[0.3em] uppercase text-accent">بداية جديدة</p>
         <h1 className="font-display text-3xl font-bold text-foreground md:text-4xl">
@@ -69,7 +150,7 @@ export default function NewProject() {
         <p className="mt-2 text-sm text-muted-foreground">حدد التلاوة والمقاس، والباقي علينا</p>
       </div>
 
-      <Card className="relative overflow-hidden border-accent/20 bg-card/50 backdrop-blur-sm shadow-deep">
+      <Card className={`relative overflow-hidden border-accent/20 bg-card/50 backdrop-blur-sm shadow-deep${bootstrapping ? " hidden" : ""}`}>
         <div className="pattern-stars pointer-events-none absolute inset-0 opacity-20" aria-hidden />
         <CardContent className="relative z-10 space-y-6 p-6 md:p-8">
           {/* Title */}
