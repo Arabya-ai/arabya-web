@@ -20,23 +20,25 @@ export default async function HomePage() {
   return (
     <div className="shell home-simple">
       <StudyHashRedirect />
-      <header className="home-title-block">
-        <p className="home-brand-word" aria-hidden="true">
-          {t("brandWord")}
-        </p>
-        <h1>{t("title")}</h1>
-        <p className="home-lead">{t("subtitle")}</p>
-        <div className="home-cta-row">
-          <Link href="/mushaf/1" className="home-cta home-cta--primary">
-            {t("openMushaf")}
-          </Link>
-          <ContinueReading />
-        </div>
-      </header>
-      <SurahIndex
-        surahs={surahs}
-        mushafFirstPage={mushafIndex.surahFirstPage}
-      />
+      <section className="home-catalog" aria-labelledby="home-index-title">
+        <header className="home-catalog-head">
+          <div className="home-catalog-copy">
+            <p className="home-catalog-brand">{t("brandWord")}</p>
+            <h1 id="home-index-title">{t("title")}</h1>
+            <p className="home-lead">{t("subtitle")}</p>
+          </div>
+          <div className="home-catalog-actions">
+            <Link href="/mushaf/1" className="home-cta home-cta--primary">
+              {t("openMushaf")}
+            </Link>
+            <ContinueReading />
+          </div>
+        </header>
+        <SurahIndex
+          surahs={surahs}
+          mushafFirstPage={mushafIndex.surahFirstPage}
+        />
+      </section>
       <StudyAssistant />
       <ReadingHabitCard />
       <PrayerTimesCard />
