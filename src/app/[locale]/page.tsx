@@ -24,6 +24,9 @@ export default async function HomePage() {
         <header className="home-index-intro">
           <h1 id="home-index-title">{t("title")}</h1>
           <p className="home-lead">{t("subtitle")}</p>
+          <div className="home-index-ornament" aria-hidden="true">
+            <span className="home-index-ornament-mark" />
+          </div>
           <div className="home-index-toolbar">
             <Link href="/mushaf/1" className="home-tool-link home-tool-link--primary">
               {t("openMushaf")}
