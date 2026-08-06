@@ -30,7 +30,7 @@ export function ContinueReading() {
 
   return (
     <p className="continue-reading">
-      <Link href={getMushafPageHref(page)} className="continue-link home-cta--ghost">
+      <Link href={getMushafPageHref(page)} className="continue-link home-tool-link">
         {t("continueReading", { page: pageLabel })}
       </Link>
     </p>

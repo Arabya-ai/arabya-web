@@ -178,6 +178,7 @@ input {
 .surah-ornament-text,
 .home-title-block h1,
 .home-catalog-head h1,
+.home-index-intro h1,
 .surah-read-head h1,
 .page-block > h1,
 .ayah-study-head h1,
@@ -640,170 +641,157 @@ html[data-theme="dark"] .site-header {
   font-size: 0.9rem;
 }
 
-/* Home — catalog hero integrated with surah index */
+/* Home — clean catalog: intro + search + surah grid (no boxed hero) */
 .home-simple {
-  padding: 1.25rem 0 3rem;
+  padding: 1.75rem 0 3rem;
 }
 
-.home-catalog {
-  margin-bottom: 1.5rem;
-  padding: 1.15rem 1.1rem 1.25rem;
-  border-radius: 22px;
-  border: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--brand-soft) 55%, var(--surface)) 0%,
-      var(--surface) 7.5rem
-    );
-  box-shadow: 0 1px 0 color-mix(in srgb, #fff 45%, transparent) inset;
+.home-index {
+  margin-bottom: 1.75rem;
 }
 
-.home-catalog-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 0.85rem 1.25rem;
-  padding-bottom: 1rem;
-  margin-bottom: 0.85rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--brand) 10%, var(--line));
+.home-index-intro {
+  text-align: center;
+  max-width: 34rem;
+  margin: 0 auto 1.35rem;
+  padding: 0.25rem 0.35rem 1.15rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
 }
 
-.home-catalog-copy {
-  flex: 1 1 14rem;
-  min-width: 0;
-}
-
-.home-catalog-brand {
-  margin: 0 0 0.2rem;
-  font-family: var(--font-reem-kufi), "Reem Kufi", sans-serif;
-  font-weight: 700;
-  font-size: 0.95rem;
-  letter-spacing: 0.02em;
-  color: var(--brand-deep);
-}
-
-.home-catalog-head h1 {
+.home-index-intro h1 {
   margin: 0;
   font-family: var(--font-quran);
-  font-size: clamp(1.55rem, 3.8vw, 2.05rem);
+  font-size: clamp(1.85rem, 4.5vw, 2.45rem);
   font-weight: 400;
   color: var(--brand-deep);
-  line-height: 1.4;
+  line-height: 1.45;
   text-wrap: balance;
 }
 
-.home-catalog-head .home-lead {
-  margin: 0.35rem 0 0;
-  max-width: 36rem;
+.home-index-intro .home-lead {
+  margin: 0.55rem auto 0;
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 500;
-  line-height: 1.65;
+  line-height: 1.75;
   text-wrap: pretty;
 }
 
-.home-catalog-actions {
+.home-index-toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
-  flex: 0 1 auto;
+  justify-content: center;
+  gap: 0.55rem 0.85rem;
+  margin-top: 1rem;
 }
 
-.home-cta {
+.home-tool-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.55rem;
-  padding: 0.5rem 1.05rem;
+  min-height: 2.4rem;
+  padding: 0.4rem 0.95rem;
   border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--brand) 20%, var(--line));
+  background: transparent;
+  color: var(--brand-deep);
   font-weight: 700;
   font-size: 0.9rem;
   text-decoration: none;
-  transition:
-    transform 160ms ease,
-    background 160ms ease,
-    border-color 160ms ease,
-    box-shadow 160ms ease;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
 }
 
-.home-cta:active {
-  transform: scale(0.98);
-}
-
-.home-cta--primary {
-  background: var(--brand);
-  color: var(--on-brand);
-  border: 1px solid color-mix(in srgb, var(--brand-deep) 55%, transparent);
-  box-shadow: 0 6px 16px color-mix(in srgb, var(--brand) 18%, transparent);
-}
-
-.home-cta--primary:hover,
-.home-cta--primary:focus-visible {
-  background: var(--brand-deep);
+.home-tool-link:hover,
+.home-tool-link:focus-visible {
+  background: var(--brand-soft);
+  border-color: color-mix(in srgb, var(--brand) 40%, var(--line));
   outline: none;
 }
 
-.home-cta--primary:focus-visible {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-cyan) 40%, transparent);
+.home-tool-link--primary {
+  background: var(--brand-deep);
+  border-color: var(--brand-deep);
+  color: var(--on-brand);
 }
 
-.home-catalog .continue-reading {
+.home-tool-link--primary:hover,
+.home-tool-link--primary:focus-visible {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--on-brand);
+}
+
+.home-index .continue-reading {
   margin: 0;
 }
 
-.home-catalog .continue-link,
-.home-cta--ghost {
-  background: var(--surface);
-  border: 1px solid color-mix(in srgb, var(--brand) 18%, var(--line));
-  color: var(--brand-deep);
-  box-shadow: none;
-  min-height: 2.55rem;
-  padding: 0.5rem 1.05rem;
+.home-index .continue-link {
+  min-height: 2.4rem;
+  padding: 0.4rem 0.95rem;
   border-radius: 999px;
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.home-catalog .continue-link:hover,
-.home-cta--ghost:hover,
-.home-cta--ghost:focus-visible {
-  background: var(--brand-soft);
-  border-color: color-mix(in srgb, var(--brand) 35%, var(--line));
-  outline: none;
-}
-
-.home-catalog .index-simple {
-  display: grid;
-  gap: 0.95rem;
-  animation: none;
-}
-
-.home-catalog .index-search-simple input {
-  min-height: 2.85rem;
-  border-radius: 14px;
-  border-color: color-mix(in srgb, var(--brand) 14%, var(--line));
-  background: color-mix(in srgb, var(--surface) 92%, var(--brand-soft));
   box-shadow: none;
+  background: transparent;
 }
 
-.home-catalog .index-search-simple input:focus {
+.home-index .index-simple {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.home-index .index-search-simple input {
+  min-height: 2.85rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--brand) 16%, var(--line));
+  background: var(--surface);
+  box-shadow: none;
+  font-size: 0.95rem;
+}
+
+.home-index .index-search-simple input:focus {
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 16%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 14%, transparent);
 }
 
-.home-catalog .surah-grid-section {
+.home-index .surah-grid-section {
   margin-top: 0.15rem;
   margin-bottom: 0;
 }
 
-.home-catalog .surah-grid-section h2 {
-  margin: 0 0 0.75rem;
-  font-size: 0.92rem;
-  font-weight: 700;
+.home-index .surah-grid-section h2 {
+  margin: 0 0 0.85rem;
+  text-align: start;
+  font-family: var(--font-ui);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
   color: var(--muted);
+}
+
+.home-index .surah-grid {
+  gap: 0.5rem;
+  padding-top: 0.15rem;
+}
+
+.home-index .surah-chip {
+  min-height: 3rem;
+  border-radius: 12px;
+  background: var(--chip-bg);
+  border: 1px solid var(--chip-border);
+  box-shadow: none;
+}
+
+.home-index .surah-chip:hover,
+.home-index .surah-chip:focus-visible {
+  background: var(--chip-hover-bg);
+  border-color: var(--chip-hover-border);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--brand) 10%, transparent);
+  z-index: 2;
+}
+
+.home-index .chip-name {
+  font-size: 1.08rem;
 }
 
 .index-simple {
