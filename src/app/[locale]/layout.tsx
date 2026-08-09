@@ -13,7 +13,6 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { AuthSessionProvider } from "@/components/AuthSessionProvider";
-import { CloudAutoSync } from "@/components/CloudAutoSync";
 import { AppShell } from "@/components/SiteChrome";
 import { SyncUiLocaleFromPath } from "@/components/SyncUiLocaleFromPath";
 import {
@@ -28,30 +27,35 @@ const cairo = Cairo({
   variable: "--font-cairo",
   subsets: ["arabic", "latin"],
   weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
 });
 
 const plexArabic = IBM_Plex_Sans_Arabic({
   variable: "--font-plex-ar",
   subsets: ["arabic", "latin"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
 });
 
 const naskh = Noto_Naskh_Arabic({
   variable: "--font-naskh",
   subsets: ["arabic"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 const amiri = Amiri({
   variable: "--font-amiri",
   subsets: ["arabic", "latin"],
   weight: ["400", "700"],
+  display: "swap",
 });
 
 const tajawal = Tajawal({
@@ -140,7 +144,6 @@ export default async function LocaleLayout({ children, params }: Props) {
         <NextIntlClientProvider messages={messages}>
           <SyncUiLocaleFromPath />
           <AuthSessionProvider>
-            <CloudAutoSync />
             <AppShell footerCredit={footerCredit}>{children}</AppShell>
           </AuthSessionProvider>
         </NextIntlClientProvider>

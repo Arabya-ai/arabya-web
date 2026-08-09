@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type {
@@ -16,11 +17,8 @@ import { getSurahDisplayTitle } from "@/lib/surah-names";
 import { makeWordId } from "@/lib/word-id";
 import { narrativeIrab } from "@/lib/irab-narrative";
 import { orderTafsirSources, tafsirDisplayName } from "@/lib/tafsir-label";
-import { WordStudyDock } from "@/components/WordStudyDock";
-import { SurahAudioPlayer } from "@/components/SurahAudioPlayer";
 import { MushafToolbar } from "@/components/mushaf/MushafToolbar";
 import { MushafPageFrame } from "@/components/mushaf/MushafPageFrame";
-import { MushafStudySheets } from "@/components/mushaf/MushafStudySheets";
 import { getAyahNote, saveAyahNote } from "@/lib/ayah-notes";
 import {
   buildMushafShareUrl,
@@ -31,6 +29,24 @@ import { useMushafPrefs } from "@/hooks/useMushafPrefs";
 import { useMushafStudyCache } from "@/hooks/useMushafStudyCache";
 import { useQuranAudio, type AudioStatusKey } from "@/hooks/useQuranAudio";
 import { clampFontScale, type WordRef } from "@/hooks/mushaf-utils";
+
+/** Study/audio UI — code-split so first paint is the mushaf page only. */
+const WordStudyDock = dynamic(
+  () => import("@/components/WordStudyDock").then((m) => m.WordStudyDock),
+  { ssr: false },
+);
+const SurahAudioPlayer = dynamic(
+  () =>
+    import("@/components/SurahAudioPlayer").then((m) => m.SurahAudioPlayer),
+  { ssr: false },
+);
+const MushafStudySheets = dynamic(
+  () =>
+    import("@/components/mushaf/MushafStudySheets").then(
+      (m) => m.MushafStudySheets,
+    ),
+  { ssr: false },
+);
 
 type Props = {
   page: MushafPageContent;

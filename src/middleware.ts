@@ -1,5 +1,10 @@
 import createMiddleware from "next-intl/middleware";
-import { NextResponse, type NextRequest } from "next/server";
+import {
+  NextResponse,
+  type NextFetchEvent,
+  type NextMiddleware,
+  type NextRequest,
+} from "next/server";
 import { auth } from "@/auth";
 import { routing } from "@/i18n/routing";
 
@@ -52,44 +57,20 @@ function setLocaleCookie(res: NextResponse, locale: "ar" | "en"): void {
   });
 }
 
-export default auth((req) => {
-  const request = req as unknown as NextRequest;
+/** Locale redirects + intl — no auth decode (keeps mushaf/home TTFB low). */
+function runPublicMiddleware(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
-
-  if (isStaticOrApi(pathname)) {
-    return NextResponse.next();
-  }
-
   const preferred = request.cookies.get(LOCALE_COOKIE)?.value;
 
-  // Never expose /ar/… publicly — Arabic stays at the unprefixed root.
   if (pathname === "/ar" || pathname.startsWith("/ar/")) {
     const url = request.nextUrl.clone();
     url.pathname = pathname === "/ar" ? "/" : pathname.slice(3);
     return NextResponse.redirect(url);
   }
 
-  /**
-   * Preference rules:
-   * - Cookie `en` + unprefixed URL → send to `/en…` (sticky English).
-   * - Explicit `/en…` always wins (never bounce back to Arabic because cookie is `ar`).
-   *   Visiting `/en` also updates the cookie to `en`.
-   * - Switching to Arabic is done via the language switcher (sets cookie `ar` + navigates).
-   */
   if (preferred === "en" && !pathname.startsWith("/en")) {
     const url = request.nextUrl.clone();
     url.pathname = withLocalePrefix(pathname, "en");
-    return NextResponse.redirect(url);
-  }
-
-  if (isProtectedPath(pathname) && !req.auth) {
-    const locale = resolveUiLocale(pathname, preferred);
-    const returnTo = `${pathname}${request.nextUrl.search}`;
-    const url = request.nextUrl.clone();
-    url.pathname = withLocalePrefix("/login", locale);
-    // Drop original query (e.g. ?s=&v=) so only callbackUrl carries the return path.
-    url.search = "";
-    url.searchParams.set("callbackUrl", returnTo);
     return NextResponse.redirect(url);
   }
 
@@ -100,7 +81,44 @@ export default auth((req) => {
   }
 
   return response;
-});
+}
+
+const authGuard = auth((req) => {
+  const request = req as unknown as NextRequest;
+  const { pathname } = request.nextUrl;
+
+  if (!req.auth) {
+    const preferred = request.cookies.get(LOCALE_COOKIE)?.value;
+    const locale = resolveUiLocale(pathname, preferred);
+    const returnTo = `${pathname}${request.nextUrl.search}`;
+    const url = request.nextUrl.clone();
+    url.pathname = withLocalePrefix("/login", locale);
+    // Drop original query (e.g. ?s=&v=) so only callbackUrl carries the return path.
+    url.search = "";
+    url.searchParams.set("callbackUrl", returnTo);
+    return NextResponse.redirect(url);
+  }
+
+  return runPublicMiddleware(request);
+}) as NextMiddleware;
+
+export default function middleware(
+  request: NextRequest,
+  event: NextFetchEvent,
+) {
+  const { pathname } = request.nextUrl;
+
+  if (isStaticOrApi(pathname)) {
+    return NextResponse.next();
+  }
+
+  // Auth JWT decode only on account/studio/admin/create — not on reading pages.
+  if (isProtectedPath(pathname)) {
+    return authGuard(request, event);
+  }
+
+  return runPublicMiddleware(request);
+}
 
 export const config = {
   matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],

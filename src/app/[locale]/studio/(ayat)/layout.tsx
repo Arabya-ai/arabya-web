@@ -1,42 +1,28 @@
-import {
-  Amiri,
-  Reem_Kufi,
-  Tajawal,
-} from "next/font/google";
+import "@/ayat-studio/theme.css";
+import type { CSSProperties, ReactNode } from "react";
 import { Toaster } from "@/ayat-studio/components/ui/toaster";
 import { TooltipProvider } from "@/ayat-studio/components/ui/tooltip";
 import { StudioProviders } from "@/ayat-studio/components/StudioProviders";
 
-const tajawal = Tajawal({
-  subsets: ["arabic", "latin"],
-  weight: ["300", "400", "500", "700", "800"],
-  variable: "--font-tajawal",
-  display: "swap",
-});
-
-const reemKufi = Reem_Kufi({
-  subsets: ["arabic", "latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-reem-kufi",
-  display: "swap",
-});
-
-const amiriQuran = Amiri({
-  subsets: ["arabic", "latin"],
-  weight: ["400", "700"],
-  variable: "--font-amiri-quran",
-  display: "swap",
-});
-
+/**
+ * Studio route CSS only — theme is not imported on mushaf/home.
+ * Fonts reuse the seven families already loaded in [locale]/layout
+ * (Tajawal, Reem Kufi, Amiri → --font-amiri-quran alias).
+ */
 export default function CreateRootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
+  const studioFontAlias = {
+    ["--font-amiri-quran"]: "var(--font-amiri)",
+  } as CSSProperties;
+
   return (
     <div
       id="ayat-studio-root"
-      className={`ayat-studio ${tajawal.variable} ${reemKufi.variable} ${amiriQuran.variable}`}
+      className="ayat-studio"
+      style={studioFontAlias}
     >
       <StudioProviders>
         <TooltipProvider>

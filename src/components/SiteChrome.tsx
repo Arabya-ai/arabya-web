@@ -4,9 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { AuthButton } from "@/components/AuthButton";
 import { BrandLockup } from "@/components/BrandLockup";
-import { InstallAppPrompt } from "@/components/InstallAppPrompt";
+import { DeferredChrome } from "@/components/DeferredChrome";
 import { PreferencesMenu } from "@/components/PreferencesMenu";
-import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { useDismissibleOpen } from "@/hooks/useDismissibleOpen";
 import { Link } from "@/i18n/navigation";
 
@@ -20,11 +19,10 @@ export function AppShell({
 }) {
   return (
     <>
-      <ServiceWorkerRegister />
       <SiteHeader />
       <main>{children}</main>
       <SiteFooter credit={footerCredit} />
-      <InstallAppPrompt />
+      <DeferredChrome />
     </>
   );
 }
