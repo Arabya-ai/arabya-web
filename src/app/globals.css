@@ -161,7 +161,8 @@ input {
   font-size: inherit;
 }
 
-/* Uthmanic script â€” weight 400 only (bold triggers fallback to Naskh) */
+/* Uthmanic script — mushaf/Quran surfaces only (not UI titles).
+   Weight 400 only (bold triggers fallback to Naskh). */
 .mushaf-text,
 .mushaf-word,
 .mushaf-sura-name,
@@ -175,9 +176,6 @@ input {
 .chip-tip strong,
 .surah-card-name,
 .surah-ornament-text,
-.home-title-block h1,
-.home-catalog-head h1,
-.home-index-intro h1,
 .surah-read-head h1,
 .page-block > h1,
 .ayah-study-head h1,
@@ -658,9 +656,10 @@ html[data-theme="dark"] .site-header {
 
 .home-index-intro h1 {
   margin: 0;
-  font-family: var(--font-quran);
+  /* UI display font — avoids waiting on UthmanicHafs for LCP */
+  font-family: var(--font-reem-kufi), var(--font-ui), sans-serif;
   font-size: clamp(1.95rem, 4.8vw, 2.55rem);
-  font-weight: 400;
+  font-weight: 600;
   color: var(--brand-deep);
   line-height: 1.4;
   text-wrap: balance;
