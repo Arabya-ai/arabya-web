@@ -9,16 +9,9 @@ import {
 } from "@/lib/mushaf";
 import { toArabicNumerals } from "@/lib/format";
 import {
-  getIrab,
   getTafsirSources,
   getVerseTranslationEditions,
-  sliceIrabToVerseNumbers,
 } from "@/lib/quran";
-import {
-  getWordSenses,
-  resolveLexiconMap,
-  sliceWordSensesToVerseNumbers,
-} from "@/lib/word-senses";
 import { getSurahDisplayTitle } from "@/lib/surah-names";
 import { buildSocialMetadata } from "@/lib/og-meta";
 import { shareOgImageUrl, type ShareKind } from "@/lib/share";
@@ -177,49 +170,6 @@ export default async function MushafPageRoute({ params }: Props) {
 
   if (!pageContent) notFound();
 
-  const surahIds = [...new Set(pageContent.blocks.map((b) => b.surahId))];
-  const verseNumbersBySurah = new Map<number, Set<number>>();
-  for (const block of pageContent.blocks) {
-    let set = verseNumbersBySurah.get(block.surahId);
-    if (!set) {
-      set = new Set();
-      verseNumbersBySurah.set(block.surahId, set);
-    }
-    for (const verse of block.verses) {
-      set.add(verse.verseNumber);
-    }
-  }
-
-  const irabBySurah: Record<number, Awaited<ReturnType<typeof getIrab>>> = {};
-  const sensesBySurah: Record<
-    number,
-    Awaited<ReturnType<typeof getWordSenses>>
-  > = {};
-
-  await Promise.all(
-    surahIds.map(async (surahId) => {
-      const verses = verseNumbersBySurah.get(surahId) ?? new Set();
-      const [fullIrab, fullSenses] = await Promise.all([
-        getIrab(surahId),
-        getWordSenses(surahId),
-      ]);
-      irabBySurah[surahId] = sliceIrabToVerseNumbers(fullIrab, verses);
-      sensesBySurah[surahId] = sliceWordSensesToVerseNumbers(
-        fullSenses,
-        verses,
-      );
-    }),
-  );
-
-  const lexiconKeys = new Set<string>();
-  for (const senses of Object.values(sensesBySurah)) {
-    if (!senses) continue;
-    for (const entry of Object.values(senses.words)) {
-      if (entry.lexiconKey) lexiconKeys.add(entry.lexiconKey);
-    }
-  }
-  const lexiconByKey = await resolveLexiconMap(lexiconKeys);
-
   const { prev, next } = getAdjacentMushafPages(
     pageNum,
     pageContent.totalPages,
@@ -231,9 +181,6 @@ export default async function MushafPageRoute({ params }: Props) {
 
       <MushafPageStudio
         page={pageContent}
-        irabBySurah={irabBySurah}
-        sensesBySurah={sensesBySurah}
-        lexiconByKey={lexiconByKey}
         tafsirSources={tafsirSources}
         verseEditions={verseEditions}
       />

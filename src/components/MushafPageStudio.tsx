@@ -11,6 +11,7 @@ import type {
   WordSensesSurah,
 } from "@/lib/types";
 import type { MushafPageContent } from "@/lib/mushaf";
+import type { MushafPageStudyPayload } from "@/lib/mushaf-page-study";
 import { formatVerseKey, toArabicNumerals } from "@/lib/format";
 import { isBookmarked, toggleBookmark } from "@/lib/bookmarks";
 import { getSurahDisplayTitle } from "@/lib/surah-names";
@@ -25,6 +26,7 @@ import {
   copyLinkOnly,
   type ShareTarget,
 } from "@/lib/share";
+import { apiGet } from "@/lib/api-client";
 import { useMushafPrefs } from "@/hooks/useMushafPrefs";
 import { useMushafStudyCache } from "@/hooks/useMushafStudyCache";
 import { useQuranAudio, type AudioStatusKey } from "@/hooks/useQuranAudio";
@@ -50,9 +52,6 @@ const MushafStudySheets = dynamic(
 
 type Props = {
   page: MushafPageContent;
-  irabBySurah: Record<number, IrabSurah | null>;
-  sensesBySurah?: Record<number, WordSensesSurah | null>;
-  lexiconByKey?: Record<string, string>;
   tafsirSources: TafsirSource[];
   verseEditions: VerseTranslationEdition[];
 };
@@ -65,9 +64,6 @@ function formatPageNum(page: number, locale: string): string {
 
 export function MushafPageStudio({
   page,
-  irabBySurah,
-  sensesBySurah = {},
-  lexiconByKey = {},
   tafsirSources,
   verseEditions,
 }: Props) {
@@ -77,6 +73,42 @@ export function MushafPageStudio({
   const tShare = useTranslations("Mushaf.shareTargets");
   const tToast = useTranslations("Mushaf.toast");
   const tAudio = useTranslations("Audio");
+
+  const [irabBySurah, setIrabBySurah] = useState<
+    Record<number, IrabSurah | null>
+  >({});
+  const [sensesBySurah, setSensesBySurah] = useState<
+    Record<number, WordSensesSurah | null>
+  >({});
+  const [lexiconByKey, setLexiconByKey] = useState<Record<string, string>>({});
+  const [studyReady, setStudyReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setStudyReady(false);
+    setIrabBySurah({});
+    setSensesBySurah({});
+    setLexiconByKey({});
+
+    void (async () => {
+      try {
+        const res = await apiGet(`/api/mushaf/${page.page}/study`);
+        if (!res.ok || cancelled) return;
+        const data = (await res.json()) as MushafPageStudyPayload;
+        if (cancelled) return;
+        setIrabBySurah(data.irabBySurah);
+        setSensesBySurah(data.sensesBySurah);
+        setLexiconByKey(data.lexiconByKey);
+        setStudyReady(true);
+      } catch {
+        if (!cancelled) setStudyReady(true);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [page.page]);
 
   const modes: { id: Mode; label: string }[] = useMemo(() => {
     const list: { id: Mode; label: string }[] = [
@@ -506,6 +538,7 @@ export function MushafPageStudio({
     <div
       className="studio"
       style={{ ["--mushaf-scale" as string]: String(prefs.fontScale) }}
+      aria-busy={!studyReady}
     >
       <MushafToolbar
         prefs={prefs}
@@ -620,7 +653,10 @@ export function MushafPageStudio({
         selectWord={selectWord}
         activeTafsir={study.activeTafsir}
         tafsirSources={orderedTafsirSources}
-        tafsirLoading={study.tafsirLoading}
+        tafsirLoading={
+          study.tafsirLoading ||
+          (!studyReady && (mode === "irab" || mode === "meaning-table"))
+        }
         tafsirRows={study.tafsirRows}
       />
     </div>
