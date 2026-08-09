@@ -1425,12 +1425,12 @@ button.nav-pill {
   margin: 0;
   flex: 1 1 auto;
   min-width: 0;
-  font-family: "UthmanicHafs", var(--font-naskh), serif;
-  font-weight: 400;
-  font-size: clamp(0.95rem, 2.8vw, 1.45rem);
+  /* UI font — stable LCP without waiting on UthmanicHafs */
+  font-family: var(--font-ui), "Segoe UI", Tahoma, sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.05rem, 3.2vw, 1.55rem);
   line-height: 1.4;
   color: var(--ink);
-  font-synthesis: none;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1440,6 +1440,7 @@ button.nav-pill {
   margin: 0;
   flex: 0 0 auto;
   color: var(--muted);
+  font-family: var(--font-ui), "Segoe UI", Tahoma, sans-serif;
   font-size: clamp(0.72rem, 2.2vw, 0.88rem);
   font-weight: 600;
   white-space: nowrap;

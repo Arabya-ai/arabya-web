@@ -90,23 +90,45 @@ export function MushafPageStudio({
     setSensesBySurah({});
     setLexiconByKey({});
 
-    void (async () => {
-      try {
-        const res = await apiGet(`/api/mushaf/${page.page}/study`);
-        if (!res.ok || cancelled) return;
-        const data = (await res.json()) as MushafPageStudyPayload;
-        if (cancelled) return;
-        setIrabBySurah(data.irabBySurah);
-        setSensesBySurah(data.sensesBySurah);
-        setLexiconByKey(data.lexiconByKey);
-        setStudyReady(true);
-      } catch {
-        if (!cancelled) setStudyReady(true);
-      }
-    })();
+    const loadStudy = () => {
+      void (async () => {
+        try {
+          const res = await apiGet(`/api/mushaf/${page.page}/study`);
+          if (!res.ok || cancelled) return;
+          const data = (await res.json()) as MushafPageStudyPayload;
+          if (cancelled) return;
+          setIrabBySurah(data.irabBySurah);
+          setSensesBySurah(data.sensesBySurah);
+          setLexiconByKey(data.lexiconByKey);
+          setStudyReady(true);
+        } catch {
+          if (!cancelled) setStudyReady(true);
+        }
+      })();
+    };
+
+    // After first paint — do not compete with LCP/FCP on the critical path.
+    let idleId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    const w = window as Window & {
+      requestIdleCallback?: (
+        cb: () => void,
+        opts?: { timeout: number },
+      ) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (typeof w.requestIdleCallback === "function") {
+      idleId = w.requestIdleCallback(loadStudy, { timeout: 1800 });
+    } else {
+      timeoutId = setTimeout(loadStudy, 1);
+    }
 
     return () => {
       cancelled = true;
+      if (idleId !== undefined && typeof w.cancelIdleCallback === "function") {
+        w.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
     };
   }, [page.page]);
 
@@ -245,17 +267,25 @@ export function MushafPageStudio({
   }, []);
 
   useEffect(() => {
-    if (!selected && wordRows[0]) {
-      const hasVerseLink =
-        typeof window !== "undefined" &&
-        Boolean(new URLSearchParams(window.location.search).get("v"));
-      if (hasVerseLink) return;
-      setActiveWord({
-        surahId: wordRows[0].surahId,
-        verse: wordRows[0].verseNumber,
-        position: wordRows[0].word.position,
-      });
-    }
+    // Only auto-select when deep-linking to a verse (?v=).
+    // Selecting on every load opens the study dock and steals LCP.
+    if (selected || !wordRows[0]) return;
+    if (typeof window === "undefined") return;
+    const verseKey = new URLSearchParams(window.location.search).get("v");
+    if (!verseKey) return;
+    const m = /^(\d{1,3}):(\d{1,3})$/.exec(verseKey);
+    if (!m) return;
+    const sid = Number(m[1]);
+    const vid = Number(m[2]);
+    const found = wordRows.find(
+      (r) => r.surahId === sid && r.verseNumber === vid,
+    );
+    if (!found) return;
+    setActiveWord({
+      surahId: found.surahId,
+      verse: found.verseNumber,
+      position: found.word.position,
+    });
   }, [selected, wordRows]);
 
   useEffect(() => {
@@ -538,7 +568,6 @@ export function MushafPageStudio({
     <div
       className="studio"
       style={{ ["--mushaf-scale" as string]: String(prefs.fontScale) }}
-      aria-busy={!studyReady}
     >
       <MushafToolbar
         prefs={prefs}
