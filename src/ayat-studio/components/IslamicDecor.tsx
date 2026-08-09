@@ -50,6 +50,11 @@ export function ArabyaMarkIcon({
   size = 64,
   glow = false,
 }: MarkProps) {
+  const src =
+    size <= 128
+      ? "/brand/arabya-mark-ui.webp"
+      : "/brand/arabya-mark-square.png";
+
   return (
     <span
       className={cn(
@@ -61,12 +66,13 @@ export function ArabyaMarkIcon({
       aria-hidden
     >
       <img
-        src="/brand/arabya-mark-square.png"
+        src={src}
         alt=""
         width={size}
         height={size}
         className="arabya-mark-icon__img relative z-[1] h-full w-full select-none object-cover"
         draggable={false}
+        decoding="async"
       />
     </span>
   );

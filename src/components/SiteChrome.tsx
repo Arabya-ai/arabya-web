@@ -89,10 +89,13 @@ export function SiteHeader() {
     if (!el) return;
 
     const syncHeight = () => {
-      document.documentElement.style.setProperty(
-        "--arabya-header-height",
-        `${el.offsetHeight}px`,
-      );
+      // Read geometry in rAF to avoid forced sync reflow during layout.
+      requestAnimationFrame(() => {
+        document.documentElement.style.setProperty(
+          "--arabya-header-height",
+          `${el.offsetHeight}px`,
+        );
+      });
     };
     syncHeight();
 

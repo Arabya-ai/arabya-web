@@ -44,12 +44,12 @@ export function AppSidebar() {
           title="الصفحة الرئيسية — عربية"
         >
           <Image
-            src="/brand/arabya-mark-square.png"
+            src="/brand/arabya-mark-ui.webp"
             alt="عربية"
             width={collapsed ? 28 : 36}
             height={collapsed ? 28 : 36}
             className="arabya-mark-icon shrink-0"
-            unoptimized
+            sizes="36px"
           />
           {!collapsed && (
             <div className="flex min-w-0 flex-col gap-1.5">
@@ -109,12 +109,12 @@ export function AppSidebar() {
               title="الصفحة الرئيسية — عربية"
             >
               <Image
-                src="/brand/arabya-mark-square.png"
+                src="/brand/arabya-mark-ui.webp"
                 alt="عربية"
                 width={48}
                 height={48}
                 className="arabya-mark-icon"
-                unoptimized
+                sizes="48px"
               />
               <span className="text-xs font-display font-semibold text-sidebar-foreground">
                 عربية

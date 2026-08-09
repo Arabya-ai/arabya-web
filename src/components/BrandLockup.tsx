@@ -3,6 +3,9 @@
 import Image from "next/image";
 import { useLocale } from "next-intl";
 
+/** Compact UI mark (~6 KB WebP). Keep full PNG for canvas/export. */
+export const BRAND_MARK_UI_SRC = "/brand/arabya-mark-ui.webp";
+
 type BrandLockupProps = {
   size?: "header" | "footer";
 };
@@ -22,13 +25,13 @@ export function BrandLockup({ size = "header" }: BrandLockupProps) {
         <span className="brand-emblem-plate">
           <span className="brand-emblem-shine" />
           <Image
-            src="/brand/arabya-mark-square.png"
+            src={BRAND_MARK_UI_SRC}
             alt=""
             width={logoSize}
             height={logoSize}
             className="brand-logo"
             priority={isHeader}
-            unoptimized
+            sizes={`${logoSize}px`}
           />
         </span>
       </span>
