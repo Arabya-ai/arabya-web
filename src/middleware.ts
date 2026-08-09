@@ -100,7 +100,7 @@ const authGuard = auth((req) => {
   }
 
   return runPublicMiddleware(request);
-}) as NextMiddleware;
+}) as unknown as NextMiddleware;
 
 export default function middleware(
   request: NextRequest,
