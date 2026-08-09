@@ -1,5 +1,6 @@
 "use client";
 
+import "@/app/dashboard-shell.css";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { usePathname } from "@/i18n/navigation";

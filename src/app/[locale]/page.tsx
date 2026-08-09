@@ -2,10 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { SurahIndex } from "@/components/SurahIndex";
 import { ContinueReading } from "@/components/ContinueReading";
-import { ReadingHabitCard } from "@/components/ReadingHabitCard";
-import { PrayerTimesCard } from "@/components/PrayerTimesCard";
-import { AsmaAlHusnaCard } from "@/components/AsmaAlHusnaCard";
-import { StudyAssistant } from "@/components/StudyAssistant";
+import { HomeDeferredWidgets } from "@/components/HomeDeferredWidgets";
 import { StudyHashRedirect } from "@/components/StudyHashRedirect";
 import { getMushafIndex } from "@/lib/mushaf";
 import { getSurahs } from "@/lib/quran";
@@ -39,10 +36,7 @@ export default async function HomePage() {
           mushafFirstPage={mushafIndex.surahFirstPage}
         />
       </section>
-      <StudyAssistant />
-      <ReadingHabitCard />
-      <PrayerTimesCard />
-      <AsmaAlHusnaCard />
+      <HomeDeferredWidgets />
     </div>
   );
 }

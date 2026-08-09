@@ -85,28 +85,6 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const el = headerRef.current;
-    if (!el) return;
-
-    const syncHeight = () => {
-      // Read geometry in rAF to avoid forced sync reflow during layout.
-      requestAnimationFrame(() => {
-        document.documentElement.style.setProperty(
-          "--arabya-header-height",
-          `${el.offsetHeight}px`,
-        );
-      });
-    };
-    syncHeight();
-
-    const ro = new ResizeObserver(syncHeight);
-    ro.observe(el);
-    return () => {
-      ro.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
     if (!open) return;
 
     function onPointerDown(e: PointerEvent) {

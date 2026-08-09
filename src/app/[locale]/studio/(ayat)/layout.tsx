@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { Toaster } from "@/ayat-studio/components/ui/toaster";
 import { TooltipProvider } from "@/ayat-studio/components/ui/tooltip";
 import { StudioProviders } from "@/ayat-studio/components/StudioProviders";
+import { StudioHeaderHeightSync } from "@/components/StudioHeaderHeightSync";
 
 /**
  * Studio route CSS only — theme is not imported on mushaf/home.
@@ -24,6 +25,7 @@ export default function CreateRootLayout({
       className="ayat-studio"
       style={studioFontAlias}
     >
+      <StudioHeaderHeightSync />
       <StudioProviders>
         <TooltipProvider>
           {children}

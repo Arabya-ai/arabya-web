@@ -37,6 +37,19 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["@resvg/resvg-js"],
+  experimental: {
+    // Tree-shake heavy barrels so home/mushaf ship less unused JS.
+    optimizePackageImports: [
+      "lucide-react",
+      "next-intl",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-select",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-popover",
+      "@radix-ui/react-tooltip",
+    ],
+  },
   async headers() {
     return [
       {
