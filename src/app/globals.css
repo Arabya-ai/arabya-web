@@ -5592,9 +5592,10 @@ html[data-theme="dark"] .mushaf-word.is-sync {
 }
 
 .prayer-grid li.is-next-prayer {
-  border-color: var(--brand);
-  background: color-mix(in srgb, var(--brand) 10%, var(--surface));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand) 22%, transparent);
+  border-color: var(--brand-deep);
+  /* Solid token — avoid color-mix (build fallback becomes solid --brand). */
+  background: var(--brand-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand) 18%, transparent);
 }
 
 .prayer-grid li.is-next-prayer .prayer-name,
@@ -5755,15 +5756,14 @@ html[data-theme="dark"] .mushaf-word.is-sync {
   gap: 0.2rem;
   padding: 0.65rem 0.7rem;
   border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--brand) 14%, var(--line));
-  background: color-mix(in srgb, var(--brand) 5%, var(--surface-2));
+  border: 1px solid var(--line);
+  background: var(--surface);
   min-width: 0;
 }
 
 .prayer-name {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  /* ink (not brand-deep) so names stay WCAG AA on tinted prayer chips */
   color: var(--ink);
 }
 
