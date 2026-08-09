@@ -26,7 +26,8 @@ import { getFooterCredit } from "@/lib/site-appearance-store";
 const cairo = Cairo({
   variable: "--font-cairo",
   subsets: ["arabic", "latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  // Keep families; trim rarely used 800 to shrink render-blocking font CSS.
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -40,14 +41,14 @@ const plexArabic = IBM_Plex_Sans_Arabic({
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
 const naskh = Noto_Naskh_Arabic({
   variable: "--font-naskh",
   subsets: ["arabic"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "700"],
   display: "swap",
 });
 
@@ -61,7 +62,7 @@ const amiri = Amiri({
 const tajawal = Tajawal({
   variable: "--font-tajawal",
   subsets: ["arabic", "latin"],
-  weight: ["400", "500", "700", "800"],
+  weight: ["400", "500", "700"],
   display: "swap",
 });
 
