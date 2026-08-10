@@ -1107,7 +1107,7 @@
     "surahsHeading": "Surahs (114)",
     "surahCount": "{count} surahs",
     "ayahCount": "{count} ayahs",
-    "audioNote": "Playback uses the existing mushaf player (EveryAyah)."
+    "audioNote": "Playback uses the existing mushaf player (EveryAyah). Profile photos use public Quran.com CDN stills when available."
   },
   "Adhkar": {
     "metaTitle": "Adhkar · Arabya",
