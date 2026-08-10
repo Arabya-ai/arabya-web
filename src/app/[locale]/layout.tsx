@@ -24,16 +24,16 @@ import {
 import { getFooterCredit } from "@/lib/site-appearance-store";
 
 /**
- * Keep all 7 families available via CSS variables, but only preload Cairo.
- * Preloading every weight of every family (~25 font files) saturates mobile
- * bandwidth and delays LCP (PSI often reports NO_LCP when LCP never settles).
+ * Keep all 7 families available via CSS variables; preload none of them.
+ * Early LCP text uses system-ui; Uthmanic is preloaded only on /mushaf via layout.
+ * Preloading every Google family (~25 files) was starving mobile LCP (NO_LCP / 6s+).
  */
 const cairo = Cairo({
   variable: "--font-cairo",
   subsets: ["arabic", "latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
-  preload: true,
+  preload: false,
 });
 
 const plexArabic = IBM_Plex_Sans_Arabic({
