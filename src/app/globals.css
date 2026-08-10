@@ -5309,6 +5309,13 @@ html[data-theme="dark"] .mushaf-word.is-sync {
   color: var(--muted);
 }
 
+.prayer-city-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .prayer-city select {
   font: inherit;
   font-weight: 700;
@@ -5318,6 +5325,27 @@ html[data-theme="dark"] .mushaf-word.is-sync {
   border: 1px solid var(--line);
   background: var(--surface-2);
   color: var(--ink);
+}
+
+.prayer-geo-btn {
+  font: inherit;
+  font-weight: 700;
+  min-height: 2.5rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--brand-soft);
+  color: var(--brand-deep);
+  cursor: pointer;
+}
+
+.prayer-geo-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.prayer-status--hint {
+  color: var(--brand-deep);
 }
 
 .prayer-hijri {
@@ -6223,3 +6251,246 @@ a.auth-btn--google {
   }
 }
 
+
+/* —— Reciters catalog (additive) —— */
+.reciters-catalog {
+  display: grid;
+  gap: 1rem;
+}
+
+.reciters-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 0.55rem;
+}
+
+.reciters-grid-link {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel, var(--surface));
+  text-decoration: none;
+  color: inherit;
+  min-height: 100%;
+}
+
+.reciters-grid-link:hover,
+.reciters-grid-link:focus-visible {
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--line));
+}
+
+.reciters-grid-name {
+  font-weight: 700;
+  color: var(--brand-deep);
+  font-size: 1.05rem;
+}
+
+.reciters-grid-style,
+.reciters-grid-meta {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.reciter-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+}
+
+.reciter-detail-tags li {
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--brand-deep);
+}
+
+.reciter-detail-bio {
+  margin: 0.85rem 0 0;
+  max-width: 42rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+.reciter-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.reciter-detail-note {
+  margin: 0.65rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.reciter-use-btn {
+  background: var(--brand-soft);
+  color: var(--brand-deep);
+  border-color: color-mix(in srgb, var(--brand) 35%, var(--line));
+}
+
+.reciter-surah-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.reciter-surah-link {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  text-decoration: none;
+  color: inherit;
+  background: var(--panel, var(--surface));
+}
+
+.reciter-surah-link:hover,
+.reciter-surah-link:focus-visible {
+  border-color: color-mix(in srgb, var(--brand) 40%, var(--line));
+}
+
+.reciter-surah-num {
+  font-weight: 700;
+  color: var(--muted);
+  min-width: 2ch;
+}
+
+.reciter-surah-name {
+  font-weight: 700;
+  color: var(--brand-deep);
+}
+
+.reciter-surah-meta {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* —— Adhkar (additive) —— */
+.adhkar-category-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.65rem;
+}
+
+.adhkar-category-link {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel, var(--surface));
+  text-decoration: none;
+  color: inherit;
+  min-height: 100%;
+}
+
+.adhkar-category-link:hover,
+.adhkar-category-link:focus-visible {
+  border-color: color-mix(in srgb, var(--brand) 40%, var(--line));
+}
+
+.adhkar-category-title {
+  font-weight: 800;
+  color: var(--brand-deep);
+  font-size: 1.1rem;
+}
+
+.adhkar-category-desc {
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.adhkar-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.adhkar-card {
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--panel, var(--surface));
+  display: grid;
+  gap: 0.55rem;
+}
+
+.adhkar-card.is-done {
+  border-color: color-mix(in srgb, var(--brand) 50%, var(--line));
+  background: color-mix(in srgb, var(--brand-soft) 55%, var(--surface));
+}
+
+.adhkar-card-text {
+  margin: 0;
+  font-family: var(--font-quran);
+  font-size: 1.25rem;
+  line-height: 1.85;
+  color: var(--ink);
+}
+
+.adhkar-card-fadl,
+.adhkar-card-source,
+.adhkar-card-progress {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.adhkar-card-bar {
+  height: 0.35rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.adhkar-card-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--brand);
+}
+
+.adhkar-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.adhkar-tap-btn {
+  font: inherit;
+  font-weight: 800;
+  min-height: 2.6rem;
+  padding: 0.45rem 1.1rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--brand) 40%, var(--line));
+  background: var(--brand);
+  color: #fff;
+  cursor: pointer;
+}
+
+.adhkar-tap-btn:disabled {
+  opacity: 0.85;
+  cursor: default;
+}

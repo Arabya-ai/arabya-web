@@ -27,6 +27,7 @@
     "fetch-translations-legacy": "node scripts/fetch-translations.mjs",
     "fetch-new-translations": "node scripts/fetch-new-translations.mjs",
     "build-mushaf-index": "node scripts/build-mushaf-index.mjs",
+    "build-surah-stats": "node scripts/build-surah-stats.mjs",
     "build-search-index": "node scripts/build-search-index.mjs",
     "validate-data": "node scripts/validate-data.mjs",
     "build-quality-queue": "node scripts/build-quality-queue.mjs",

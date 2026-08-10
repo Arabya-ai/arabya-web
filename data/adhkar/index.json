@@ -1,0 +1,33 @@
+{
+  "sourceNote": "Curated starter set for Arabya. Expand with owner-supplied licensed Hisn al-Muslim editions later.",
+  "categories": [
+    {
+      "slug": "morning",
+      "titleAr": "أذكار الصباح",
+      "titleEn": "Morning remembrances",
+      "descriptionAr": "أذكار مختارة تُقال في الصباح.",
+      "descriptionEn": "Selected remembrances for the morning."
+    },
+    {
+      "slug": "evening",
+      "titleAr": "أذكار المساء",
+      "titleEn": "Evening remembrances",
+      "descriptionAr": "أذكار مختارة تُقال في المساء.",
+      "descriptionEn": "Selected remembrances for the evening."
+    },
+    {
+      "slug": "after-salah",
+      "titleAr": "أذكار بعد الصلاة",
+      "titleEn": "After prayer",
+      "descriptionAr": "أذكار تُقال عقب الصلوات المفروضة.",
+      "descriptionEn": "Remembrances after the obligatory prayers."
+    },
+    {
+      "slug": "general",
+      "titleAr": "أذكار عامة",
+      "titleEn": "General dhikr",
+      "descriptionAr": "تسبيح وتحميد وتهليل واستغفار.",
+      "descriptionEn": "Tasbih, tahmid, tahlil, and istighfar."
+    }
+  ]
+}

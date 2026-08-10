@@ -1,0 +1,689 @@
+{
+  "generatedAt": "2026-08-10T02:01:00.850Z",
+  "surahs": {
+    "1": {
+      "surahId": 1,
+      "verses": 7,
+      "words": 29,
+      "letters": 139
+    },
+    "2": {
+      "surahId": 2,
+      "verses": 286,
+      "words": 6116,
+      "letters": 25896
+    },
+    "3": {
+      "surahId": 3,
+      "verses": 200,
+      "words": 3481,
+      "letters": 14754
+    },
+    "4": {
+      "surahId": 4,
+      "verses": 176,
+      "words": 3747,
+      "letters": 16076
+    },
+    "5": {
+      "surahId": 5,
+      "verses": 120,
+      "words": 2804,
+      "letters": 12026
+    },
+    "6": {
+      "surahId": 6,
+      "verses": 165,
+      "words": 3050,
+      "letters": 12556
+    },
+    "7": {
+      "surahId": 7,
+      "verses": 206,
+      "words": 3320,
+      "letters": 14236
+    },
+    "8": {
+      "surahId": 8,
+      "verses": 75,
+      "words": 1233,
+      "letters": 5348
+    },
+    "9": {
+      "surahId": 9,
+      "verses": 129,
+      "words": 2498,
+      "letters": 10942
+    },
+    "10": {
+      "surahId": 10,
+      "verses": 109,
+      "words": 1833,
+      "letters": 7514
+    },
+    "11": {
+      "surahId": 11,
+      "verses": 123,
+      "words": 1917,
+      "letters": 7721
+    },
+    "12": {
+      "surahId": 12,
+      "verses": 111,
+      "words": 1777,
+      "letters": 7196
+    },
+    "13": {
+      "surahId": 13,
+      "verses": 43,
+      "words": 853,
+      "letters": 3494
+    },
+    "14": {
+      "surahId": 14,
+      "verses": 52,
+      "words": 830,
+      "letters": 3494
+    },
+    "15": {
+      "surahId": 15,
+      "verses": 99,
+      "words": 655,
+      "letters": 2826
+    },
+    "16": {
+      "surahId": 16,
+      "verses": 128,
+      "words": 1844,
+      "letters": 7709
+    },
+    "17": {
+      "surahId": 17,
+      "verses": 111,
+      "words": 1556,
+      "letters": 6556
+    },
+    "18": {
+      "surahId": 18,
+      "verses": 110,
+      "words": 1579,
+      "letters": 6486
+    },
+    "19": {
+      "surahId": 19,
+      "verses": 98,
+      "words": 961,
+      "letters": 3871
+    },
+    "20": {
+      "surahId": 20,
+      "verses": 135,
+      "words": 1335,
+      "letters": 5334
+    },
+    "21": {
+      "surahId": 21,
+      "verses": 112,
+      "words": 1169,
+      "letters": 4981
+    },
+    "22": {
+      "surahId": 22,
+      "verses": 78,
+      "words": 1274,
+      "letters": 5235
+    },
+    "23": {
+      "surahId": 23,
+      "verses": 118,
+      "words": 1050,
+      "letters": 4396
+    },
+    "24": {
+      "surahId": 24,
+      "verses": 64,
+      "words": 1316,
+      "letters": 5656
+    },
+    "25": {
+      "surahId": 25,
+      "verses": 77,
+      "words": 893,
+      "letters": 3826
+    },
+    "26": {
+      "surahId": 26,
+      "verses": 227,
+      "words": 1318,
+      "letters": 5563
+    },
+    "27": {
+      "surahId": 27,
+      "verses": 93,
+      "words": 1151,
+      "letters": 4741
+    },
+    "28": {
+      "surahId": 28,
+      "verses": 88,
+      "words": 1430,
+      "letters": 5857
+    },
+    "29": {
+      "surahId": 29,
+      "verses": 69,
+      "words": 976,
+      "letters": 4248
+    },
+    "30": {
+      "surahId": 30,
+      "verses": 60,
+      "words": 817,
+      "letters": 3426
+    },
+    "31": {
+      "surahId": 31,
+      "verses": 34,
+      "words": 546,
+      "letters": 2132
+    },
+    "32": {
+      "surahId": 32,
+      "verses": 30,
+      "words": 372,
+      "letters": 1540
+    },
+    "33": {
+      "surahId": 33,
+      "verses": 73,
+      "words": 1287,
+      "letters": 5672
+    },
+    "34": {
+      "surahId": 34,
+      "verses": 54,
+      "words": 883,
+      "letters": 3545
+    },
+    "35": {
+      "surahId": 35,
+      "verses": 45,
+      "words": 775,
+      "letters": 3184
+    },
+    "36": {
+      "surahId": 36,
+      "verses": 83,
+      "words": 725,
+      "letters": 3020
+    },
+    "37": {
+      "surahId": 37,
+      "verses": 182,
+      "words": 860,
+      "letters": 3821
+    },
+    "38": {
+      "surahId": 38,
+      "verses": 88,
+      "words": 733,
+      "letters": 3016
+    },
+    "39": {
+      "surahId": 39,
+      "verses": 75,
+      "words": 1172,
+      "letters": 4782
+    },
+    "40": {
+      "surahId": 40,
+      "verses": 85,
+      "words": 1219,
+      "letters": 5037
+    },
+    "41": {
+      "surahId": 41,
+      "verses": 54,
+      "words": 794,
+      "letters": 3332
+    },
+    "42": {
+      "surahId": 42,
+      "verses": 53,
+      "words": 860,
+      "letters": 3468
+    },
+    "43": {
+      "surahId": 43,
+      "verses": 89,
+      "words": 830,
+      "letters": 3551
+    },
+    "44": {
+      "surahId": 44,
+      "verses": 59,
+      "words": 346,
+      "letters": 1454
+    },
+    "45": {
+      "surahId": 45,
+      "verses": 37,
+      "words": 488,
+      "letters": 2048
+    },
+    "46": {
+      "surahId": 46,
+      "verses": 35,
+      "words": 643,
+      "letters": 2627
+    },
+    "47": {
+      "surahId": 47,
+      "verses": 38,
+      "words": 539,
+      "letters": 2389
+    },
+    "48": {
+      "surahId": 48,
+      "verses": 29,
+      "words": 560,
+      "letters": 2479
+    },
+    "49": {
+      "surahId": 49,
+      "verses": 18,
+      "words": 347,
+      "letters": 1508
+    },
+    "50": {
+      "surahId": 50,
+      "verses": 45,
+      "words": 373,
+      "letters": 1488
+    },
+    "51": {
+      "surahId": 51,
+      "verses": 60,
+      "words": 360,
+      "letters": 1523
+    },
+    "52": {
+      "surahId": 52,
+      "verses": 49,
+      "words": 312,
+      "letters": 1305
+    },
+    "53": {
+      "surahId": 53,
+      "verses": 62,
+      "words": 360,
+      "letters": 1419
+    },
+    "54": {
+      "surahId": 54,
+      "verses": 55,
+      "words": 342,
+      "letters": 1461
+    },
+    "55": {
+      "surahId": 55,
+      "verses": 78,
+      "words": 351,
+      "letters": 1657
+    },
+    "56": {
+      "surahId": 56,
+      "verses": 96,
+      "words": 379,
+      "letters": 1715
+    },
+    "57": {
+      "surahId": 57,
+      "verses": 29,
+      "words": 574,
+      "letters": 2502
+    },
+    "58": {
+      "surahId": 58,
+      "verses": 22,
+      "words": 472,
+      "letters": 2010
+    },
+    "59": {
+      "surahId": 59,
+      "verses": 24,
+      "words": 445,
+      "letters": 1930
+    },
+    "60": {
+      "surahId": 60,
+      "verses": 13,
+      "words": 348,
+      "letters": 1540
+    },
+    "61": {
+      "surahId": 61,
+      "verses": 14,
+      "words": 221,
+      "letters": 946
+    },
+    "62": {
+      "surahId": 62,
+      "verses": 11,
+      "words": 175,
+      "letters": 756
+    },
+    "63": {
+      "surahId": 63,
+      "verses": 11,
+      "words": 180,
+      "letters": 787
+    },
+    "64": {
+      "surahId": 64,
+      "verses": 18,
+      "words": 241,
+      "letters": 1072
+    },
+    "65": {
+      "surahId": 65,
+      "verses": 12,
+      "words": 287,
+      "letters": 1183
+    },
+    "66": {
+      "surahId": 66,
+      "verses": 12,
+      "words": 249,
+      "letters": 1074
+    },
+    "67": {
+      "surahId": 67,
+      "verses": 30,
+      "words": 333,
+      "letters": 1330
+    },
+    "68": {
+      "surahId": 68,
+      "verses": 52,
+      "words": 300,
+      "letters": 1263
+    },
+    "69": {
+      "surahId": 69,
+      "verses": 52,
+      "words": 258,
+      "letters": 1113
+    },
+    "70": {
+      "surahId": 70,
+      "verses": 44,
+      "words": 217,
+      "letters": 953
+    },
+    "71": {
+      "surahId": 71,
+      "verses": 28,
+      "words": 226,
+      "letters": 953
+    },
+    "72": {
+      "surahId": 72,
+      "verses": 28,
+      "words": 285,
+      "letters": 1095
+    },
+    "73": {
+      "surahId": 73,
+      "verses": 20,
+      "words": 199,
+      "letters": 850
+    },
+    "74": {
+      "surahId": 74,
+      "verses": 56,
+      "words": 255,
+      "letters": 1026
+    },
+    "75": {
+      "surahId": 75,
+      "verses": 40,
+      "words": 164,
+      "letters": 671
+    },
+    "76": {
+      "surahId": 76,
+      "verses": 31,
+      "words": 243,
+      "letters": 1078
+    },
+    "77": {
+      "surahId": 77,
+      "verses": 50,
+      "words": 181,
+      "letters": 820
+    },
+    "78": {
+      "surahId": 78,
+      "verses": 40,
+      "words": 173,
+      "letters": 780
+    },
+    "79": {
+      "surahId": 79,
+      "verses": 46,
+      "words": 179,
+      "letters": 770
+    },
+    "80": {
+      "surahId": 80,
+      "verses": 42,
+      "words": 133,
+      "letters": 548
+    },
+    "81": {
+      "surahId": 81,
+      "verses": 29,
+      "words": 104,
+      "letters": 431
+    },
+    "82": {
+      "surahId": 82,
+      "verses": 19,
+      "words": 80,
+      "letters": 330
+    },
+    "83": {
+      "surahId": 83,
+      "verses": 36,
+      "words": 169,
+      "letters": 748
+    },
+    "84": {
+      "surahId": 84,
+      "verses": 25,
+      "words": 107,
+      "letters": 440
+    },
+    "85": {
+      "surahId": 85,
+      "verses": 22,
+      "words": 109,
+      "letters": 463
+    },
+    "86": {
+      "surahId": 86,
+      "verses": 17,
+      "words": 61,
+      "letters": 252
+    },
+    "87": {
+      "surahId": 87,
+      "verses": 19,
+      "words": 72,
+      "letters": 295
+    },
+    "88": {
+      "surahId": 88,
+      "verses": 26,
+      "words": 92,
+      "letters": 380
+    },
+    "89": {
+      "surahId": 89,
+      "verses": 30,
+      "words": 137,
+      "letters": 577
+    },
+    "90": {
+      "surahId": 90,
+      "verses": 20,
+      "words": 82,
+      "letters": 338
+    },
+    "91": {
+      "surahId": 91,
+      "verses": 15,
+      "words": 54,
+      "letters": 250
+    },
+    "92": {
+      "surahId": 92,
+      "verses": 21,
+      "words": 71,
+      "letters": 313
+    },
+    "93": {
+      "surahId": 93,
+      "verses": 11,
+      "words": 40,
+      "letters": 165
+    },
+    "94": {
+      "surahId": 94,
+      "verses": 8,
+      "words": 27,
+      "letters": 102
+    },
+    "95": {
+      "surahId": 95,
+      "verses": 8,
+      "words": 34,
+      "letters": 157
+    },
+    "96": {
+      "surahId": 96,
+      "verses": 19,
+      "words": 72,
+      "letters": 288
+    },
+    "97": {
+      "surahId": 97,
+      "verses": 5,
+      "words": 30,
+      "letters": 112
+    },
+    "98": {
+      "surahId": 98,
+      "verses": 8,
+      "words": 94,
+      "letters": 397
+    },
+    "99": {
+      "surahId": 99,
+      "verses": 8,
+      "words": 36,
+      "letters": 156
+    },
+    "100": {
+      "surahId": 100,
+      "verses": 11,
+      "words": 40,
+      "letters": 164
+    },
+    "101": {
+      "surahId": 101,
+      "verses": 11,
+      "words": 36,
+      "letters": 158
+    },
+    "102": {
+      "surahId": 102,
+      "verses": 8,
+      "words": 28,
+      "letters": 126
+    },
+    "103": {
+      "surahId": 103,
+      "verses": 3,
+      "words": 14,
+      "letters": 71
+    },
+    "104": {
+      "surahId": 104,
+      "verses": 9,
+      "words": 33,
+      "letters": 135
+    },
+    "105": {
+      "surahId": 105,
+      "verses": 5,
+      "words": 23,
+      "letters": 96
+    },
+    "106": {
+      "surahId": 106,
+      "verses": 4,
+      "words": 17,
+      "letters": 75
+    },
+    "107": {
+      "surahId": 107,
+      "verses": 7,
+      "words": 25,
+      "letters": 114
+    },
+    "108": {
+      "surahId": 108,
+      "verses": 3,
+      "words": 10,
+      "letters": 42
+    },
+    "109": {
+      "surahId": 109,
+      "verses": 6,
+      "words": 26,
+      "letters": 95
+    },
+    "110": {
+      "surahId": 110,
+      "verses": 3,
+      "words": 19,
+      "letters": 80
+    },
+    "111": {
+      "surahId": 111,
+      "verses": 5,
+      "words": 23,
+      "letters": 81
+    },
+    "112": {
+      "surahId": 112,
+      "verses": 4,
+      "words": 15,
+      "letters": 47
+    },
+    "113": {
+      "surahId": 113,
+      "verses": 5,
+      "words": 23,
+      "letters": 71
+    },
+    "114": {
+      "surahId": 114,
+      "verses": 6,
+      "words": 20,
+      "letters": 80
+    }
+  }
+}
