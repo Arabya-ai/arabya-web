@@ -23,12 +23,17 @@ import {
 } from "@/i18n/routing";
 import { getFooterCredit } from "@/lib/site-appearance-store";
 
+/**
+ * Keep all 7 families available via CSS variables, but only preload Cairo.
+ * Preloading every weight of every family (~25 font files) saturates mobile
+ * bandwidth and delays LCP (PSI often reports NO_LCP when LCP never settles).
+ */
 const cairo = Cairo({
   variable: "--font-cairo",
   subsets: ["arabic", "latin"],
-  // Keep families; trim rarely used 800 to shrink render-blocking font CSS.
   weight: ["400", "500", "600", "700"],
   display: "swap",
+  preload: true,
 });
 
 const plexArabic = IBM_Plex_Sans_Arabic({
@@ -36,6 +41,7 @@ const plexArabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic", "latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
+  preload: false,
 });
 
 const jakarta = Plus_Jakarta_Sans({
@@ -43,6 +49,7 @@ const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
+  preload: false,
 });
 
 const naskh = Noto_Naskh_Arabic({
@@ -50,6 +57,7 @@ const naskh = Noto_Naskh_Arabic({
   subsets: ["arabic"],
   weight: ["400", "700"],
   display: "swap",
+  preload: false,
 });
 
 const amiri = Amiri({
@@ -57,6 +65,7 @@ const amiri = Amiri({
   subsets: ["arabic", "latin"],
   weight: ["400", "700"],
   display: "swap",
+  preload: false,
 });
 
 const tajawal = Tajawal({
@@ -64,6 +73,7 @@ const tajawal = Tajawal({
   subsets: ["arabic", "latin"],
   weight: ["400", "500", "700"],
   display: "swap",
+  preload: false,
 });
 
 const reemKufi = Reem_Kufi({
@@ -71,6 +81,7 @@ const reemKufi = Reem_Kufi({
   subsets: ["arabic", "latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
+  preload: false,
 });
 
 export function generateStaticParams() {

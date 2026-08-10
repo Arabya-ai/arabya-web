@@ -1411,10 +1411,10 @@ button.nav-pill {
   margin-bottom: 1.25rem;
 }
 
-/* Primary LCP text — must stay visible, UI font, no animation/clip-path */
+/* Primary LCP text — system font first so paint never waits on webfonts */
 .mushaf-lcp-heading {
   margin: 0 0 0.85rem;
-  font-family: var(--font-ui), system-ui, "Segoe UI", Tahoma, sans-serif;
+  font-family: system-ui, "Segoe UI", Tahoma, sans-serif;
   font-size: clamp(1.2rem, 3.6vw, 1.7rem);
   font-weight: 700;
   line-height: 1.4;
@@ -1534,13 +1534,8 @@ button.nav-pill {
   content: "";
   position: absolute;
   inset: -8%;
-  /* Prefer AVIF/WebP (~45–59 KiB) over legacy PNG (~82 KiB optimized). */
-  background-image: url("/brand/surah-wing-pattern.webp");
-  background-image: image-set(
-    url("/brand/surah-wing-pattern.avif") type("image/avif"),
-    url("/brand/surah-wing-pattern.webp") type("image/webp"),
-    url("/brand/surah-wing-pattern.png") type("image/png")
-  );
+  /* Image applied only after .surah-ornament--textured (post-LCP). */
+  background-image: none;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -1548,6 +1543,15 @@ button.nav-pill {
   mix-blend-mode: multiply;
   filter: contrast(1.08) brightness(0.92);
   pointer-events: none;
+}
+
+.surah-ornament--textured .surah-ornament-wing::after {
+  background-image: url("/brand/surah-wing-pattern.webp");
+  background-image: image-set(
+    url("/brand/surah-wing-pattern.avif") type("image/avif"),
+    url("/brand/surah-wing-pattern.webp") type("image/webp"),
+    url("/brand/surah-wing-pattern.png") type("image/png")
+  );
 }
 
 .surah-ornament-wing:last-child::after {
