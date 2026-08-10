@@ -64,3 +64,42 @@ export function resolvePortalCity(raw: string | null | undefined): PortalCity {
   if (id in PORTAL_CITIES) return PORTAL_CITIES[id as PortalCityId];
   return PORTAL_CITIES[DEFAULT_PORTAL_CITY];
 }
+
+/** Haversine distance in km between two WGS84 points. */
+function haversineKm(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+): number {
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const r = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * r * Math.asin(Math.sqrt(a));
+}
+
+/** Nearest curated portal city for a GPS fix (keeps Aladhan methods stable). */
+export function nearestPortalCity(
+  latitude: number,
+  longitude: number,
+): PortalCity {
+  let best = PORTAL_CITIES[DEFAULT_PORTAL_CITY];
+  let bestKm = Number.POSITIVE_INFINITY;
+  for (const city of PORTAL_CITY_LIST) {
+    const km = haversineKm(
+      latitude,
+      longitude,
+      city.latitude,
+      city.longitude,
+    );
+    if (km < bestKm) {
+      bestKm = km;
+      best = city;
+    }
+  }
+  return best;
+}

@@ -2,7 +2,7 @@ import { Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { getSurah, getSurahMeta } from "@/lib/quran";
+import { getSurah, getSurahMeta, getSurahStats } from "@/lib/quran";
 import { formatCount, getMushafPageHref } from "@/lib/format";
 import { normalizeForHafsFont } from "@/lib/quran-text";
 import { getSurahDisplayTitle, getSurahUthmaniTitle } from "@/lib/surah-names";
@@ -36,10 +36,11 @@ export default async function SurahReadPage({ params }: Props) {
   const surahId = Number(id);
   if (!Number.isInteger(surahId) || surahId < 1 || surahId > 114) notFound();
 
-  const [surah, meta, mushaf] = await Promise.all([
+  const [surah, meta, mushaf, stats] = await Promise.all([
     getSurah(surahId),
     getSurahMeta(surahId),
     getMushafIndex(),
+    getSurahStats(surahId),
   ]);
   if (!surah || !meta) notFound();
 
@@ -77,6 +78,15 @@ export default async function SurahReadPage({ params }: Props) {
             count: verseCount,
             juz,
           })}
+          {stats ? (
+            <>
+              {" · "}
+              {t("statsMeta", {
+                words: formatCount(stats.words, locale),
+                letters: formatCount(stats.letters, locale),
+              })}
+            </>
+          ) : null}
         </p>
       </header>
 

@@ -1,0 +1,136 @@
+{
+  "source": "Arabya editorial blurbs for portal catalog — audio remains EveryAyah folders in src/lib/audio.ts",
+  "reciters": {
+    "alafasy": {
+      "countryAr": "الكويت",
+      "countryEn": "Kuwait",
+      "riwayaAr": "حفص عن عاصم",
+      "riwayaEn": "Hafs ʿan ʿĀṣim",
+      "bioAr": "قارئ كويتي مشهور بتلاوته المرتلة الواضحة، من أكثر الأصوات استماعاً في التطبيقات الحديثة.",
+      "bioEn": "Kuwaiti reciter known for a clear murattal style, widely listened to in modern Quran apps.",
+      "imageUrl": "https://static.qurancdn.com/images/reciters/6/mishary-rashid-alafasy-profile.jpeg"
+    },
+    "husary": {
+      "countryAr": "مصر",
+      "countryEn": "Egypt",
+      "riwayaAr": "حفص عن عاصم",
+      "riwayaEn": "Hafs ʿan ʿĀṣim",
+      "bioAr": "محمود خليل الحصري من أعلام التلاوة المصرية، مرجعية في الإتقان والتعليم.",
+      "bioEn": "Mahmoud Khalil Al-Husary is a landmark Egyptian reciter, a reference for precision and teaching.",
+      "imageUrl": "https://static.qurancdn.com/images/reciters/5/mahmoud-khalil-al-hussary-profile.png"
+    },
+    "minshawi": {
+      "countryAr": "مصر",
+      "countryEn": "Egypt",
+      "riwayaAr": "حفص عن عاصم",
+      "riwayaEn": "Hafs ʿan ʿĀṣim",
+      "bioAr": "محمد صديق المنشاوي صاحب صوت مؤثر وأداء مجوّد ومرتل واسع الانتشار.",
+      "bioEn": "Muhammad Siddiq Al-Minshawi is known for an emotive voice in both mujawwad and murattal styles.",
+      "imageUrl": "https://static.qurancdn.com/images/reciters/7/mohamed-siddiq-el-minshawi-profile.jpeg"
+    },
+    "abdulbasit": {
+      "countryAr": "مصر",
+      "countryEn": "Egypt",
+      "riwayaAr": "حفص عن عاصم",
+      "riwayaEn": "Hafs ʿan ʿĀṣim",
+      "bioAr": "عبد الباسط عبد الصمد من أشهر أصوات القرن العشرين، بترتيل هادئ وإيقاع متقن.",
+      "bioEn": "Abdul Basit Abdus Samad is among the most famous twentieth-century voices, with calm precise murattal.",
+      "imageUrl": "https://static.qurancdn.com/images/reciters/1/abdelbasset-profile.jpeg"
+    },
+    "sudais": {
+      "countryAr": "السعودية",
+      "countryEn": "Saudi Arabia",
+      "riwayaAr": "حفص عن عاصم",
+      "riwayaEn": "Hafs ʿan ʿĀṣim",
+      "bioAr": "عبد الرحمن السديس إمام المسجد الحرام، يُعرف بصوت مؤثر في التراويح والترتيل.",
+      "bioEn": "Abdurrahman As-Sudais is an imam of the Grand Mosque in Makkah, known for moving tarawih and murattal.",
+      "imageUrl": "https://static.qurancdn.com/images/reciters/2/abdul-rahman-al-sudais-profile.jpeg"
+    },
+    "ghamdi": {
+      "countryAr": "السعودية",
+      "countryEn": "Saudi Arabia",
+      "riwayaAr": "حفص عن عاصم",
+      "riwayaEn": "Hafs ʿan ʿĀṣim",
+      "bioAr": "سعد الغامدي قارئ سعودي بصوت هادئ شائع في الاستماع اليومي.",
+      "bioEn": "Saad Al-Ghamdi is a Saudi reciter with a calm voice popular for daily listening.",
+      "imageUrl": "https://static.qurancdn.com/images/reciters/16/saad-al-ghamdi-profile.png"
+    },
+    "maher": {
+      "countryAr": "السعودية",
+      "countryEn": "Saudi Arabia",
+      "riwayaAr": "حفص عن عاصم",
+      "riwayaEn": "Hafs ʿan ʿĀṣim",
+      "bioAr": "ماهر المعيقلي إمام المسجد الحرام، يتميز بتلاوة خاشعة وإيقاع متزن.",
+      "bioEn": "Maher Al-Muaiqly is an imam of the Grand Mosque, known for a humble balanced recitation."
+    },
+    "shuraym": {
+      "countryAr": "السعودية",
+      "countryEn": "Saudi Arabia",
+      "riwayaAr": "حفص عن عاصم",
+      "riwayaEn": "Hafs ʿan ʿĀṣim",
+      "bioAr": "سعود الشريم إمام المسجد الحرام، معروف بقراءة متأنية وصوت مميز.",
+      "bioEn": "Saud Ash-Shuraym is an imam of the Grand Mosque, known for measured distinctive recitation.",
+      "imageUrl": "https://static.qurancdn.com/images/reciters/8/saoud-shuraim-profile.jpeg"
+    },
+    "dussary": {
+      "countryAr": "السعودية",
+      "countryEn": "Saudi Arabia",
+      "riwayaAr": "حفص عن عاصم",
+      "riwayaEn": "Hafs ʿan ʿĀṣim",
+      "bioAr": "ياسر الدوسري إمام في المسجد الحرام، يشتهر بصوت مؤثر في القيام والتراويح.",
+      "bioEn": "Yasser Ad-Dussary is an imam in the Grand Mosque, known for a moving night-prayer voice."
+    },
+    "qatami": {
+      "countryAr": "السعودية",
+      "countryEn": "Saudi Arabia",
+      "riwayaAr": "حفص عن عاصم",
+      "riwayaEn": "Hafs ʿan ʿĀṣim",
+      "bioAr": "ناصر القطامي قارئ سعودي بصوت واضح محبوب في التطبيقات.",
+      "bioEn": "Nasser Al-Qatami is a Saudi reciter with a clear voice popular in Quran apps."
+    },
+    "warsh-aldosary": {
+      "countryAr": "السعودية",
+      "countryEn": "Saudi Arabia",
+      "riwayaAr": "ورش عن نافع",
+      "riwayaEn": "Warsh ʿan Nāfiʿ",
+      "bioAr": "إبراهيم الدوسري — تسجيل ورش ضمن مكتبة EveryAyah التعليمية.",
+      "bioEn": "Ibrahim Al-Dosary — Warsh recording in the educational EveryAyah library."
+    },
+    "warsh-jazaery": {
+      "countryAr": "الجزائر",
+      "countryEn": "Algeria",
+      "riwayaAr": "ورش عن نافع",
+      "riwayaEn": "Warsh ʿan Nāfiʿ",
+      "bioAr": "ياسين الجزائري — تسجيل ورش ضمن مكتبة EveryAyah التعليمية.",
+      "bioEn": "Yassin Al-Jazaery — Warsh recording in the educational EveryAyah library."
+    },
+    "abdulbasit-mujawwad": {
+      "imageUrl": "https://static.qurancdn.com/images/reciters/1/abdelbasset-profile.jpeg"
+    },
+    "abdulsamad-qe": {
+      "imageUrl": "https://static.qurancdn.com/images/reciters/1/abdelbasset-profile.jpeg"
+    },
+    "shaatree": {
+      "imageUrl": "https://static.qurancdn.com/images/reciters/3/abu-bakr-al-shatri-pofile.jpeg"
+    },
+    "hani-rifai": {
+      "imageUrl": "https://static.qurancdn.com/images/reciters/4/hani-ar-rifai-profile.jpeg"
+    },
+    "husary-mujawwad": {
+      "imageUrl": "https://static.qurancdn.com/images/reciters/5/mahmoud-khalil-al-hussary-profile.png"
+    },
+    "husary-muallim": {
+      "imageUrl": "https://static.qurancdn.com/images/reciters/5/mahmoud-khalil-al-hussary-profile.png"
+    },
+    "minshawi-mujawwad": {
+      "imageUrl": "https://static.qurancdn.com/images/reciters/7/mohamed-siddiq-el-minshawi-profile.jpeg"
+    },
+    "menshawi-16": {
+      "imageUrl": "https://static.qurancdn.com/images/reciters/7/mohamed-siddiq-el-minshawi-profile.jpeg"
+    },
+    "tunaiji": {
+      "imageUrl": "https://static.qurancdn.com/images/reciters/11/khalifa-al-tunaiji-profile.jpeg"
+    }
+  },
+  "imageSource": "Profile stills hosted by Quran.com static CDN (static.qurancdn.com); used as remote references with initials fallback when unavailable."
+}

@@ -36,6 +36,36 @@ export async function getSurahMeta(id: number): Promise<SurahMeta | undefined> {
   return surahs.find((s) => s.id === id);
 }
 
+export type SurahStats = {
+  surahId: number;
+  verses: number;
+  words: number;
+  letters: number;
+};
+
+let surahStatsCache: Record<string, SurahStats> | null = null;
+
+/** Precomputed verse/word/letter counts from data/surah-stats.json */
+export async function getSurahStats(
+  id: number,
+): Promise<SurahStats | null> {
+  if (!surahStatsCache) {
+    try {
+      const raw = await readFile(
+        path.join(dataRoot, "surah-stats.json"),
+        "utf8",
+      );
+      const parsed = JSON.parse(raw) as {
+        surahs?: Record<string, SurahStats>;
+      };
+      surahStatsCache = parsed.surahs ?? {};
+    } catch {
+      surahStatsCache = {};
+    }
+  }
+  return surahStatsCache[String(id)] ?? null;
+}
+
 export async function getIrab(id: number): Promise<IrabSurah | null> {
   try {
     const raw = await readFile(path.join(dataRoot, "irab", `${id}.json`), "utf8");

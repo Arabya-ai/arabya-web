@@ -66,6 +66,12 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
         <Link href="/asma" role="menuitem" onClick={go()}>
           {t("asma")}
         </Link>
+        <Link href="/reciters" role="menuitem" onClick={go()}>
+          {t("reciters")}
+        </Link>
+        <Link href="/adhkar" role="menuitem" onClick={go()}>
+          {t("adhkar")}
+        </Link>
         <Link href="/study" role="menuitem" onClick={go()}>
           {t("study")}
         </Link>

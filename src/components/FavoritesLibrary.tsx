@@ -12,6 +12,7 @@ import {
   getSurahEnglishName,
   getSurahUthmaniTitle,
 } from "@/lib/surah-names";
+import { FavoriteRecitersSection } from "@/components/FavoriteRecitersSection";
 
 function formatCount(value: number, locale: string): string {
   return locale === "ar" ? toArabicNumerals(value) : String(value);
@@ -221,6 +222,8 @@ export function FavoritesLibrary({
           <p className="library-empty">{t("emptyNotes")}</p>
         )}
       </section>
+
+      <FavoriteRecitersSection mode={mode} />
     </div>
   );
 }

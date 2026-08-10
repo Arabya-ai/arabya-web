@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { toArabicNumerals } from "@/lib/format";
 import {
   DEFAULT_PORTAL_CITY,
+  nearestPortalCity,
   PORTAL_CITY_LIST,
   type PortalCityId,
 } from "@/lib/portal-cities";
@@ -53,6 +54,8 @@ export function PrayerTimesCard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nowMs, setNowMs] = useState(() => Date.now());
+  const [geoBusy, setGeoBusy] = useState(false);
+  const [geoHint, setGeoHint] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -107,11 +110,41 @@ export function PrayerTimesCard() {
 
   const onCity = (id: string) => {
     setCity(id);
+    setGeoHint(null);
     try {
       localStorage.setItem(CITY_KEY, id);
     } catch {
       /* ignore */
     }
+  };
+
+  const onUseLocation = () => {
+    if (!navigator.geolocation) {
+      setGeoHint(t("geoUnsupported"));
+      return;
+    }
+    setGeoBusy(true);
+    setGeoHint(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const nearest = nearestPortalCity(
+          pos.coords.latitude,
+          pos.coords.longitude,
+        );
+        onCity(nearest.id);
+        setGeoHint(
+          t("geoMatched", {
+            city: t(`cities.${nearest.id}` as `cities.${PortalCityId}`),
+          }),
+        );
+        setGeoBusy(false);
+      },
+      () => {
+        setGeoHint(t("geoDenied"));
+        setGeoBusy(false);
+      },
+      { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 },
+    );
   };
 
   const next = useMemo(() => {
@@ -148,20 +181,30 @@ export function PrayerTimesCard() {
           <h2 id="prayer-h">{t("title")}</h2>
           <p className="prayer-help">{t("help")}</p>
         </div>
-        <label className="prayer-city">
-          <span className="sr-only">{t("city")}</span>
-          <select
-            value={city}
-            onChange={(e) => onCity(e.target.value)}
-            aria-label={t("citySelect")}
+        <div className="prayer-city-controls">
+          <label className="prayer-city">
+            <span className="sr-only">{t("city")}</span>
+            <select
+              value={city}
+              onChange={(e) => onCity(e.target.value)}
+              aria-label={t("citySelect")}
+            >
+              {PORTAL_CITY_LIST.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {t(`cities.${c.id}` as `cities.${PortalCityId}`)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            className="prayer-geo-btn"
+            onClick={onUseLocation}
+            disabled={geoBusy}
           >
-            {PORTAL_CITY_LIST.map((c) => (
-              <option key={c.id} value={c.id}>
-                {t(`cities.${c.id}` as `cities.${PortalCityId}`)}
-              </option>
-            ))}
-          </select>
-        </label>
+            {geoBusy ? t("geoLoading") : t("useLocation")}
+          </button>
+        </div>
       </header>
 
       {hijri || gregorian ? (
@@ -179,6 +222,12 @@ export function PrayerTimesCard() {
             </div>
           ) : null}
         </div>
+      ) : null}
+
+      {geoHint ? (
+        <p className="prayer-status prayer-status--hint" role="status">
+          {geoHint}
+        </p>
       ) : null}
 
       {loading ? <p className="prayer-status">{t("loading")}</p> : null}

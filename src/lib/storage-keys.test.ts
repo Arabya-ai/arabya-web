@@ -12,6 +12,10 @@ describe("STORAGE_KEYS", () => {
     expect(STORAGE_KEYS.mushafFontScale).toBe("arabya-mushaf-font-scale");
     expect(STORAGE_KEYS.lastMushafPage).toBe("arabya-last-mushaf-page");
     expect(STORAGE_KEYS.theme).toBe("arabya-theme");
+    expect(STORAGE_KEYS.reciter).toBe("arabya-reciter");
+    expect(STORAGE_KEYS.favoriteReciters).toBe("arabya-favorite-reciters");
+    expect(STORAGE_KEYS.adhkarProgress).toBe("arabya-adhkar-progress");
+    expect(STORAGE_KEYS.prayerCity).toBe("arabya-prayer-city");
     expect(readingHabitPagesKey("2026-07-25")).toBe(
       "arabya-reading-habit:pages:2026-07-25",
     );
