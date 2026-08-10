@@ -118,22 +118,23 @@ export async function generateMetadata({
   } else if (kind === "listen-wbw") {
     title = `${t("listenWbwPrefix")}${title}`;
     description = `${t("listenWbwDescPrefix")}${description}`;
-  } else if (kind === "ayah") {
+  } else if (share === "ayah") {
     title = `${t("shareAyahPrefix")}${title}`;
-  } else if (kind === "surah") {
+  } else if (share === "surah") {
     title = `${t("shareSurahPrefix")}${title}`;
-  } else if (kind === "page") {
+  } else if (share === "page") {
     title = `${t("sharePagePrefix")}${title}`;
-  } else if (kind === "note") {
+  } else if (share === "note") {
     title = `${t("shareNotePrefix")}${title}`;
   }
 
   const pathParams = new URLSearchParams();
-  pathParams.set("share", kind);
+  if (share) pathParams.set("share", kind);
   if (v) pathParams.set("v", v);
   if (sid) pathParams.set("sid", sid);
   if (listen) pathParams.set("listen", listen);
-  const path = `/mushaf/${pageNum}?${pathParams.toString()}`;
+  const qs = pathParams.toString();
+  const path = qs ? `/mushaf/${pageNum}?${qs}` : `/mushaf/${pageNum}`;
 
   const social = buildSocialMetadata({
     title,

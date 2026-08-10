@@ -1411,6 +1411,23 @@ button.nav-pill {
   margin-bottom: 1.25rem;
 }
 
+/* Primary LCP text — must stay visible, UI font, no animation/clip-path */
+.mushaf-lcp-heading {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-ui), system-ui, "Segoe UI", Tahoma, sans-serif;
+  font-size: clamp(1.2rem, 3.6vw, 1.7rem);
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.mushaf-lcp-meta {
+  font-weight: 600;
+  font-size: 0.82em;
+  color: var(--muted);
+}
+
 .mushaf-banner-top {
   display: flex;
   flex-direction: row;
@@ -1425,7 +1442,6 @@ button.nav-pill {
   margin: 0;
   flex: 1 1 auto;
   min-width: 0;
-  /* UI font — stable LCP without waiting on UthmanicHafs */
   font-family: var(--font-ui), "Segoe UI", Tahoma, sans-serif;
   font-weight: 700;
   font-size: clamp(1.05rem, 3.2vw, 1.55rem);
