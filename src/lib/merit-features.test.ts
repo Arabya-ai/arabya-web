@@ -46,6 +46,7 @@ describe("reciter catalog", () => {
     expect(list.length).toBeGreaterThan(20);
     const alafasy = await getReciterCatalogEntry("alafasy");
     expect(alafasy?.meta.riwayaAr).toBeTruthy();
+    expect(alafasy?.meta.imageUrl).toMatch(/^https:\/\/static\.qurancdn\.com\//);
     expect(await getReciterCatalogEntry("no-such-reciter")).toBeNull();
   });
 });

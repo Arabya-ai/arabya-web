@@ -11,6 +11,7 @@ import { getSurahDisplayTitle } from "@/lib/surah-names";
 import { FavoriteReciterButton } from "@/components/FavoriteReciterButton";
 import { UseReciterButton } from "@/components/UseReciterButton";
 import { ReciterSurahLink } from "@/components/ReciterSurahLink";
+import { ReciterAvatar } from "@/components/ReciterAvatar";
 import { RECITERS } from "@/lib/audio";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
@@ -66,13 +67,18 @@ export default async function ReciterDetailPage({ params }: Props) {
       </nav>
 
       <header className="asma-page-head">
-        <h1>{name}</h1>
-        <ul className="reciter-detail-tags">
-          {entry.style ? <li>{entry.style}</li> : null}
-          {riwaya ? <li>{riwaya}</li> : null}
-          {country ? <li>{country}</li> : null}
-          <li>{t("surahCount", { count: formatCount(114, locale) })}</li>
-        </ul>
+        <div className="reciter-detail-hero">
+          <ReciterAvatar name={name} imageUrl={entry.meta.imageUrl} size={88} />
+          <div>
+            <h1>{name}</h1>
+            <ul className="reciter-detail-tags">
+              {entry.style ? <li>{entry.style}</li> : null}
+              {riwaya ? <li>{riwaya}</li> : null}
+              {country ? <li>{country}</li> : null}
+              <li>{t("surahCount", { count: formatCount(114, locale) })}</li>
+            </ul>
+          </div>
+        </div>
         {bio ? <p className="reciter-detail-bio">{bio}</p> : null}
         <div className="reciter-detail-actions">
           <UseReciterButton reciterId={entry.id} mushafPage={firstPage} />

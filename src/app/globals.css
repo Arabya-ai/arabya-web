@@ -6269,7 +6269,9 @@ a.auth-btn--google {
 
 .reciters-grid-link {
   display: grid;
-  gap: 0.2rem;
+  grid-template-columns: auto 1fr;
+  gap: 0.65rem;
+  align-items: center;
   padding: 0.75rem 0.85rem;
   border-radius: 12px;
   border: 1px solid var(--line);
@@ -6282,6 +6284,12 @@ a.auth-btn--google {
 .reciters-grid-link:hover,
 .reciters-grid-link:focus-visible {
   border-color: color-mix(in srgb, var(--brand) 45%, var(--line));
+}
+
+.reciters-grid-body {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
 }
 
 .reciters-grid-name {
@@ -6493,4 +6501,42 @@ a.auth-btn--google {
 .adhkar-tap-btn:disabled {
   opacity: 0.85;
   cursor: default;
+}
+
+.reciter-avatar-img,
+.reciter-avatar-fallback {
+  display: block;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--brand-soft);
+  border: 1px solid color-mix(in srgb, var(--brand) 25%, var(--line));
+  flex-shrink: 0;
+}
+
+.reciter-avatar-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: var(--brand-deep);
+  font-family: var(--font-title);
+}
+
+.reciter-detail-hero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.reciter-detail-hero .reciter-avatar-img,
+.reciter-detail-hero .reciter-avatar-fallback {
+  width: 5.5rem;
+  height: 5.5rem;
+}
+
+.reciter-detail-hero h1 {
+  margin: 0;
 }

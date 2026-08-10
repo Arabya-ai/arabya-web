@@ -9,6 +9,8 @@ export type ReciterMeta = {
   riwayaEn?: string;
   bioAr?: string;
   bioEn?: string;
+  /** Absolute URL to a public profile still (optional). */
+  imageUrl?: string;
 };
 
 export type ReciterCatalogEntry = Reciter & {
