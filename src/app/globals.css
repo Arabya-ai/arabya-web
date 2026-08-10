@@ -1534,7 +1534,13 @@ button.nav-pill {
   content: "";
   position: absolute;
   inset: -8%;
-  background-image: url("/brand/surah-wing-pattern.png");
+  /* Prefer AVIF/WebP (~45–59 KiB) over legacy PNG (~82 KiB optimized). */
+  background-image: url("/brand/surah-wing-pattern.webp");
+  background-image: image-set(
+    url("/brand/surah-wing-pattern.avif") type("image/avif"),
+    url("/brand/surah-wing-pattern.webp") type("image/webp"),
+    url("/brand/surah-wing-pattern.png") type("image/png")
+  );
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -1636,6 +1642,7 @@ html[data-theme="dark"] .surah-ornament-wing::after {
 .mushaf-word {
   appearance: none;
   display: inline;
+  position: relative;
   margin: 0;
   padding: 0.01em 0.04em;
   border: 0;
@@ -1653,6 +1660,19 @@ html[data-theme="dark"] .surah-ornament-wing::after {
   transition: background 120ms ease, box-shadow 120ms ease;
   vertical-align: baseline;
   white-space: nowrap;
+}
+
+/* Enlarge tap area without changing Uthmanic glyph metrics. */
+@media (pointer: coarse) {
+  .mushaf-word {
+    padding: 0.1em 0.12em;
+  }
+
+  .mushaf-word::before {
+    content: "";
+    position: absolute;
+    inset: -0.28em -0.1em;
+  }
 }
 
 .mushaf-word:hover {
@@ -1682,6 +1702,7 @@ html[data-theme="dark"] .surah-ornament-wing::after {
 .ayah-end {
   appearance: none;
   display: inline-block;
+  position: relative;
   margin-inline: 0.08em 0.12em;
   color: var(--brand);
   font-family: var(--font-ui);
@@ -1701,6 +1722,18 @@ html[data-theme="dark"] .surah-ornament-wing::after {
   white-space: nowrap;
   cursor: pointer;
   transition: background 120ms ease, border-color 120ms ease;
+}
+
+@media (pointer: coarse) {
+  .ayah-end::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+  }
 }
 
 .ayah-end:hover {
@@ -3413,10 +3446,10 @@ html[data-theme="dark"] .arabya-footer-panel {
   }
 
   .ayah-end {
-    font-size: 0.55em;
-    min-width: 1.55em;
-    height: 1.55em;
-    line-height: 1.55em;
+    font-size: 0.58em;
+    min-width: 1.65em;
+    height: 1.65em;
+    line-height: 1.65em;
   }
 
   .mushaf-toolbar {
