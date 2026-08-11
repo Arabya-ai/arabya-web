@@ -315,9 +315,9 @@ export default function Editor() {
 
     const measure = () => {
       const stageW = stage.clientWidth;
-      // Cap by stage AND viewport so portrait frames never force page scroll.
-      const viewportCap = Math.max(220, window.innerHeight * 0.62);
-      const stageH = Math.min(stage.clientHeight, viewportCap);
+      // Cap by stage AND viewport so portrait frames never force overflow inside editor.
+      const viewportCap = Math.max(200, window.innerHeight * 0.55);
+      const stageH = Math.min(stage.clientHeight || viewportCap, viewportCap);
       const fitted = fitAspectBox(
         stageW,
         Math.max(stageH, 1),

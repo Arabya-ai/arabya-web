@@ -508,22 +508,28 @@ html[data-theme="dark"] .arabya-mark-icon {
   min-height: 100%;
 }
 
-/* Root studio wrapper: fill main only, not the viewport past the footer */
+/* Root studio wrapper */
 #ayat-studio-root.ayat-studio {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  height: 100%;
   background-attachment: scroll;
 }
 
-/* Studio pages: main fills remaining viewport under site header (no footer) */
+/* Only editor main is viewport-locked — fill it completely */
 main.studio-main-viewport {
   display: flex;
   flex-direction: column;
   min-height: 0;
   height: calc(100dvh - var(--arabya-header-height, 4.5rem));
   max-height: calc(100dvh - var(--arabya-header-height, 4.5rem));
+  overflow: hidden;
+}
+
+main.studio-main-viewport #ayat-studio-root.ayat-studio {
+  height: 100%;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 

@@ -8,6 +8,7 @@ import { DeferredChrome } from "@/components/DeferredChrome";
 import { PreferencesMenu } from "@/components/PreferencesMenu";
 import { useDismissibleOpen } from "@/hooks/useDismissibleOpen";
 import { Link, usePathname } from "@/i18n/navigation";
+import { isStudioEditorViewportPath } from "@/ayat-studio/lib/studio-shell-mode";
 
 /** Site chrome for all pages including Arabya Studio (header + footer). */
 export function AppShell({
@@ -18,20 +19,17 @@ export function AppShell({
   footerCredit: string;
 }) {
   const pathname = usePathname();
-  // Studio editor needs the full viewport — footer would force page scroll.
-  const hideFooter =
-    pathname === "/studio" ||
-    pathname.startsWith("/studio/") ||
-    pathname === "/create" ||
-    pathname.startsWith("/create/");
+  // Only the editor needs a locked viewport (preview must fit without page scroll).
+  // Dashboard/projects/settings must keep normal page scrolling + footer.
+  const editorViewport = isStudioEditorViewportPath(pathname);
 
   return (
     <>
       <SiteHeader />
-      <main className={hideFooter ? "studio-main-viewport" : undefined}>
+      <main className={editorViewport ? "studio-main-viewport" : undefined}>
         {children}
       </main>
-      {!hideFooter && <SiteFooter credit={footerCredit} />}
+      {!editorViewport && <SiteFooter credit={footerCredit} />}
       <DeferredChrome />
     </>
   );
