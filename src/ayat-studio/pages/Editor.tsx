@@ -204,7 +204,7 @@ function EditorPanel({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between px-4 py-3.5 text-sm font-medium text-foreground hover:bg-accent/5 transition-colors"
+        className="flex w-full items-center justify-between px-5 py-3.5 text-sm font-medium text-foreground hover:bg-accent/5 transition-colors"
       >
         <div className="flex items-center gap-2.5">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/10 border border-accent/20">
@@ -217,7 +217,7 @@ function EditorPanel({
         />
       </button>
       {open && (
-        <div className="relative isolate space-y-4 overflow-hidden px-4 pb-4 animate-fade-in">
+        <div className="relative isolate space-y-4 overflow-hidden px-5 pb-5 animate-fade-in">
           {children}
         </div>
       )}
@@ -739,7 +739,7 @@ export default function Editor() {
   const transDur = project.transitionDuration ?? 0.6;
 
   return (
-    <div className="studio-editor flex min-h-0 flex-1 flex-col gap-3 lg:flex-row lg:items-stretch">
+    <div className="studio-editor flex min-h-0 flex-1 flex-col gap-4 lg:flex-row lg:items-stretch lg:gap-5">
       <style>{`
         @keyframes studio-fade { from { opacity: 0.15 } to { opacity: 1 } }
         @keyframes studio-slide { from { transform: translateX(28px); opacity: 0.2 } to { transform: none; opacity: 1 } }
@@ -751,8 +751,8 @@ export default function Editor() {
         @keyframes studio-kenburns { from { transform: scale(1) } to { transform: scale(1.06) } }
       `}</style>
 
-      <div className="studio-editor-controls order-1 flex w-full min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-[hsl(var(--card))] shadow-deep lg:order-1 lg:h-full lg:min-h-0 lg:w-[22rem] lg:flex-none xl:w-[24rem] 2xl:w-[26rem]">
-        <div className="relative z-10 flex shrink-0 items-center justify-between gap-2 border-b border-border/60 bg-[hsl(var(--card))] px-3 py-3 sm:px-4 sm:py-4">
+      <div className="studio-editor-controls order-1 flex w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] shadow-deep lg:order-1 lg:h-full lg:min-h-0 lg:w-[22rem] lg:flex-none xl:w-[24rem] 2xl:w-[26rem]">
+        <div className="relative z-10 flex shrink-0 items-center justify-between gap-2 border-b border-border/60 bg-[hsl(var(--card))] px-4 py-4 sm:px-5 sm:py-4">
           <div className="min-w-0 flex-1">
             <p className="text-[11px] tracking-widest uppercase text-accent/80 sm:text-xs">
               المشروع
@@ -1452,12 +1452,12 @@ export default function Editor() {
         </div>
       </div>
 
-      <div className="studio-live-preview relative order-2 flex w-full shrink-0 flex-col items-center justify-center overflow-hidden rounded-xl border border-border bg-[hsl(var(--card))] p-2 shadow-deep sm:p-3 lg:order-2 lg:h-full lg:max-h-none lg:min-h-0 lg:flex-1 lg:p-4">
+      <div className="studio-live-preview relative order-2 flex w-full shrink-0 flex-col items-center justify-center overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] p-4 shadow-deep sm:p-5 lg:order-2 lg:h-full lg:max-h-none lg:min-h-0 lg:flex-1 lg:p-6">
         <div className="pattern-mihrab pointer-events-none absolute inset-0 overflow-hidden rounded-2xl opacity-20" />
         <div className="relative z-[1] mb-2 shrink-0 text-center text-[11px] tracking-widest uppercase text-accent/80 sm:mb-3 sm:text-xs">
           معاينة مباشرة
         </div>
-        <div className="studio-live-preview__stage relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center p-1 pb-1 sm:pb-2">
+        <div className="studio-live-preview__stage relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center p-2 pb-3 sm:pb-4">
           <div
             ref={previewFrameRef}
             className={`${previewAspect} studio-live-preview__frame relative flex flex-col overflow-hidden rounded-2xl border border-primary/35 shadow-deep`}
