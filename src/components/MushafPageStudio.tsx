@@ -606,7 +606,7 @@ export function MushafPageStudio({
         meaningLang={prefs.meaningLang}
         selectWord={selectWord}
         shareAyah={(sid, vn) => void shareAyah(sid, vn)}
-        audioPlaying={audio.audioPlaying}
+        audioPlaying={audio.audioPlaying || audio.surahPlaying}
         syncHighlightPos={audio.syncHighlightPos}
         selectedSurahId={selected?.surahId ?? null}
         selectedVerseNumber={selected?.verseNumber ?? null}

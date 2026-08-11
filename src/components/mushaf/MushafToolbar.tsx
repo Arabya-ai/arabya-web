@@ -200,7 +200,6 @@ export function MushafToolbar({
             }}
             aria-label={t("reciter")}
             title={t("reciter")}
-            disabled={!selected && !studyBlock}
           >
             {RECITERS.map((r) => (
               <option key={r.id} value={r.id}>
@@ -217,7 +216,6 @@ export function MushafToolbar({
             onChange={(e) => setRepeatCount(Number(e.target.value))}
             aria-label={t("repeat")}
             title={t("repeat")}
-            disabled={!selected && !studyBlock}
           >
             {[1, 2, 3, 5, 7, 10].map((n) => (
               <option key={n} value={n}>
@@ -237,7 +235,6 @@ export function MushafToolbar({
             className={`tool-btn mtb-link ${audio.wbwPlaying ? "is-on" : ""}`}
             onClick={() => void audio.playWordByWordAudio()}
             aria-pressed={audio.wbwPlaying}
-            disabled={!selected}
             title={t("words")}
           >
             <MushafToolIcon name="words" />
@@ -248,7 +245,6 @@ export function MushafToolbar({
             className={`tool-btn mtb-link ${audio.audioPlaying ? "is-on" : ""}`}
             onClick={() => void audio.playAyahAudio()}
             aria-pressed={audio.audioPlaying}
-            disabled={!selected}
             title={t("ayah")}
           >
             <MushafToolIcon name="ayah" />

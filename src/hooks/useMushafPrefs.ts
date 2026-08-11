@@ -34,7 +34,19 @@ export function useMushafPrefs(
   const [verseEdition, setVerseEdition] = useState(
     () => verseEditions[0]?.slug ?? "saheeh-en",
   );
-  const [reciterId, setReciterId] = useState(DEFAULT_RECITER_ID);
+  const [reciterId, setReciterId] = useState(() => {
+    if (typeof window === "undefined") return DEFAULT_RECITER_ID;
+    try {
+      const saved = localStorage.getItem(RECITER_KEY);
+      if (!saved) return DEFAULT_RECITER_ID;
+      const resolved = RECITERS.find(
+        (r) => r.id === saved || r.folder === saved,
+      );
+      return resolved?.id ?? DEFAULT_RECITER_ID;
+    } catch {
+      return DEFAULT_RECITER_ID;
+    }
+  });
   const [fontHydrated, setFontHydrated] = useState(false);
 
   useEffect(() => {
@@ -63,10 +75,8 @@ export function useMushafPrefs(
       if (lang === "ar" || lang === "en" || lang === "id" || lang === "ur") {
         setMeaningLang(lang);
       }
-      const savedReciter = localStorage.getItem(RECITER_KEY);
-      if (savedReciter && RECITERS.some((r) => r.id === savedReciter)) {
-        setReciterId(savedReciter);
-      }
+      // Reciter resolved in useState initializer — avoid post-mount setState
+      // that would stop in-progress audio via useQuranAudio.
       const ed = localStorage.getItem(VERSE_TRANS_KEY);
       if (ed && verseEditions.some((e) => e.slug === ed)) setVerseEdition(ed);
     } catch {
@@ -162,9 +172,11 @@ export function useMushafPrefs(
   };
 
   const persistReciterId = (id: string) => {
-    setReciterId(id);
+    const resolved =
+      RECITERS.find((r) => r.id === id || r.folder === id)?.id ?? id;
+    setReciterId(resolved);
     try {
-      localStorage.setItem(RECITER_KEY, id);
+      localStorage.setItem(RECITER_KEY, resolved);
     } catch {
       /* ignore */
     }

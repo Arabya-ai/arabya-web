@@ -1903,9 +1903,9 @@ html[data-theme="dark"] .surah-ornament-wing::after {
 }
 
 .mushaf-toolbar .reciter-pick {
-  flex: 1 1 7rem;
+  flex: 1 1 8rem;
   min-width: 0;
-  max-width: 9rem;
+  max-width: 14rem;
 }
 
 .mushaf-toolbar .repeat-pick {
