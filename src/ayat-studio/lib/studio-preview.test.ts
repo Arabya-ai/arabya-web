@@ -8,6 +8,7 @@ import {
   ayahIndexAtTime,
   clampAyahPreviewIndex,
   fitAspectBox,
+  measurePreviewFrame,
 } from "@/ayat-studio/lib/studio-preview";
 
 describe("studio ayah preview helpers", () => {
@@ -39,6 +40,50 @@ describe("studio ayah preview helpers", () => {
     const box = fitAspectBox(200, 600, 9, 16);
     expect(box.width).toBe(200);
     expect(box.height).toBeCloseTo(355.56, 1);
+  });
+
+  it("sizes stacked mobile preview primarily by stage width", () => {
+    const box = measurePreviewFrame({
+      stageW: 360,
+      stageH: 200, // collapsed / capped stage must not shrink the frame
+      aspectW: 9,
+      aspectH: 16,
+      viewportH: 800,
+      stacked: true,
+      stackedViewportRatio: 0.9,
+    });
+    expect(box.width).toBe(360);
+    expect(box.height).toBeCloseTo(640, 0);
+  });
+
+  it("soft-caps stacked portrait when full-width height exceeds viewport budget", () => {
+    const box = measurePreviewFrame({
+      stageW: 400,
+      stageH: 100,
+      aspectW: 9,
+      aspectH: 16,
+      viewportH: 600,
+      stacked: true,
+      stackedViewportRatio: 0.9,
+    });
+    // softMaxH = 540 → width = 540 * 9/16
+    expect(box.height).toBe(540);
+    expect(box.width).toBeCloseTo(303.75, 1);
+  });
+
+  it("keeps desktop preview inside stage + viewport height", () => {
+    const box = measurePreviewFrame({
+      stageW: 500,
+      stageH: 700,
+      aspectW: 9,
+      aspectH: 16,
+      viewportH: 900,
+      stacked: false,
+      desktopViewportRatio: 0.68,
+    });
+    // height capped at 0.68 * 900 = 612
+    expect(box.height).toBeLessThanOrEqual(612 + 0.5);
+    expect(box.width / box.height).toBeCloseTo(9 / 16, 3);
   });
 });
 

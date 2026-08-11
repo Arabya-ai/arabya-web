@@ -102,7 +102,6 @@ import {
   frameTafsirFontPx,
   frameTranslationFontPx,
   STUDIO_FRAME_GRADIENT_CSS,
-  STUDIO_PREVIEW_VIEWPORT_HEIGHT_RATIO,
   STUDIO_TAFSIR_PREVIEW_MAX_CHARS,
   normalizeProgressBarStyle,
   normalizeReciterPosition,
@@ -121,7 +120,8 @@ import { ArabyaMarkIcon } from "@/ayat-studio/components/IslamicDecor";
 import { fetchAyahs, type AyahData } from "@/ayat-studio/lib/quran-api";
 import {
   clampAyahPreviewIndex,
-  fitAspectBox,
+  measurePreviewFrame,
+  STUDIO_STACKED_LAYOUT_MAX_PX,
 } from "@/ayat-studio/lib/studio-preview";
 import {
   fetchStudioEditions,
@@ -217,16 +217,18 @@ function EditorPanel({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between px-5 py-3.5 text-sm font-medium text-foreground hover:bg-accent/5 transition-colors"
+        className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-sm font-medium text-foreground hover:bg-accent/5 transition-colors sm:px-5"
       >
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent/10 border border-accent/20">
+        <div className="flex min-w-0 flex-1 items-center gap-2.5">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-accent/20 bg-accent/10">
             <Icon className="h-3.5 w-3.5 text-accent" />
           </div>
-          <span className="font-display">{title}</span>
+          <span className="min-w-0 truncate font-display text-start leading-snug">
+            {title}
+          </span>
         </div>
         <ChevronDown
-          className={`h-4 w-4 text-accent/60 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`h-4 w-4 shrink-0 text-accent/60 transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && (
@@ -328,19 +330,17 @@ export default function Editor() {
       aspectRatios.find((r) => r.id === project.ratio) ?? aspectRatios[0];
 
     const measure = () => {
-      const stageW = stage.clientWidth;
-      // Cap by stage AND viewport so portrait frames never force overflow inside editor.
-      const viewportCap = Math.max(
-        240,
-        window.innerHeight * STUDIO_PREVIEW_VIEWPORT_HEIGHT_RATIO,
-      );
-      const stageH = Math.min(stage.clientHeight || viewportCap, viewportCap);
-      const fitted = fitAspectBox(
-        stageW,
-        Math.max(stageH, 1),
-        ratioMeta.width,
-        ratioMeta.height,
-      );
+      const stacked =
+        window.matchMedia(`(max-width: ${STUDIO_STACKED_LAYOUT_MAX_PX}px)`)
+          .matches;
+      const fitted = measurePreviewFrame({
+        stageW: stage.clientWidth,
+        stageH: stage.clientHeight,
+        aspectW: ratioMeta.width,
+        aspectH: ratioMeta.height,
+        viewportH: window.innerHeight,
+        stacked,
+      });
       if (fitted.width > 0 && fitted.height > 0) {
         setPreviewFrameSize(fitted);
         setFrameWidth(Math.round(fitted.width));

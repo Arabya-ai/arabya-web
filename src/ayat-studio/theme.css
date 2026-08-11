@@ -122,6 +122,7 @@ html[data-theme="dark"] .ayat-studio-portal {
 @media (max-width: 1023px) {
   .studio-editor {
     gap: 1rem;
+    overflow-y: auto;
   }
 
   .studio-editor-controls,
@@ -133,12 +134,17 @@ html[data-theme="dark"] .ayat-studio-portal {
     isolation: isolate;
     position: relative;
     z-index: 2;
+    /* Compact controls so preview gets the visual priority */
+    max-height: min(38dvh, 20rem);
+    flex: 0 0 auto;
   }
 
   .studio-live-preview {
     isolation: isolate;
     position: relative;
     z-index: 1;
+    flex: 0 0 auto;
+    min-height: 0;
   }
 
   .studio-editor-controls .rounded-lg.border {
@@ -150,19 +156,14 @@ html[data-theme="dark"] .ayat-studio-portal {
     color: hsl(var(--foreground));
   }
 
+  /* Do not cap stage height tightly — JS sizes by width for stacked layout */
   .studio-live-preview__stage {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    max-height: min(48dvh, 24rem);
-  }
-
-  .studio-editor {
-    overflow-y: auto;
-  }
-
-  .studio-editor-controls {
-    max-height: min(42dvh, 22rem);
+    width: 100%;
+    max-height: none;
+    min-height: min(58dvh, 32rem);
   }
 }
 
@@ -657,13 +658,17 @@ main.studio-main-viewport #ayat-studio-root.ayat-studio {
 @media (max-height: 520px) and (orientation: landscape) {
   .studio-editor-controls {
     min-height: 0 !important;
-    max-height: min(52dvh, 20rem) !important;
+    max-height: min(40dvh, 14rem) !important;
   }
 
   .studio-live-preview {
-    max-height: min(52dvh, 22rem) !important;
+    max-height: none !important;
     min-height: 0 !important;
-    padding-block: 0.5rem !important;
+    padding-block: 0.35rem !important;
+  }
+
+  .studio-live-preview__stage {
+    min-height: min(50dvh, 16rem) !important;
   }
 }
 
