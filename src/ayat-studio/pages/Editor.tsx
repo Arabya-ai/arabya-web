@@ -739,7 +739,7 @@ export default function Editor() {
   const transDur = project.transitionDuration ?? 0.6;
 
   return (
-    <div className="studio-editor flex min-h-0 flex-col gap-4 lg:h-[calc(100dvh-var(--arabya-header-height,4.5rem)-11rem)] lg:flex-row lg:items-stretch">
+    <div className="studio-editor flex min-h-0 flex-col gap-4 lg:h-[calc(100dvh-var(--arabya-header-height,4.5rem)-6.5rem)] lg:flex-row lg:items-stretch">
       <style>{`
         @keyframes studio-fade { from { opacity: 0.15 } to { opacity: 1 } }
         @keyframes studio-slide { from { transform: translateX(28px); opacity: 0.2 } to { transform: none; opacity: 1 } }
@@ -751,7 +751,7 @@ export default function Editor() {
         @keyframes studio-kenburns { from { transform: scale(1) } to { transform: scale(1.06) } }
       `}</style>
 
-      <div className="studio-editor-controls order-1 flex w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] shadow-deep lg:order-1 lg:h-full lg:min-h-0 lg:w-[min(100%,21rem)] lg:flex-none lg:min-w-[17rem] xl:w-[min(100%,22rem)] 2xl:w-96">
+      <div className="studio-editor-controls order-1 flex w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] shadow-deep lg:order-1 lg:h-full lg:min-h-0 lg:w-[min(100%,22rem)] lg:flex-none lg:min-w-[18rem] xl:w-[min(100%,24rem)] 2xl:w-[26rem]">
         <div className="relative z-10 flex shrink-0 items-center justify-between gap-2 border-b border-border/60 bg-[hsl(var(--card))] px-3 py-3 sm:px-4 sm:py-4">
           <div className="min-w-0 flex-1">
             <p className="text-[11px] tracking-widest uppercase text-accent/80 sm:text-xs">
@@ -1463,10 +1463,10 @@ export default function Editor() {
             className={`${previewAspect} studio-live-preview__frame relative flex flex-col overflow-hidden rounded-2xl border border-primary/35 shadow-deep`}
             style={{
               /* Shrink width when height caps so the whole frame (media) stays on screen */
-              width: `min(20rem, 100%, calc(min(70vh, 36rem) * ${previewAr}))`,
+              width: `min(28rem, 100%, calc(min(82vh, 44rem) * ${previewAr}))`,
               maxWidth: "100%",
               height: "auto",
-              maxHeight: "min(70vh, 36rem)",
+              maxHeight: "min(82vh, 44rem)",
               aspectRatio: `${previewRatioMeta.width} / ${previewRatioMeta.height}`,
               background:
                 "linear-gradient(180deg, hsl(178 50% 18%) 0%, hsl(200 50% 8%) 100%)",

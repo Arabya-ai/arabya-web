@@ -15,7 +15,7 @@ export default function DashboardLayout({
   return (
     <SidebarProvider
       defaultOpen
-      className="ayat-studio-shell relative min-h-0 w-full overflow-x-hidden xl:min-h-[calc(100dvh-12rem)]"
+      className="ayat-studio-shell relative min-h-0 w-full overflow-x-hidden xl:min-h-[calc(100dvh-7rem)]"
     >
       <AppSidebar />
       <SidebarInset className="relative z-0 min-h-0 min-w-0 max-w-full overflow-x-hidden bg-transparent">
@@ -27,7 +27,7 @@ export default function DashboardLayout({
           </span>
         </header>
         <div className="flex min-h-0 flex-1 flex-col overflow-x-hidden overflow-y-auto">
-          <div className="relative mx-auto w-full max-w-[1600px] flex-1 animate-fade-in p-2.5 sm:p-4 md:p-5 lg:p-6">
+          <div className="relative mx-auto w-full max-w-[1800px] flex-1 animate-fade-in p-2.5 sm:p-4 md:p-5 lg:p-4 xl:p-5">
             {children}
           </div>
         </div>
