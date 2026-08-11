@@ -5,6 +5,7 @@ import {
   type NextMiddleware,
   type NextRequest,
 } from "next/server";
+import { auth } from "@/auth";
 import { routing } from "@/i18n/routing";
 
 const intlMiddleware = createMiddleware(routing);
@@ -17,6 +18,26 @@ function stripLocalePrefix(pathname: string): string {
     return pathname.slice(3) || "/";
   }
   return pathname;
+}
+
+function withLocalePrefix(pathname: string, locale: "ar" | "en"): string {
+  const bare = stripLocalePrefix(pathname);
+  if (locale === "ar") return bare;
+  return bare === "/" ? "/en" : `/en${bare}`;
+}
+
+function resolveUiLocale(
+  pathname: string,
+  preferred: string | undefined,
+): "ar" | "en" {
+  if (pathname.startsWith("/en")) return "en";
+  if (preferred === "en" || preferred === "ar") return preferred;
+  return "ar";
+}
+
+function isProtectedPath(pathname: string): boolean {
+  const bare = stripLocalePrefix(pathname);
+  return /^(?:\/(?:account|studio|admin|create))(?:\/|$)/.test(bare);
 }
 
 function isStaticOrApi(pathname: string): boolean {
@@ -36,7 +57,7 @@ function setLocaleCookie(res: NextResponse, locale: "ar" | "en"): void {
   });
 }
 
-/** Locale redirects + intl — AUTH BYPASS FOR TESTING */
+/** Locale redirects + intl — no auth decode (keeps mushaf/home TTFB low). */
 function runPublicMiddleware(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
   const preferred = request.cookies.get(LOCALE_COOKIE)?.value;
@@ -49,8 +70,7 @@ function runPublicMiddleware(request: NextRequest): NextResponse {
 
   if (preferred === "en" && !pathname.startsWith("/en")) {
     const url = request.nextUrl.clone();
-    const bare = stripLocalePrefix(pathname);
-    url.pathname = bare === "/" ? "/en" : `/en${bare}`;
+    url.pathname = withLocalePrefix(pathname, "en");
     return NextResponse.redirect(url);
   }
 
@@ -63,6 +83,25 @@ function runPublicMiddleware(request: NextRequest): NextResponse {
   return response;
 }
 
+const authGuard = auth((req) => {
+  const request = req as unknown as NextRequest;
+  const { pathname } = request.nextUrl;
+
+  if (!req.auth) {
+    const preferred = request.cookies.get(LOCALE_COOKIE)?.value;
+    const locale = resolveUiLocale(pathname, preferred);
+    const returnTo = `${pathname}${request.nextUrl.search}`;
+    const url = request.nextUrl.clone();
+    url.pathname = withLocalePrefix("/login", locale);
+    // Drop original query (e.g. ?s=&v=) so only callbackUrl carries the return path.
+    url.search = "";
+    url.searchParams.set("callbackUrl", returnTo);
+    return NextResponse.redirect(url);
+  }
+
+  return runPublicMiddleware(request);
+}) as unknown as NextMiddleware;
+
 export default function middleware(
   request: NextRequest,
   event: NextFetchEvent,
@@ -73,7 +112,11 @@ export default function middleware(
     return NextResponse.next();
   }
 
-  // AUTH DISABLED FOR TESTING
+  // Auth JWT decode only on account/studio/admin/create — not on reading pages.
+  if (isProtectedPath(pathname)) {
+    return authGuard(request, event);
+  }
+
   return runPublicMiddleware(request);
 }
 
