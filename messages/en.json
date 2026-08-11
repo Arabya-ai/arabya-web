@@ -526,6 +526,7 @@
     "playError": "Could not play audio",
     "wbwPlaying": "Word-by-word recitation…",
     "wbwError": "Could not play word-by-word recitation",
+    "needWord": "Select an ayah or word on the page first",
     "surahResolveError": "Could not resolve surah for playback",
     "surahPlayingFrom": "Playing surah from ayah {verse}…",
     "surahConnectionError": "Could not play surah — check your connection",

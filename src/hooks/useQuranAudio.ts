@@ -5,8 +5,10 @@ import {
   ayahAudioUrl,
   getReciter,
   reciterDisplayName,
+  reciterHasWordSync,
   wordAudioUrl,
   type VerseTiming,
+  type WordTimingSegment,
 } from "@/lib/audio";
 import { apiGet } from "@/lib/api-client";
 import {
@@ -16,6 +18,12 @@ import {
 } from "@/lib/media-session";
 import type { MushafPageContent } from "@/lib/mushaf";
 import type { WordRef } from "@/hooks/mushaf-utils";
+import {
+  hardStopMedia,
+  playClipToEnd,
+  playUrlUntilEnd,
+  unlockAudioElement,
+} from "@/lib/quran-audio-playback";
 
 function uiLocale(): string {
   if (typeof document === "undefined") return "ar";
@@ -32,12 +40,26 @@ type SelectedAyah = {
   verseKey: string;
 } | null;
 
+type AyahTarget = {
+  surahId: number;
+  verseNumber: number;
+  verseKey: string;
+};
+
+type TimingsPack = {
+  audioUrl: string;
+  verses: Record<string, VerseTiming>;
+};
+
+type ExclusiveMode = "ayah" | "wbw" | "surah";
+
 export type AudioStatusKey =
   | "ayahSyncPlaying"
   | "ayahPlayingNoSync"
   | "playError"
   | "wbwPlaying"
   | "wbwError"
+  | "needWord"
   | "surahResolveError"
   | "surahPlayingFrom"
   | "surahConnectionError"
@@ -63,20 +85,6 @@ export type SurahPlayerState = {
   versesCount: number;
 };
 
-function hardStopMedia(audio: HTMLAudioElement | null) {
-  if (!audio) return;
-  try {
-    audio.pause();
-    audio.ontimeupdate = null;
-    audio.onended = null;
-    audio.onerror = null;
-    audio.removeAttribute("src");
-    audio.load();
-  } catch {
-    /* ignore */
-  }
-}
-
 const emptyPlayer: SurahPlayerState = {
   active: false,
   playing: false,
@@ -90,6 +98,48 @@ const emptyPlayer: SurahPlayerState = {
   verseIndex: 0,
   versesCount: 0,
 };
+
+function firstAyahOnPage(page: MushafPageContent): AyahTarget | null {
+  const block = page.blocks[0];
+  const verse = block?.verses[0];
+  if (!block || !verse) return null;
+  return {
+    surahId: block.surahId,
+    verseNumber: verse.verseNumber,
+    verseKey: `${block.surahId}:${verse.verseNumber}`,
+  };
+}
+
+function verseWords(
+  page: MushafPageContent,
+  surahId: number,
+  verseNumber: number,
+) {
+  const block = page.blocks.find((b) => b.surahId === surahId);
+  const verse = block?.verses.find((v) => v.verseNumber === verseNumber);
+  return (verse?.words ?? []).filter(
+    (w) => !w.charType || w.charType === "word",
+  );
+}
+
+function verseTimingAt(
+  verses: Record<string, VerseTiming>,
+  ms: number,
+): { timing: VerseTiming; segment: WordTimingSegment | null } | null {
+  for (const timing of Object.values(verses)) {
+    if (ms >= timing.timestampFrom && ms < timing.timestampTo - 40) {
+      const segment =
+        timing.segments.find((s) => ms >= s.startMs && ms < s.endMs) ?? null;
+      return { timing, segment };
+    }
+  }
+  return null;
+}
+
+function parseVerseKey(verseKey: string): { surahId: number; verse: number } {
+  const [sid, vn] = verseKey.split(":");
+  return { surahId: Number(sid), verse: Number(vn) };
+}
 
 export function useQuranAudio({
   selected,
@@ -115,27 +165,39 @@ export function useQuranAudio({
   const [surahPlaying, setSurahPlaying] = useState(false);
   const [syncHighlightPos, setSyncHighlightPos] = useState<number | null>(null);
   const [surahPlayer, setSurahPlayer] = useState<SurahPlayerState>(emptyPlayer);
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const wbwStopRef = useRef(false);
+  const sessionRef = useRef(0);
+  const modeRef = useRef<ExclusiveMode | null>(null);
   const ayahStopRef = useRef(false);
+  const wbwStopRef = useRef(false);
   const surahStopRef = useRef(false);
   const surahPausedRef = useRef(false);
   const pinnedRef = useRef(false);
   const rateRef = useRef(1);
+  const prevPageRef = useRef<number | null>(null);
+  const prevReciterRef = useRef<string | null>(null);
   const surahMetaRef = useRef<{
     surahId: number;
     versesCount: number;
     fromVerse: number;
     title: string;
   } | null>(null);
-  const timingsCacheRef = useRef<
-    Record<string, { audioUrl: string; verses: Record<string, VerseTiming> }>
+  const timingsCacheRef = useRef<Record<string, TimingsPack | null>>({});
+  const timingsInflightRef = useRef<
+    Record<string, Promise<TimingsPack | null>>
   >({});
+
   const pageNum = page.page;
+  const resolvedReciterId = getReciter(reciterId).id;
+
+  const isSessionCurrent = (session: number) => sessionRef.current === session;
 
   const stopAllAudio = () => {
-    wbwStopRef.current = true;
+    sessionRef.current += 1;
+    modeRef.current = null;
     ayahStopRef.current = true;
+    wbwStopRef.current = true;
     surahStopRef.current = true;
     surahPausedRef.current = false;
     hardStopMedia(audioRef.current);
@@ -150,6 +212,141 @@ export function useQuranAudio({
     }));
   };
 
+  const beginExclusive = (
+    mode: ExclusiveMode,
+  ): { start: boolean; session: number } => {
+    if (
+      modeRef.current === mode &&
+      (audioPlaying || wbwPlaying || surahPlaying)
+    ) {
+      stopAllAudio();
+      return { start: false, session: sessionRef.current };
+    }
+
+    const session = sessionRef.current + 1;
+    sessionRef.current = session;
+    modeRef.current = mode;
+
+    clearMediaSession();
+    hardStopMedia(audioRef.current);
+
+    if (!audioRef.current) audioRef.current = new Audio();
+    unlockAudioElement(audioRef.current);
+
+    ayahStopRef.current = mode !== "ayah";
+    wbwStopRef.current = mode !== "wbw";
+    surahStopRef.current = mode !== "surah";
+    surahPausedRef.current = false;
+
+    setAudioPlaying(mode === "ayah");
+    setWbwPlaying(mode === "wbw");
+    setSurahPlaying(mode === "surah");
+    setSyncHighlightPos(null);
+    if (mode !== "surah") {
+      setSurahPlayer(emptyPlayer);
+    }
+
+    return { start: true, session };
+  };
+
+  const resolveAyahTarget = (): AyahTarget | null => {
+    if (selected) {
+      return {
+        surahId: selected.surahId,
+        verseNumber: selected.verseNumber,
+        verseKey:
+          selected.verseKey ||
+          `${selected.surahId}:${selected.verseNumber}`,
+      };
+    }
+
+    const first = firstAyahOnPage(page);
+    if (!first) return null;
+
+    const words = verseWords(page, first.surahId, first.verseNumber);
+    if (words.length) {
+      onSelectWord(first.surahId, first.verseNumber, words[0].position);
+    }
+
+    return first;
+  };
+
+  const loadChapterTimings = async (
+    surahId: number,
+    rid: string,
+  ): Promise<TimingsPack | null> => {
+    const cacheKey = `${rid}:${surahId}`;
+    if (Object.prototype.hasOwnProperty.call(timingsCacheRef.current, cacheKey)) {
+      return timingsCacheRef.current[cacheKey];
+    }
+
+    const inflight = timingsInflightRef.current[cacheKey];
+    if (inflight) return inflight;
+
+    const reciter = getReciter(rid);
+    if (!reciter.quranComChapterReciterId) {
+      timingsCacheRef.current[cacheKey] = null;
+      return null;
+    }
+
+    const promise = (async () => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 8000);
+      try {
+        const res = await apiGet(`/api/audio-timings/${rid}/${surahId}`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) {
+          timingsCacheRef.current[cacheKey] = null;
+          return null;
+        }
+        const data = (await res.json()) as TimingsPack;
+        timingsCacheRef.current[cacheKey] = data;
+        return data;
+      } catch {
+        timingsCacheRef.current[cacheKey] = null;
+        return null;
+      } finally {
+        clearTimeout(timer);
+        delete timingsInflightRef.current[cacheKey];
+      }
+    })();
+
+    timingsInflightRef.current[cacheKey] = promise;
+    return promise;
+  };
+
+  const resolveTimings = async (
+    surahId: number,
+    rid: string,
+    waitMs = 500,
+  ): Promise<TimingsPack | null> => {
+    const cacheKey = `${rid}:${surahId}`;
+    if (Object.prototype.hasOwnProperty.call(timingsCacheRef.current, cacheKey)) {
+      return timingsCacheRef.current[cacheKey];
+    }
+
+    const loadPromise = loadChapterTimings(surahId, rid);
+    if (waitMs <= 0) return loadPromise;
+
+    const timeoutPromise = new Promise<null>((resolve) => {
+      window.setTimeout(() => resolve(null), waitMs);
+    });
+
+    return Promise.race([loadPromise, timeoutPromise]);
+  };
+
+  const mediaStopHandlers = (session: number, mode: ExclusiveMode) => ({
+    onPause: () => {
+      if (modeRef.current !== mode || !isSessionCurrent(session)) return;
+      stopAllAudio();
+    },
+    onStop: () => {
+      if (modeRef.current !== mode || !isSessionCurrent(session)) return;
+      stopAllAudio();
+    },
+  });
+
   useEffect(() => {
     return () => {
       stopAllAudio();
@@ -157,191 +354,120 @@ export function useQuranAudio({
   }, []);
 
   useEffect(() => {
-    stopAllAudio();
-  }, [pageNum, reciterId]);
+    const pageChanged =
+      prevPageRef.current !== null && prevPageRef.current !== pageNum;
+    const reciterChanged =
+      prevReciterRef.current !== null &&
+      prevReciterRef.current !== resolvedReciterId;
 
-  const loadChapterTimings = async (surahId: number, rid: string) => {
-    const cacheKey = `${rid}:${surahId}`;
-    if (timingsCacheRef.current[cacheKey]) {
-      return timingsCacheRef.current[cacheKey];
+    prevPageRef.current = pageNum;
+    prevReciterRef.current = resolvedReciterId;
+
+    if (pageChanged || reciterChanged) {
+      stopAllAudio();
     }
-    const reciter = getReciter(rid);
-    if (!reciter.quranComChapterReciterId) return null;
-    try {
-      const res = await apiGet(`/api/audio-timings/${rid}/${surahId}`);
-      if (!res.ok) return null;
-      const data = (await res.json()) as {
-        audioUrl: string;
-        verses: Record<string, VerseTiming>;
-      };
-      timingsCacheRef.current[cacheKey] = data;
-      return data;
-    } catch {
-      return null;
+  }, [pageNum, resolvedReciterId]);
+
+  useEffect(() => {
+    if (!reciterHasWordSync(resolvedReciterId)) return;
+    for (const block of page.blocks) {
+      void loadChapterTimings(block.surahId, resolvedReciterId);
     }
-  };
+  }, [pageNum, resolvedReciterId, page.blocks]);
 
   const playAyahAudio = async () => {
-    if (!selected) return;
-    if (audioPlaying || wbwPlaying || surahPlaying) {
+    const { start, session } = beginExclusive("ayah");
+    if (!start) return;
+
+    const target = resolveAyahTarget();
+    if (!target) {
       stopAllAudio();
       return;
     }
 
-    ayahStopRef.current = false;
-    wbwStopRef.current = true;
-    surahStopRef.current = true;
-    setWbwPlaying(false);
-    setSurahPlaying(false);
-    setSurahPlayer(emptyPlayer);
-    setAudioPlaying(true);
-    if (!audioRef.current) audioRef.current = new Audio();
-    const audio = audioRef.current;
+    const audio = audioRef.current!;
     const times = Math.max(1, Math.min(10, repeatCount));
+
     setMediaSessionPlaying(
       {
-        title: tAudio("mediaSessionAyah", {
-          verseKey: selected.verseKey || `${selected.surahId}:${selected.verseNumber}`,
-        }),
-        artist: reciterArtist(reciterId),
+        title: tAudio("mediaSessionAyah", { verseKey: target.verseKey }),
+        artist: reciterArtist(resolvedReciterId),
       },
-      {
-        onPause: () => stopAllAudio(),
-        onStop: () => stopAllAudio(),
-      },
+      mediaStopHandlers(session, "ayah"),
     );
 
-    const pack = await loadChapterTimings(selected.surahId, reciterId);
-    if (ayahStopRef.current) {
+    const pack = await resolveTimings(target.surahId, resolvedReciterId);
+    if (!isSessionCurrent(session) || ayahStopRef.current) {
       setAudioPlaying(false);
       clearMediaSession();
       return;
     }
-    const verseKey =
-      selected.verseKey || `${selected.surahId}:${selected.verseNumber}`;
-    const verseTiming = pack?.verses[verseKey];
+
+    const verseTiming = pack?.verses[target.verseKey];
     const useSync = Boolean(pack?.audioUrl && verseTiming);
 
     let failed = false;
     try {
-      onStatusNote(
-        useSync ? "ayahSyncPlaying" : "ayahPlayingNoSync",
-      );
+      onStatusNote(useSync ? "ayahSyncPlaying" : "ayahPlayingNoSync");
 
       for (let i = 0; i < times; i++) {
-        if (ayahStopRef.current) break;
+        if (ayahStopRef.current || !isSessionCurrent(session)) break;
 
         if (useSync && pack && verseTiming) {
-          const syncOk = await new Promise<boolean>((resolve) => {
-            let settled = false;
-            const finish = (ok: boolean) => {
-              if (settled) return;
-              settled = true;
-              audio.removeEventListener("timeupdate", onTime);
-              audio.removeEventListener("ended", onEnded);
-              audio.removeEventListener("error", onError);
-              audio.removeEventListener("loadedmetadata", onMeta);
-              setSyncHighlightPos(null);
-              resolve(ok);
-            };
-            const onTime = () => {
-              if (ayahStopRef.current) {
-                audio.pause();
-                finish(true);
-                return;
-              }
-              const ms = audio.currentTime * 1000;
-              if (ms >= verseTiming.timestampTo - 40) {
-                audio.pause();
-                finish(true);
-                return;
-              }
+          const result = await playClipToEnd(audio, pack.audioUrl, {
+            shouldStop: () =>
+              ayahStopRef.current || !isSessionCurrent(session),
+            startAtSec: verseTiming.timestampFrom / 1000,
+            stopAtSec: verseTiming.timestampTo / 1000,
+            session,
+            isCurrent: isSessionCurrent,
+            onTime: (currentTime) => {
+              const ms = currentTime * 1000;
               const seg = verseTiming.segments.find(
                 (s) => ms >= s.startMs && ms < s.endMs,
               );
               if (seg) {
                 setSyncHighlightPos(seg.position);
                 onHighlightWord({
-                  surahId: selected.surahId,
-                  verse: selected.verseNumber,
+                  surahId: target.surahId,
+                  verse: target.verseNumber,
                   position: seg.position,
                 });
               }
-            };
-            const onEnded = () => finish(true);
-            const onError = () => finish(false);
-            const onMeta = () => {
-              try {
-                audio.currentTime = Math.max(
-                  0,
-                  verseTiming.timestampFrom / 1000,
-                );
-              } catch {
-                /* ignore */
-              }
-              void audio.play().catch(() => finish(false));
-            };
-            audio.addEventListener("timeupdate", onTime);
-            audio.addEventListener("ended", onEnded);
-            audio.addEventListener("error", onError);
-            audio.addEventListener("loadedmetadata", onMeta, { once: true });
-            audio.src = pack.audioUrl;
-            audio.load();
+            },
           });
 
-          if (!syncOk && !ayahStopRef.current) {
-            const url = ayahAudioUrl(
-              selected.surahId,
-              selected.verseNumber,
-              reciterId,
+          if (
+            result === "error" &&
+            !ayahStopRef.current &&
+            isSessionCurrent(session)
+          ) {
+            await playUrlUntilEnd(
+              audio,
+              ayahAudioUrl(
+                target.surahId,
+                target.verseNumber,
+                resolvedReciterId,
+              ),
+              () => ayahStopRef.current || !isSessionCurrent(session),
+              1,
+              session,
+              isSessionCurrent,
             );
-            await new Promise<void>((resolve) => {
-              const onEnded = () => {
-                audio.removeEventListener("ended", onEnded);
-                audio.removeEventListener("error", onError);
-                resolve();
-              };
-              const onError = () => {
-                audio.removeEventListener("ended", onEnded);
-                audio.removeEventListener("error", onError);
-                resolve();
-              };
-              audio.addEventListener("ended", onEnded);
-              audio.addEventListener("error", onError);
-              audio.src = url;
-              void audio.play().catch(() => {
-                audio.removeEventListener("ended", onEnded);
-                audio.removeEventListener("error", onError);
-                resolve();
-              });
-            });
           }
         } else {
-          const url = ayahAudioUrl(
-            selected.surahId,
-            selected.verseNumber,
-            reciterId,
+          await playUrlUntilEnd(
+            audio,
+            ayahAudioUrl(
+              target.surahId,
+              target.verseNumber,
+              resolvedReciterId,
+            ),
+            () => ayahStopRef.current || !isSessionCurrent(session),
+            1,
+            session,
+            isSessionCurrent,
           );
-          await new Promise<void>((resolve) => {
-            const onEnded = () => {
-              audio.removeEventListener("ended", onEnded);
-              audio.removeEventListener("error", onError);
-              resolve();
-            };
-            const onError = () => {
-              audio.removeEventListener("ended", onEnded);
-              audio.removeEventListener("error", onError);
-              resolve();
-            };
-            audio.addEventListener("ended", onEnded);
-            audio.addEventListener("error", onError);
-            audio.src = url;
-            void audio.play().catch(() => {
-              audio.removeEventListener("ended", onEnded);
-              audio.removeEventListener("error", onError);
-              resolve();
-            });
-          });
         }
       }
     } catch {
@@ -351,81 +477,56 @@ export function useQuranAudio({
       setAudioPlaying(false);
       setSyncHighlightPos(null);
       clearMediaSession();
-      if (!ayahStopRef.current && !failed) onStatusNote(null);
+      if (!ayahStopRef.current && !failed && isSessionCurrent(session)) {
+        onStatusNote(null);
+      }
     }
   };
 
   const playWordByWordAudio = async () => {
-    if (!selected) return;
-    if (wbwPlaying || audioPlaying || surahPlaying) {
+    const { start, session } = beginExclusive("wbw");
+    if (!start) return;
+
+    const target = resolveAyahTarget();
+    if (!target) {
       stopAllAudio();
       return;
     }
 
-    const block = page.blocks.find((b) => b.surahId === selected.surahId);
-    const verse = block?.verses.find(
-      (v) => v.verseNumber === selected.verseNumber,
-    );
-    const words = (verse?.words ?? []).filter(
-      (w) => !w.charType || w.charType === "word",
-    );
-    if (!words.length) return;
+    const words = verseWords(page, target.surahId, target.verseNumber);
+    if (!words.length) {
+      onStatusNote("needWord", undefined, 2200);
+      stopAllAudio();
+      return;
+    }
 
-    wbwStopRef.current = false;
-    ayahStopRef.current = true;
-    surahStopRef.current = true;
-    setWbwPlaying(true);
-    setAudioPlaying(false);
-    setSurahPlaying(false);
-    setSurahPlayer(emptyPlayer);
-    onStatusNote("wbwPlaying");
-    if (!audioRef.current) audioRef.current = new Audio();
-    const audio = audioRef.current;
+    const audio = audioRef.current!;
     const times = Math.max(1, Math.min(10, repeatCount));
+
+    onStatusNote("wbwPlaying");
     setMediaSessionPlaying(
       {
-        title: tAudio("mediaSessionWbw", { verseKey: selected.verseKey }),
-        artist: reciterArtist(reciterId),
+        title: tAudio("mediaSessionWbw", { verseKey: target.verseKey }),
+        artist: reciterArtist(resolvedReciterId),
       },
-      {
-        onPause: () => stopAllAudio(),
-        onStop: () => stopAllAudio(),
-      },
+      mediaStopHandlers(session, "wbw"),
     );
 
     let failed = false;
     try {
       for (let round = 0; round < times; round++) {
-        if (wbwStopRef.current) break;
+        if (wbwStopRef.current || !isSessionCurrent(session)) break;
         for (const word of words) {
-          if (wbwStopRef.current) break;
-          onSelectWord(selected.surahId, selected.verseNumber, word.position);
-          const url = wordAudioUrl(
-            selected.surahId,
-            selected.verseNumber,
-            word.position,
+          if (wbwStopRef.current || !isSessionCurrent(session)) break;
+          onSelectWord(target.surahId, target.verseNumber, word.position);
+          await playUrlUntilEnd(
+            audio,
+            wordAudioUrl(target.surahId, target.verseNumber, word.position),
+            () => wbwStopRef.current || !isSessionCurrent(session),
+            1,
+            session,
+            isSessionCurrent,
           );
-          await new Promise<void>((resolve) => {
-            const onEnded = () => {
-              cleanup();
-              resolve();
-            };
-            const onError = () => {
-              cleanup();
-              resolve();
-            };
-            const cleanup = () => {
-              audio.removeEventListener("ended", onEnded);
-              audio.removeEventListener("error", onError);
-            };
-            audio.addEventListener("ended", onEnded);
-            audio.addEventListener("error", onError);
-            audio.src = url;
-            audio.play().catch(() => {
-              cleanup();
-              resolve();
-            });
-          });
         }
       }
     } catch {
@@ -434,7 +535,7 @@ export function useQuranAudio({
     } finally {
       setWbwPlaying(false);
       clearMediaSession();
-      if (!wbwStopRef.current && !failed) {
+      if (!wbwStopRef.current && !failed && isSessionCurrent(session)) {
         onStatusNote(null);
       }
     }
@@ -450,26 +551,21 @@ export function useQuranAudio({
       onStatusNote("surahResolveError", undefined, 2200);
       return;
     }
-    if (surahPlaying || audioPlaying || wbwPlaying) {
-      stopAllAudio();
-      return;
-    }
 
-    surahStopRef.current = false;
-    surahPausedRef.current = false;
-    ayahStopRef.current = true;
-    wbwStopRef.current = true;
-    setSurahPlaying(true);
-    setAudioPlaying(false);
-    setWbwPlaying(false);
-    setSyncHighlightPos(null);
+    const { start, session } = beginExclusive("surah");
+    if (!start) return;
 
-    if (!audioRef.current) audioRef.current = new Audio();
-    const audio = audioRef.current;
-    const start = Math.max(1, Math.min(fromVerse, versesCount));
+    const audio = audioRef.current!;
+    const startVerse = Math.max(1, Math.min(fromVerse, versesCount));
     const times = Math.max(1, Math.min(10, repeatCount));
     const label = title || tAudio("surahFallbackLabel", { surahId });
-    surahMetaRef.current = { surahId, versesCount, fromVerse: start, title: label };
+
+    surahMetaRef.current = {
+      surahId,
+      versesCount,
+      fromVerse: startVerse,
+      title: label,
+    };
 
     setSurahPlayer({
       active: true,
@@ -481,38 +577,43 @@ export function useQuranAudio({
       duration: 0,
       playbackRate: rateRef.current,
       mode: "verses",
-      verseIndex: start,
+      verseIndex: startVerse,
       versesCount,
     });
 
-    onStatusNote("surahPlayingFrom", { verse: start });
+    onStatusNote("surahPlayingFrom", { verse: startVerse });
     setMediaSessionPlaying(
       {
         title: label,
-        artist: reciterArtist(reciterId),
+        artist: reciterArtist(resolvedReciterId),
       },
       {
         onPlay: () => {
+          if (modeRef.current !== "surah" || !isSessionCurrent(session)) return;
           surahPausedRef.current = false;
           void audioRef.current?.play().catch(() => undefined);
           setSurahPlayer((p) => ({ ...p, playing: true }));
           setMediaSessionPlaying({
             title: label,
-            artist: reciterArtist(reciterId),
+            artist: reciterArtist(resolvedReciterId),
           });
         },
         onPause: () => {
+          if (modeRef.current !== "surah" || !isSessionCurrent(session)) return;
           surahPausedRef.current = true;
           audioRef.current?.pause();
           setSurahPlayer((p) => ({ ...p, playing: false }));
           setMediaSessionPaused();
         },
-        onStop: () => stopAllAudio(),
+        onStop: () => {
+          if (modeRef.current !== "surah" || !isSessionCurrent(session)) return;
+          stopAllAudio();
+        },
       },
     );
 
-    const pack = await loadChapterTimings(surahId, reciterId);
-    if (surahStopRef.current) {
+    const pack = await resolveTimings(surahId, resolvedReciterId);
+    if (!isSessionCurrent(session) || surahStopRef.current) {
       setSurahPlaying(false);
       clearMediaSession();
       return;
@@ -527,66 +628,61 @@ export function useQuranAudio({
       }
     };
 
+    const shouldStopSurah = () =>
+      surahStopRef.current || !isSessionCurrent(session);
+
     try {
       if (pack?.audioUrl) {
-        setSurahPlayer((p) => ({ ...p, mode: "chapter", active: true, playing: true }));
-        for (let round = 0; round < times; round++) {
-          if (surahStopRef.current) break;
-          await waitWhilePaused();
-          if (surahStopRef.current) break;
+        setSurahPlayer((p) => ({
+          ...p,
+          mode: "chapter",
+          active: true,
+          playing: true,
+        }));
 
-          const ok = await new Promise<boolean>((resolve) => {
-            let settled = false;
-            const finish = (v: boolean) => {
-              if (settled) return;
-              settled = true;
-              audio.removeEventListener("timeupdate", onTime);
-              audio.removeEventListener("ended", onEnded);
-              audio.removeEventListener("error", onError);
-              audio.removeEventListener("loadedmetadata", onMeta);
-              resolve(v);
-            };
-            const onTime = () => {
-              if (surahStopRef.current) {
-                audio.pause();
-                finish(true);
-                return;
+        for (let round = 0; round < times; round++) {
+          if (shouldStopSurah()) break;
+          await waitWhilePaused();
+          if (shouldStopSurah()) break;
+
+          const fromKey = `${surahId}:${startVerse}`;
+          const startTiming = pack.verses[fromKey];
+          const startAtSec = startTiming
+            ? startTiming.timestampFrom / 1000
+            : undefined;
+
+          const result = await playClipToEnd(audio, pack.audioUrl, {
+            shouldStop: shouldStopSurah,
+            playbackRate: rateRef.current,
+            startAtSec,
+            session,
+            isCurrent: isSessionCurrent,
+            onTime: (currentTime, duration) => {
+              const ms = currentTime * 1000;
+              const hit = verseTimingAt(pack.verses, ms);
+              if (hit?.segment) {
+                const { surahId: sid, verse } = parseVerseKey(hit.timing.verseKey);
+                setSyncHighlightPos(hit.segment.position);
+                onHighlightWord({
+                  surahId: sid,
+                  verse,
+                  position: hit.segment.position,
+                });
+                setSurahPlayer((p) => ({
+                  ...p,
+                  verseIndex: verse,
+                }));
               }
               setSurahPlayer((p) => ({
                 ...p,
-                currentTime: audio.currentTime,
-                duration: Number.isFinite(audio.duration) ? audio.duration : p.duration,
+                currentTime,
+                duration: Number.isFinite(duration) ? duration : p.duration,
                 playing: !audio.paused,
               }));
-            };
-            const onEnded = () => finish(true);
-            const onError = () => finish(false);
-            const onMeta = () => {
-              const fromKey = `${surahId}:${start}`;
-              const timing = pack.verses[fromKey];
-              if (timing) {
-                try {
-                  audio.currentTime = Math.max(0, timing.timestampFrom / 1000);
-                } catch {
-                  /* ignore */
-                }
-              }
-              setSurahPlayer((p) => ({
-                ...p,
-                duration: Number.isFinite(audio.duration) ? audio.duration : 0,
-              }));
-              void audio.play().catch(() => finish(false));
-            };
-            audio.playbackRate = rateRef.current;
-            audio.addEventListener("timeupdate", onTime);
-            audio.addEventListener("ended", onEnded);
-            audio.addEventListener("error", onError);
-            audio.addEventListener("loadedmetadata", onMeta, { once: true });
-            audio.src = pack.audioUrl;
-            audio.load();
+            },
           });
 
-          if (!ok) {
+          if (result === "error") {
             failed = !playedAny;
             break;
           }
@@ -594,11 +690,11 @@ export function useQuranAudio({
         }
       } else {
         for (let round = 0; round < times; round++) {
-          if (surahStopRef.current) break;
-          for (let v = start; v <= versesCount; v++) {
-            if (surahStopRef.current) break;
+          if (shouldStopSurah()) break;
+          for (let v = startVerse; v <= versesCount; v++) {
+            if (shouldStopSurah()) break;
             await waitWhilePaused();
-            if (surahStopRef.current) break;
+            if (shouldStopSurah()) break;
 
             setSurahPlayer((p) => ({
               ...p,
@@ -608,40 +704,23 @@ export function useQuranAudio({
               active: true,
             }));
 
-            const url = ayahAudioUrl(surahId, v, reciterId);
-            const ok = await new Promise<boolean>((resolve) => {
-              const onEnded = () => {
-                cleanup();
-                resolve(true);
-              };
-              const onError = () => {
-                cleanup();
-                resolve(false);
-              };
-              const onTime = () => {
-                setSurahPlayer((p) => ({
-                  ...p,
-                  currentTime: audio.currentTime,
-                  duration: Number.isFinite(audio.duration) ? audio.duration : 0,
-                  playing: !audio.paused,
-                }));
-              };
-              const cleanup = () => {
-                audio.removeEventListener("ended", onEnded);
-                audio.removeEventListener("error", onError);
-                audio.removeEventListener("timeupdate", onTime);
-              };
-              audio.addEventListener("ended", onEnded);
-              audio.addEventListener("error", onError);
-              audio.addEventListener("timeupdate", onTime);
-              audio.playbackRate = rateRef.current;
-              audio.src = url;
-              audio.play().catch(() => {
-                cleanup();
-                resolve(false);
-              });
-            });
-            if (!ok) {
+            const result = await playUrlUntilEnd(
+              audio,
+              ayahAudioUrl(surahId, v, resolvedReciterId),
+              shouldStopSurah,
+              rateRef.current,
+              session,
+              isSessionCurrent,
+            );
+
+            setSurahPlayer((p) => ({
+              ...p,
+              currentTime: audio.currentTime,
+              duration: Number.isFinite(audio.duration) ? audio.duration : 0,
+              playing: !audio.paused,
+            }));
+
+            if (result === "error") {
               if (!playedAny) {
                 failed = true;
                 onStatusNote("surahConnectionError", undefined, 2500);
@@ -658,6 +737,7 @@ export function useQuranAudio({
       onStatusNote("surahPlayError", undefined, 2000);
     } finally {
       setSurahPlaying(false);
+      setSyncHighlightPos(null);
       setSurahPlayer((p) =>
         p.pinned || pinnedRef.current
           ? { ...p, playing: false, active: true }
@@ -668,7 +748,9 @@ export function useQuranAudio({
       } else {
         setMediaSessionPaused();
       }
-      if (!surahStopRef.current && !failed) onStatusNote(null);
+      if (!surahStopRef.current && !failed && isSessionCurrent(session)) {
+        onStatusNote(null);
+      }
       if (failed && !playedAny) {
         clearMediaSession();
         setSurahPlayer(emptyPlayer);
@@ -702,7 +784,7 @@ export function useQuranAudio({
     const meta = surahMetaRef.current;
     setMediaSessionPlaying({
       title: meta?.title || tAudio("mediaSessionSurahFallback"),
-      artist: reciterArtist(reciterId),
+      artist: reciterArtist(resolvedReciterId),
     });
   };
 
