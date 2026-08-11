@@ -533,7 +533,17 @@ html[data-theme="dark"] .arabya-mark-icon {
 
 .studio-live-preview__frame {
   display: flex;
-  flex-shrink: 0;
+  flex-shrink: 1;
+}
+
+@media (min-width: 1024px) {
+  .studio-live-preview {
+    overflow: hidden;
+  }
+
+  .studio-live-preview__stage {
+    overflow: hidden;
+  }
 }
 
 .studio-live-preview__media img,

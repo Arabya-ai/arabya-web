@@ -1452,20 +1452,19 @@ export default function Editor() {
         </div>
       </div>
 
-      <div className="studio-live-preview relative order-2 flex w-full shrink-0 flex-col items-center justify-center overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] p-4 shadow-deep sm:p-5 lg:order-2 lg:h-full lg:max-h-none lg:min-h-0 lg:flex-1 lg:p-6">
+      <div className="studio-live-preview relative order-2 flex w-full flex-col items-center overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] p-4 shadow-deep sm:p-5 lg:order-2 lg:h-full lg:min-h-0 lg:flex-1 lg:p-5">
         <div className="pattern-mihrab pointer-events-none absolute inset-0 overflow-hidden rounded-2xl opacity-20" />
-        <div className="relative z-[1] mb-2 shrink-0 text-center text-[11px] tracking-widest uppercase text-accent/80 sm:mb-3 sm:text-xs">
+        <div className="relative z-[1] mb-2 shrink-0 text-center text-[11px] tracking-widest uppercase text-accent/80 sm:text-xs">
           معاينة مباشرة
         </div>
-        <div className="studio-live-preview__stage relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center p-2 pb-3 sm:pb-4">
+        <div className="studio-live-preview__stage relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center">
           <div
             ref={previewFrameRef}
             className={`${previewAspect} studio-live-preview__frame relative flex flex-col overflow-hidden rounded-2xl border border-primary/35 shadow-deep`}
             style={{
-              /* Shrink width when height caps so the whole frame (media) stays on screen */
-              width: `min(36rem, 100%, calc(100% * ${previewAr}))`,
+              width: "auto",
               maxWidth: "100%",
-              height: "auto",
+              height: "100%",
               maxHeight: "100%",
               aspectRatio: `${previewRatioMeta.width} / ${previewRatioMeta.height}`,
               background:
@@ -1702,15 +1701,17 @@ export default function Editor() {
           )}
 
         </div>
-        <AudioPreviewPlayer
-          project={project}
-          controlsDock="below"
-          onAyahIndexChange={(idx) =>
-            setPreviewAyahIndex(
-              clampAyahPreviewIndex(idx, previewAyahs.length),
-            )
-          }
-        />
+        <div className="relative z-[1] w-full shrink-0">
+          <AudioPreviewPlayer
+            project={project}
+            controlsDock="below"
+            onAyahIndexChange={(idx) =>
+              setPreviewAyahIndex(
+                clampAyahPreviewIndex(idx, previewAyahs.length),
+              )
+            }
+          />
+        </div>
         </div>
       </div>
     </div>
