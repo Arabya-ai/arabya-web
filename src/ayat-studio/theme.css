@@ -112,6 +112,28 @@ html[data-theme="dark"] .ayat-studio-portal {
   color: hsl(var(--foreground));
 }
 
+/* Opaque select menus — no bleed-through on mobile */
+.ayat-studio-portal.studio-select-content,
+.ayat-studio-portal .studio-select-content {
+  background-color: hsl(var(--popover)) !important;
+  color: hsl(var(--popover-foreground));
+}
+
+@media (max-width: 1023px) {
+  .studio-editor {
+    gap: 1rem;
+  }
+
+  .studio-editor-controls,
+  .studio-live-preview {
+    backdrop-filter: none !important;
+  }
+
+  .studio-editor-controls .rounded-lg.border {
+    background-color: hsl(var(--background)) !important;
+  }
+}
+
 /* Professional brand mark used instead of star medallions */
 .arabya-mark-icon {
   border-radius: 22%;

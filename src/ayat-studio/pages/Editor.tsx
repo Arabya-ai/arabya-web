@@ -750,8 +750,8 @@ export default function Editor() {
         @keyframes studio-kenburns { from { transform: scale(1) } to { transform: scale(1.06) } }
       `}</style>
 
-      <div className="studio-editor-controls order-2 flex min-h-[min(44dvh,26rem)] w-full min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border/70 bg-card/70 shadow-deep backdrop-blur-md lg:order-1 lg:h-full lg:min-h-0 lg:w-[min(100%,21rem)] lg:flex-none lg:min-w-[17rem] xl:w-[min(100%,22rem)] 2xl:w-96">
-        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border/60 bg-gradient-to-l from-primary/5 to-transparent px-3 py-3 sm:px-4 sm:py-4">
+      <div className="studio-editor-controls order-1 flex min-h-[min(44dvh,26rem)] w-full min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] shadow-deep lg:order-1 lg:h-full lg:min-h-0 lg:w-[min(100%,21rem)] lg:flex-none lg:min-w-[17rem] xl:w-[min(100%,22rem)] 2xl:w-96">
+        <div className="relative z-10 flex shrink-0 items-center justify-between gap-2 border-b border-border/60 bg-[hsl(var(--card))] px-3 py-3 sm:px-4 sm:py-4">
           <div className="min-w-0 flex-1">
             <p className="text-[11px] tracking-widest uppercase text-accent/80 sm:text-xs">
               المشروع
@@ -770,14 +770,14 @@ export default function Editor() {
             <Save className="h-4 w-4" />
           </button>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div className="relative z-0 min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[hsl(var(--card))]">
           <EditorPanel title="القارئ والسورة" icon={BookOpen} defaultOpen>
             <div className="space-y-3">
             <Select
               value={project.reciterId}
               onValueChange={(v) => update({ reciterId: v })}
             >
-              <SelectTrigger className="bg-background/50 border-accent/20">
+              <SelectTrigger className="border-accent/20">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="max-h-72">
@@ -801,7 +801,7 @@ export default function Editor() {
                 update({ surahId: sid, ayahStart: start, ayahEnd: end });
               }}
             >
-              <SelectTrigger className="bg-background/50 border-accent/20">
+              <SelectTrigger className="border-accent/20">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="max-h-72">
@@ -824,7 +824,7 @@ export default function Editor() {
                     update({ ayahStart: s, ayahEnd: end });
                   }}
                   max={selectedSurah?.ayahCount}
-                  className="bg-background/50 border-accent/20 text-center"
+                  className="border-accent/20 bg-[hsl(var(--background))] text-center"
                 />
               </div>
               <div>
@@ -838,7 +838,7 @@ export default function Editor() {
                     update({ ayahStart: start, ayahEnd: e2 });
                   }}
                   max={selectedSurah?.ayahCount}
-                  className="bg-background/50 border-accent/20 text-center"
+                  className="border-accent/20 bg-[hsl(var(--background))] text-center"
                 />
               </div>
             </div>
@@ -875,7 +875,7 @@ export default function Editor() {
                   update({ transition: v as StoredProject["transition"] })
                 }
               >
-                <SelectTrigger className="bg-background/50 border-accent/20">
+                <SelectTrigger className="border-accent/20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -899,7 +899,7 @@ export default function Editor() {
                 step={1}
               />
             </div>
-            <div className="space-y-2.5 rounded-lg border border-accent/15 bg-background/30 p-3">
+            <div className="space-y-2.5 rounded-lg border border-accent/15 bg-[hsl(var(--background))] p-3">
               <p className="text-[11px] font-medium text-accent">شريط انتقال الآيات</p>
               <StudioToggleRow
                 label="عرض آيات فقط"
@@ -993,7 +993,7 @@ export default function Editor() {
               checked={project.softVignette ?? true}
               onCheckedChange={(v) => update({ softVignette: v })}
             />
-            <div className="space-y-3 rounded-lg border border-accent/15 bg-background/30 p-3">
+            <div className="space-y-3 rounded-lg border border-accent/15 bg-[hsl(var(--background))] p-3">
               <Label className="text-xs text-accent">اسم القارئ</Label>
               <Select
                 value={normalizeReciterPosition(project.reciterPosition)}
@@ -1001,7 +1001,7 @@ export default function Editor() {
                   update({ reciterPosition: v as ReciterPosition })
                 }
               >
-                <SelectTrigger className="bg-background/50 border-accent/20">
+                <SelectTrigger className="border-accent/20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1013,7 +1013,7 @@ export default function Editor() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-3 rounded-lg border border-accent/15 bg-background/30 p-3">
+            <div className="space-y-3 rounded-lg border border-accent/15 bg-[hsl(var(--background))] p-3">
               <Label className="text-xs text-accent">شريط التقدم داخل الإطار</Label>
               <Select
                 value={normalizeProgressBarStyle(project.progressBarStyle)}
@@ -1021,7 +1021,7 @@ export default function Editor() {
                   update({ progressBarStyle: v as ProgressBarStyle })
                 }
               >
-                <SelectTrigger className="bg-background/50 border-accent/20">
+                <SelectTrigger className="border-accent/20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1054,7 +1054,7 @@ export default function Editor() {
                   update({ visualizer: v as StoredProject["visualizer"] })
                 }
               >
-                <SelectTrigger className="bg-background/50 border-accent/20">
+                <SelectTrigger className="border-accent/20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1099,7 +1099,7 @@ export default function Editor() {
                   value={project.translationSlug || "saheeh-en"}
                   onValueChange={(v) => update({ translationSlug: v })}
                 >
-                  <SelectTrigger className="bg-background/50 border-accent/20">
+                  <SelectTrigger className="border-accent/20">
                     <SelectValue placeholder="اختر ترجمة" />
                   </SelectTrigger>
                   <SelectContent className="max-h-72">
@@ -1122,7 +1122,7 @@ export default function Editor() {
                     value={translationText}
                     onChange={(e) => setOverride("translation", e.target.value)}
                     rows={3}
-                    className="bg-background/50 border-accent/20 text-sm"
+                    className="border-accent/20 bg-[hsl(var(--background))] text-sm"
                     placeholder={
                       layersLoading ? "جاري التحميل…" : "نص الترجمة…"
                     }
@@ -1143,7 +1143,7 @@ export default function Editor() {
                   value={project.tafsirSlug || "muyassar"}
                   onValueChange={(v) => update({ tafsirSlug: v })}
                 >
-                  <SelectTrigger className="bg-background/50 border-accent/20">
+                  <SelectTrigger className="border-accent/20">
                     <SelectValue placeholder="اختر تفسيرًا" />
                   </SelectTrigger>
                   <SelectContent className="max-h-72">
@@ -1165,7 +1165,7 @@ export default function Editor() {
                     value={tafsirText}
                     onChange={(e) => setOverride("tafsir", e.target.value)}
                     rows={4}
-                    className="bg-background/50 border-accent/20 text-sm"
+                    className="border-accent/20 bg-[hsl(var(--background))] text-sm"
                     placeholder={
                       layersLoading ? "جاري التحميل…" : "نص التفسير…"
                     }
@@ -1217,7 +1217,7 @@ export default function Editor() {
                   value={normalizeSurahLabelFont(project.surahLabelFontFamily)}
                   onValueChange={(v) => update({ surahLabelFontFamily: v })}
                 >
-                  <SelectTrigger className="bg-background/50 border-accent/20">
+                  <SelectTrigger className="border-accent/20">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -1297,7 +1297,7 @@ export default function Editor() {
                   })
                 }
               >
-                <SelectTrigger className="bg-background/50 border-accent/20">
+                <SelectTrigger className="border-accent/20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1376,7 +1376,7 @@ export default function Editor() {
                 value={project.ratio}
                 onValueChange={(v) => update({ ratio: v })}
               >
-                <SelectTrigger className="bg-background/50 border-accent/20">
+                <SelectTrigger className="border-accent/20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="max-h-80">
@@ -1396,7 +1396,7 @@ export default function Editor() {
                   update({ quality: v as StoredProject["quality"] })
                 }
               >
-                <SelectTrigger className="bg-background/50 border-accent/20">
+                <SelectTrigger className="border-accent/20">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1467,7 +1467,7 @@ export default function Editor() {
         </div>
       </div>
 
-      <div className="studio-live-preview relative order-1 flex max-h-[min(48dvh,28rem)] w-full shrink-0 flex-col items-center justify-center overflow-hidden rounded-2xl border border-border/70 bg-card/40 p-3 backdrop-blur-md sm:max-h-[min(52dvh,32rem)] sm:p-4 lg:order-2 lg:h-full lg:max-h-none lg:min-h-0 lg:flex-1 lg:overflow-visible lg:p-5">
+      <div className="studio-live-preview relative order-2 flex max-h-[min(42dvh,24rem)] w-full shrink-0 flex-col items-center justify-center overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] p-3 shadow-deep sm:max-h-[min(46dvh,28rem)] sm:p-4 lg:order-2 lg:h-full lg:max-h-none lg:min-h-0 lg:flex-1 lg:p-5">
         <div className="pattern-mihrab pointer-events-none absolute inset-0 overflow-hidden rounded-2xl opacity-20" />
         <div className="relative z-[1] mb-2 shrink-0 text-center text-[11px] tracking-widest uppercase text-accent/80 sm:mb-3 sm:text-xs">
           معاينة مباشرة
