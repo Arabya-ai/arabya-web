@@ -39,9 +39,8 @@ export default function Dashboard() {
   return (
     <div className="space-y-10">
       {/* Hero header */}
-      <div className="relative overflow-hidden rounded-3xl glass-panel border-gold p-8 md:p-10">
-        <div className="pattern-mihrab absolute inset-0 opacity-30" />
-        <div className="aurora-orb h-64 w-64 -top-20 -left-20" style={{ background: "hsl(41 75% 50% / 0.3)" }} />
+      <div className="relative overflow-hidden rounded-3xl border border-accent/20 bg-[hsl(var(--card))] p-8 shadow-deep md:p-10">
+        <div className="pattern-mihrab pointer-events-none absolute inset-0 opacity-15" aria-hidden />
         <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/5 px-3 py-1 text-xs text-accent">
