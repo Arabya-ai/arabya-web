@@ -129,8 +129,35 @@ html[data-theme="dark"] .ayat-studio-portal {
     backdrop-filter: none !important;
   }
 
+  .studio-editor-controls {
+    isolation: isolate;
+    position: relative;
+    z-index: 2;
+  }
+
+  .studio-live-preview {
+    isolation: isolate;
+    position: relative;
+    z-index: 1;
+  }
+
   .studio-editor-controls .rounded-lg.border {
     background-color: hsl(var(--background)) !important;
+  }
+
+  .studio-editor-controls .studio-native-select {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground));
+  }
+
+  .studio-live-preview__stage {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .studio-live-preview__frame {
+    max-height: min(38dvh, 20rem) !important;
   }
 }
 
@@ -533,24 +560,6 @@ html[data-theme="dark"] .arabya-mark-icon {
   min-width: 0;
   flex: 1;
   text-align: start;
-}
-
-@media (max-width: 1023px) {
-  .studio-editor {
-    gap: 1rem;
-  }
-
-  .studio-editor-controls {
-    max-height: none !important;
-  }
-
-  .studio-live-preview {
-    flex-shrink: 0;
-  }
-
-  .studio-live-preview__frame {
-    max-height: 100%;
-  }
 }
 
 @media (max-height: 520px) and (orientation: landscape) {

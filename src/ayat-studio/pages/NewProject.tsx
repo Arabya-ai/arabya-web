@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/ayat-studio/components/ui/card";
 import { Input } from "@/ayat-studio/components/ui/input";
 import { Label } from "@/ayat-studio/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ayat-studio/components/ui/select";
+import { StudioFieldSelect } from "@/ayat-studio/components/StudioFieldSelect";
 import { useRouter } from "@/i18n/navigation";
 import { studioPath } from "@/ayat-studio/lib/studio-paths";
 import { useEffect, useRef, useState } from "react";
@@ -150,7 +151,7 @@ export default function NewProject() {
         <p className="mt-2 text-sm text-muted-foreground">حدد التلاوة والمقاس، والباقي علينا</p>
       </div>
 
-      <Card className={`relative overflow-visible border-accent/20 bg-card/50 backdrop-blur-sm shadow-deep${bootstrapping ? " hidden" : ""}`}>
+      <Card className={`relative overflow-hidden border-accent/20 bg-[hsl(var(--card))] shadow-deep${bootstrapping ? " hidden" : ""}`}>
         <div className="pattern-stars pointer-events-none absolute inset-0 opacity-20" aria-hidden />
         <CardContent className="relative z-10 space-y-6 p-6 md:p-8">
           {/* Title */}
@@ -175,14 +176,16 @@ export default function NewProject() {
                 <Mic2 className="h-3.5 w-3.5" />
                 القارئ
               </Label>
-              <Select value={reciterId} onValueChange={setReciterId}>
-                <SelectTrigger className="h-12 bg-background/50 border-accent/20"><SelectValue placeholder="اختر القارئ" /></SelectTrigger>
-                <SelectContent>
-                  {reciters.map((r) => (
-                    <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <StudioFieldSelect
+                aria-label="القارئ"
+                value={reciterId}
+                onValueChange={setReciterId}
+                triggerClassName="h-12 border-accent/20"
+                options={reciters.map((r) => ({
+                  value: r.id,
+                  label: r.name,
+                }))}
+              />
             </div>
 
             {/* Aspect ratio */}
@@ -208,16 +211,19 @@ export default function NewProject() {
               <BookOpen className="h-3.5 w-3.5" />
               السورة
             </Label>
-            <Select value={surahId} onValueChange={(v) => { setSurahId(v); setAyahEnd(""); }}>
-              <SelectTrigger className="h-12 bg-background/50 border-accent/20"><SelectValue placeholder="اختر السورة" /></SelectTrigger>
-              <SelectContent>
-                {surahs.map((s) => (
-                  <SelectItem key={s.id} value={s.id.toString()}>
-                    <span className="text-accent ml-2">{s.id}.</span> {s.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <StudioFieldSelect
+              aria-label="السورة"
+              value={surahId}
+              onValueChange={(v) => {
+                setSurahId(v);
+                setAyahEnd("");
+              }}
+              triggerClassName="h-12 border-accent/20"
+              options={surahs.map((s) => ({
+                value: s.id.toString(),
+                label: `${s.id}. ${s.name}`,
+              }))}
+            />
           </div>
 
           {/* Ayah range */}

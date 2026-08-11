@@ -68,11 +68,11 @@ const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
 >(({ className, children, position = "popper", ...props }, ref) => {
-  const [container, setContainer] = React.useState<HTMLElement | undefined>();
   const isMobile = useIsMobile();
-  React.useLayoutEffect(() => {
-    setContainer(getStudioPortalContainer());
-  }, []);
+  const container = React.useMemo(
+    () => getStudioPortalContainer(),
+    [],
+  );
 
   return (
     <SelectPrimitive.Portal container={container}>

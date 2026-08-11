@@ -329,8 +329,8 @@ export function AudioPreviewPlayer({
       <div
         className={
           controlsDock === "below"
-            ? "relative z-20 mx-auto mt-2 flex w-full max-w-[min(100%,18rem)] shrink-0 items-center justify-center gap-2 rounded-full border border-accent/30 bg-background/90 px-3 py-1.5 shadow-md backdrop-blur-md"
-            : "absolute bottom-2 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-accent/30 bg-background/70 px-3 py-1.5 backdrop-blur-md"
+            ? "relative z-20 mx-auto mt-2 flex w-full max-w-[min(100%,18rem)] shrink-0 items-center justify-center gap-2 rounded-full border border-accent/30 bg-[hsl(var(--background))] px-3 py-1.5 shadow-md"
+            : "absolute bottom-2 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2 rounded-full border border-accent/30 bg-[hsl(var(--background))] px-3 py-1.5 shadow-md"
         }
       >
         <button

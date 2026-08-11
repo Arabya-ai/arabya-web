@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/ayat-studio/components/ui/select";
+import { StudioFieldSelect } from "@/ayat-studio/components/StudioFieldSelect";
 import { Slider } from "@/ayat-studio/components/ui/slider";
 import { Switch } from "@/ayat-studio/components/ui/switch";
 import {
@@ -216,7 +217,7 @@ function EditorPanel({
         />
       </button>
       {open && (
-        <div className="relative isolate space-y-4 overflow-visible px-4 pb-4 animate-fade-in">
+        <div className="relative isolate space-y-4 overflow-hidden px-4 pb-4 animate-fade-in">
           {children}
         </div>
       )}
@@ -738,7 +739,7 @@ export default function Editor() {
   const transDur = project.transitionDuration ?? 0.6;
 
   return (
-    <div className="studio-editor flex min-h-0 flex-col gap-4 sm:gap-4 lg:h-[calc(100dvh-var(--arabya-header-height,4.5rem)-11rem)] lg:flex-row lg:items-stretch">
+    <div className="studio-editor flex min-h-0 flex-col gap-4 lg:h-[calc(100dvh-var(--arabya-header-height,4.5rem)-11rem)] lg:flex-row lg:items-stretch">
       <style>{`
         @keyframes studio-fade { from { opacity: 0.15 } to { opacity: 1 } }
         @keyframes studio-slide { from { transform: translateX(28px); opacity: 0.2 } to { transform: none; opacity: 1 } }
@@ -750,7 +751,7 @@ export default function Editor() {
         @keyframes studio-kenburns { from { transform: scale(1) } to { transform: scale(1.06) } }
       `}</style>
 
-      <div className="studio-editor-controls order-1 flex min-h-[min(44dvh,26rem)] w-full min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] shadow-deep lg:order-1 lg:h-full lg:min-h-0 lg:w-[min(100%,21rem)] lg:flex-none lg:min-w-[17rem] xl:w-[min(100%,22rem)] 2xl:w-96">
+      <div className="studio-editor-controls order-1 flex w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] shadow-deep lg:order-1 lg:h-full lg:min-h-0 lg:w-[min(100%,21rem)] lg:flex-none lg:min-w-[17rem] xl:w-[min(100%,22rem)] 2xl:w-96">
         <div className="relative z-10 flex shrink-0 items-center justify-between gap-2 border-b border-border/60 bg-[hsl(var(--card))] px-3 py-3 sm:px-4 sm:py-4">
           <div className="min-w-0 flex-1">
             <p className="text-[11px] tracking-widest uppercase text-accent/80 sm:text-xs">
@@ -770,25 +771,22 @@ export default function Editor() {
             <Save className="h-4 w-4" />
           </button>
         </div>
-        <div className="relative z-0 min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[hsl(var(--card))]">
+        <div className="relative z-0 min-h-0 max-h-[min(58dvh,34rem)] flex-1 overflow-y-auto overscroll-contain bg-[hsl(var(--card))] lg:max-h-none">
           <EditorPanel title="القارئ والسورة" icon={BookOpen} defaultOpen>
             <div className="space-y-3">
-            <Select
+            <StudioFieldSelect
+              aria-label="القارئ"
               value={project.reciterId}
               onValueChange={(v) => update({ reciterId: v })}
-            >
-              <SelectTrigger className="border-accent/20">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="max-h-72">
-                {reciters.map((r) => (
-                  <SelectItem key={r.id} value={r.id}>
-                    {r.name} — {r.style} · {r.bitrate}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
+              triggerClassName="border-accent/20"
+              contentClassName="max-h-72"
+              options={reciters.map((r) => ({
+                value: r.id,
+                label: `${r.name} — ${r.style} · ${r.bitrate}`,
+              }))}
+            />
+            <StudioFieldSelect
+              aria-label="السورة"
               value={project.surahId.toString()}
               onValueChange={(v) => {
                 const sid = Number(v);
@@ -800,18 +798,13 @@ export default function Editor() {
                   end = Math.min(max, start + maxAyahSpan - 1);
                 update({ surahId: sid, ayahStart: start, ayahEnd: end });
               }}
-            >
-              <SelectTrigger className="border-accent/20">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="max-h-72">
-                {surahs.map((s) => (
-                  <SelectItem key={s.id} value={s.id.toString()}>
-                    {s.id}. {s.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              triggerClassName="border-accent/20"
+              contentClassName="max-h-72"
+              options={surahs.map((s) => ({
+                value: s.id.toString(),
+                label: `${s.id}. ${s.name}`,
+              }))}
+            />
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <Label className="text-xs text-accent">من آية</Label>
@@ -1467,7 +1460,7 @@ export default function Editor() {
         </div>
       </div>
 
-      <div className="studio-live-preview relative order-2 flex max-h-[min(42dvh,24rem)] w-full shrink-0 flex-col items-center justify-center overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] p-3 shadow-deep sm:max-h-[min(46dvh,28rem)] sm:p-4 lg:order-2 lg:h-full lg:max-h-none lg:min-h-0 lg:flex-1 lg:p-5">
+      <div className="studio-live-preview relative order-2 flex w-full shrink-0 flex-col items-center justify-center overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] p-3 shadow-deep sm:p-4 lg:order-2 lg:h-full lg:max-h-none lg:min-h-0 lg:flex-1 lg:p-5">
         <div className="pattern-mihrab pointer-events-none absolute inset-0 overflow-hidden rounded-2xl opacity-20" />
         <div className="relative z-[1] mb-2 shrink-0 text-center text-[11px] tracking-widest uppercase text-accent/80 sm:mb-3 sm:text-xs">
           معاينة مباشرة
@@ -1716,16 +1709,16 @@ export default function Editor() {
             </div>
           )}
 
-          <AudioPreviewPlayer
-            project={project}
-            controlsDock="below"
-            onAyahIndexChange={(idx) =>
-              setPreviewAyahIndex(
-                clampAyahPreviewIndex(idx, previewAyahs.length),
-              )
-            }
-          />
         </div>
+        <AudioPreviewPlayer
+          project={project}
+          controlsDock="below"
+          onAyahIndexChange={(idx) =>
+            setPreviewAyahIndex(
+              clampAyahPreviewIndex(idx, previewAyahs.length),
+            )
+          }
+        />
         </div>
       </div>
     </div>
