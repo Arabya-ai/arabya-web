@@ -48,6 +48,8 @@ type ProgressPayload = {
 type UserRole = "member" | "creator" | "editor" | "admin";
 
 const ALLOWED_ORIGINS = new Set([
+  "https://www.arabya.org",
+  "https://arabya.org",
   "https://www.arabyaai.com",
   "https://arabyaai.com",
   "http://localhost:3000",
@@ -56,7 +58,7 @@ const ALLOWED_ORIGINS = new Set([
 
 function corsHeaders(request?: Request): Record<string, string> {
   const origin = request?.headers.get("Origin") || "";
-  const allow = ALLOWED_ORIGINS.has(origin) ? origin : "https://www.arabyaai.com";
+  const allow = ALLOWED_ORIGINS.has(origin) ? origin : "https://www.arabya.org";
   return {
     "Access-Control-Allow-Origin": allow,
     "Access-Control-Allow-Headers": "Authorization, Content-Type",

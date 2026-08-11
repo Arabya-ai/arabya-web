@@ -52,7 +52,7 @@ describe("renderCreateAyahPng branding", () => {
   });
 
   it("exposes site host constant used by exporters", () => {
-    expect(ARABYA_SITE_HOST).toBe("arabyaai.com");
+    expect(ARABYA_SITE_HOST).toBe("arabya.org");
     expect(ARABYA_BRAND_AR).toBe("عربية");
   });
 });

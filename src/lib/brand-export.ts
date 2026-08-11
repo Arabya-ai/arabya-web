@@ -3,8 +3,9 @@
  * Keep create/studio/mushaf exports consistent: mark + name + site URL.
  */
 
-export const ARABYA_SITE_HOST = "arabyaai.com";
-export const ARABYA_SITE_URL = "https://www.arabyaai.com";
+/** Canonical public site (primary domain is .org for now). */
+export const ARABYA_SITE_HOST = "arabya.org";
+export const ARABYA_SITE_URL = "https://www.arabya.org";
 export const ARABYA_BRAND_AR = "عربية";
 export const ARABYA_BRAND_EN = "Arabya";
 export const ARABYA_MARK_PUBLIC_PATH = "/brand/arabya-mark-square.png";

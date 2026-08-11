@@ -1,4 +1,5 @@
 import { renderOgCardLatin } from "@/lib/og-card";
+import { ARABYA_SITE_HOST } from "@/lib/brand-export";
 import { OG_IMAGE_SIZE } from "@/lib/og-meta";
 
 export const size = OG_IMAGE_SIZE;
@@ -9,6 +10,6 @@ export default function OgImage() {
   return renderOgCardLatin({
     title: "Arabya",
     subtitle: "Word-by-word Quran study",
-    footer: "arabyaai.com",
+    footer: ARABYA_SITE_HOST,
   });
 }

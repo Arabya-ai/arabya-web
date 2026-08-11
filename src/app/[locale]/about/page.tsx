@@ -10,7 +10,7 @@ const richTags = {
   brand: (c: ReactNode) => <strong className="info-em">{c}</strong>,
   strong: (c: ReactNode) => <strong>{c}</strong>,
   siteLink: (c: ReactNode) => (
-    <a href="https://www.arabyaai.com" rel="noreferrer">
+    <a href="https://www.arabya.org" rel="noreferrer">
       {c}
     </a>
   ),

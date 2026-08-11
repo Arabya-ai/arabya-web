@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { ARABYA_SITE_HOST } from "@/lib/brand-export";
 import { OG_IMAGE_SIZE } from "@/lib/og-meta";
 
 export type OgCardContent = {
@@ -34,7 +35,7 @@ export function renderOgCardLatin(opts: OgCardContent) {
             justifyContent: "space-between",
           }}
         >
-          <div style={{ fontSize: 28, opacity: 0.8 }}>arabyaai.com</div>
+          <div style={{ fontSize: 28, opacity: 0.8 }}>{ARABYA_SITE_HOST}</div>
           <div style={{ fontSize: 40, fontWeight: 700 }}>Arabya</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>

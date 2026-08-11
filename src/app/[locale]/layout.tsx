@@ -108,7 +108,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: t("defaultTitle"),
       description: t("ogDescription"),
-      url: isEn ? "https://www.arabyaai.com/en" : "https://www.arabyaai.com",
+      url: isEn ? "https://www.arabya.org/en" : "https://www.arabya.org",
       siteName: t("siteName"),
       locale: isEn ? "en_US" : "ar_AR",
       type: "website",

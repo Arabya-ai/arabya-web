@@ -20,11 +20,12 @@
 1. https://console.cloud.google.com/ — مشروع Arabya  
 2. OAuth consent screen → External  
 3. Credentials → OAuth client ID → Web application  
-4. Origins: `http://localhost:3000` و `https://www.arabyaai.com`  
+4. Origins: `http://localhost:3000` و `https://www.arabya.org` (وأبقِ `https://www.arabyaai.com` مؤقتاً إن لزم)  
 5. Redirect URIs:
    - `http://localhost:3000/api/auth/callback/google`
-   - `https://www.arabyaai.com/api/auth/callback/google`  
-6. نفس القيم في Vercel → Environment Variables → Redeploy  
+   - `https://www.arabya.org/api/auth/callback/google`  
+   - (اختياري أثناء الانتقال) `https://www.arabyaai.com/api/auth/callback/google`  
+6. نفس القيم في Vercel → Environment Variables → عيّن `AUTH_URL=https://www.arabya.org` ثم Redeploy  
 
 **تنبيه:** `AUTH_GOOGLE_ID` يجب أن يكون معرّفًا ينتهي بـ `.apps.googleusercontent.com` — **ليس** رابط `callback/google`.
 

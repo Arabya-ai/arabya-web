@@ -77,7 +77,7 @@ export type CreateAyahImageOpts = {
 
 /**
  * Shareable ayah PNG (inspired by rukn / PNG exporters; uses local QPC text + resvg).
- * Always includes Arabya mark + brand name + arabyaai.com (stronger when watermark).
+ * Always includes Arabya mark + brand name + site host (stronger when watermark).
  */
 export async function renderCreateAyahPng(
   opts: CreateAyahImageOpts,

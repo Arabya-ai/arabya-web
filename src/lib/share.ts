@@ -1,3 +1,5 @@
+import { ARABYA_SITE_URL } from "@/lib/brand-export";
+
 /** Share helpers — distinct deep links + social destinations. */
 
 export type ListenMode = "surah" | "ayah" | "wbw";
@@ -31,9 +33,7 @@ export type ShareTarget = {
 export function absoluteUrl(pathOrUrl: string): string {
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
   const base =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : "https://www.arabyaai.com";
+    typeof window !== "undefined" ? window.location.origin : ARABYA_SITE_URL;
   return `${base}${pathOrUrl.startsWith("/") ? "" : "/"}${pathOrUrl}`;
 }
 
@@ -45,7 +45,7 @@ export function buildMushafShareUrl(opts: {
   surahId?: number;
   reciter?: string;
 }): string {
-  const url = new URL(`/mushaf/${opts.page}`, "https://www.arabyaai.com");
+  const url = new URL(`/mushaf/${opts.page}`, ARABYA_SITE_URL);
   url.searchParams.set("share", opts.kind);
 
   if (opts.verse) url.searchParams.set("v", opts.verse);

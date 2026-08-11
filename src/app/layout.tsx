@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.arabyaai.com"),
+  metadataBase: new URL("https://www.arabya.org"),
   applicationName: "Arabya",
   appleWebApp: {
     capable: true,

@@ -15,7 +15,7 @@ Arabya is **not** merely “mushaf + tafsir”. It is a **word-by-word Arabic te
 
 - Comprehensive portal (reading, audio, tafsirs, translations, tools) **plus** deep word study.
 - Open data, APIs, owner-supplied files, and **owner-directed import/scraping pipelines** are all valid ways to acquire content when the owner requests them.
-- Domain `arabya.ai` only after the core product is ready on `arabyaai.com`.
+- Domain `arabya.ai` only after the core product is ready; current primary public host is `arabya.org` (legacy `arabyaai.com` redirects there).
 
 ## Hard constraints for agents
 

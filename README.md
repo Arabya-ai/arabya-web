@@ -6,7 +6,7 @@
 
 - **Next.js 15 + TypeScript + Tailwind 4**
 - **البيانات:** ملفات JSON داخل `/data` (Git-first)
-- **النشر:** Vercel ← GitHub `Arabya-ai/arabya-web` → **www.arabyaai.com**
+- **النشر:** Vercel ← GitHub `Arabya-ai/arabya-web` → **www.arabya.org** (مع توجيه `arabyaai.com` إليه)
 
 ## سياسة البيانات (Git-first)
 
@@ -77,7 +77,7 @@ npm run dev
 ## ربط النطاق على Vercel
 
 1. استورد `Arabya-ai/arabya-web` في [Vercel](https://vercel.com/dashboard)
-2. **Settings → Domains** → أضف `arabyaai.com` و `www.arabyaai.com`
+2. **Settings → Domains** → أضف `arabya.org` و `www.arabya.org` (و`arabyaai.com` كتوجيه إن لزم)
 3. انسخ سجلات DNS إلى المسجّل
 4. `arabya.ai` يُربط بعد اكتمال المنتج
 5. HTTPS تلقائي من Vercel

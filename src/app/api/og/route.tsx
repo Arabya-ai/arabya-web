@@ -7,6 +7,7 @@ import {
 } from "@/lib/surah-names";
 import { renderOgCardLatin } from "@/lib/og-card";
 import { renderOgCard } from "@/lib/og-card-arabic";
+import { ARABYA_SITE_HOST } from "@/lib/brand-export";
 import type { ShareKind } from "@/lib/share";
 
 export const runtime = "nodejs";
@@ -184,7 +185,7 @@ export async function GET(request: Request) {
         eyebrow: kindEyebrowLatin(kind),
         title: titleLatin,
         subtitle: subtitleLatin,
-        footer: "arabyaai.com",
+        footer: ARABYA_SITE_HOST,
       });
     } catch {
       /* fall through to Arabic card */
@@ -204,7 +205,7 @@ export async function GET(request: Request) {
       eyebrow: kindEyebrowLatin(kind),
       title: titleLatin,
       subtitle: subtitleLatin,
-      footer: "arabyaai.com",
+      footer: ARABYA_SITE_HOST,
     });
   }
 }

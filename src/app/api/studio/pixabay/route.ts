@@ -76,7 +76,7 @@ export async function GET(request: Request) {
         headers: {
           Accept: "application/json",
           "User-Agent":
-            "Mozilla/5.0 (compatible; ArabyaStudio/1.0; +https://www.arabyaai.com)",
+            "Mozilla/5.0 (compatible; ArabyaStudio/1.0; +https://www.arabya.org)",
         },
       });
     } catch {

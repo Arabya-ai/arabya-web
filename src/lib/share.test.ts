@@ -61,7 +61,7 @@ describe("share helpers", () => {
       kind: "page",
       title: "t",
       text: "body",
-      url: "https://www.arabyaai.com/mushaf/1?share=page",
+      url: "https://www.arabya.org/mushaf/1?share=page",
     });
     expect(links.map((l) => l.id)).toEqual([
       "whatsapp",
