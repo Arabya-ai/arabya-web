@@ -1462,9 +1462,9 @@ export default function Editor() {
             ref={previewFrameRef}
             className={`${previewAspect} studio-live-preview__frame relative flex flex-col overflow-hidden rounded-2xl border border-primary/35 shadow-deep`}
             style={{
-              width: "auto",
+              width: `min(32rem, 100%, calc(100% * ${previewAr}))`,
               maxWidth: "100%",
-              height: "100%",
+              height: "auto",
               maxHeight: "100%",
               aspectRatio: `${previewRatioMeta.width} / ${previewRatioMeta.height}`,
               background:
