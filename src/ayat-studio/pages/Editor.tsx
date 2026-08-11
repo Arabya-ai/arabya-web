@@ -174,6 +174,18 @@ function BrandLockupLabels({
   );
 }
 
+function StudioToggleRow({
+  label,
+  ...switchProps
+}: { label: string } & React.ComponentProps<typeof Switch>) {
+  return (
+    <div className="studio-toggle-row">
+      <Label className="text-xs leading-snug">{label}</Label>
+      <Switch className="shrink-0" {...switchProps} />
+    </div>
+  );
+}
+
 function EditorPanel({
   title,
   icon: Icon,
@@ -204,7 +216,9 @@ function EditorPanel({
         />
       </button>
       {open && (
-        <div className="px-4 pb-4 space-y-3 animate-fade-in">{children}</div>
+        <div className="relative isolate space-y-4 overflow-visible px-4 pb-4 animate-fade-in">
+          {children}
+        </div>
       )}
     </div>
   );
@@ -724,7 +738,7 @@ export default function Editor() {
   const transDur = project.transitionDuration ?? 0.6;
 
   return (
-    <div className="studio-editor flex min-h-0 flex-col gap-3 sm:gap-4 lg:h-[calc(100dvh-var(--arabya-header-height,4.5rem)-11rem)] lg:flex-row lg:items-stretch">
+    <div className="studio-editor flex min-h-0 flex-col gap-4 sm:gap-4 lg:h-[calc(100dvh-var(--arabya-header-height,4.5rem)-11rem)] lg:flex-row lg:items-stretch">
       <style>{`
         @keyframes studio-fade { from { opacity: 0.15 } to { opacity: 1 } }
         @keyframes studio-slide { from { transform: translateX(28px); opacity: 0.2 } to { transform: none; opacity: 1 } }
@@ -736,7 +750,7 @@ export default function Editor() {
         @keyframes studio-kenburns { from { transform: scale(1) } to { transform: scale(1.06) } }
       `}</style>
 
-      <div className="studio-editor-controls order-2 flex max-h-[min(48vh,26rem)] w-full shrink-0 flex-col overflow-hidden rounded-2xl border border-border/70 bg-card/70 shadow-deep backdrop-blur-md sm:max-h-[min(52vh,30rem)] lg:order-1 lg:h-full lg:max-h-none lg:w-[min(100%,21rem)] lg:min-w-[17rem] xl:w-[min(100%,22rem)] 2xl:w-96">
+      <div className="studio-editor-controls order-2 flex min-h-[min(44dvh,26rem)] w-full min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border/70 bg-card/70 shadow-deep backdrop-blur-md lg:order-1 lg:h-full lg:min-h-0 lg:w-[min(100%,21rem)] lg:flex-none lg:min-w-[17rem] xl:w-[min(100%,22rem)] 2xl:w-96">
         <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border/60 bg-gradient-to-l from-primary/5 to-transparent px-3 py-3 sm:px-4 sm:py-4">
           <div className="min-w-0 flex-1">
             <p className="text-[11px] tracking-widest uppercase text-accent/80 sm:text-xs">
@@ -758,6 +772,7 @@ export default function Editor() {
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <EditorPanel title="القارئ والسورة" icon={BookOpen} defaultOpen>
+            <div className="space-y-3">
             <Select
               value={project.reciterId}
               onValueChange={(v) => update({ reciterId: v })}
@@ -836,6 +851,7 @@ export default function Editor() {
                 حد التصدير {STUDIO_MAX_AYAHS} آية لكل فيديو (خطة مجانية).
               </p>
             )}
+            </div>
           </EditorPanel>
 
           <EditorPanel title="الخلفية" icon={ImageIcon}>
@@ -883,46 +899,38 @@ export default function Editor() {
                 step={1}
               />
             </div>
-            <div className="space-y-2 rounded-lg border border-accent/15 bg-background/30 p-3">
+            <div className="space-y-2.5 rounded-lg border border-accent/15 bg-background/30 p-3">
               <p className="text-[11px] font-medium text-accent">شريط انتقال الآيات</p>
-              <div className="flex items-center justify-between gap-2">
-                <Label className="text-xs">عرض آيات فقط</Label>
-                <Switch
-                  checked={ayahOnly}
-                  onCheckedChange={(v) => update({ previewShowAyahOnly: v })}
-                />
-              </div>
-              <div className="flex items-center justify-between gap-2">
-                <Label className="text-xs">عرض شريط الانتقال</Label>
-                <Switch
-                  checked={project.previewShowNavBar ?? true}
-                  onCheckedChange={(v) => update({ previewShowNavBar: v })}
-                />
-              </div>
-              <div className="flex items-center justify-between gap-2">
-                <Label className="text-xs">عرض أرقام الآيات</Label>
-                <Switch
-                  checked={showNumbers}
-                  onCheckedChange={(v) => update({ previewShowAyahNumbers: v })}
-                />
-              </div>
+              <StudioToggleRow
+                label="عرض آيات فقط"
+                checked={ayahOnly}
+                onCheckedChange={(v) => update({ previewShowAyahOnly: v })}
+              />
+              <StudioToggleRow
+                label="عرض شريط الانتقال"
+                checked={project.previewShowNavBar ?? true}
+                onCheckedChange={(v) => update({ previewShowNavBar: v })}
+              />
+              <StudioToggleRow
+                label="عرض أرقام الآيات"
+                checked={showNumbers}
+                onCheckedChange={(v) => update({ previewShowAyahNumbers: v })}
+              />
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <Label className="text-xs">شعار عربية ستوديو</Label>
-                <Switch
-                  checked={
-                    needsWatermark
-                      ? true
-                      : (project.brandSignature ?? true)
-                  }
-                  disabled={needsWatermark}
-                  onCheckedChange={(v) => {
-                    if (needsWatermark) return;
-                    update({ brandSignature: v });
-                  }}
-                />
-              </div>
+              <StudioToggleRow
+                label="شعار عربية ستوديو"
+                checked={
+                  needsWatermark
+                    ? true
+                    : (project.brandSignature ?? true)
+                }
+                disabled={needsWatermark}
+                onCheckedChange={(v) => {
+                  if (needsWatermark) return;
+                  update({ brandSignature: v });
+                }}
+              />
               {needsWatermark ? (
                 <p className="text-[10px] leading-relaxed text-muted-foreground">
                   حساب مسجّل: الشعار إلزامي عند التصدير ولا يمكن إخفاؤه.
@@ -980,14 +988,12 @@ export default function Editor() {
                 </div>
               )}
             </div>
-            <div className="flex items-center justify-between gap-2">
-              <Label className="text-xs">ظلال vignette ناعمة</Label>
-              <Switch
-                checked={project.softVignette ?? true}
-                onCheckedChange={(v) => update({ softVignette: v })}
-              />
-            </div>
-            <div className="space-y-2 rounded-lg border border-accent/15 bg-background/30 p-3">
+            <StudioToggleRow
+              label="ظلال vignette ناعمة"
+              checked={project.softVignette ?? true}
+              onCheckedChange={(v) => update({ softVignette: v })}
+            />
+            <div className="space-y-3 rounded-lg border border-accent/15 bg-background/30 p-3">
               <Label className="text-xs text-accent">اسم القارئ</Label>
               <Select
                 value={normalizeReciterPosition(project.reciterPosition)}
@@ -1007,7 +1013,7 @@ export default function Editor() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2 rounded-lg border border-accent/15 bg-background/30 p-3">
+            <div className="space-y-3 rounded-lg border border-accent/15 bg-background/30 p-3">
               <Label className="text-xs text-accent">شريط التقدم داخل الإطار</Label>
               <Select
                 value={normalizeProgressBarStyle(project.progressBarStyle)}
@@ -1461,15 +1467,15 @@ export default function Editor() {
         </div>
       </div>
 
-      <div className="studio-live-preview relative order-1 flex min-h-[min(52vh,32rem)] w-full flex-1 flex-col items-center justify-center overflow-visible rounded-2xl border border-border/70 bg-card/40 p-3 backdrop-blur-md sm:min-h-[min(56vh,36rem)] sm:p-4 lg:order-2 lg:h-full lg:min-h-0 lg:flex-1 lg:p-5">
+      <div className="studio-live-preview relative order-1 flex max-h-[min(48dvh,28rem)] w-full shrink-0 flex-col items-center justify-center overflow-hidden rounded-2xl border border-border/70 bg-card/40 p-3 backdrop-blur-md sm:max-h-[min(52dvh,32rem)] sm:p-4 lg:order-2 lg:h-full lg:max-h-none lg:min-h-0 lg:flex-1 lg:overflow-visible lg:p-5">
         <div className="pattern-mihrab pointer-events-none absolute inset-0 overflow-hidden rounded-2xl opacity-20" />
         <div className="relative z-[1] mb-2 shrink-0 text-center text-[11px] tracking-widest uppercase text-accent/80 sm:mb-3 sm:text-xs">
           معاينة مباشرة
         </div>
-        <div className="studio-live-preview__stage relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center p-1 pb-12">
+        <div className="studio-live-preview__stage relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center p-1 pb-2 sm:pb-3 lg:pb-12">
           <div
             ref={previewFrameRef}
-            className={`${previewAspect} studio-live-preview__frame relative flex flex-col overflow-visible rounded-2xl border border-primary/35 shadow-deep`}
+            className={`${previewAspect} studio-live-preview__frame relative flex flex-col overflow-hidden rounded-2xl border border-primary/35 shadow-deep`}
             style={{
               /* Shrink width when height caps so the whole frame (media) stays on screen */
               width: `min(20rem, 100%, calc(min(70vh, 36rem) * ${previewAr}))`,

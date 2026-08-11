@@ -500,12 +500,45 @@ html[data-theme="dark"] .arabya-mark-icon {
   pointer-events: none;
 }
 
-@media (max-height: 520px) and (orientation: landscape) {
+.studio-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.studio-toggle-row label {
+  min-width: 0;
+  flex: 1;
+  text-align: start;
+}
+
+@media (max-width: 1023px) {
+  .studio-editor {
+    gap: 1rem;
+  }
+
   .studio-editor-controls {
-    max-height: min(48vh, 18rem) !important;
+    max-height: none !important;
   }
 
   .studio-live-preview {
+    flex-shrink: 0;
+  }
+
+  .studio-live-preview__frame {
+    max-height: 100%;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .studio-editor-controls {
+    min-height: 0 !important;
+    max-height: min(52dvh, 20rem) !important;
+  }
+
+  .studio-live-preview {
+    max-height: min(44dvh, 18rem) !important;
     min-height: 0 !important;
     padding-block: 0.5rem !important;
   }

@@ -150,7 +150,7 @@ export default function NewProject() {
         <p className="mt-2 text-sm text-muted-foreground">حدد التلاوة والمقاس، والباقي علينا</p>
       </div>
 
-      <Card className={`relative overflow-hidden border-accent/20 bg-card/50 backdrop-blur-sm shadow-deep${bootstrapping ? " hidden" : ""}`}>
+      <Card className={`relative overflow-visible border-accent/20 bg-card/50 backdrop-blur-sm shadow-deep${bootstrapping ? " hidden" : ""}`}>
         <div className="pattern-stars pointer-events-none absolute inset-0 opacity-20" aria-hidden />
         <CardContent className="relative z-10 space-y-6 p-6 md:p-8">
           {/* Title */}
