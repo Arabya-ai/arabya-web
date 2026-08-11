@@ -315,10 +315,12 @@ export default function Editor() {
 
     const measure = () => {
       const stageW = stage.clientWidth;
-      const stageH = stage.clientHeight;
+      // Cap by stage AND viewport so portrait frames never force page scroll.
+      const viewportCap = Math.max(220, window.innerHeight * 0.62);
+      const stageH = Math.min(stage.clientHeight, viewportCap);
       const fitted = fitAspectBox(
         stageW,
-        stageH,
+        Math.max(stageH, 1),
         ratioMeta.width,
         ratioMeta.height,
       );
@@ -753,7 +755,7 @@ export default function Editor() {
   const transDur = project.transitionDuration ?? 0.6;
 
   return (
-    <div className="studio-editor flex min-h-0 flex-1 flex-col gap-4 lg:flex-row lg:items-stretch lg:gap-5">
+    <div className="studio-editor flex h-full min-h-0 flex-1 flex-col gap-3 overflow-hidden lg:flex-row lg:items-stretch lg:gap-4">
       <style>{`
         @keyframes studio-fade { from { opacity: 0.15 } to { opacity: 1 } }
         @keyframes studio-slide { from { transform: translateX(28px); opacity: 0.2 } to { transform: none; opacity: 1 } }
@@ -1466,14 +1468,14 @@ export default function Editor() {
         </div>
       </div>
 
-      <div className="studio-live-preview relative order-2 flex w-full min-h-0 flex-col overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] p-4 shadow-deep sm:p-5 lg:order-2 lg:h-full lg:flex-1 lg:p-5">
+      <div className="studio-live-preview relative order-2 flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] p-3 shadow-deep sm:p-4 lg:order-2 lg:h-full lg:p-4">
         <div className="pattern-mihrab pointer-events-none absolute inset-0 overflow-hidden rounded-2xl opacity-20" />
-        <div className="relative z-[1] mb-2 shrink-0 text-center text-[11px] tracking-widest uppercase text-accent/80 sm:text-xs">
+        <div className="relative z-[1] mb-1.5 shrink-0 text-center text-[11px] tracking-widest uppercase text-accent/80 sm:text-xs">
           معاينة مباشرة
         </div>
         <div
           ref={previewStageRef}
-          className="studio-live-preview__stage relative z-[1] flex min-h-[12rem] w-full flex-1 items-center justify-center overflow-hidden"
+          className="studio-live-preview__stage relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden"
         >
           <div
             ref={previewFrameRef}

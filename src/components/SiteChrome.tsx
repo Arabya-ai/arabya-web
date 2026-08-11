@@ -7,7 +7,7 @@ import { BrandLockup } from "@/components/BrandLockup";
 import { DeferredChrome } from "@/components/DeferredChrome";
 import { PreferencesMenu } from "@/components/PreferencesMenu";
 import { useDismissibleOpen } from "@/hooks/useDismissibleOpen";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 
 /** Site chrome for all pages including Arabya Studio (header + footer). */
 export function AppShell({
@@ -17,11 +17,21 @@ export function AppShell({
   children: React.ReactNode;
   footerCredit: string;
 }) {
+  const pathname = usePathname();
+  // Studio editor needs the full viewport — footer would force page scroll.
+  const hideFooter =
+    pathname === "/studio" ||
+    pathname.startsWith("/studio/") ||
+    pathname === "/create" ||
+    pathname.startsWith("/create/");
+
   return (
     <>
       <SiteHeader />
-      <main>{children}</main>
-      <SiteFooter credit={footerCredit} />
+      <main className={hideFooter ? "studio-main-viewport" : undefined}>
+        {children}
+      </main>
+      {!hideFooter && <SiteFooter credit={footerCredit} />}
       <DeferredChrome />
     </>
   );

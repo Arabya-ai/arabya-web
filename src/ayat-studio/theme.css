@@ -154,7 +154,15 @@ html[data-theme="dark"] .ayat-studio-portal {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    max-height: min(44dvh, 24rem);
+    max-height: min(40dvh, 20rem);
+  }
+
+  .studio-editor {
+    overflow-y: auto;
+  }
+
+  .studio-editor-controls {
+    max-height: min(42dvh, 22rem);
   }
 }
 
@@ -502,8 +510,21 @@ html[data-theme="dark"] .arabya-mark-icon {
 
 /* Root studio wrapper: fill main only, not the viewport past the footer */
 #ayat-studio-root.ayat-studio {
+  display: flex;
+  flex-direction: column;
   min-height: 0;
+  height: 100%;
   background-attachment: scroll;
+}
+
+/* Studio pages: main fills remaining viewport under site header (no footer) */
+main.studio-main-viewport {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: calc(100dvh - var(--arabya-header-height, 4.5rem));
+  max-height: calc(100dvh - var(--arabya-header-height, 4.5rem));
+  overflow: hidden;
 }
 
 @media (max-width: 1023px) {
@@ -531,8 +552,8 @@ html[data-theme="dark"] .arabya-mark-icon {
 .studio-live-preview__frame {
   display: flex;
   flex-shrink: 0;
-  min-width: 8rem;
-  min-height: 10rem;
+  min-width: 6rem;
+  min-height: 8rem;
 }
 
 @media (min-width: 1024px) {
