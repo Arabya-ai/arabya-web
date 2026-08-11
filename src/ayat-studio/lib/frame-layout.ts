@@ -30,9 +30,78 @@ export function frameBrandBorderInsetPx(frameW: number): number {
   return Math.max(2, Math.round(frameW * 0.02));
 }
 
-/** Reciter name baseline from bottom — matches export canvas. */
-export function frameReciterBottomPx(frameH: number): number {
-  return Math.round(frameH * 0.035);
+/** Brand lockup stack height — deterministic from frame width (preview = export). */
+export function frameBrandLockupBoxH(frameW: number): number {
+  const mark = frameBrandMarkPx(frameW);
+  const titleSize = frameBrandTitlePx(frameW);
+  const subSize = frameBrandSubPx(frameW);
+  const urlSize = Math.max(10, Math.round(subSize * 0.92));
+  return Math.max(mark, titleSize + subSize + urlSize + 14);
+}
+
+/** Approximate brand lockup width when canvas measureText is unavailable (preview). */
+export function estimateBrandLockupBoxW(frameW: number): number {
+  const mark = frameBrandMarkPx(frameW);
+  const gap = Math.round(mark * 0.22);
+  const subSize = frameBrandSubPx(frameW);
+  const urlSize = Math.max(10, Math.round(subSize * 0.92));
+  const textW = Math.ceil(
+    Math.max(
+      BRAND_LOCKUP_EN.length * subSize * 0.62,
+      BRAND_SITE_HOST.length * urlSize * 0.56,
+    ),
+  );
+  return mark + gap + textW;
+}
+
+type BottomLane = "left" | "center" | "right";
+
+function bottomLane(pos: string): BottomLane | null {
+  if (!pos.startsWith("bottom-")) return null;
+  if (pos.endsWith("left")) return "left";
+  if (pos.endsWith("right")) return "right";
+  return "center";
+}
+
+/**
+ * True when brand lockup and reciter name would occupy the same bottom zone
+ * (same corner, or either is centered on the bottom edge).
+ */
+export function brandAndReciterCollide(
+  brandPosition: string,
+  reciterPosition: ReciterPosition | string,
+  showBrand: boolean,
+): boolean {
+  if (!showBrand || reciterPosition === "hidden") return false;
+  const brandLane = bottomLane(brandPosition);
+  const reciterLane = bottomLane(String(reciterPosition));
+  if (!brandLane || !reciterLane) return false;
+  return (
+    brandLane === reciterLane ||
+    brandLane === "center" ||
+    reciterLane === "center"
+  );
+}
+
+/**
+ * Distance from frame bottom to reciter baseline (canvas) / CSS `bottom`.
+ * When brand occupies the same bottom zone, lift the name above the lockup
+ * so preview and export stay readable and match.
+ */
+export function frameReciterBottomPx(
+  frameH: number,
+  opts?: {
+    collideWithBrand?: boolean;
+    brandBoxH?: number;
+    brandPad?: number;
+  },
+): number {
+  const base = Math.round(frameH * 0.035);
+  if (!opts?.collideWithBrand) return base;
+  const pad = opts.brandPad ?? base;
+  const boxH = opts.brandBoxH ?? 0;
+  const gap = Math.max(6, Math.round(frameH * 0.012));
+  return Math.max(base, pad + boxH + gap);
 }
 
 /** Export-style progress bar vertical position from top. */

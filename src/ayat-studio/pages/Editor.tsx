@@ -90,6 +90,9 @@ import {
   DEFAULT_SURAH_LABEL_FONT_SIZE,
   frameAyahFontPx,
   frameBrandBorderInsetPx,
+  frameBrandLockupBoxH,
+  estimateBrandLockupBoxW,
+  brandAndReciterCollide,
   frameBrandMarkPx,
   frameBrandPadPx,
   frameBrandSubPx,
@@ -777,16 +780,16 @@ export default function Editor() {
   const brandMark = frameBrandMarkPx(frameWidth);
   const brandTitlePx = frameBrandTitlePx(frameWidth);
   const brandSubPx = frameBrandSubPx(frameWidth);
-  const brandUrlPx = Math.max(10, Math.round(brandSubPx * 0.92));
   const brandPad = frameBrandPadPx(frameWidth);
   const brandGap = Math.round(brandMark * 0.22);
-  const brandBoxW = brandMark + brandGap + Math.round(frameWidth * 0.28);
-  const brandBoxH = Math.max(
-    brandMark,
-    brandTitlePx + brandSubPx + brandUrlPx + 14,
-  );
+  const brandBoxW = estimateBrandLockupBoxW(frameWidth);
+  const brandBoxH = frameBrandLockupBoxH(frameWidth);
+  const showBrandLockup =
+    needsWatermark || (project.brandSignature ?? true);
+  const brandPos = normalizeBrandPosition(project.brandPosition);
+  const reciterPos = normalizeReciterPosition(project.reciterPosition);
   const brandAnchor = brandLockupAnchor(
-    normalizeBrandPosition(project.brandPosition),
+    brandPos,
     frameWidth,
     frameHeight,
     brandBoxW,
@@ -797,7 +800,15 @@ export default function Editor() {
     project.overlayPosition,
     frameHeight,
   );
-  const reciterBottom = frameReciterBottomPx(frameHeight);
+  const reciterBottom = frameReciterBottomPx(frameHeight, {
+    collideWithBrand: brandAndReciterCollide(
+      brandPos,
+      reciterPos,
+      showBrandLockup && !ayahOnly,
+    ),
+    brandBoxH,
+    brandPad,
+  });
 
   return (
     <div className="studio-editor flex h-full min-h-0 flex-1 flex-col gap-3 overflow-hidden lg:flex-row lg:items-stretch lg:gap-4">
@@ -1745,12 +1756,11 @@ export default function Editor() {
               )}
 
               {!ayahOnly &&
-                normalizeReciterPosition(project.reciterPosition) !==
-                  "hidden" && (
+                reciterPos !== "hidden" && (
                   <div
                     dir="ltr"
                     className={`pointer-events-none absolute inset-x-0 z-[3] flex px-[4%] ${reciterJustifyClass(
-                      normalizeReciterPosition(project.reciterPosition),
+                      reciterPos,
                     )}`}
                     style={{ bottom: reciterBottom }}
                   >
@@ -1766,7 +1776,7 @@ export default function Editor() {
                   </div>
                 )}
 
-              {(needsWatermark || (project.brandSignature ?? true)) && (
+              {showBrandLockup && (
                 <div
                   dir="ltr"
                   className="pointer-events-none absolute z-[8] flex items-center drop-shadow-[0_1px_3px_rgba(0,0,0,0.65)]"

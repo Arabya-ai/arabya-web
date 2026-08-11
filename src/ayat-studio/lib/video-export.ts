@@ -25,7 +25,10 @@ import {
   frameBrandTitlePx,
   frameOverlayYCenter,
   frameProgressBarTopPx,
+  frameReciterBottomPx,
   frameReciterFontPx,
+  frameBrandLockupBoxH,
+  brandAndReciterCollide,
   frameSurahLabelGapPx,
   frameSurahLabelPx,
   frameTafsirFontPx,
@@ -863,20 +866,30 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   if ((ctx as any).filter) (ctx as any).filter = "none";
 
   const reciterPos = normalizeReciterPosition(project.reciterPosition);
+  const forceBrand = showWatermark;
+  const showBrandLockup = forceBrand || project.brandSignature !== false;
+  const brandPos = normalizeBrandPosition(project.brandPosition);
+  const brandBoxH = frameBrandLockupBoxH(width);
+  const brandPad = frameBrandPadPx(width);
+  const reciterCollides = brandAndReciterCollide(
+    brandPos,
+    reciterPos,
+    showBrandLockup,
+  );
+
   if (!ayahOnly && reciterPos !== "hidden") {
     ctx.fillStyle = "rgba(255,255,255,0.55)";
     ctx.font = `${frameReciterFontPx(width)}px "IBM Plex Sans Arabic", sans-serif`;
     ctx.direction = "rtl";
     ctx.textAlign = reciterTextAlign(reciterPos);
-    ctx.fillText(
-      reciterName,
-      reciterX(reciterPos, width),
-      height - height * 0.035,
-    );
+    const reciterBottom = frameReciterBottomPx(height, {
+      collideWithBrand: reciterCollides,
+      brandBoxH,
+      brandPad,
+    });
+    ctx.fillText(reciterName, reciterX(reciterPos, width), height - reciterBottom);
   }
 
-  const forceBrand = showWatermark;
-  const showBrandLockup = forceBrand || project.brandSignature !== false;
   if (showBrandLockup) {
     ctx.strokeStyle = "rgba(200,169,81,0.4)";
     ctx.lineWidth = Math.max(2, width * 0.003);
@@ -885,7 +898,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
     drawBrandLockup(ctx, {
       width,
       height,
-      position: normalizeBrandPosition(project.brandPosition),
+      position: brandPos,
       markImg: watermarkImg,
       required: forceBrand,
     });
@@ -926,7 +939,7 @@ function drawBrandLockup(
   const urlW = Math.max(1, ctx.measureText(BRAND_SITE_HOST).width);
   const textW = Math.ceil(Math.max(engW, urlW));
   const boxW = mark + gap + textW;
-  const boxH = Math.max(mark, titleSize + subSize + urlSize + 14);
+  const boxH = frameBrandLockupBoxH(width);
   const { x, y } = brandLockupAnchor(position, width, height, boxW, boxH, pad);
 
   ctx.globalAlpha = required ? 0.95 : 0.92;

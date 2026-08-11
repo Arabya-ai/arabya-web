@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
+  brandAndReciterCollide,
   frameAyahFontPx,
   frameAyahLineHeightPx,
   frameBrandBorderInsetPx,
+  frameBrandLockupBoxH,
   frameBrandMarkPx,
   frameOverlayYCenter,
   frameProgressBarTopPx,
+  frameReciterBottomPx,
   frameSurahLabelGapPx,
   frameSurahLabelPx,
   normalizeProgressBarStyle,
@@ -57,5 +60,36 @@ describe("frame-layout", () => {
     expect(frameBrandBorderInsetPx(1080)).toBe(Math.round(1080 * 0.02));
     expect(frameProgressBarTopPx(1000)).toBe(930);
     expect(STUDIO_TAFSIR_PREVIEW_MAX_CHARS).toBe(360);
+  });
+
+  it("detects brand/reciter bottom-zone collisions", () => {
+    expect(brandAndReciterCollide("bottom-left", "bottom-left", true)).toBe(
+      true,
+    );
+    expect(brandAndReciterCollide("bottom-left", "bottom-right", true)).toBe(
+      false,
+    );
+    expect(brandAndReciterCollide("bottom-left", "bottom-center", true)).toBe(
+      true,
+    );
+    expect(brandAndReciterCollide("top-left", "bottom-left", true)).toBe(false);
+    expect(brandAndReciterCollide("bottom-left", "hidden", true)).toBe(false);
+    expect(brandAndReciterCollide("bottom-left", "bottom-left", false)).toBe(
+      false,
+    );
+  });
+
+  it("lifts reciter above brand when they share a bottom corner", () => {
+    const h = 1000;
+    const boxH = frameBrandLockupBoxH(360);
+    const pad = 10;
+    const lifted = frameReciterBottomPx(h, {
+      collideWithBrand: true,
+      brandBoxH: boxH,
+      brandPad: pad,
+    });
+    const base = frameReciterBottomPx(h);
+    expect(lifted).toBeGreaterThan(base);
+    expect(lifted).toBeGreaterThanOrEqual(pad + boxH + 6);
   });
 });

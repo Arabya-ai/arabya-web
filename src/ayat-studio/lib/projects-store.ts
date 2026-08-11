@@ -235,7 +235,7 @@ export function createDefaultProject(input: {
     brandSignature: true,
     brandPosition: "bottom-left",
     softVignette: true,
-    reciterPosition: "bottom-left",
+    reciterPosition: "bottom-right",
     progressBarStyle: "none",
     progressBarColor: "#C8A951",
   };
