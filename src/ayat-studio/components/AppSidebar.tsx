@@ -101,30 +101,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {!collapsed && (
-          <div className="mt-auto p-4 relative">
-            <Link
-              href="/"
-              className="flex flex-col items-center gap-2 rounded-xl border border-accent/20 bg-card/40 p-4 text-center transition hover:border-accent/40 hover:bg-accent/5"
-              title="الصفحة الرئيسية — عربية"
-            >
-              <Image
-                src="/brand/arabya-mark-ui.webp"
-                alt="عربية"
-                width={48}
-                height={48}
-                className="arabya-mark-icon"
-                sizes="48px"
-              />
-              <span className="text-xs font-display font-semibold text-sidebar-foreground">
-                عربية
-              </span>
-              <span className="text-[10px] tracking-widest text-muted-foreground">
-                الصفحة الرئيسية
-              </span>
-            </Link>
-          </div>
-        )}
       </SidebarContent>
     </Sidebar>
   );
