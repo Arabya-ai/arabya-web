@@ -153,11 +153,8 @@ html[data-theme="dark"] .ayat-studio-portal {
   .studio-live-preview__stage {
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-  }
-
-  .studio-live-preview__frame {
-    max-height: min(38dvh, 20rem) !important;
+    justify-content: center;
+    max-height: min(44dvh, 24rem);
   }
 }
 
@@ -533,7 +530,9 @@ html[data-theme="dark"] .arabya-mark-icon {
 
 .studio-live-preview__frame {
   display: flex;
-  flex-shrink: 1;
+  flex-shrink: 0;
+  min-width: 8rem;
+  min-height: 10rem;
 }
 
 @media (min-width: 1024px) {

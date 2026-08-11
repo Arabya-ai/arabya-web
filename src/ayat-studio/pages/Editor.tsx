@@ -23,7 +23,6 @@ import {
   aspectRatios,
   transitions,
   visualizers,
-  previewAspectClass,
 } from "@/ayat-studio/lib/quran-data";
 import {
   BookOpen,
@@ -109,7 +108,7 @@ import { Link } from "@/i18n/navigation";
 import { useStudioPreviewSrc } from "@/ayat-studio/hooks/use-studio-preview-src";
 import { ArabyaMarkIcon } from "@/ayat-studio/components/IslamicDecor";
 import { fetchAyahs, type AyahData } from "@/ayat-studio/lib/quran-api";
-import { clampAyahPreviewIndex } from "@/ayat-studio/lib/studio-preview";
+import { clampAyahPreviewIndex, fitAspectBox } from "@/ayat-studio/lib/studio-preview";
 import {
   fetchStudioEditions,
   fetchTranslationMap,
@@ -299,21 +298,40 @@ export default function Editor() {
   const [tafsirMap, setTafsirMap] = useState<Record<number, string> | null>(null);
   const [layersLoading, setLayersLoading] = useState(false);
   const previewFrameRef = useRef<HTMLDivElement>(null);
+  const previewStageRef = useRef<HTMLDivElement>(null);
   const [frameWidth, setFrameWidth] = useState(320);
   const [frameHeight, setFrameHeight] = useState(568);
+  const [previewFrameSize, setPreviewFrameSize] = useState({
+    width: 280,
+    height: 498,
+  });
 
-  useEffect(() => {
-    const el = previewFrameRef.current;
-    if (!el) return;
+  useLayoutEffect(() => {
+    if (!project) return;
+    const stage = previewStageRef.current;
+    if (!stage) return;
+    const ratioMeta =
+      aspectRatios.find((r) => r.id === project.ratio) ?? aspectRatios[0];
+
     const measure = () => {
-      const w = el.clientWidth;
-      const h = el.clientHeight;
-      if (w > 0) setFrameWidth(w);
-      if (h > 0) setFrameHeight(h);
+      const stageW = stage.clientWidth;
+      const stageH = stage.clientHeight;
+      const fitted = fitAspectBox(
+        stageW,
+        stageH,
+        ratioMeta.width,
+        ratioMeta.height,
+      );
+      if (fitted.width > 0 && fitted.height > 0) {
+        setPreviewFrameSize(fitted);
+        setFrameWidth(Math.round(fitted.width));
+        setFrameHeight(Math.round(fitted.height));
+      }
     };
+
     measure();
     const ro = new ResizeObserver(measure);
-    ro.observe(el);
+    ro.observe(stage);
     return () => ro.disconnect();
   }, [project?.ratio, project?.id]);
 
@@ -530,10 +548,6 @@ export default function Editor() {
 
   const selectedSurah = surahs.find((s) => s.id === project.surahId);
   const selectedReciter = reciters.find((r) => r.id === project.reciterId);
-  const previewAspect = previewAspectClass(project.ratio);
-  const previewRatioMeta =
-    aspectRatios.find((r) => r.id === project.ratio) ?? aspectRatios[0];
-  const previewAr = previewRatioMeta.width / previewRatioMeta.height;
   const ayahNum = currentPreviewAyah?.numberInSurah ?? project.ayahStart;
 
   const setOverride = (
@@ -1452,21 +1466,23 @@ export default function Editor() {
         </div>
       </div>
 
-      <div className="studio-live-preview relative order-2 flex w-full flex-col items-center overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] p-4 shadow-deep sm:p-5 lg:order-2 lg:h-full lg:min-h-0 lg:flex-1 lg:p-5">
+      <div className="studio-live-preview relative order-2 flex w-full min-h-0 flex-col overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] p-4 shadow-deep sm:p-5 lg:order-2 lg:h-full lg:flex-1 lg:p-5">
         <div className="pattern-mihrab pointer-events-none absolute inset-0 overflow-hidden rounded-2xl opacity-20" />
         <div className="relative z-[1] mb-2 shrink-0 text-center text-[11px] tracking-widest uppercase text-accent/80 sm:text-xs">
           معاينة مباشرة
         </div>
-        <div className="studio-live-preview__stage relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center">
+        <div
+          ref={previewStageRef}
+          className="studio-live-preview__stage relative z-[1] flex min-h-[12rem] w-full flex-1 items-center justify-center overflow-hidden"
+        >
           <div
             ref={previewFrameRef}
-            className={`${previewAspect} studio-live-preview__frame relative flex flex-col overflow-hidden rounded-2xl border border-primary/35 shadow-deep`}
+            className="studio-live-preview__frame relative flex flex-col overflow-hidden rounded-2xl border border-primary/35 shadow-deep"
             style={{
-              width: `min(32rem, 100%, calc(100% * ${previewAr}))`,
+              width: `${previewFrameSize.width}px`,
+              height: `${previewFrameSize.height}px`,
               maxWidth: "100%",
-              height: "auto",
               maxHeight: "100%",
-              aspectRatio: `${previewRatioMeta.width} / ${previewRatioMeta.height}`,
               background:
                 "linear-gradient(180deg, hsl(178 50% 18%) 0%, hsl(200 50% 8%) 100%)",
             }}
@@ -1701,7 +1717,8 @@ export default function Editor() {
           )}
 
         </div>
-        <div className="relative z-[1] w-full shrink-0">
+        </div>
+        <div className="relative z-[1] mt-2 w-full shrink-0 pb-1">
           <AudioPreviewPlayer
             project={project}
             controlsDock="below"
@@ -1711,7 +1728,6 @@ export default function Editor() {
               )
             }
           />
-        </div>
         </div>
       </div>
     </div>

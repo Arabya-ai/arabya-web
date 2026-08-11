@@ -7,6 +7,7 @@ import {
 import {
   ayahIndexAtTime,
   clampAyahPreviewIndex,
+  fitAspectBox,
 } from "@/ayat-studio/lib/studio-preview";
 
 describe("studio ayah preview helpers", () => {
@@ -26,6 +27,18 @@ describe("studio ayah preview helpers", () => {
     expect(ayahIndexAtTime(segs, 2.1)).toBe(1);
     expect(ayahIndexAtTime(segs, 7.9)).toBe(2);
     expect(ayahIndexAtTime(segs, 99)).toBe(2);
+  });
+
+  it("fits portrait aspect inside wide container by height", () => {
+    const box = fitAspectBox(800, 600, 9, 16);
+    expect(box.height).toBe(600);
+    expect(box.width).toBeCloseTo(337.5, 1);
+  });
+
+  it("fits portrait aspect inside narrow container by width", () => {
+    const box = fitAspectBox(200, 600, 9, 16);
+    expect(box.width).toBe(200);
+    expect(box.height).toBeCloseTo(355.56, 1);
   });
 });
 
