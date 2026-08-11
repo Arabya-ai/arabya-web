@@ -739,7 +739,7 @@ export default function Editor() {
   const transDur = project.transitionDuration ?? 0.6;
 
   return (
-    <div className="studio-editor flex min-h-0 flex-col gap-4 lg:h-[calc(100dvh-var(--arabya-header-height,4.5rem)-6.5rem)] lg:flex-row lg:items-stretch">
+    <div className="studio-editor flex min-h-0 flex-1 flex-col gap-3 lg:flex-row lg:items-stretch">
       <style>{`
         @keyframes studio-fade { from { opacity: 0.15 } to { opacity: 1 } }
         @keyframes studio-slide { from { transform: translateX(28px); opacity: 0.2 } to { transform: none; opacity: 1 } }
@@ -751,7 +751,7 @@ export default function Editor() {
         @keyframes studio-kenburns { from { transform: scale(1) } to { transform: scale(1.06) } }
       `}</style>
 
-      <div className="studio-editor-controls order-1 flex w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] shadow-deep lg:order-1 lg:h-full lg:min-h-0 lg:w-[min(100%,22rem)] lg:flex-none lg:min-w-[18rem] xl:w-[min(100%,24rem)] 2xl:w-[26rem]">
+      <div className="studio-editor-controls order-1 flex w-full min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-[hsl(var(--card))] shadow-deep lg:order-1 lg:h-full lg:min-h-0 lg:w-[22rem] lg:flex-none xl:w-[24rem] 2xl:w-[26rem]">
         <div className="relative z-10 flex shrink-0 items-center justify-between gap-2 border-b border-border/60 bg-[hsl(var(--card))] px-3 py-3 sm:px-4 sm:py-4">
           <div className="min-w-0 flex-1">
             <p className="text-[11px] tracking-widest uppercase text-accent/80 sm:text-xs">
@@ -771,7 +771,7 @@ export default function Editor() {
             <Save className="h-4 w-4" />
           </button>
         </div>
-        <div className="relative z-0 min-h-0 max-h-[min(58dvh,34rem)] flex-1 overflow-y-auto overscroll-contain bg-[hsl(var(--card))] lg:max-h-none">
+        <div className="relative z-0 min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[hsl(var(--card))]">
           <EditorPanel title="القارئ والسورة" icon={BookOpen} defaultOpen>
             <div className="space-y-3">
             <StudioFieldSelect
@@ -1452,21 +1452,21 @@ export default function Editor() {
         </div>
       </div>
 
-      <div className="studio-live-preview relative order-2 flex w-full shrink-0 flex-col items-center justify-center overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] p-3 shadow-deep sm:p-4 lg:order-2 lg:h-full lg:max-h-none lg:min-h-0 lg:flex-1 lg:p-5">
+      <div className="studio-live-preview relative order-2 flex w-full shrink-0 flex-col items-center justify-center overflow-hidden rounded-xl border border-border bg-[hsl(var(--card))] p-2 shadow-deep sm:p-3 lg:order-2 lg:h-full lg:max-h-none lg:min-h-0 lg:flex-1 lg:p-4">
         <div className="pattern-mihrab pointer-events-none absolute inset-0 overflow-hidden rounded-2xl opacity-20" />
         <div className="relative z-[1] mb-2 shrink-0 text-center text-[11px] tracking-widest uppercase text-accent/80 sm:mb-3 sm:text-xs">
           معاينة مباشرة
         </div>
-        <div className="studio-live-preview__stage relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center p-1 pb-2 sm:pb-3 lg:pb-12">
+        <div className="studio-live-preview__stage relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center p-1 pb-1 sm:pb-2">
           <div
             ref={previewFrameRef}
             className={`${previewAspect} studio-live-preview__frame relative flex flex-col overflow-hidden rounded-2xl border border-primary/35 shadow-deep`}
             style={{
               /* Shrink width when height caps so the whole frame (media) stays on screen */
-              width: `min(28rem, 100%, calc(min(82vh, 44rem) * ${previewAr}))`,
+              width: `min(36rem, 100%, calc(100% * ${previewAr}))`,
               maxWidth: "100%",
               height: "auto",
-              maxHeight: "min(82vh, 44rem)",
+              maxHeight: "100%",
               aspectRatio: `${previewRatioMeta.width} / ${previewRatioMeta.height}`,
               background:
                 "linear-gradient(180deg, hsl(178 50% 18%) 0%, hsl(200 50% 8%) 100%)",
