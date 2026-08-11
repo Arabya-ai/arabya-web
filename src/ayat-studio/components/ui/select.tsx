@@ -10,13 +10,7 @@ import {
 } from "@/ayat-studio/lib/studio-portal";
 import { useIsMobile } from "@/ayat-studio/hooks/use-mobile";
 
-const Select = ({
-  modal,
-  ...props
-}: React.ComponentProps<typeof SelectPrimitive.Root>) => {
-  const isMobile = useIsMobile();
-  return <SelectPrimitive.Root modal={modal ?? isMobile} {...props} />;
-};
+const Select = SelectPrimitive.Root;
 
 const SelectGroup = SelectPrimitive.Group;
 
