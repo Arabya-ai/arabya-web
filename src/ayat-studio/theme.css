@@ -562,6 +562,62 @@ html[data-theme="dark"] .arabya-mark-icon {
   text-align: start;
 }
 
+/* Switches — explicit teal track when on (Tailwind bg-primary unreliable in studio scope) */
+.ayat-studio .studio-switch[data-state="unchecked"] {
+  background-color: hsl(var(--input));
+}
+
+.ayat-studio .studio-switch[data-state="checked"] {
+  background-color: var(--brand-deep, hsl(var(--primary)));
+}
+
+.ayat-studio .studio-switch-thumb {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+}
+
+.ayat-studio .studio-switch[data-state="checked"] .studio-switch-thumb {
+  border-color: color-mix(in srgb, var(--brand-deep, #0f766e) 35%, white);
+}
+
+/* Logo position 3×3 grid */
+.ayat-studio .studio-position-btn {
+  border-color: hsl(var(--border) / 0.75);
+  background-color: hsl(var(--card));
+  color: hsl(var(--muted-foreground));
+}
+
+.ayat-studio .studio-position-btn:hover {
+  border-color: color-mix(in srgb, var(--brand-deep, #0f766e) 45%, transparent);
+}
+
+.ayat-studio .studio-position-btn[aria-pressed="true"] {
+  border-color: var(--brand-deep, hsl(var(--primary)));
+  background-color: color-mix(in srgb, var(--brand-deep, #0f766e) 18%, hsl(var(--card)));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-deep, #0f766e) 25%, transparent);
+}
+
+.ayat-studio .studio-position-dot {
+  background-color: hsl(var(--muted-foreground) / 0.45);
+}
+
+.ayat-studio .studio-position-btn[aria-pressed="true"] .studio-position-dot {
+  background-color: var(--brand-deep, hsl(var(--primary)));
+}
+
+.ayat-studio .studio-slider-track {
+  background-color: hsl(var(--secondary));
+}
+
+.ayat-studio .studio-slider-range {
+  background-color: var(--brand-deep, hsl(var(--primary)));
+}
+
+.ayat-studio .studio-slider-thumb {
+  border: 2px solid var(--brand-deep, hsl(var(--primary)));
+  background-color: hsl(var(--card));
+}
+
 @media (max-height: 520px) and (orientation: landscape) {
   .studio-editor-controls {
     min-height: 0 !important;

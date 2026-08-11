@@ -946,7 +946,7 @@ export default function Editor() {
                   </Label>
                   <div
                     dir="ltr"
-                    className="mx-auto grid w-[7.5rem] grid-cols-3 gap-1"
+                    className="studio-position-pad mx-auto grid w-[7.5rem] grid-cols-3 gap-1"
                     role="group"
                     aria-label="موضع شعار عربية"
                   >
@@ -963,17 +963,9 @@ export default function Editor() {
                           onClick={() =>
                             update({ brandPosition: pos as BrandPosition })
                           }
-                          className={`flex h-7 items-center justify-center rounded-md border text-[9px] transition ${
-                            active
-                              ? "border-accent bg-accent/25 text-accent shadow-glow"
-                              : "border-border/60 bg-card/50 text-muted-foreground hover:border-accent/40 hover:text-accent"
-                          }`}
+                          className="studio-position-btn flex h-7 items-center justify-center rounded-md border text-[9px] transition"
                         >
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full ${
-                              active ? "bg-accent" : "bg-muted-foreground/50"
-                            }`}
-                          />
+                          <span className="studio-position-dot h-1.5 w-1.5 rounded-full" />
                         </button>
                       );
                     })}
