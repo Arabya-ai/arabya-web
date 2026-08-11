@@ -134,9 +134,10 @@ html[data-theme="dark"] .ayat-studio-portal {
     isolation: isolate;
     position: relative;
     z-index: 2;
-    /* Compact controls so preview gets the visual priority */
-    max-height: min(38dvh, 20rem);
+    /* Enough room for open panels; scroll inside the card */
+    max-height: min(46dvh, 24rem);
     flex: 0 0 auto;
+    overflow-y: auto;
   }
 
   .studio-live-preview {
@@ -156,14 +157,14 @@ html[data-theme="dark"] .ayat-studio-portal {
     color: hsl(var(--foreground));
   }
 
-  /* Do not cap stage height tightly — JS sizes by width for stacked layout */
+  /* Stage hugs the measured frame — JS keeps stacked size screen-friendly */
   .studio-live-preview__stage {
     flex-direction: column;
     align-items: center;
     justify-content: center;
     width: 100%;
-    max-height: none;
-    min-height: min(58dvh, 32rem);
+    max-height: min(50dvh, 26rem);
+    min-height: min(36dvh, 18rem);
   }
 }
 

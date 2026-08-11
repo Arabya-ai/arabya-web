@@ -30,9 +30,9 @@ export const STUDIO_STACKED_LAYOUT_MAX_PX = 1023;
 
 /**
  * Size the live preview frame for the current layout.
- * Stacked (phone/tablet): fill stage width first so 9:16 is not tiny;
- * the editor page can scroll. Side-by-side (desktop): fit inside stage
- * height with a viewport cap so the locked editor shell does not overflow.
+ * Stacked (phone/tablet): fit a comfortable fraction of the viewport so
+ * controls + preview stay usable without a huge scroll. Side-by-side
+ * (desktop): fit inside stage height with a viewport cap.
  */
 export function measurePreviewFrame(opts: {
   stageW: number;
@@ -43,8 +43,10 @@ export function measurePreviewFrame(opts: {
   stacked: boolean;
   /** Desktop max fraction of viewport height (editor shell locked). */
   desktopViewportRatio?: number;
-  /** Stacked soft max fraction of viewport height. */
+  /** Stacked max fraction of viewport height for the frame. */
   stackedViewportRatio?: number;
+  /** Stacked max fraction of stage width (keeps tablet frames from dominating). */
+  stackedWidthRatio?: number;
 }): { width: number; height: number } {
   const {
     stageW,
@@ -54,16 +56,17 @@ export function measurePreviewFrame(opts: {
     viewportH,
     stacked,
     desktopViewportRatio = 0.68,
-    stackedViewportRatio = 0.9,
+    stackedViewportRatio = 0.48,
+    stackedWidthRatio = 0.72,
   } = opts;
   if (stageW <= 0 || aspectW <= 0 || aspectH <= 0) {
     return { width: 0, height: 0 };
   }
 
   if (stacked) {
-    // Prefer full stage width; soft-cap height so portrait frames stay usable.
-    const softMaxH = Math.max(320, viewportH * stackedViewportRatio);
-    return fitAspectBox(stageW, softMaxH, aspectW, aspectH);
+    const softMaxH = Math.max(260, viewportH * stackedViewportRatio);
+    const softMaxW = Math.max(160, stageW * stackedWidthRatio);
+    return fitAspectBox(softMaxW, softMaxH, aspectW, aspectH);
   }
 
   const viewportCap = Math.max(240, viewportH * desktopViewportRatio);
