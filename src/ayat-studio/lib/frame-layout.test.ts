@@ -2,12 +2,16 @@ import { describe, expect, it } from "vitest";
 import {
   frameAyahFontPx,
   frameAyahLineHeightPx,
+  frameBrandBorderInsetPx,
   frameBrandMarkPx,
+  frameOverlayYCenter,
+  frameProgressBarTopPx,
   frameSurahLabelGapPx,
   frameSurahLabelPx,
   normalizeProgressBarStyle,
   normalizeReciterPosition,
   reciterX,
+  STUDIO_TAFSIR_PREVIEW_MAX_CHARS,
 } from "./frame-layout";
 
 describe("frame-layout", () => {
@@ -45,5 +49,13 @@ describe("frame-layout", () => {
     expect(reciterX("bottom-left", 1000)).toBe(40);
     expect(reciterX("bottom-right", 1000)).toBe(960);
     expect(reciterX("bottom-center", 1000)).toBe(500);
+  });
+
+  it("uses shared overlay anchors for preview and export", () => {
+    expect(frameOverlayYCenter("center", 1000)).toBe(420);
+    expect(frameOverlayYCenter("top", 800)).toBe(176);
+    expect(frameBrandBorderInsetPx(1080)).toBe(Math.round(1080 * 0.02));
+    expect(frameProgressBarTopPx(1000)).toBe(930);
+    expect(STUDIO_TAFSIR_PREVIEW_MAX_CHARS).toBe(360);
   });
 });

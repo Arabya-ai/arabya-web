@@ -53,7 +53,11 @@ import {
 import { saveExport } from "@/ayat-studio/lib/projects-store";
 import { useToast } from "@/ayat-studio/hooks/use-toast";
 import { BackgroundPicker } from "@/ayat-studio/components/BackgroundPicker";
-import { AudioPreviewPlayer } from "@/ayat-studio/components/AudioPreviewPlayer";
+import {
+  StudioAudioPreviewProvider,
+  StudioAudioTransport,
+  StudioFrameAudioOverlay,
+} from "@/ayat-studio/components/AudioPreviewPlayer";
 import { ColorPickerField } from "@/ayat-studio/components/ColorPickerField";
 import { useSession } from "next-auth/react";
 import {
@@ -74,7 +78,7 @@ import {
 import {
   BRAND_POSITION_LABELS_AR,
   BRAND_POSITION_PAD,
-  brandPositionClass,
+  brandLockupAnchor,
   normalizeBrandPosition,
   type BrandPosition,
 } from "@/ayat-studio/lib/brand-position";
@@ -85,14 +89,21 @@ import {
   DEFAULT_SURAH_LABEL_COLOR,
   DEFAULT_SURAH_LABEL_FONT_SIZE,
   frameAyahFontPx,
+  frameBrandBorderInsetPx,
   frameBrandMarkPx,
+  frameBrandPadPx,
   frameBrandSubPx,
   frameBrandTitlePx,
+  frameOverlayYCenter,
+  frameReciterBottomPx,
   frameReciterFontPx,
   frameSurahLabelGapPx,
   frameSurahLabelPx,
   frameTafsirFontPx,
   frameTranslationFontPx,
+  STUDIO_FRAME_GRADIENT_CSS,
+  STUDIO_PREVIEW_VIEWPORT_HEIGHT_RATIO,
+  STUDIO_TAFSIR_PREVIEW_MAX_CHARS,
   normalizeProgressBarStyle,
   normalizeReciterPosition,
   normalizeSurahLabelFont,
@@ -108,7 +119,10 @@ import { Link } from "@/i18n/navigation";
 import { useStudioPreviewSrc } from "@/ayat-studio/hooks/use-studio-preview-src";
 import { ArabyaMarkIcon } from "@/ayat-studio/components/IslamicDecor";
 import { fetchAyahs, type AyahData } from "@/ayat-studio/lib/quran-api";
-import { clampAyahPreviewIndex, fitAspectBox } from "@/ayat-studio/lib/studio-preview";
+import {
+  clampAyahPreviewIndex,
+  fitAspectBox,
+} from "@/ayat-studio/lib/studio-preview";
 import {
   fetchStudioEditions,
   fetchTranslationMap,
@@ -316,7 +330,10 @@ export default function Editor() {
     const measure = () => {
       const stageW = stage.clientWidth;
       // Cap by stage AND viewport so portrait frames never force overflow inside editor.
-      const viewportCap = Math.max(200, window.innerHeight * 0.55);
+      const viewportCap = Math.max(
+        240,
+        window.innerHeight * STUDIO_PREVIEW_VIEWPORT_HEIGHT_RATIO,
+      );
       const stageH = Math.min(stage.clientHeight || viewportCap, viewportCap);
       const fitted = fitAspectBox(
         stageW,
@@ -334,7 +351,11 @@ export default function Editor() {
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(stage);
-    return () => ro.disconnect();
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
   }, [project?.ratio, project?.id]);
 
   useEffect(() => {
@@ -753,6 +774,30 @@ export default function Editor() {
   const showNumbers = project.previewShowAyahNumbers ?? true;
   const ayahOnly = project.previewShowAyahOnly ?? false;
   const transDur = project.transitionDuration ?? 0.6;
+  const brandMark = frameBrandMarkPx(frameWidth);
+  const brandTitlePx = frameBrandTitlePx(frameWidth);
+  const brandSubPx = frameBrandSubPx(frameWidth);
+  const brandUrlPx = Math.max(10, Math.round(brandSubPx * 0.92));
+  const brandPad = frameBrandPadPx(frameWidth);
+  const brandGap = Math.round(brandMark * 0.22);
+  const brandBoxW = brandMark + brandGap + Math.round(frameWidth * 0.28);
+  const brandBoxH = Math.max(
+    brandMark,
+    brandTitlePx + brandSubPx + brandUrlPx + 14,
+  );
+  const brandAnchor = brandLockupAnchor(
+    normalizeBrandPosition(project.brandPosition),
+    frameWidth,
+    frameHeight,
+    brandBoxW,
+    brandBoxH,
+    brandPad,
+  );
+  const overlayYCenter = frameOverlayYCenter(
+    project.overlayPosition,
+    frameHeight,
+  );
+  const reciterBottom = frameReciterBottomPx(frameHeight);
 
   return (
     <div className="studio-editor flex h-full min-h-0 flex-1 flex-col gap-3 overflow-hidden lg:flex-row lg:items-stretch lg:gap-4">
@@ -1468,182 +1513,205 @@ export default function Editor() {
         </div>
       </div>
 
-      <div className="studio-live-preview relative order-2 flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] p-3 shadow-deep sm:p-4 lg:order-2 lg:h-full lg:p-4">
-        <div className="pattern-mihrab pointer-events-none absolute inset-0 overflow-hidden rounded-2xl opacity-20" />
-        <div className="relative z-[1] mb-1.5 shrink-0 text-center text-[11px] tracking-widest uppercase text-accent/80 sm:text-xs">
-          معاينة مباشرة
-        </div>
-        <div
-          ref={previewStageRef}
-          className="studio-live-preview__stage relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden"
-        >
-          <div
-            ref={previewFrameRef}
-            className="studio-live-preview__frame relative flex flex-col overflow-hidden rounded-2xl border border-primary/35 shadow-deep"
-            style={{
-              width: `${previewFrameSize.width}px`,
-              height: `${previewFrameSize.height}px`,
-              maxWidth: "100%",
-              maxHeight: "100%",
-              background:
-                "linear-gradient(180deg, hsl(178 50% 18%) 0%, hsl(200 50% 8%) 100%)",
-            }}
-          >
-          <div className="studio-live-preview__media pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl">
-          {project.bgUrl && previewBgKind !== "video" && previewMedia.src && (
-            <img
-              key={previewMedia.src}
-              src={previewMedia.src}
-              alt=""
-              className="absolute inset-0 z-[1] h-full w-full object-cover"
-              style={{ opacity: (project.bgOpacity ?? 100) / 100 }}
-            />
-          )}
-          {project.bgUrl && previewBgKind === "video" && previewMedia.src && (
-            <video
-              key={previewMedia.src}
-              src={previewMedia.src}
-              poster={previewMedia.poster || undefined}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              className="absolute inset-0 z-[1] h-full w-full object-cover"
-              style={{ opacity: (project.bgOpacity ?? 100) / 100 }}
-              onLoadedData={(e) => {
-                e.currentTarget.play().catch(() => undefined);
-              }}
-            />
-          )}
-          {project.bgUrl && previewMedia.loading && (
-            <div className="absolute inset-0 z-[1] flex items-center justify-center bg-black/35">
-              <Loader2 className="h-6 w-6 animate-spin text-accent" />
-            </div>
-          )}
-          {project.bgUrl && previewMedia.error && !previewMedia.loading && (
-            <div className="absolute inset-x-3 top-3 z-[5] rounded-md border border-destructive/40 bg-black/70 px-2 py-1.5 text-center text-[10px] text-red-200">
-              {previewMedia.error}
-            </div>
-          )}
-          <div
-            className="pointer-events-none absolute inset-0 z-[2]"
-            style={{ background: "#000", opacity: project.overlayOpacity / 100 }}
-          />
-          {(project.softVignette ?? true) && (
-            <div
-              className="pointer-events-none absolute inset-0 z-[2]"
-              style={{
-                background:
-                  "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%)",
-              }}
-            />
-          )}
-          {(project.brandSignature ?? true) && (
-            <div className="pointer-events-none absolute inset-2 z-[6] rounded-xl border border-[hsl(var(--accent)/0.4)]" />
-          )}
+      <StudioAudioPreviewProvider
+        project={project}
+        onAyahIndexChange={(idx) =>
+          setPreviewAyahIndex(clampAyahPreviewIndex(idx, previewAyahs.length))
+        }
+      >
+        <div className="studio-live-preview relative order-2 flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] p-2 shadow-deep sm:p-3 lg:order-2 lg:h-full lg:p-3">
+          <div className="pattern-mihrab pointer-events-none absolute inset-0 overflow-hidden rounded-2xl opacity-20" />
+          <div className="relative z-[1] mb-1 shrink-0 text-center text-[11px] tracking-widest uppercase text-accent/80 sm:text-xs">
+            معاينة مباشرة
           </div>
-
           <div
-            className={`relative z-[3] flex min-h-0 flex-1 flex-col p-4 sm:p-6 ${
-              project.overlayPosition === "top"
-                ? "justify-start"
-                : project.overlayPosition === "bottom"
-                  ? "justify-end"
-                  : "justify-center"
-            }`}
+            ref={previewStageRef}
+            className="studio-live-preview__stage relative z-[1] flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden"
           >
             <div
-              key={`${previewAyahIndex}-${project.transition}-${transDur}`}
-              className="text-center"
-              style={previewTransitionStyle(project.transition, transDur)}
+              ref={previewFrameRef}
+              className="studio-live-preview__frame relative overflow-hidden rounded-2xl border border-primary/35 shadow-deep"
+              style={{
+                width: `${previewFrameSize.width}px`,
+                height: `${previewFrameSize.height}px`,
+                maxWidth: "100%",
+                maxHeight: "100%",
+                background: STUDIO_FRAME_GRADIENT_CSS,
+              }}
             >
-              {!ayahOnly && (
-                <p
-                  className="tracking-widest"
+              <div className="studio-live-preview__media pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-2xl">
+                {project.bgUrl && previewBgKind !== "video" && previewMedia.src && (
+                  <img
+                    key={previewMedia.src}
+                    src={previewMedia.src}
+                    alt=""
+                    className="absolute inset-0 z-[1] h-full w-full object-cover"
+                    style={{ opacity: (project.bgOpacity ?? 100) / 100 }}
+                  />
+                )}
+                {project.bgUrl && previewBgKind === "video" && previewMedia.src && (
+                  <video
+                    key={previewMedia.src}
+                    src={previewMedia.src}
+                    poster={previewMedia.poster || undefined}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    className="absolute inset-0 z-[1] h-full w-full object-cover"
+                    style={{ opacity: (project.bgOpacity ?? 100) / 100 }}
+                    onLoadedData={(e) => {
+                      e.currentTarget.play().catch(() => undefined);
+                    }}
+                  />
+                )}
+                {project.bgUrl && previewMedia.loading && (
+                  <div className="absolute inset-0 z-[1] flex items-center justify-center bg-black/35">
+                    <Loader2 className="h-6 w-6 animate-spin text-accent" />
+                  </div>
+                )}
+                {project.bgUrl && previewMedia.error && !previewMedia.loading && (
+                  <div className="absolute inset-x-3 top-3 z-[5] rounded-md border border-destructive/40 bg-black/70 px-2 py-1.5 text-center text-[10px] text-red-200">
+                    {previewMedia.error}
+                  </div>
+                )}
+                <div
+                  className="pointer-events-none absolute inset-0 z-[2]"
                   style={{
-                    color:
-                      project.surahLabelTextColor || DEFAULT_SURAH_LABEL_COLOR,
-                    fontSize: `${frameSurahLabelPx(
-                      project.surahLabelFontSize ?? DEFAULT_SURAH_LABEL_FONT_SIZE,
-                      frameWidth,
-                    )}px`,
-                    fontFamily: `"${normalizeSurahLabelFont(
-                      project.surahLabelFontFamily,
-                    )}", "IBM Plex Sans Arabic", sans-serif`,
-                    marginBottom: `${frameSurahLabelGapPx(
-                      frameSurahLabelPx(
-                        project.surahLabelFontSize ??
-                          DEFAULT_SURAH_LABEL_FONT_SIZE,
-                        frameWidth,
-                      ),
-                      frameHeight,
-                    )}px`,
+                    background: "#000",
+                    opacity: project.overlayOpacity / 100,
                   }}
+                />
+                {(project.softVignette ?? true) && (
+                  <div
+                    className="pointer-events-none absolute inset-0 z-[2]"
+                    style={{
+                      background:
+                        "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%)",
+                    }}
+                  />
+                )}
+                {(project.brandSignature ?? true) && (
+                  <div
+                    className="pointer-events-none absolute z-[6] rounded-xl border border-[rgba(200,169,81,0.4)]"
+                    style={{
+                      inset: frameBrandBorderInsetPx(frameWidth),
+                    }}
+                  />
+                )}
+              </div>
+
+              <div
+                className="pointer-events-none absolute inset-x-0 z-[3] px-[7.5%] text-center"
+                style={{
+                  top: overlayYCenter,
+                  transform: "translateY(-50%)",
+                }}
+              >
+                <div
+                  key={`${previewAyahIndex}-${project.transition}-${transDur}`}
+                  style={previewTransitionStyle(project.transition, transDur)}
                 >
-                  {selectedSurah?.name}
-                  {showNumbers
-                    ? ` · آية ${currentPreviewAyah?.numberInSurah ?? project.ayahStart}`
-                    : ""}
-                </p>
-              )}
-              {ayahsLoading ? (
-                <p className="flex items-center justify-center gap-2 text-sm text-white/70 sm:text-base">
-                  <Loader2 className="h-4 w-4 animate-spin" /> جاري تحميل نص الآيات…
-                </p>
-              ) : ayahsError ? (
-                <p className="text-sm text-red-300 sm:text-base">{ayahsError}</p>
-              ) : currentPreviewAyah ? (
-                <p
-                  className="font-quran mb-2"
-                  style={{
-                    fontSize: `${frameAyahFontPx(project.fontSize, frameWidth)}px`,
-                    color: project.textColor,
-                    lineHeight: 1.95,
-                    textShadow: "0 2px 12px rgba(0,0,0,0.8)",
-                  }}
-                >
-                  {currentPreviewAyah.text}
-                </p>
-              ) : (
-                <p className="text-sm text-white/60 sm:text-base">لا يوجد نص للعرض</p>
-              )}
-              {project.translationEnabled && translationText ? (
-                <p
-                  className="mb-2 leading-relaxed"
-                  style={{
-                    fontSize: `${frameTranslationFontPx(
-                      project.translationFontSize ?? 22,
-                      frameWidth,
-                    )}px`,
-                    color: project.translationTextColor || "#f0e6d0",
-                    textShadow: "0 1px 8px rgba(0,0,0,0.7)",
-                  }}
-                  dir="auto"
-                >
-                  {translationText}
-                </p>
-              ) : null}
-              {project.tafsirEnabled && tafsirText ? (
-                <p
-                  className="mb-2 leading-relaxed opacity-95"
-                  style={{
-                    fontSize: `${frameTafsirFontPx(
-                      project.tafsirFontSize ?? 18,
-                      frameWidth,
-                    )}px`,
-                    color: project.tafsirTextColor || "#d4c4a8",
-                    textShadow: "0 1px 8px rgba(0,0,0,0.7)",
-                  }}
-                  dir="auto"
-                >
-                  {tafsirText.length > 220
-                    ? `${tafsirText.slice(0, 220)}…`
-                    : tafsirText}
-                </p>
-              ) : null}
+                  {!ayahOnly && (
+                    <p
+                      className="tracking-widest"
+                      style={{
+                        color:
+                          project.surahLabelTextColor ||
+                          DEFAULT_SURAH_LABEL_COLOR,
+                        fontSize: `${frameSurahLabelPx(
+                          project.surahLabelFontSize ??
+                            DEFAULT_SURAH_LABEL_FONT_SIZE,
+                          frameWidth,
+                        )}px`,
+                        fontFamily: `"${normalizeSurahLabelFont(
+                          project.surahLabelFontFamily,
+                        )}", "IBM Plex Sans Arabic", sans-serif`,
+                        marginBottom: `${frameSurahLabelGapPx(
+                          frameSurahLabelPx(
+                            project.surahLabelFontSize ??
+                              DEFAULT_SURAH_LABEL_FONT_SIZE,
+                            frameWidth,
+                          ),
+                          frameHeight,
+                        )}px`,
+                        textShadow: "0 2px 8px rgba(0,0,0,0.55)",
+                      }}
+                    >
+                      {selectedSurah?.name}
+                      {showNumbers
+                        ? ` · آية ${currentPreviewAyah?.numberInSurah ?? project.ayahStart}`
+                        : ""}
+                    </p>
+                  )}
+                  {ayahsLoading ? (
+                    <p className="flex items-center justify-center gap-2 text-sm text-white/70 sm:text-base">
+                      <Loader2 className="h-4 w-4 animate-spin" /> جاري تحميل
+                      نص الآيات…
+                    </p>
+                  ) : ayahsError ? (
+                    <p className="text-sm text-red-300 sm:text-base">
+                      {ayahsError}
+                    </p>
+                  ) : currentPreviewAyah ? (
+                    <p
+                      className="font-quran mb-2 font-bold"
+                      style={{
+                        fontSize: `${frameAyahFontPx(project.fontSize, frameWidth)}px`,
+                        color: project.textColor,
+                        lineHeight: 1.95,
+                        textShadow: "0 2px 12px rgba(0,0,0,0.8)",
+                      }}
+                    >
+                      {currentPreviewAyah.text}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-white/60 sm:text-base">
+                      لا يوجد نص للعرض
+                    </p>
+                  )}
+                  {project.translationEnabled && translationText ? (
+                    <p
+                      className="mb-2 leading-relaxed"
+                      style={{
+                        fontSize: `${frameTranslationFontPx(
+                          project.translationFontSize ?? 22,
+                          frameWidth,
+                        )}px`,
+                        color: project.translationTextColor || "#f0e6d0",
+                        textShadow: "0 1px 8px rgba(0,0,0,0.7)",
+                      }}
+                      dir="auto"
+                    >
+                      {translationText}
+                    </p>
+                  ) : null}
+                  {project.tafsirEnabled && tafsirText ? (
+                    <p
+                      className="mb-2 leading-relaxed opacity-95"
+                      style={{
+                        fontSize: `${frameTafsirFontPx(
+                          project.tafsirFontSize ?? 18,
+                          frameWidth,
+                        )}px`,
+                        color: project.tafsirTextColor || "#d4c4a8",
+                        textShadow: "0 1px 8px rgba(0,0,0,0.7)",
+                      }}
+                      dir="auto"
+                    >
+                      {tafsirText.length > STUDIO_TAFSIR_PREVIEW_MAX_CHARS
+                        ? `${tafsirText.slice(0, STUDIO_TAFSIR_PREVIEW_MAX_CHARS)}…`
+                        : tafsirText}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+
               {showNav && (
-                <div className="mt-2 flex items-center justify-center gap-2">
+                <div className="pointer-events-auto absolute inset-x-0 z-[4] flex items-center justify-center gap-2"
+                  style={{ top: overlayYCenter + frameHeight * 0.12 }}
+                >
                   <button
                     type="button"
                     className="rounded-full border border-white/20 bg-black/30 p-1 text-white/80 hover:bg-black/50"
@@ -1675,63 +1743,60 @@ export default function Editor() {
                   </button>
                 </div>
               )}
+
+              {!ayahOnly &&
+                normalizeReciterPosition(project.reciterPosition) !==
+                  "hidden" && (
+                  <div
+                    dir="ltr"
+                    className={`pointer-events-none absolute inset-x-0 z-[3] flex px-[4%] ${reciterJustifyClass(
+                      normalizeReciterPosition(project.reciterPosition),
+                    )}`}
+                    style={{ bottom: reciterBottom }}
+                  >
+                    <span
+                      className="max-w-[80%] truncate"
+                      style={{
+                        color: "rgba(255,255,255,0.55)",
+                        fontSize: `${frameReciterFontPx(frameWidth)}px`,
+                      }}
+                    >
+                      {selectedReciter?.name}
+                    </span>
+                  </div>
+                )}
+
+              {(needsWatermark || (project.brandSignature ?? true)) && (
+                <div
+                  dir="ltr"
+                  className="pointer-events-none absolute z-[8] flex items-center drop-shadow-[0_1px_3px_rgba(0,0,0,0.65)]"
+                  style={{
+                    left: brandAnchor.x,
+                    top: brandAnchor.y,
+                    gap: brandGap,
+                  }}
+                  aria-label="عربية ستوديو"
+                >
+                  <ArabyaMarkIcon size={brandMark} className="shrink-0" />
+                  <BrandLockupLabels
+                    titlePx={brandTitlePx}
+                    subPx={brandSubPx}
+                  />
+                </div>
+              )}
+
+              <StudioFrameAudioOverlay
+                project={project}
+                frameWidth={frameWidth}
+                frameHeight={frameHeight}
+              />
             </div>
           </div>
-
-          {!ayahOnly &&
-            normalizeReciterPosition(project.reciterPosition) !== "hidden" && (
-              <div
-                dir="ltr"
-                className={`relative z-[3] flex items-end gap-2 px-3 pb-3 pt-1 sm:px-4 ${reciterJustifyClass(
-                  normalizeReciterPosition(project.reciterPosition),
-                )}`}
-              >
-                <span
-                  className="max-w-[80%] truncate"
-                  style={{
-                    color: "rgba(255,255,255,0.55)",
-                    fontSize: `${frameReciterFontPx(frameWidth)}px`,
-                  }}
-                >
-                  {selectedReciter?.name}
-                </span>
-              </div>
-            )}
-
-          {(needsWatermark || (project.brandSignature ?? true)) && (
-            <div
-              dir="ltr"
-              className={`pointer-events-none absolute z-[8] flex items-center drop-shadow-[0_1px_3px_rgba(0,0,0,0.65)] ${brandPositionClass(
-                normalizeBrandPosition(project.brandPosition),
-              )}`}
-              style={{ gap: Math.max(4, frameBrandMarkPx(frameWidth) * 0.18) }}
-              aria-label="عربية ستوديو"
-            >
-              <ArabyaMarkIcon
-                size={frameBrandMarkPx(frameWidth)}
-                className="shrink-0"
-              />
-              <BrandLockupLabels
-                titlePx={frameBrandTitlePx(frameWidth)}
-                subPx={frameBrandSubPx(frameWidth)}
-              />
-            </div>
-          )}
-
+          <div className="relative z-[1] w-full shrink-0 pb-1">
+            <StudioAudioTransport controlsDock="below" />
+          </div>
         </div>
-        </div>
-        <div className="relative z-[1] mt-2 w-full shrink-0 pb-1">
-          <AudioPreviewPlayer
-            project={project}
-            controlsDock="below"
-            onAyahIndexChange={(idx) =>
-              setPreviewAyahIndex(
-                clampAyahPreviewIndex(idx, previewAyahs.length),
-              )
-            }
-          />
-        </div>
-      </div>
+      </StudioAudioPreviewProvider>
     </div>
   );
 }

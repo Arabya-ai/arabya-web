@@ -18,15 +18,19 @@ import {
   DEFAULT_SURAH_LABEL_FONT_SIZE,
   frameAyahFontPx,
   frameAyahLineHeightPx,
+  frameBrandBorderInsetPx,
   frameBrandMarkPx,
   frameBrandPadPx,
   frameBrandSubPx,
   frameBrandTitlePx,
+  frameOverlayYCenter,
+  frameProgressBarTopPx,
   frameReciterFontPx,
   frameSurahLabelGapPx,
   frameSurahLabelPx,
   frameTafsirFontPx,
   frameTranslationFontPx,
+  STUDIO_TAFSIR_PREVIEW_MAX_CHARS,
   normalizeProgressBarStyle,
   normalizeReciterPosition,
   normalizeSurahLabelFont,
@@ -755,10 +759,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   ctx.scale(scale, scale);
   ctx.translate(-width / 2, 0);
 
-  let yCenter: number;
-  if (project.overlayPosition === "top") yCenter = height * 0.22;
-  else if (project.overlayPosition === "bottom") yCenter = height * 0.62;
-  else yCenter = height * 0.42;
+  let yCenter: number = frameOverlayYCenter(project.overlayPosition, height);
 
   const showNumbers = project.previewShowAyahNumbers !== false;
   const ayahOnly = project.previewShowAyahOnly === true;
@@ -838,7 +839,9 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   if (tafsirText) {
     const tSize = frameTafsirFontPx(project.tafsirFontSize ?? 18, width);
     const clipped =
-      tafsirText.length > 360 ? `${tafsirText.slice(0, 360)}…` : tafsirText;
+      tafsirText.length > STUDIO_TAFSIR_PREVIEW_MAX_CHARS
+        ? `${tafsirText.slice(0, STUDIO_TAFSIR_PREVIEW_MAX_CHARS)}…`
+        : tafsirText;
     ctx.fillStyle = project.tafsirTextColor || "#d4c4a8";
     ctx.font = `${tSize}px "IBM Plex Sans Arabic", sans-serif`;
     ctx.direction = canvasTextDirection(clipped);
@@ -877,7 +880,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   if (showBrandLockup) {
     ctx.strokeStyle = "rgba(200,169,81,0.4)";
     ctx.lineWidth = Math.max(2, width * 0.003);
-    const framePad = Math.round(width * 0.02);
+    const framePad = frameBrandBorderInsetPx(width);
     ctx.strokeRect(framePad, framePad, width - framePad * 2, height - framePad * 2);
     drawBrandLockup(ctx, {
       width,
@@ -984,7 +987,7 @@ function drawProgressBar(
   const p = Math.max(0, Math.min(1, progress));
   const barW = width * 0.7;
   const barX = (width - barW) / 2;
-  const barY = height - height * 0.07;
+  const barY = frameProgressBarTopPx(height);
   const hex = color.replace("#", "");
   const full = hex.length === 3 ? hex.split("").map((c) => c + c).join("") : hex;
   const num = parseInt(full, 16) || 0xc8a951;

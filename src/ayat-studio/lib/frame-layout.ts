@@ -3,6 +3,43 @@
  * so WYSIWYG holds when the preview frame width is measured.
  */
 
+/** Default frame gradient when no background media is set (preview + export). */
+export const STUDIO_FRAME_GRADIENT_CSS =
+  "linear-gradient(180deg, hsl(168 70% 18%) 0%, hsl(168 60% 8%) 100%)";
+
+/** Tafsir clip length — preview must match export canvas. */
+export const STUDIO_TAFSIR_PREVIEW_MAX_CHARS = 360;
+
+/** Live preview max height as a fraction of viewport (editor shell is locked). */
+export const STUDIO_PREVIEW_VIEWPORT_HEIGHT_RATIO = 0.68;
+
+export type OverlayPosition = "top" | "center" | "bottom";
+
+/** Vertical anchor for ayah block — same ratios as video-export drawFrame. */
+export function frameOverlayYCenter(
+  position: OverlayPosition | string | undefined,
+  frameH: number,
+): number {
+  if (position === "top") return frameH * 0.22;
+  if (position === "bottom") return frameH * 0.62;
+  return frameH * 0.42;
+}
+
+/** Gold border inset around the frame (preview + export). */
+export function frameBrandBorderInsetPx(frameW: number): number {
+  return Math.max(2, Math.round(frameW * 0.02));
+}
+
+/** Reciter name baseline from bottom — matches export canvas. */
+export function frameReciterBottomPx(frameH: number): number {
+  return Math.round(frameH * 0.035);
+}
+
+/** Export-style progress bar vertical position from top. */
+export function frameProgressBarTopPx(frameH: number): number {
+  return frameH - frameH * 0.07;
+}
+
 export function frameAyahFontPx(fontSize: number, frameW: number): number {
   return Math.max(12, Math.round((fontSize / 48) * frameW * 0.06));
 }
