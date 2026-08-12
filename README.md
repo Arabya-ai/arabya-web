@@ -6,9 +6,10 @@
 
 - **Next.js 15 + TypeScript + Tailwind 4**
 - **البيانات:** ملفات JSON داخل `/data` (Git-first)
-- **النشر (مجاني حالياً):** [Render](https://render.com) ← GitHub `Arabya-ai/arabya-web` → **www.arabya.org**  
-  (Vercel Hobby متوقف بسبب تجاوز الحدود — لا تنتظره؛ الدليل: [`docs/platform/hosting-free-render-ar.md`](docs/platform/hosting-free-render-ar.md))
-- **بيانات المشترك (لاحقًا):** Cloudflare D1 / Worker — منفصل عن استضافة الصفحات
+- **النشر (موصى به الآن إن قبلت دفعاً شهرياً صغيراً):** Contabo VPS — الدليل: [`docs/platform/hosting-contabo-ar.md`](docs/platform/hosting-contabo-ar.md)  
+- **بديل مجاني مؤقت:** [Render](https://render.com) — [`docs/platform/hosting-free-render-ar.md`](docs/platform/hosting-free-render-ar.md)  
+- **Vercel Hobby:** متوقف حالياً بعد تجاوز الحدود  
+- **بيانات المشترك (لاحقًا):** Cloudflare D1 / Worker
 
 ## سياسة البيانات (Git-first)
 
@@ -76,18 +77,12 @@ npm run dev
 
 أيضاً في المصحف: جدول كلمات/إعراب للصفحة، قرّاء EveryAyah، تلاوة كلمة بكلمة، تكبير خط، مشاركة، مفضّلات، وضع ليلي، OG.
 
-## ربط النطاق (استضافة مجانية — Render)
+## ربط النطاق (الاستضافة)
 
-Vercel متوقف مؤقتاً على الخطة المجانية. المسار الحالي:
+- **Contabo (مدفوع رخيص وثابت):** [`docs/platform/hosting-contabo-ar.md`](docs/platform/hosting-contabo-ar.md)
+- **Render (مجاني مؤقت):** [`docs/platform/hosting-free-render-ar.md`](docs/platform/hosting-free-render-ar.md)
 
-1. اتبع الدليل بالعربية: [`docs/platform/hosting-free-render-ar.md`](docs/platform/hosting-free-render-ar.md)
-2. انشر على Render (Free) من GitHub
-3. اربط `www.arabya.org` من لوحة Render → Custom Domains
-4. حدّث Google OAuth redirect إلى النطاق الجديد
-
-ملف الإعداد الجاهز: `render.yaml` في جذر المشروع.
-
-كل `git push` إلى `main` يعيد النشر تلقائياً على Render بعد ربط المستودع.
+بعد ربط المستودع أو السيرفر، كل `git push` إلى `main` يمكن أن يعيد النشر حسب إعدادك (ServerAvatar / webhook).
 
 ## QA سريع بعد النشر
 
