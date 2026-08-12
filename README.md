@@ -6,7 +6,9 @@
 
 - **Next.js 15 + TypeScript + Tailwind 4**
 - **البيانات:** ملفات JSON داخل `/data` (Git-first)
-- **النشر:** Vercel ← GitHub `Arabya-ai/arabya-web` → **www.arabya.org** (مع توجيه `arabyaai.com` إليه)
+- **النشر (مجاني حالياً):** [Render](https://render.com) ← GitHub `Arabya-ai/arabya-web` → **www.arabya.org**  
+  (Vercel Hobby متوقف بسبب تجاوز الحدود — لا تنتظره؛ الدليل: [`docs/platform/hosting-free-render-ar.md`](docs/platform/hosting-free-render-ar.md))
+- **بيانات المشترك (لاحقًا):** Cloudflare D1 / Worker — منفصل عن استضافة الصفحات
 
 ## سياسة البيانات (Git-first)
 
@@ -74,15 +76,18 @@ npm run dev
 
 أيضاً في المصحف: جدول كلمات/إعراب للصفحة، قرّاء EveryAyah، تلاوة كلمة بكلمة، تكبير خط، مشاركة، مفضّلات، وضع ليلي، OG.
 
-## ربط النطاق على Vercel
+## ربط النطاق (استضافة مجانية — Render)
 
-1. استورد `Arabya-ai/arabya-web` في [Vercel](https://vercel.com/dashboard)
-2. **Settings → Domains** → أضف `arabya.org` و `www.arabya.org` (و`arabyaai.com` كتوجيه إن لزم)
-3. انسخ سجلات DNS إلى المسجّل
-4. `arabya.ai` يُربط بعد اكتمال المنتج
-5. HTTPS تلقائي من Vercel
+Vercel متوقف مؤقتاً على الخطة المجانية. المسار الحالي:
 
-كل `git push` إلى `main` يعيد النشر تلقائيًا.
+1. اتبع الدليل بالعربية: [`docs/platform/hosting-free-render-ar.md`](docs/platform/hosting-free-render-ar.md)
+2. انشر على Render (Free) من GitHub
+3. اربط `www.arabya.org` من لوحة Render → Custom Domains
+4. حدّث Google OAuth redirect إلى النطاق الجديد
+
+ملف الإعداد الجاهز: `render.yaml` في جذر المشروع.
+
+كل `git push` إلى `main` يعيد النشر تلقائياً على Render بعد ربط المستودع.
 
 ## QA سريع بعد النشر
 

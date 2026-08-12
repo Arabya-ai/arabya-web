@@ -23,6 +23,9 @@ import {
 } from "@/i18n/routing";
 import { getFooterCredit } from "@/lib/site-appearance-store";
 
+const enableVercelAnalytics =
+  process.env.VERCEL === "1" || Boolean(process.env.NEXT_PUBLIC_VERCEL_ENV);
+
 /**
  * Keep all 7 families available via CSS variables; preload none of them.
  * Early LCP text uses system-ui; Uthmanic is preloaded only on /mushaf via layout.
@@ -159,7 +162,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             <AppShell footerCredit={footerCredit}>{children}</AppShell>
           </AuthSessionProvider>
         </NextIntlClientProvider>
-        <Analytics />
+        {enableVercelAnalytics ? <Analytics /> : null}
       </body>
     </html>
   );

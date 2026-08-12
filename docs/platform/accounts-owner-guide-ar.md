@@ -5,6 +5,7 @@
 ## أين نحن؟
 - **المرحلة A:** تسجيل الدخول بـ Google — **تمت** على المحلي والموقع الحي.
 - **المرحلة B:** مزامنة المفضّلات/الملاحظات/عادة القراءة عبر **Cloudflare D1**.
+- **الاستضافة:** **Render المجاني** بدل Vercel المتوقف — `docs/platform/hosting-free-render-ar.md`.
 
 ---
 
@@ -25,7 +26,8 @@
    - `http://localhost:3000/api/auth/callback/google`
    - `https://www.arabya.org/api/auth/callback/google`  
    - (اختياري أثناء الانتقال) `https://www.arabyaai.com/api/auth/callback/google`  
-6. نفس القيم في Vercel → Environment Variables → عيّن `AUTH_URL=https://www.arabya.org` ثم Redeploy  
+6. نفس القيم في **Render → Environment** → عيّن `AUTH_URL` ثم Redeploy  
+   (لا تعتمد على Vercel الآن — متوقف على الخطة المجانية)  
 
 **تنبيه:** `AUTH_GOOGLE_ID` يجب أن يكون معرّفًا ينتهي بـ `.apps.googleusercontent.com` — **ليس** رابط `callback/google`.
 
@@ -33,13 +35,14 @@
 
 ## المرحلة B — Cloudflare D1 (المسار الحالي)
 
-### توضيح: Vercel و D1 ليسا بديلين
+### توضيح: الاستضافة و D1 ليسا بديلين
 | الاسم | الدور |
 |--------|--------|
-| **Vercel** | يستضيف موقع عربية (الصفحات + دخول Google) — **يبقى** |
-| **Cloudflare D1** | خزانة بيانات المشترك للمزامنة — **نضيفها الآن** |
+| **Render (حالياً)** | يستضيف موقع عربية (الصفحات + دخول Google) — **مجاني** |
+| **Vercel** | كان الاستضافة — **متوقف** بعد تجاوز حدود Hobby |
+| **Cloudflare D1** | خزانة بيانات المشترك للمزامنة — عند الحاجة |
 
-المتصفح → موقع عربية على Vercel → بعد الدخول → عامل Cloudflare (Worker) → قاعدة D1.
+المتصفح → موقع عربية على Render → بعد الدخول → عامل Cloudflare (Worker) → قاعدة D1.
 
 الزائر بلا حساب يبقى على تخزين الجهاز فقط. نص القرآن يبقى في Git.
 

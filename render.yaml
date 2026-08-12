@@ -1,0 +1,33 @@
+# Free Node host for Arabya (alternative to paused Vercel Hobby).
+# Owner steps (Arabic): docs/platform/hosting-free-render-ar.md
+#
+# After connecting this Blueprint in Render, set the secret env vars in the dashboard
+# (AUTH_SECRET, AUTH_GOOGLE_ID, AUTH_GOOGLE_SECRET, …) then point DNS to Render.
+
+services:
+  - type: web
+    name: arabya-web
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: main
+    autoDeploy: true
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      # Public site URL — update if Render gives a different custom domain
+      - key: AUTH_URL
+        value: https://www.arabya.org
+      - key: AUTH_SECRET
+        sync: false
+      - key: AUTH_GOOGLE_ID
+        sync: false
+      - key: AUTH_GOOGLE_SECRET
+        sync: false
+      - key: ARABYA_ADMIN_EMAILS
+        sync: false
