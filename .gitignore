@@ -45,6 +45,11 @@ yarn-error.log*
 # local scrape cache for quran-words import/fetch
 /.cache/
 
+# local user sync (Contabo SQLite)
+data/user-data.sqlite
+data/user-data.sqlite-wal
+data/user-data.sqlite-shm
+
 # vercel
 .vercel
 

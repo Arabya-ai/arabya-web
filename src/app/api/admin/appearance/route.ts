@@ -50,7 +50,7 @@ export async function PATCH(request: Request) {
           ok: false,
           error: "cloud_required",
           message:
-            "Saving appearance on production needs cloud sync (D1). Enable ARABYA_D1_ENABLED and redeploy the sync Worker.",
+            "Saving appearance on production needs user sync. Enable ARABYA_USER_SYNC_ENABLED on the server.",
         },
         { status: 503 },
       );

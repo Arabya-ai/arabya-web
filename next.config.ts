@@ -36,7 +36,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["@resvg/resvg-js"],
+  serverExternalPackages: ["@resvg/resvg-js", "better-sqlite3"],
   experimental: {
     // Tree-shake heavy barrels so home/mushaf ship less unused JS.
     optimizePackageImports: [

@@ -1,12 +1,13 @@
 /**
- * Cloud bookmarks adapter — inactive until ARABYA_D1_ENABLED=1 and D1 binding.
+ * Cloud bookmarks adapter — inactive until user sync is enabled.
  * Local bookmarks remain the default via bookmarks.ts.
  */
 
 import type { Bookmark } from "./bookmarks";
+import { isCloudSyncConfigured } from "./cloud-sync";
 
 export function isCloudBookmarksEnabled(): boolean {
-  return process.env.ARABYA_D1_ENABLED === "1";
+  return isCloudSyncConfigured();
 }
 
 /** Placeholder for future D1 sync. Returns null while disabled. */

@@ -12,7 +12,11 @@ export async function GET() {
   }
   if (!isCloudSyncConfigured()) {
     return NextResponse.json(
-      { ok: false, error: "not_configured", message: "مزامنة D1 غير مفعّلة بعد على السيرفر." },
+      {
+        ok: false,
+        error: "not_configured",
+        message: "مزامنة الحساب غير مفعّلة بعد على السيرفر.",
+      },
       { status: 503 },
     );
   }
@@ -37,7 +41,11 @@ export async function PUT(request: Request) {
   }
   if (!isCloudSyncConfigured()) {
     return NextResponse.json(
-      { ok: false, error: "not_configured", message: "مزامنة D1 غير مفعّلة بعد على السيرفر." },
+      {
+        ok: false,
+        error: "not_configured",
+        message: "مزامنة الحساب غير مفعّلة بعد على السيرفر.",
+      },
       { status: 503 },
     );
   }

@@ -110,6 +110,51 @@ curl -I http://127.0.0.1:3000
 
 ---
 
+## 3) مزامنة المفضّلة والملاحظات (SQLite على السيرفر)
+
+بدلاً من D1/Cloudflare — البيانات تُحفظ في ملف SQLite على Contabo (قرص 200GB).
+
+### أ) تفعيل المزامنة (مرة واحدة على SSH)
+
+```bash
+sudo mkdir -p /var/lib/arabya
+sudo chown "$(whoami):$(whoami)" /var/lib/arabya
+
+cd /var/www/arabya-web
+nano .env.production.local
+```
+
+أضف أو عدّل:
+
+```
+ARABYA_USER_SYNC_ENABLED=1
+ARABYA_USER_DB_PATH=/var/lib/arabya/user-data.sqlite
+```
+
+احفظ ثم:
+
+```bash
+cp -f .env.production.local .env.local
+bash scripts/contabo-deploy.sh
+```
+
+(السكربت ينشئ ملف SQLite تلقائياً إن لم يكن موجوداً.)
+
+### ب) اختبار من جهازين
+
+1. سجّل دخول Gmail على **https://www.arabya.org**
+2. من المصحف: احفظ آية في **المفضّلة** أو اكتب **ملاحظة**
+3. من **حسابي** → اضغط **مزامنة** (أو انتظر المزامنة التلقائية)
+4. من جهاز أو متصفح آخر (نفس الحساب): **مزامنة** ثم افتح **/favorites** — يجب أن تظهر البيانات
+
+### ج) نسخ احتياطي (اختياري)
+
+```bash
+cp /var/lib/arabya/user-data.sqlite /var/lib/arabya/backup-$(date +%F).sqlite
+```
+
+---
+
 ## Proxy LiteSpeed (مرجع — لا تغيّر إن كان الموقع يعمل)
 
 ملف `.htaccess` الصحيح:

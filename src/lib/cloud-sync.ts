@@ -4,6 +4,29 @@ import type { ReadingHabitState } from "@/lib/reading-habit";
 import type { UserRole } from "@/lib/roles";
 import { isEnvAdminEmail } from "@/lib/roles";
 import type { StudyEntry } from "@/lib/study-archive";
+import {
+  isLocalUserSyncEnabled,
+  localAdminBanUser,
+  localAdminDeleteUser,
+  localAdminGetPortfolio,
+  localAdminGetUser,
+  localAdminListAudit,
+  localAdminListRoleRequests,
+  localAdminListUsers,
+  localAdminReviewRoleRequest,
+  localAdminSetRole,
+  localAdminStats,
+  localCreateRoleRequest,
+  localFetchRoleStatus,
+  localGetRoleRequest,
+  localPullSync,
+  localPushSync,
+  localReadSiteAppearance,
+  localStudioCreateUpload,
+  localStudioListUploads,
+  localWriteSiteAppearance,
+  resolveUserDbPath,
+} from "@/lib/local-user-db";
 
 export type SyncProgress = {
   lastPage: number | null;
@@ -62,6 +85,14 @@ function d1EnabledFlag(): boolean {
   return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
 }
 
+export type CloudSyncMode = "local" | "worker" | "none";
+
+/** Worker (Cloudflare D1) sync — legacy path. */
+export function isWorkerSyncConfigured(): boolean {
+  const env = cloudSyncEnvStatus();
+  return env.hasSyncUrl && env.hasSyncSecret && env.d1Enabled;
+}
+
 /** Safe (non-secret) snapshot of which sync env vars are present. */
 export function cloudSyncEnvStatus(): {
   hasSyncUrl: boolean;
@@ -69,6 +100,9 @@ export function cloudSyncEnvStatus(): {
   d1Enabled: boolean;
   d1Raw: string;
   syncHost: string | null;
+  localSyncEnabled: boolean;
+  userDbPath: string | null;
+  syncMode: CloudSyncMode;
 } {
   const urlRaw = (process.env.ARABYA_SYNC_URL || "").trim();
   let syncHost: string | null = null;
@@ -77,18 +111,31 @@ export function cloudSyncEnvStatus(): {
   } catch {
     syncHost = "invalid_url";
   }
+  const localSyncEnabled = isLocalUserSyncEnabled();
+  const workerReady =
+    Boolean(urlRaw) &&
+    Boolean(process.env.ARABYA_SYNC_SECRET?.trim()) &&
+    d1EnabledFlag();
+  const syncMode: CloudSyncMode = localSyncEnabled
+    ? "local"
+    : workerReady
+      ? "worker"
+      : "none";
   return {
     hasSyncUrl: Boolean(urlRaw),
     hasSyncSecret: Boolean(process.env.ARABYA_SYNC_SECRET?.trim()),
     d1Enabled: d1EnabledFlag(),
     d1Raw: (process.env.ARABYA_D1_ENABLED || "").trim().slice(0, 16),
     syncHost,
+    localSyncEnabled,
+    userDbPath: localSyncEnabled ? resolveUserDbPath() : null,
+    syncMode,
   };
 }
 
+/** True when local SQLite or remote Worker sync is active. */
 export function isCloudSyncConfigured(): boolean {
-  const env = cloudSyncEnvStatus();
-  return env.hasSyncUrl && env.hasSyncSecret && env.d1Enabled;
+  return isLocalUserSyncEnabled() || isWorkerSyncConfigured();
 }
 
 function syncBaseUrl(): string {
@@ -103,7 +150,7 @@ async function callWorker<T extends Record<string, unknown>>(
   path: string,
   body: Record<string, unknown>,
 ): Promise<T> {
-  if (!isCloudSyncConfigured()) {
+  if (!isWorkerSyncConfigured()) {
     throw new Error("cloud_sync_not_configured");
   }
 
@@ -151,7 +198,10 @@ function profileBody(user: {
 export async function fetchCloudRoleStatus(
   email: string,
 ): Promise<{ role: UserRole | null; banned: boolean; unreachable?: boolean }> {
-  if (!isCloudSyncConfigured()) return { role: null, banned: false };
+  if (isLocalUserSyncEnabled()) {
+    return localFetchRoleStatus(email);
+  }
+  if (!isWorkerSyncConfigured()) return { role: null, banned: false };
   try {
     const data = await callWorker<{ role?: UserRole; banned?: boolean }>(
       "/v1/role",
@@ -179,6 +229,9 @@ export async function pullCloudSync(user: {
   image?: string | null;
   role?: string;
 }) {
+  if (isLocalUserSyncEnabled()) {
+    return localPullSync(user);
+  }
   const data = await callWorker<
     SyncPayload & { ok: boolean; userId?: string; role?: UserRole }
   >("/v1/pull", profileBody(user));
@@ -202,6 +255,9 @@ export async function pushCloudSync(
   },
   payload: SyncPayload,
 ) {
+  if (isLocalUserSyncEnabled()) {
+    return localPushSync(user, payload);
+  }
   const data = await callWorker<
     SyncPayload & { ok: boolean; userId?: string; role?: UserRole }
   >("/v1/push", {
@@ -226,6 +282,9 @@ export async function pushCloudSync(
 }
 
 export async function studioListUploads(actorEmail: string) {
+  if (isLocalUserSyncEnabled()) {
+    return localStudioListUploads();
+  }
   return callWorker<{ uploads: SourceUploadRow[] }>("/v1/studio/uploads", {
     actorEmail,
     action: "list",
@@ -236,6 +295,9 @@ export async function studioCreateUpload(
   actorEmail: string,
   input: { filename: string; payload: string; notes?: string; kind?: string },
 ) {
+  if (isLocalUserSyncEnabled()) {
+    return localStudioCreateUpload(actorEmail, input);
+  }
   return callWorker<{ id: string; status: string }>("/v1/studio/uploads", {
     actorEmail,
     action: "create",
@@ -255,6 +317,9 @@ export type SourceUploadRow = {
 };
 
 export async function getRoleRequest(email: string) {
+  if (isLocalUserSyncEnabled()) {
+    return localGetRoleRequest(email);
+  }
   return callWorker<{ request: RoleRequestRow | null }>("/v1/role-request", {
     email,
     action: "get",
@@ -266,6 +331,9 @@ export async function createRoleRequest(
   message: string,
   targetRole: "editor" | "admin" = "editor",
 ) {
+  if (isLocalUserSyncEnabled()) {
+    return localCreateRoleRequest(user, message, targetRole);
+  }
   return callWorker<{ id: string; status: string }>("/v1/role-request", {
     ...profileBody(user),
     action: "create",
@@ -280,6 +348,9 @@ export async function adminBanUser(
   banned: boolean,
   reason?: string,
 ) {
+  if (isLocalUserSyncEnabled()) {
+    return localAdminBanUser(actorEmail, userId, banned, reason);
+  }
   return callWorker<{ status: string }>("/v1/admin/ban-user", {
     actorEmail,
     userId,
@@ -289,6 +360,9 @@ export async function adminBanUser(
 }
 
 export async function adminGetPortfolio(actorEmail: string, userId: string) {
+  if (isLocalUserSyncEnabled()) {
+    return localAdminGetPortfolio(actorEmail, userId);
+  }
   return callWorker<{
     user: AdminUserRow & { uid?: string };
     bookmarkCount: number;
@@ -300,6 +374,9 @@ export async function adminGetPortfolio(actorEmail: string, userId: string) {
 }
 
 export async function adminGetStats(actorEmail: string) {
+  if (isLocalUserSyncEnabled()) {
+    return { stats: localAdminStats() };
+  }
   return callWorker<{ stats: AdminStats }>("/v1/admin/stats", { actorEmail });
 }
 
@@ -307,6 +384,9 @@ export async function adminListUsers(
   actorEmail: string,
   opts: { q?: string; role?: string; limit?: number; offset?: number } = {},
 ) {
+  if (isLocalUserSyncEnabled()) {
+    return localAdminListUsers(opts);
+  }
   return callWorker<{
     users: AdminUserRow[];
     total: number;
@@ -322,6 +402,11 @@ export async function adminListUsers(
 }
 
 export async function adminGetUser(actorEmail: string, userId: string) {
+  if (isLocalUserSyncEnabled()) {
+    const detail = localAdminGetUser(userId);
+    if (!detail) throw new Error("not_found");
+    return detail;
+  }
   return callWorker<{
     user: AdminUserRow;
     bookmarkCount: number;
@@ -335,6 +420,9 @@ export async function adminSetRole(
   role: UserRole | "user",
   reason?: string,
 ) {
+  if (isLocalUserSyncEnabled()) {
+    return localAdminSetRole(actorEmail, userId, role, reason);
+  }
   const normalized = role === "user" ? "member" : role;
   return callWorker<{ role: string; fromRole?: string }>(
     "/v1/admin/set-role",
@@ -352,6 +440,9 @@ export async function adminDeleteUser(
   userId: string,
   reason?: string,
 ) {
+  if (isLocalUserSyncEnabled()) {
+    return localAdminDeleteUser(actorEmail, userId, reason);
+  }
   return callWorker<{ deleted: string }>("/v1/admin/delete-user", {
     actorEmail,
     userId,
@@ -363,6 +454,9 @@ export async function adminListRoleRequests(
   actorEmail: string,
   status = "pending",
 ) {
+  if (isLocalUserSyncEnabled()) {
+    return localAdminListRoleRequests(status);
+  }
   return callWorker<{ requests: RoleRequestRow[] }>(
     "/v1/admin/role-requests",
     { actorEmail, action: "list", status },
@@ -375,6 +469,14 @@ export async function adminReviewRoleRequest(
   decision: "approved" | "rejected",
   reviewNote?: string,
 ) {
+  if (isLocalUserSyncEnabled()) {
+    return localAdminReviewRoleRequest(
+      actorEmail,
+      requestId,
+      decision,
+      reviewNote,
+    );
+  }
   return callWorker<{ decision: string }>("/v1/admin/role-requests", {
     actorEmail,
     action: "review",
@@ -385,6 +487,9 @@ export async function adminReviewRoleRequest(
 }
 
 export async function adminListAudit(actorEmail: string) {
+  if (isLocalUserSyncEnabled()) {
+    return localAdminListAudit();
+  }
   return callWorker<{
     entries: Array<{
       id: string;
@@ -406,7 +511,10 @@ export type CloudSiteAppearance = {
 };
 
 export async function fetchCloudSiteAppearance(): Promise<CloudSiteAppearance | null> {
-  if (!isCloudSyncConfigured()) return null;
+  if (isLocalUserSyncEnabled()) {
+    return localReadSiteAppearance();
+  }
+  if (!isWorkerSyncConfigured()) return null;
   try {
     const data = await callWorker<{ appearance?: CloudSiteAppearance }>(
       "/v1/site-appearance",
@@ -423,7 +531,17 @@ export async function fetchCloudSiteAppearanceDetailed(): Promise<{
   appearance: CloudSiteAppearance | null;
   error: string | null;
 }> {
-  if (!isCloudSyncConfigured()) {
+  if (isLocalUserSyncEnabled()) {
+    try {
+      return { appearance: localReadSiteAppearance(), error: null };
+    } catch (err) {
+      return {
+        appearance: null,
+        error: err instanceof Error ? err.message.slice(0, 80) : "fetch_failed",
+      };
+    }
+  }
+  if (!isWorkerSyncConfigured()) {
     return { appearance: null, error: "not_configured" };
   }
   try {
@@ -441,6 +559,9 @@ export async function fetchCloudSiteAppearanceDetailed(): Promise<{
 }
 
 export async function adminGetSiteAppearance(actorEmail: string) {
+  if (isLocalUserSyncEnabled()) {
+    return { appearance: localReadSiteAppearance() };
+  }
   return callWorker<{ appearance: CloudSiteAppearance }>(
     "/v1/admin/site-appearance",
     { actorEmail, action: "get" },
@@ -451,6 +572,9 @@ export async function adminSetSiteAppearance(
   actorEmail: string,
   input: { footerCreditAr: string; footerCreditEn: string },
 ) {
+  if (isLocalUserSyncEnabled()) {
+    return { appearance: localWriteSiteAppearance(actorEmail, input) };
+  }
   return callWorker<{ appearance: CloudSiteAppearance }>(
     "/v1/admin/site-appearance",
     {

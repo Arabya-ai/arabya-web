@@ -18,6 +18,13 @@ echo "==> Install & build"
 npm ci
 npm run build
 
+if [[ "${ARABYA_USER_SYNC_ENABLED:-}" == "1" || "${ARABYA_USER_SYNC_ENABLED:-}" == "true" ]]; then
+  echo "==> Ensure user SQLite DB"
+  DB_PATH="${ARABYA_USER_DB_PATH:-/var/lib/arabya/user-data.sqlite}"
+  mkdir -p "$(dirname "$DB_PATH")"
+  ARABYA_USER_DB_PATH="$DB_PATH" npm run init-user-db
+fi
+
 echo "==> Restart PM2"
 if pm2 describe arabya-web >/dev/null 2>&1; then
   pm2 restart arabya-web
