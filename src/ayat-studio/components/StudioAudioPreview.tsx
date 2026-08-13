@@ -43,8 +43,7 @@ function createProgressStore(): ProgressStore {
     },
     set(value) {
       const next = Math.max(0, Math.min(1, value));
-      // Skip microscopic updates to cut subscriber churn.
-      if (Math.abs(next - progress) < 0.002 && next !== 0 && next !== 1) return;
+      if (Math.abs(next - progress) < 0.004 && next !== 0 && next !== 1) return;
       progress = next;
       listeners.forEach((l) => l());
     },
@@ -94,7 +93,9 @@ function useStudioAudioPreviewLogic(
   const [error, setError] = useState<string | null>(null);
 
   const progressStoreRef = useRef<ProgressStore | null>(null);
-  if (!progressStoreRef.current) progressStoreRef.current = createProgressStore();
+  if (!progressStoreRef.current) {
+    progressStoreRef.current = createProgressStore();
+  }
   const progressStore = progressStoreRef.current;
 
   const ctxRef = useRef<AudioContext | null>(null);
@@ -105,11 +106,14 @@ function useStudioAudioPreviewLogic(
   const dataRef = useRef<Uint8Array | null>(null);
   const startTimeRef = useRef(0);
   const startedAtSecRef = useRef(0);
-  const ignoreEndedRef = useRef(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const segmentsRef = useRef<{ start: number; end: number }[]>([]);
   const lastAyahIndexRef = useRef(-1);
+  /** Bumps on pause/stop/new play so stale source.onended cannot clobber UI. */
+  const playGenRef = useRef(0);
+  const playingRef = useRef(false);
+
   const onAyahIndexChangeRef = useRef(onAyahIndexChange);
   onAyahIndexChangeRef.current = onAyahIndexChange;
 
@@ -146,15 +150,92 @@ function useStudioAudioPreviewLogic(
     }
   }, [project.playbackRate]);
 
-  const stop = useCallback(() => {
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    rafRef.current = null;
-    ignoreEndedRef.current = true;
+  const clearRaf = () => {
+    if (rafRef.current != null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+  };
+
+  const disconnectSource = () => {
     try {
       sourceRef.current?.stop();
-    } catch {}
-    sourceRef.current?.disconnect();
+    } catch {
+      /* already stopped */
+    }
+    try {
+      sourceRef.current?.disconnect();
+    } catch {
+      /* ignore */
+    }
     sourceRef.current = null;
+  };
+
+  const emitAyahIndex = (timeSec: number) => {
+    const idx = ayahIndexAtTime(segmentsRef.current, timeSec);
+    if (idx !== lastAyahIndexRef.current) {
+      lastAyahIndexRef.current = idx;
+      onAyahIndexChangeRef.current?.(idx);
+    }
+  };
+
+  const renderLoopRef = useRef<() => void>(() => {});
+  renderLoopRef.current = () => {
+    const ctx = ctxRef.current;
+    const buffer = bufferRef.current;
+    if (!ctx || !buffer || !playingRef.current) {
+      rafRef.current = null;
+      return;
+    }
+
+    const rate = Math.max(0.75, Math.min(1.25, rateRef.current || 1));
+    const elapsed =
+      (ctx.currentTime - startTimeRef.current) * rate +
+      startedAtSecRef.current;
+    const dur = buffer.duration || 1;
+    progressStore.set(Math.min(elapsed / dur, 1));
+    emitAyahIndex(elapsed);
+
+    const canvas = canvasRef.current;
+    const analyser = analyserRef.current;
+    const data = dataRef.current;
+    const p = projectRef.current;
+    if (canvas && analyser && data) {
+      analyser.getByteFrequencyData(data as Uint8Array<ArrayBuffer>);
+      const type = (p.visualizer || "bars") as VisualizerType;
+      if (type !== "none") {
+        drawVisualizer({
+          canvas,
+          data,
+          type,
+          color: p.visualizerColor || "#C8A951",
+          intensity: (p.visualizerIntensity ?? 60) / 100,
+          time: elapsed,
+        });
+      }
+    }
+
+    if (elapsed >= dur - 0.02) {
+      playingRef.current = false;
+      playGenRef.current += 1;
+      clearRaf();
+      disconnectSource();
+      startedAtSecRef.current = 0;
+      progressStore.set(0);
+      lastAyahIndexRef.current = -1;
+      onAyahIndexChangeRef.current?.(0);
+      setPlaying(false);
+      return;
+    }
+
+    rafRef.current = requestAnimationFrame(() => renderLoopRef.current());
+  };
+
+  const stopHard = useCallback(() => {
+    playGenRef.current += 1;
+    playingRef.current = false;
+    clearRaf();
+    disconnectSource();
     startedAtSecRef.current = 0;
     progressStore.set(0);
     setPlaying(false);
@@ -163,21 +244,19 @@ function useStudioAudioPreviewLogic(
   }, [progressStore]);
 
   useEffect(() => {
-    stop();
+    stopHard();
     setReady(false);
     bufferRef.current = null;
     segmentsRef.current = [];
-    lastAyahIndexRef.current = -1;
-    progressStore.set(0);
     setDuration(0);
-  }, [reciterId, surahId, ayahStart, ayahEnd, stop, progressStore]);
+  }, [reciterId, surahId, ayahStart, ayahEnd, stopHard]);
 
   useEffect(() => {
     return () => {
-      stop();
+      stopHard();
       ctxRef.current?.close().catch(() => {});
     };
-  }, [stop]);
+  }, [stopHard]);
 
   const ensureBuffer = async () => {
     if (bufferRef.current) return bufferRef.current;
@@ -186,7 +265,9 @@ function useStudioAudioPreviewLogic(
     try {
       const ctx =
         ctxRef.current ??
-        new (window.AudioContext || (window as any).webkitAudioContext)();
+        new (window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext })
+            .webkitAudioContext)();
       ctxRef.current = ctx;
       const ayahs = await fetchAyahs(surahId, ayahStart, ayahEnd, reciterId);
       const { buffer, segments } = await fetchAndDecodeAudio(ayahs, ctx);
@@ -198,60 +279,28 @@ function useStudioAudioPreviewLogic(
       setDuration(buffer.duration);
       setReady(true);
       return buffer;
-    } catch (e: any) {
-      setError(e?.message || "فشل تحميل الصوت");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "فشل تحميل الصوت");
       throw e;
     } finally {
       setLoading(false);
     }
   };
 
-  const emitAyahIndex = (timeSec: number) => {
-    const idx = ayahIndexAtTime(segmentsRef.current, timeSec);
-    if (idx !== lastAyahIndexRef.current) {
-      lastAyahIndexRef.current = idx;
-      onAyahIndexChangeRef.current?.(idx);
-    }
-  };
-
-  const renderLoop = () => {
-    const canvas = canvasRef.current;
-    const analyser = analyserRef.current;
-    const data = dataRef.current;
-    const ctx = ctxRef.current;
-    const p = projectRef.current;
-    if (!canvas || !analyser || !data || !ctx) return;
-
-    analyser.getByteFrequencyData(data as any);
-    const rate = Math.max(0.75, Math.min(1.25, rateRef.current || 1));
-    const elapsed =
-      (ctx.currentTime - startTimeRef.current) * rate +
-      startedAtSecRef.current;
-    const dur = bufferRef.current?.duration || 1;
-    progressStore.set(Math.min(elapsed / dur, 1));
-    emitAyahIndex(elapsed);
-
-    drawVisualizer({
-      canvas,
-      data,
-      type: (p.visualizer || "bars") as VisualizerType,
-      color: p.visualizerColor || "#C8A951",
-      intensity: (p.visualizerIntensity ?? 60) / 100,
-      time: elapsed,
-    });
-
-    if (elapsed >= dur) {
-      stop();
-      return;
-    }
-    rafRef.current = requestAnimationFrame(renderLoop);
-  };
-
   const play = useCallback(async () => {
     try {
+      // Invalidate any in-flight source / onended from a previous pause.
+      playGenRef.current += 1;
+      const gen = playGenRef.current;
+      clearRaf();
+      disconnectSource();
+
       const buffer = await ensureBuffer();
+      if (gen !== playGenRef.current) return;
+
       const ctx = ctxRef.current!;
       if (ctx.state === "suspended") await ctx.resume();
+      if (gen !== playGenRef.current) return;
 
       const source = ctx.createBufferSource();
       source.buffer = buffer;
@@ -286,42 +335,43 @@ function useStudioAudioPreviewLogic(
       );
       startTimeRef.current = ctx.currentTime;
       source.start(0, offset);
+
+      playingRef.current = true;
       setPlaying(true);
       emitAyahIndex(offset);
-      rafRef.current = requestAnimationFrame(renderLoop);
+      rafRef.current = requestAnimationFrame(() => renderLoopRef.current());
 
       source.onended = () => {
-        if (ignoreEndedRef.current) {
-          ignoreEndedRef.current = false;
-          setPlaying(false);
-          return;
-        }
+        // Ignore stops from pause/stopHard or superseded play() calls.
+        if (gen !== playGenRef.current) return;
+        if (!playingRef.current) return;
+        playingRef.current = false;
         startedAtSecRef.current = 0;
         progressStore.set(0);
+        clearRaf();
+        sourceRef.current = null;
         setPlaying(false);
+        lastAyahIndexRef.current = -1;
+        onAyahIndexChangeRef.current?.(0);
       };
     } catch {
       /* error already surfaced */
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- renderLoop/ensureBuffer use refs
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- buffer load uses current ids via closure; loop via refs
   }, [progressStore, reciterId, surahId, ayahStart, ayahEnd]);
 
   const pause = useCallback(() => {
     const ctx = ctxRef.current;
-    if (ctx && sourceRef.current) {
+    if (ctx && sourceRef.current && playingRef.current) {
       const rate = Math.max(0.75, Math.min(1.25, rateRef.current || 1));
       startedAtSecRef.current =
         (ctx.currentTime - startTimeRef.current) * rate +
         startedAtSecRef.current;
     }
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    rafRef.current = null;
-    ignoreEndedRef.current = true;
-    try {
-      sourceRef.current?.stop();
-    } catch {}
-    sourceRef.current?.disconnect();
-    sourceRef.current = null;
+    playGenRef.current += 1;
+    playingRef.current = false;
+    clearRaf();
+    disconnectSource();
     setPlaying(false);
   }, []);
 
@@ -383,7 +433,83 @@ export function StudioAudioPreviewProvider({
   );
 }
 
-/** Visualizer + export-style progress bar — must sit inside the preview frame. */
+function StudioProgressBar({
+  project,
+  frameWidth,
+  frameHeight,
+}: {
+  project: StoredProject;
+  frameWidth: number;
+  frameHeight: number;
+}) {
+  const { progressStore } = useStudioAudioPreviewContext();
+  const progress = useProgress(progressStore);
+  const style = normalizeProgressBarStyle(project.progressBarStyle);
+  if (style === "none") return null;
+
+  const barColor = project.progressBarColor || "#C8A951";
+  const barTop = frameProgressBarTopPx(frameHeight);
+  const barW = frameWidth * 0.7;
+  const barLeft = (frameWidth - barW) / 2;
+  const pillH = Math.max(8, frameHeight * 0.01);
+  const lineH = Math.max(3, frameHeight * 0.005);
+
+  return (
+    <div
+      className="pointer-events-none absolute z-[6]"
+      style={{
+        left: barLeft,
+        top: barTop,
+        width: barW,
+        transform: "translateY(-50%)",
+      }}
+      aria-hidden
+    >
+      {style === "dots" ? (
+        <div className="flex items-center justify-between">
+          {Array.from({ length: 24 }).map((_, i) => {
+            const active = i / 24 <= progress;
+            const r = active ? 3.5 : 2.2;
+            return (
+              <span
+                key={i}
+                className="rounded-full"
+                style={{
+                  width: r * 2,
+                  height: r * 2,
+                  background: active ? barColor : "rgba(255,255,255,0.25)",
+                }}
+              />
+            );
+          })}
+        </div>
+      ) : (
+        <div
+          className="w-full overflow-hidden bg-white/20"
+          style={{
+            height: style === "pill" ? pillH : lineH,
+            borderRadius: style === "pill" ? pillH / 2 : 2,
+            boxShadow:
+              style === "glow"
+                ? `0 0 ${Math.max(8, frameWidth * 0.01)}px ${barColor}`
+                : undefined,
+          }}
+        >
+          <div
+            className="h-full"
+            style={{
+              width: `${progress * 100}%`,
+              background: barColor,
+              borderRadius: style === "pill" ? pillH / 2 : 0,
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Visualizer canvas (stable) + progress bar (subscribes separately). */
 export function StudioFrameAudioOverlay({
   project,
   frameWidth,
@@ -393,80 +519,24 @@ export function StudioFrameAudioOverlay({
   frameWidth: number;
   frameHeight: number;
 }) {
-  const { progressStore, canvasRef } = useStudioAudioPreviewContext();
-  const progress = useProgress(progressStore);
-  const style = normalizeProgressBarStyle(project.progressBarStyle);
-  const barColor = project.progressBarColor || "#C8A951";
-  const barTop = frameProgressBarTopPx(frameHeight);
-  const barW = frameWidth * 0.7;
-  const barLeft = (frameWidth - barW) / 2;
-  const pillH = Math.max(8, frameHeight * 0.01);
-  const lineH = Math.max(3, frameHeight * 0.005);
+  const { canvasRef } = useStudioAudioPreviewContext();
+  const showViz = (project.visualizer ?? "bars") !== "none";
 
   return (
     <>
-      {(project.visualizer ?? "bars") !== "none" && (
+      {showViz ? (
         <canvas
           ref={canvasRef}
           className="pointer-events-none absolute inset-0 z-[5] h-full w-full"
           width={Math.max(1, Math.round(frameWidth))}
           height={Math.max(1, Math.round(frameHeight))}
         />
-      )}
-
-      {style !== "none" && (
-        <div
-          className="pointer-events-none absolute z-[6]"
-          style={{
-            left: barLeft,
-            top: barTop,
-            width: barW,
-            transform: "translateY(-50%)",
-          }}
-          aria-hidden
-        >
-          {style === "dots" ? (
-            <div className="flex items-center justify-between">
-              {Array.from({ length: 24 }).map((_, i) => {
-                const active = i / 24 <= progress;
-                const r = active ? 3.5 : 2.2;
-                return (
-                  <span
-                    key={i}
-                    className="rounded-full"
-                    style={{
-                      width: r * 2,
-                      height: r * 2,
-                      background: active ? barColor : "rgba(255,255,255,0.25)",
-                    }}
-                  />
-                );
-              })}
-            </div>
-          ) : (
-            <div
-              className="w-full overflow-hidden bg-white/20"
-              style={{
-                height: style === "pill" ? pillH : lineH,
-                borderRadius: style === "pill" ? pillH / 2 : 2,
-                boxShadow:
-                  style === "glow"
-                    ? `0 0 ${Math.max(8, frameWidth * 0.01)}px ${barColor}`
-                    : undefined,
-              }}
-            >
-              <div
-                className="h-full"
-                style={{
-                  width: `${progress * 100}%`,
-                  background: barColor,
-                  borderRadius: style === "pill" ? pillH / 2 : 0,
-                }}
-              />
-            </div>
-          )}
-        </div>
-      )}
+      ) : null}
+      <StudioProgressBar
+        project={project}
+        frameWidth={frameWidth}
+        frameHeight={frameHeight}
+      />
     </>
   );
 }
@@ -501,7 +571,10 @@ export function StudioAudioTransport({
       >
         <button
           type="button"
-          onClick={playing ? pause : play}
+          onClick={() => {
+            if (playing) pause();
+            else void play();
+          }}
           disabled={loading}
           className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-accent-foreground transition hover:scale-110"
           aria-label={playing ? "إيقاف" : "تشغيل"}

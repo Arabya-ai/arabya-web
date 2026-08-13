@@ -82,11 +82,13 @@ export function ayahIndexAtTime(
   timeSec: number,
 ): number {
   if (segments.length === 0) return 0;
+  // Prefer exact hit; otherwise hold the last segment that has started
+  // (covers tiny decode gaps without snapping back to ayah 0).
+  let lastStarted = 0;
   for (let i = 0; i < segments.length; i++) {
-    if (timeSec >= segments[i].start && timeSec < segments[i].end) return i;
+    const seg = segments[i]!;
+    if (timeSec >= seg.start && timeSec < seg.end) return i;
+    if (timeSec >= seg.start) lastStarted = i;
   }
-  if (timeSec >= segments[segments.length - 1]!.end) {
-    return segments.length - 1;
-  }
-  return 0;
+  return lastStarted;
 }

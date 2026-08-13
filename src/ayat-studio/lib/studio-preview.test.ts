@@ -30,6 +30,15 @@ describe("studio ayah preview helpers", () => {
     expect(ayahIndexAtTime(segs, 99)).toBe(2);
   });
 
+  it("holds previous ayah across tiny gaps instead of snapping to 0", () => {
+    const segs = [
+      { start: 0, end: 2 },
+      { start: 2.05, end: 5 },
+    ];
+    expect(ayahIndexAtTime(segs, 2.02)).toBe(0);
+    expect(ayahIndexAtTime(segs, 2.06)).toBe(1);
+  });
+
   it("fits portrait aspect inside wide container by height", () => {
     const box = fitAspectBox(800, 600, 9, 16);
     expect(box.height).toBe(600);

@@ -310,6 +310,8 @@ export default function Editor() {
   const [progressLabel, setProgressLabel] = useState("");
   const [previewAyahs, setPreviewAyahs] = useState<AyahData[]>([]);
   const [previewAyahIndex, setPreviewAyahIndex] = useState(0);
+  const previewAyahCountRef = useRef(0);
+  previewAyahCountRef.current = previewAyahs.length;
   const [ayahsLoading, setAyahsLoading] = useState(false);
   const [ayahsError, setAyahsError] = useState<string | null>(null);
   const [translationEditions, setTranslationEditions] = useState<StudioEdition[]>([]);
@@ -1552,9 +1554,15 @@ export default function Editor() {
 
       <StudioAudioPreviewProvider
         project={project}
-        onAyahIndexChange={(idx) =>
-          setPreviewAyahIndex(clampAyahPreviewIndex(idx, previewAyahs.length))
-        }
+        onAyahIndexChange={(idx) => {
+          setPreviewAyahIndex((prev) => {
+            const next = clampAyahPreviewIndex(
+              idx,
+              previewAyahCountRef.current,
+            );
+            return prev === next ? prev : next;
+          });
+        }}
       >
         <div className="studio-live-preview relative order-2 flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] p-2 shadow-deep sm:p-3 lg:order-2 lg:h-full lg:p-3">
           <div className="pattern-mihrab pointer-events-none absolute inset-0 overflow-hidden rounded-2xl opacity-20" />
