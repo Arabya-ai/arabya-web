@@ -539,9 +539,9 @@
     "tapToListenBtn": "▶ Listen now"
   },
   "Sync": {
-    "ariaLabel": "Cloud sync",
+    "ariaLabel": "Account sync",
     "title": "Device sync (automatic)",
-    "lead": "After you sign in, your data syncs to the cloud when you open the site and on every change (favorite, note, reading habit). The buttons below are optional for emergencies only.",
+    "lead": "After you sign in, your data syncs to the server (SQLite) when you open the site and on every change (favorite, note, reading habit). The buttons below are optional for emergencies only.",
     "syncNow": "Sync now",
     "syncFull": "Full sync now",
     "statusAuto": "Sync runs automatically after sign-in.",
@@ -550,11 +550,11 @@
     "statusPush": "Uploading…",
     "statusError": "Sync failed",
     "statusNotSignedIn": "Sign in to sync.",
-    "statusNotConfigured": "Cloud sync is not configured on this deployment.",
-    "statusPullFailed": "Could not download cloud data.",
-    "statusPushFailed": "Could not upload to the cloud.",
+    "statusNotConfigured": "Account sync is not enabled on the server.",
+    "statusPullFailed": "Could not download data from the server.",
+    "statusPushFailed": "Could not upload to the server.",
     "statusSynced": "Synced automatically ({bookmarks} favorites, {notes} notes, {study} studies).",
-    "statusSaved": "Changes saved to the cloud."
+    "statusSaved": "Changes saved to the server."
   },
   "Upgrade": {
     "title": "Request upgrade",
