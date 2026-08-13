@@ -1,7 +1,7 @@
-# PM2 process file for Contabo / VPS Node hosting.
-# Usage (after npm ci && npm run build):
-#   pm2 start deploy/contabo/ecosystem.config.cjs
-#   pm2 save
+// PM2 process file for Contabo / VPS Node hosting.
+// Usage (after npm ci && npm run build):
+//   pm2 start deploy/contabo/ecosystem.config.cjs
+//   pm2 save
 
 module.exports = {
   apps: [
