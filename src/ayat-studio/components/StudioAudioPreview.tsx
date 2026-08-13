@@ -121,6 +121,8 @@ function useStudioAudioPreviewLogic(
   const surahId = project.surahId;
   const ayahStart = project.ayahStart;
   const ayahEnd = project.ayahEnd;
+  const pauseBetweenAyahsMs = project.pauseBetweenAyahsMs ?? 0;
+  const softNormalize = project.softNormalize ?? true;
 
   const projectRef = useRef(project);
   projectRef.current = project;
@@ -249,7 +251,15 @@ function useStudioAudioPreviewLogic(
     bufferRef.current = null;
     segmentsRef.current = [];
     setDuration(0);
-  }, [reciterId, surahId, ayahStart, ayahEnd, stopHard]);
+  }, [
+    reciterId,
+    surahId,
+    ayahStart,
+    ayahEnd,
+    pauseBetweenAyahsMs,
+    softNormalize,
+    stopHard,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -270,7 +280,10 @@ function useStudioAudioPreviewLogic(
             .webkitAudioContext)();
       ctxRef.current = ctx;
       const ayahs = await fetchAyahs(surahId, ayahStart, ayahEnd, reciterId);
-      const { buffer, segments } = await fetchAndDecodeAudio(ayahs, ctx);
+      const { buffer, segments } = await fetchAndDecodeAudio(ayahs, ctx, {
+        pauseBetweenAyahsMs,
+        softNormalize,
+      });
       bufferRef.current = buffer;
       segmentsRef.current = segments.map((s) => ({
         start: s.start,
@@ -357,8 +370,7 @@ function useStudioAudioPreviewLogic(
     } catch {
       /* error already surfaced */
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- buffer load uses current ids via closure; loop via refs
-  }, [progressStore, reciterId, surahId, ayahStart, ayahEnd]);
+  }, [progressStore, reciterId, surahId, ayahStart, ayahEnd, pauseBetweenAyahsMs, softNormalize]);
 
   const pause = useCallback(() => {
     const ctx = ctxRef.current;
@@ -461,7 +473,6 @@ function StudioProgressBar({
         left: barLeft,
         top: barTop,
         width: barW,
-        transform: "translateY(-50%)",
       }}
       aria-hidden
     >

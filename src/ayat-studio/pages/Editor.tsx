@@ -104,8 +104,17 @@ import {
   frameSurahLabelPx,
   frameTafsirFontPx,
   frameTranslationFontPx,
+  STUDIO_AYAH_MAX_LINES,
+  STUDIO_AYAH_WIDTH_RATIO,
   STUDIO_FRAME_GRADIENT_CSS,
+  STUDIO_KENBURNS_ZOOM,
+  STUDIO_LAYER_WIDTH_RATIO,
+  STUDIO_TAFSIR_LINE_HEIGHT,
+  STUDIO_TAFSIR_MAX_LINES,
   STUDIO_TAFSIR_PREVIEW_MAX_CHARS,
+  STUDIO_TRANSLATION_LINE_HEIGHT,
+  STUDIO_TRANSLATION_MAX_LINES,
+  frameLayerStackGapPx,
   normalizeProgressBarStyle,
   normalizeReciterPosition,
   normalizeSurahLabelFont,
@@ -264,7 +273,8 @@ function previewTransitionStyle(
     case "glow":
       return { animation: `studio-glow ${d} ease` };
     case "kenburns":
-      return { animation: `studio-kenburns ${Math.max(sec, 4)}s linear` };
+      // Ken Burns applies to background media in preview + export — not the text stack.
+      return {};
     case "none":
       return {};
     default:
@@ -828,6 +838,8 @@ export default function Editor() {
     project.overlayPosition,
     frameHeight,
   );
+  const ayahFontPx = frameAyahFontPx(project.fontSize, frameWidth);
+  const layerStackGapPx = frameLayerStackGapPx(ayahFontPx);
   const reciterBottom = frameReciterBottomPx(frameHeight, {
     collideWithBrand: brandAndReciterCollide(
       brandPos,
@@ -848,7 +860,7 @@ export default function Editor() {
         @keyframes studio-wipe { from { clip-path: inset(0 100% 0 0); opacity: 0.4 } to { clip-path: inset(0 0 0 0); opacity: 1 } }
         @keyframes studio-rise { from { transform: translateY(24px); opacity: 0.15 } to { transform: none; opacity: 1 } }
         @keyframes studio-glow { from { text-shadow: 0 0 0 transparent; opacity: 0.3 } to { opacity: 1 } }
-        @keyframes studio-kenburns { from { transform: scale(1) } to { transform: scale(1.06) } }
+        @keyframes studio-kenburns { from { transform: scale(1) } to { transform: scale(${1 + STUDIO_KENBURNS_ZOOM}) } }
       `}</style>
 
       <div className="studio-editor-controls order-1 flex w-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] shadow-deep lg:order-1 lg:h-full lg:min-h-0 lg:w-[22rem] lg:flex-none xl:w-[24rem] 2xl:w-[26rem]">
@@ -1591,7 +1603,14 @@ export default function Editor() {
                     src={previewMedia.src}
                     alt=""
                     className="absolute inset-0 z-[1] h-full w-full object-cover"
-                    style={{ opacity: (project.bgOpacity ?? 100) / 100 }}
+                    style={{
+                      opacity: (project.bgOpacity ?? 100) / 100,
+                      ...(project.transition === "kenburns"
+                        ? {
+                            animation: `studio-kenburns ${Math.max(transDur, 4)}s linear infinite`,
+                          }
+                        : null),
+                    }}
                   />
                 )}
                 {project.bgUrl && previewBgKind === "video" && previewMedia.src && (
@@ -1605,7 +1624,14 @@ export default function Editor() {
                     playsInline
                     preload="auto"
                     className="absolute inset-0 z-[1] h-full w-full object-cover"
-                    style={{ opacity: (project.bgOpacity ?? 100) / 100 }}
+                    style={{
+                      opacity: (project.bgOpacity ?? 100) / 100,
+                      ...(project.transition === "kenburns"
+                        ? {
+                            animation: `studio-kenburns ${Math.max(transDur, 4)}s linear infinite`,
+                          }
+                        : null),
+                    }}
                     onLoadedData={(e) => {
                       e.currentTarget.play().catch(() => undefined);
                     }}
@@ -1637,7 +1663,7 @@ export default function Editor() {
                     }}
                   />
                 )}
-                {(project.brandSignature ?? true) && (
+                {(needsWatermark || (project.brandSignature ?? true)) && (
                   <div
                     className="pointer-events-none absolute z-[6] rounded-xl border border-[rgba(200,169,81,0.4)]"
                     style={{
@@ -1648,10 +1674,11 @@ export default function Editor() {
               </div>
 
               <div
-                className="pointer-events-none absolute inset-x-0 z-[3] px-[7.5%] text-center"
+                className="pointer-events-none absolute inset-x-0 z-[3] text-center"
                 style={{
                   top: overlayYCenter,
                   transform: "translateY(-50%)",
+                  paddingInline: `${((1 - STUDIO_AYAH_WIDTH_RATIO) / 2) * 100}%`,
                 }}
               >
                 <div
@@ -1673,6 +1700,7 @@ export default function Editor() {
                         fontFamily: `"${normalizeSurahLabelFont(
                           project.surahLabelFontFamily,
                         )}", "IBM Plex Sans Arabic", sans-serif`,
+                        lineHeight: 1,
                         marginBottom: `${frameSurahLabelGapPx(
                           frameSurahLabelPx(
                             project.surahLabelFontSize ??
@@ -1701,12 +1729,20 @@ export default function Editor() {
                     </p>
                   ) : currentPreviewAyah ? (
                     <p
-                      className="font-quran mb-2 font-bold"
+                      className="font-quran font-bold"
                       style={{
-                        fontSize: `${frameAyahFontPx(project.fontSize, frameWidth)}px`,
+                        fontSize: `${ayahFontPx}px`,
                         color: project.textColor,
                         lineHeight: 1.95,
                         textShadow: "0 2px 12px rgba(0,0,0,0.8)",
+                        marginBottom:
+                          project.translationEnabled || project.tafsirEnabled
+                            ? layerStackGapPx
+                            : 0,
+                        display: "-webkit-box",
+                        WebkitLineClamp: STUDIO_AYAH_MAX_LINES,
+                        WebkitBoxOrient: "vertical" as const,
+                        overflow: "hidden",
                       }}
                     >
                       {currentPreviewAyah.text}
@@ -1718,7 +1754,7 @@ export default function Editor() {
                   )}
                   {project.translationEnabled && translationText ? (
                     <p
-                      className="mb-2 leading-relaxed"
+                      className="leading-relaxed"
                       style={{
                         fontSize: `${frameTranslationFontPx(
                           project.translationFontSize ?? 22,
@@ -1726,6 +1762,16 @@ export default function Editor() {
                         )}px`,
                         color: project.translationTextColor || "#f0e6d0",
                         textShadow: "0 1px 8px rgba(0,0,0,0.7)",
+                        lineHeight: STUDIO_TRANSLATION_LINE_HEIGHT,
+                        width: `${(STUDIO_LAYER_WIDTH_RATIO / STUDIO_AYAH_WIDTH_RATIO) * 100}%`,
+                        marginInline: "auto",
+                        marginBottom: project.tafsirEnabled
+                          ? layerStackGapPx
+                          : 0,
+                        display: "-webkit-box",
+                        WebkitLineClamp: STUDIO_TRANSLATION_MAX_LINES,
+                        WebkitBoxOrient: "vertical" as const,
+                        overflow: "hidden",
                       }}
                       dir="auto"
                     >
@@ -1734,7 +1780,7 @@ export default function Editor() {
                   ) : null}
                   {project.tafsirEnabled && tafsirText ? (
                     <p
-                      className="mb-2 leading-relaxed opacity-95"
+                      className="leading-relaxed opacity-95"
                       style={{
                         fontSize: `${frameTafsirFontPx(
                           project.tafsirFontSize ?? 18,
@@ -1742,6 +1788,13 @@ export default function Editor() {
                         )}px`,
                         color: project.tafsirTextColor || "#d4c4a8",
                         textShadow: "0 1px 8px rgba(0,0,0,0.7)",
+                        lineHeight: STUDIO_TAFSIR_LINE_HEIGHT,
+                        width: `${(STUDIO_LAYER_WIDTH_RATIO / STUDIO_AYAH_WIDTH_RATIO) * 100}%`,
+                        marginInline: "auto",
+                        display: "-webkit-box",
+                        WebkitLineClamp: STUDIO_TAFSIR_MAX_LINES,
+                        WebkitBoxOrient: "vertical" as const,
+                        overflow: "hidden",
                       }}
                       dir="auto"
                     >
@@ -1810,6 +1863,12 @@ export default function Editor() {
                   </div>
                 )}
 
+              <StudioFrameAudioOverlay
+                project={project}
+                frameWidth={frameWidth}
+                frameHeight={frameHeight}
+              />
+
               {showBrandLockup && (
                 <div
                   dir="ltr"
@@ -1828,12 +1887,6 @@ export default function Editor() {
                   />
                 </div>
               )}
-
-              <StudioFrameAudioOverlay
-                project={project}
-                frameWidth={frameWidth}
-                frameHeight={frameHeight}
-              />
             </div>
           </div>
           <div className="relative z-[1] w-full shrink-0 pb-1">

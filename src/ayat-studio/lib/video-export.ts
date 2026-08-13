@@ -33,7 +33,18 @@ import {
   frameSurahLabelPx,
   frameTafsirFontPx,
   frameTranslationFontPx,
+  STUDIO_AYAH_FONT_STACK,
+  STUDIO_AYAH_MAX_LINES,
+  STUDIO_AYAH_WIDTH_RATIO,
+  STUDIO_KENBURNS_ZOOM,
+  STUDIO_LAYER_WIDTH_RATIO,
+  STUDIO_TAFSIR_LINE_HEIGHT,
+  STUDIO_TAFSIR_MAX_LINES,
   STUDIO_TAFSIR_PREVIEW_MAX_CHARS,
+  STUDIO_TRANSLATION_LINE_HEIGHT,
+  STUDIO_TRANSLATION_MAX_LINES,
+  frameLayerStackGapPx,
+  resolveStudioExportSize,
   normalizeProgressBarStyle,
   normalizeReciterPosition,
   normalizeSurahLabelFont,
@@ -62,11 +73,22 @@ export async function exportProjectToVideo({
   }
 
   const ratio = aspectRatios.find((r) => r.id === project.ratio) || aspectRatios[0];
-  let scale = project.quality === "standard" ? 0.5 : project.quality === "ultra" ? 1.5 : 1;
-  let width = Math.round((ratio.width * scale) / 2) * 2;
-  let height = Math.round((ratio.height * scale) / 2) * 2;
+  let { width, height, scale } = resolveStudioExportSize(
+    ratio.width,
+    ratio.height,
+    project.quality,
+  );
 
   onProgress?.(0, "جلب الآيات والصوت...");
+
+  if (typeof document !== "undefined" && document.fonts?.load) {
+    try {
+      await document.fonts.load(`bold 48px ${STUDIO_AYAH_FONT_STACK}`);
+      await document.fonts.load('16px "IBM Plex Sans Arabic"');
+    } catch {
+      /* canvas will fall back */
+    }
+  }
 
   const ayahs = await fetchAyahs(project.surahId, project.ayahStart, project.ayahEnd, project.reciterId);
   if (ayahs.length === 0) throw new Error("لم يتم العثور على آيات");
@@ -203,9 +225,14 @@ export async function exportProjectToVideo({
     if (typeof VideoEncoder.isConfigSupported === "function") {
       let support = await VideoEncoder.isConfigSupported(videoConfig);
       if (!support.supported && scale > 1) {
-        scale = 1;
-        width = Math.round((ratio.width * scale) / 2) * 2;
-        height = Math.round((ratio.height * scale) / 2) * 2;
+        const fallback = resolveStudioExportSize(
+          ratio.width,
+          ratio.height,
+          "high",
+        );
+        scale = fallback.scale;
+        width = fallback.width;
+        height = fallback.height;
         canvas.width = width;
         canvas.height = height;
         videoConfig = { ...videoConfig, width, height, bitrate: 5_000_000 };
@@ -354,7 +381,15 @@ export async function exportProjectToVideo({
         });
       }
 
-      // Re-draw brand after visualizer so bars/wave never cover mark + URL.
+      // Re-draw progress + brand after visualizer so bars/wave never cover them
+      // (preview stacks progress/brand above the visualizer canvas).
+      drawProgressBar(ctx, {
+        width,
+        height,
+        progress: timeSec / totalDuration,
+        style: normalizeProgressBarStyle(project.progressBarStyle),
+        color: project.progressBarColor || "#C8A951",
+      });
       if (watermark || project.brandSignature !== false) {
         drawBrandLockup(ctx, {
           width,
@@ -416,8 +451,11 @@ export async function exportProjectToPng(
   const tafsirMap = layers?.tafsirMap ?? null;
   const watermark = layers?.watermark ?? false;
   const ratio = aspectRatios.find((r) => r.id === project.ratio) || aspectRatios[0];
-  const width = ratio.width;
-  const height = ratio.height;
+  const { width, height } = resolveStudioExportSize(
+    ratio.width,
+    ratio.height,
+    project.quality,
+  );
   const ayahs = await fetchAyahs(
     project.surahId,
     project.ayahStart,
@@ -425,6 +463,15 @@ export async function exportProjectToPng(
     project.reciterId,
   );
   if (ayahs.length === 0) throw new Error("لم يتم العثور على الآية");
+
+  if (typeof document !== "undefined" && document.fonts?.load) {
+    try {
+      await document.fonts.load(`bold 48px ${STUDIO_AYAH_FONT_STACK}`);
+      await document.fonts.load('16px "IBM Plex Sans Arabic"');
+    } catch {
+      /* canvas will fall back */
+    }
+  }
 
   const revokes: Array<() => void> = [];
   try {
@@ -686,7 +733,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
     ctx.save();
     ctx.globalAlpha = bgAlpha;
     if (transition === "kenburns") {
-      const zoom = 1 + 0.08 * kenburnsT;
+      const zoom = 1 + STUDIO_KENBURNS_ZOOM * kenburnsT;
       const newW = dw * zoom;
       const newH = dh * zoom;
       const newX = dx - (newW - dw) / 2;
@@ -767,28 +814,82 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   const showNumbers = project.previewShowAyahNumbers !== false;
   const ayahOnly = project.previewShowAyahOnly === true;
 
-  ctx.fillStyle = project.textColor;
   const fontPx = frameAyahFontPx(project.fontSize, width);
   const lineH = frameAyahLineHeightPx(fontPx);
-  ctx.font = `bold ${fontPx}px "Amiri", "Scheherazade New", serif`;
+  const ayahMaxW = width * STUDIO_AYAH_WIDTH_RATIO;
+  const layerMaxW = width * STUDIO_LAYER_WIDTH_RATIO;
+
+  ctx.fillStyle = project.textColor;
+  ctx.font = `bold ${fontPx}px ${STUDIO_AYAH_FONT_STACK}`;
   ctx.textAlign = "center";
   ctx.direction = "rtl";
+  const ayahLineCount = countWrapLines(
+    ctx,
+    ayahText,
+    ayahMaxW,
+    STUDIO_AYAH_MAX_LINES,
+  );
 
-  const ayahMaxW = width * 0.85;
-  const ayahLineCount = countWrapLines(ctx, ayahText, ayahMaxW, 6);
-  const ayahTopY = yCenter - ((ayahLineCount - 1) / 2) * lineH;
+  const labelSize = ayahOnly
+    ? 0
+    : frameSurahLabelPx(
+        project.surahLabelFontSize ?? DEFAULT_SURAH_LABEL_FONT_SIZE,
+        width,
+      );
+  const labelGap = ayahOnly ? 0 : frameSurahLabelGapPx(labelSize, height);
+  const labelBlockH = ayahOnly ? 0 : labelSize + labelGap;
+
+  const trSize = translationText
+    ? frameTranslationFontPx(project.translationFontSize ?? 22, width)
+    : 0;
+  const trLineH = trSize * STUDIO_TRANSLATION_LINE_HEIGHT;
+  let trLineCount = 0;
+  if (translationText) {
+    ctx.font = `${trSize}px "IBM Plex Sans Arabic", sans-serif`;
+    trLineCount = countWrapLines(
+      ctx,
+      translationText,
+      layerMaxW,
+      STUDIO_TRANSLATION_MAX_LINES,
+    );
+  }
+
+  const tfSize = tafsirText
+    ? frameTafsirFontPx(project.tafsirFontSize ?? 18, width)
+    : 0;
+  const tfLineH = tfSize * STUDIO_TAFSIR_LINE_HEIGHT;
+  const clippedTafsir = tafsirText
+    ? tafsirText.length > STUDIO_TAFSIR_PREVIEW_MAX_CHARS
+      ? `${tafsirText.slice(0, STUDIO_TAFSIR_PREVIEW_MAX_CHARS)}…`
+      : tafsirText
+    : "";
+  let tfLineCount = 0;
+  if (clippedTafsir) {
+    ctx.font = `${tfSize}px "IBM Plex Sans Arabic", sans-serif`;
+    tfLineCount = countWrapLines(
+      ctx,
+      clippedTafsir,
+      layerMaxW,
+      STUDIO_TAFSIR_MAX_LINES,
+    );
+  }
+
+  const ayahBlockH = ayahLineCount * lineH;
+  const trBlockH = trLineCount ? trLineCount * trLineH : 0;
+  const tfBlockH = tfLineCount ? tfLineCount * tfLineH : 0;
+  const stackGap = frameLayerStackGapPx(fontPx);
+  const totalH =
+    labelBlockH +
+    ayahBlockH +
+    (trBlockH ? stackGap + trBlockH : 0) +
+    (tfBlockH ? stackGap + tfBlockH : 0);
+
+  // Match preview: center the whole text stack on overlayYCenter.
+  let cursorY = yCenter - totalH / 2;
 
   if (!ayahOnly) {
-    const labelSize = frameSurahLabelPx(
-      project.surahLabelFontSize ?? DEFAULT_SURAH_LABEL_FONT_SIZE,
-      width,
-    );
     const labelFont = normalizeSurahLabelFont(project.surahLabelFontFamily);
-    const labelGap = frameSurahLabelGapPx(labelSize, height);
-    const labelY = Math.max(
-      height * 0.06 + labelSize,
-      ayahTopY - labelGap,
-    );
+    const labelY = cursorY + labelSize;
     ctx.fillStyle =
       project.surahLabelTextColor || DEFAULT_SURAH_LABEL_COLOR;
     ctx.font = `${labelSize}px "${labelFont}", "IBM Plex Sans Arabic", sans-serif`;
@@ -802,62 +903,67 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
       labelY,
     );
     ctx.shadowBlur = 0;
+    cursorY += labelBlockH;
   }
 
+  const ayahCenterY = cursorY + ayahBlockH / 2;
   ctx.fillStyle = project.textColor;
-  ctx.font = `bold ${fontPx}px "Amiri", "Scheherazade New", serif`;
+  ctx.font = `bold ${fontPx}px ${STUDIO_AYAH_FONT_STACK}`;
   ctx.textAlign = "center";
   ctx.direction = "rtl";
   ctx.shadowColor = glow
     ? "rgba(200,169,81,0.9)"
     : "rgba(0,0,0,0.8)";
   ctx.shadowBlur = glow || 16;
-  wrapText(ctx, ayahText, width / 2, yCenter, ayahMaxW, lineH);
+  wrapTextLines(
+    ctx,
+    ayahText,
+    width / 2,
+    ayahCenterY,
+    ayahMaxW,
+    lineH,
+    STUDIO_AYAH_MAX_LINES,
+  );
   ctx.shadowBlur = 0;
+  cursorY += ayahBlockH;
 
-  let nextY = yCenter + ((ayahLineCount - 1) / 2) * lineH + fontPx * 1.15;
-  if (translationText) {
-    const tSize = frameTranslationFontPx(
-      project.translationFontSize ?? 22,
-      width,
-    );
+  if (translationText && trLineCount) {
+    cursorY += stackGap;
+    const trCenterY = cursorY + (trLineCount * trLineH) / 2;
     ctx.fillStyle = project.translationTextColor || "#f0e6d0";
-    ctx.font = `${tSize}px "IBM Plex Sans Arabic", sans-serif`;
+    ctx.font = `${trSize}px "IBM Plex Sans Arabic", sans-serif`;
     ctx.direction = canvasTextDirection(translationText);
     ctx.shadowColor = "rgba(0,0,0,0.7)";
     ctx.shadowBlur = 10;
-    const used = wrapTextLines(
+    wrapTextLines(
       ctx,
       translationText,
       width / 2,
-      nextY,
-      width * 0.82,
-      tSize * 1.45,
-      4,
+      trCenterY,
+      layerMaxW,
+      trLineH,
+      STUDIO_TRANSLATION_MAX_LINES,
     );
-    nextY += used * tSize * 1.45 + tSize * 0.4;
     ctx.shadowBlur = 0;
+    cursorY += trBlockH;
   }
 
-  if (tafsirText) {
-    const tSize = frameTafsirFontPx(project.tafsirFontSize ?? 18, width);
-    const clipped =
-      tafsirText.length > STUDIO_TAFSIR_PREVIEW_MAX_CHARS
-        ? `${tafsirText.slice(0, STUDIO_TAFSIR_PREVIEW_MAX_CHARS)}…`
-        : tafsirText;
+  if (clippedTafsir && tfLineCount) {
+    cursorY += stackGap;
+    const tfCenterY = cursorY + (tfLineCount * tfLineH) / 2;
     ctx.fillStyle = project.tafsirTextColor || "#d4c4a8";
-    ctx.font = `${tSize}px "IBM Plex Sans Arabic", sans-serif`;
-    ctx.direction = canvasTextDirection(clipped);
+    ctx.font = `${tfSize}px "IBM Plex Sans Arabic", sans-serif`;
+    ctx.direction = canvasTextDirection(clippedTafsir);
     ctx.shadowColor = "rgba(0,0,0,0.7)";
     ctx.shadowBlur = 8;
     wrapTextLines(
       ctx,
-      clipped,
+      clippedTafsir,
       width / 2,
-      nextY,
-      width * 0.82,
-      tSize * 1.4,
-      5,
+      tfCenterY,
+      layerMaxW,
+      tfLineH,
+      STUDIO_TAFSIR_MAX_LINES,
     );
     ctx.shadowBlur = 0;
   }
@@ -1074,7 +1180,7 @@ function wrapText(
   maxWidth: number,
   lineHeight: number,
 ) {
-  wrapTextLines(ctx, text, x, y, maxWidth, lineHeight, 6);
+  wrapTextLines(ctx, text, x, y, maxWidth, lineHeight, STUDIO_AYAH_MAX_LINES);
 }
 
 function countWrapLines(
@@ -1090,6 +1196,7 @@ function countWrapLines(
     const test = current ? `${current} ${w}` : w;
     if (ctx.measureText(test).width > maxWidth && current) {
       lines.push(current);
+      if (lines.length >= maxLines) return maxLines;
       current = w;
     } else {
       current = test;
@@ -1115,12 +1222,16 @@ function wrapTextLines(
     const test = current ? `${current} ${w}` : w;
     if (ctx.measureText(test).width > maxWidth && current) {
       lines.push(current);
+      if (lines.length >= maxLines) {
+        current = "";
+        break;
+      }
       current = w;
     } else {
       current = test;
     }
   }
-  if (current) lines.push(current);
+  if (current && lines.length < maxLines) lines.push(current);
   const trimmed = lines.slice(0, maxLines);
   const total = trimmed.length;
   const startY = y - ((total - 1) / 2) * lineHeight;

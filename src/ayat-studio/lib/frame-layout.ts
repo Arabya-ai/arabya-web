@@ -10,8 +10,57 @@ export const STUDIO_FRAME_GRADIENT_CSS =
 /** Tafsir clip length — preview must match export canvas. */
 export const STUDIO_TAFSIR_PREVIEW_MAX_CHARS = 360;
 
+/** Shared wrap caps — preview line-clamp must match export canvas. */
+export const STUDIO_AYAH_MAX_LINES = 6;
+export const STUDIO_TRANSLATION_MAX_LINES = 4;
+export const STUDIO_TAFSIR_MAX_LINES = 5;
+
+/** Content column widths as fraction of frame (preview CSS + export canvas). */
+export const STUDIO_AYAH_WIDTH_RATIO = 0.85;
+export const STUDIO_LAYER_WIDTH_RATIO = 0.82;
+
+/** Gap between ayah / translation / tafsir blocks as a fraction of ayah font px. */
+export const STUDIO_LAYER_STACK_GAP_RATIO = 0.35;
+
+/** Line-height multipliers for non-ayah layers (preview CSS + export canvas). */
+export const STUDIO_TRANSLATION_LINE_HEIGHT = 1.45;
+export const STUDIO_TAFSIR_LINE_HEIGHT = 1.4;
+
+/**
+ * Ken Burns max zoom increment — preview CSS scale(1+z) and export canvas
+ * must use the same value.
+ */
+export const STUDIO_KENBURNS_ZOOM = 0.08;
+
+/**
+ * Canvas font stack for Quran ayah — must match `.ayat-studio .font-quran`
+ * (Amiri from next/font aliased as --font-amiri-quran).
+ */
+export const STUDIO_AYAH_FONT_STACK =
+  '"Amiri", "Amiri Quran", "Scheherazade New", serif';
+
 /** Live preview max height as a fraction of viewport (editor shell is locked). */
 export const STUDIO_PREVIEW_VIEWPORT_HEIGHT_RATIO = 0.68;
+
+/** Pixel size for MP4/PNG export from aspect ratio + quality ladder. */
+export function resolveStudioExportSize(
+  ratioWidth: number,
+  ratioHeight: number,
+  quality: "standard" | "high" | "ultra" | string | undefined,
+): { width: number; height: number; scale: number } {
+  const scale =
+    quality === "standard" ? 0.5 : quality === "ultra" ? 1.5 : 1;
+  return {
+    scale,
+    width: Math.round((ratioWidth * scale) / 2) * 2,
+    height: Math.round((ratioHeight * scale) / 2) * 2,
+  };
+}
+
+/** Vertical gap between stacked text layers. */
+export function frameLayerStackGapPx(ayahFontPx: number): number {
+  return ayahFontPx * STUDIO_LAYER_STACK_GAP_RATIO;
+}
 
 export type OverlayPosition = "top" | "center" | "bottom";
 
