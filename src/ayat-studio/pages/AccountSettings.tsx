@@ -154,7 +154,8 @@ export default function AccountSettings() {
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
               يُستخدم عبر خادم عربية (`/api/studio/pexels`). يمكن ضبط{" "}
-              <code className="text-accent">PEXELS_API_KEY</code> على Vercel بدل إدخاله هنا.
+              <code className="text-accent">PEXELS_API_KEY</code> في ملف{" "}
+              <code className="text-accent">.env.production.local</code> على السيرفر بدل إدخاله هنا.
             </p>
             <a
               href="https://www.pexels.com/api/new/"
@@ -189,7 +190,8 @@ export default function AccountSettings() {
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
               منفصل عن Pexels تمامًا (`/api/studio/pixabay`). يمكن ضبط{" "}
-              <code className="text-accent">PIXABAY_API_KEY</code> على Vercel بدل إدخاله هنا.
+              <code className="text-accent">PIXABAY_API_KEY</code> في ملف{" "}
+              <code className="text-accent">.env.production.local</code> على السيرفر بدل إدخاله هنا.
             </p>
             <a
               href="https://pixabay.com/service/about/api/"

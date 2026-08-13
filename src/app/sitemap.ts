@@ -19,6 +19,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/hadith`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${base}/heritage`, changeFrequency: "yearly", priority: 0.3 },
     { url: `${base}/reciters`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/roots`, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/study`, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${base}/asma`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/qiraat`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/pricing`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/adhkar`, changeFrequency: "monthly", priority: 0.6 },
   ];
 

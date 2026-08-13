@@ -19,7 +19,7 @@
 2. افتح **الاستوديو** من الهيدر/الفوتر أو `/studio`.
 3. مشروع جديد → المحرر → تصدير MP4 (بلس، Chrome/Edge، ≤ 40 آية) أو PNG.
 4. خلفيات Pexels / Pixabay:
-   - على Vercel: `PEXELS_API_KEY` و/أو `PIXABAY_API_KEY` (مفتاح أو عدة مفصولة بفاصلة)
+   - على السيرفر (`.env.production.local`): `PEXELS_API_KEY` و/أو `PIXABAY_API_KEY` (مفتاح أو عدة مفصولة بفاصلة)
    - و/أو `PEXELS_API_KEYS` / `PIXABAY_API_KEYS`
    - و/أو مفتاح في `/studio/settings` (كل خدمة بمفتاحها المنفصل)
    عند 401/403/429 يجرّب الخادم المفتاح التالي تلقائيًا.
