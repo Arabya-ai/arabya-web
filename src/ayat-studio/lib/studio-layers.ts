@@ -7,6 +7,9 @@ export type StudioEdition = {
   lang?: string;
 };
 
+/** Cap tafsir body kept in memory / textarea — preview already clips shorter. */
+export const STUDIO_LAYER_TEXT_MAX_CHARS = 2_000;
+
 export async function fetchStudioEditions(): Promise<{
   translations: StudioEdition[];
   tafsirs: StudioEdition[];
@@ -16,36 +19,74 @@ export async function fetchStudioEditions(): Promise<{
   return res.json();
 }
 
+function buildVerseMap(
+  verses: Array<{ verseNumber?: number; text?: string }> | undefined,
+  opts?: { from?: number; to?: number; maxChars?: number },
+): Record<number, string> {
+  const map: Record<number, string> = {};
+  const from = opts?.from;
+  const to = opts?.to;
+  const maxChars = opts?.maxChars;
+  for (const v of verses || []) {
+    const n = Number(v.verseNumber);
+    if (!Number.isInteger(n) || n < 1) continue;
+    if (from != null && n < from) continue;
+    if (to != null && n > to) continue;
+    let text = String(v.text || "").trim();
+    if (maxChars != null && text.length > maxChars) {
+      text = `${text.slice(0, maxChars)}…`;
+    }
+    map[n] = text;
+  }
+  return map;
+}
+
 export async function fetchTranslationMap(
   slug: string,
   surahId: number,
+  range?: { from: number; to: number },
 ): Promise<Record<number, string>> {
-  const res = await fetch(`/api/translation/${encodeURIComponent(slug)}/${surahId}`, {
-    credentials: "same-origin",
-  });
+  const q = new URLSearchParams();
+  if (range) {
+    q.set("from", String(range.from));
+    q.set("to", String(range.to));
+  }
+  const qs = q.toString();
+  const res = await fetch(
+    `/api/translation/${encodeURIComponent(slug)}/${surahId}${qs ? `?${qs}` : ""}`,
+    { credentials: "same-origin" },
+  );
   if (!res.ok) throw new Error("فشل جلب الترجمة");
   const json = await res.json();
-  const map: Record<number, string> = {};
-  for (const v of json.verses || []) {
-    map[v.verseNumber] = String(v.text || "").trim();
-  }
-  return map;
+  return buildVerseMap(json.verses, {
+    from: range?.from,
+    to: range?.to,
+    maxChars: STUDIO_LAYER_TEXT_MAX_CHARS,
+  });
 }
 
 export async function fetchTafsirMap(
   slug: string,
   surahId: number,
+  range?: { from: number; to: number },
 ): Promise<Record<number, string>> {
-  const res = await fetch(`/api/tafsir/${encodeURIComponent(slug)}/${surahId}`, {
-    credentials: "same-origin",
-  });
+  const q = new URLSearchParams();
+  if (range) {
+    q.set("from", String(range.from));
+    q.set("to", String(range.to));
+  }
+  const qs = q.toString();
+  const res = await fetch(
+    `/api/tafsir/${encodeURIComponent(slug)}/${surahId}${qs ? `?${qs}` : ""}`,
+    { credentials: "same-origin" },
+  );
   if (!res.ok) throw new Error("فشل جلب التفسير");
   const json = await res.json();
-  const map: Record<number, string> = {};
-  for (const v of json.verses || []) {
-    map[v.verseNumber] = String(v.text || "").trim();
-  }
-  return map;
+  return buildVerseMap(json.verses, {
+    from: range?.from,
+    to: range?.to,
+    maxChars: STUDIO_LAYER_TEXT_MAX_CHARS,
+  });
 }
 
 export function layerKey(surahId: number, ayah: number): string {

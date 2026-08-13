@@ -2,10 +2,13 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
   type RefObject,
 } from "react";
@@ -19,15 +22,44 @@ import {
   normalizeProgressBarStyle,
 } from "@/ayat-studio/lib/frame-layout";
 
+type ProgressStore = {
+  subscribe: (onStoreChange: () => void) => () => void;
+  getSnapshot: () => number;
+  set: (value: number) => void;
+};
+
+function createProgressStore(): ProgressStore {
+  let progress = 0;
+  const listeners = new Set<() => void>();
+  return {
+    subscribe(onStoreChange) {
+      listeners.add(onStoreChange);
+      return () => {
+        listeners.delete(onStoreChange);
+      };
+    },
+    getSnapshot() {
+      return progress;
+    },
+    set(value) {
+      const next = Math.max(0, Math.min(1, value));
+      // Skip microscopic updates to cut subscriber churn.
+      if (Math.abs(next - progress) < 0.002 && next !== 0 && next !== 1) return;
+      progress = next;
+      listeners.forEach((l) => l());
+    },
+  };
+}
+
 type StudioAudioPreviewState = {
   loading: boolean;
   ready: boolean;
   playing: boolean;
   muted: boolean;
-  progress: number;
   duration: number;
   error: string | null;
   canvasRef: RefObject<HTMLCanvasElement | null>;
+  progressStore: ProgressStore;
   play: () => Promise<void>;
   pause: () => void;
   toggleMute: () => void;
@@ -46,6 +78,10 @@ function useStudioAudioPreviewContext(): StudioAudioPreviewState {
   return ctx;
 }
 
+function useProgress(store: ProgressStore): number {
+  return useSyncExternalStore(store.subscribe, store.getSnapshot, () => 0);
+}
+
 function useStudioAudioPreviewLogic(
   project: StoredProject,
   onAyahIndexChange?: (index: number) => void,
@@ -54,9 +90,12 @@ function useStudioAudioPreviewLogic(
   const [ready, setReady] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  const progressStoreRef = useRef<ProgressStore | null>(null);
+  if (!progressStoreRef.current) progressStoreRef.current = createProgressStore();
+  const progressStore = progressStoreRef.current;
 
   const ctxRef = useRef<AudioContext | null>(null);
   const bufferRef = useRef<AudioBuffer | null>(null);
@@ -83,6 +122,8 @@ function useStudioAudioPreviewLogic(
   projectRef.current = project;
   const rateRef = useRef(project.playbackRate ?? 1);
   rateRef.current = project.playbackRate ?? 1;
+  const mutedRef = useRef(muted);
+  mutedRef.current = muted;
 
   useEffect(() => {
     if (gainRef.current) {
@@ -105,7 +146,7 @@ function useStudioAudioPreviewLogic(
     }
   }, [project.playbackRate]);
 
-  const stop = () => {
+  const stop = useCallback(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     rafRef.current = null;
     ignoreEndedRef.current = true;
@@ -115,11 +156,11 @@ function useStudioAudioPreviewLogic(
     sourceRef.current?.disconnect();
     sourceRef.current = null;
     startedAtSecRef.current = 0;
-    setProgress(0);
+    progressStore.set(0);
     setPlaying(false);
     lastAyahIndexRef.current = -1;
     onAyahIndexChangeRef.current?.(0);
-  };
+  }, [progressStore]);
 
   useEffect(() => {
     stop();
@@ -127,16 +168,16 @@ function useStudioAudioPreviewLogic(
     bufferRef.current = null;
     segmentsRef.current = [];
     lastAyahIndexRef.current = -1;
-    setProgress(0);
+    progressStore.set(0);
     setDuration(0);
-  }, [reciterId, surahId, ayahStart, ayahEnd]);
+  }, [reciterId, surahId, ayahStart, ayahEnd, stop, progressStore]);
 
   useEffect(() => {
     return () => {
       stop();
       ctxRef.current?.close().catch(() => {});
     };
-  }, []);
+  }, [stop]);
 
   const ensureBuffer = async () => {
     if (bufferRef.current) return bufferRef.current;
@@ -187,7 +228,7 @@ function useStudioAudioPreviewLogic(
       (ctx.currentTime - startTimeRef.current) * rate +
       startedAtSecRef.current;
     const dur = bufferRef.current?.duration || 1;
-    setProgress(Math.min(elapsed / dur, 1));
+    progressStore.set(Math.min(elapsed / dur, 1));
     emitAyahIndex(elapsed);
 
     drawVisualizer({
@@ -206,7 +247,7 @@ function useStudioAudioPreviewLogic(
     rafRef.current = requestAnimationFrame(renderLoop);
   };
 
-  const play = async () => {
+  const play = useCallback(async () => {
     try {
       const buffer = await ensureBuffer();
       const ctx = ctxRef.current!;
@@ -216,7 +257,9 @@ function useStudioAudioPreviewLogic(
       source.buffer = buffer;
 
       const gain = ctx.createGain();
-      gain.gain.value = muted ? 0 : (projectRef.current.volume ?? 80) / 100;
+      gain.gain.value = mutedRef.current
+        ? 0
+        : (projectRef.current.volume ?? 80) / 100;
 
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 256;
@@ -254,17 +297,18 @@ function useStudioAudioPreviewLogic(
           return;
         }
         startedAtSecRef.current = 0;
-        setProgress(0);
+        progressStore.set(0);
         setPlaying(false);
       };
     } catch {
       /* error already surfaced */
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- renderLoop/ensureBuffer use refs
+  }, [progressStore, reciterId, surahId, ayahStart, ayahEnd]);
 
-  const pause = () => {
+  const pause = useCallback(() => {
     const ctx = ctxRef.current;
-    if (ctx && playing) {
+    if (ctx && sourceRef.current) {
       const rate = Math.max(0.75, Math.min(1.25, rateRef.current || 1));
       startedAtSecRef.current =
         (ctx.currentTime - startTimeRef.current) * rate +
@@ -279,31 +323,47 @@ function useStudioAudioPreviewLogic(
     sourceRef.current?.disconnect();
     sourceRef.current = null;
     setPlaying(false);
-  };
+  }, []);
 
-  const toggleMute = () => {
+  const toggleMute = useCallback(() => {
     setMuted((m) => {
       const next = !m;
       if (gainRef.current) {
-        gainRef.current.gain.value = next ? 0 : (project.volume ?? 80) / 100;
+        gainRef.current.gain.value = next
+          ? 0
+          : (projectRef.current.volume ?? 80) / 100;
       }
       return next;
     });
-  };
+  }, []);
 
-  return {
-    loading,
-    ready,
-    playing,
-    muted,
-    progress,
-    duration,
-    error,
-    canvasRef,
-    play,
-    pause,
-    toggleMute,
-  };
+  return useMemo(
+    () => ({
+      loading,
+      ready,
+      playing,
+      muted,
+      duration,
+      error,
+      canvasRef,
+      progressStore,
+      play,
+      pause,
+      toggleMute,
+    }),
+    [
+      loading,
+      ready,
+      playing,
+      muted,
+      duration,
+      error,
+      progressStore,
+      play,
+      pause,
+      toggleMute,
+    ],
+  );
 }
 
 export function StudioAudioPreviewProvider({
@@ -333,7 +393,8 @@ export function StudioFrameAudioOverlay({
   frameWidth: number;
   frameHeight: number;
 }) {
-  const { progress, canvasRef } = useStudioAudioPreviewContext();
+  const { progressStore, canvasRef } = useStudioAudioPreviewContext();
+  const progress = useProgress(progressStore);
   const style = normalizeProgressBarStyle(project.progressBarStyle);
   const barColor = project.progressBarColor || "#C8A951";
   const barTop = frameProgressBarTopPx(frameHeight);
@@ -420,13 +481,14 @@ export function StudioAudioTransport({
     ready,
     playing,
     muted,
-    progress,
     duration,
     error,
+    progressStore,
     play,
     pause,
     toggleMute,
   } = useStudioAudioPreviewContext();
+  const progress = useProgress(progressStore);
 
   return (
     <>

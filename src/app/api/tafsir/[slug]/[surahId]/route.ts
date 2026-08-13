@@ -3,7 +3,8 @@ import { getTafsir, getTafsirSources } from "@/lib/quran";
 
 type Params = { params: Promise<{ slug: string; surahId: string }> };
 
-export async function GET(_req: Request, { params }: Params) {
+/** Studio may request a verse range to avoid multi‑MB full-surah payloads. */
+export async function GET(req: Request, { params }: Params) {
   const { slug, surahId: surahIdRaw } = await params;
   const surahId = Number(surahIdRaw);
 
@@ -18,9 +19,33 @@ export async function GET(_req: Request, { params }: Params) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
-  return NextResponse.json(tafsir, {
-    headers: {
-      "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+  const url = new URL(req.url);
+  const from = Number(url.searchParams.get("from") || "0");
+  const to = Number(url.searchParams.get("to") || "0");
+  const maxChars = Number(url.searchParams.get("maxChars") || "2000");
+  const clip =
+    Number.isInteger(from) &&
+    Number.isInteger(to) &&
+    from >= 1 &&
+    to >= from;
+
+  const verses = (tafsir.verses || [])
+    .filter((v) => !clip || (v.verseNumber >= from && v.verseNumber <= to))
+    .map((v) => {
+      const text = String(v.text || "");
+      const clipped =
+        Number.isFinite(maxChars) && maxChars > 0 && text.length > maxChars
+          ? `${text.slice(0, maxChars)}…`
+          : text;
+      return { ...v, text: clipped };
+    });
+
+  return NextResponse.json(
+    { ...tafsir, verses },
+    {
+      headers: {
+        "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+      },
     },
-  });
+  );
 }

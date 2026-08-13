@@ -132,6 +132,7 @@ import {
   fetchTafsirMap,
   layerKey,
   resolveLayerText,
+  STUDIO_LAYER_TEXT_MAX_CHARS,
   type StudioEdition,
 } from "@/ayat-studio/lib/studio-layers";
 
@@ -318,6 +319,7 @@ export default function Editor() {
   const [layersLoading, setLayersLoading] = useState(false);
   const previewFrameRef = useRef<HTMLDivElement>(null);
   const previewStageRef = useRef<HTMLDivElement>(null);
+  const saveTimerRef = useRef<number | undefined>(undefined);
   const [frameWidth, setFrameWidth] = useState(320);
   const [frameHeight, setFrameHeight] = useState(568);
   const [previewFrameSize, setPreviewFrameSize] = useState({
@@ -325,6 +327,11 @@ export default function Editor() {
     height: 498,
   });
 
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(saveTimerRef.current);
+    };
+  }, []);
   useLayoutEffect(() => {
     if (!project) return;
     const stage = previewStageRef.current;
@@ -345,9 +352,15 @@ export default function Editor() {
         stacked,
       });
       if (fitted.width > 0 && fitted.height > 0) {
-        setPreviewFrameSize(fitted);
-        setFrameWidth(Math.round(fitted.width));
-        setFrameHeight(Math.round(fitted.height));
+        setPreviewFrameSize((prev) =>
+          prev.width === fitted.width && prev.height === fitted.height
+            ? prev
+            : fitted,
+        );
+        const fw = Math.round(fitted.width);
+        const fh = Math.round(fitted.height);
+        setFrameWidth((w) => (w === fw ? w : fw));
+        setFrameHeight((h) => (h === fh ? h : fh));
       }
     };
 
@@ -449,20 +462,29 @@ export default function Editor() {
   useEffect(() => {
     if (!project) return;
     let cancelled = false;
+    const range = {
+      from: project.ayahStart,
+      to: project.ayahEnd,
+    };
     const load = async () => {
       if (!project.translationEnabled && !project.tafsirEnabled) {
         setTranslationMap(null);
         setTafsirMap(null);
+        setLayersLoading(false);
         return;
       }
       setLayersLoading(true);
       try {
         const [tr, tf] = await Promise.all([
           project.translationEnabled && project.translationSlug
-            ? fetchTranslationMap(project.translationSlug, project.surahId)
+            ? fetchTranslationMap(
+                project.translationSlug,
+                project.surahId,
+                range,
+              )
             : Promise.resolve(null),
           project.tafsirEnabled && project.tafsirSlug
-            ? fetchTafsirMap(project.tafsirSlug, project.surahId)
+            ? fetchTafsirMap(project.tafsirSlug, project.surahId, range)
             : Promise.resolve(null),
         ]);
         if (cancelled) return;
@@ -486,11 +508,12 @@ export default function Editor() {
     };
   }, [
     project?.surahId,
+    project?.ayahStart,
+    project?.ayahEnd,
     project?.translationEnabled,
     project?.tafsirEnabled,
     project?.translationSlug,
     project?.tafsirSlug,
-    toast,
   ]);
 
   const currentPreviewAyah =
@@ -550,19 +573,22 @@ export default function Editor() {
   const update = (patch: Partial<StoredProject>) => {
     const next = { ...project, ...patch };
     setProject(next);
-    try {
-      saveProject(next);
-    } catch (err) {
-      console.warn("saveProject failed", err);
-      toast({
-        title: "تعذّر حفظ المشروع محليًا",
-        description:
-          err instanceof Error
-            ? err.message
-            : "قد تكون مساحة التخزين ممتلئة. احذف مشاريع قديمة أو استخدم خلفية Pexels.",
-        variant: "destructive",
-      });
-    }
+    window.clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = window.setTimeout(() => {
+      try {
+        saveProject(next);
+      } catch (err) {
+        console.warn("saveProject failed", err);
+        toast({
+          title: "تعذّر حفظ المشروع محليًا",
+          description:
+            err instanceof Error
+              ? err.message
+              : "قد تكون مساحة التخزين ممتلئة. احذف مشاريع قديمة أو استخدم خلفية Pexels.",
+          variant: "destructive",
+        });
+      }
+    }, 400);
   };
 
   const clampSpan = (start: number, end: number) => {
@@ -1176,7 +1202,7 @@ export default function Editor() {
                     نص الترجمة (قابل للتعديل — الآية {ayahNum})
                   </Label>
                   <Textarea
-                    value={translationText}
+                    value={translationText.slice(0, STUDIO_LAYER_TEXT_MAX_CHARS)}
                     onChange={(e) => setOverride("translation", e.target.value)}
                     rows={3}
                     className="border-accent/20 bg-[hsl(var(--background))] text-sm"
@@ -1219,7 +1245,7 @@ export default function Editor() {
                     نص التفسير (قابل للتعديل — الآية {ayahNum})
                   </Label>
                   <Textarea
-                    value={tafsirText}
+                    value={tafsirText.slice(0, STUDIO_LAYER_TEXT_MAX_CHARS)}
                     onChange={(e) => setOverride("tafsir", e.target.value)}
                     rows={4}
                     className="border-accent/20 bg-[hsl(var(--background))] text-sm"
