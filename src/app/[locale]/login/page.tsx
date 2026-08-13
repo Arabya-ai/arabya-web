@@ -11,6 +11,7 @@ import {
   isGoogleAuthConfigured,
   signIn,
 } from "@/auth";
+import { isE2eAuthEnabled } from "@/lib/e2e-auth";
 import { safeInternalPath } from "@/lib/safe-path";
 
 export const dynamic = "force-dynamic";
@@ -60,6 +61,7 @@ export default async function LoginPage({ params, searchParams }: Props) {
   const t = await getTranslations("Auth");
   const { error, diag, callbackUrl } = await searchParams;
   const ready = isGoogleAuthConfigured();
+  const e2eReady = isE2eAuthEnabled();
   const errorText = errorMessage(error, t);
   const showDiag = diag === "1" || Boolean(error);
   const diagnostics = showDiag ? getAuthEnvDiagnostics() : null;
@@ -109,11 +111,43 @@ export default async function LoginPage({ params, searchParams }: Props) {
               {t("continueGoogle")}
             </button>
           </form>
-        ) : (
+        ) : null}
+
+        {e2eReady ? (
+          <form
+            className="auth-e2e-form"
+            action={async (formData) => {
+              "use server";
+              const email = String(formData.get("email") || "").trim();
+              await signIn("e2e", {
+                email,
+                redirectTo,
+              });
+            }}
+          >
+            <label className="auth-setup-note" htmlFor="e2e-email">
+              دخول اختبار محلي (E2E فقط — لا يظهر على الإنتاج)
+            </label>
+            <input
+              id="e2e-email"
+              name="email"
+              type="email"
+              required
+              defaultValue="e2e@arabya.local"
+              className="auth-e2e-input"
+              dir="ltr"
+            />
+            <button type="submit" className="auth-btn auth-btn--account">
+              دخول اختبار
+            </button>
+          </form>
+        ) : null}
+
+        {!ready && !e2eReady ? (
           <div className="auth-setup-note" role="status">
             <p>{t("notConfigured")}</p>
           </div>
-        )}
+        ) : null}
 
         <p className="auth-foot">
           <Link href="/">{t("backHome")}</Link>

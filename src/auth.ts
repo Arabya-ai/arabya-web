@@ -1,6 +1,12 @@
 import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { fetchCloudRoleStatus } from "@/lib/cloud-sync";
+import {
+  E2E_AUTH_PROVIDER_ID,
+  E2E_DEFAULT_EMAIL,
+  isE2eAuthEnabled,
+} from "@/lib/e2e-auth";
 import {
   mergeRoleWithEnvAdmin,
   resolveRoleFromEmail,
@@ -67,6 +73,7 @@ export function getAuthEnvDiagnostics() {
 const ROLE_REFRESH_MS = 5 * 60 * 1000;
 
 const googleReady = isGoogleAuthConfigured();
+const e2eReady = isE2eAuthEnabled();
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // Auth.js requires a secret; missing one makes every /api/auth/* return 500
@@ -76,14 +83,41 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     (process.env.NODE_ENV !== "production"
       ? "arabya-local-dev-only-not-for-production"
       : undefined),
-  providers: googleReady
-    ? [
-        Google({
-          clientId: env("AUTH_GOOGLE_ID")!,
-          clientSecret: env("AUTH_GOOGLE_SECRET")!,
-        }),
-      ]
-    : [],
+  providers: [
+    ...(googleReady
+      ? [
+          Google({
+            clientId: env("AUTH_GOOGLE_ID")!,
+            clientSecret: env("AUTH_GOOGLE_SECRET")!,
+          }),
+        ]
+      : []),
+    ...(e2eReady
+      ? [
+          Credentials({
+            id: E2E_AUTH_PROVIDER_ID,
+            name: "E2E",
+            credentials: {
+              email: { label: "Email", type: "email" },
+            },
+            async authorize(credentials) {
+              if (!isE2eAuthEnabled()) return null;
+              const email = String(credentials?.email || "")
+                .trim()
+                .toLowerCase();
+              if (!email || !email.includes("@")) return null;
+              return {
+                id: email,
+                email,
+                name: email === E2E_DEFAULT_EMAIL ? "E2E Tester" : email,
+              };
+            },
+          }),
+        ]
+      : []),
+  ],
+  // Credentials JWT sessions (E2E) — Google still uses JWT strategy by default.
+  session: { strategy: "jwt" },
   trustHost: true,
   pages: {
     signIn: "/login",
