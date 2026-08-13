@@ -1,4 +1,5 @@
 import { Analytics } from "@vercel/analytics/next";
+import { CloudflareAnalytics } from "@/components/CloudflareAnalytics";
 import {
   Amiri,
   Cairo,
@@ -163,6 +164,7 @@ export default async function LocaleLayout({ children, params }: Props) {
           </AuthSessionProvider>
         </NextIntlClientProvider>
         {enableVercelAnalytics ? <Analytics /> : null}
+        <CloudflareAnalytics />
       </body>
     </html>
   );

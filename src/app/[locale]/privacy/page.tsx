@@ -16,7 +16,16 @@ const richTags = {
   ),
   vaLink: (c: ReactNode) => (
     <a
-      href="https://vercel.com/docs/analytics"
+      href="https://developers.cloudflare.com/web-analytics/"
+      rel="noreferrer"
+      target="_blank"
+    >
+      {c}
+    </a>
+  ),
+  cfLink: (c: ReactNode) => (
+    <a
+      href="https://developers.cloudflare.com/web-analytics/"
       rel="noreferrer"
       target="_blank"
     >

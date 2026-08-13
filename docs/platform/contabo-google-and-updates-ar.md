@@ -155,6 +155,44 @@ cp /var/lib/arabya/user-data.sqlite /var/lib/arabya/backup-$(date +%F).sqlite
 
 ---
 
+## 4) Cloudflare Web Analytics (زيارات مجمّعة)
+
+DNS عندك على Cloudflare — يمكن قياس الزيارات بدون إعلانات أو تتبع طرف ثالث.
+
+### أ) من لوحة Cloudflare
+
+1. **Analytics & Logs** → **Web Analytics**
+2. **Add a site** → `www.arabya.org`
+3. انسخ **Beacon token**
+
+### ب) على السيرفر
+
+```bash
+cd /var/www/arabya-web
+nano .env.production.local
+```
+
+أضف:
+
+```
+NEXT_PUBLIC_CF_BEACON_TOKEN=التوكن_هنا
+```
+
+> لا ترسل التوكن في الدردشة — الصقه في السيرفر فقط.
+
+```bash
+cp -f .env.production.local .env.local
+bash scripts/contabo-deploy.sh
+```
+
+### ج) التحقق
+
+1. افتح https://www.arabya.org في نافذة خاصة
+2. في Cloudflare → Web Analytics → انتظر دقائق ثم تحقق من ظهور زيارة
+3. (اختياري) في المتصفح → أدوات المطوّر → Network → ابحث عن `beacon.min.js`
+
+---
+
 ## Proxy LiteSpeed (مرجع — لا تغيّر إن كان الموقع يعمل)
 
 ملف `.htaccess` الصحيح:

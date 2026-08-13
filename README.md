@@ -6,10 +6,10 @@
 
 - **Next.js 15 + TypeScript + Tailwind 4**
 - **البيانات:** ملفات JSON داخل `/data` (Git-first)
-- **النشر (موصى به الآن إن قبلت دفعاً شهرياً صغيراً):** Contabo VPS — الدليل: [`docs/platform/hosting-contabo-ar.md`](docs/platform/hosting-contabo-ar.md)  
-- **بديل مجاني مؤقت:** [Render](https://render.com) — [`docs/platform/hosting-free-render-ar.md`](docs/platform/hosting-free-render-ar.md)  
-- **Vercel Hobby:** متوقف حالياً بعد تجاوز الحدود  
-- **بيانات المشترك (لاحقًا):** Cloudflare D1 / Worker
+- **النشر (الإنتاج):** Contabo VPS + ServerAvatar — [`docs/platform/hosting-contabo-ar.md`](docs/platform/hosting-contabo-ar.md) · OAuth والتحديث: [`docs/platform/contabo-google-and-updates-ar.md`](docs/platform/contabo-google-and-updates-ar.md)  
+- **حسابات Google + المزامنة:** SQLite على السيرفر — [`docs/platform/accounts-owner-guide-ar.md`](docs/platform/accounts-owner-guide-ar.md)  
+- **Analytics:** Cloudflare Web Analytics (token في `.env.production.local`)  
+- **legacy:** Render / Vercel / D1 — لم تعد مسار الإنتاج؛ راجع `docs/platform/d1-accounts.md` للأرشيف فقط
 
 ## سياسة البيانات (Git-first)
 
@@ -17,7 +17,8 @@
 |--------------|-------------|---------|
 | نص القرآن، الكلمات، الإعراب، التفاسير | `/data` على GitHub | مجاني دائمًا، نسخة مع كل commit |
 | مفضّلات / آخر صفحة / الوضع الليلي | `localStorage` في المتصفح | بلا سيرفر |
-| حسابات سحابية (لاحقًا) | Cloudflare D1 | مواصفات فقط — انظر `docs/platform/d1-accounts.md` |
+| مفضّلات / ملاحظات / عادة القراءة (مع حساب) | SQLite على Contabo | `ARABYA_USER_SYNC_ENABLED=1` |
+| حسابات (legacy) | Cloudflare D1 / Worker | أرشيف — `docs/platform/d1-accounts.md` |
 | صوت / ملفات كبيرة (لاحقًا) | CDN أو R2 | التلاوة الحالية من EveryAyah |
 
 **لا نعتمد** Google Sheets أو Supabase كقاعدة للمحتوى القرآني.

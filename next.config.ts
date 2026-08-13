@@ -13,14 +13,14 @@ const contentSecurityPolicy = [
   "frame-ancestors 'self'",
   "object-src 'none'",
   "form-action 'self' https://accounts.google.com",
-  "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com",
+  "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com https://static.cloudflareinsights.com",
   "worker-src 'self' blob:",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
   "img-src 'self' data: blob: https:",
   // blob: Studio preview/export; https: Pexels/Vimeo CDN fallbacks for <video>
   "media-src 'self' blob: data: https:",
-  "connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com https://api.quran.com https://accounts.google.com https://images.pexels.com https://videos.pexels.com https://player.vimeo.com https://cdn.pixabay.com https://pixabay.com https://i.vimeocdn.com",
+  "connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com https://cloudflareinsights.com https://api.quran.com https://accounts.google.com https://images.pexels.com https://videos.pexels.com https://player.vimeo.com https://cdn.pixabay.com https://pixabay.com https://i.vimeocdn.com",
   "upgrade-insecure-requests",
 ].join("; ");
 
