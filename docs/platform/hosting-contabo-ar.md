@@ -110,9 +110,27 @@ Contabo جاهز:
 
 ---
 
+## بعد النشر — Google + تحديثات
+
+- **Google OAuth + سحب التحديثات:** `docs/platform/contabo-google-and-updates-ar.md`
+- **تحديث سريع على السيرفر:** `bash scripts/contabo-deploy.sh`
+
+## Proxy على ServerAvatar + OpenLiteSpeed
+
+إن ظهرت صفحة ServerAvatar الافتراضية أو 500:
+
+1. في `/etc/serveravatar-ols/arabyaorg.conf` أضف `extprocessor arabya-node` → `127.0.0.1:3000`
+2. في `public_html/.htaccess`:
+
+```apache
+RewriteEngine On
+RewriteRule ^(.*)$ http://arabya-node/$1 [P,L]
+```
+
+> استخدم الاسم `arabya-node` وليس `http://127.0.0.1:3000` مباشرة في RewriteRule.
+
 ## ملفات مساعدة في المشروع
 
-- سكربت تهيئة سريع (إن دخلت SSH): `scripts/contabo-bootstrap.sh`  
-- إعداد PM2 اختياري: `deploy/contabo/ecosystem.config.cjs`
-
-استخدمها فقط إذا طلب منك المبرمج ذلك أو فضّلت الإعداد اليدوي بدل ServerAvatar.
+- تهيئة أول مرة: `scripts/contabo-bootstrap.sh`  
+- تحديث بعد `git pull`: `scripts/contabo-deploy.sh`  
+- PM2: `deploy/contabo/ecosystem.config.cjs`
