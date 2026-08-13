@@ -4,6 +4,18 @@ import { ARABYA_SITE_URL } from "@/lib/brand-export";
 
 export type ListenMode = "surah" | "ayah" | "wbw";
 
+export function listenModeFromSearch(
+  params: URLSearchParams,
+): ListenMode | null {
+  const listen = params.get("listen");
+  if (listen === "ayah" || listen === "wbw" || listen === "surah") return listen;
+  const share = params.get("share");
+  if (share === "listen-ayah") return "ayah";
+  if (share === "listen-wbw") return "wbw";
+  if (share === "listen-surah") return "surah";
+  return null;
+}
+
 export type ShareKind =
   | "ayah"
   | "page"

@@ -534,7 +534,9 @@
     "mediaSessionAyah": "Ayah {verseKey}",
     "mediaSessionWbw": "Word by word — {verseKey}",
     "mediaSessionSurahFallback": "Surah",
-    "surahFallbackLabel": "Surah {surahId}"
+    "surahFallbackLabel": "Surah {surahId}",
+    "tapToListen": "Tap to listen — your browser blocks autoplay",
+    "tapToListenBtn": "▶ Listen now"
   },
   "Sync": {
     "ariaLabel": "Cloud sync",

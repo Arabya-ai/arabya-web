@@ -119,6 +119,21 @@ export function ayahAudioUrl(
   return `https://everyayah.com/data/${reciter.folder}/${s}${v}.mp3`;
 }
 
+/** Same-origin EveryAyah proxy — preferred for mushaf HTMLAudioElement playback. */
+export function mushafAyahAudioUrl(
+  surahId: number,
+  verse: number,
+  reciterId: string = DEFAULT_RECITER_ID,
+): string {
+  const reciter = getReciter(reciterId);
+  const q = new URLSearchParams({
+    folder: reciter.folder,
+    s: String(surahId),
+    v: String(verse),
+  });
+  return `/api/mushaf/audio?${q.toString()}`;
+}
+
 /** Per-word clip from Quran.com CDN (path from API word.audio_url). */
 export function wordAudioUrl(
   surahId: number,

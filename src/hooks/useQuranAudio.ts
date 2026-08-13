@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  ayahAudioUrl,
   getReciter,
+  mushafAyahAudioUrl,
   reciterDisplayName,
   reciterHasWordSync,
   wordAudioUrl,
@@ -375,6 +375,24 @@ export function useQuranAudio({
     }
   }, [pageNum, resolvedReciterId, page.blocks]);
 
+  const playAyahEveryAyah = async (
+    audio: HTMLAudioElement,
+    target: AyahTarget,
+    session: number,
+  ) =>
+    playUrlUntilEnd(
+      audio,
+      mushafAyahAudioUrl(
+        target.surahId,
+        target.verseNumber,
+        resolvedReciterId,
+      ),
+      () => ayahStopRef.current || !isSessionCurrent(session),
+      1,
+      session,
+      isSessionCurrent,
+    );
+
   const playAyahAudio = async () => {
     const { start, session } = beginExclusive("ayah");
     if (!start) return;
@@ -396,15 +414,21 @@ export function useQuranAudio({
       mediaStopHandlers(session, "ayah"),
     );
 
-    const pack = await resolveTimings(target.surahId, resolvedReciterId);
+    const pack = await resolveTimings(target.surahId, resolvedReciterId, 2500);
     if (!isSessionCurrent(session) || ayahStopRef.current) {
       setAudioPlaying(false);
       clearMediaSession();
+      onStatusNote("playError", undefined, 2200);
       return;
     }
 
     const verseTiming = pack?.verses[target.verseKey];
-    const useSync = Boolean(pack?.audioUrl && verseTiming);
+    const verseDurationMs = verseTiming
+      ? verseTiming.timestampTo - verseTiming.timestampFrom
+      : 0;
+    const useSync = Boolean(
+      pack?.audioUrl && verseTiming && verseDurationMs > 200,
+    );
 
     let failed = false;
     try {
@@ -414,6 +438,7 @@ export function useQuranAudio({
         if (ayahStopRef.current || !isSessionCurrent(session)) break;
 
         if (useSync && pack && verseTiming) {
+          const startedAt = performance.now();
           const result = await playClipToEnd(audio, pack.audioUrl, {
             shouldStop: () =>
               ayahStopRef.current || !isSessionCurrent(session),
@@ -437,37 +462,22 @@ export function useQuranAudio({
             },
           });
 
+          const elapsedSec = (performance.now() - startedAt) / 1000;
+          const expectedSec = Math.max(0.4, verseDurationMs / 1000 - 0.2);
+          const syncFailed =
+            result === "error" ||
+            (result === "ok" && elapsedSec < expectedSec * 0.35);
+
           if (
-            result === "error" &&
+            syncFailed &&
             !ayahStopRef.current &&
             isSessionCurrent(session)
           ) {
-            await playUrlUntilEnd(
-              audio,
-              ayahAudioUrl(
-                target.surahId,
-                target.verseNumber,
-                resolvedReciterId,
-              ),
-              () => ayahStopRef.current || !isSessionCurrent(session),
-              1,
-              session,
-              isSessionCurrent,
-            );
+            setSyncHighlightPos(null);
+            await playAyahEveryAyah(audio, target, session);
           }
         } else {
-          await playUrlUntilEnd(
-            audio,
-            ayahAudioUrl(
-              target.surahId,
-              target.verseNumber,
-              resolvedReciterId,
-            ),
-            () => ayahStopRef.current || !isSessionCurrent(session),
-            1,
-            session,
-            isSessionCurrent,
-          );
+          await playAyahEveryAyah(audio, target, session);
         }
       }
     } catch {
@@ -683,10 +693,53 @@ export function useQuranAudio({
           });
 
           if (result === "error") {
-            failed = !playedAny;
+            playedAny = false;
             break;
           }
           playedAny = true;
+        }
+
+        if (!playedAny && !shouldStopSurah()) {
+          for (let round = 0; round < times; round++) {
+            if (shouldStopSurah()) break;
+            for (let v = startVerse; v <= versesCount; v++) {
+              if (shouldStopSurah()) break;
+              await waitWhilePaused();
+              if (shouldStopSurah()) break;
+
+              setSurahPlayer((p) => ({
+                ...p,
+                mode: "verses",
+                verseIndex: v,
+                playing: true,
+                active: true,
+              }));
+
+              const result = await playUrlUntilEnd(
+                audio,
+                mushafAyahAudioUrl(surahId, v, resolvedReciterId),
+                shouldStopSurah,
+                rateRef.current,
+                session,
+                isSessionCurrent,
+              );
+
+              setSurahPlayer((p) => ({
+                ...p,
+                currentTime: audio.currentTime,
+                duration: Number.isFinite(audio.duration) ? audio.duration : 0,
+                playing: !audio.paused,
+              }));
+
+              if (result === "error") {
+                failed = true;
+                onStatusNote("surahConnectionError", undefined, 2500);
+                break;
+              }
+              playedAny = true;
+            }
+            if (failed) break;
+          }
         }
       } else {
         for (let round = 0; round < times; round++) {
@@ -706,7 +759,7 @@ export function useQuranAudio({
 
             const result = await playUrlUntilEnd(
               audio,
-              ayahAudioUrl(surahId, v, resolvedReciterId),
+              mushafAyahAudioUrl(surahId, v, resolvedReciterId),
               shouldStopSurah,
               rateRef.current,
               session,

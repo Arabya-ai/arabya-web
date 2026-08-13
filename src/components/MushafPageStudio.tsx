@@ -24,6 +24,8 @@ import { getAyahNote, saveAyahNote } from "@/lib/ayah-notes";
 import {
   buildMushafShareUrl,
   copyLinkOnly,
+  listenModeFromSearch,
+  type ListenMode,
   type ShareTarget,
 } from "@/lib/share";
 import { apiGet } from "@/lib/api-client";
@@ -155,6 +157,7 @@ export function MushafPageStudio({
   const [bookmarked, setBookmarked] = useState(false);
   const [repeatCount, setRepeatCount] = useState(1);
   const [ayahNoteDraft, setAyahNoteDraft] = useState("");
+  const [pendingListen, setPendingListen] = useState<ListenMode | null>(null);
 
   const prefs = useMushafPrefs(page, verseEditions);
 
@@ -248,7 +251,7 @@ export function MushafPageStudio({
   });
 
   const listenBootRef = useRef<{
-    listen: string | null;
+    listen: ListenMode | null;
     verseKey: string | null;
     done: boolean;
   } | null>(null);
@@ -257,7 +260,7 @@ export function MushafPageStudio({
     if (typeof window === "undefined" || listenBootRef.current) return;
     const params = new URLSearchParams(window.location.search);
     listenBootRef.current = {
-      listen: params.get("listen"),
+      listen: listenModeFromSearch(params),
       verseKey: params.get("v"),
       done: false,
     };
@@ -334,24 +337,29 @@ export function MushafPageStudio({
     }
 
     dl.done = true;
+    setPendingListen(dl.listen);
+  }, [selected, wordRows, page.blocks]);
+
+  const startPendingListen = () => {
+    const mode = pendingListen;
+    if (!mode) return;
+    setPendingListen(null);
     const block =
-      page.blocks.find((b) => b.surahId === selected.surahId) ??
+      page.blocks.find((b) => b.surahId === selected?.surahId) ??
       page.blocks[0];
-    if (dl.listen === "surah" && block) {
+    if (mode === "surah" && block) {
       void audio.playSurahAudio(
         block.surahId,
         block.meta.versesCount,
-        selected.verseNumber,
+        selected?.verseNumber ?? 1,
         getSurahDisplayTitle(block.surahId, locale),
       );
-    } else if (dl.listen === "ayah") {
+    } else if (mode === "ayah") {
       void audio.playAyahAudio();
-    } else if (dl.listen === "wbw") {
+    } else if (mode === "wbw") {
       void audio.playWordByWordAudio();
     }
-    // Intentional: deep-link boot once selection is ready
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected, wordRows, page.blocks]);
+  };
 
   useEffect(() => {
     if (!selected) {
@@ -569,6 +577,18 @@ export function MushafPageStudio({
       className="studio"
       style={{ ["--mushaf-scale" as string]: String(prefs.fontScale) }}
     >
+      {pendingListen ? (
+        <div className="listen-tap-banner" role="status">
+          <p>{tAudio("tapToListen")}</p>
+          <button
+            type="button"
+            className="tool-btn mtb-link"
+            onClick={startPendingListen}
+          >
+            {tAudio("tapToListenBtn")}
+          </button>
+        </div>
+      ) : null}
       <MushafToolbar
         prefs={prefs}
         studySurahId={studySurahId}

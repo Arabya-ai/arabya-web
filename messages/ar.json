@@ -534,7 +534,9 @@
     "mediaSessionAyah": "آية {verseKey}",
     "mediaSessionWbw": "كلمة بكلمة — {verseKey}",
     "mediaSessionSurahFallback": "سورة",
-    "surahFallbackLabel": "سورة {surahId}"
+    "surahFallbackLabel": "سورة {surahId}",
+    "tapToListen": "اضغط للاستماع — المتصفح يمنع التشغيل التلقائي",
+    "tapToListenBtn": "▶ استماع الآن"
   },
   "Sync": {
     "ariaLabel": "مزامنة سحابية",

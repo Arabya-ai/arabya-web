@@ -136,6 +136,7 @@ export async function playClipToEnd(
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("error", onError);
     };
+    let sawProgress = false;
     const onTime = () => {
       if (!alive()) {
         audio.pause();
@@ -144,7 +145,13 @@ export async function playClipToEnd(
         return;
       }
       opts.onTime?.(audio.currentTime, audio.duration);
-      if (opts.stopAtSec != null && audio.currentTime >= opts.stopAtSec - 0.04) {
+      const start = opts.startAtSec ?? 0;
+      if (audio.currentTime > start + 0.05) sawProgress = true;
+      if (
+        opts.stopAtSec != null &&
+        sawProgress &&
+        audio.currentTime >= opts.stopAtSec - 0.04
+      ) {
         audio.pause();
         cleanup();
         resolve("ok");
@@ -161,7 +168,6 @@ export async function playClipToEnd(
     audio.addEventListener("timeupdate", onTime);
     audio.addEventListener("ended", onEnded);
     audio.addEventListener("error", onError);
-    onTime();
   });
 }
 

@@ -3,6 +3,7 @@ import {
   absoluteUrl,
   buildListenUrl,
   buildMushafShareUrl,
+  listenModeFromSearch,
   socialShareLinks,
   shareOgImageUrl,
 } from "@/lib/share";
@@ -38,6 +39,15 @@ describe("share helpers", () => {
     ).toBe(
       "/mushaf/1?share=listen-surah&v=1%3A1&sid=1&listen=surah&reciter=alafasy",
     );
+  });
+
+  it("parses listen mode from search params", () => {
+    expect(
+      listenModeFromSearch(new URLSearchParams("listen=ayah")),
+    ).toBe("ayah");
+    expect(
+      listenModeFromSearch(new URLSearchParams("share=listen-wbw&v=1:1")),
+    ).toBe("wbw");
   });
 
   it("keeps listen helper compatible", () => {
