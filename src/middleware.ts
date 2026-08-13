@@ -1,11 +1,8 @@
 import createMiddleware from "next-intl/middleware";
 import {
   NextResponse,
-  type NextFetchEvent,
-  type NextMiddleware,
   type NextRequest,
 } from "next/server";
-import { auth } from "@/auth";
 import { routing } from "@/i18n/routing";
 import { ARABYA_SITE_HOST } from "@/lib/brand-export";
 
@@ -48,18 +45,12 @@ function withLocalePrefix(pathname: string, locale: "ar" | "en"): string {
   return bare === "/" ? "/en" : `/en${bare}`;
 }
 
-function resolveUiLocale(
-  pathname: string,
-  preferred: string | undefined,
-): "ar" | "en" {
-  if (pathname.startsWith("/en")) return "en";
-  if (preferred === "en" || preferred === "ar") return preferred;
-  return "ar";
-}
-
-function isProtectedPath(pathname: string): boolean {
-  const bare = stripLocalePrefix(pathname);
-  return /^(?:\/(?:account|studio|admin|create))(?:\/|$)/.test(bare);
+function setLocaleCookie(res: NextResponse, locale: "ar" | "en"): void {
+  res.cookies.set(LOCALE_COOKIE, locale, {
+    path: "/",
+    maxAge: LOCALE_MAX_AGE,
+    sameSite: "lax",
+  });
 }
 
 function isStaticOrApi(pathname: string): boolean {
@@ -71,15 +62,7 @@ function isStaticOrApi(pathname: string): boolean {
   );
 }
 
-function setLocaleCookie(res: NextResponse, locale: "ar" | "en"): void {
-  res.cookies.set(LOCALE_COOKIE, locale, {
-    path: "/",
-    maxAge: LOCALE_MAX_AGE,
-    sameSite: "lax",
-  });
-}
-
-/** Locale redirects + intl — no auth decode (keeps mushaf/home TTFB low). */
+/** Locale redirects + intl — auth gates live in server layouts/pages (Node). */
 function runPublicMiddleware(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
   const preferred = request.cookies.get(LOCALE_COOKIE)?.value;
@@ -105,29 +88,7 @@ function runPublicMiddleware(request: NextRequest): NextResponse {
   return response;
 }
 
-const authGuard = auth((req) => {
-  const request = req as unknown as NextRequest;
-  const { pathname } = request.nextUrl;
-
-  if (!req.auth) {
-    const preferred = request.cookies.get(LOCALE_COOKIE)?.value;
-    const locale = resolveUiLocale(pathname, preferred);
-    const returnTo = `${pathname}${request.nextUrl.search}`;
-    const url = request.nextUrl.clone();
-    url.pathname = withLocalePrefix("/login", locale);
-    // Drop original query (e.g. ?s=&v=) so only callbackUrl carries the return path.
-    url.search = "";
-    url.searchParams.set("callbackUrl", returnTo);
-    return NextResponse.redirect(url);
-  }
-
-  return runPublicMiddleware(request);
-}) as unknown as NextMiddleware;
-
-export default function middleware(
-  request: NextRequest,
-  event: NextFetchEvent,
-) {
+export default function middleware(request: NextRequest) {
   const hostRedirect = canonicalHostRedirect(request);
   if (hostRedirect) return hostRedirect;
 
@@ -135,11 +96,6 @@ export default function middleware(
 
   if (isStaticOrApi(pathname)) {
     return NextResponse.next();
-  }
-
-  // Auth JWT decode only on account/studio/admin/create — not on reading pages.
-  if (isProtectedPath(pathname)) {
-    return authGuard(request, event);
   }
 
   return runPublicMiddleware(request);

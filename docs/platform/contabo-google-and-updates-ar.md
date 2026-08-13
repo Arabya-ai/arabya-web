@@ -48,6 +48,7 @@ AUTH_SECRET=... (موجود مسبقاً)
 AUTH_GOOGLE_ID=xxxx.apps.googleusercontent.com
 AUTH_GOOGLE_SECRET=GOCSPX-...
 AUTH_URL=https://www.arabya.org
+AUTH_TRUST_HOST=true
 ARABYA_ADMIN_EMAILS=بريدك@gmail.com
 NODE_ENV=production
 PORT=3000
@@ -63,12 +64,22 @@ pm2 status
 
 ### ج) اختبار
 
-1. افتح: https://www.arabya.org
-2. اضغط **دخول**
-3. اختر حساب Gmail
-4. يجب أن تفتح **حسابي** أو الصفحة التي طلبتها
+1. **امسح كookies** لـ `arabya.org` من المتصفح (أو نافذة خاصة).
+2. افتح دائماً: **https://www.arabya.org** (وليس `arabya.org` بدون www).
+3. اضغط **دخول** → اختر Gmail.
+4. يجب أن تفتح **حسابي** بدون «too many redirects».
 
-إن ظهر خطأ: من `/admin/settings` (بعد دخولك كمدير) راجع تشخيص Auth، أو أرسل لقطة بدون أسرار.
+### د) إن ظهر ERR_TOO_MANY_REDIRECTS
+
+```bash
+cd /var/www/arabya-web
+git pull origin main
+bash scripts/contabo-deploy.sh
+```
+
+ثم أعد الاختبار من **https://www.arabya.org/login** في نافذة خاصة.
+
+إن استمر الخطأ: في Cloudflare → SSL/TLS → **Full** (وليس Flexible).
 
 ---
 

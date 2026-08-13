@@ -1,5 +1,6 @@
-import "@/ayat-studio/theme.css";
 import type { CSSProperties, ReactNode } from "react";
+import { requireSession } from "@/lib/require-session";
+import "@/ayat-studio/theme.css";
 import { Toaster } from "@/ayat-studio/components/ui/toaster";
 import { TooltipProvider } from "@/ayat-studio/components/ui/tooltip";
 import { StudioProviders } from "@/ayat-studio/components/StudioProviders";
@@ -10,11 +11,13 @@ import { StudioHeaderHeightSync } from "@/components/StudioHeaderHeightSync";
  * Fonts reuse the seven families already loaded in [locale]/layout
  * (Tajawal, Reem Kufi, Amiri → --font-amiri-quran alias).
  */
-export default function CreateRootLayout({
+export default async function CreateRootLayout({
   children,
 }: {
   children: ReactNode;
 }) {
+  await requireSession();
+
   const studioFontAlias = {
     ["--font-amiri-quran"]: "var(--font-amiri)",
   } as CSSProperties;
