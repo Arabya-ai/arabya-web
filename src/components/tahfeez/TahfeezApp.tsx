@@ -331,8 +331,8 @@ export function TahfeezApp({
             </button>
           ))}
         </div>
-        <Link className="tahfeez-action" href="/account/tahfeez">
-          {ar ? "بورتفوليو الحساب" : "Account portfolio"}
+        <Link className="tahfeez-action" href="/account">
+          {ar ? "حسابي" : "My account"}
         </Link>
       </header>
 
@@ -547,7 +547,7 @@ export function TahfeezApp({
 
       {tab === "stats" || tab === "pages" ? (
         <div className="tahfeez-card">
-          <h3>{ar ? "البورتفوليو" : "Portfolio"}</h3>
+          <h3>{ar ? "تقدّمك في الحساب" : "Your progress"}</h3>
           <div className="tahfeez-stat-grid">
             <div className="tahfeez-stat">
               <b>{stats.pagesCompleted}</b>
@@ -578,7 +578,7 @@ export function TahfeezApp({
           </ul>
           <p style={{ marginTop: "0.75rem" }}>
             <Link className="tahfeez-action" href="/account/tahfeez">
-              {ar ? "عرض البورتفوليو الكامل" : "Full portfolio"}
+              {ar ? "تفاصيل التسميع في حسابي" : "Recitation details in my account"}
             </Link>
           </p>
         </div>

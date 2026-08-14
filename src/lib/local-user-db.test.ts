@@ -4,11 +4,14 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   getUserDb,
+  localAdminListUsers,
   localAdminStats,
   localPullSync,
   localPushSync,
+  localSaveTahfeezPortfolio,
   resetUserDbForTests,
 } from "@/lib/local-user-db";
+import { emptyTahfeezPortfolio } from "@/lib/tahfeez/types";
 
 describe("local-user-db sync", () => {
   let tmpDir: string;
@@ -150,5 +153,71 @@ describe("local-user-db sync", () => {
     expect(stats.totalUsers).toBeGreaterThanOrEqual(1);
     expect(stats.totalBookmarks).toBeGreaterThanOrEqual(3);
     expect(stats.totalNotes).toBeGreaterThanOrEqual(1);
+  });
+
+  it("lists CRM members with recitation stats from the same user row", () => {
+    getUserDb();
+    const user = {
+      email: "hifz@example.com",
+      name: "Hifz User",
+      image: null,
+    };
+    localPushSync(user, {
+      bookmarks: [
+        {
+          key: "1:1",
+          surahId: 1,
+          verse: 1,
+          page: 1,
+          savedAt: 1_900_000_000_000,
+        },
+      ],
+      notes: [],
+      study: [],
+      progress: { lastPage: 3, habit: {}, updatedAt: null },
+    });
+    localSaveTahfeezPortfolio(user, {
+      ...emptyTahfeezPortfolio(),
+      stats: {
+        ...emptyTahfeezPortfolio().stats,
+        overallAccuracy: 91,
+      },
+      sessions: [
+        {
+          id: "s1",
+          surahId: 1,
+          surahName: "الفاتحة",
+          ayahStart: 1,
+          ayahEnd: 7,
+          accuracy: 90,
+          correct: 9,
+          wrong: 1,
+          skipped: 0,
+          totalWords: 10,
+          durationSec: 40,
+          completedAt: "2026-08-01T00:00:00.000Z",
+        },
+        {
+          id: "s2",
+          surahId: 2,
+          surahName: "البقرة",
+          ayahStart: 1,
+          ayahEnd: 5,
+          accuracy: 92,
+          correct: 10,
+          wrong: 1,
+          skipped: 0,
+          totalWords: 11,
+          durationSec: 50,
+          completedAt: "2026-08-02T00:00:00.000Z",
+        },
+      ],
+    });
+
+    const { users } = localAdminListUsers({ q: "hifz@example.com" });
+    const row = users.find((u) => u.email === "hifz@example.com");
+    expect(row?.bookmarkCount).toBe(1);
+    expect(row?.tahfeezSessions).toBe(2);
+    expect(row?.tahfeezAccuracy).toBeGreaterThan(0);
   });
 });

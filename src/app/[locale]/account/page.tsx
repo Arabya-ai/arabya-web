@@ -78,31 +78,46 @@ export default async function AccountPage({ params }: Props) {
 
         <section className="dash-card dash-card--accent">
           <h2>{t("shortcuts")}</h2>
-          <div className="dash-actions">
-            <Link href="/studio" className="account-panel-link">
-              {t("studio")}
+          <div className="account-hub">
+            <Link href="/tahfeez" className="account-hub-card">
+              <strong>{t("tahfeez")}</strong>
+              <span>{t("tahfeezLead")}</span>
+              <em>{t("openRecitation")}</em>
+            </Link>
+            <Link href="/studio/dashboard" className="account-hub-card">
+              <strong>{t("studio")}</strong>
+              <span>{t("studioLead")}</span>
+              <em>{t("openTool")}</em>
+            </Link>
+            <Link href="/account/study" className="account-hub-card">
+              <strong>{t("study")}</strong>
+              <span>{t("studyLead")}</span>
+              <em>{t("openTool")}</em>
+            </Link>
+            <Link href="/favorites" className="account-hub-card">
+              <strong>{t("favorites")}</strong>
+              <span>{t("favoritesLead")}</span>
+              <em>{t("openTool")}</em>
+            </Link>
+            <Link href="/account/stats" className="account-hub-card">
+              <strong>{t("statsPageTitle")}</strong>
+              <span>{t("statsLead")}</span>
+              <em>{t("openTool")}</em>
             </Link>
             {canAccessAdmin(role) ? (
-              <Link href="/admin" className="account-panel-link">
-                {t("admin")}
+              <Link href="/admin/users" className="account-hub-card">
+                <strong>{t("admin")}</strong>
+                <span>{t("crmLead")}</span>
+                <em>{t("openCrm")}</em>
               </Link>
             ) : null}
             {canAccessEditorialTools(role) ? (
-              <Link href="/account/edit" className="account-panel-link">
-                {t("editHub")}
+              <Link href="/account/edit" className="account-hub-card">
+                <strong>{t("editHub")}</strong>
+                <span>{t("qualityQueue")}</span>
+                <em>{t("openTool")}</em>
               </Link>
             ) : null}
-            {canAccessEditorialTools(role) ? (
-              <Link href="/account/edit/queue" className="account-panel-link">
-                {t("qualityQueue")}
-              </Link>
-            ) : null}
-            <Link href="/account/study" className="account-panel-link">
-              {t("study")}
-            </Link>
-            <Link href="/favorites" className="account-panel-link">
-              {t("favorites")}
-            </Link>
           </div>
         </section>
 

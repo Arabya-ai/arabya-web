@@ -15,7 +15,8 @@ export type DashIconName =
   | "spark"
   | "shield"
   | "book"
-  | "cloud";
+  | "cloud"
+  | "mic";
 
 const paths: Record<DashIconName, string> = {
   home: "M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5Z",
@@ -36,6 +37,7 @@ const paths: Record<DashIconName, string> = {
   shield: "M12 3 4 7v5c0 5 3.5 8.5 8 9.5 4.5-1 8-4.5 8-9.5V7l-8-4Z",
   book: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v15H6.5A2.5 2.5 0 0 0 4 19.5V4.5A2.5 2.5 0 0 1 6.5 2Z",
   cloud: "M17.5 19a4.5 4.5 0 0 0 .5-9 7 7 0 0 0-13.2 2A4 4 0 0 0 6 19h11.5Z",
+  mic: "M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Zm7 9a7 7 0 0 1-14 0m7 7v4m-4 0h8",
 };
 
 export function DashIcon({

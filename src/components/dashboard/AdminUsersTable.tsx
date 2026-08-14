@@ -316,6 +316,9 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
               <th scope="col">{t("colRole")}</th>
               <th scope="col">{t("colPlan")}</th>
               <th scope="col">{t("colStatus")}</th>
+              <th scope="col">{t("colTahfeez")}</th>
+              <th scope="col">{t("colAccuracy")}</th>
+              <th scope="col">{t("colBookmarks")}</th>
               <th scope="col">{t("colActions")}</th>
             </tr>
           </thead>
@@ -338,6 +341,9 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
                 <td>
                   <StatusBadge status={u.status} />
                 </td>
+                <td>{u.tahfeezSessions ?? 0}</td>
+                <td>{u.tahfeezAccuracy ?? 0}%</td>
+                <td>{u.bookmarkCount ?? 0}</td>
                 <td>
                   <Actions u={u} />
                 </td>
@@ -367,6 +373,17 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
                 <PlanBadge u={u} />
                 <StatusBadge status={u.status} />
               </div>
+              <p className="users-card-stats">
+                <span>
+                  {t("colTahfeez")}: {u.tahfeezSessions ?? 0}
+                </span>
+                <span>
+                  {t("colAccuracy")}: {u.tahfeezAccuracy ?? 0}%
+                </span>
+                <span>
+                  {t("colBookmarks")}: {u.bookmarkCount ?? 0}
+                </span>
+              </p>
               <Actions u={u} />
             </article>
           ))

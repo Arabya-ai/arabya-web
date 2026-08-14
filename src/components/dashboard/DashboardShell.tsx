@@ -92,7 +92,8 @@ export function DashboardShell({
                       : "spark"
                 }
               />
-              {tRoles(role)}            </span>
+              {tRoles(role)}
+            </span>
             {userEmail ? (
               <span className="dash-user-area" dir="ltr">
                 {userEmail}

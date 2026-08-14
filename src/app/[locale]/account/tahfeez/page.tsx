@@ -45,12 +45,12 @@ export default async function AccountTahfeezPage({ params }: Props) {
       userEmail={session.user.email}
       userImage={session.user.image}
       backHref="/account"
-      backLabel="←"
+      backLabel={t("backToAccount")}
     >
       <div className="dash-stack">
         <div className="dash-card dash-card--accent">
           <p>
-            <Link href="/tahfeez">{locale === "en" ? "Open smart recitation" : "فتح التسميع الذكي"}</Link>
+            <Link href="/tahfeez">{t("openSession")}</Link>
           </p>
         </div>
         <div className="dash-card">

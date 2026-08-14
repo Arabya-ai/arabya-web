@@ -72,6 +72,10 @@ export type AdminUserRow = {
   lastSeenAt: number | null;
   createdAt: number;
   updatedAt: number;
+  bookmarkCount?: number;
+  noteCount?: number;
+  tahfeezSessions?: number;
+  tahfeezAccuracy?: number;
 };
 
 export type RoleRequestRow = {
@@ -379,6 +383,7 @@ export async function adminGetPortfolio(actorEmail: string, userId: string) {
     notes: unknown[];
     study?: unknown[];
     tahfeez?: TahfeezPortfolio;
+    progress?: { lastPage?: number | null };
   }>("/v1/admin/portfolio", { actorEmail, userId });
 }
 

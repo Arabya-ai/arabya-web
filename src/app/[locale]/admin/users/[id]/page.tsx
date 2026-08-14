@@ -7,7 +7,6 @@ import {
 
 import { auth } from "@/auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { Link } from "@/i18n/navigation";
 import {
   adminGetPortfolio,
   isCloudSyncConfigured,
@@ -17,6 +16,7 @@ import {
   isSuperAdminEmail,
   type UserRole,
 } from "@/lib/roles";
+import type { TahfeezPortfolio } from "@/lib/tahfeez/types";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +28,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: t("portfolioMetaTitle") };
 }
 
-export default async function AdminUserPortfolioPage({ params }: Props) {
+function formatWhen(value: number | string | null | undefined, locale: string) {
+  if (value == null || value === "") return "—";
+  const n = typeof value === "number" ? value : Date.parse(value);
+  if (!Number.isFinite(n) || n <= 0) return "—";
+  return new Date(n).toLocaleString(locale);
+}
+
+export default async function AdminMemberFilePage({ params }: Props) {
   const locale = await resolveLocale(params);
   const t = await getTranslations("Admin");
   const tRoles = await getTranslations("Roles");
@@ -71,6 +78,8 @@ export default async function AdminUserPortfolioPage({ params }: Props) {
   const bookmarks = Array.isArray(data.bookmarks) ? data.bookmarks : [];
   const notes = Array.isArray(data.notes) ? data.notes : [];
   const userRole = (u.role as UserRole) || "user";
+  const tahfeez = (data.tahfeez || null) as TahfeezPortfolio | null;
+  const progress = data.progress as { lastPage?: number | null } | undefined;
 
   return (
     <DashboardShell
@@ -104,38 +113,60 @@ export default async function AdminUserPortfolioPage({ params }: Props) {
                 {t("roleLabel")}: {tRoles(userRole)} · {t("statusLabel")}:{" "}
                 {u.status === "banned" ? t("statusBanned") : t("statusActive")}
               </p>
+              <dl className="crm-meta">
+                <div>
+                  <dt>{t("createdLabel")}</dt>
+                  <dd>{formatWhen(u.createdAt, locale)}</dd>
+                </div>
+                <div>
+                  <dt>{t("lastSeenLabel")}</dt>
+                  <dd>{formatWhen(u.lastSeenAt, locale)}</dd>
+                </div>
+                <div>
+                  <dt>{t("lastPageLabel")}</dt>
+                  <dd>{progress?.lastPage ?? "—"}</dd>
+                </div>
+              </dl>
             </div>
           </div>
         </section>
 
         <section className="dash-card">
-          <h2>{locale === "en" ? "Smart recitation" : "التسميع الذكي"}</h2>
-          {"tahfeez" in data && data.tahfeez ? (
-            <ul className="dash-list">
-              <li>
-                {locale === "en" ? "Sessions" : "جلسات"}:{" "}
-                {(data.tahfeez as { stats: { totalSessions: number } }).stats
-                  .totalSessions}
-              </li>
-              <li>
-                {locale === "en" ? "Accuracy" : "دقة"}:{" "}
-                {
-                  (data.tahfeez as { stats: { overallAccuracy: number } }).stats
-                    .overallAccuracy
-                }
-                %
-              </li>
-            </ul>
+          <h2>{t("recitationTitle")}</h2>
+          {tahfeez ? (
+            <>
+              <ul className="dash-list">
+                <li>
+                  {t("colTahfeez")}: {tahfeez.stats.totalSessions}
+                </li>
+                <li>
+                  {t("colAccuracy")}: {tahfeez.stats.overallAccuracy}%
+                </li>
+                <li>
+                  {t("recitationWords")}: {tahfeez.stats.totalCorrectWords} /{" "}
+                  {tahfeez.stats.totalWrongWords}
+                </li>
+              </ul>
+              <h3 style={{ marginTop: "1rem", fontSize: "1rem" }}>
+                {t("recitationSessions")}
+              </h3>
+              {tahfeez.sessions.length === 0 ? (
+                <p className="dash-muted">{t("noRecitation")}</p>
+              ) : (
+                <ul className="dash-list">
+                  {tahfeez.sessions.slice(0, 30).map((s) => (
+                    <li key={s.id}>
+                      {s.surahName} · {s.ayahStart}
+                      {s.ayahEnd !== s.ayahStart ? `–${s.ayahEnd}` : ""} · {s.accuracy}% ·{" "}
+                      {new Date(s.completedAt).toLocaleString(locale)}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
           ) : (
-            <p className="dash-muted">
-              {locale === "en" ? "No tahfeez data." : "لا بيانات تسميع."}
-            </p>
+            <p className="dash-muted">{t("noRecitation")}</p>
           )}
-          <p style={{ marginTop: "0.75rem" }}>
-            <Link href="/admin/tahfeez">
-              {locale === "en" ? "All recitation portfolios" : "كل بورتفوليوهات التسميع"}
-            </Link>
-          </p>
         </section>
 
         <section className="dash-card">

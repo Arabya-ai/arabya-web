@@ -559,36 +559,67 @@ export function localAdminListUsers(opts: {
   const limit = Math.min(100, Math.max(1, opts.limit ?? 50));
   const offset = Math.max(0, opts.offset ?? 0);
 
-  let sql = `SELECT id, uid, email, name, image, role, status, last_seen_at as lastSeenAt,
-                    created_at as createdAt, updated_at as updatedAt
-             FROM users WHERE 1=1`;
+  let sql = `SELECT u.id, u.uid, u.email, u.name, u.image, u.role, u.status,
+                    u.last_seen_at as lastSeenAt,
+                    u.created_at as createdAt, u.updated_at as updatedAt,
+                    (SELECT COUNT(*) FROM bookmarks b WHERE b.user_id = u.id) as bookmarkCount,
+                    (SELECT COUNT(*) FROM ayah_notes n WHERE n.user_id = u.id) as noteCount,
+                    t.stats_json as tahfeezStatsJson
+             FROM users u
+             LEFT JOIN tahfeez_portfolio t ON t.user_id = u.id
+             WHERE 1=1`;
   const binds: (string | number)[] = [];
 
   if (needle) {
-    sql += ` AND (email LIKE ? OR IFNULL(name, '') LIKE ? OR IFNULL(uid, '') LIKE ? OR id LIKE ?)`;
+    sql += ` AND (u.email LIKE ? OR IFNULL(u.name, '') LIKE ? OR IFNULL(u.uid, '') LIKE ? OR u.id LIKE ?)`;
     binds.push(`%${needle}%`, `%${needle}%`, `%${needle}%`, `%${needle}%`);
   }
   if (role === "member" || role === "user") {
-    sql += ` AND role IN ('member', 'user')`;
+    sql += ` AND u.role IN ('member', 'user')`;
   } else if (role === "creator" || role === "editor" || role === "admin") {
-    sql += ` AND role = ?`;
+    sql += ` AND u.role = ?`;
     binds.push(role);
   }
-  sql += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+  sql += ` ORDER BY u.created_at DESC LIMIT ? OFFSET ?`;
   binds.push(limit, offset);
 
-  const users = db.prepare(sql).all(...binds) as AdminUserRow[];
+  const raw = db.prepare(sql).all(...binds) as Array<
+    AdminUserRow & { tahfeezStatsJson?: string | null }
+  >;
+  const users: AdminUserRow[] = raw.map((row) => {
+    let tahfeezSessions = 0;
+    let tahfeezAccuracy = 0;
+    try {
+      const s = JSON.parse(row.tahfeezStatsJson || "{}") as {
+        totalSessions?: number;
+        overallAccuracy?: number;
+      };
+      tahfeezSessions = Number(s.totalSessions || 0);
+      tahfeezAccuracy = Number(s.overallAccuracy || 0);
+    } catch {
+      /* ignore */
+    }
+    const { tahfeezStatsJson: _drop, ...rest } = row;
+    void _drop;
+    return {
+      ...rest,
+      bookmarkCount: Number(row.bookmarkCount || 0),
+      noteCount: Number(row.noteCount || 0),
+      tahfeezSessions,
+      tahfeezAccuracy,
+    };
+  });
 
-  let countSql = `SELECT COUNT(*) as c FROM users WHERE 1=1`;
+  let countSql = `SELECT COUNT(*) as c FROM users u WHERE 1=1`;
   const countBinds: (string | number)[] = [];
   if (needle) {
-    countSql += ` AND (email LIKE ? OR IFNULL(name, '') LIKE ? OR IFNULL(uid, '') LIKE ? OR id LIKE ?)`;
+    countSql += ` AND (u.email LIKE ? OR IFNULL(u.name, '') LIKE ? OR IFNULL(u.uid, '') LIKE ? OR u.id LIKE ?)`;
     countBinds.push(`%${needle}%`, `%${needle}%`, `%${needle}%`, `%${needle}%`);
   }
   if (role === "member" || role === "user") {
-    countSql += ` AND role IN ('member', 'user')`;
+    countSql += ` AND u.role IN ('member', 'user')`;
   } else if (role === "creator" || role === "editor" || role === "admin") {
-    countSql += ` AND role = ?`;
+    countSql += ` AND u.role = ?`;
     countBinds.push(role);
   }
   const total = db.prepare(countSql).get(...countBinds) as { c: number };

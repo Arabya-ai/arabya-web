@@ -51,11 +51,16 @@ export default function Dashboard() {
               مرحباً بك في <span className="text-gradient-gold">عربية ستوديو</span>
             </h1>
             <p className="mt-2 text-muted-foreground">
-              ابدأ تحفتك القرآنية القادمة — كل الأدوات بين يديك
+              أداة إنشاء الفيديو داخل حسابك في عربية — ليست حساباً منفصلاً
             </p>
           </div>
           <div className="flex items-center gap-3">
             <ArabesqueMedallion size={64} className="hidden md:block text-accent animate-pulse-glow" />
+            <Button variant="outline" size="lg" asChild>
+              <Link href="/account">
+                حسابي
+              </Link>
+            </Button>
             <Button variant="hero" size="lg" asChild>
               <Link href={studioPath("/projects/new")}>
                 <Plus className="h-4 w-4" />

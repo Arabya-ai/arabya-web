@@ -6,7 +6,7 @@ import {
   SidebarTrigger,
 } from "@/ayat-studio/components/ui/sidebar";
 import { AppSidebar } from "@/ayat-studio/components/AppSidebar";
-import { usePathname } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import { isStudioEditorPath } from "@/ayat-studio/lib/studio-shell-mode";
 
 export default function DashboardLayout({
@@ -45,8 +45,14 @@ export default function DashboardLayout({
         <header className="relative z-10 flex h-11 shrink-0 items-center gap-3 border-b border-border/60 bg-card/70 px-3 backdrop-blur-xl sm:h-12 sm:px-4">
           <SidebarTrigger className="shrink-0 text-accent hover:bg-accent/10" />
           <span className="truncate text-xs tracking-widest text-muted-foreground">
-            الاستوديو
+            الاستوديو · ضمن حسابك
           </span>
+          <Link
+            href="/account"
+            className="ms-auto truncate text-xs font-semibold text-accent hover:underline"
+          >
+            حسابي
+          </Link>
         </header>
         <div
           className={

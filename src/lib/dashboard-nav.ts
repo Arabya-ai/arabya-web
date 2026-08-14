@@ -12,26 +12,38 @@ export type DashNavItem = {
   group?: string;
 };
 
-/** Unified nav by role — shown in account, studio, and admin shells. */
+/**
+ * One account hub. Studio and tahfeez are tools inside the same account,
+ * not separate logins. Super-admin CRM lives under groupAdmin.
+ */
 export function unifiedDashNav(role: UserRole): DashNavItem[] {
   const items: DashNavItem[] = [
     { href: "/account", label: "overview", icon: "home", group: "groupAccount" },
     {
-      href: "/account/stats",
-      label: "stats",
-      icon: "stats",
+      href: "/account/tahfeez",
+      label: "tahfeez",
+      icon: "mic",
       group: "groupAccount",
     },
+    {
+      href: "/studio/dashboard",
+      label: "studio",
+      icon: "studio",
+      group: "groupAccount",
+    },
+    { href: "/account/study", label: "study", icon: "book", group: "groupAccount" },
     {
       href: "/favorites",
       label: "favorites",
       icon: "favorites",
       group: "groupAccount",
     },
-    { href: "/account/study", label: "study", icon: "book", group: "groupAccount" },
-    { href: "/tahfeez", label: "tahfeez", icon: "spark", group: "groupAccount" },
-    { href: "/account/tahfeez", label: "tahfeezPortfolio", icon: "stats", group: "groupAccount" },
-    { href: "/studio", label: "studio", icon: "spark", group: "groupAccount" },
+    {
+      href: "/account/stats",
+      label: "stats",
+      icon: "stats",
+      group: "groupAccount",
+    },
     {
       href: "/account#role-request",
       label: "upgrade",
@@ -75,12 +87,6 @@ export function unifiedDashNav(role: UserRole): DashNavItem[] {
         href: "/admin/users",
         label: "users",
         icon: "users",
-        group: "groupAdmin",
-      },
-      {
-        href: "/admin/tahfeez",
-        label: "tahfeezAdmin",
-        icon: "book",
         group: "groupAdmin",
       },
       {

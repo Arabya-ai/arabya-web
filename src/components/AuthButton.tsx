@@ -53,18 +53,8 @@ export function AuthButton() {
           <Link href="/account" role="menuitem" onClick={() => setOpen(false)}>
             {t("dashboard")}
           </Link>
-          <Link
-            href="/favorites"
-            role="menuitem"
-            onClick={() => setOpen(false)}
-          >
-            {t("favorites")}
-          </Link>
-          <Link href="/studio" role="menuitem" onClick={() => setOpen(false)}>
-            {t("studio")}
-          </Link>
           {data.user.role === "admin" ? (
-            <Link href="/admin" role="menuitem" onClick={() => setOpen(false)}>
+            <Link href="/admin/users" role="menuitem" onClick={() => setOpen(false)}>
               {t("admin")}
             </Link>
           ) : null}

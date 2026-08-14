@@ -1,5 +1,5 @@
 "use client";
-import { Home, FolderOpen, Plus, History, Settings } from "lucide-react";
+import { Home, FolderOpen, Plus, History, Settings, UserRound } from "lucide-react";
 import Image from "next/image";
 import { NavLink } from "@/ayat-studio/components/NavLink";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -17,6 +17,7 @@ import {
 } from "@/ayat-studio/components/ui/sidebar";
 
 const items = [
+  { title: "حسابي", url: "/account", icon: UserRound, site: true },
   { title: "الرئيسية", url: "/dashboard", icon: Home },
   { title: "مشاريعي", url: "/projects", icon: FolderOpen },
   { title: "مشروع جديد", url: "/projects/new", icon: Plus },
@@ -72,7 +73,10 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu className="gap-1 px-2">
               {items.map((item) => {
-                const isActive = pathname === studioPath(item.url);
+                const href = "site" in item && item.site ? item.url : studioPath(item.url);
+                const isActive =
+                  pathname === href ||
+                  (href !== "/account" && pathname.startsWith(`${href}/`));
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
@@ -84,15 +88,27 @@ export function AppSidebar() {
                           : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-accent border border-transparent"
                       }`}
                     >
-                      <NavLink to={item.url} end>
-                        <item.icon className="h-4 w-4 shrink-0" />
-                        {!collapsed && (
-                          <span className="font-medium">{item.title}</span>
-                        )}
-                        {isActive && !collapsed && (
-                          <span className="absolute left-2 h-1.5 w-1.5 rounded-full bg-accent shadow-glow" />
-                        )}
-                      </NavLink>
+                      {"site" in item && item.site ? (
+                        <Link href={item.url}>
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          {!collapsed && (
+                            <span className="font-medium">{item.title}</span>
+                          )}
+                          {isActive && !collapsed && (
+                            <span className="absolute left-2 h-1.5 w-1.5 rounded-full bg-accent shadow-glow" />
+                          )}
+                        </Link>
+                      ) : (
+                        <NavLink to={item.url} end>
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          {!collapsed && (
+                            <span className="font-medium">{item.title}</span>
+                          )}
+                          {isActive && !collapsed && (
+                            <span className="absolute left-2 h-1.5 w-1.5 rounded-full bg-accent shadow-glow" />
+                          )}
+                        </NavLink>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
