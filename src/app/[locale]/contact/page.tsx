@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { InfoHeroNav } from "@/components/info/InfoHeroNav";
 import { resolveLocale } from "@/i18n/locale-params";
 import { CONTACT_EMAIL } from "@/lib/contact";
+import { buildInfoHeroNavItems } from "@/lib/info-hero-nav";
 
 type Props = { params: Promise<{ locale: string }> };
 
