@@ -474,6 +474,7 @@ export function TahfeezApp({
                     setSessionAccuracy(0);
                     setListeningHint("");
                     setElapsed(0);
+                    hypoAllRef.current = "";
                   }}
                 >
                   {ar ? "إعادة" : "Reset"}
