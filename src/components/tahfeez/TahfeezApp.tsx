@@ -5,6 +5,11 @@ import { Link } from "@/i18n/navigation";
 import { mushafAyahAudioUrl } from "@/lib/audio";
 import { alignRecitation } from "@/lib/tahfeez/align";
 import {
+  extractSpeechSegments,
+  freshWordResults,
+  isAyahRecitationComplete,
+} from "@/lib/tahfeez/session";
+import {
   emptyTahfeezPortfolio,
   type TahfeezPortfolio,
   type TahfeezSessionSummary,
@@ -27,7 +32,14 @@ type SpeechRec = {
   interimResults: boolean;
   start: () => void;
   stop: () => void;
-  onresult: ((ev: { results: ArrayLike<{ 0: { transcript: string }; isFinal: boolean }> }) => void) | null;
+  onresult:
+    | ((
+        ev: {
+          resultIndex?: number;
+          results: ArrayLike<{ 0: { transcript: string }; isFinal: boolean }>;
+        },
+      ) => void)
+    | null;
   onerror: ((ev: { error?: string }) => void) | null;
   onend: (() => void) | null;
 };
@@ -46,6 +58,32 @@ function statusIcon(status: TahfeezWordStatus): string {
   if (status === "wrong") return "✕";
   if (status === "skipped" || status === "hesitation") return "•";
   return "○";
+}
+
+function resetAyahAttemptState(
+  expectedWords: string[],
+  refs: {
+    expectedRef: { current: string[] };
+    resultsRef: { current: TahfeezWordResult[] };
+    cursorRef: { current: number };
+    hypoAllRef: { current: string };
+    ayahCompletedRef: { current: boolean };
+  },
+  setters: {
+    setWordResults: (v: TahfeezWordResult[]) => void;
+    setCursor: (v: number) => void;
+    setSessionAccuracy: (v: number) => void;
+  },
+): void {
+  refs.expectedRef.current = expectedWords;
+  const base = freshWordResults(expectedWords);
+  refs.resultsRef.current = base;
+  refs.cursorRef.current = 0;
+  refs.hypoAllRef.current = "";
+  refs.ayahCompletedRef.current = false;
+  setters.setWordResults(base);
+  setters.setCursor(0);
+  setters.setSessionAccuracy(0);
 }
 
 export function TahfeezApp({
@@ -85,6 +123,12 @@ export function TahfeezApp({
   const expectedRef = useRef<string[]>([]);
   const cursorRef = useRef(0);
   const resultsRef = useRef<TahfeezWordResult[]>([]);
+  const ayahIndexRef = useRef(0);
+  const verseNumberRef = useRef(1);
+  const recordingRef = useRef(false);
+  const advancingRef = useRef(false);
+  const ayahCompletedRef = useRef(false);
+  const elapsedRef = useRef(0);
 
   const verse = initialVerses[ayahIndex] || initialVerses[0];
   const expectedWords = useMemo(
@@ -93,18 +137,30 @@ export function TahfeezApp({
   );
 
   useEffect(() => {
-    expectedRef.current = expectedWords;
-    const base = expectedWords.map((text, index) => ({
-      index,
-      text,
-      status: "pending" as const,
-    }));
-    setWordResults(base);
-    resultsRef.current = base;
-    setCursor(0);
-    cursorRef.current = 0;
-    setSessionAccuracy(0);
-    hypoAllRef.current = "";
+    ayahIndexRef.current = ayahIndex;
+    verseNumberRef.current = verse?.verseNumber || 1;
+  }, [ayahIndex, verse?.verseNumber]);
+
+  useEffect(() => {
+    recordingRef.current = recording;
+  }, [recording]);
+
+  useEffect(() => {
+    elapsedRef.current = elapsed;
+  }, [elapsed]);
+
+  useEffect(() => {
+    resetAyahAttemptState(
+      expectedWords,
+      {
+        expectedRef,
+        resultsRef,
+        cursorRef,
+        hypoAllRef,
+        ayahCompletedRef,
+      },
+      { setWordResults, setCursor, setSessionAccuracy },
+    );
   }, [expectedWords]);
 
   useEffect(() => {
@@ -141,39 +197,146 @@ export function TahfeezApp({
     audioRef.current?.pause();
   }, []);
 
-  const applyHypothesis = useCallback(async (hypothesisChunk: string) => {
-    if (!hypothesisChunk.trim()) return;
-    hypoAllRef.current = `${hypoAllRef.current} ${hypothesisChunk}`.trim();
-    const hypothesis = hypoAllRef.current;
-    const local = alignRecitation(expectedRef.current, hypothesis);
-    setWordResults(local.results);
-    resultsRef.current = local.results;
-    setCursor(local.cursor);
-    cursorRef.current = local.cursor;
-    setSessionAccuracy(local.accuracy);
-
-    try {
-      const res = await fetch("/api/tahfeez/check", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          expectedWords: expectedRef.current,
-          hypothesis,
-          cursor: 0,
-        }),
-      });
-      const data = await res.json();
-      if (data?.ok && Array.isArray(data.results)) {
-        setWordResults(data.results);
-        resultsRef.current = data.results;
-        setCursor(data.cursor);
-        cursorRef.current = data.cursor;
-        setSessionAccuracy(data.accuracy);
+  const persistSession = useCallback(
+    async (opts?: { verseNumber?: number; durationSec?: number }) => {
+      const decided = resultsRef.current.filter((r) => r.status !== "pending");
+      const correct = decided.filter((r) => r.status === "correct").length;
+      const wrong = decided.filter((r) => r.status === "wrong").length;
+      const skipped = decided.filter((r) => r.status === "skipped").length;
+      const accuracy =
+        decided.length === 0
+          ? 0
+          : Math.round((correct / decided.length) * 100);
+      const ayahNum = opts?.verseNumber ?? verseNumberRef.current;
+      const session: TahfeezSessionSummary = {
+        id: `tf_${Date.now().toString(36)}_${ayahNum}`,
+        surahId: initialSurahId,
+        surahName: initialSurahName,
+        ayahStart: ayahNum,
+        ayahEnd: ayahNum,
+        accuracy,
+        correct,
+        wrong,
+        skipped,
+        totalWords: expectedRef.current.length,
+        durationSec: opts?.durationSec ?? elapsedRef.current,
+        completedAt: new Date().toISOString(),
+      };
+      try {
+        const res = await fetch("/api/tahfeez/portfolio", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session }),
+        });
+        const data = await res.json();
+        if (data?.portfolio) setPortfolio(data.portfolio);
+      } catch {
+        /* ignore */
       }
-    } catch {
-      /* local result kept */
-    }
-  }, []);
+    },
+    [initialSurahId, initialSurahName],
+  );
+
+  const advanceToNextAyah = useCallback(() => {
+    const idx = ayahIndexRef.current;
+    if (idx >= initialVerses.length - 1) return false;
+
+    const nextIdx = idx + 1;
+    const nextWords = (initialVerses[nextIdx]?.words || []).map((w) => w.text);
+    ayahIndexRef.current = nextIdx;
+    verseNumberRef.current = initialVerses[nextIdx]?.verseNumber || nextIdx + 1;
+    resetAyahAttemptState(
+      nextWords,
+      {
+        expectedRef,
+        resultsRef,
+        cursorRef,
+        hypoAllRef,
+        ayahCompletedRef,
+      },
+      { setWordResults, setCursor, setSessionAccuracy },
+    );
+    setAyahIndex(nextIdx);
+    setListeningHint(
+      ar
+        ? `الآية ${verseNumberRef.current} — استمر في التسميع`
+        : `Ayah ${verseNumberRef.current} — keep reciting`,
+    );
+    return true;
+  }, [ar, initialVerses]);
+
+  const maybeCompleteAyah = useCallback(
+    async (alignedCursor: number) => {
+      const total = expectedRef.current.length;
+      if (!isAyahRecitationComplete(alignedCursor, total)) return;
+      if (ayahCompletedRef.current || advancingRef.current) return;
+      if (!recordingRef.current) return;
+
+      ayahCompletedRef.current = true;
+      advancingRef.current = true;
+
+      const completedVerse = verseNumberRef.current;
+      await persistSession({ verseNumber: completedVerse });
+
+      const hasNext = advanceToNextAyah();
+      if (!hasNext) {
+        setListeningHint(
+          ar ? "اكتملت السورة — أحسنت!" : "Surah complete — well done!",
+        );
+        keepListeningRef.current = false;
+        recognitionRef.current?.stop();
+        recognitionRef.current = null;
+        setRecording(false);
+        if (timerRef.current) {
+          window.clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+      }
+
+      advancingRef.current = false;
+    },
+    [advanceToNextAyah, ar, persistSession],
+  );
+
+  const applyHypothesis = useCallback(
+    async (hypothesisChunk: string) => {
+      if (!hypothesisChunk.trim() || advancingRef.current) return;
+      hypoAllRef.current = `${hypoAllRef.current} ${hypothesisChunk}`.trim();
+      const hypothesis = hypoAllRef.current;
+      const local = alignRecitation(expectedRef.current, hypothesis);
+      setWordResults(local.results);
+      resultsRef.current = local.results;
+      setCursor(local.cursor);
+      cursorRef.current = local.cursor;
+      setSessionAccuracy(local.accuracy);
+
+      void maybeCompleteAyah(local.cursor);
+
+      try {
+        const res = await fetch("/api/tahfeez/check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            expectedWords: expectedRef.current,
+            hypothesis,
+            cursor: 0,
+          }),
+        });
+        const data = await res.json();
+        if (data?.ok && Array.isArray(data.results) && !advancingRef.current) {
+          setWordResults(data.results);
+          resultsRef.current = data.results;
+          setCursor(data.cursor);
+          cursorRef.current = data.cursor;
+          setSessionAccuracy(data.accuracy);
+          void maybeCompleteAyah(data.cursor);
+        }
+      } catch {
+        /* local result kept */
+      }
+    },
+    [maybeCompleteAyah],
+  );
 
   const stopRecording = useCallback(() => {
     keepListeningRef.current = false;
@@ -189,45 +352,40 @@ export function TahfeezApp({
   const finishSession = useCallback(async () => {
     stopRecording();
     stopAudio();
-    const decided = resultsRef.current.filter((r) => r.status !== "pending");
-    const correct = decided.filter((r) => r.status === "correct").length;
-    const wrong = decided.filter((r) => r.status === "wrong").length;
-    const skipped = decided.filter((r) => r.status === "skipped").length;
-    const accuracy =
-      decided.length === 0 ? 0 : Math.round((correct / decided.length) * 100);
-    const session: TahfeezSessionSummary = {
-      id: `tf_${Date.now().toString(36)}`,
-      surahId: initialSurahId,
-      surahName: initialSurahName,
-      ayahStart: verse?.verseNumber || 1,
-      ayahEnd: verse?.verseNumber || 1,
-      accuracy,
-      correct,
-      wrong,
-      skipped,
-      totalWords: expectedRef.current.length,
-      durationSec: elapsed,
-      completedAt: new Date().toISOString(),
-    };
-    try {
-      const res = await fetch("/api/tahfeez/portfolio", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ session }),
-      });
-      const data = await res.json();
-      if (data?.portfolio) setPortfolio(data.portfolio);
-    } catch {
-      /* ignore */
+    if (resultsRef.current.some((r) => r.status !== "pending")) {
+      await persistSession();
     }
-  }, [
-    elapsed,
-    initialSurahId,
-    initialSurahName,
-    stopAudio,
-    stopRecording,
-    verse?.verseNumber,
-  ]);
+  }, [persistSession, stopAudio, stopRecording]);
+
+  const bindRecognitionHandlers = useCallback(
+    (rec: SpeechRec) => {
+      rec.onresult = (ev) => {
+        const { finalText, displayHint } = extractSpeechSegments(
+          ev.results,
+          ev.resultIndex ?? 0,
+        );
+        if (displayHint) setListeningHint(displayHint);
+        if (finalText) void applyHypothesis(finalText);
+      };
+      rec.onerror = (ev) => {
+        if (ev.error === "not-allowed") {
+          setError(ar ? "الميكروفون مرفوض" : "Microphone blocked");
+          stopRecording();
+        } else if (ev.error === "no-speech" || ev.error === "aborted") {
+          /* benign while restarting */
+        }
+      };
+      rec.onend = () => {
+        if (!keepListeningRef.current) return;
+        try {
+          rec.start();
+        } catch {
+          stopRecording();
+        }
+      };
+    },
+    [applyHypothesis, ar, stopRecording],
+  );
 
   const startRecording = useCallback(async () => {
     setError(null);
@@ -248,6 +406,18 @@ export function TahfeezApp({
     }
 
     stopAudio();
+    resetAyahAttemptState(
+      expectedRef.current,
+      {
+        expectedRef,
+        resultsRef,
+        cursorRef,
+        hypoAllRef,
+        ayahCompletedRef,
+      },
+      { setWordResults, setCursor, setSessionAccuracy },
+    );
+
     const rec = new Ctor();
     rec.lang = "ar-SA";
     rec.continuous = true;
@@ -259,38 +429,12 @@ export function TahfeezApp({
       setElapsed(Math.floor((Date.now() - startedAtRef.current) / 1000));
     }, 500);
 
-    rec.onresult = (ev) => {
-      let finalText = "";
-      let interim = "";
-      for (let i = 0; i < ev.results.length; i++) {
-        const row = ev.results[i];
-        if (row.isFinal) finalText += `${row[0].transcript} `;
-        else interim += row[0].transcript;
-      }
-      setListeningHint((finalText || interim).trim());
-      if (finalText.trim()) void applyHypothesis(finalText);
-    };
-    rec.onerror = (ev) => {
-      if (ev.error === "not-allowed") {
-        setError(ar ? "الميكروفون مرفوض" : "Microphone blocked");
-        stopRecording();
-      }
-    };
-    rec.onend = () => {
-      if (keepListeningRef.current) {
-        try {
-          rec.start();
-        } catch {
-          stopRecording();
-        }
-      }
-    };
-
+    bindRecognitionHandlers(rec);
     recognitionRef.current = rec;
     rec.start();
     setRecording(true);
     setListeningHint(ar ? "جاري التسجيل…" : "Recording…");
-  }, [applyHypothesis, ar, stopAudio, stopRecording]);
+  }, [ar, bindRecognitionHandlers, stopAudio]);
 
   const toggleMic = () => {
     if (recording) void finishSession();
@@ -462,19 +606,19 @@ export function TahfeezApp({
                   className="tahfeez-action"
                   onClick={() => {
                     stopRecording();
-                    const base = expectedWords.map((text, index) => ({
-                      index,
-                      text,
-                      status: "pending" as const,
-                    }));
-                    setWordResults(base);
-                    resultsRef.current = base;
-                    setCursor(0);
-                    cursorRef.current = 0;
-                    setSessionAccuracy(0);
+                    resetAyahAttemptState(
+                      expectedWords,
+                      {
+                        expectedRef,
+                        resultsRef,
+                        cursorRef,
+                        hypoAllRef,
+                        ayahCompletedRef,
+                      },
+                      { setWordResults, setCursor, setSessionAccuracy },
+                    );
                     setListeningHint("");
                     setElapsed(0);
-                    hypoAllRef.current = "";
                   }}
                 >
                   {ar ? "إعادة" : "Reset"}
@@ -502,11 +646,11 @@ export function TahfeezApp({
               <p className="tahfeez-note" style={{ textAlign: "center" }}>
                 {recording
                   ? ar
-                    ? `بدأ التسجيل · ${elapsed}ث`
-                    : `Recording · ${elapsed}s`
+                    ? `بدأ التسجيل · ${elapsed}ث · ${cursor}/${expectedWords.length}`
+                    : `Recording · ${elapsed}s · ${cursor}/${expectedWords.length}`
                   : ar
-                    ? "اضغط الميكروفون لبدء التسميع"
-                    : "Tap the mic to start"}
+                    ? "اضغط الميكروفون لبدء التسميع — ينتقل تلقائياً للآية التالية"
+                    : "Tap the mic — auto-advances to the next ayah"}
               </p>
             </div>
           </section>
