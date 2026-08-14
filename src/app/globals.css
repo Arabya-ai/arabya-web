@@ -1447,23 +1447,6 @@ button.nav-pill {
   margin-bottom: 1.25rem;
 }
 
-/* Primary LCP text — system font first so paint never waits on webfonts */
-.mushaf-lcp-heading {
-  margin: 0 0 0.85rem;
-  font-family: system-ui, "Segoe UI", Tahoma, sans-serif;
-  font-size: clamp(1.2rem, 3.6vw, 1.7rem);
-  font-weight: 700;
-  line-height: 1.4;
-  color: var(--ink);
-  text-wrap: balance;
-}
-
-.mushaf-lcp-meta {
-  font-weight: 600;
-  font-size: 0.82em;
-  color: var(--muted);
-}
-
 .mushaf-banner-top {
   display: flex;
   flex-direction: row;
@@ -1478,10 +1461,10 @@ button.nav-pill {
   margin: 0;
   flex: 1 1 auto;
   min-width: 0;
-  font-family: var(--font-ui), "Segoe UI", Tahoma, sans-serif;
+  font-family: system-ui, "Segoe UI", Tahoma, sans-serif;
   font-weight: 700;
-  font-size: clamp(1.05rem, 3.2vw, 1.55rem);
-  line-height: 1.4;
+  font-size: clamp(0.82rem, 2.35vw, 1rem);
+  line-height: 1.35;
   color: var(--ink);
   white-space: nowrap;
   overflow: hidden;
@@ -1492,8 +1475,8 @@ button.nav-pill {
   margin: 0;
   flex: 0 0 auto;
   color: var(--muted);
-  font-family: var(--font-ui), "Segoe UI", Tahoma, sans-serif;
-  font-size: clamp(0.72rem, 2.2vw, 0.88rem);
+  font-family: system-ui, "Segoe UI", Tahoma, sans-serif;
+  font-size: clamp(0.68rem, 2vw, 0.8rem);
   font-weight: 600;
   white-space: nowrap;
   line-height: 1.35;

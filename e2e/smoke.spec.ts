@@ -48,8 +48,8 @@ test.describe("smoke", () => {
   test("mushaf page 1 loads Madinah frame and word text", async ({ page }) => {
     await gotoOk(page, "/mushaf/1");
     await expect(page.locator(".mushaf-page")).toBeVisible({ timeout: 30_000 });
-    // LCP heading replaced the old .mushaf-madinah-label (UI-font H1).
-    await expect(page.locator(".mushaf-lcp-heading")).toBeVisible({
+    // LCP: mushaf title h1 in banner top row (UI font, stable paint).
+    await expect(page.locator(".mushaf-madinah-label")).toBeVisible({
       timeout: 30_000,
     });
     await expect(page.locator(".mushaf-text")).toBeVisible();

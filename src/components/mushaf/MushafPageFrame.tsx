@@ -56,18 +56,13 @@ export function MushafPageFrame({
     >
       <div className="mushaf-frame">
         <header className="mushaf-banner">
-          {/*
-            Stable LCP candidate: UI font, no clip-path, no Uthmanic wait.
-            Ornamental surah title stays visual but must not be the only paint target.
-          */}
-          <h1 className="mushaf-lcp-heading">
-            {t("madinah")}
-            <span className="mushaf-lcp-meta">
-              {" "}
-              · {juzLabel(page.juz, locale)} ·{" "}
+          <div className="mushaf-banner-top">
+            <h1 className="mushaf-madinah-label">{t("madinah")}</h1>
+            <p className="mushaf-banner-meta">
+              {juzLabel(page.juz, locale)} ·{" "}
               {t("pageOf", { page: pageLabel, total: totalLabel })}
-            </span>
-          </h1>
+            </p>
+          </div>
           {page.blocks.length === 1 ? (
             <SurahOrnamentTitle
               as="h2"
