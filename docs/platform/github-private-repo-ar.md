@@ -7,7 +7,7 @@
 ## الحالة
 
 - المستودع: `Arabya-ai/arabya-web`
-- بعد التخصيص: **Private** — السيرفر لا يستطيع `git pull` بدون مفتاح أو توكن.
+- بعد التخصيص: **Private** — السيرفر لا يستطيع `git pull` بدون توكن.
 
 ---
 
@@ -19,63 +19,54 @@
 
 ---
 
-## 2) ربط Contabo بالمستودع الخاص (مطلوب بعد Private)
+## 2) ربط Contabo بالمستودع الخاص
 
-عند `git pull` يظهر: `Username for 'https://github.com':` — هذا **طبيعي**. الحل الموصى به: **Deploy key** (مفتاح SSH للسيرفر فقط).
+عند `git pull` يظهر: `Username for 'https://github.com':` — **طبيعي**.
 
-### أ) على السيرفر (SSH كـ root)
+> **Deploy keys معطّلة:** في منظمة **Arabya-ai** قد تظهر **Disabled by Arabya-ai** — لا تستخدم Deploy keys. استخدم **Personal Access Token** (PAT) أدناه.
 
-إذا علقت عند سؤال Username، اضغط **`Ctrl+C`** لإلغاء الأمر.
+### أ) إنشاء التوken (مرة واحدة — من المتصفح)
+
+1. افتح: https://github.com/settings/tokens  
+2. **Generate new token** → **Generate new token (classic)**  
+3. Note: `Contabo arabya deploy`  
+4. Expiration: 90 days (أو حسب رغبتك)  
+5. الصلاحيات: **`repo`** فقط  
+6. **Generate token** — **انسخ التوken فوراً** (لن يظهر مرة أخرى)
+
+### ب) على السيرفر (SSH)
+
+إذا علقت عند Username، اضغ **`Ctrl+C`**.
 
 ```bash
-ssh-keygen -t ed25519 -C "contabo-arabya" -f /root/.ssh/arabya_github -N ""
-cat /root/.ssh/arabya_github.pub
+cd /var/www/arabya-web
+git remote set-url origin https://github.com/Arabya-ai/arabya-web.git
+git config --global credential.helper store
+git pull origin main
 ```
 
-**انسخ** السطر الكامل الذي يبدأ بـ `ssh-ed25519 ...` (يظهر بعد أمر `cat`).
+عند السؤال:
+- **Username:** اسم مستخدم GitHub (مثل بريدك/اسمك على GitHub)
+- **Password:** **التوken** (وليس كلمة مرور GitHub)
 
-### ب) على GitHub
-
-1. افتح: https://github.com/Arabya-ai/arabya-web/settings/keys  
-2. **Add deploy key**  
-3. Title: `Contabo VPS`  
-4. Key: الصق المفتاح العام  
-5. **Allow write access**: اتركه **غير مفعّل** (قراءة فقط)  
-6. **Add key**
-
-### ج) على السيرفر — ضبط Git لاستخدام SSH
+بعد نجاح pull مرة واحدة، يُحفظ في `/root/.git-credentials` ولا يُسأل مجدداً:
 
 ```bash
-cat >> /root/.ssh/config << 'EOF'
-Host github.com
-  HostName github.com
-  User git
-  IdentityFile /root/.ssh/arabya_github
-  IdentitiesOnly yes
-EOF
-chmod 600 /root/.ssh/config
-
-cd /var/www/arabya-web
-git remote set-url origin git@github.com:Arabya-ai/arabya-web.git
-
-# اختبار (قد يظهر رسالة GitHub — طبيعي)
-ssh -T git@github.com
-
-git pull origin main
+chmod 600 /root/.git-credentials
 bash scripts/contabo-deploy.sh
 ```
 
+### ج) أمان
+
+- لا ترسل التوken في الدردشة.  
+- إن تسرّب: احذفه من GitHub وأنشئ توkenاً جديداً.
+
 ---
 
-## 3) بديل: توكن شخصي (أقل أماناً)
+## 3) Deploy keys (غير متاح حالياً)
 
-إن فضّلت HTTPS:
-
-1. GitHub → **Settings** → **Developer settings** → **Personal access tokens** → **Tokens (classic)**  
-2. **Generate new token** — صلاحية **repo** فقط  
-3. على السيرفر عند `git pull`:
-   - Username: اسم مستخدم GitHub  
-   - Password: **التوكن** (وليس كلمة مرور الحساب)
+صفحة https://github.com/Arabya-ai/arabya-web/settings/keys تظهر **Disabled by Arabya-ai**.  
+لتفعيلها يحتاج **مدير المنظمة** تغيير السياسة — أو استمر مع PAT أعلاه.
 
 ---
 
