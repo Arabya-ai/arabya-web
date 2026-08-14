@@ -154,6 +154,8 @@ export default async function LoginPage({ params, searchParams }: Props) {
           {" · "}
           <Link href="/privacy">{t("privacy")}</Link>
           {" · "}
+          <Link href="/terms">{t("terms")}</Link>
+          {" · "}
           <Link href="/login?diag=1">{t("diag")}</Link>
         </p>
       </div>

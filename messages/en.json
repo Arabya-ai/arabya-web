@@ -42,6 +42,7 @@
     "study": "Quick study",
     "about": "About Arabya",
     "privacy": "Privacy",
+    "terms": "Terms of use",
     "mushaf": "Mushaf",
     "menu": "Menu",
     "close": "Close",
@@ -255,6 +256,7 @@
     "notConfigured": "Sign-in is not configured on this device yet. The owner needs to finish Google OAuth setup (see docs/platform/accounts-owner-guide-ar.md).",
     "brandKicker": "Arabya",
     "privacy": "Privacy",
+    "terms": "Terms of use",
     "errorConfiguration": "Server sign-in setup is incomplete, or Google rejected the client ID (invalid_client). Re-paste AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET in .env.production.local on the server without spaces or quotes, then restart PM2.",
     "errorAccessDenied": "Sign-in was denied. If the app is in testing mode, add your email as a Test user in Google.",
     "errorOAuthAccountNotLinked": "This email is linked to a different sign-in method.",
@@ -842,6 +844,7 @@
     "ctaMushaf": "Open the mushaf",
     "ctaStudio": "Arabya Studio",
     "ctaPrivacy": "Privacy policy",
+    "ctaTerms": "Terms of use",
     "sections": {
       "pillars": {
         "title": "What we offer",
@@ -890,6 +893,56 @@
       "contact": {
         "title": "Contact",
         "body": "For questions or suggestions: the <ghOrgLink>Arabya-ai</ghOrgLink> organization on GitHub. See also our <privacyLink>privacy policy</privacyLink>."
+      }
+    }
+  },
+  "Terms": {
+    "metaTitle": "Terms of use",
+    "metaDescription": "Arabya terms: permitted use, no commercial cloning or bulk scraping, and copyright on original content.",
+    "kicker": "Fair use — protecting the work",
+    "title": "Terms of use",
+    "updated": "14 August 2026",
+    "updatedLabel": "Last updated: {date}",
+    "lead": "By using <brand>Arabya</brand> (arabya.org / arabyaai.com) you agree to these terms. Reading and study are open to everyone; the code, UI, and derived datasets remain protected by <brand>Arabya</brand>.",
+    "sections": {
+      "summary": {
+        "title": "Summary",
+        "s0": "Personal reading and study are welcome.",
+        "s1": "Copying the site or extracting its data for <strong>commercial</strong> republication or a clone competitor is not allowed.",
+        "s2": "Large-scale automated scraping or overloading our servers is not allowed.",
+        "s3": "Original content and the UI are © <brand>Arabya platform</brand> unless stated otherwise."
+      },
+      "use": {
+        "title": "Permitted use",
+        "p0": "You may browse the mushaf, study words, listen to recitation, and use Studio and smart recitation (where login is required) for personal and educational purposes.",
+        "p1": "You may not use the service for unlawful activity, attempting to break into systems, or impersonating the platform."
+      },
+      "prohibited": {
+        "title": "Prohibited",
+        "p0": "Copying the site design, code, or derived datasets <strong>in whole or in part</strong> to launch a competing site or commercial product without written permission.",
+        "p1": "Extracting data (API scraping, bulk download, mirrors) beyond normal visitor use.",
+        "p2": "Removing branding, copyright notices, or source attribution from content or exports (e.g. Studio images).",
+        "p3": "Training models on or selling datasets built from platform content without permission."
+      },
+      "ownership": {
+        "title": "Intellectual property",
+        "o0": "The UI, UX, original Arabic copy, logo, and derived datasets produced by <brand>Arabya</brand> are protected by copyright.",
+        "o1": "© 2026 <brand>Arabya platform</brand>. All rights reserved in original content and software.",
+        "o2": "The names «Arabya» / «عربية» and associated branding are part of the platform identity."
+      },
+      "sources": {
+        "title": "Third-party sources",
+        "q0": "The Quranic text itself is not commercial property — it is the word of Allah.",
+        "q1": "Tafsirs, translations, and iʿrāb come from open or licensed sources; we follow each license (e.g. Quranic Arabic Corpus GPL attribution where applicable).",
+        "q2": "Your use of third-party licensed content is also subject to that party's terms."
+      },
+      "enforcement": {
+        "title": "Enforcement",
+        "p0": "We may restrict access, suspend accounts, or take legal action for violations. For questions or licensing: <ghOrgLink>Arabya-ai</ghOrgLink> on GitHub."
+      },
+      "changes": {
+        "title": "Changes",
+        "p0": "We may update this page. The “Last updated” date above reflects the current version. See also <privacyLink>Privacy</privacyLink> and <aboutLink>About Arabya</aboutLink>."
       }
     }
   },

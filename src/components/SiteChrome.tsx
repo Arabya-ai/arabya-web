@@ -178,6 +178,9 @@ export function SiteHeader() {
           <Link href="/privacy" onClick={() => setOpen(false)}>
             {t("privacy")}
           </Link>
+          <Link href="/terms" onClick={() => setOpen(false)}>
+            {t("terms")}
+          </Link>
           <div className="nav-auth-slot">
             <AuthButton />
           </div>
@@ -214,6 +217,7 @@ export function SiteFooter({ credit }: { credit: string }) {
               <Link href="/studio">{t("studio")}</Link>
               <Link href="/about">{t("about")}</Link>
               <Link href="/privacy">{t("privacy")}</Link>
+              <Link href="/terms">{t("terms")}</Link>
               <span className="arabya-footer-prefs">
                 <PreferencesMenu compact dropUp />
               </span>

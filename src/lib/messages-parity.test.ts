@@ -17,7 +17,7 @@ function flatten(
   return out;
 }
 
-const namespaces = ["Auth", "Account", "Tahfeez", "Dash", "Admin"] as const;
+const namespaces = ["Auth", "Account", "Tahfeez", "Dash", "Admin", "Terms"] as const;
 
 describe("account/CRM i18n parity", () => {
   const ar = JSON.parse(

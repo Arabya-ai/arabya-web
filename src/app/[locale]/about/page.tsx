@@ -50,6 +50,7 @@ const richTags = {
     </a>
   ),
   privacyLink: (c: ReactNode) => <Link href="/privacy">{c}</Link>,
+  termsLink: (c: ReactNode) => <Link href="/terms">{c}</Link>,
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -89,6 +90,9 @@ export default async function AboutPage({ params }: Props) {
             </Link>
             <Link href="/privacy" className="info-btn info-btn--ghost">
               {t("ctaPrivacy")}
+            </Link>
+            <Link href="/terms" className="info-btn info-btn--ghost">
+              {t("ctaTerms")}
             </Link>
           </div>
         </header>
