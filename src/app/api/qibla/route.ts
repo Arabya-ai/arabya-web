@@ -1,13 +1,21 @@
 import { NextResponse } from "next/server";
-import { resolvePortalCity } from "@/lib/portal-cities";
+import { resolvePortalLocationFromSearch } from "@/lib/portal-cities";
 import { enforceRateLimit } from "@/lib/rate-limit";
 
 /** Qibla bearing from city coordinates via Aladhan (free, no key). */
 export async function GET(req: Request) {
   const limited = enforceRateLimit(req, { prefix: "qibla", limit: 30 });
   if (limited) return limited;
+
   const { searchParams } = new URL(req.url);
-  const cfg = resolvePortalCity(searchParams.get("city"));
+  const resolved = resolvePortalLocationFromSearch(searchParams);
+  if (!resolved.ok) {
+    return NextResponse.json(
+      { error: resolved.code, code: resolved.code },
+      { status: 400 },
+    );
+  }
+  const cfg = resolved.cfg;
 
   try {
     const url = `https://api.aladhan.com/v1/qibla/${cfg.latitude}/${cfg.longitude}`;
@@ -39,6 +47,7 @@ export async function GET(req: Request) {
         longitude: cfg.longitude,
         direction: Math.round(normalized * 10) / 10,
         directionLabel: `${Math.round(normalized)}° من الشمال`,
+        ...(cfg.approxCity ? { approxCity: cfg.approxCity } : {}),
       },
       {
         headers: {

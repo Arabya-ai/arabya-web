@@ -191,7 +191,6 @@ async function pixabayFetch(
     orientation?: "landscape" | "portrait" | "square";
   },
 ) {
-  const key = getPixabayKey();
   const params = new URLSearchParams({
     type: kind,
     query,
@@ -200,14 +199,10 @@ async function pixabayFetch(
   });
   if (opts.orientation) params.set("orientation", opts.orientation);
 
-  const headers: HeadersInit = {};
-  if (key) headers["X-Pixabay-Key"] = key;
-
   let res: Response;
   try {
     res = await fetch(`/api/studio/pixabay?${params}`, {
       credentials: "same-origin",
-      headers,
     });
   } catch {
     throw new Error("تعذّر الاتصال بخادم البحث. حدّث الصفحة وحاول مجددًا.");
@@ -217,15 +212,13 @@ async function pixabayFetch(
     const err = await res.json().catch(() => ({}));
     if (err.error === "missing_pixabay_key") {
       throw new Error(
-        "لم يتم تكوين مفتاح Pixabay. أضِفه من الإعدادات، أو اطلب من المالك ضبط PIXABAY_API_KEY على السيرفر.",
+        "مفتاح Pixabay غير مضبوط على السيرفر. اطلب من المدير تعيين PIXABAY_API_KEY.",
       );
     }
     if (err.error === "auth_required") {
       throw new Error("يلزم تسجيل الدخول للبحث في الخلفيات.");
     }
-    throw new Error(
-      `فشل البحث في Pixabay (${res.status})${err.detail ? `: ${String(err.detail).slice(0, 80)}` : ""}`,
-    );
+    throw new Error(`فشل البحث في Pixabay (${res.status})`);
   }
 
   const data = await res.json();

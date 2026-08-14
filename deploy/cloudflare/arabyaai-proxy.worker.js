@@ -51,7 +51,9 @@ async function handle(request) {
         );
       }
     }
-  } catch (_) {}
+  } catch {
+    /* ignore cookie rewrite failures */
+  }
 
   headers.set("x-arabya-bridge", "arabyaai-proxy");
   return new Response(response.body, {

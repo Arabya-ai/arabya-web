@@ -35,6 +35,7 @@ import type {
   TahfeezPortfolio,
   TahfeezSessionSummary,
 } from "@/lib/tahfeez/types";
+import { mintActorTicket } from "@/lib/actor-ticket";
 
 export type SyncProgress = {
   lastPage: number | null;
@@ -166,13 +167,25 @@ async function callWorker<T extends Record<string, unknown>>(
     throw new Error("cloud_sync_not_configured");
   }
 
+  const secret = syncSecret();
+  const actorSub = String(
+    body.actorEmail || body.email || "service:next",
+  )
+    .trim()
+    .toLowerCase();
+  // Never send ensureAdmin — Worker derives admin from allowlists + ticket.sub.
+  const { ensureAdmin: _ensureAdmin, ...safeBody } = body;
+  void _ensureAdmin;
+  const actorTicket = await mintActorTicket(actorSub, secret);
+
   const res = await fetch(`${syncBaseUrl()}${path}`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${syncSecret()}`,
+      Authorization: `Bearer ${secret}`,
       "Content-Type": "application/json",
+      "X-Arabya-Actor": actorTicket,
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(safeBody),
     cache: "no-store",
   });
 

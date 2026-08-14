@@ -32,7 +32,6 @@ async function pexelsFetch(kind: "photos" | "videos", query: string, opts: {
   page?: number;
   orientation?: "landscape" | "portrait" | "square";
 }) {
-  const key = getPexelsKey();
   const params = new URLSearchParams({
     type: kind,
     query,
@@ -41,14 +40,10 @@ async function pexelsFetch(kind: "photos" | "videos", query: string, opts: {
   });
   if (opts.orientation) params.set("orientation", opts.orientation);
 
-  const headers: HeadersInit = {};
-  if (key) headers["X-Pexels-Key"] = key;
-
   let res: Response;
   try {
     res = await fetch(`/api/studio/pexels?${params}`, {
       credentials: "same-origin",
-      headers,
     });
   } catch {
     throw new Error("تعذّر الاتصال بخادم البحث. حدّث الصفحة وحاول مجددًا.");
@@ -58,7 +53,7 @@ async function pexelsFetch(kind: "photos" | "videos", query: string, opts: {
     const err = await res.json().catch(() => ({}));
     if (err.error === "missing_pexels_key") {
       throw new Error(
-        "لم يتم تكوين مفتاح Pexels. أضِفه من الإعدادات، أو اطلب من المالك ضبط PEXELS_API_KEY على السيرفر.",
+        "مفتاح Pexels غير مضبوط على السيرفر. اطلب من المدير تعيين PEXELS_API_KEY.",
       );
     }
     if (err.error === "auth_required") {

@@ -4,7 +4,7 @@ import { findRootByQuery, searchAyahs } from "@/lib/quran";
 import { enforceRateLimit } from "@/lib/rate-limit";
 
 const PREVIEW_LIMIT = 10;
-const ALL_CAP = 5000;
+const ALL_CAP = 200;
 
 export async function GET(req: Request) {
   const limited = enforceRateLimit(req, { prefix: "search", limit: 60 });

@@ -22,6 +22,14 @@ export async function requireSession() {
 export async function requireAdmin() {
   const result = await requireSession();
   if ("error" in result) return result;
+  if (result.session.user?.roleUnverified) {
+    return {
+      error: NextResponse.json(
+        { ok: false, error: "role_unverified" },
+        { status: 503 },
+      ),
+    };
+  }
   if (!canAccessAdmin(result.role)) {
     return {
       error: NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 }),
@@ -33,6 +41,14 @@ export async function requireAdmin() {
 export async function requireStudio() {
   const result = await requireSession();
   if ("error" in result) return result;
+  if (result.session.user?.roleUnverified) {
+    return {
+      error: NextResponse.json(
+        { ok: false, error: "role_unverified" },
+        { status: 503 },
+      ),
+    };
+  }
   if (!canAccessStudio(result.role)) {
     return {
       error: NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 }),

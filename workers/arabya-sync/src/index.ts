@@ -1,7 +1,10 @@
 /**
  * Arabya personal-data + admin sync Worker (Cloudflare + D1).
  * Called only by the Next.js app after Auth.js verifies the session.
+ * Actor identity comes from HMAC ticket (X-Arabya-Actor), not body.actorEmail.
  */
+
+import { isServiceActor, verifyActorTicket } from "./actor-ticket";
 
 export interface Env {
   DB: D1Database;
@@ -61,7 +64,8 @@ function corsHeaders(request?: Request): Record<string, string> {
   const allow = ALLOWED_ORIGINS.has(origin) ? origin : "https://www.arabya.org";
   return {
     "Access-Control-Allow-Origin": allow,
-    "Access-Control-Allow-Headers": "Authorization, Content-Type",
+    "Access-Control-Allow-Headers":
+      "Authorization, Content-Type, X-Arabya-Actor",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     Vary: "Origin",
   };
@@ -663,6 +667,36 @@ const workerHandler = {
       body = (await request.json()) as Record<string, unknown>;
     } catch {
       return badRequest("invalid_json");
+    }
+
+    const ticket = await verifyActorTicket(
+      request.headers.get("X-Arabya-Actor"),
+      env.ARABYA_SYNC_SECRET,
+    );
+    if (!ticket) {
+      return unauthorized();
+    }
+
+    // Service tickets: read-only site chrome only.
+    if (isServiceActor(ticket.sub)) {
+      if (
+        url.pathname !== "/v1/site-appearance" ||
+        String(body.action || "get") !== "get"
+      ) {
+        return forbidden("service_actor_limited");
+      }
+    } else {
+      // Bind actor from signed ticket — ignore spoofable body fields.
+      body.actorEmail = ticket.sub;
+      delete body.ensureAdmin;
+      if (
+        url.pathname === "/v1/role" ||
+        url.pathname === "/v1/pull" ||
+        url.pathname === "/v1/push" ||
+        url.pathname === "/v1/role-request"
+      ) {
+        body.email = ticket.sub;
+      }
     }
 
     const email = String(body.email || "")

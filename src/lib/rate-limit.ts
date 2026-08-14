@@ -48,11 +48,13 @@ export type RateLimitCheck = {
   ok: boolean;
   retryAfterSec: number;
   remaining: number;
+  /** Saturated store → callers should return 503, not allow. */
+  saturated?: boolean;
 };
 
 /**
- * Record one hit for `bucketKey`. Fail-open when the map is saturated so the
- * limiter itself cannot become a DoS vector.
+ * Record one hit for `bucketKey`. Fail-closed when the map is saturated so new
+ * identities cannot bypass limits by exhausting buckets.
  */
 export function checkRateLimit(
   bucketKey: string,
@@ -63,7 +65,7 @@ export function checkRateLimit(
   sweep(now);
 
   if (hits.size >= MAX_BUCKETS && !hits.has(bucketKey)) {
-    return { ok: true, retryAfterSec: 0, remaining: limit };
+    return { ok: false, retryAfterSec: 60, remaining: 0, saturated: true };
   }
 
   const cutoff = now - windowMs;
@@ -95,13 +97,32 @@ export function resetRateLimitForTests() {
   lastSweep = 0;
 }
 
-function tooManyResponse(retryAfterSec: number): NextResponse {
+/** Test helper — fill the map to the saturation threshold. */
+export function saturateRateLimitForTests() {
+  for (let i = 0; i < MAX_BUCKETS; i++) {
+    hits.set(`__sat:${i}`, [Date.now()]);
+  }
+}
+
+function blockedResponse(result: RateLimitCheck): NextResponse {
+  if (result.saturated) {
+    return NextResponse.json(
+      { ok: false, error: "rate_limit_unavailable" },
+      {
+        status: 503,
+        headers: {
+          "Retry-After": String(result.retryAfterSec || 60),
+          "Cache-Control": "no-store",
+        },
+      },
+    );
+  }
   return NextResponse.json(
     { ok: false, error: "rate_limited" },
     {
       status: 429,
       headers: {
-        "Retry-After": String(retryAfterSec),
+        "Retry-After": String(result.retryAfterSec),
         "Cache-Control": "no-store",
       },
     },
@@ -109,7 +130,7 @@ function tooManyResponse(retryAfterSec: number): NextResponse {
 }
 
 /**
- * Rate-limit by IP (or explicit key). Returns a 429 Response when blocked,
+ * Rate-limit by IP (or explicit key). Returns a 429/503 Response when blocked,
  * otherwise null so the route can continue.
  */
 export function enforceRateLimit(
@@ -119,7 +140,7 @@ export function enforceRateLimit(
   const id = opts.key?.trim() || clientIp(request);
   const result = checkRateLimit(`${opts.prefix}:${id}`, opts.limit);
   if (result.ok) return null;
-  return tooManyResponse(result.retryAfterSec);
+  return blockedResponse(result);
 }
 
 /** Rate-limit with an already-known key (e.g. email after auth). */
@@ -130,5 +151,5 @@ export function enforceRateLimitKey(
 ): Response | null {
   const result = checkRateLimit(`${prefix}:${key}`, limit);
   if (result.ok) return null;
-  return tooManyResponse(result.retryAfterSec);
+  return blockedResponse(result);
 }

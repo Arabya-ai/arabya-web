@@ -10,6 +10,7 @@ import {
 import {
   mergeRoleWithEnvAdmin,
   resolveRoleFromEmail,
+  isEnvAdminEmail,
   type UserRole,
 } from "@/lib/roles";
 import { resolveUserPlan, type UserPlan } from "@/lib/plans";
@@ -22,6 +23,8 @@ declare module "next-auth" {
       image?: string | null;
       role: UserRole;
       plan: UserPlan;
+      /** True when elevated role could not be re-verified (fail-closed for admin APIs). */
+      roleUnverified?: boolean;
     };
     error?: "Banned";
   }
@@ -38,6 +41,7 @@ declare module "@auth/core/jwt" {
     plan?: UserPlan;
     roleFetchedAt?: number;
     banned?: boolean;
+    roleUnverified?: boolean;
   }
 }
 
@@ -172,11 +176,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           // Keep prior banned/role when Worker is down — never clear a ban on error.
           if (!token.role) {
             token.role = resolveRoleFromEmail(email);
+            token.roleUnverified = false;
           } else {
             token.role = mergeRoleWithEnvAdmin(email, token.role as UserRole);
+            // Fail-closed for elevated roles until verification succeeds again.
+            const elevated =
+              token.role === "admin" ||
+              token.role === "editor" ||
+              token.role === "creator";
+            token.roleUnverified = elevated && !isEnvAdminEmail(email);
           }
         } else {
           token.banned = status.banned;
+          token.roleUnverified = false;
           if (status.banned) {
             token.role = "member";
           } else {
@@ -186,6 +198,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
       } else if (!token.role) {
         token.role = resolveRoleFromEmail(email);
+        token.roleUnverified = false;
       } else {
         token.role = mergeRoleWithEnvAdmin(email, token.role as UserRole);
       }
@@ -204,6 +217,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.role = (token.role as UserRole) || "member";
         session.user.plan = (token.plan as UserPlan) || "free";
+        session.user.roleUnverified = token.roleUnverified === true;
       }
       return session;
     },

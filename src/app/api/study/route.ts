@@ -48,13 +48,14 @@ export async function GET(req: Request) {
       return NextResponse.json(
         {
           ...result,
-          mode: "local-study-brief",
+          mode: "local-retrieval",
+          assistant: "local",
           llm: {
             enabled: false,
             note:
               locale === "en"
-                ? "LLM mode is off. Set ARABYA_LLM_ENABLED=1 and ARABYA_LLM_API_KEY."
-                : "وضع LLM غير مفعّل. عيّن ARABYA_LLM_ENABLED=1 و ARABYA_LLM_API_KEY.",
+                ? "Local retrieval only (no language model). Results cite ayahs and local tafsir snippets — not a fatwa."
+                : "استرجاع محلي فقط (بدون نموذج لغوي). النتائج تستشهد بالآيات ومقتطفات التفسير المحلي — وليست فتوى.",
           },
         },
         {
@@ -68,14 +69,15 @@ export async function GET(req: Request) {
     return NextResponse.json(
       {
         ...result,
-        mode: "llm-ready-stub",
+        mode: "local-retrieval",
+        assistant: "local",
         llm: {
           enabled: true,
           answer: null,
           note:
             locale === "en"
-              ? "Provider not wired yet — local retrieval with ayah citations is below."
-              : "المزوّد غير موصول بعد — الاسترجاع المحلي متاح أدناه مع استشهادات الآية.",
+              ? "Provider not wired yet — local retrieval with ayah citations is below. Not a fatwa."
+              : "المزوّد غير موصول بعد — الاسترجاع المحلي متاح أدناه مع استشهادات الآية. ليست فتوى.",
         },
       },
       {
@@ -86,9 +88,16 @@ export async function GET(req: Request) {
     );
   }
 
-  return NextResponse.json(result, {
-    headers: {
-      "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
+  return NextResponse.json(
+    {
+      ...result,
+      mode: "local-retrieval",
+      assistant: "local",
     },
-  });
+    {
+      headers: {
+        "Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
+      },
+    },
+  );
 }

@@ -5,6 +5,7 @@ import {
   enforceRateLimit,
   enforceRateLimitKey,
   resetRateLimitForTests,
+  saturateRateLimitForTests,
 } from "./rate-limit";
 
 afterEach(() => {
@@ -84,5 +85,14 @@ describe("enforce helpers", () => {
     expect(enforceRateLimitKey("sync", "a@b.c", 1)).toBeNull();
     const blocked = enforceRateLimitKey("sync", "a@b.c", 1);
     expect(blocked?.status).toBe(429);
+  });
+
+  it("fails closed with 503 when bucket map is saturated", () => {
+    saturateRateLimitForTests();
+    const blocked = checkRateLimit("new:never-seen", 5);
+    expect(blocked.ok).toBe(false);
+    expect(blocked.saturated).toBe(true);
+    const res = enforceRateLimitKey("prefix", "fresh-key", 5);
+    expect(res?.status).toBe(503);
   });
 });

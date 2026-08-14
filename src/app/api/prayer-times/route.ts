@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { resolvePortalCity } from "@/lib/portal-cities";
+import { resolvePortalLocationFromSearch } from "@/lib/portal-cities";
 import { enforceRateLimit } from "@/lib/rate-limit";
 
 const GREGORIAN_MONTHS_AR: Record<number, string> = {
@@ -65,7 +65,14 @@ export async function GET(req: Request) {
   const limited = enforceRateLimit(req, { prefix: "prayer-times", limit: 30 });
   if (limited) return limited;
   const { searchParams } = new URL(req.url);
-  const cfg = resolvePortalCity(searchParams.get("city"));
+  const resolved = resolvePortalLocationFromSearch(searchParams);
+  if (!resolved.ok) {
+    return NextResponse.json(
+      { error: resolved.code, code: resolved.code },
+      { status: 400 },
+    );
+  }
+  const cfg = resolved.cfg;
 
   try {
     const url = new URL("https://api.aladhan.com/v1/timings");
@@ -152,6 +159,7 @@ export async function GET(req: Request) {
         city: cfg.id,
         timezone: payload.data?.meta?.timezone ?? null,
         source: "api.aladhan.com",
+        ...(cfg.approxCity ? { approxCity: cfg.approxCity } : {}),
         gregorian: {
           readable: payload.data?.date?.readable ?? null,
           ar: gregorianAr,

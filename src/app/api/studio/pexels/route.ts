@@ -5,11 +5,12 @@ import { requireSession } from "@/lib/require-role";
 export const runtime = "nodejs";
 
 /**
- * Server-side Pexels proxy with multi-key failover.
+ * Server-side Pexels proxy with multi-key failover (server env keys only).
  *
  * Keys (tried in order; rotate on 401/403/429/402):
- * 1. `X-Pexels-Key` header (from /studio/settings) — one or many
- * 2. `PEXELS_API_KEY` and/or `PEXELS_API_KEYS` env (comma-separated OK)
+ * - `PEXELS_API_KEY` and/or `PEXELS_API_KEYS` env (comma-separated OK)
+ *
+ * Client-supplied keys are ignored (do not send secrets from the browser).
  */
 export async function GET(request: Request) {
   const gate = await requireSession();
@@ -25,7 +26,6 @@ export async function GET(request: Request) {
   }
 
   const keys = parseApiKeys(
-    request.headers.get("x-pexels-key") ?? undefined,
     process.env.PEXELS_API_KEY,
     process.env.PEXELS_API_KEYS,
   );
@@ -53,7 +53,6 @@ export async function GET(request: Request) {
       : `https://api.pexels.com/v1/search?${params}`;
 
   let lastStatus = 0;
-  let lastDetail = "";
 
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
@@ -64,7 +63,6 @@ export async function GET(request: Request) {
       });
     } catch {
       lastStatus = 502;
-      lastDetail = "upstream_unreachable";
       continue;
     }
 
@@ -75,13 +73,11 @@ export async function GET(request: Request) {
         headers: {
           "Content-Type": "application/json",
           "Cache-Control": "private, max-age=120",
-          "X-Pexels-Key-Index": String(i),
         },
       });
     }
 
     lastStatus = upstream.status;
-    lastDetail = text.slice(0, 200);
     if (!shouldRotateApiKey(upstream.status)) {
       break;
     }
@@ -89,16 +85,9 @@ export async function GET(request: Request) {
 
   return Response.json(
     {
-      error: "pexels_http",
-      status: lastStatus,
-      detail: lastDetail,
-      keysTried: keys.length,
+      error: "pexels_unavailable",
+      status: lastStatus >= 400 ? lastStatus : 502,
     },
-    {
-      status:
-        lastStatus === 401 || lastStatus === 403 || lastStatus === 429
-          ? 400
-          : 502,
-    },
+    { status: 502 },
   );
 }

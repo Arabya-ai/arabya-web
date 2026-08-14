@@ -5,13 +5,10 @@ import { requireSession } from "@/lib/require-role";
 export const runtime = "nodejs";
 
 /**
- * Server-side Pixabay proxy with multi-key failover.
+ * Server-side Pixabay proxy with multi-key failover (server env keys only).
  *
- * Keys (tried in order; rotate on 401/403/429/402):
- * 1. `X-Pixabay-Key` header (from /studio/settings) — one or many
- * 2. `PIXABAY_API_KEY` and/or `PIXABAY_API_KEYS` env (comma-separated OK)
- *
- * Separate from Pexels so keys, rate limits, and errors never mix.
+ * Keys: `PIXABAY_API_KEY` and/or `PIXABAY_API_KEYS` env.
+ * Client-supplied keys are ignored.
  */
 export async function GET(request: Request) {
   const gate = await requireSession();
@@ -27,7 +24,6 @@ export async function GET(request: Request) {
   }
 
   const keys = parseApiKeys(
-    request.headers.get("x-pixabay-key") ?? undefined,
     process.env.PIXABAY_API_KEY,
     process.env.PIXABAY_API_KEYS,
   );
@@ -38,7 +34,6 @@ export async function GET(request: Request) {
   const perPage = searchParams.get("per_page") || (kind === "videos" ? "12" : "18");
   const page = searchParams.get("page") || "1";
   const orientationRaw = searchParams.get("orientation");
-  // Pixabay: horizontal | vertical | all (no square)
   let orientation = "all";
   if (orientationRaw === "landscape") orientation = "horizontal";
   else if (orientationRaw === "portrait") orientation = "vertical";
@@ -47,7 +42,6 @@ export async function GET(request: Request) {
   }
 
   let lastStatus = 0;
-  let lastDetail = "";
 
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
@@ -62,7 +56,6 @@ export async function GET(request: Request) {
       params.set("image_type", "photo");
       if (orientation !== "all") params.set("orientation", orientation);
     } else if (orientation !== "all") {
-      // Videos API also accepts orientation in recent docs; ignore if upstream rejects.
       params.set("orientation", orientation);
     }
 
@@ -82,7 +75,6 @@ export async function GET(request: Request) {
       });
     } catch {
       lastStatus = 502;
-      lastDetail = "upstream_unreachable";
       continue;
     }
 
@@ -93,30 +85,18 @@ export async function GET(request: Request) {
         headers: {
           "Content-Type": "application/json",
           "Cache-Control": "private, max-age=120",
-          "X-Pixabay-Key-Index": String(i),
         },
       });
     }
 
     lastStatus = upstream.status;
-    lastDetail = text.slice(0, 200);
     if (!shouldRotateApiKey(upstream.status)) {
       break;
     }
   }
 
   return Response.json(
-    {
-      error: "pixabay_http",
-      status: lastStatus,
-      detail: lastDetail,
-      keysTried: keys.length,
-    },
-    {
-      status:
-        lastStatus === 401 || lastStatus === 403 || lastStatus === 429
-          ? 400
-          : 502,
-    },
+    { error: "pixabay_unavailable", status: lastStatus >= 400 ? lastStatus : 502 },
+    { status: 502 },
   );
 }
