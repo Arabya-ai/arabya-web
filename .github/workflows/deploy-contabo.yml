@@ -20,14 +20,54 @@ jobs:
     runs-on: ubuntu-latest
     environment: Production
     steps:
-      - name: SSH deploy
-        uses: appleboy/ssh-action@v1.2.2
-        with:
-          host: ${{ secrets.CONTABO_HOST }}
-          username: ${{ secrets.CONTABO_SSH_USER }}
-          key: ${{ secrets.CONTABO_SSH_KEY }}
-          command_timeout: 20m
-          script: |
-            set -euo pipefail
-            cd /var/www/arabya-web
-            bash scripts/contabo-deploy.sh
+      - name: Validate SSH secrets
+        env:
+          SSH_HOST: ${{ secrets.CONTABO_HOST }}
+          SSH_USER: ${{ secrets.CONTABO_SSH_USER }}
+          SSH_KEY: ${{ secrets.CONTABO_SSH_KEY }}
+          SSH_KEY_B64: ${{ secrets.CONTABO_SSH_KEY_B64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "$SSH_HOST" ] || [ -z "$SSH_USER" ]; then
+            echo "::error::Missing CONTABO_HOST or CONTABO_SSH_USER in Production secrets."
+            exit 1
+          fi
+          if [ -n "$SSH_KEY_B64" ]; then
+            echo "Will use CONTABO_SSH_KEY_B64"
+            exit 0
+          fi
+          if [ -z "$SSH_KEY" ]; then
+            echo "::error::Set CONTABO_SSH_KEY (PEM) or CONTABO_SSH_KEY_B64 in Production secrets."
+            exit 1
+          fi
+          if ! printf '%s' "$SSH_KEY" | grep -q 'BEGIN.*PRIVATE KEY'; then
+            echo "::error::CONTABO_SSH_KEY must be the PRIVATE key file (starts with -----BEGIN ... PRIVATE KEY-----)."
+            echo "Do not paste the .pub public key."
+            exit 1
+          fi
+
+      - name: Deploy over SSH
+        env:
+          SSH_HOST: ${{ secrets.CONTABO_HOST }}
+          SSH_USER: ${{ secrets.CONTABO_SSH_USER }}
+          SSH_KEY: ${{ secrets.CONTABO_SSH_KEY }}
+          SSH_KEY_B64: ${{ secrets.CONTABO_SSH_KEY_B64 }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          if [ -n "$SSH_KEY_B64" ]; then
+            printf '%s' "$SSH_KEY_B64" | tr -d '\n' | base64 -d > ~/.ssh/contabo_key
+          else
+            printf '%s\n' "$SSH_KEY" > ~/.ssh/contabo_key
+          fi
+          chmod 600 ~/.ssh/contabo_key
+          if ! ssh-keygen -lf ~/.ssh/contabo_key >/dev/null 2>&1; then
+            echo "::error::Could not parse SSH private key. Delete CONTABO_SSH_KEY and paste the full private key again, or use CONTABO_SSH_KEY_B64."
+            exit 1
+          fi
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+          ssh -i ~/.ssh/contabo_key -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
+            "$SSH_USER@$SSH_HOST" \
+            'cd /var/www/arabya-web && bash scripts/contabo-deploy.sh'
+          rm -f ~/.ssh/contabo_key

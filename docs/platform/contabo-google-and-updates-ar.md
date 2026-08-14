@@ -116,8 +116,33 @@ curl -I http://127.0.0.1:3000
 2. أضف:
    - `CONTABO_HOST` = `169.58.169.79`
    - `CONTABO_SSH_USER` = اسم مستخدم SSH (غالباً `root`)
-   - `CONTABO_SSH_KEY` = المفتاح الخاص كاملاً (PEM)
+   - `CONTABO_SSH_KEY` = **المفتاح الخاص** كاملاً (ليس `.pub`)
 3. **Actions** → **Deploy Contabo** → **Run workflow** (أول مرة للاختبار)
+
+#### إن ظهر `ssh: no key found`
+
+معناه أن `CONTABO_SSH_KEY` فارغ أو لصقتَ **المفتاح العام** (`id_rsa.pub`) بدل **الخاص** (`id_rsa`).
+
+**الصحيح** — محتوى الملف الخاص يبدأ هكذا:
+```
+-----BEGIN OPENSSH PRIVATE KEY-----
+...
+-----END OPENSSH PRIVATE KEY-----
+```
+أو `-----BEGIN RSA PRIVATE KEY-----` …
+
+**خطوات الإصلاح:**
+1. Production → **Update** على `CONTABO_SSH_KEY` → احذف القيمة القديمة.
+2. من جهازك (الذي تدخل منه SSH للسيرفر): افتح الملف الخاص (`~/.ssh/id_rsa` أو `id_ed25519`) وانسخ **كل** المحتوى.
+3. الصق في GitHub → **Update secret** → احفظ.
+4. **Actions** → **Deploy Contabo** → **Run workflow** مرة أخرى.
+
+**بديل (أسهل للنسخ):** على جهازك نفّذ:
+```bash
+base64 -w 0 ~/.ssh/id_rsa
+```
+(أو `id_ed25519`) — انسخ السطر الطويل وأضف secret جديداً:
+`CONTABO_SSH_KEY_B64` = ذلك النص (سطر واحد بدون مسافات).
 
 بدون هذه الأسرار، النشر يبقى يدوياً بالأمر أعلاه.
 
