@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
+import { CONTACT_EMAIL } from "@/lib/contact";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -12,6 +13,9 @@ const richTags = {
   aboutLink: (c: ReactNode) => <Link href="/about">{c}</Link>,
   accountLink: (c: ReactNode) => <Link href="/account">{c}</Link>,
   contactLink: (c: ReactNode) => <Link href="/contact">{c}</Link>,
+  emailLink: (c: ReactNode) => (
+    <a href={`mailto:${CONTACT_EMAIL}`}>{c}</a>
+  ),
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

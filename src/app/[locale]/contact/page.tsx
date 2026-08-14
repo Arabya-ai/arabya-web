@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { InfoHeroNav } from "@/components/info/InfoHeroNav";
 import { resolveLocale } from "@/i18n/locale-params";
-import { buildInfoHeroNavItems } from "@/lib/info-hero-nav";
+import { CONTACT_EMAIL } from "@/lib/contact";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -12,7 +12,7 @@ const richTags = {
   brand: (c: ReactNode) => <strong className="info-em">{c}</strong>,
   strong: (c: ReactNode) => <strong>{c}</strong>,
   emailLink: (c: ReactNode) => (
-    <a href="mailto:contact@arabya.org">{c}</a>
+    <a href={`mailto:${CONTACT_EMAIL}`}>{c}</a>
   ),
   privacyLink: (c: ReactNode) => <Link href="/privacy">{c}</Link>,
   termsLink: (c: ReactNode) => <Link href="/terms">{c}</Link>,
@@ -53,8 +53,8 @@ export default async function ContactPage({ params }: Props) {
           </h2>
           <p>{t("sections.email.p0")}</p>
           <p className="info-contact-email">
-            <a className="info-btn info-btn--primary" href="mailto:contact@arabya.org">
-              {t("sections.email.cta")}
+            <a className="info-btn info-btn--primary" href={`mailto:${CONTACT_EMAIL}`}>
+              {CONTACT_EMAIL}
             </a>
           </p>
           <p className="info-note">{t("sections.email.note")}</p>

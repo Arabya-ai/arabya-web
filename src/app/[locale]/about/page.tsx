@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { InfoHeroNav } from "@/components/info/InfoHeroNav";
 import { resolveLocale } from "@/i18n/locale-params";
 import { buildInfoHeroNavItems } from "@/lib/info-hero-nav";
+import { CONTACT_EMAIL } from "@/lib/contact";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -40,6 +41,9 @@ const richTags = {
   privacyLink: (c: ReactNode) => <Link href="/privacy">{c}</Link>,
   termsLink: (c: ReactNode) => <Link href="/terms">{c}</Link>,
   contactLink: (c: ReactNode) => <Link href="/contact">{c}</Link>,
+  emailLink: (c: ReactNode) => (
+    <a href={`mailto:${CONTACT_EMAIL}`}>{c}</a>
+  ),
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
