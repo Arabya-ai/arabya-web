@@ -18,6 +18,18 @@ OpenLiteSpeed only answers Next.js for `www.arabya.org`. Requests with Host `www
 
 Script: `deploy/cloudflare/arabyaai-proxy.worker.js`
 
+### Auth / login (important)
+
+Google OAuth and session cookies follow `AUTH_URL` → **`https://www.arabya.org`**.  
+They cannot be shared across `.org` and `.com`.
+
+The Worker therefore:
+
+1. **Redirects** `/login`, `/en/login`, and `/api/auth/*` on `.com` → `www.arabya.org` (same path + query).
+2. **Rewrites** inbound `Host` / `Origin` / `Referer` to `www.arabya.org` on other requests so Next.js Server Actions do not fail CSRF (that mismatch previously showed «حدث خطأ» on `/login` when the Google button POSTed).
+
+App middleware mirrors the login redirect if OLS ever serves `.com` without the Worker.
+
 ## Optional later (needs root SSH)
 
 If you get SSH as root:
