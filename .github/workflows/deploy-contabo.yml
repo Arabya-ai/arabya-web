@@ -26,7 +26,7 @@ jobs:
           host: ${{ secrets.CONTABO_HOST }}
           username: ${{ secrets.CONTABO_SSH_USER }}
           key: ${{ secrets.CONTABO_SSH_KEY }}
-          script_stop: true
+          command_timeout: 20m
           script: |
             set -euo pipefail
             cd /var/www/arabya-web
