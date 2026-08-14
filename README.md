@@ -10,6 +10,7 @@
 - **حسابات Google + المزامنة:** SQLite على السيرفر — [`docs/platform/accounts-owner-guide-ar.md`](docs/platform/accounts-owner-guide-ar.md)  
 - **Analytics:** Cloudflare Web Analytics (token في `.env.production.local`)  
 - **legacy:** Render / D1 — أرشيف فقط؛ راجع `docs/platform/d1-accounts.md`
+- **Spec Kit (تطوير في Cursor):** دستور `.specify/memory/constitution.md` · مواصفات `specs/` · أوامر `/speckit-specify` و`/speckit-plan` و`/speckit-implement` — لا تظهر للزائر على Contabo
 
 ## سياسة البيانات (Git-first)
 
