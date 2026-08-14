@@ -3288,12 +3288,16 @@ html[data-theme="dark"] .arabya-footer-panel {
 
 .info-btn--primary {
   background: var(--brand-deep);
-  color: #fff;
+  color: var(--on-brand);
   border: 1px solid var(--brand-deep);
 }
 
-.info-btn--primary:hover {
+.info-btn--primary:hover,
+.info-btn--primary:focus-visible {
   background: color-mix(in srgb, var(--brand-deep) 88%, #000);
+  border-color: color-mix(in srgb, var(--brand-deep) 88%, #000);
+  color: var(--on-brand);
+  outline: none;
 }
 
 .info-btn--ghost {
@@ -3302,8 +3306,30 @@ html[data-theme="dark"] .arabya-footer-panel {
   border: 1px solid color-mix(in srgb, var(--brand) 28%, var(--line));
 }
 
-.info-btn--ghost:hover {
+.info-btn--ghost:hover,
+.info-btn--ghost:focus-visible {
   background: var(--brand-soft);
+  color: var(--brand-deep);
+  outline: none;
+}
+
+.info-btn--current,
+.info-btn--ghost[aria-current="page"],
+.info-btn--primary[aria-current="page"] {
+  background: var(--brand-deep);
+  border-color: var(--brand-deep);
+  color: var(--on-brand);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--brand-deep) 22%, transparent);
+}
+
+.info-btn--primary.info-btn--current,
+.info-btn--primary[aria-current="page"] {
+  background: var(--brand);
+  border-color: var(--brand);
+}
+
+.info-contact-email {
+  margin: 0.5rem 0 0.85rem;
 }
 
 .info-section {
