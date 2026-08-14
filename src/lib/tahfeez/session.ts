@@ -18,6 +18,14 @@ export function freshWordResults(
   }));
 }
 
+/** Ignore stale alignment / API responses after ayah changes. */
+export function isStaleAlignGeneration(
+  captured: number,
+  current: number,
+): boolean {
+  return captured !== current;
+}
+
 /**
  * Extract only new/changed speech segments from a Web Speech API result event.
  * Uses resultIndex so cumulative finals are not duplicated in the hypothesis.

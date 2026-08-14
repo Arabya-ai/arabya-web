@@ -3,7 +3,15 @@ import {
   extractSpeechSegments,
   freshWordResults,
   isAyahRecitationComplete,
+  isStaleAlignGeneration,
 } from "./session";
+
+describe("isStaleAlignGeneration", () => {
+  it("flags mismatched generation", () => {
+    expect(isStaleAlignGeneration(1, 2)).toBe(true);
+    expect(isStaleAlignGeneration(2, 2)).toBe(false);
+  });
+});
 
 describe("isAyahRecitationComplete", () => {
   it("is false until cursor reaches word count", () => {
