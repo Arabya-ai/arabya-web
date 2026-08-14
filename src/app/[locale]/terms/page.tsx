@@ -9,13 +9,9 @@ type Props = { params: Promise<{ locale: string }> };
 const richTags = {
   brand: (c: ReactNode) => <strong className="info-em">{c}</strong>,
   strong: (c: ReactNode) => <strong>{c}</strong>,
-  ghOrgLink: (c: ReactNode) => (
-    <a href="https://github.com/Arabya-ai" rel="noreferrer" target="_blank">
-      {c}
-    </a>
-  ),
   privacyLink: (c: ReactNode) => <Link href="/privacy">{c}</Link>,
   aboutLink: (c: ReactNode) => <Link href="/about">{c}</Link>,
+  contactLink: (c: ReactNode) => <Link href="/contact">{c}</Link>,
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

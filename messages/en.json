@@ -969,7 +969,7 @@
       },
       "enforcement": {
         "title": "Enforcement",
-        "p0": "We may restrict access, suspend accounts, or take legal action for violations. For questions or licensing: <ghOrgLink>Arabya-ai</ghOrgLink> on GitHub."
+        "p0": "We may restrict access, suspend accounts, or take legal action for violations. For questions or licensing: <contactLink>Contact us</contactLink>."
       },
       "changes": {
         "title": "Changes",
