@@ -7,6 +7,7 @@ import {
 
 import { auth } from "@/auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { Link } from "@/i18n/navigation";
 import {
   adminGetPortfolio,
   isCloudSyncConfigured,
@@ -105,6 +106,36 @@ export default async function AdminUserPortfolioPage({ params }: Props) {
               </p>
             </div>
           </div>
+        </section>
+
+        <section className="dash-card">
+          <h2>{locale === "en" ? "Smart recitation" : "التسميع الذكي"}</h2>
+          {"tahfeez" in data && data.tahfeez ? (
+            <ul className="dash-list">
+              <li>
+                {locale === "en" ? "Sessions" : "جلسات"}:{" "}
+                {(data.tahfeez as { stats: { totalSessions: number } }).stats
+                  .totalSessions}
+              </li>
+              <li>
+                {locale === "en" ? "Accuracy" : "دقة"}:{" "}
+                {
+                  (data.tahfeez as { stats: { overallAccuracy: number } }).stats
+                    .overallAccuracy
+                }
+                %
+              </li>
+            </ul>
+          ) : (
+            <p className="dash-muted">
+              {locale === "en" ? "No tahfeez data." : "لا بيانات تسميع."}
+            </p>
+          )}
+          <p style={{ marginTop: "0.75rem" }}>
+            <Link href="/admin/tahfeez">
+              {locale === "en" ? "All recitation portfolios" : "كل بورتفوليوهات التسميع"}
+            </Link>
+          </p>
         </section>
 
         <section className="dash-card">

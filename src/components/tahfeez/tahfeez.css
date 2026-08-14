@@ -1,0 +1,412 @@
+/**
+ * Smart tasmeeʿ shell — dark emerald dashboard matching product mock.
+ * Scoped under .tahfeez-shell so it does not leak into the main site.
+ */
+
+.tahfeez-shell {
+  --tz-bg: #071512;
+  --tz-panel: #0c1f1b;
+  --tz-panel-2: #102822;
+  --tz-line: rgba(94, 234, 212, 0.18);
+  --tz-teal: #2dd4bf;
+  --tz-teal-deep: #0f766e;
+  --tz-ink: #e7f8f3;
+  --tz-muted: rgba(231, 248, 243, 0.62);
+  --tz-good: #34d399;
+  --tz-warn: #fbbf24;
+  --tz-bad: #f87171;
+  --tz-glow: 0 0 28px rgba(45, 212, 191, 0.28);
+  min-height: calc(100dvh - 4.5rem);
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(15, 118, 110, 0.35), transparent),
+    linear-gradient(180deg, #061411 0%, var(--tz-bg) 40%, #050f0d 100%);
+  color: var(--tz-ink);
+  padding: 0.75rem 0.85rem 1.5rem;
+}
+
+.tahfeez-shell * {
+  box-sizing: border-box;
+}
+
+.tahfeez-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--tz-line);
+  border-radius: 1rem;
+  background: linear-gradient(135deg, rgba(16, 40, 34, 0.95), rgba(7, 21, 18, 0.9));
+}
+
+.tahfeez-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.tahfeez-brand strong {
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+}
+
+.tahfeez-brand span {
+  font-size: 0.78rem;
+  color: var(--tz-muted);
+}
+
+.tahfeez-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.tahfeez-tabs button {
+  border: 0;
+  background: transparent;
+  color: var(--tz-muted);
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.tahfeez-tabs button[aria-selected="true"] {
+  color: var(--tz-ink);
+  background: rgba(45, 212, 191, 0.14);
+  box-shadow: inset 0 -2px 0 var(--tz-teal);
+}
+
+.tahfeez-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(220px, 300px);
+  gap: 0.85rem;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .tahfeez-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tahfeez-card {
+  border: 1px solid var(--tz-line);
+  border-radius: 1.1rem;
+  background: linear-gradient(165deg, var(--tz-panel) 0%, var(--tz-panel-2) 100%);
+  padding: 0.9rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+}
+
+.tahfeez-card h3 {
+  margin: 0 0 0.65rem;
+  font-size: 0.92rem;
+  color: var(--tz-teal);
+  font-weight: 600;
+}
+
+.tahfeez-reciter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  text-align: center;
+}
+
+.tahfeez-reciter-avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 999px;
+  border: 2px solid rgba(45, 212, 191, 0.45);
+  background:
+    radial-gradient(circle at 30% 30%, rgba(45, 212, 191, 0.35), transparent 55%),
+    #0a1a16;
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  box-shadow: var(--tz-glow);
+}
+
+.tahfeez-transport {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.tahfeez-transport button,
+.tahfeez-action {
+  border: 1px solid var(--tz-line);
+  background: rgba(45, 212, 191, 0.08);
+  color: var(--tz-ink);
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+.tahfeez-transport button:hover,
+.tahfeez-action:hover {
+  background: rgba(45, 212, 191, 0.18);
+}
+
+.tahfeez-progress {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.tahfeez-progress > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--tz-teal-deep), var(--tz-teal));
+}
+
+.tahfeez-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.tahfeez-stat {
+  border: 1px solid var(--tz-line);
+  border-radius: 0.75rem;
+  padding: 0.55rem;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.tahfeez-stat b {
+  display: block;
+  font-size: 1.15rem;
+}
+
+.tahfeez-stat small {
+  color: var(--tz-muted);
+  font-size: 0.72rem;
+}
+
+.tahfeez-ring {
+  --p: 0;
+  width: 96px;
+  height: 96px;
+  margin: 0.4rem auto;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(var(--tz-teal) calc(var(--p) * 1%), rgba(255, 255, 255, 0.08) 0);
+  position: relative;
+}
+
+.tahfeez-ring::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 999px;
+  background: var(--tz-panel);
+}
+
+.tahfeez-ring strong {
+  position: relative;
+  z-index: 1;
+  font-size: 1.2rem;
+}
+
+.tahfeez-stage {
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tahfeez-stage-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.tahfeez-stage-frame {
+  flex: 1;
+  min-height: 260px;
+  border: 1px solid var(--tz-line);
+  border-radius: 1rem;
+  padding: 1rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
+    rgba(0, 0, 0, 0.22);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.tahfeez-ayah {
+  font-family: var(--font-amiri-quran), "Amiri", serif;
+  font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+  line-height: 2.1;
+  text-align: center;
+  direction: rtl;
+}
+
+.tahfeez-ayah[data-hidden="true"] .tahfeez-word[data-status="pending"] {
+  color: transparent;
+  text-shadow: 0 0 10px rgba(231, 248, 243, 0.35);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 0.35rem;
+}
+
+.tahfeez-word {
+  display: inline-block;
+  margin-inline: 0.18rem;
+  padding: 0.05rem 0.15rem;
+  border-radius: 0.3rem;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.tahfeez-word[data-status="correct"] {
+  color: var(--tz-good);
+  background: rgba(52, 211, 153, 0.12);
+}
+
+.tahfeez-word[data-status="wrong"] {
+  color: var(--tz-bad);
+  background: rgba(248, 113, 113, 0.14);
+}
+
+.tahfeez-word[data-status="skipped"] {
+  color: var(--tz-warn);
+  background: rgba(251, 191, 36, 0.12);
+}
+
+.tahfeez-word[data-status="hesitation"] {
+  color: var(--tz-warn);
+}
+
+.tahfeez-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.tahfeez-mic {
+  width: 74px;
+  height: 74px;
+  border-radius: 999px;
+  border: 2px solid rgba(45, 212, 191, 0.55);
+  background: radial-gradient(circle at 40% 30%, #14b8a6, #0f766e 70%);
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: var(--tz-glow);
+}
+
+.tahfeez-mic[data-on="true"] {
+  animation: tahfeez-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes tahfeez-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: var(--tz-glow);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 40px rgba(45, 212, 191, 0.5);
+  }
+}
+
+.tahfeez-wave {
+  height: 36px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+}
+
+.tahfeez-wave span {
+  width: 3px;
+  border-radius: 99px;
+  background: var(--tz-teal);
+  animation: tahfeez-bar 0.9s ease-in-out infinite;
+}
+
+.tahfeez-wave span:nth-child(2n) {
+  animation-delay: 0.15s;
+}
+.tahfeez-wave span:nth-child(3n) {
+  animation-delay: 0.3s;
+}
+
+@keyframes tahfeez-bar {
+  0%,
+  100% {
+    height: 8px;
+    opacity: 0.45;
+  }
+  50% {
+    height: 28px;
+    opacity: 1;
+  }
+}
+
+.tahfeez-word-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 280px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.tahfeez-word-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.55rem;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid transparent;
+  font-size: 0.92rem;
+}
+
+.tahfeez-word-list li[data-status="correct"] {
+  border-color: rgba(52, 211, 153, 0.35);
+}
+.tahfeez-word-list li[data-status="wrong"] {
+  border-color: rgba(248, 113, 113, 0.35);
+}
+.tahfeez-word-list li[data-status="skipped"] {
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+.tahfeez-select,
+.tahfeez-shell select {
+  width: 100%;
+  border-radius: 0.65rem;
+  border: 1px solid var(--tz-line);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--tz-ink);
+  padding: 0.45rem 0.55rem;
+  font: inherit;
+}
+
+.tahfeez-note {
+  font-size: 0.78rem;
+  color: var(--tz-muted);
+  line-height: 1.5;
+}
+
+.tahfeez-login-gate {
+  max-width: 32rem;
+  margin: 3rem auto;
+  text-align: center;
+}

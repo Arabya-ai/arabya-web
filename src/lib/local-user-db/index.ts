@@ -13,6 +13,12 @@ import type {
 } from "@/lib/cloud-sync";
 import type { StudyEntry } from "@/lib/study-archive";
 import {
+  emptyTahfeezPortfolio,
+  type TahfeezPortfolio,
+  type TahfeezSessionSummary,
+  type TahfeezPortfolioStats,
+} from "@/lib/tahfeez/types";
+import {
   isSuperAdminEmail,
   type UserRole,
 } from "@/lib/roles";
@@ -863,11 +869,162 @@ export function localAdminGetPortfolio(actorEmail: string, userId: string) {
   const detail = localAdminGetUser(targetId);
   if (!detail) throw new Error("not_found");
   const data = pullAll(db, targetId);
+  const tahfeez = localGetTahfeezPortfolio(targetId);
   return {
     ...detail,
     bookmarks: data.bookmarks,
     notes: data.notes,
     study: data.study,
     progress: data.progress,
+    tahfeez,
   };
+}
+
+function parseTahfeezPortfolio(
+  statsJson: string,
+  sessionsJson: string,
+): TahfeezPortfolio {
+  const empty = emptyTahfeezPortfolio();
+  try {
+    const stats = {
+      ...empty.stats,
+      ...(JSON.parse(statsJson || "{}") as Partial<TahfeezPortfolioStats>),
+    };
+    const sessions = JSON.parse(sessionsJson || "[]") as TahfeezSessionSummary[];
+    return {
+      stats,
+      sessions: Array.isArray(sessions) ? sessions.slice(0, 100) : [],
+    };
+  } catch {
+    return empty;
+  }
+}
+
+export function localGetTahfeezPortfolio(emailOrId: string): TahfeezPortfolio {
+  const db = getUserDb();
+  const id = userIdFromEmail(emailOrId);
+  const row = db
+    .prepare(
+      `SELECT stats_json as statsJson, sessions_json as sessionsJson
+       FROM tahfeez_portfolio WHERE user_id = ?`,
+    )
+    .get(id) as { statsJson: string; sessionsJson: string } | undefined;
+  if (!row) return emptyTahfeezPortfolio();
+  return parseTahfeezPortfolio(row.statsJson, row.sessionsJson);
+}
+
+export function localSaveTahfeezPortfolio(
+  user: UserProfile,
+  portfolio: TahfeezPortfolio,
+): TahfeezPortfolio {
+  const db = getUserDb();
+  upsertUserProfile(
+    db,
+    user.email,
+    user.name ?? null,
+    user.image ?? null,
+  );
+  const id = userIdFromEmail(user.email);
+  const now = Date.now();
+  const sessions = (portfolio.sessions || []).slice(0, 100);
+  const stats: TahfeezPortfolioStats = {
+    ...emptyTahfeezPortfolio().stats,
+    ...portfolio.stats,
+    totalSessions: sessions.length,
+    updatedAt: new Date(now).toISOString(),
+  };
+  db.prepare(
+    `INSERT INTO tahfeez_portfolio (user_id, stats_json, sessions_json, updated_at)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(user_id) DO UPDATE SET
+       stats_json = excluded.stats_json,
+       sessions_json = excluded.sessions_json,
+       updated_at = excluded.updated_at`,
+  ).run(id, JSON.stringify(stats), JSON.stringify(sessions), now);
+  return { stats, sessions };
+}
+
+export function localAppendTahfeezSession(
+  user: UserProfile,
+  session: TahfeezSessionSummary,
+): TahfeezPortfolio {
+  const current = localGetTahfeezPortfolio(user.email);
+  const sessions = [session, ...current.sessions.filter((s) => s.id !== session.id)].slice(
+    0,
+    100,
+  );
+  const totalCorrect =
+    current.stats.totalCorrectWords + (session.correct || 0);
+  const totalWrong = current.stats.totalWrongWords + (session.wrong || 0);
+  const decided = totalCorrect + totalWrong;
+  const stats: TahfeezPortfolioStats = {
+    ...current.stats,
+    totalSessions: sessions.length,
+    totalCorrectWords: totalCorrect,
+    totalWrongWords: totalWrong,
+    overallAccuracy:
+      decided === 0 ? 0 : Math.round((totalCorrect / decided) * 100),
+    pagesCompleted: Math.max(
+      current.stats.pagesCompleted,
+      session.accuracy >= 80 ? current.stats.pagesCompleted + 0 : current.stats.pagesCompleted,
+    ),
+    pagesInProgress: Math.max(1, current.stats.pagesInProgress),
+    lastSurahId: session.surahId,
+    lastAyah: session.ayahEnd,
+    updatedAt: new Date().toISOString(),
+  };
+  // Count unique high-accuracy sessions as page progress proxy
+  const strong = sessions.filter((s) => s.accuracy >= 85).length;
+  stats.pagesCompleted = Math.min(604, strong);
+  stats.pagesInProgress = Math.max(
+    0,
+    sessions.filter((s) => s.accuracy > 0 && s.accuracy < 85).length,
+  );
+  return localSaveTahfeezPortfolio(user, { stats, sessions });
+}
+
+export function localAdminListTahfeezSummaries(limit = 50): Array<{
+  email: string;
+  name: string | null;
+  role: string;
+  overallAccuracy: number;
+  totalSessions: number;
+  updatedAt: string;
+}> {
+  const db = getUserDb();
+  const rows = db
+    .prepare(
+      `SELECT u.email as email, u.name as name, u.role as role,
+              t.stats_json as statsJson, t.updated_at as updatedAt
+       FROM tahfeez_portfolio t
+       JOIN users u ON u.id = t.user_id
+       ORDER BY t.updated_at DESC
+       LIMIT ?`,
+    )
+    .all(limit) as Array<{
+    email: string;
+    name: string | null;
+    role: string;
+    statsJson: string;
+    updatedAt: number;
+  }>;
+  return rows.map((r) => {
+    let overallAccuracy = 0;
+    let totalSessions = 0;
+    try {
+      const s = JSON.parse(r.statsJson || "{}") as TahfeezPortfolioStats;
+      overallAccuracy = s.overallAccuracy || 0;
+      totalSessions = s.totalSessions || 0;
+    } catch {
+      /* ignore */
+    }
+    return {
+      email: r.email,
+      name: r.name,
+      role: r.role,
+      overallAccuracy,
+      totalSessions,
+      updatedAt: new Date(r.updatedAt).toISOString(),
+    };
+  });
 }

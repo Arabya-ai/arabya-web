@@ -29,6 +29,8 @@ export function unifiedDashNav(role: UserRole): DashNavItem[] {
       group: "groupAccount",
     },
     { href: "/account/study", label: "study", icon: "book", group: "groupAccount" },
+    { href: "/tahfeez", label: "tahfeez", icon: "spark", group: "groupAccount" },
+    { href: "/account/tahfeez", label: "tahfeezPortfolio", icon: "stats", group: "groupAccount" },
     { href: "/studio", label: "studio", icon: "spark", group: "groupAccount" },
     {
       href: "/account#role-request",
@@ -73,6 +75,12 @@ export function unifiedDashNav(role: UserRole): DashNavItem[] {
         href: "/admin/users",
         label: "users",
         icon: "users",
+        group: "groupAdmin",
+      },
+      {
+        href: "/admin/tahfeez",
+        label: "tahfeezAdmin",
+        icon: "book",
         group: "groupAdmin",
       },
       {

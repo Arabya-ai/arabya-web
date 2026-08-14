@@ -38,6 +38,7 @@
     "asma": "Divine Names",
     "reciters": "Reciters",
     "adhkar": "Adhkar",
+    "tahfeez": "Smart Recitation",
     "study": "Quick study",
     "about": "About Arabya",
     "privacy": "Privacy",
@@ -314,6 +315,13 @@
     "studyPageTitle": "Study",
     "studyPageSubtitle": "Everything you studied from words and quick search — editable and deletable."
   },
+  "Tahfeez": {
+    "metaTitle": "Smart Recitation",
+    "metaDescription": "Recite with word-level feedback — free for signed-in users.",
+    "portfolioTitle": "Recitation portfolio",
+    "portfolioSubtitle": "Your sessions, accuracy, and hifz progress",
+    "loginRequired": "Sign in to use smart recitation."
+  },
   "Dash": {
     "overview": "Overview",
     "stats": "Stats",
@@ -323,11 +331,14 @@
     "pricing": "Plans",
     "upgrade": "Request upgrade",
     "studio": "Studio",
+    "tahfeez": "Smart Recitation",
+    "tahfeezPortfolio": "Recitation portfolio",
     "edit": "Edit",
     "queue": "Quality queue",
     "sources": "Sources",
     "adminStats": "Platform stats",
     "users": "Users",
+    "tahfeezAdmin": "Recitation oversight",
     "requests": "Upgrade requests",
     "audit": "Role audit",
     "settings": "Settings",

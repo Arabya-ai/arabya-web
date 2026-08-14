@@ -119,3 +119,11 @@ CREATE TABLE IF NOT EXISTS site_settings (
   updated_at INTEGER NOT NULL,
   updated_by TEXT
 );
+
+CREATE TABLE IF NOT EXISTS tahfeez_portfolio (
+  user_id TEXT PRIMARY KEY,
+  stats_json TEXT NOT NULL DEFAULT '{}',
+  sessions_json TEXT NOT NULL DEFAULT '[]',
+  updated_at INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

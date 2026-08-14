@@ -12,21 +12,29 @@ import {
   localAdminGetUser,
   localAdminListAudit,
   localAdminListRoleRequests,
+  localAdminListTahfeezSummaries,
   localAdminListUsers,
   localAdminReviewRoleRequest,
   localAdminSetRole,
   localAdminStats,
+  localAppendTahfeezSession,
   localCreateRoleRequest,
   localFetchRoleStatus,
   localGetRoleRequest,
+  localGetTahfeezPortfolio,
   localPullSync,
   localPushSync,
   localReadSiteAppearance,
+  localSaveTahfeezPortfolio,
   localStudioCreateUpload,
   localStudioListUploads,
   localWriteSiteAppearance,
   resolveUserDbPath,
 } from "@/lib/local-user-db";
+import type {
+  TahfeezPortfolio,
+  TahfeezSessionSummary,
+} from "@/lib/tahfeez/types";
 
 export type SyncProgress = {
   lastPage: number | null;
@@ -370,7 +378,45 @@ export async function adminGetPortfolio(actorEmail: string, userId: string) {
     bookmarks: unknown[];
     notes: unknown[];
     study?: unknown[];
+    tahfeez?: TahfeezPortfolio;
   }>("/v1/admin/portfolio", { actorEmail, userId });
+}
+
+export async function getTahfeezPortfolio(email: string): Promise<TahfeezPortfolio> {
+  if (!isLocalUserSyncEnabled()) {
+    const { emptyTahfeezPortfolio } = await import("@/lib/tahfeez/types");
+    return emptyTahfeezPortfolio();
+  }
+  return localGetTahfeezPortfolio(email);
+}
+
+export async function saveTahfeezPortfolio(
+  user: { email: string; name?: string | null; image?: string | null },
+  portfolio: TahfeezPortfolio,
+): Promise<TahfeezPortfolio> {
+  if (!isLocalUserSyncEnabled()) {
+    throw new Error("not_configured");
+  }
+  return localSaveTahfeezPortfolio(user, portfolio);
+}
+
+export async function appendTahfeezSession(
+  user: { email: string; name?: string | null; image?: string | null },
+  session: TahfeezSessionSummary,
+): Promise<TahfeezPortfolio> {
+  if (!isLocalUserSyncEnabled()) {
+    throw new Error("not_configured");
+  }
+  return localAppendTahfeezSession(user, session);
+}
+
+export async function adminListTahfeezSummaries(actorEmail: string) {
+  const { isSuperAdminEmail } = await import("@/lib/roles");
+  if (!isSuperAdminEmail(actorEmail)) throw new Error("super_admin_required");
+  if (!isLocalUserSyncEnabled()) {
+    return { rows: [] as ReturnType<typeof localAdminListTahfeezSummaries> };
+  }
+  return { rows: localAdminListTahfeezSummaries(80) };
 }
 
 export async function adminGetStats(actorEmail: string) {
