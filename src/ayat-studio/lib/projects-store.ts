@@ -119,9 +119,40 @@ export interface StoredExport {
   videoUrl?: string;
 }
 
+export function formatProjectDate(
+  createdAt: string | undefined,
+  locale = "ar-EG",
+): string {
+  if (!createdAt) return "—";
+  const ms = Date.parse(createdAt);
+  if (!Number.isFinite(ms)) return "—";
+  return new Date(ms).toLocaleDateString(locale);
+}
+
+function normalizeStoredProject(project: StoredProject): StoredProject {
+  const createdAt = project.createdAt?.trim();
+  if (createdAt && Number.isFinite(Date.parse(createdAt))) return project;
+  return { ...project, createdAt: new Date(0).toISOString() };
+}
+
+function persistProjects(projects: StoredProject[]): void {
+  localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+}
+
 export function getProjects(): StoredProject[] {
   try {
-    return JSON.parse(localStorage.getItem(PROJECTS_KEY) || "[]");
+    const raw = JSON.parse(
+      localStorage.getItem(PROJECTS_KEY) || "[]",
+    ) as StoredProject[];
+    if (!Array.isArray(raw)) return [];
+    let changed = false;
+    const normalized = raw.map((p) => {
+      const next = normalizeStoredProject(p);
+      if (next.createdAt !== p.createdAt) changed = true;
+      return next;
+    });
+    if (changed) persistProjects(normalized);
+    return normalized;
   } catch {
     return [];
   }

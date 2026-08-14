@@ -80,11 +80,6 @@ export default async function ResourcesPage({ params }: Props) {
         </ul>
       </section>
 
-      <section className="resource-block">
-        <h2>{t("qiraatTitle")}</h2>
-        <p className="layer-soon">{t("qiraatSoon")}</p>
-      </section>
-
       <p>
         <Link href="/">{t("backIndex")}</Link>
       </p>

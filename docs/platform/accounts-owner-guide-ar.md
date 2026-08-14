@@ -12,7 +12,7 @@
 | **D — لوحة المدير** | `/admin` (تعمل عند تفعيل المزامنة) |
 | **E — Analytics** | Cloudflare Web Analytics (اختياري — انظر الأسفل) |
 
-**ما لم نعد نستخدمه:** Vercel · Render · Cloudflare D1 للمزامنة.
+**ما لم نعد نستخدمه:** Render · Cloudflare D1 للمزامنة (أرشيف).
 
 ---
 
@@ -174,7 +174,7 @@ bash scripts/contabo-deploy.sh
 
 ## إغلاق المسارات القديمة (100% نقل)
 
-- [ ] Vercel: المشروع **Paused** أو محذوف
+- [ ] DNS: `www.arabya.org` و `www.arabyaai.com` → IP Contabo
 - [ ] Render: لا توجد خدمة نشطة (إن وُجدت)
 - [ ] DNS: كل السجلات → IP Contabo فقط
 - [ ] Google OAuth: احذف روابط `arabyaai.com` / `onrender.com` إن لم تعد تحتاجها

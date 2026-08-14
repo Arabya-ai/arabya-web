@@ -138,11 +138,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           ? path.slice(3) || "/"
           : path;
       if (session?.error === "Banned") return false;
+      const isStudioLanding =
+        bare === "/studio" || bare === "/studio/";
       if (
         bare.startsWith("/account") ||
-        bare.startsWith("/studio") ||
         bare.startsWith("/admin") ||
-        bare.startsWith("/create")
+        bare.startsWith("/create") ||
+        (bare.startsWith("/studio") && !isStudioLanding)
       ) {
         return !!session?.user;
       }

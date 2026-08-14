@@ -33,6 +33,7 @@ else
 fi
 pm2 save
 
-echo "==> Health check"
-curl -sI http://127.0.0.1:3000 | head -8
-echo "Deploy done."
+echo "==> Health check (both domains via Host header)"
+curl -sI -H "Host: www.arabya.org" http://127.0.0.1:3000 | head -5
+curl -sI -H "Host: www.arabyaai.com" http://127.0.0.1:3000 | head -5
+echo "Deploy done. Ensure Nginx serves www.arabya.org and www.arabyaai.com — see deploy/contabo/nginx-dual-domain.conf"

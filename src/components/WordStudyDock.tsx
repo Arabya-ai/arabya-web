@@ -71,7 +71,6 @@ const LAYER_IDS = [
   "semantics",
   "lexicon",
   "translation",
-  "rhetoric",
   "tafsir",
 ] as const;
 
@@ -101,7 +100,6 @@ function layerHintKey(id: LayerId): string {
   if (id === "morphology") return "morphologyHint";
   if (id === "semantics") return "semanticsHint";
   if (id === "lexicon") return "lexiconHint";
-  if (id === "rhetoric") return "rhetoricHint";
   if (id === "syntax") return "syntaxHint";
   if (id === "translation") return "translationHint";
   return "tafsirHint";
@@ -507,14 +505,6 @@ export function WordStudyDock({
             ) : (
               <p className="layer-empty">{t("verseTransEmpty")}</p>
             )}
-          </>
-        ) : null}
-
-        {layer === "rhetoric" ? (
-          <>
-            <h3>{t("rhetoricTitle")}</h3>
-            <p className="layer-hint">{activeHint}</p>
-            <p className="layer-empty">{t("rhetoricAwaiting")}</p>
           </>
         ) : null}
 

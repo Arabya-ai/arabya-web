@@ -4,30 +4,34 @@ import {
   type NextRequest,
 } from "next/server";
 import { routing } from "@/i18n/routing";
-import { ARABYA_SITE_HOST } from "@/lib/brand-export";
 
 const intlMiddleware = createMiddleware(routing);
 
 const LOCALE_COOKIE = "NEXT_LOCALE";
 const LOCALE_MAX_AGE = 60 * 60 * 24 * 365;
 
-/** Primary public host; legacy .com and apex .org redirect here. */
-const CANONICAL_HOST = `www.${ARABYA_SITE_HOST}`;
-const LEGACY_HOSTS = new Set([
-  ARABYA_SITE_HOST,
-  "arabyaai.com",
+/** Both domains serve the same app on Contabo (apex → www per domain). */
+const PRIMARY_HOSTS = new Set([
+  "www.arabya.org",
   "www.arabyaai.com",
 ]);
 
+const APEX_TO_WWW: Record<string, string> = {
+  "arabya.org": "www.arabya.org",
+  "arabyaai.com": "www.arabyaai.com",
+};
+
 function canonicalHostRedirect(request: NextRequest): NextResponse | null {
   const host = request.headers.get("host")?.split(":")[0]?.toLowerCase();
-  if (!host || host === CANONICAL_HOST) return null;
-  if (host === "localhost" || host.endsWith(".vercel.app")) return null;
-  if (!LEGACY_HOSTS.has(host)) return null;
+  if (!host || PRIMARY_HOSTS.has(host)) return null;
+  if (host === "localhost") return null;
+
+  const wwwTarget = APEX_TO_WWW[host];
+  if (!wwwTarget) return null;
 
   const url = request.nextUrl.clone();
   url.protocol = "https:";
-  url.hostname = CANONICAL_HOST;
+  url.hostname = wwwTarget;
   url.port = "";
   return NextResponse.redirect(url, 308);
 }
@@ -106,6 +110,6 @@ export default function middleware(request: NextRequest) {
 export const config = {
   // Do not treat emails in CRM paths (user@domain.com) as static files.
   matcher: [
-    "/((?!api|_next|_vercel|.*\\.(?:ico|png|jpe?g|gif|webp|svg|css|js|map|txt|xml|json|woff2?|ttf|webmanifest)$).*)",
+    "/((?!api|_next|.*\\.(?:ico|png|jpe?g|gif|webp|svg|css|js|map|txt|xml|json|woff2?|ttf|webmanifest)$).*)",
   ],
 };

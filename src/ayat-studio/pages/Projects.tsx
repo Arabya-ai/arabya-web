@@ -5,7 +5,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { studioPath } from "@/ayat-studio/lib/studio-paths";
 import { Plus, Edit, Copy, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getProjects, deleteProject, duplicateProject, type StoredProject } from "@/ayat-studio/lib/projects-store";
+import { getProjects, deleteProject, duplicateProject, formatProjectDate, type StoredProject } from "@/ayat-studio/lib/projects-store";
 import { reciters, surahs } from "@/ayat-studio/lib/quran-data";
 import { useToast } from "@/ayat-studio/hooks/use-toast";
 import { ArabesqueMedallion } from "@/ayat-studio/components/IslamicDecor";
@@ -107,7 +107,7 @@ export default function Projects() {
                       </div>
                       <div className="flex items-center justify-between pt-1 border-t border-border/40">
                         <span className="text-accent/70">التاريخ</span>
-                        <span>{new Date(p.createdAt).toLocaleDateString("ar-EG")}</span>
+                        <span>{formatProjectDate(p.createdAt)}</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-1 border-t border-border/40 pt-3">

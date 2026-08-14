@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { AccountHeaderIcon } from "@/components/AccountHeaderIcon";
 import { AuthButton } from "@/components/AuthButton";
 import { BrandLockup } from "@/components/BrandLockup";
 import { DeferredChrome } from "@/components/DeferredChrome";
@@ -145,6 +146,7 @@ export function SiteHeader() {
         </Link>
 
         <div className="header-actions">
+          <AccountHeaderIcon />
           <div className="header-prefs">
             <PreferencesMenu compact />
           </div>
@@ -176,7 +178,9 @@ export function SiteHeader() {
           <Link href="/privacy" onClick={() => setOpen(false)}>
             {t("privacy")}
           </Link>
-          <AuthButton />
+          <div className="nav-auth-slot">
+            <AuthButton />
+          </div>
           <div className="nav-prefs-slot">
             <PreferencesMenu compact />
           </div>

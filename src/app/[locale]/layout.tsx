@@ -1,4 +1,3 @@
-import { Analytics } from "@vercel/analytics/next";
 import { CloudflareAnalytics } from "@/components/CloudflareAnalytics";
 import {
   Amiri,
@@ -23,9 +22,6 @@ import {
   type AppLocale,
 } from "@/i18n/routing";
 import { getFooterCredit } from "@/lib/site-appearance-store";
-
-const enableVercelAnalytics =
-  process.env.VERCEL === "1" || Boolean(process.env.NEXT_PUBLIC_VERCEL_ENV);
 
 /**
  * Keep all 7 families available via CSS variables; preload none of them.
@@ -163,7 +159,6 @@ export default async function LocaleLayout({ children, params }: Props) {
             <AppShell footerCredit={footerCredit}>{children}</AppShell>
           </AuthSessionProvider>
         </NextIntlClientProvider>
-        {enableVercelAnalytics ? <Analytics /> : null}
         <CloudflareAnalytics />
       </body>
     </html>

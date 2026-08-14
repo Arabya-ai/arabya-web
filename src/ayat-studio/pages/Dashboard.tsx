@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { studioPath } from "@/ayat-studio/lib/studio-paths";
 import { FolderOpen, Plus, Video, Download, Clock, Sparkles, ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getProjects, getExports, type StoredProject, type StoredExport } from "@/ayat-studio/lib/projects-store";
+import { getProjects, getExports, formatProjectDate, type StoredProject, type StoredExport } from "@/ayat-studio/lib/projects-store";
 import { reciters, surahs } from "@/ayat-studio/lib/quran-data";
 import { ArabesqueMedallion, OrnamentDivider } from "@/ayat-studio/components/IslamicDecor";
 
@@ -156,7 +156,7 @@ export default function Dashboard() {
                         </div>
                         <div className="flex items-center justify-between pt-1 border-t border-border/40">
                           <span className="text-accent/70">التاريخ</span>
-                          <span>{new Date(p.createdAt).toLocaleDateString("ar-EG")}</span>
+                          <span>{formatProjectDate(p.createdAt)}</span>
                         </div>
                       </div>
                     </CardContent>

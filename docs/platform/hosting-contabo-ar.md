@@ -1,10 +1,7 @@
-# استضافة Contabo لـ عربية (بديل مدفوع ثابت عن Vercel)
+# استضافة Contabo لـ عربية
 
-اخترت Contabo لأنك تريد ثباتاً دون الاعتماد على حدود Hobby المجانية.  
-هذا **ليس ضمان 100%** (لا يوجد ضمان مطلق)، لكنه الأنسب غالباً لـ:
-- تشغيل Next.js كما على Vercel (Node كامل + مجلد `/data`)
-- تكلفة شهرية منخفضة وثابتة تقريباً
-- السيرفر لا «ينام» مثل Render المجاني
+الإنتاج يعمل على **Contabo VPS** (Node + PM2 + Nginx).  
+النطاقان **`www.arabya.org`** و **`www.arabyaai.com`** يشيران إلى نفس التطبيق.
 
 ---
 
@@ -14,123 +11,54 @@
 |--------|--------|
 | Contabo Cloud VPS 10 (مستحسن للبداية) | حوالي **€4.5–7** (~$5–8) |
 | منطقة أوروبا (EU) | بدون رسوم موقع إضافية عادة |
-| ServerAvatar (اختياري لتسهيل الإدارة) | مجاني محدود أو باقة مدفوعة حسب احتياجك |
-| النطاق `arabya.org` | عند مسجّلك الحالي (منفصل) |
-
-**المجموع المتوقع بدون ServerAvatar مدفوع:** نحو **$5–8 / شهر**.
+| ServerAvatar (اختياري) | مجاني محدود أو باقة مدفوعة |
+| النطاقان `arabya.org` + `arabyaai.com` | عند مسجّلك (منفصل) |
 
 ---
 
-## ماذا تشتري من Contabo؟
+## المسار الأسهل: ServerAvatar
 
-1. افتح: https://contabo.com/en/vps/  
-2. اختر **Cloud VPS 10** (أو أعلى إن أحببت هامش أمان).  
-3. الإعدادات المقترحة:
-   - **Region:** European Union (ألمانيا/الاتحاد الأوروبي)
-   - **Image / OS:** **Ubuntu 24.04** أو **22.04**
-   - **App:** لا تثبت لوحة cPanel الآن (سنستخدم ServerAvatar أو إعداداً بسيطاً)
-   - مدة العقد: شهري إن أردت مرونة، أو سنوي إن أردت سعراً أقل
-4. أكمل الدفع واحفظ رسالة البريد التي فيها:
-   - **IP Address**
-   - **Root password** (أو مفتاح SSH)
-
----
-
-## المسار الأسهل لك (موصى به): ServerAvatar
-
-أنت لست مضطراً لكتابة أوامر معقدة يدوياً.
-
-### أ) حساب ServerAvatar
-1. https://serveravatar.com/ — سجّل حساباً  
-2. اختر باقة تناسب سيروراً واحداً (ابدأ بالأقل إن وُجدت تجربة)
-
-### ب) ربط السيرفر
-1. في ServerAvatar: **Add Server**  
-2. أدخل IP + بيانات root من Contabo  
-3. انتظر حتى يكتمل التثبيت (Nginx + أدوات الإدارة)
-
-### ج) إنشاء تطبيق Node لعربية
-1. **Create Application** → نوع **Node.js**  
-2. Domain مؤقتاً: استخدم IP أو نطاقاً فرعياً، ثم لاحقاً `www.arabya.org`  
-3. اربط مستودع GitHub: `Arabya-ai/arabya-web` فرع `main`  
-4. إعدادات البناء/التشغيل:
-   - **Install:** `npm ci`
-   - **Build:** `npm run build`
-   - **Start:** `npm run start`
-   - **Node version:** 22 أو أحدث متاح
-5. أضف متغيرات البيئة (نفس قيم Vercel):
+### إنشاء تطبيق Node
+1. **Create Application** → **Node.js**
+2. Domains: `www.arabya.org` **و** `www.arabyaai.com`
+3. GitHub: `Arabya-ai/arabya-web` فرع `main`
+4. **Install:** `npm ci` · **Build:** `npm run build` · **Start:** `npm run start`
+5. متغيرات البيئة:
    - `AUTH_SECRET`
-   - `AUTH_GOOGLE_ID`
-   - `AUTH_GOOGLE_SECRET`
-   - `AUTH_URL=https://www.arabya.org` (بعد ربط النطاق)
+   - `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`
+   - `AUTH_URL=https://www.arabya.org` (أو `.com` — نفس السيرفر)
    - `ARABYA_ADMIN_EMAILS`
-   - أي مفاتيح استوديو إن وُجدت
-6. فعّل **SSL** (Let's Encrypt) من ServerAvatar بعد ربط النطاق
+6. SSL (Let's Encrypt) لكل النطاقات الأربعة: apex + www لكل domain
 
 ---
 
-## ربط النطاق
+## DNS (النطاقان)
 
-1. في ServerAvatar/Contabo سجّل أن التطبيق يستمع على `www.arabya.org`  
-2. عند DNS (Cloudflare أو المسجّل):
-   - سجل **A** لـ `www` → IP السيرفر  
-   - سجل **A** لـ `@` (الجذر) → نفس الـ IP (أو حسب توجيهك الحالي)
-3. أزل/عدّل توجيه Vercel القديم حتى لا يتعارض  
-4. حدّث Google OAuth:
-   - Origin: `https://www.arabya.org`
-   - Redirect: `https://www.arabya.org/api/auth/callback/google`
+| السجل | القيمة |
+|--------|--------|
+| `A` `@` لـ arabya.org | IP السيرفر |
+| `A` `www` لـ arabya.org | IP السيرفر |
+| `A` `@` لـ arabyaai.com | IP السيرفر |
+| `A` `www` لـ arabyaai.com | IP السيرفر |
 
----
-
-## ماذا ترسل للمبرمج بعد الشراء؟
-
-انسخ وأرسل:
-
-```
-Contabo جاهز:
-- IP: x.x.x.x
-- نظام: Ubuntu …
-- ServerAvatar: نعم / لا
-- النطاق مربوط: لا / نعم
-```
-
-**لا ترسل كلمة مرور root في الدردشة العامة إن أمكن.**  
-الأفضل: بعد ربط ServerAvatar تقول «السيرفر مربوط» فقط، أو تضبط وصول SSH بمفتاح لاحقاً.
+**Google OAuth** — أضف كل Origins و Redirect URIs:
+- `https://www.arabya.org` و `https://www.arabyaai.com`
+- `…/api/auth/callback/google` لكل منهما
 
 ---
 
-## مقارنة سريعة لقرارك
+## Nginx (يدوي)
 
-| | Contabo | Render المجاني | Vercel Pro |
-|--|---------|----------------|------------|
-| التكلفة | ~$5–8 | $0 | ~$20+ |
-| ثبات بدون نوم | ممتاز | متوسط | ممتاز |
-| صيانة | عليك (أو عبر ServerAvatar) | قليلة | قليلة جداً |
-| مناسب لك الآن | نعم إن قبلت الدفع الشهري الصغير | إن أردت $0 فقط | الأسهل والأغلى |
+انظر `deploy/contabo/nginx-dual-domain.conf` — كلا النطاقين → `127.0.0.1:3000`.
 
 ---
 
-## بعد النشر — Google + تحديثات
+## تحديث بعد كل دمج على main
 
-- **Google OAuth + سحب التحديثات:** `docs/platform/contabo-google-and-updates-ar.md`
-- **تحديث سريع على السيرفر:** `bash scripts/contabo-deploy.sh`
-
-## Proxy على ServerAvatar + OpenLiteSpeed
-
-إن ظهرت صفحة ServerAvatar الافتراضية أو 500:
-
-1. في `/etc/serveravatar-ols/arabyaorg.conf` أضف `extprocessor arabya-node` → `127.0.0.1:3000`
-2. في `public_html/.htaccess`:
-
-```apache
-RewriteEngine On
-RewriteRule ^(.*)$ http://arabya-node/$1 [P,L]
+```bash
+cd /var/www/arabya-web && bash scripts/contabo-deploy.sh
 ```
 
-> استخدم الاسم `arabya-node` وليس `http://127.0.0.1:3000` مباشرة في RewriteRule.
-
-## ملفات مساعدة في المشروع
-
-- تهيئة أول مرة: `scripts/contabo-bootstrap.sh`  
-- تحديث بعد `git pull`: `scripts/contabo-deploy.sh`  
+- Google OAuth: `docs/platform/contabo-google-and-updates-ar.md`
 - PM2: `deploy/contabo/ecosystem.config.cjs`
+- Bootstrap أول مرة: `scripts/contabo-bootstrap.sh`

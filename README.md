@@ -9,7 +9,7 @@
 - **النشر (الإنتاج):** Contabo VPS + ServerAvatar — [`docs/platform/hosting-contabo-ar.md`](docs/platform/hosting-contabo-ar.md) · OAuth والتحديث: [`docs/platform/contabo-google-and-updates-ar.md`](docs/platform/contabo-google-and-updates-ar.md)  
 - **حسابات Google + المزامنة:** SQLite على السيرفر — [`docs/platform/accounts-owner-guide-ar.md`](docs/platform/accounts-owner-guide-ar.md)  
 - **Analytics:** Cloudflare Web Analytics (token في `.env.production.local`)  
-- **legacy:** Render / Vercel / D1 — لم تعد مسار الإنتاج؛ راجع `docs/platform/d1-accounts.md` للأرشيف فقط
+- **legacy:** Render / D1 — أرشيف فقط؛ راجع `docs/platform/d1-accounts.md`
 
 ## سياسة البيانات (Git-first)
 

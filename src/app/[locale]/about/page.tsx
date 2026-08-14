@@ -22,7 +22,7 @@ const richTags = {
   rootsLink: (c: ReactNode) => <Link href="/roots">{c}</Link>,
   asmaLink: (c: ReactNode) => <Link href="/asma">{c}</Link>,
   studioLink: (c: ReactNode) => <Link href="/studio">{c}</Link>,
-  booksLink: (c: ReactNode) => <Link href="/books">{c}</Link>,
+  booksLink: (c: ReactNode) => <span>{c}</span>,
   resourcesLink: (c: ReactNode) => <Link href="/resources">{c}</Link>,
   qLink: (c: ReactNode) => (
     <a href="https://quran.com" rel="noreferrer" target="_blank">

@@ -1,5 +1,4 @@
 import type { CSSProperties, ReactNode } from "react";
-import { requireSession } from "@/lib/require-session";
 import "@/ayat-studio/theme.css";
 import { Toaster } from "@/ayat-studio/components/ui/toaster";
 import { TooltipProvider } from "@/ayat-studio/components/ui/tooltip";
@@ -16,8 +15,6 @@ export default async function CreateRootLayout({
 }: {
   children: ReactNode;
 }) {
-  await requireSession();
-
   const studioFontAlias = {
     ["--font-amiri-quran"]: "var(--font-amiri)",
   } as CSSProperties;
