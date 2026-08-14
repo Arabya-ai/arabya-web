@@ -2,10 +2,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   checkRateLimit,
   clientIpFromHeaders,
+  enforceApiBaseline,
   enforceRateLimit,
   enforceRateLimitKey,
   resetRateLimitForTests,
   saturateRateLimitForTests,
+  API_BASELINE_LIMIT,
 } from "./rate-limit";
 
 afterEach(() => {
@@ -94,5 +96,16 @@ describe("enforce helpers", () => {
     expect(blocked.saturated).toBe(true);
     const res = enforceRateLimitKey("prefix", "fresh-key", 5);
     expect(res?.status).toBe(503);
+  });
+
+  it("enforces API baseline per IP", () => {
+    const req = new Request("https://www.arabya.org/api/search", {
+      headers: { "cf-connecting-ip": "7.7.7.7" },
+    });
+    for (let i = 0; i < API_BASELINE_LIMIT; i++) {
+      expect(enforceApiBaseline(req)).toBeNull();
+    }
+    const blocked = enforceApiBaseline(req);
+    expect(blocked?.status).toBe(429);
   });
 });

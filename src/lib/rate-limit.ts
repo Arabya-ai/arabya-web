@@ -12,6 +12,13 @@ const WINDOW_MS = 60_000;
 const MAX_BUCKETS = 50_000;
 const SWEEP_EVERY_MS = 60_000;
 
+/** Every /api request — enforced in middleware before route handlers. */
+export const API_BASELINE_LIMIT = 120;
+/** OAuth sign-in / session endpoints per IP. */
+export const AUTH_RATE_LIMIT = 30;
+/** Bulk Quran search (`?all=1`) per IP — caps scraping throughput. */
+export const SEARCH_BULK_LIMIT = 10;
+
 const hits = new Map<string, number[]>();
 let lastSweep = 0;
 
@@ -152,4 +159,12 @@ export function enforceRateLimitKey(
   const result = checkRateLimit(`${prefix}:${key}`, limit);
   if (result.ok) return null;
   return blockedResponse(result);
+}
+
+/** Global baseline for all `/api/*` traffic (middleware + optional route reuse). */
+export function enforceApiBaseline(request: Request): Response | null {
+  return enforceRateLimit(request, {
+    prefix: "api-baseline",
+    limit: API_BASELINE_LIMIT,
+  });
 }
