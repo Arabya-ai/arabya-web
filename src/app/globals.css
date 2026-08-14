@@ -3422,9 +3422,15 @@ html[data-theme="dark"] .arabya-footer-panel {
 
 .info-list a,
 .info-section a,
-.info-hero a {
+.info-hero a:not(.info-btn) {
   color: var(--brand-deep);
   font-weight: 650;
+}
+
+.info-hero .info-btn--current,
+.info-hero .info-btn[aria-current="page"],
+.info-hero .info-btn--primary {
+  color: var(--on-brand);
 }
 
 .info-list code,
