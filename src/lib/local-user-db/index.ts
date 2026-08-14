@@ -629,21 +629,24 @@ export function localAdminListUsers(opts: {
 
 export function localAdminGetUser(userId: string) {
   const db = getUserDb();
-  const id = userIdFromEmail(userId);
+  const raw = userId.trim();
   const user = db
     .prepare(
       `SELECT id, uid, email, name, image, role, status, last_seen_at as lastSeenAt,
               created_at as createdAt, updated_at as updatedAt
-       FROM users WHERE id = ?`,
+       FROM users
+       WHERE uid = ? OR id = ? OR lower(email) = lower(?)
+       LIMIT 1`,
     )
-    .get(id) as AdminUserRow | undefined;
+    .get(raw, userIdFromEmail(raw), raw) as AdminUserRow | undefined;
   if (!user) return null;
+  const targetId = user.id;
   const bm = db
     .prepare(`SELECT COUNT(*) as c FROM bookmarks WHERE user_id = ?`)
-    .get(id) as { c: number };
+    .get(targetId) as { c: number };
   const notes = db
     .prepare(`SELECT COUNT(*) as c FROM ayah_notes WHERE user_id = ?`)
-    .get(id) as { c: number };
+    .get(targetId) as { c: number };
   return {
     user,
     bookmarkCount: Number(bm?.c || 0),
@@ -896,9 +899,9 @@ export function localAdminListAudit() {
 export function localAdminGetPortfolio(actorEmail: string, userId: string) {
   if (!isSuperAdminEmail(actorEmail)) throw new Error("super_admin_required");
   const db = getUserDb();
-  const targetId = userIdFromEmail(userId);
-  const detail = localAdminGetUser(targetId);
+  const detail = localAdminGetUser(userId);
   if (!detail) throw new Error("not_found");
+  const targetId = detail.user.id;
   const data = pullAll(db, targetId);
   const tahfeez = localGetTahfeezPortfolio(targetId);
   return {

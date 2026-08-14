@@ -154,7 +154,7 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
     if (isSuperAdmin) {
       return (
         <Link
-          href={`/admin/users/${encodeURIComponent(u.id)}`}
+          href={`/admin/users/${encodeURIComponent(u.uid || u.id)}`}
           className="users-id-cell users-id-cell--link"
         >
           {inner}

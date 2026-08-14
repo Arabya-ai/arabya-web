@@ -4,6 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   getUserDb,
+  localAdminGetUser,
   localAdminListUsers,
   localAdminStats,
   localPullSync,
@@ -219,5 +220,10 @@ describe("local-user-db sync", () => {
     expect(row?.bookmarkCount).toBe(1);
     expect(row?.tahfeezSessions).toBe(2);
     expect(row?.tahfeezAccuracy).toBeGreaterThan(0);
+    const byUid = localAdminGetUser(row?.uid || "");
+    const byEmail = localAdminGetUser("hifz@example.com");
+    expect(byUid?.user.email).toBe("hifz@example.com");
+    expect(byEmail?.user.email).toBe("hifz@example.com");
+    expect(byEmail?.bookmarkCount).toBe(1);
   });
 });
