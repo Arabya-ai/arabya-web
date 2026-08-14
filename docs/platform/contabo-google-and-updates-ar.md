@@ -108,6 +108,19 @@ curl -I http://127.0.0.1:3000
 
 افتح https://www.arabya.org/mushaf/1 وتأكد أن الصفحة تعمل.
 
+### النشر التلقائي (GitHub Actions — مرة واحدة)
+
+بعد دمج أي تغيير على `main` ونجاح CI، يمكن أن ينشر workflow **`Deploy Contabo`** تلقائياً عبر SSH.
+
+1. GitHub → **Settings** → **Environments** → **Production** → **Environment secrets**
+2. أضف:
+   - `CONTABO_HOST` = `169.58.169.79`
+   - `CONTABO_SSH_USER` = اسم مستخدم SSH (غالباً `root`)
+   - `CONTABO_SSH_KEY` = المفتاح الخاص كاملاً (PEM)
+3. **Actions** → **Deploy Contabo** → **Run workflow** (أول مرة للاختبار)
+
+بدون هذه الأسرار، النشر يبقى يدوياً بالأمر أعلاه.
+
 ---
 
 ## 3) مزامنة المفضّلة والملاحظات (SQLite على السيرفر)
