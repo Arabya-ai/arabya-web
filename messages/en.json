@@ -990,9 +990,9 @@
         "title": "Quick summary",
         "s0": "No sign-in is required to read, study, or use Studio.",
         "s1": "Without an account: favorites, notes, and reading habit stay <strong>on your device only</strong>.",
-        "s2": "With a Google account: that data may sync to SQLite on the server tied to your email.",
+        "s2": "With a Google account: that data may sync to the server tied to your account.",
         "s3": "Everything on Arabya is free for everyone.",
-        "s4": "Aggregated usage stats may be recorded via Cloudflare Web Analytics (no ad tracking)."
+        "s4": "Aggregated usage stats may be recorded (no ad tracking)."
       },
       "accounts": {
         "title": "Optional account (Google)",
@@ -1011,14 +1011,6 @@
         "title": "What stays on your device",
         "p0": "A local copy for speed, plus UI settings (appearance, font size, gloss language, translation, reciter…). You can clear site data from browser settings."
       },
-      "server": {
-        "title": "Hosting & providers",
-        "site": "<strong>Hosting:</strong> Contabo VPS — technical logs may include IP addresses or user-agent strings for security.",
-        "sync": "<strong>Sync:</strong> SQLite file on the server when using a Google account.",
-        "login": "<strong>Sign-in:</strong> via Google — see Google privacy policy as well.",
-        "analytics": "<strong>Analytics:</strong> <cfLink>Cloudflare Web Analytics</cfLink> for aggregated visits.",
-        "media": "<strong>Media:</strong> recitation files may load from third-party servers when played."
-      },
       "cookies": {
         "title": "Cookies",
         "p0": "We use cookies required for the session after sign-in, plus local storage for preferences. We do not use third-party ad trackers across sites."
@@ -1027,7 +1019,7 @@
         "title": "Your rights & choices",
         "r0": "Browse and study without an account.",
         "r1": "Sign out and clear local storage from the browser.",
-        "r2": "Request inquiry or deletion of account data via <ghOrgLink>Arabya-ai</ghOrgLink> on GitHub."
+        "r2": "Request inquiry or deletion of account data via <contactLink>Contact us</contactLink>."
       },
       "changes": {
         "title": "Policy changes",

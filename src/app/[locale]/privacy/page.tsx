@@ -9,31 +9,9 @@ type Props = { params: Promise<{ locale: string }> };
 const richTags = {
   brand: (c: ReactNode) => <strong className="info-em">{c}</strong>,
   strong: (c: ReactNode) => <strong>{c}</strong>,
-  ghOrgLink: (c: ReactNode) => (
-    <a href="https://github.com/Arabya-ai" rel="noreferrer" target="_blank">
-      {c}
-    </a>
-  ),
-  vaLink: (c: ReactNode) => (
-    <a
-      href="https://developers.cloudflare.com/web-analytics/"
-      rel="noreferrer"
-      target="_blank"
-    >
-      {c}
-    </a>
-  ),
-  cfLink: (c: ReactNode) => (
-    <a
-      href="https://developers.cloudflare.com/web-analytics/"
-      rel="noreferrer"
-      target="_blank"
-    >
-      {c}
-    </a>
-  ),
   aboutLink: (c: ReactNode) => <Link href="/about">{c}</Link>,
   accountLink: (c: ReactNode) => <Link href="/account">{c}</Link>,
+  contactLink: (c: ReactNode) => <Link href="/contact">{c}</Link>,
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -51,7 +29,6 @@ export default async function PrivacyPage({ params }: Props) {
 
   const summary = ["s0", "s1", "s2", "s3", "s4"] as const;
   const syncItems = ["i0", "i1", "i2"] as const;
-  const server = ["site", "sync", "login", "analytics", "media"] as const;
   const rights = ["r0", "r1", "r2"] as const;
 
   return (
@@ -103,17 +80,6 @@ export default async function PrivacyPage({ params }: Props) {
             {t("sections.local.title")}
           </h2>
           <p>{t("sections.local.p0")}</p>
-        </section>
-
-        <section className="info-section" aria-labelledby="privacy-server">
-          <h2 id="privacy-server" className="info-section-title">
-            {t("sections.server.title")}
-          </h2>
-          <ul className="info-list">
-            {server.map((key) => (
-              <li key={key}>{t.rich(`sections.server.${key}`, richTags)}</li>
-            ))}
-          </ul>
         </section>
 
         <section className="info-section" aria-labelledby="privacy-cookies">
