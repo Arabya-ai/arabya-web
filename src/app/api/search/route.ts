@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { sanitizeSearchQuery } from "@/lib/api-query";
 import { findRootByQuery, searchAyahs } from "@/lib/quran";
-import { enforceRateLimit } from "@/lib/rate-limit";
+import {
+  enforceRateLimit,
+  SEARCH_BULK_LIMIT,
+} from "@/lib/rate-limit";
 
 const PREVIEW_LIMIT = 10;
 const ALL_CAP = 200;
@@ -12,6 +15,13 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const q = sanitizeSearchQuery(searchParams.get("q"));
   const wantAll = searchParams.get("all") === "1";
+  if (wantAll) {
+    const bulkLimited = enforceRateLimit(req, {
+      prefix: "search-bulk",
+      limit: SEARCH_BULK_LIMIT,
+    });
+    if (bulkLimited) return bulkLimited;
+  }
   const rawLimit = Number(searchParams.get("limit"));
   const limit = wantAll
     ? ALL_CAP

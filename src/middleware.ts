@@ -4,6 +4,7 @@ import {
   type NextRequest,
 } from "next/server";
 import { routing } from "@/i18n/routing";
+import { enforceApiBaseline } from "@/lib/rate-limit";
 
 const intlMiddleware = createMiddleware(routing);
 
@@ -100,6 +101,12 @@ export default function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
+  if (pathname.startsWith("/api")) {
+    const limited = enforceApiBaseline(request);
+    if (limited) return limited;
+    return NextResponse.next();
+  }
+
   if (isStaticOrApi(pathname)) {
     return NextResponse.next();
   }
@@ -110,6 +117,7 @@ export default function middleware(request: NextRequest) {
 export const config = {
   // Do not treat emails in CRM paths (user@domain.com) as static files.
   matcher: [
-    "/((?!api|_next|.*\\.(?:ico|png|jpe?g|gif|webp|svg|css|js|map|txt|xml|json|woff2?|ttf|webmanifest)$).*)",
+    "/api/:path*",
+    "/((?!_next|.*\\.(?:ico|png|jpe?g|gif|webp|svg|css|js|map|txt|xml|json|woff2?|ttf|webmanifest)$).*)",
   ],
 };
