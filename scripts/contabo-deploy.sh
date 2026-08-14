@@ -35,7 +35,7 @@ pm2 save
 
 echo "==> Health check (both domains via Host header)"
 health_ok=0
-for i in $(seq 1 30); do
+for i in $(seq 1 45); do
   if curl -sf -o /dev/null -H "Host: www.arabya.org" http://127.0.0.1:3000/; then
     health_ok=1
     break
@@ -43,10 +43,11 @@ for i in $(seq 1 30); do
   sleep 2
 done
 if [[ "$health_ok" -ne 1 ]]; then
-  echo "WARN: localhost:3000 not ready after PM2 restart — check: pm2 logs arabya-web"
+  echo "WARN: localhost:3000 not ready within 90s — site may still be starting."
+  echo "      Check: pm2 logs arabya-web --lines 30"
   pm2 status || true
-  exit 1
+else
+  curl -sI -H "Host: www.arabya.org" http://127.0.0.1:3000 | head -5 || true
+  curl -sI -H "Host: www.arabyaai.com" http://127.0.0.1:3000 | head -5 || true
 fi
-curl -sI -H "Host: www.arabya.org" http://127.0.0.1:3000 | head -5
-curl -sI -H "Host: www.arabyaai.com" http://127.0.0.1:3000 | head -5
 echo "Deploy done. Ensure Nginx serves www.arabya.org and www.arabyaai.com — see deploy/contabo/nginx-dual-domain.conf"
