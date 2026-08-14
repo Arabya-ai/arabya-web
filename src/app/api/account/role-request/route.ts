@@ -4,6 +4,7 @@ import {
   getRoleRequest,
   isCloudSyncConfigured,
 } from "@/lib/cloud-sync";
+import { enforceRateLimitKey } from "@/lib/rate-limit";
 import { requireSession } from "@/lib/require-role";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,8 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const gate = await requireSession();
   if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("role-request-get", gate.email, 30);
+  if (limited) return limited;
   if (!isCloudSyncConfigured()) {
     return NextResponse.json(
       { ok: false, error: "not_configured", request: null },
@@ -29,6 +32,8 @@ export async function GET() {
 export async function POST(request: Request) {
   const gate = await requireSession();
   if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("role-request-post", gate.email, 10);
+  if (limited) return limited;
   if (!isCloudSyncConfigured()) {
     return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
   }

@@ -1,0 +1,134 @@
+/**
+ * In-memory sliding-window rate limiter for Contabo single-instance deploys.
+ *
+ * Suitable while arabya-web runs as one Node/PM2 process. If you move to
+ * multiple instances, replace the Map store with Redis/Upstash using the same
+ * `enforceRateLimit` / `enforceRateLimitKey` surface so call sites stay unchanged.
+ */
+
+import { NextResponse } from "next/server";
+
+const WINDOW_MS = 60_000;
+const MAX_BUCKETS = 50_000;
+const SWEEP_EVERY_MS = 60_000;
+
+const hits = new Map<string, number[]>();
+let lastSweep = 0;
+
+function sweep(now: number) {
+  if (now - lastSweep < SWEEP_EVERY_MS) return;
+  lastSweep = now;
+  const cutoff = now - WINDOW_MS;
+  for (const [key, stamps] of hits) {
+    const next = stamps.filter((t) => t > cutoff);
+    if (next.length === 0) hits.delete(key);
+    else hits.set(key, next);
+  }
+}
+
+/** Trusted client IP behind Cloudflare, then first X-Forwarded-For hop. */
+export function clientIpFromHeaders(headers: Headers): string {
+  const cf = headers.get("cf-connecting-ip")?.trim();
+  if (cf) return cf;
+  const xff = headers.get("x-forwarded-for");
+  if (xff) {
+    const first = xff.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  const real = headers.get("x-real-ip")?.trim();
+  if (real) return real;
+  return "unknown";
+}
+
+export function clientIp(request: Request): string {
+  return clientIpFromHeaders(request.headers);
+}
+
+export type RateLimitCheck = {
+  ok: boolean;
+  retryAfterSec: number;
+  remaining: number;
+};
+
+/**
+ * Record one hit for `bucketKey`. Fail-open when the map is saturated so the
+ * limiter itself cannot become a DoS vector.
+ */
+export function checkRateLimit(
+  bucketKey: string,
+  limit: number,
+  windowMs: number = WINDOW_MS,
+): RateLimitCheck {
+  const now = Date.now();
+  sweep(now);
+
+  if (hits.size >= MAX_BUCKETS && !hits.has(bucketKey)) {
+    return { ok: true, retryAfterSec: 0, remaining: limit };
+  }
+
+  const cutoff = now - windowMs;
+  const prev = hits.get(bucketKey) ?? [];
+  const recent = prev.filter((t) => t > cutoff);
+
+  if (recent.length >= limit) {
+    const oldest = recent[0] ?? now;
+    const retryAfterSec = Math.max(
+      1,
+      Math.ceil((oldest + windowMs - now) / 1000),
+    );
+    hits.set(bucketKey, recent);
+    return { ok: false, retryAfterSec, remaining: 0 };
+  }
+
+  recent.push(now);
+  hits.set(bucketKey, recent);
+  return {
+    ok: true,
+    retryAfterSec: 0,
+    remaining: Math.max(0, limit - recent.length),
+  };
+}
+
+/** Test helper — clears all buckets. */
+export function resetRateLimitForTests() {
+  hits.clear();
+  lastSweep = 0;
+}
+
+function tooManyResponse(retryAfterSec: number): NextResponse {
+  return NextResponse.json(
+    { ok: false, error: "rate_limited" },
+    {
+      status: 429,
+      headers: {
+        "Retry-After": String(retryAfterSec),
+        "Cache-Control": "no-store",
+      },
+    },
+  );
+}
+
+/**
+ * Rate-limit by IP (or explicit key). Returns a 429 Response when blocked,
+ * otherwise null so the route can continue.
+ */
+export function enforceRateLimit(
+  request: Request,
+  opts: { prefix: string; limit: number; key?: string },
+): Response | null {
+  const id = opts.key?.trim() || clientIp(request);
+  const result = checkRateLimit(`${opts.prefix}:${id}`, opts.limit);
+  if (result.ok) return null;
+  return tooManyResponse(result.retryAfterSec);
+}
+
+/** Rate-limit with an already-known key (e.g. email after auth). */
+export function enforceRateLimitKey(
+  prefix: string,
+  key: string,
+  limit: number,
+): Response | null {
+  const result = checkRateLimit(`${prefix}:${key}`, limit);
+  if (result.ok) return null;
+  return tooManyResponse(result.retryAfterSec);
+}

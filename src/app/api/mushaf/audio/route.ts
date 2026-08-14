@@ -1,4 +1,5 @@
 import { getReciter, RECITERS } from "@/lib/audio";
+import { enforceRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -12,6 +13,11 @@ function pad(n: number, width: number): string {
  * Same-origin avoids intermittent CDN / mixed-content issues on mobile browsers.
  */
 export async function GET(request: Request) {
+  const limited = enforceRateLimit(request, {
+    prefix: "mushaf-audio",
+    limit: 300,
+  });
+  if (limited) return limited;
   const { searchParams } = new URL(request.url);
   const folder = (searchParams.get("folder") || "").trim();
   const sid = Number(searchParams.get("s") || "0");

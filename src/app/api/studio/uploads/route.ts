@@ -4,6 +4,7 @@ import {
   studioCreateUpload,
   studioListUploads,
 } from "@/lib/cloud-sync";
+import { enforceRateLimitKey } from "@/lib/rate-limit";
 import { requireSession } from "@/lib/require-role";
 import { canAccessEditorialTools } from "@/lib/roles";
 
@@ -12,6 +13,8 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const gate = await requireSession();
   if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("studio-uploads", gate.email, 60);
+  if (limited) return limited;
   if (!canAccessEditorialTools(gate.role)) {
     return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
   }
@@ -29,6 +32,8 @@ export async function GET() {
 export async function POST(request: Request) {
   const gate = await requireSession();
   if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("studio-uploads-post", gate.email, 30);
+  if (limited) return limited;
   if (!canAccessEditorialTools(gate.role)) {
     return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
   }

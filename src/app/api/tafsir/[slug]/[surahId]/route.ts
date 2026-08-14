@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { getTafsir, getTafsirSources } from "@/lib/quran";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 type Params = { params: Promise<{ slug: string; surahId: string }> };
 
 /** Studio may request a verse range to avoid multi‑MB full-surah payloads. */
 export async function GET(req: Request, { params }: Params) {
+  const limited = enforceRateLimit(req, { prefix: "tafsir", limit: 60 });
+  if (limited) return limited;
   const { slug, surahId: surahIdRaw } = await params;
   const surahId = Number(surahIdRaw);
 

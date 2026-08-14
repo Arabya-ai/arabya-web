@@ -1,9 +1,10 @@
-import { auth } from "@/auth";
 import {
   isAllowedStudioMediaRedirect,
   isAllowedStudioMediaUrl,
   studioMediaReferer,
 } from "@/ayat-studio/lib/media-url";
+import { enforceRateLimitKey } from "@/lib/rate-limit";
+import { requireSession } from "@/lib/require-role";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -15,10 +16,10 @@ const MAX_REDIRECTS = 6;
  * Forwards Range requests so video seeking works during MP4 export.
  */
 export async function GET(request: Request) {
-  const session = await auth();
-  if (!session?.user) {
-    return Response.json({ error: "auth_required" }, { status: 401 });
-  }
+  const gate = await requireSession();
+  if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("studio-media", gate.email, 600);
+  if (limited) return limited;
 
   const raw = new URL(request.url).searchParams.get("url")?.trim() || "";
   if (!raw || !isAllowedStudioMediaUrl(raw)) {

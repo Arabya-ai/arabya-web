@@ -4,6 +4,7 @@ import {
   adminReviewRoleRequest,
   isCloudSyncConfigured,
 } from "@/lib/cloud-sync";
+import { enforceRateLimitKey } from "@/lib/rate-limit";
 import { requireAdmin } from "@/lib/require-role";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,8 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
   const gate = await requireAdmin();
   if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("admin-requests", gate.email, 60);
+  if (limited) return limited;
   if (!isCloudSyncConfigured()) {
     return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
   }
@@ -27,6 +30,8 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   const gate = await requireAdmin();
   if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("admin-requests", gate.email, 30);
+  if (limited) return limited;
   if (!isCloudSyncConfigured()) {
     return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
   }

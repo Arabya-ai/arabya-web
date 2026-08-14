@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { adminListUsers, isCloudSyncConfigured } from "@/lib/cloud-sync";
+import { enforceRateLimitKey } from "@/lib/rate-limit";
 import { requireAdmin } from "@/lib/require-role";
 
 export const dynamic = "force-dynamic";
@@ -7,6 +8,8 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
   const gate = await requireAdmin();
   if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("admin-users", gate.email, 60);
+  if (limited) return limited;
   if (!isCloudSyncConfigured()) {
     return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
   }

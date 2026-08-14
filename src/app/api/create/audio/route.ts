@@ -1,5 +1,6 @@
-import { auth } from "@/auth";
 import { reciters } from "@/ayat-studio/lib/quran-data";
+import { enforceRateLimitKey } from "@/lib/rate-limit";
+import { requireSession } from "@/lib/require-role";
 
 export const runtime = "nodejs";
 
@@ -14,10 +15,10 @@ function pad(n: number, width: number): string {
  * (direct everyayah.com fetch fails with TypeError: Failed to fetch).
  */
 export async function GET(request: Request) {
-  const session = await auth();
-  if (!session?.user) {
-    return Response.json({ error: "auth_required" }, { status: 401 });
-  }
+  const gate = await requireSession();
+  if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("create-audio", gate.email, 120);
+  if (limited) return limited;
 
   const { searchParams } = new URL(request.url);
   const folder = (searchParams.get("folder") || "").trim();

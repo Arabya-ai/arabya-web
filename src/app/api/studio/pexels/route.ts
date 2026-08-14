@@ -1,5 +1,6 @@
-import { auth } from "@/auth";
 import { parseApiKeys, shouldRotateApiKey } from "@/lib/api-keys";
+import { enforceRateLimitKey } from "@/lib/rate-limit";
+import { requireSession } from "@/lib/require-role";
 
 export const runtime = "nodejs";
 
@@ -11,10 +12,10 @@ export const runtime = "nodejs";
  * 2. `PEXELS_API_KEY` and/or `PEXELS_API_KEYS` env (comma-separated OK)
  */
 export async function GET(request: Request) {
-  const session = await auth();
-  if (!session?.user) {
-    return Response.json({ error: "auth_required" }, { status: 401 });
-  }
+  const gate = await requireSession();
+  if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("studio-pexels", gate.email, 60);
+  if (limited) return limited;
 
   const { searchParams } = new URL(request.url);
   const kind = searchParams.get("type") === "videos" ? "videos" : "photos";

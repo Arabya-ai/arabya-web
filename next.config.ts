@@ -36,6 +36,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   serverExternalPackages: ["@resvg/resvg-js", "better-sqlite3"],
   experimental: {
     // Tree-shake heavy barrels so home/mushaf ship less unused JS.

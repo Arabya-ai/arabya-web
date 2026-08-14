@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { resolvePortalCity } from "@/lib/portal-cities";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 const GREGORIAN_MONTHS_AR: Record<number, string> = {
   1: "يناير",
@@ -61,6 +62,8 @@ function toArabicDigits(value: string | number): string {
  * Proxied server-side so the browser only talks to our origin.
  */
 export async function GET(req: Request) {
+  const limited = enforceRateLimit(req, { prefix: "prayer-times", limit: 30 });
+  if (limited) return limited;
   const { searchParams } = new URL(req.url);
   const cfg = resolvePortalCity(searchParams.get("city"));
 

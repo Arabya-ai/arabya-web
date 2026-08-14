@@ -1,4 +1,3 @@
-import { auth } from "@/auth";
 import { getSurah, getVerseTranslation, getVerseTranslationEditions } from "@/lib/quran";
 import { getSurahDisplayTitle } from "@/lib/surah-names";
 import { renderCreateAyahPng } from "@/lib/create-ayah-image";
@@ -10,6 +9,8 @@ import {
   type UserPlan,
 } from "@/lib/plans";
 import { normalizeForHafsFont } from "@/lib/quran-text";
+import { enforceRateLimitKey } from "@/lib/rate-limit";
+import { requireSession } from "@/lib/require-role";
 
 export const runtime = "nodejs";
 
@@ -25,14 +26,12 @@ function isSafeEditionSlug(slug: string): boolean {
 }
 
 export async function GET(request: Request) {
-  const session = await auth();
-  if (!session?.user) {
-    return Response.json({ error: "auth_required" }, { status: 401 });
-  }
-  if (session.error === "Banned") {
-    return Response.json({ error: "banned" }, { status: 403 });
-  }
-  const plan = session.user.plan ?? "free";
+  const gate = await requireSession();
+  if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("create-image", gate.email, 20);
+  if (limited) return limited;
+
+  const plan = gate.session.user.plan ?? "free";
   const { searchParams } = new URL(request.url);
   const sid = Number(searchParams.get("s") || "0");
   const vid = Number(searchParams.get("v") || "0");

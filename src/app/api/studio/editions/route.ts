@@ -1,14 +1,15 @@
-import { auth } from "@/auth";
 import { getTafsirSources, getVerseTranslationEditions } from "@/lib/quran";
+import { enforceRateLimitKey } from "@/lib/rate-limit";
+import { requireSession } from "@/lib/require-role";
 
 export const runtime = "nodejs";
 
 /** Authenticated catalog of translation + tafsir editions for Arabya Studio. */
 export async function GET() {
-  const session = await auth();
-  if (!session?.user) {
-    return Response.json({ error: "auth_required" }, { status: 401 });
-  }
+  const gate = await requireSession();
+  if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("studio-editions", gate.email, 60);
+  if (limited) return limited;
 
   const [translations, tafsirs] = await Promise.all([
     getVerseTranslationEditions(),

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { enforceRateLimitKey } from "@/lib/rate-limit";
 import { requireAdmin } from "@/lib/require-role";
 import {
   loadAdminSiteAppearance,
@@ -11,6 +12,8 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   const gate = await requireAdmin();
   if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("admin-appearance", gate.email, 60);
+  if (limited) return limited;
   try {
     const data = await loadAdminSiteAppearance(gate.email);
     return NextResponse.json({ ok: true, ...data });
@@ -23,6 +26,8 @@ export async function GET() {
 export async function PATCH(request: Request) {
   const gate = await requireAdmin();
   if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("admin-appearance", gate.email, 30);
+  if (limited) return limited;
   let body: { footerCreditAr?: string; footerCreditEn?: string };
   try {
     body = (await request.json()) as {

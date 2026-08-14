@@ -11,6 +11,7 @@ import {
   canAssignRole,
   normalizeUserRole,
 } from "@/lib/roles";
+import { enforceRateLimitKey } from "@/lib/rate-limit";
 import { requireAdmin } from "@/lib/require-role";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,8 @@ type Ctx = { params: Promise<{ id: string }> };
 export async function PATCH(request: Request, ctx: Ctx) {
   const gate = await requireAdmin();
   if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("admin-user-mut", gate.email, 10);
+  if (limited) return limited;
   if (!isCloudSyncConfigured()) {
     return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
   }
@@ -87,6 +90,8 @@ export async function PATCH(request: Request, ctx: Ctx) {
 export async function POST(request: Request, ctx: Ctx) {
   const gate = await requireAdmin();
   if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("admin-user-mut", gate.email, 10);
+  if (limited) return limited;
   if (!isCloudSyncConfigured()) {
     return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
   }
@@ -117,6 +122,8 @@ export async function POST(request: Request, ctx: Ctx) {
 export async function DELETE(request: Request, ctx: Ctx) {
   const gate = await requireAdmin();
   if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("admin-user-mut", gate.email, 10);
+  if (limited) return limited;
   if (!isCloudSyncConfigured()) {
     return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
   }

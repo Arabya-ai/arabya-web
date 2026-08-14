@@ -8,6 +8,7 @@ import {
 import { renderOgCardLatin } from "@/lib/og-card";
 import { renderOgCard } from "@/lib/og-card-arabic";
 import { ARABYA_SITE_HOST } from "@/lib/brand-export";
+import { enforceRateLimit } from "@/lib/rate-limit";
 import type { ShareKind } from "@/lib/share";
 
 export const runtime = "nodejs";
@@ -63,6 +64,8 @@ function kindEyebrowLatin(kind: ShareKind): string {
 }
 
 export async function GET(request: Request) {
+  const limited = enforceRateLimit(request, { prefix: "og", limit: 60 });
+  if (limited) return limited;
   const { searchParams } = new URL(request.url);
   const kind = (searchParams.get("kind") || "page") as ShareKind;
   const pageNum = Number(searchParams.get("page") || "0");

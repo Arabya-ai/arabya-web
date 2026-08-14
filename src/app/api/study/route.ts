@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sanitizeSearchQuery } from "@/lib/api-query";
+import { enforceRateLimit } from "@/lib/rate-limit";
 import { runStudyQuery } from "@/lib/study";
 
 /**
@@ -7,6 +8,8 @@ import { runStudyQuery } from "@/lib/study";
  * Optional LLM mode when ARABYA_LLM_ENABLED=1 (see docs/platform/rag-llm.md).
  */
 export async function GET(req: Request) {
+  const limited = enforceRateLimit(req, { prefix: "study", limit: 60 });
+  if (limited) return limited;
   const { searchParams } = new URL(req.url);
   const q = sanitizeSearchQuery(searchParams.get("q"));
   const mode = (searchParams.get("mode") ?? "local").trim().slice(0, 32);

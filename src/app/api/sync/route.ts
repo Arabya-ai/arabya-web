@@ -1,15 +1,17 @@
-import { auth } from "@/auth";
 import { isCloudSyncConfigured, pullCloudSync, pushCloudSync } from "@/lib/cloud-sync";
+import { enforceRateLimitKey } from "@/lib/rate-limit";
+import { requireSession } from "@/lib/require-role";
 import type { StudyEntry } from "@/lib/study-archive";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.email) {
-    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
-  }
+  const gate = await requireSession();
+  if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("sync", gate.email, 60);
+  if (limited) return limited;
+
   if (!isCloudSyncConfigured()) {
     return NextResponse.json(
       {
@@ -23,9 +25,9 @@ export async function GET() {
 
   try {
     const data = await pullCloudSync({
-      email: session.user.email,
-      name: session.user.name,
-      image: session.user.image,
+      email: gate.email,
+      name: gate.name,
+      image: gate.image,
     });
     return NextResponse.json(data);
   } catch (err) {
@@ -35,10 +37,11 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  const session = await auth();
-  if (!session?.user?.email) {
-    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
-  }
+  const gate = await requireSession();
+  if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("sync", gate.email, 60);
+  if (limited) return limited;
+
   if (!isCloudSyncConfigured()) {
     return NextResponse.json(
       {
@@ -65,9 +68,9 @@ export async function PUT(request: Request) {
   try {
     const data = await pushCloudSync(
       {
-        email: session.user.email,
-        name: session.user.name,
-        image: session.user.image,
+        email: gate.email,
+        name: gate.name,
+        image: gate.image,
       },
       {
         bookmarks: Array.isArray(body.bookmarks) ? (body.bookmarks as never) : [],

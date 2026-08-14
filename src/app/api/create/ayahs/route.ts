@@ -1,19 +1,20 @@
-import { auth } from "@/auth";
 import { getSurah } from "@/lib/quran";
 import { normalizeForHafsFont } from "@/lib/quran-text";
 import {
   STUDIO_MAX_AYAHS,
   canExportUnlimitedStudioAyahs,
 } from "@/lib/plans";
+import { enforceRateLimitKey } from "@/lib/rate-limit";
+import { requireSession } from "@/lib/require-role";
 
 export const runtime = "nodejs";
 
 /** Authenticated ayah text range for Ayat Studio (local QPC). */
 export async function GET(request: Request) {
-  const session = await auth();
-  if (!session?.user) {
-    return Response.json({ error: "auth_required" }, { status: 401 });
-  }
+  const gate = await requireSession();
+  if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("create-ayahs", gate.email, 60);
+  if (limited) return limited;
 
   const { searchParams } = new URL(request.url);
   const sid = Number(searchParams.get("s") || "0");
@@ -35,8 +36,8 @@ export async function GET(request: Request) {
     Math.max(start, Number.isFinite(to) ? to : start),
   );
   const unlimited = canExportUnlimitedStudioAyahs(
-    (session.user.role as "member" | "creator" | "editor" | "admin") || "member",
-    session.user.email,
+    gate.role,
+    gate.email,
   );
   if (!unlimited && end - start + 1 > STUDIO_MAX_AYAHS) {
     return Response.json({ error: "range_too_long" }, { status: 400 });

@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { resolvePortalCity } from "@/lib/portal-cities";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 /** Qibla bearing from city coordinates via Aladhan (free, no key). */
 export async function GET(req: Request) {
+  const limited = enforceRateLimit(req, { prefix: "qibla", limit: 30 });
+  if (limited) return limited;
   const { searchParams } = new URL(req.url);
   const cfg = resolvePortalCity(searchParams.get("city"));
 

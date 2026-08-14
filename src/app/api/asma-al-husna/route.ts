@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { getAsmaByNumber, getAsmaNames, todayAsmaIndex } from "@/lib/asma";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 export async function GET(req: Request) {
+  const limited = enforceRateLimit(req, { prefix: "asma-al-husna", limit: 60 });
+  if (limited) return limited;
   const { searchParams } = new URL(req.url);
   const nRaw = Number(searchParams.get("n"));
 

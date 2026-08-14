@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getReciter, type VerseTiming, type WordTimingSegment } from "@/lib/audio";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 type UpstreamStamp = {
   verse_key: string;
@@ -28,9 +29,11 @@ function parseSegments(raw: number[][] | undefined): WordTimingSegment[] {
  * Cached at the edge; falls back to 404 when reciter has no chapter id.
  */
 export async function GET(
-  _req: Request,
+  req: Request,
   ctx: { params: Promise<{ reciterId: string; surahId: string }> },
 ) {
+  const limited = enforceRateLimit(req, { prefix: "audio-timings", limit: 120 });
+  if (limited) return limited;
   const { reciterId, surahId: surahRaw } = await ctx.params;
   const surahId = Number(surahRaw);
   const reciter = getReciter(reciterId);
