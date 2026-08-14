@@ -894,7 +894,7 @@
       },
       "contact": {
         "title": "Contact",
-        "body": "For questions or suggestions, see <contactLink>Contact us</contactLink>. See also our <privacyLink>privacy policy</privacyLink>."
+        "body": "For questions or suggestions, see <contactLink>Contact us</contactLink> or email <emailLink>contact@arabya.org</emailLink>. See also our <privacyLink>privacy policy</privacyLink>."
       }
     }
   },
@@ -969,7 +969,7 @@
       },
       "enforcement": {
         "title": "Enforcement",
-        "p0": "We may restrict access, suspend accounts, or take legal action for violations. For questions or licensing: <contactLink>Contact us</contactLink>."
+        "p0": "We may restrict access, suspend accounts, or take legal action for violations. For questions or licensing: <contactLink>Contact us</contactLink> or <emailLink>contact@arabya.org</emailLink>."
       },
       "changes": {
         "title": "Changes",
@@ -1019,7 +1019,7 @@
         "title": "Your rights & choices",
         "r0": "Browse and study without an account.",
         "r1": "Sign out and clear local storage from the browser.",
-        "r2": "Request inquiry or deletion of account data via <contactLink>Contact us</contactLink>."
+        "r2": "Request inquiry or deletion of account data via <contactLink>Contact us</contactLink> or <emailLink>contact@arabya.org</emailLink>."
       },
       "changes": {
         "title": "Policy changes",

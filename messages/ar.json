@@ -894,7 +894,7 @@
       },
       "contact": {
         "title": "التواصل",
-        "body": "للاستفسارات والمقترحات راجع <contactLink>تواصل معنا</contactLink>. راجع أيضًا <privacyLink>سياسة الخصوصية</privacyLink>."
+        "body": "للاستفسارات والمقترحات راجع <contactLink>تواصل معنا</contactLink> أو راسلنا على <emailLink>contact@arabya.org</emailLink>. راجع أيضًا <privacyLink>سياسة الخصوصية</privacyLink>."
       }
     }
   },
@@ -969,7 +969,7 @@
       },
       "enforcement": {
         "title": "الإنفاذ",
-        "p0": "نحتفظ بحق تقييد الوصول، أو إيقاف الحسابات، أو اتخاذ إجراءات قانونية عند مخالفة هذه الشروط. للاستفسار أو طلب ترخيص: <contactLink>تواصل معنا</contactLink>."
+        "p0": "نحتفظ بحق تقييد الوصول، أو إيقاف الحسابات، أو اتخاذ إجراءات قانونية عند مخالفة هذه الشروط. للاستفسار أو طلب ترخيص: <contactLink>تواصل معنا</contactLink> أو <emailLink>contact@arabya.org</emailLink>."
       },
       "changes": {
         "title": "تعديل الشروط",
@@ -1019,7 +1019,7 @@
         "title": "حقوقك وخياراتك",
         "r0": "التصفح والدراسة دون حساب.",
         "r1": "تسجيل الخروج ومسح التخزين المحلي من المتصفح.",
-        "r2": "طلب الاستفسار أو حذف بيانات الحساب عبر <contactLink>تواصل معنا</contactLink>."
+        "r2": "طلب الاستفسار أو حذف بيانات الحساب عبر <contactLink>تواصل معنا</contactLink> أو <emailLink>contact@arabya.org</emailLink>."
       },
       "changes": {
         "title": "تعديل السياسة",
