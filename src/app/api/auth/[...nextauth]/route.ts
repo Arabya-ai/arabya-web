@@ -1,9 +1,10 @@
 import { handlers } from "@/auth";
 import { AUTH_RATE_LIMIT, enforceRateLimit } from "@/lib/rate-limit";
+import type { NextRequest } from "next/server";
 
 async function withAuthRateLimit(
-  handler: (req: Request) => Promise<Response>,
-  req: Request,
+  handler: (req: NextRequest) => Promise<Response>,
+  req: NextRequest,
 ): Promise<Response> {
   const limited = enforceRateLimit(req, {
     prefix: "auth",
@@ -13,10 +14,10 @@ async function withAuthRateLimit(
   return handler(req);
 }
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   return withAuthRateLimit(handlers.GET, req);
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   return withAuthRateLimit(handlers.POST, req);
 }
