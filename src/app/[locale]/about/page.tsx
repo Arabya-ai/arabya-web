@@ -2,7 +2,9 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { InfoHeroNav } from "@/components/info/InfoHeroNav";
 import { resolveLocale } from "@/i18n/locale-params";
+import { buildInfoHeroNavItems } from "@/lib/info-hero-nav";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -35,22 +37,9 @@ const richTags = {
     </a>
   ),
   code: (c: ReactNode) => <code>{c}</code>,
-  ghLink: (c: ReactNode) => (
-    <a
-      href="https://github.com/Arabya-ai/arabya-web"
-      rel="noreferrer"
-      target="_blank"
-    >
-      {c}
-    </a>
-  ),
-  ghOrgLink: (c: ReactNode) => (
-    <a href="https://github.com/Arabya-ai" rel="noreferrer" target="_blank">
-      {c}
-    </a>
-  ),
   privacyLink: (c: ReactNode) => <Link href="/privacy">{c}</Link>,
   termsLink: (c: ReactNode) => <Link href="/terms">{c}</Link>,
+  contactLink: (c: ReactNode) => <Link href="/contact">{c}</Link>,
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -81,20 +70,7 @@ export default async function AboutPage({ params }: Props) {
           <h1 className="info-title portal-display">{t("title")}</h1>
           <p className="info-lead">{t.rich("lead", richTags)}</p>
           <p className="info-free-note">{t("freeNote")}</p>
-          <div className="info-hero-actions">
-            <Link href="/mushaf/1" className="info-btn info-btn--primary">
-              {t("ctaMushaf")}
-            </Link>
-            <Link href="/studio" className="info-btn info-btn--ghost">
-              {t("ctaStudio")}
-            </Link>
-            <Link href="/privacy" className="info-btn info-btn--ghost">
-              {t("ctaPrivacy")}
-            </Link>
-            <Link href="/terms" className="info-btn info-btn--ghost">
-              {t("ctaTerms")}
-            </Link>
-          </div>
+          <InfoHeroNav items={buildInfoHeroNavItems((key) => t(key))} />
         </header>
 
         <section className="info-section" aria-labelledby="about-pillars">

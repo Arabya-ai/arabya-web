@@ -43,6 +43,7 @@
     "about": "About Arabya",
     "privacy": "Privacy",
     "terms": "Terms of use",
+    "contact": "Contact",
     "mushaf": "Mushaf",
     "menu": "Menu",
     "close": "Close",
@@ -845,6 +846,7 @@
     "ctaStudio": "Arabya Studio",
     "ctaPrivacy": "Privacy policy",
     "ctaTerms": "Terms of use",
+    "ctaContact": "Contact us",
     "sections": {
       "pillars": {
         "title": "What we offer",
@@ -892,7 +894,36 @@
       },
       "contact": {
         "title": "Contact",
-        "body": "For questions or suggestions: the <ghOrgLink>Arabya-ai</ghOrgLink> organization on GitHub. See also our <privacyLink>privacy policy</privacyLink>."
+        "body": "For questions or suggestions, see <contactLink>Contact us</contactLink>. See also our <privacyLink>privacy policy</privacyLink>."
+      }
+    }
+  },
+  "Contact": {
+    "metaTitle": "Contact us",
+    "metaDescription": "Contact the Arabya team: questions, feedback, and content licensing.",
+    "kicker": "We are here to help",
+    "title": "Contact us",
+    "lead": "We would love to hear from you — questions about <brand>Arabya</brand>, product feedback, or content licensing requests.",
+    "sections": {
+      "email": {
+        "title": "Email",
+        "p0": "Send your message to:",
+        "cta": "contact@arabya.org",
+        "note": "We aim to reply within a few business days. Do not send passwords or sensitive account data by email."
+      },
+      "topics": {
+        "title": "How can we help?",
+        "t0": "General questions about the platform and tools.",
+        "t1": "Suggestions to improve the experience.",
+        "t2": "Licensing or attribution requests for original content."
+      },
+      "response": {
+        "title": "Response time",
+        "p0": "Arabya is a small project — we read every message and reply when we can. For urgent account issues, try signing in from your account page first."
+      },
+      "legal": {
+        "title": "Related policies",
+        "body": "See our <privacyLink>privacy policy</privacyLink> and <termsLink>terms of use</termsLink>. Learn about the project on <aboutLink>About Arabya</aboutLink>."
       }
     }
   },
