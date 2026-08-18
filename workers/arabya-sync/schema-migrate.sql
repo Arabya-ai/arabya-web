@@ -42,7 +42,9 @@ CREATE TABLE IF NOT EXISTS site_settings (
   updated_by TEXT
 );
 
--- Legacy (already applied on production — kept for fresh DBs via schema.sql)
+-- Adhkar / tasbeeh sync columns (2026-08)
+-- ALTER TABLE reading_progress ADD COLUMN adhkar_json TEXT NOT NULL DEFAULT '{}';
+-- ALTER TABLE reading_progress ADD COLUMN tasbeeh_json TEXT NOT NULL DEFAULT '{"phraseId":"subhanallah","count":0}';
 -- ALTER TABLE users ADD COLUMN status TEXT NOT NULL DEFAULT 'active';
 -- ALTER TABLE users ADD COLUMN last_seen_at INTEGER;
 -- ALTER TABLE users ADD COLUMN uid TEXT;

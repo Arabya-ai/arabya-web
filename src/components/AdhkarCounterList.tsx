@@ -7,6 +7,7 @@ import {
   getAdhkarCount,
   incrementAdhkarCount,
   resetAdhkarCount,
+  setLastAdhkarCategory,
 } from "@/lib/adhkar-progress";
 import { formatCount } from "@/lib/format";
 
@@ -22,15 +23,19 @@ function CounterCard({ item }: { item: AdhkarItem }) {
 
   const done = current >= target;
   const pct = Math.min(100, Math.round((current / target) * 100));
+  const fadl =
+    locale === "en"
+      ? item.fadlEn || item.fadlAr
+      : item.fadlAr || item.fadlEn;
 
   return (
     <article className={`adhkar-card${done ? " is-done" : ""}`}>
       <p className="adhkar-card-text" lang="ar" dir="rtl">
         {item.textAr}
       </p>
-      {item.fadlAr ? (
+      {fadl ? (
         <p className="adhkar-card-fadl">
-          <strong>{t("fadlLabel")}:</strong> {item.fadlAr}
+          <strong>{t("fadlLabel")}:</strong> {fadl}
         </p>
       ) : null}
       {item.source ? (
@@ -68,7 +73,17 @@ function CounterCard({ item }: { item: AdhkarItem }) {
   );
 }
 
-export function AdhkarCounterList({ items }: { items: AdhkarItem[] }) {
+export function AdhkarCounterList({
+  items,
+  categorySlug,
+}: {
+  items: AdhkarItem[];
+  categorySlug?: string;
+}) {
+  useEffect(() => {
+    if (categorySlug) setLastAdhkarCategory(categorySlug);
+  }, [categorySlug]);
+
   return (
     <div className="adhkar-list">
       {items.map((item) => (

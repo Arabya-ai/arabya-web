@@ -3,6 +3,9 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
 import { getAdhkarCategories } from "@/lib/adhkar";
+import { formatCount } from "@/lib/format";
+import { AdhkarHubClient } from "@/components/AdhkarHubClient";
+import { AdhkarLocalNav } from "@/components/AdhkarLocalNav";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -22,40 +25,83 @@ export default async function AdhkarIndexPage({ params }: Props) {
 
   return (
     <div className="shell page-block adhkar-page">
-      <nav className="surah-nav" aria-label={t("navAria")}>
-        <Link href="/" className="nav-pill">
-          {t("backIndex")}
-        </Link>
-      </nav>
+      <AdhkarLocalNav locale={locale} current="hub" />
 
-      <header className="asma-page-head">
+      <header className="adhkar-hero">
+        <p className="adhkar-kicker">{t("kicker")}</p>
         <h1>{t("title")}</h1>
         <p>{t("lead")}</p>
+        <div className="home-index-ornament" aria-hidden="true">
+          <span className="home-index-ornament-mark" />
+        </div>
       </header>
 
-      {categories.length === 0 ? (
-        <p className="empty-state">{t("empty")}</p>
-      ) : (
-        <ul className="adhkar-category-grid">
-          {categories.map((c) => {
-            const title = locale === "en" ? c.titleEn : c.titleAr;
-            const desc =
-              locale === "en"
-                ? c.descriptionEn || c.descriptionAr
-                : c.descriptionAr || c.descriptionEn;
-            return (
-              <li key={c.slug}>
-                <Link href={`/adhkar/${c.slug}`} className="adhkar-category-link">
-                  <span className="adhkar-category-title">{title}</span>
-                  {desc ? (
-                    <span className="adhkar-category-desc">{desc}</span>
-                  ) : null}
-                </Link>
-              </li>
-            );
-          })}
+      <AdhkarHubClient
+        locale={locale}
+        categories={categories.map((c) => ({
+          slug: c.slug,
+          titleAr: c.titleAr,
+          titleEn: c.titleEn,
+          itemCount: c.itemCount ?? 0,
+          targetSum: c.targetSum ?? c.itemCount ?? 0,
+        }))}
+      />
+
+      <section className="adhkar-tools" aria-labelledby="adhkar-tools-title">
+        <h2 id="adhkar-tools-title">{t("toolsHeading")}</h2>
+        <ul className="adhkar-tool-grid">
+          <li>
+            <Link href="/adhkar/duas" className="adhkar-tool-card">
+              <span className="adhkar-tool-mark" aria-hidden />
+              <span className="adhkar-tool-title">{t("tools.duas")}</span>
+              <span className="adhkar-tool-desc">{t("tools.duasDesc")}</span>
+            </Link>
+          </li>
+          <li>
+            <Link href="/adhkar/tasbeeh" className="adhkar-tool-card">
+              <span className="adhkar-tool-mark" aria-hidden />
+              <span className="adhkar-tool-title">{t("tools.tasbeeh")}</span>
+              <span className="adhkar-tool-desc">{t("tools.tasbeehDesc")}</span>
+            </Link>
+          </li>
         </ul>
-      )}
+      </section>
+
+      <section aria-labelledby="adhkar-cats-title">
+        <h2 id="adhkar-cats-title">{t("categoriesHeading")}</h2>
+        {categories.length === 0 ? (
+          <p className="empty-state">{t("empty")}</p>
+        ) : (
+          <ul className="adhkar-category-grid">
+            {categories.map((c) => {
+              const title = locale === "en" ? c.titleEn : c.titleAr;
+              const desc =
+                locale === "en"
+                  ? c.descriptionEn || c.descriptionAr
+                  : c.descriptionAr || c.descriptionEn;
+              return (
+                <li key={c.slug}>
+                  <Link href={`/adhkar/${c.slug}`} className="adhkar-category-link">
+                    <span className="adhkar-category-title">{title}</span>
+                    {desc ? (
+                      <span className="adhkar-category-desc">{desc}</span>
+                    ) : null}
+                    {typeof c.itemCount === "number" ? (
+                      <span className="adhkar-category-count">
+                        {t("countLabel", {
+                          count: formatCount(c.itemCount, locale),
+                        })}
+                      </span>
+                    ) : null}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+
+      <p className="adhkar-credit">{t("credit")}</p>
     </div>
   );
 }

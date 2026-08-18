@@ -59,6 +59,23 @@ export function resolveUserDbPath(): string {
   return path.join(process.cwd(), "data", "user-data.sqlite");
 }
 
+function migrateUserDb(db: SqliteDb) {
+  const cols = db
+    .prepare(`PRAGMA table_info(reading_progress)`)
+    .all() as Array<{ name: string }>;
+  const names = new Set(cols.map((c) => c.name));
+  if (!names.has("adhkar_json")) {
+    db.exec(
+      `ALTER TABLE reading_progress ADD COLUMN adhkar_json TEXT NOT NULL DEFAULT '{}'`,
+    );
+  }
+  if (!names.has("tasbeeh_json")) {
+    db.exec(
+      `ALTER TABLE reading_progress ADD COLUMN tasbeeh_json TEXT NOT NULL DEFAULT '{"phraseId":"subhanallah","count":0}'`,
+    );
+  }
+}
+
 export function getUserDb(): SqliteDb {
   if (dbSingleton) return dbSingleton;
   const dbPath = resolveUserDbPath();
@@ -67,6 +84,7 @@ export function getUserDb(): SqliteDb {
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
   db.exec(SCHEMA_SQL);
+  migrateUserDb(db);
   dbSingleton = db;
   return db;
 }
@@ -195,11 +213,19 @@ function pullAll(db: SqliteDb, userId: string) {
 
   const progress = db
     .prepare(
-      `SELECT last_page as lastPage, habit_json as habitJson, updated_at as updatedAt
+      `SELECT last_page as lastPage, habit_json as habitJson,
+              adhkar_json as adhkarJson, tasbeeh_json as tasbeehJson,
+              updated_at as updatedAt
        FROM reading_progress WHERE user_id = ?`,
     )
     .get(userId) as
-    | { lastPage: number | null; habitJson: string; updatedAt: number }
+    | {
+        lastPage: number | null;
+        habitJson: string;
+        adhkarJson?: string;
+        tasbeehJson?: string;
+        updatedAt: number;
+      }
     | undefined;
 
   let habit: unknown = {};
@@ -211,6 +237,32 @@ function pullAll(db: SqliteDb, userId: string) {
     }
   }
 
+  let adhkar: Record<string, number> = {};
+  if (progress?.adhkarJson) {
+    try {
+      const parsed = JSON.parse(progress.adhkarJson) as Record<string, number>;
+      adhkar = parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      adhkar = {};
+    }
+  }
+
+  let tasbeeh = { phraseId: "subhanallah", count: 0 };
+  if (progress?.tasbeehJson) {
+    try {
+      const parsed = JSON.parse(progress.tasbeehJson) as {
+        phraseId?: string;
+        count?: number;
+      };
+      tasbeeh = {
+        phraseId: parsed.phraseId || "subhanallah",
+        count: Math.max(0, Number(parsed.count) || 0),
+      };
+    } catch {
+      tasbeeh = { phraseId: "subhanallah", count: 0 };
+    }
+  }
+
   return {
     bookmarks,
     notes,
@@ -218,6 +270,8 @@ function pullAll(db: SqliteDb, userId: string) {
     progress: {
       lastPage: progress?.lastPage ?? null,
       habit,
+      adhkar,
+      tasbeeh,
       updatedAt: progress?.updatedAt ?? null,
     },
   };
@@ -292,19 +346,25 @@ function pushAll(db: SqliteDb, userId: string, payload: SyncPayload) {
     }
 
     const habitJson = JSON.stringify(payload.progress?.habit ?? {});
+    const adhkarJson = JSON.stringify(payload.progress?.adhkar ?? {});
+    const tasbeehJson = JSON.stringify(
+      payload.progress?.tasbeeh ?? { phraseId: "subhanallah", count: 0 },
+    );
     const lastPage =
       payload.progress?.lastPage == null
         ? null
         : Math.min(604, Math.max(1, Number(payload.progress.lastPage) || 1));
     const now = Date.now();
     db.prepare(
-      `INSERT INTO reading_progress (user_id, last_page, habit_json, updated_at)
-       VALUES (?, ?, ?, ?)
+      `INSERT INTO reading_progress (user_id, last_page, habit_json, adhkar_json, tasbeeh_json, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?)
        ON CONFLICT(user_id) DO UPDATE SET
          last_page = excluded.last_page,
          habit_json = excluded.habit_json,
+         adhkar_json = excluded.adhkar_json,
+         tasbeeh_json = excluded.tasbeeh_json,
          updated_at = excluded.updated_at`,
-    ).run(userId, lastPage, habitJson, now);
+    ).run(userId, lastPage, habitJson, adhkarJson, tasbeehJson, now);
   });
   tx();
 }

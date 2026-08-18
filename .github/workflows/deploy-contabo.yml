@@ -52,6 +52,8 @@ jobs:
           SSH_USER: ${{ secrets.CONTABO_SSH_USER }}
           SSH_KEY: ${{ secrets.CONTABO_SSH_KEY }}
           SSH_KEY_B64: ${{ secrets.CONTABO_SSH_KEY_B64 }}
+          MPT_DAHL_API_KEY: ${{ secrets.MPT_DAHL_API_KEY }}
+          MONEYPRINTER_API_URL: ${{ secrets.MONEYPRINTER_API_URL }}
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
@@ -67,7 +69,14 @@ jobs:
             exit 1
           fi
           ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+          REMOTE_ENV=""
+          if [ -n "${MPT_DAHL_API_KEY:-}" ]; then
+            REMOTE_ENV="${REMOTE_ENV} export MPT_DAHL_API_KEY=$(printf %q "$MPT_DAHL_API_KEY");"
+          fi
+          if [ -n "${MONEYPRINTER_API_URL:-}" ]; then
+            REMOTE_ENV="${REMOTE_ENV} export MONEYPRINTER_API_URL=$(printf %q "$MONEYPRINTER_API_URL");"
+          fi
           ssh -i ~/.ssh/contabo_key -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
             "$SSH_USER@$SSH_HOST" \
-            'cd /var/www/arabya-web && bash scripts/contabo-deploy.sh'
+            "${REMOTE_ENV} cd /var/www/arabya-web && bash scripts/contabo-deploy.sh"
           rm -f ~/.ssh/contabo_key

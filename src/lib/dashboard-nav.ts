@@ -20,6 +20,12 @@ export function unifiedDashNav(role: UserRole): DashNavItem[] {
   const items: DashNavItem[] = [
     { href: "/account", label: "overview", icon: "home", group: "groupAccount" },
     {
+      href: "/account/adhkar",
+      label: "adhkar",
+      icon: "spark",
+      group: "groupAccount",
+    },
+    {
       href: "/account/tahfeez",
       label: "tahfeez",
       icon: "mic",

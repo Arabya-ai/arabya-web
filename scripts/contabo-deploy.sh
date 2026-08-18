@@ -31,6 +31,11 @@ if pm2 describe arabya-web >/dev/null 2>&1; then
 else
   NODE_ENV=production PORT=3000 pm2 start node_modules/next/dist/bin/next --name arabya-web -- start -p 3000
 fi
+
+if [[ -x scripts/contabo-mpt-deploy.sh ]]; then
+  bash scripts/contabo-mpt-deploy.sh || echo "WARN: MPT deploy step failed — /studio/ai may show engine offline."
+fi
+
 pm2 save
 
 echo "==> Health check (both domains via Host header)"

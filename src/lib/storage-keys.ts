@@ -21,6 +21,7 @@ export const STORAGE_KEYS = {
   reciter: "arabya-reciter",
   favoriteReciters: "arabya-favorite-reciters",
   adhkarProgress: "arabya-adhkar-progress",
+  tasbeeh: "arabya-tasbeeh",
   /** UI locale preference (ar | en) — separate from meaningLang / verseTrans */
   uiLocale: "arabya-ui-locale",
   studyQuery: "arabya-study-query",

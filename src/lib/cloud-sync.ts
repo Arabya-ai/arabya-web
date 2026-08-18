@@ -40,6 +40,8 @@ import { mintActorTicket } from "@/lib/actor-ticket";
 export type SyncProgress = {
   lastPage: number | null;
   habit: ReadingHabitState | Record<string, unknown>;
+  adhkar?: Record<string, number>;
+  tasbeeh?: { phraseId: string; count: number };
   updatedAt?: number | null;
 };
 
@@ -267,7 +269,13 @@ export async function pullCloudSync(user: {
     bookmarks: Array.isArray(data.bookmarks) ? data.bookmarks : [],
     notes: Array.isArray(data.notes) ? data.notes : [],
     study: Array.isArray(data.study) ? data.study : [],
-    progress: data.progress || { lastPage: null, habit: {}, updatedAt: null },
+    progress: data.progress || {
+      lastPage: null,
+      habit: {},
+      adhkar: {},
+      tasbeeh: { phraseId: "subhanallah", count: 0 },
+      updatedAt: null,
+    },
   };
 }
 
@@ -293,6 +301,11 @@ export async function pushCloudSync(
     progress: {
       lastPage: payload.progress.lastPage,
       habit: payload.progress.habit,
+      adhkar: payload.progress.adhkar ?? {},
+      tasbeeh: payload.progress.tasbeeh ?? {
+        phraseId: "subhanallah",
+        count: 0,
+      },
     },
   });
   return {
@@ -302,7 +315,13 @@ export async function pushCloudSync(
     bookmarks: Array.isArray(data.bookmarks) ? data.bookmarks : [],
     notes: Array.isArray(data.notes) ? data.notes : [],
     study: Array.isArray(data.study) ? data.study : [],
-    progress: data.progress || { lastPage: null, habit: {}, updatedAt: null },
+    progress: data.progress || {
+      lastPage: null,
+      habit: {},
+      adhkar: {},
+      tasbeeh: { phraseId: "subhanallah", count: 0 },
+      updatedAt: null,
+    },
   };
 }
 

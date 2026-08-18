@@ -17,31 +17,22 @@ import {
 } from "@/lib/study-archive";
 
 import { STORAGE_KEYS } from "@/lib/storage-keys";
+import {
+  applyAdhkarProgressMap,
+  applyTasbeehState,
+  getAdhkarProgressMap,
+  getTasbeehState,
+} from "@/lib/adhkar-progress";
+import {
+  CLOUD_SYNC_EVENT,
+  DATA_REV_KEY,
+  notifyCloudSyncNeeded,
+  withCloudSyncSuppressed,
+} from "@/lib/sync-notify";
 
-export const CLOUD_SYNC_EVENT = "arabya-cloud-sync-needed";
-export const DATA_REV_KEY = STORAGE_KEYS.dataRev;
+export { CLOUD_SYNC_EVENT, DATA_REV_KEY, notifyCloudSyncNeeded, withCloudSyncSuppressed };
+
 const NOTES_KEY = STORAGE_KEYS.ayahNotes;
-
-let suppressNotify = 0;
-
-export function withCloudSyncSuppressed(fn: () => void) {
-  suppressNotify += 1;
-  try {
-    fn();
-  } finally {
-    suppressNotify -= 1;
-  }
-}
-
-export function notifyCloudSyncNeeded() {
-  if (typeof window === "undefined" || suppressNotify > 0) return;
-  try {
-    localStorage.setItem(DATA_REV_KEY, String(Date.now()));
-  } catch {
-    /* ignore */
-  }
-  window.dispatchEvent(new Event(CLOUD_SYNC_EVENT));
-}
 
 function writeAllNotes(list: AyahNote[]) {
   localStorage.setItem(NOTES_KEY, JSON.stringify(list.slice(0, 300)));
@@ -57,6 +48,8 @@ export function collectLocalSyncPayload() {
     progress: {
       lastPage: Number.isFinite(lastPage) ? lastPage : null,
       habit: readReadingHabit(),
+      adhkar: getAdhkarProgressMap(),
+      tasbeeh: getTasbeehState(),
     },
   };
 }
@@ -65,7 +58,13 @@ export function applyCloudToLocal(data: {
   bookmarks: Bookmark[];
   notes: AyahNote[];
   study?: StudyEntry[];
-  progress: { lastPage: number | null; habit: unknown; updatedAt?: number | null };
+  progress: {
+    lastPage: number | null;
+    habit: unknown;
+    adhkar?: Record<string, number>;
+    tasbeeh?: { phraseId: string; count: number };
+    updatedAt?: number | null;
+  };
 }) {
   withCloudSyncSuppressed(() => {
     if (Array.isArray(data.bookmarks)) writeBookmarks(data.bookmarks);
@@ -78,6 +77,12 @@ export function applyCloudToLocal(data: {
     }
     if (data.progress?.lastPage != null) {
       localStorage.setItem(LAST_MUSHAF_PAGE_KEY, String(data.progress.lastPage));
+    }
+    if (data.progress?.adhkar && typeof data.progress.adhkar === "object") {
+      applyAdhkarProgressMap(data.progress.adhkar);
+    }
+    if (data.progress?.tasbeeh && typeof data.progress.tasbeeh === "object") {
+      applyTasbeehState(data.progress.tasbeeh);
     }
   });
 }
@@ -124,11 +129,46 @@ function mergeStudy(local: StudyEntry[], cloud: StudyEntry[]): StudyEntry[] {
     .slice(0, 200);
 }
 
+function mergeAdhkar(
+  local: Record<string, number>,
+  cloud: Record<string, number>,
+): Record<string, number> {
+  const out: Record<string, number> = { ...cloud };
+  for (const [key, value] of Object.entries(local)) {
+    const prev = out[key] ?? 0;
+    out[key] = Math.max(prev, Number(value) || 0);
+  }
+  return out;
+}
+
+function mergeTasbeeh(
+  local: { phraseId: string; count: number },
+  cloud: { phraseId: string; count: number },
+  preferCloud: boolean,
+) {
+  if (preferCloud) {
+    return {
+      phraseId: cloud.phraseId || local.phraseId,
+      count: Math.max(local.count || 0, cloud.count || 0),
+    };
+  }
+  return {
+    phraseId: local.phraseId || cloud.phraseId,
+    count: Math.max(local.count || 0, cloud.count || 0),
+  };
+}
+
 export function mergeCloudAndLocal(cloud: {
   bookmarks: Bookmark[];
   notes: AyahNote[];
   study?: StudyEntry[];
-  progress: { lastPage: number | null; habit: unknown; updatedAt?: number | null };
+  progress: {
+    lastPage: number | null;
+    habit: unknown;
+    adhkar?: Record<string, number>;
+    tasbeeh?: { phraseId: string; count: number };
+    updatedAt?: number | null;
+  };
 }) {
   const local = collectLocalSyncPayload();
   const localRev = Number(localStorage.getItem(DATA_REV_KEY) || 0);
@@ -142,10 +182,28 @@ export function mergeCloudAndLocal(cloud: {
           cloud.progress?.habit && typeof cloud.progress.habit === "object"
             ? cloud.progress.habit
             : local.progress.habit,
+        adhkar: mergeAdhkar(
+          local.progress.adhkar || {},
+          cloud.progress?.adhkar || {},
+        ),
+        tasbeeh: mergeTasbeeh(
+          local.progress.tasbeeh || { phraseId: "subhanallah", count: 0 },
+          cloud.progress?.tasbeeh || { phraseId: "subhanallah", count: 0 },
+          true,
+        ),
       }
     : {
         lastPage: local.progress.lastPage ?? cloud.progress?.lastPage ?? null,
         habit: local.progress.habit,
+        adhkar: mergeAdhkar(
+          local.progress.adhkar || {},
+          cloud.progress?.adhkar || {},
+        ),
+        tasbeeh: mergeTasbeeh(
+          local.progress.tasbeeh || { phraseId: "subhanallah", count: 0 },
+          cloud.progress?.tasbeeh || { phraseId: "subhanallah", count: 0 },
+          false,
+        ),
       };
 
   return {

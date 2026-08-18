@@ -9,6 +9,7 @@ describe("unifiedDashNav", () => {
       .map((item) => item.href);
 
     expect(accountHrefs).toContain("/account");
+    expect(accountHrefs).toContain("/account/adhkar");
     expect(accountHrefs).toContain("/account/tahfeez");
     expect(accountHrefs).toContain("/studio/dashboard");
     expect(accountHrefs).toContain("/studio/ai");

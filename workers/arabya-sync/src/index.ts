@@ -46,6 +46,8 @@ type StudyEntryRow = {
 type ProgressPayload = {
   lastPage: number | null;
   habit: unknown;
+  adhkar?: Record<string, number>;
+  tasbeeh?: { phraseId: string; count: number };
 };
 
 type UserRole = "member" | "creator" | "editor" | "admin";
@@ -255,13 +257,38 @@ async function pullAll(db: D1Database, userId: string) {
     studyRows = [];
   }
 
-  const progress = await db
-    .prepare(
-      `SELECT last_page as lastPage, habit_json as habitJson, updated_at as updatedAt
-       FROM reading_progress WHERE user_id = ?`,
-    )
-    .bind(userId)
-    .first<{ lastPage: number | null; habitJson: string; updatedAt: number }>();
+  let progress:
+    | {
+        lastPage: number | null;
+        habitJson: string;
+        adhkarJson?: string | null;
+        tasbeehJson?: string | null;
+        updatedAt: number;
+      }
+    | null = null;
+  try {
+    progress = await db
+      .prepare(
+        `SELECT last_page as lastPage, habit_json as habitJson,
+                adhkar_json as adhkarJson, tasbeeh_json as tasbeehJson,
+                updated_at as updatedAt
+         FROM reading_progress WHERE user_id = ?`,
+      )
+      .bind(userId)
+      .first<typeof progress>();
+  } catch {
+    progress = await db
+      .prepare(
+        `SELECT last_page as lastPage, habit_json as habitJson, updated_at as updatedAt
+         FROM reading_progress WHERE user_id = ?`,
+      )
+      .bind(userId)
+      .first<{
+        lastPage: number | null;
+        habitJson: string;
+        updatedAt: number;
+      }>();
+  }
 
   let habit: unknown = {};
   if (progress?.habitJson) {
@@ -272,6 +299,32 @@ async function pullAll(db: D1Database, userId: string) {
     }
   }
 
+  let adhkar: Record<string, number> = {};
+  if (progress && "adhkarJson" in progress && progress.adhkarJson) {
+    try {
+      const parsed = JSON.parse(progress.adhkarJson) as Record<string, number>;
+      adhkar = parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      adhkar = {};
+    }
+  }
+
+  let tasbeeh = { phraseId: "subhanallah", count: 0 };
+  if (progress && "tasbeehJson" in progress && progress.tasbeehJson) {
+    try {
+      const parsed = JSON.parse(progress.tasbeehJson) as {
+        phraseId?: string;
+        count?: number;
+      };
+      tasbeeh = {
+        phraseId: parsed.phraseId || "subhanallah",
+        count: Math.max(0, Number(parsed.count) || 0),
+      };
+    } catch {
+      tasbeeh = { phraseId: "subhanallah", count: 0 };
+    }
+  }
+
   return {
     bookmarks: bookmarks.results ?? [],
     notes: notes.results ?? [],
@@ -279,6 +332,8 @@ async function pullAll(db: D1Database, userId: string) {
     progress: {
       lastPage: progress?.lastPage ?? null,
       habit,
+      adhkar,
+      tasbeeh,
       updatedAt: progress?.updatedAt ?? null,
     },
   };
@@ -368,23 +423,44 @@ async function pushAll(
   }
 
   const habitJson = JSON.stringify(progress?.habit ?? {});
+  const adhkarJson = JSON.stringify(progress?.adhkar ?? {});
+  const tasbeehJson = JSON.stringify(
+    progress?.tasbeeh ?? { phraseId: "subhanallah", count: 0 },
+  );
   const lastPage =
     progress?.lastPage == null
       ? null
       : Math.min(604, Math.max(1, Number(progress.lastPage) || 1));
   const now = Date.now();
-  stmts.push(
-    db
-      .prepare(
-        `INSERT INTO reading_progress (user_id, last_page, habit_json, updated_at)
-         VALUES (?, ?, ?, ?)
-         ON CONFLICT(user_id) DO UPDATE SET
-           last_page = excluded.last_page,
-           habit_json = excluded.habit_json,
-           updated_at = excluded.updated_at`,
-      )
-      .bind(userId, lastPage, habitJson, now),
-  );
+  try {
+    stmts.push(
+      db
+        .prepare(
+          `INSERT INTO reading_progress (user_id, last_page, habit_json, adhkar_json, tasbeeh_json, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?)
+           ON CONFLICT(user_id) DO UPDATE SET
+             last_page = excluded.last_page,
+             habit_json = excluded.habit_json,
+             adhkar_json = excluded.adhkar_json,
+             tasbeeh_json = excluded.tasbeeh_json,
+             updated_at = excluded.updated_at`,
+        )
+        .bind(userId, lastPage, habitJson, adhkarJson, tasbeehJson, now),
+    );
+  } catch {
+    stmts.push(
+      db
+        .prepare(
+          `INSERT INTO reading_progress (user_id, last_page, habit_json, updated_at)
+           VALUES (?, ?, ?, ?)
+           ON CONFLICT(user_id) DO UPDATE SET
+             last_page = excluded.last_page,
+             habit_json = excluded.habit_json,
+             updated_at = excluded.updated_at`,
+        )
+        .bind(userId, lastPage, habitJson, now),
+    );
+  }
 
   await db.batch(stmts);
 }
