@@ -25,15 +25,16 @@ if [[ "${ARABYA_USER_SYNC_ENABLED:-}" == "1" || "${ARABYA_USER_SYNC_ENABLED:-}" 
   ARABYA_USER_DB_PATH="$DB_PATH" npm run init-user-db
 fi
 
-echo "==> Restart PM2"
+echo "==> MoneyPrinterTurbo engine"
+if [[ -f scripts/contabo-mpt-deploy.sh ]]; then
+  bash scripts/contabo-mpt-deploy.sh || echo "WARN: MPT deploy step failed — /studio/ai may show engine offline."
+fi
+
+echo "==> Restart PM2 arabya-web (after env keys are written)"
 if pm2 describe arabya-web >/dev/null 2>&1; then
   pm2 restart arabya-web --update-env
 else
   NODE_ENV=production PORT=3000 pm2 start node_modules/next/dist/bin/next --name arabya-web -- start -p 3000
-fi
-
-if [[ -f scripts/contabo-mpt-deploy.sh ]]; then
-  bash scripts/contabo-mpt-deploy.sh || echo "WARN: MPT deploy step failed — /studio/ai may show engine offline."
 fi
 
 pm2 save

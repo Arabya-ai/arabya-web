@@ -31,3 +31,11 @@ def test_dahl_models_prefers_primary():
     )
     assert models[0] == "MiniMaxAI/MiniMax-M2.7"
     assert "moonshotai/Kimi-K2.6" in models
+
+
+def test_should_rotate_on_quota_or_generic_errors():
+    from app.services.dahl_router import _should_rotate
+
+    assert _should_rotate(Exception("402 available tokens exhausted"))
+    assert _should_rotate(Exception("timeout"))
+    assert _should_rotate(Exception("Just a moment..."))

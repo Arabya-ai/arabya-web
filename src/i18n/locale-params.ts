@@ -1,5 +1,5 @@
+import { redirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
-import { redirect } from "@/i18n/navigation";
 import {
   defaultLocale,
   isAppLocale,
@@ -18,8 +18,16 @@ export async function resolveLocale(
   return locale;
 }
 
+/** Prefix a path for the active locale (Arabic has no prefix). */
+export function localizedHref(href: string, locale: AppLocale): string {
+  const bare = href.startsWith("/") ? href : `/${href}`;
+  if (locale === defaultLocale) return bare;
+  return bare === "/" ? `/${locale}` : `/${locale}${bare}`;
+}
+
 /** Locale-aware redirect for server components (auth gates, etc.). */
 export function redirectLocalized(href: string, locale: AppLocale): never {
-  redirect({ href, locale });
-  throw new Error("redirectLocalized: unreachable");
+  // Use next/navigation — next-intl's redirect() can render a 404 HTML body
+  // on 307 responses for auth-gated App Router layouts.
+  redirect(localizedHref(href, locale));
 }

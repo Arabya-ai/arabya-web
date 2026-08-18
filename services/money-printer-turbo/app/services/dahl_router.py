@@ -114,8 +114,6 @@ def dahl_chat_completion(
                 note = f"key {key_index + 1} model {model_name}: {exc}"
                 errors.append(note)
                 logger.warning(f"dahl attempt failed — {note}")
-                if not _should_rotate(exc):
-                    raise
                 continue
 
     joined = " | ".join(errors[-6:])

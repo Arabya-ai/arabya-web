@@ -37,35 +37,13 @@
 
 Edge TTS للأصوات العربية لا يحتاج مفتاحًا.
 
-## مطلوب منك الآن (مرة واحدة — GitHub Secrets)
+## مطلوب منك الآن
 
-اذهب إلى **GitHub → arabya-web → Settings → Secrets and variables → Actions → Environment: Production** وأضف:
+سجّل الدخول بـ Google ثم افتح:
+https://www.arabya.org/studio/ai
 
-| Secret | القيمة |
-|--------|--------|
-| `MPT_DAHL_API_KEYS` | `dahl_MXKfDh99X8tRDsADskujwoFUJUZckQ63A,dahl_G8LWDeCbzaALdbuZyb4viaBMgMx3tX4nD` |
-| `MPT_DAHL_MODELS` | `MiniMaxAI/MiniMax-M2.7,moonshotai/Kimi-K2.6,deepseek-ai/DeepSeek-V4-Flash-0731` |
-| `MONEYPRINTER_API_URL` | `http://127.0.0.1:8080` |
+بدون حساب ستُحوَّل إلى صفحة تسجيل الدخول (وليس 404).
 
-ثم من **Actions → Deploy Contabo → Run workflow**.
+التبديل التلقائي عند نفاد الرصيد: المفتاح الجديد أولًا، ثم المفتاح السابق؛ والنماذج بالترتيب MiniMax M2.7 → Kimi K2.6 → DeepSeek V4.
 
-**أو** عبر SSH على Contabo:
-
-```bash
-cd /var/www/arabya-web
-bash scripts/contabo-mpt-deploy.sh
-pm2 restart arabya-web --update-env
-```
-
-## التبديل التلقائي (Model Routing)
-
-عند نفاد رصيد مفتاح Dahl أو فشل نموذج، المحرك يجرّب بالترتيب:
-
-1. المفتاح التالي (إن وُجد أكثر من مفتاح)
-2. النموذج التالي: MiniMax M2.7 → Kimi K2.6 → DeepSeek V4
-
-## ملاحظة عن /studio/ai
-
-الصفحة **تتطلّب تسجيل الدخول** (Google). بدون حساب تُحوَّل إلى `/login` — وليست 404. إن ظهرت 404 فغالبًا قبل اكتمال آخر نشر؛ حدّث الصفحة بعد Deploy Contabo.
-
-**أمان:** لا تُرسل المفاتيح في الدردشة مرة أخرى — استخدم Secrets أو SSH فقط.
+لا تضع المفاتيح في Git. إن أضفت أسرار GitHub Production (`MPT_DAHL_API_KEYS`) تُستخدم بدل القيم على السيرفر.

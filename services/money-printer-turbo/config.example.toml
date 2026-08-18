@@ -118,6 +118,10 @@ openai_api_key = ""
 openai_base_url = ""
 openai_model_name = ""
 
+# Dahl Inference failover (comma-separated). Used when openai_base_url is inference.dahl.global
+dahl_api_keys = ""
+dahl_models = "MiniMaxAI/MiniMax-M2.7,moonshotai/Kimi-K2.6,deepseek-ai/DeepSeek-V4-Flash-0731"
+
 # Google Gemini
 # API key: https://aistudio.google.com/app/apikey
 gemini_api_key = ""
