@@ -72,6 +72,14 @@ function rewriteAssetString(value: string): string {
   if (value.startsWith("/tasks/")) {
     return `${files}/${value.slice("/tasks/".length)}`;
   }
+  const storageIdx = value.indexOf("/storage/tasks/");
+  if (storageIdx !== -1) {
+    const rest = value.slice(storageIdx + "/storage/tasks/".length);
+    const parts = rest.split("/").filter(Boolean);
+    if (isSafeMptFilePath(parts)) {
+      return `${files}/${parts.join("/")}`;
+    }
+  }
   return value;
 }
 

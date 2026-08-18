@@ -19,8 +19,19 @@ import { MPT_LANGUAGES, MPT_VOICES } from "@/mpt-studio/lib/voices";
 import {
   MPT_ASPECTS,
   MPT_SOURCES,
+  type MptSource,
   type MptVideoBody,
 } from "@/lib/mpt-payload";
+
+const SOURCE_LABEL: Record<
+  MptSource,
+  "source_pexels" | "source_pixabay" | "source_coverr" | "source_local"
+> = {
+  pexels: "source_pexels",
+  pixabay: "source_pixabay",
+  coverr: "source_coverr",
+  local: "source_local",
+};
 
 const defaultForm: MptVideoBody = {
   video_subject: "",
@@ -310,7 +321,7 @@ export default function AiCreate() {
               >
                 {MPT_SOURCES.map((source) => (
                   <option key={source} value={source}>
-                    {t(`source_${source}`)}
+                    {t(SOURCE_LABEL[source])}
                   </option>
                 ))}
               </select>

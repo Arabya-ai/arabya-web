@@ -72,4 +72,12 @@ describe("rewriteMptValue", () => {
     expect(rewritten.videos[1]).toBe("/api/studio/ai/files/abc/final-2.mp4");
     expect(rewritten.note).toBe("keep");
   });
+
+  it("rewrites engine filesystem task paths without leaking the host path", () => {
+    expect(
+      rewriteMptValue(
+        "/workspace/services/money-printer-turbo/storage/tasks/abc/final-1.mp4",
+      ),
+    ).toBe("/api/studio/ai/files/abc/final-1.mp4");
+  });
 });
