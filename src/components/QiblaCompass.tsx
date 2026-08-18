@@ -159,7 +159,7 @@ export function QiblaCompass() {
             />
           </div>
           <p className="qibla-degrees">
-            {t("qiblaDegrees", { degrees: degreesLabel ?? "" })}
+            <span dir="ltr">{degreesLabel}°</span> {t("qiblaFromNorth")}
           </p>
         </div>
       ) : null}

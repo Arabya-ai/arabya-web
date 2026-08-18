@@ -1257,7 +1257,7 @@
     "qiblaLead": "Bearing from north toward the Kaaba, using the selected city or the nearest city to your location.",
     "qiblaError": "Could not load the qibla direction right now.",
     "qiblaNorth": "N",
-    "qiblaDegrees": "{degrees}° from north",
+    "qiblaFromNorth": "from north",
     "credit": "Arabya’s adhkar section is adapted from the open-source Adhkari project (Qur98/azkar) — Copyright © 2026 Qur98, MIT License. Quran reading and word study stay available without an account.",
     "tools": {
       "hub": "Adhkar",
