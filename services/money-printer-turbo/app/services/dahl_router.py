@@ -113,7 +113,10 @@ def dahl_chat_completion(
             except Exception as exc:
                 note = f"key {key_index + 1} model {model_name}: {exc}"
                 errors.append(note)
-                logger.warning(f"dahl attempt failed — {note}")
+                logger.warning(
+                    f"dahl attempt failed — key {key_index + 1}/{len(keys)} "
+                    f"model={model_name} err={type(exc).__name__}"
+                )
                 continue
 
     joined = " | ".join(errors[-6:])

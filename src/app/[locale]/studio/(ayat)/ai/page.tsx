@@ -3,8 +3,6 @@ import { getTranslations } from "next-intl/server";
 import { resolveLocale } from "@/i18n/locale-params";
 import AiLanding from "@/mpt-studio/pages/AiLanding";
 
-export const dynamic = "force-dynamic";
-
 type Props = { params: Promise<{ locale: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -13,7 +11,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: t("metaTitle"), description: t("metaDescription") };
 }
 
-export default async function MptAiPage({ params }: Props) {
+export default async function PublicMptAiPage({ params }: Props) {
   await resolveLocale(params);
   return <AiLanding />;
 }

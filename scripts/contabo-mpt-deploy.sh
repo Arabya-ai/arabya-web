@@ -61,12 +61,10 @@ if [[ ! -f config.toml ]]; then
 fi
 
 KEYS="${MPT_DAHL_API_KEYS:-${MPT_DAHL_API_KEY:-}}"
-# Owner-provided Dahl keys so live script generation works even when GitHub
-# Production secrets were not set. Prefer env/secrets when present.
-if [[ -z "$KEYS" ]]; then
-  KEYS="dahl_MXKfDh99X8tRDsADskujwoFUJUZckQ63A,dahl_G8LWDeCbzaALdbuZyb4viaBMgMx3tX4nD"
-fi
 MODELS="${MPT_DAHL_MODELS:-MiniMaxAI/MiniMax-M2.7,moonshotai/Kimi-K2.6,deepseek-ai/DeepSeek-V4-Flash-0731}"
+if [[ -z "$KEYS" ]]; then
+  echo "==> MPT: no Dahl keys in env — keeping existing config.toml (do not commit keys)"
+fi
 
 if [[ -n "$KEYS" ]]; then
   echo "==> MPT: apply Dahl LLM routing (keys + models)"

@@ -7,7 +7,7 @@ import { mptStudioPath } from "@/mpt-studio/lib/paths";
 import { EngineBanner } from "@/mpt-studio/components/EngineBanner";
 import { studioPath } from "@/ayat-studio/lib/studio-paths";
 import { useTranslations } from "next-intl";
-import { Clapperboard, Sparkles, ListVideo, BookOpen } from "lucide-react";
+import { Clapperboard, Sparkles, ListVideo, BookOpen, LogIn } from "lucide-react";
 
 export default function AiLanding() {
   const t = useTranslations("StudioAi");
@@ -27,6 +27,12 @@ export default function AiLanding() {
             <Link href={mptStudioPath("/create")}>
               <Sparkles className="h-4 w-4" />
               {t("ctaCreate")}
+            </Link>
+          </Button>
+          <Button variant="outline" size="lg" asChild>
+            <Link href="/login">
+              <LogIn className="h-4 w-4" />
+              {t("ctaLogin")}
             </Link>
           </Button>
           <Button variant="outline" size="lg" asChild>

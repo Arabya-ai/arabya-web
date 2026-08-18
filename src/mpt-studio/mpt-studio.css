@@ -24,6 +24,10 @@
   border-color: hsl(var(--destructive) / 0.35);
 }
 
+.mpt-studio .mpt-banner[data-state="login"] {
+  border-color: hsl(var(--primary) / 0.35);
+}
+
 .mpt-studio .mpt-grid {
   display: grid;
   gap: 1rem;
