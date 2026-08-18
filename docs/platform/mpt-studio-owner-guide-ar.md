@@ -37,6 +37,22 @@
 
 Edge TTS للأصوات العربية لا يحتاج مفتاحًا.
 
-## مطلوب منك الآن
+## مطلوب منك الآن (خطوة واحدة على Contabo)
 
-لا شيء لتشغيل المسار المحلي إن كان المحرك يعمل. إن أردت توليد سكربت ومقاطع مخزون تلقائيًا، أرسل مفتاح النموذج (OpenAI أو Gemini) ومفتاح Pexels أو Pixabay لأضعهما في `config.toml` على السيرفر — لا تُرفع إلى Git.
+افتح SSH على السيرفر ثم الصق في `/var/www/arabya-web/.env.production.local`:
+
+```bash
+MONEYPRINTER_API_URL=http://127.0.0.1:8080
+MPT_DAHL_API_KEY=مفتاحك_الجديد_من_Dahl
+MPT_LLM_MODEL=MiniMaxAI/MiniMax-M2.7
+```
+
+ثم نفّذ:
+
+```bash
+cd /var/www/arabya-web && bash scripts/contabo-mpt-deploy.sh && pm2 restart arabya-web
+```
+
+أو أضف `MPT_DAHL_API_KEY` و `MONEYPRINTER_API_URL` في **GitHub → Settings → Secrets → Production** ثم أعد تشغيل workflow «Deploy Contabo».
+
+**أمان:** المفتاح الذي أُرسل في الدردشة سابقًا يُفضّل إلغاؤه واستبداله بمفتاح جديد.
