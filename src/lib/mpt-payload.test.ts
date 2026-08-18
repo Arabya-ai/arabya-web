@@ -17,6 +17,22 @@ describe("parseMptVideoBody", () => {
     expect(parsed.body.voice_name).toContain("ar-SA");
   });
 
+  it("requires local materials when source is local", () => {
+    expect(
+      parseMptVideoBody({ video_subject: "topic", video_source: "local" }).ok,
+    ).toBe(false);
+    const parsed = parseMptVideoBody({
+      video_subject: "topic",
+      video_source: "local",
+      video_materials: [{ url: "clip-1.png" }],
+    });
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.body.video_materials).toEqual([
+      { provider: "local", url: "clip-1.png" },
+    ]);
+  });
+
   it("rejects non-hex colors and clamps counts", () => {
     expect(
       parseMptVideoBody({

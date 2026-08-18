@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/ayat-studio/components/ui/button";
@@ -8,7 +8,12 @@ import { Input } from "@/ayat-studio/components/ui/input";
 import { Label } from "@/ayat-studio/components/ui/label";
 import { Textarea } from "@/ayat-studio/components/ui/textarea";
 import { EngineBanner } from "@/mpt-studio/components/EngineBanner";
-import { mptPost, unwrapData } from "@/mpt-studio/lib/client";
+import { mptGet, mptPost, unwrapData } from "@/mpt-studio/lib/client";
+import {
+  parseMptMaterials,
+  preferredLocalMaterials,
+  type MptMaterialFile,
+} from "@/mpt-studio/lib/materials";
 import { mptStudioPath } from "@/mpt-studio/lib/paths";
 import { MPT_LANGUAGES, MPT_VOICES } from "@/mpt-studio/lib/voices";
 import {
@@ -23,15 +28,15 @@ const defaultForm: MptVideoBody = {
   video_terms: "",
   video_language: "Arabic",
   video_aspect: "9:16",
-  video_concat_mode: "random",
+  video_concat_mode: "sequential",
   video_clip_duration: 5,
   video_count: 1,
-  video_source: "pexels",
+  video_source: "local",
   voice_name: "ar-SA-ZariyahNeural-Female",
   voice_volume: 1,
   voice_rate: 1,
   bgm_type: "random",
-  bgm_volume: 0.2,
+  bgm_volume: 0,
   subtitle_enabled: true,
   subtitle_position: "bottom",
   font_name: "BeVietnamPro-Bold.ttf",
@@ -42,20 +47,68 @@ const defaultForm: MptVideoBody = {
   paragraph_number: 1,
 };
 
+function asMaterials(urls: string[]): MptVideoBody["video_materials"] {
+  return urls.map((url) => ({ provider: "local", url }));
+}
+
 export default function AiCreate() {
   const t = useTranslations("StudioAi");
   const router = useRouter();
   const [form, setForm] = useState<MptVideoBody>(defaultForm);
   const [busy, setBusy] = useState<"script" | "terms" | "video" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [materials, setMaterials] = useState<MptMaterialFile[]>([]);
+  const [materialsError, setMaterialsError] = useState<string | null>(null);
 
   const localeIsAr = useMemo(() => {
     if (typeof document === "undefined") return true;
     return document.documentElement.lang !== "en";
   }, []);
 
+  const selectedFiles = useMemo(
+    () => new Set((form.video_materials || []).map((item) => item.url)),
+    [form.video_materials],
+  );
+
   function patch(partial: Partial<MptVideoBody>) {
     setForm((prev) => ({ ...prev, ...partial }));
+  }
+
+  useEffect(() => {
+    if (form.video_source !== "local") return;
+    let cancelled = false;
+    void mptGet("/api/studio/ai/materials").then(({ status, json }) => {
+      if (cancelled) return;
+      if (status >= 400) {
+        setMaterialsError(t("errorMaterials"));
+        return;
+      }
+      const files = parseMptMaterials(json);
+      setMaterialsError(null);
+      setMaterials(files);
+      setForm((prev) => {
+        if (prev.video_source !== "local" || (prev.video_materials || []).length) {
+          return prev;
+        }
+        const preferred = preferredLocalMaterials(files).slice(0, 6);
+        return preferred.length
+          ? { ...prev, video_materials: asMaterials(preferred.map((item) => item.file)) }
+          : prev;
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [form.video_source, t]);
+
+  function toggleMaterial(file: string, checked: boolean) {
+    setForm((prev) => {
+      const current = (prev.video_materials || []).map((item) => item.url);
+      const next = checked
+        ? [...new Set([...current, file])]
+        : current.filter((name) => name !== file);
+      return { ...prev, video_materials: asMaterials(next) };
+    });
   }
 
   async function generateScript() {
@@ -100,8 +153,17 @@ export default function AiCreate() {
   async function generateVideo(event: FormEvent) {
     event.preventDefault();
     setError(null);
+    if (form.video_source === "local" && !(form.video_materials || []).length) {
+      setError(t("errorMaterials"));
+      return;
+    }
     setBusy("video");
-    const { status, json } = await mptPost("/api/studio/ai/videos", form);
+    const payload: MptVideoBody = {
+      ...form,
+      video_materials:
+        form.video_source === "local" ? form.video_materials : undefined,
+    };
+    const { status, json } = await mptPost("/api/studio/ai/videos", payload);
     setBusy(null);
     if (status >= 400) {
       setError(t("errorVideo"));
@@ -237,13 +299,18 @@ export default function AiCreate() {
                 id="mpt-source"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 value={form.video_source}
-                onChange={(e) =>
-                  patch({ video_source: e.target.value as MptVideoBody["video_source"] })
-                }
+                onChange={(e) => {
+                  const video_source = e.target.value as MptVideoBody["video_source"];
+                  patch({
+                    video_source,
+                    video_concat_mode: video_source === "local" ? "sequential" : "random",
+                    video_materials: video_source === "local" ? form.video_materials : undefined,
+                  });
+                }}
               >
                 {MPT_SOURCES.map((source) => (
                   <option key={source} value={source}>
-                    {source}
+                    {t(`source_${source}`)}
                   </option>
                 ))}
               </select>
@@ -273,6 +340,33 @@ export default function AiCreate() {
               />
             </div>
           </div>
+          {form.video_source === "local" ? (
+            <div className="mt-4">
+              <p className="text-sm font-medium">{t("localMaterials")}</p>
+              <p className="mpt-muted">{t("localMaterialsLead")}</p>
+              {materialsError ? (
+                <p className="mt-2 text-sm text-destructive" role="alert">
+                  {materialsError}
+                </p>
+              ) : null}
+              {materials.length === 0 && !materialsError ? (
+                <p className="mpt-muted mt-2">{t("localMaterialsEmpty")}</p>
+              ) : (
+                <div className="mpt-materials">
+                  {materials.map((item) => (
+                    <label key={item.file}>
+                      <input
+                        type="checkbox"
+                        checked={selectedFiles.has(item.file)}
+                        onChange={(e) => toggleMaterial(item.file, e.target.checked)}
+                      />
+                      <span>{item.name}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : null}
         </fieldset>
 
         <fieldset>
@@ -313,6 +407,14 @@ export default function AiCreate() {
               onChange={(e) => patch({ subtitle_enabled: e.target.checked })}
             />
             {t("subtitles")}
+          </label>
+          <label className="mt-2 flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={form.bgm_volume === 0}
+              onChange={(e) => patch({ bgm_volume: e.target.checked ? 0 : 0.2 })}
+            />
+            {t("noBgm")}
           </label>
         </fieldset>
 

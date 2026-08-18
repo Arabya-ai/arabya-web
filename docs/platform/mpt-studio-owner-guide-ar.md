@@ -18,7 +18,7 @@
 1. ثبّت Docker أو Python 3.11 و ffmpeg.
 2. من مجلد الموقع:
    - `docker compose -f docker-compose.mpt.yml up --build -d`
-   - أو داخل `services/money-printer-turbo`: انسخ `config.example.toml` إلى `config.toml` واملأ مفاتيح النموذج وPexels ثم `python main.py`.
+   - أو داخل `services/money-printer-turbo`: انسخ `config.example.toml` إلى `config.toml` ثم `python main.py`.
 3. أضف في `.env.production.local`:
    - `MONEYPRINTER_API_URL=http://127.0.0.1:8080`
 4. أعد تشغيل عربية (`pm2 restart arabya-web` أو سكربت التحديث).
@@ -26,7 +26,11 @@
 
 لا تفتح منفذ 8080 على الإنترنت. الواجهة تمر عبر `/api/studio/ai` بعد تسجيل الدخول فقط.
 
-## مفاتيح مطلوبة داخل `config.toml` للمحرك
+## مسار يعمل بلا مفاتيح (محلي)
+
+ضع صور PNG أو فيديوهات MP4 في `services/money-printer-turbo/storage/local_videos/`. من `/studio/ai/create` اختر مصدر «ملفات محلية»، الصق سكربتًا عربيًا، وابدأ التوليد. صوت Edge TTS لا يحتاج مفتاحًا.
+
+## مفاتيح مطلوبة داخل `config.toml` لمسار «موضوع → سكربت + مخزون»
 
 - مفتاح نموذج لغوي (OpenAI / Gemini / غيرها حسب اختيارك في ملف الإعداد)
 - مفتاح Pexels أو Pixabay لمقاطع المخزون (يمكن إعادة استخدام مفاتيح الاستوديو إن رغبت بنسخها يدويًا إلى config.toml — لا تُرسل من المتصفح)
@@ -35,6 +39,4 @@ Edge TTS للأصوات العربية لا يحتاج مفتاحًا.
 
 ## مطلوب منك الآن
 
-1. شغّل المحرك محليًا أو على Contabo كما فوق.
-2. ضع `MONEYPRINTER_API_URL`.
-3. جرّب موضوعًا قصيرًا من `/studio/ai/create` (ليس آية — الآيات تبقى في `/studio/projects/new`).
+لا شيء لتشغيل المسار المحلي إن كان المحرك يعمل. إن أردت توليد سكربت ومقاطع مخزون تلقائيًا، أرسل مفتاح النموذج (OpenAI أو Gemini) ومفتاح Pexels أو Pixabay لأضعهما في `config.toml` على السيرفر — لا تُرفع إلى Git.

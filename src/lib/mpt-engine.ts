@@ -46,6 +46,7 @@ export function isAllowedMptApiPath(pathname: string): boolean {
     pathname === "/api/v1/social-metadata" ||
     pathname === "/api/v1/tasks" ||
     pathname === "/api/v1/musics" ||
+    pathname === "/api/v1/video_materials" ||
     /^\/api\/v1\/tasks\/[A-Za-z0-9_-]+$/.test(pathname)
   );
 }

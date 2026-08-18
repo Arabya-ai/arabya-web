@@ -44,6 +44,7 @@ describe("joinMptUrl", () => {
 describe("isAllowedMptApiPath", () => {
   it("allows the documented v1 surface only", () => {
     expect(isAllowedMptApiPath("/api/v1/videos")).toBe(true);
+    expect(isAllowedMptApiPath("/api/v1/video_materials")).toBe(true);
     expect(isAllowedMptApiPath("/api/v1/tasks/abc-123")).toBe(true);
     expect(isAllowedMptApiPath("/api/v1/config")).toBe(false);
     expect(isAllowedMptApiPath("/ping")).toBe(false);
