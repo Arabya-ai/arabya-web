@@ -113,7 +113,7 @@ export function QiblaCompass() {
     : null;
 
   return (
-    <section className="qibla-panel" aria-label={t("tools.qibla")}>
+    <section className="qibla-panel" aria-label={t("title")}>
       <header className="qibla-panel-head">
         <div className="prayer-city-controls">
           <label className="prayer-city">

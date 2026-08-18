@@ -23,6 +23,7 @@ import {
   getAdhkarProgressMap,
   getTasbeehState,
 } from "@/lib/adhkar-progress";
+import { sanitizeAdhkarMap, sanitizeTasbeehState } from "@/lib/adhkar-sync";
 import {
   CLOUD_SYNC_EVENT,
   DATA_REV_KEY,
@@ -133,8 +134,8 @@ function mergeAdhkar(
   local: Record<string, number>,
   cloud: Record<string, number>,
 ): Record<string, number> {
-  const out: Record<string, number> = { ...cloud };
-  for (const [key, value] of Object.entries(local)) {
+  const out: Record<string, number> = { ...sanitizeAdhkarMap(cloud) };
+  for (const [key, value] of Object.entries(sanitizeAdhkarMap(local))) {
     const prev = out[key] ?? 0;
     out[key] = Math.max(prev, Number(value) || 0);
   }
@@ -146,15 +147,17 @@ function mergeTasbeeh(
   cloud: { phraseId: string; count: number },
   preferCloud: boolean,
 ) {
+  const localSafe = sanitizeTasbeehState(local);
+  const cloudSafe = sanitizeTasbeehState(cloud);
   if (preferCloud) {
     return {
-      phraseId: cloud.phraseId || local.phraseId,
-      count: Math.max(local.count || 0, cloud.count || 0),
+      phraseId: cloudSafe.phraseId || localSafe.phraseId,
+      count: Math.max(localSafe.count, cloudSafe.count),
     };
   }
   return {
-    phraseId: local.phraseId || cloud.phraseId,
-    count: Math.max(local.count || 0, cloud.count || 0),
+    phraseId: localSafe.phraseId || cloudSafe.phraseId,
+    count: Math.max(localSafe.count, cloudSafe.count),
   };
 }
 

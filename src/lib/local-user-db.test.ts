@@ -72,6 +72,32 @@ describe("local-user-db sync", () => {
     expect(pulled.userId).toBe("reader@example.com");
   });
 
+  it("sanitizes adhkar payload keys and bounds on push", () => {
+    getUserDb();
+    const user = { email: "adhkar@example.com", name: "A", image: null };
+    const pushed = localPushSync(user, {
+      bookmarks: [],
+      notes: [],
+      study: [],
+      progress: {
+        lastPage: 1,
+        habit: {},
+        adhkar: JSON.parse(
+          '{"morning-1":3,"__proto__":9,"bad key":4,"ok-id":1000000000}',
+        ) as Record<string, number>,
+        tasbeeh: { phraseId: "subhanallah", count: 12 },
+      },
+    });
+    expect(pushed.progress.adhkar).toEqual({
+      "morning-1": 3,
+      "ok-id": 1_000_000,
+    });
+    expect(pushed.progress.tasbeeh).toEqual({
+      phraseId: "subhanallah",
+      count: 12,
+    });
+  });
+
   it("simulates two devices: device A push → device B pull", () => {
     getUserDb();
     const email = "two-device@example.com";

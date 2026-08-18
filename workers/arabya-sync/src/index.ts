@@ -43,6 +43,48 @@ type StudyEntryRow = {
   updatedAt: number;
 };
 
+function sanitizeAdhkarMap(raw: unknown): Record<string, number> {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out: Record<string, number> = {};
+  let n = 0;
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (
+      key === "__proto__" ||
+      key === "constructor" ||
+      key === "prototype" ||
+      !/^[a-z0-9][a-z0-9-]{0,63}$/.test(key)
+    ) {
+      continue;
+    }
+    const num = typeof value === "number" ? value : Number(value);
+    if (!Number.isFinite(num) || num < 0) continue;
+    out[key] = Math.min(1_000_000, Math.floor(num));
+    n += 1;
+    if (n >= 800) break;
+  }
+  return out;
+}
+
+function sanitizeTasbeehState(raw: unknown): {
+  phraseId: string;
+  count: number;
+} {
+  const fallback = { phraseId: "subhanallah", count: 0 };
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return fallback;
+  const obj = raw as { phraseId?: unknown; count?: unknown };
+  const phraseId =
+    typeof obj.phraseId === "string" &&
+    /^[a-z0-9][a-z0-9-]{0,63}$/.test(obj.phraseId)
+      ? obj.phraseId
+      : fallback.phraseId;
+  const num = typeof obj.count === "number" ? obj.count : Number(obj.count);
+  const count =
+    Number.isFinite(num) && num >= 0
+      ? Math.min(1_000_000, Math.floor(num))
+      : 0;
+  return { phraseId, count };
+}
+
 type ProgressPayload = {
   lastPage: number | null;
   habit: unknown;
@@ -222,6 +264,15 @@ async function writeAudit(
     )
     .bind(newId("aud"), userId, actorId, fromRole, toRole, reason, Date.now())
     .run();
+}
+
+async function readingProgressHasAdhkarColumns(db: D1Database): Promise<boolean> {
+  try {
+    await db.prepare(`SELECT adhkar_json FROM reading_progress LIMIT 0`).first();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function pullAll(db: D1Database, userId: string) {
@@ -423,16 +474,15 @@ async function pushAll(
   }
 
   const habitJson = JSON.stringify(progress?.habit ?? {});
-  const adhkarJson = JSON.stringify(progress?.adhkar ?? {});
-  const tasbeehJson = JSON.stringify(
-    progress?.tasbeeh ?? { phraseId: "subhanallah", count: 0 },
-  );
+  const adhkarJson = JSON.stringify(sanitizeAdhkarMap(progress?.adhkar));
+  const tasbeehJson = JSON.stringify(sanitizeTasbeehState(progress?.tasbeeh));
   const lastPage =
     progress?.lastPage == null
       ? null
       : Math.min(604, Math.max(1, Number(progress.lastPage) || 1));
   const now = Date.now();
-  try {
+  const withAdhkarCols = await readingProgressHasAdhkarColumns(db);
+  if (withAdhkarCols) {
     stmts.push(
       db
         .prepare(
@@ -447,7 +497,7 @@ async function pushAll(
         )
         .bind(userId, lastPage, habitJson, adhkarJson, tasbeehJson, now),
     );
-  } catch {
+  } else {
     stmts.push(
       db
         .prepare(

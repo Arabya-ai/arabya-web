@@ -12,6 +12,7 @@ import type {
   SyncPayload,
 } from "@/lib/cloud-sync";
 import type { StudyEntry } from "@/lib/study-archive";
+import { sanitizeAdhkarMap, sanitizeTasbeehState } from "@/lib/adhkar-sync";
 import {
   emptyTahfeezPortfolio,
   type TahfeezPortfolio,
@@ -346,9 +347,11 @@ function pushAll(db: SqliteDb, userId: string, payload: SyncPayload) {
     }
 
     const habitJson = JSON.stringify(payload.progress?.habit ?? {});
-    const adhkarJson = JSON.stringify(payload.progress?.adhkar ?? {});
+    const adhkarJson = JSON.stringify(
+      sanitizeAdhkarMap(payload.progress?.adhkar),
+    );
     const tasbeehJson = JSON.stringify(
-      payload.progress?.tasbeeh ?? { phraseId: "subhanallah", count: 0 },
+      sanitizeTasbeehState(payload.progress?.tasbeeh),
     );
     const lastPage =
       payload.progress?.lastPage == null
