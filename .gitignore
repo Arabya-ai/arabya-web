@@ -50,6 +50,15 @@ data/user-data.sqlite
 data/user-data.sqlite-wal
 data/user-data.sqlite-shm
 
+# MoneyPrinterTurbo engine runtime (keep source; ignore secrets/output/media)
+services/money-printer-turbo/storage/
+services/money-printer-turbo/.venv/
+services/money-printer-turbo/venv/
+services/money-printer-turbo/config.toml
+services/money-printer-turbo/models/
+services/money-printer-turbo/resource/songs/*.mp3
+services/money-printer-turbo/resource/fonts/*.ttc
+
 # vercel
 .vercel
 
