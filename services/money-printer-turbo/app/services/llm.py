@@ -10,6 +10,12 @@ from openai.types.chat import ChatCompletion
 
 from app.config import config
 from app.models.llm_provider import DEFAULT_LLM_PROVIDER_ID, get_llm_provider
+from app.services.dahl_router import (
+    dahl_chat_completion,
+    dahl_keys_from_config,
+    dahl_models_from_config,
+    is_dahl_base_url,
+)
 
 _max_retries = 5
 MIN_SCRIPT_PARAGRAPH_NUMBER = 1
@@ -384,6 +390,15 @@ def _generate_response(prompt: str, app_config=None) -> str:
             api_key=api_key,
             base_url=base_url,
         )
+
+        if is_dahl_base_url(base_url):
+            return dahl_chat_completion(
+                prompt=prompt,
+                api_keys=dahl_keys_from_config(runtime_app_config),
+                models=dahl_models_from_config(runtime_app_config, model_name),
+                base_url=base_url,
+                extract_text=_extract_chat_completion_text,
+            )
 
         response = client.chat.completions.create(
             model=model_name, messages=[{"role": "user", "content": prompt}]

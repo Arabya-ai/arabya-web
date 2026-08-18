@@ -27,7 +27,7 @@ fi
 
 echo "==> Restart PM2"
 if pm2 describe arabya-web >/dev/null 2>&1; then
-  pm2 restart arabya-web
+  pm2 restart arabya-web --update-env
 else
   NODE_ENV=production PORT=3000 pm2 start node_modules/next/dist/bin/next --name arabya-web -- start -p 3000
 fi

@@ -53,6 +53,8 @@ jobs:
           SSH_KEY: ${{ secrets.CONTABO_SSH_KEY }}
           SSH_KEY_B64: ${{ secrets.CONTABO_SSH_KEY_B64 }}
           MPT_DAHL_API_KEY: ${{ secrets.MPT_DAHL_API_KEY }}
+          MPT_DAHL_API_KEYS: ${{ secrets.MPT_DAHL_API_KEYS }}
+          MPT_DAHL_MODELS: ${{ secrets.MPT_DAHL_MODELS }}
           MONEYPRINTER_API_URL: ${{ secrets.MONEYPRINTER_API_URL }}
         run: |
           set -euo pipefail
@@ -72,6 +74,12 @@ jobs:
           REMOTE_ENV=""
           if [ -n "${MPT_DAHL_API_KEY:-}" ]; then
             REMOTE_ENV="${REMOTE_ENV} export MPT_DAHL_API_KEY=$(printf %q "$MPT_DAHL_API_KEY");"
+          fi
+          if [ -n "${MPT_DAHL_API_KEYS:-}" ]; then
+            REMOTE_ENV="${REMOTE_ENV} export MPT_DAHL_API_KEYS=$(printf %q "$MPT_DAHL_API_KEYS");"
+          fi
+          if [ -n "${MPT_DAHL_MODELS:-}" ]; then
+            REMOTE_ENV="${REMOTE_ENV} export MPT_DAHL_MODELS=$(printf %q "$MPT_DAHL_MODELS");"
           fi
           if [ -n "${MONEYPRINTER_API_URL:-}" ]; then
             REMOTE_ENV="${REMOTE_ENV} export MONEYPRINTER_API_URL=$(printf %q "$MONEYPRINTER_API_URL");"
