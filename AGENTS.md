@@ -21,6 +21,8 @@
 | `/books`, `/books/[slug]` | Irab book catalog (licensed import later) |
 | `/resources`, `/qiraat` | Hubs / placeholders |
 | `/hadith`, `/heritage` | **Placeholders only** — do not build full pipelines yet |
+| `/studio` | Ayah video studio (browser WebCodecs) |
+| `/studio/ai` | Independent AI short-video UI; Python engine in `services/money-printer-turbo` |
 | `/api/tafsir/...`, `/api/translation/...`, `/api/search`, `/api/study` | Local JSON APIs |
 
 Study UI: `MushafPageStudio` + `StudyModeTabs` (keyboard-accessible RTL tabs) + `WordStudyDock` (morph/syntax/semantics/…). Do **not** show per-layer “المصدر: …” attribution chips in the dock (removed by product decision); keep footer/about GPL credit where legally needed.

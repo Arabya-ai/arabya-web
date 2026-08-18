@@ -64,6 +64,8 @@ npm run dev
 - `/books` — كتب الإعراب (مرخّصة عند التوفر)
 - `/resources` · `/qiraat` — موارد وإذاعة / القراءات (حفص حاليًا)
 - `/hadith` · `/heritage` — محاور لاحقة (placeholders)
+- `/studio` — استوديو الآيات (تلاوة + تصدير في المتصفح)
+- `/studio/ai` — فيديو ذكي من موضوع (MoneyPrinterTurbo كخدمة شقيقة؛ يحتاج محرك Python)
 - `/about` · `/privacy`
 
 ## واجهة الدراسة

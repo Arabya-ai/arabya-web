@@ -67,6 +67,12 @@ export default function Dashboard() {
                 مشروع جديد
               </Link>
             </Button>
+            <Button variant="outline" size="lg" asChild>
+              <Link href="/studio/ai">
+                <Sparkles className="h-4 w-4" />
+                فيديو ذكي
+              </Link>
+            </Button>
           </div>
         </div>
       </div>

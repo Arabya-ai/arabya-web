@@ -23,6 +23,7 @@
 - API الصور منفصل عن OG: `/api/create/image`
 - تصدير MP4 الخفيف: **Plus/Pro** فقط (Chrome/Edge + WebCodecs)
 - الاستوديو الكامل يبقى تحت `/studio` ولا يُستبدل بـ `/create`
+- مسار ثالث مستقل (غير هجين): `/studio/ai` — MoneyPrinterTurbo كخدمة Python شقيقة؛ الخطة: `docs/plans/money-printer-turbo-integration.md`
 
 ### الاشتراك (قبل PayPal)
 

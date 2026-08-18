@@ -15,6 +15,7 @@ import {
   Wand2,
   Mic2,
   ScrollText,
+  Sparkles,
 } from "lucide-react";
 import {
   ArabesqueMedallion,
@@ -102,6 +103,12 @@ export default function Landing() {
                 <Link href={studioPath("/dashboard")}>
                   <Wand2 className="h-4 w-4" />
                   ادخل الاستوديو
+                </Link>
+              </Button>
+              <Button variant="outline" asChild size="lg">
+                <Link href="/studio/ai">
+                  <Sparkles className="h-4 w-4" />
+                  فيديو ذكي
                 </Link>
               </Button>
               <Button variant="outline" asChild size="lg">
