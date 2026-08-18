@@ -74,8 +74,12 @@ export function AppSidebar() {
                   (href !== "/account" && pathname.startsWith(`${href}/`));
                 const body = (
                   <>
-                    <item.icon className="h-4 w-4 shrink-0" aria-hidden />
-                    {!collapsed && <span>{item.title}</span>}
+                    <span className="studio-app-sidebar__icon" aria-hidden>
+                      <item.icon className="h-4 w-4 shrink-0" />
+                    </span>
+                    {!collapsed && (
+                      <span className="studio-app-sidebar__item-label">{item.title}</span>
+                    )}
                   </>
                 );
                 return (
@@ -83,7 +87,7 @@ export function AppSidebar() {
                     <SidebarMenuButton
                       asChild
                       isActive={isActive}
-                      className="studio-app-sidebar__link"
+                      className="studio-app-sidebar__link text-white hover:text-white"
                     >
                       {"site" in item && item.site ? (
                         <Link href={item.url}>{body}</Link>
