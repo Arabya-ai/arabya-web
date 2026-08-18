@@ -1,4 +1,11 @@
+import {
+  isEngineSampleMaterial,
+  isMoviePyIntermediate,
+  isUsableLocalMaterial,
+} from "@/lib/mpt-payload";
 import { unwrapData } from "@/mpt-studio/lib/client";
+
+export { isEngineSampleMaterial, isMoviePyIntermediate, isUsableLocalMaterial };
 
 export type MptMaterialFile = {
   name: string;
@@ -7,6 +14,14 @@ export type MptMaterialFile = {
 };
 
 const SAFE_FILE = /^[A-Za-z0-9._-]+$/;
+
+export function isImageMaterial(file: string): boolean {
+  return /\.(png|jpe?g|webp|gif)$/i.test(file) && !isMoviePyIntermediate(file);
+}
+
+export function materialThumbPath(file: string): string {
+  return `/api/studio/ai/materials/thumb?file=${encodeURIComponent(file)}`;
+}
 
 export function parseMptMaterials(json: unknown): MptMaterialFile[] {
   const data = unwrapData(json) as { files?: unknown };
@@ -17,14 +32,14 @@ export function parseMptMaterials(json: unknown): MptMaterialFile[] {
     const rec = item as Record<string, unknown>;
     const file = String(rec.file || rec.name || "").trim();
     if (!file || !SAFE_FILE.test(file)) continue;
+    if (isMoviePyIntermediate(file)) continue;
     const size = typeof rec.size === "number" ? rec.size : undefined;
     out.push({ name: String(rec.name || file), file, size });
   }
   return out;
 }
 
-/** Skip MoviePy intermediates like `1.png.mp4` when picking defaults. */
+/** Skip engine sample stills and MoviePy intermediates when picking defaults. */
 export function preferredLocalMaterials(files: MptMaterialFile[]): MptMaterialFile[] {
-  const originals = files.filter((item) => !/\.(png|jpe?g)\.mp4$/i.test(item.file));
-  return originals.length ? originals : files;
+  return files.filter((item) => isUsableLocalMaterial(item.file));
 }

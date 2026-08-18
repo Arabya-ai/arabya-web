@@ -21,6 +21,24 @@ function asRecord(raw: unknown): Record<string, unknown> {
   return raw as Record<string, unknown>;
 }
 
+/** Numbered MoneyPrinterTurbo test stills (`1.png`) are not usable B-roll. */
+export function isEngineSampleMaterial(file: string): boolean {
+  return /^\d+\.png$/i.test(file);
+}
+
+/** MoviePy stills converted to clips, e.g. `1.png.mp4`. */
+export function isMoviePyIntermediate(file: string): boolean {
+  return /\.(png|jpe?g|gif|webp)\.mp4$/i.test(file);
+}
+
+export function isUsableLocalMaterial(file: string): boolean {
+  return (
+    /^[A-Za-z0-9._-]+$/.test(file) &&
+    !isEngineSampleMaterial(file) &&
+    !isMoviePyIntermediate(file)
+  );
+}
+
 function parseLocalMaterials(
   raw: unknown,
 ): { provider: string; url: string }[] | undefined {
@@ -29,10 +47,21 @@ function parseLocalMaterials(
   for (const item of raw.slice(0, 12)) {
     const rec = asRecord(item);
     const url = clipString(rec.url || rec.file || rec.name, 180);
-    if (!url || url.length > 180 || !/^[A-Za-z0-9._-]+$/.test(url)) continue;
+    if (!url || url.length > 180 || !isUsableLocalMaterial(url)) continue;
     out.push({ provider: "local", url });
   }
   return out.length ? out : undefined;
+}
+
+/** English Pexels/Pixabay queries when the form left terms empty. */
+export function fallbackStockTerms(subject: string, script = ""): string {
+  const words = `${subject} ${script}`
+    .match(/[A-Za-z][A-Za-z-]{2,}/g)
+    ?.map((word) => word.toLowerCase());
+  if (words?.length) {
+    return [...new Set(words)].slice(0, 8).join(", ");
+  }
+  return "mosque, charity, community, kindness, nature, people";
 }
 
 function clipString(value: unknown, max: number, fallback = ""): string {
@@ -99,12 +128,17 @@ export function parseMptVideoBody(raw: unknown): ParseResult<MptVideoBody> {
     return { ok: false, error: "missing_materials" };
   }
 
+  const video_script = clipString(input.video_script, 8000);
+  const video_terms =
+    clipString(input.video_terms, 2000) ||
+    (video_source === "local" ? "" : fallbackStockTerms(video_subject, video_script));
+
   return {
     ok: true,
     body: {
       video_subject,
-      video_script: clipString(input.video_script, 8000),
-      video_terms: clipString(input.video_terms, 2000),
+      video_script,
+      video_terms,
       video_language: clipString(input.video_language, 64, "Arabic") || "Arabic",
       video_aspect: oneOf(input.video_aspect, MPT_ASPECTS, "9:16"),
       video_concat_mode: oneOf(input.video_concat_mode, MPT_CONCAT_MODES, "random"),

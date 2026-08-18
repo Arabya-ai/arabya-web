@@ -98,10 +98,45 @@ path.write_text(text, encoding="utf-8")
 PY
 fi
 
-mkdir -p storage/local_videos storage/tasks
-if [[ ! "$(ls -A storage/local_videos 2>/dev/null)" ]]; then
-  cp -n test/resources/*.png storage/local_videos/ 2>/dev/null || true
+STOCK_PEXELS="${PEXELS_API_KEYS:-${PEXELS_API_KEY:-${MPT_PEXELS_API_KEY:-}}}"
+STOCK_PIXABAY="${PIXABAY_API_KEYS:-${PIXABAY_API_KEY:-${MPT_PIXABAY_API_KEY:-}}}"
+if [[ -n "$STOCK_PEXELS" || -n "$STOCK_PIXABAY" ]]; then
+  echo "==> MPT: apply stock footage keys from env"
+  export MPT_PEXELS_KEYS="$STOCK_PEXELS"
+  export MPT_PIXABAY_KEYS="$STOCK_PIXABAY"
+  python3 - <<'PY'
+import json
+import os
+import re
+from pathlib import Path
+
+path = Path("config.toml")
+text = path.read_text(encoding="utf-8")
+
+def set_list(name: str, csv: str, body: str) -> str:
+    items = [part.strip() for part in csv.split(",") if part.strip()]
+    if not items:
+        return body
+    rendered = ", ".join(json.dumps(item) for item in items)
+    repl = f"{name} = [{rendered}]"
+    pattern = rf"^{re.escape(name)} = .*$"
+    if re.search(pattern, body, flags=re.M):
+        return re.sub(pattern, repl, body, count=1, flags=re.M)
+    return f"{repl}\n" + body
+
+text = set_list("pexels_api_keys", os.environ.get("MPT_PEXELS_KEYS", ""), text)
+text = set_list("pixabay_api_keys", os.environ.get("MPT_PIXABAY_KEYS", ""), text)
+path.write_text(text, encoding="utf-8")
+PY
+else
+  echo "==> MPT: no Pexels/Pixabay keys in env — stock downloads stay unconfigured"
 fi
+
+mkdir -p storage/local_videos storage/tasks
+# Numbered engine test stills become a frozen "1/2/3" slideshow — never seed them as B-roll.
+find storage/local_videos -maxdepth 1 -type f \( \
+  -name '[0-9]*.png' -o -name '*.png.mp4' -o -name '*.jpg.mp4' -o -name '*.jpeg.mp4' \
+\) -delete 2>/dev/null || true
 
 echo "==> MPT: PM2 arabya-mpt-api"
 if pm2 describe arabya-mpt-api >/dev/null 2>&1; then
