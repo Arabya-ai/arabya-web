@@ -1,5 +1,6 @@
 import { STORAGE_KEYS } from "@/lib/storage-keys";
 import { notifyCloudSyncNeeded } from "@/lib/sync-notify";
+import { sanitizeAdhkarMap, sanitizeTasbeehState } from "@/lib/adhkar-sync";
 
 type ProgressMap = Record<string, number>;
 
@@ -41,17 +42,18 @@ function readMap(): ProgressMap {
 }
 
 function writeMap(map: ProgressMap) {
-  localStorage.setItem(STORAGE_KEYS.adhkarProgress, JSON.stringify(map));
+  const safe = sanitizeAdhkarMap(map);
+  localStorage.setItem(STORAGE_KEYS.adhkarProgress, JSON.stringify(safe));
   notifyCloudSyncNeeded();
   emitAdhkarUpdated();
 }
 
 export function getAdhkarProgressMap(): ProgressMap {
-  return readMap();
+  return sanitizeAdhkarMap(readMap());
 }
 
 export function applyAdhkarProgressMap(map: ProgressMap) {
-  writeMap(map && typeof map === "object" ? map : {});
+  writeMap(sanitizeAdhkarMap(map));
 }
 
 export function getAdhkarCount(itemId: string): number {
@@ -116,7 +118,7 @@ export function computeCategoryProgress(slug: string, targetSum: number) {
   }
   const total = Math.max(1, targetSum);
   const percent = Math.min(100, Math.round((done / total) * 100));
-  return { done, total, percent };
+  return { done: Math.min(done, total), total, percent };
 }
 
 export function computeItemsProgress(items: Array<{ id: string; repeat: number }>) {
@@ -168,16 +170,14 @@ export function getTasbeehState(): TasbeehState {
 }
 
 function writeTasbeeh(state: TasbeehState) {
-  localStorage.setItem(STORAGE_KEYS.tasbeeh, JSON.stringify(state));
+  const safe = sanitizeTasbeehState(state);
+  localStorage.setItem(STORAGE_KEYS.tasbeeh, JSON.stringify(safe));
   notifyCloudSyncNeeded();
   emitAdhkarUpdated();
 }
 
 export function applyTasbeehState(state: TasbeehState) {
-  writeTasbeeh({
-    phraseId: state.phraseId || DEFAULT_TASBEEH.phraseId,
-    count: Math.max(0, Math.floor(state.count || 0)),
-  });
+  writeTasbeeh(sanitizeTasbeehState(state));
 }
 
 export function setTasbeehPhrase(phraseId: string): TasbeehState {

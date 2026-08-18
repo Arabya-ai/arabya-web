@@ -1,4 +1,5 @@
 import { isCloudSyncConfigured, pullCloudSync, pushCloudSync } from "@/lib/cloud-sync";
+import { sanitizeAdhkarMap, sanitizeTasbeehState } from "@/lib/adhkar-sync";
 import { enforceRateLimitKey } from "@/lib/rate-limit";
 import { requireSession } from "@/lib/require-role";
 import type { StudyEntry } from "@/lib/study-archive";
@@ -84,14 +85,8 @@ export async function PUT(request: Request) {
         progress: {
           lastPage: body.progress?.lastPage ?? null,
           habit: (body.progress?.habit as never) || {},
-          adhkar:
-            body.progress?.adhkar && typeof body.progress.adhkar === "object"
-              ? (body.progress.adhkar as Record<string, number>)
-              : {},
-          tasbeeh:
-            body.progress?.tasbeeh && typeof body.progress.tasbeeh === "object"
-              ? (body.progress.tasbeeh as { phraseId: string; count: number })
-              : { phraseId: "subhanallah", count: 0 },
+          adhkar: sanitizeAdhkarMap(body.progress?.adhkar),
+          tasbeeh: sanitizeTasbeehState(body.progress?.tasbeeh),
         },
       },
     );
