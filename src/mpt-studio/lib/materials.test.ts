@@ -42,12 +42,13 @@ describe("material helpers", () => {
 });
 
 describe("preferredLocalMaterials", () => {
-  it("skips png.mp4 intermediates when originals exist", () => {
+  it("skips numbered engine samples and png.mp4 intermediates", () => {
     const files = preferredLocalMaterials([
       { name: "1.png", file: "1.png" },
       { name: "1.png.mp4", file: "1.png.mp4" },
       { name: "2.png", file: "2.png" },
+      { name: "mosque.mp4", file: "mosque.mp4" },
     ]);
-    expect(files.map((item) => item.file)).toEqual(["1.png", "2.png"]);
+    expect(files.map((item) => item.file)).toEqual(["mosque.mp4"]);
   });
 });

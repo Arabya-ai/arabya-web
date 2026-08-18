@@ -1,4 +1,11 @@
+import {
+  isEngineSampleMaterial,
+  isMoviePyIntermediate,
+  isUsableLocalMaterial,
+} from "@/lib/mpt-payload";
 import { unwrapData } from "@/mpt-studio/lib/client";
+
+export { isEngineSampleMaterial, isMoviePyIntermediate, isUsableLocalMaterial };
 
 export type MptMaterialFile = {
   name: string;
@@ -8,18 +15,8 @@ export type MptMaterialFile = {
 
 const SAFE_FILE = /^[A-Za-z0-9._-]+$/;
 
-/** MoviePy stills converted to clips, e.g. `1.png.mp4`. */
-export function isMoviePyIntermediate(file: string): boolean {
-  return /\.(png|jpe?g|gif|webp)\.mp4$/i.test(file);
-}
-
 export function isImageMaterial(file: string): boolean {
   return /\.(png|jpe?g|webp|gif)$/i.test(file) && !isMoviePyIntermediate(file);
-}
-
-/** Bundled MoneyPrinterTurbo test stills (`1.png` … `9.png`). */
-export function isEngineSampleMaterial(file: string): boolean {
-  return /^\d+\.png$/i.test(file);
 }
 
 export function materialThumbPath(file: string): string {
@@ -42,8 +39,7 @@ export function parseMptMaterials(json: unknown): MptMaterialFile[] {
   return out;
 }
 
-/** Skip MoviePy intermediates like `1.png.mp4` when picking defaults. */
+/** Skip engine sample stills and MoviePy intermediates when picking defaults. */
 export function preferredLocalMaterials(files: MptMaterialFile[]): MptMaterialFile[] {
-  const originals = files.filter((item) => !isMoviePyIntermediate(item.file));
-  return originals.length ? originals : files;
+  return files.filter((item) => isUsableLocalMaterial(item.file));
 }

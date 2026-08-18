@@ -126,3 +126,8 @@
   font-size: 0.72rem;
   color: hsl(var(--muted-foreground));
 }
+
+.mpt-studio .mpt-materials-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

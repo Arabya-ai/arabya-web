@@ -12,6 +12,7 @@ import { mptGet, mptPost, unwrapData } from "@/mpt-studio/lib/client";
 import {
   isEngineSampleMaterial,
   isImageMaterial,
+  isUsableLocalMaterial,
   materialThumbPath,
   parseMptMaterials,
   preferredLocalMaterials,
@@ -42,10 +43,10 @@ const defaultForm: MptVideoBody = {
   video_terms: "",
   video_language: "Arabic",
   video_aspect: "9:16",
-  video_concat_mode: "sequential",
+  video_concat_mode: "random",
   video_clip_duration: 5,
   video_count: 1,
-  video_source: "local",
+  video_source: "pexels",
   voice_name: "ar-SA-ZariyahNeural-Female",
   voice_volume: 1,
   voice_rate: 1,
@@ -135,6 +136,7 @@ export default function AiCreate() {
   }, [form.video_source, t]);
 
   function toggleMaterial(file: string, checked: boolean) {
+    if (!isUsableLocalMaterial(file)) return;
     setForm((prev) => {
       const current = (prev.video_materials || []).map((item) => item.url);
       const next = checked
@@ -186,20 +188,24 @@ export default function AiCreate() {
   async function generateVideo(event: FormEvent) {
     event.preventDefault();
     setError(null);
-    if (form.video_source === "local" && !(form.video_materials || []).length) {
-      setError(t("errorMaterials"));
+    const usable =
+      form.video_source === "local"
+        ? (form.video_materials || []).filter((item) => isUsableLocalMaterial(item.url))
+        : [];
+    if (form.video_source === "local" && !usable.length) {
+      setError(t("errorSampleMaterials"));
       return;
     }
     setBusy("video");
     const payload: MptVideoBody = {
       ...form,
-      video_materials:
-        form.video_source === "local" ? form.video_materials : undefined,
+      video_materials: form.video_source === "local" ? usable : undefined,
     };
     const { status, json } = await mptPost("/api/studio/ai/videos", payload);
     setBusy(null);
     if (status >= 400) {
-      setError(t("errorVideo"));
+      const err = (json as { error?: string } | null)?.error;
+      setError(err === "missing_materials" ? t("errorSampleMaterials") : t("errorVideo"));
       return;
     }
     const data = unwrapData(json) as { task_id?: string };
@@ -386,11 +392,17 @@ export default function AiCreate() {
                 <p className="mpt-muted mt-2">{t("localMaterialsEmpty")}</p>
               ) : (
                 <div className="mpt-materials">
-                  {materials.map((item) => (
-                    <label key={item.file}>
+                  {materials.map((item) => {
+                    const sample = isEngineSampleMaterial(item.file);
+                    return (
+                    <label
+                      key={item.file}
+                      className={sample ? "mpt-materials-disabled" : undefined}
+                    >
                       <input
                         type="checkbox"
-                        checked={selectedFiles.has(item.file)}
+                        disabled={sample}
+                        checked={!sample && selectedFiles.has(item.file)}
                         onChange={(e) => toggleMaterial(item.file, e.target.checked)}
                       />
                       <LocalMaterialThumb file={item.file} />
@@ -398,14 +410,15 @@ export default function AiCreate() {
                         <span className="mpt-materials-name" dir="ltr">
                           {item.file}
                         </span>
-                        {isEngineSampleMaterial(item.file) ? (
+                        {sample ? (
                           <span className="mpt-materials-badge">
                             {t("localMaterialsSample")}
                           </span>
                         ) : null}
                       </span>
                     </label>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

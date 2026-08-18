@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  fallbackStockTerms,
   isSafeTaskId,
   parseMptScriptBody,
   parseMptTermsBody,
@@ -15,6 +16,8 @@ describe("parseMptVideoBody", () => {
     expect(parsed.body.video_aspect).toBe("9:16");
     expect(parsed.body.video_language).toBe("Arabic");
     expect(parsed.body.voice_name).toContain("ar-SA");
+    expect(parsed.body.video_source).toBe("pexels");
+    expect(parsed.body.video_terms).toContain("mosque");
   });
 
   it("requires local materials when source is local", () => {
@@ -31,6 +34,13 @@ describe("parseMptVideoBody", () => {
     expect(parsed.body.video_materials).toEqual([
       { provider: "local", url: "clip-1.png" },
     ]);
+    expect(
+      parseMptVideoBody({
+        video_subject: "topic",
+        video_source: "local",
+        video_materials: [{ url: "1.png" }, { url: "1.png.mp4" }],
+      }).ok,
+    ).toBe(false);
   });
 
   it("rejects non-hex colors and clamps counts", () => {
@@ -73,5 +83,12 @@ describe("isSafeTaskId", () => {
     expect(isSafeTaskId("6c85c8cc-a77a-42b9-bc30-947815aa0558")).toBe(true);
     expect(isSafeTaskId("../etc/passwd")).toBe(false);
     expect(isSafeTaskId("ab")).toBe(false);
+  });
+});
+
+describe("fallbackStockTerms", () => {
+  it("keeps English words and falls back for Arabic-only text", () => {
+    expect(fallbackStockTerms("charity in the mosque")).toContain("charity");
+    expect(fallbackStockTerms("أثر الصدقة")).toContain("mosque");
   });
 });
