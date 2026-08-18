@@ -217,6 +217,8 @@ export function SiteFooter({ credit }: { credit: string }) {
               <Link href="/mushaf/1">{t("mushaf")}</Link>
               <Link href="/juz">{t("juz")}</Link>
               <Link href="/roots">{t("roots")}</Link>
+              <Link href="/asma">{t("asma")}</Link>
+              <Link href="/adhkar">{t("adhkar")}</Link>
               <Link href="/studio">{t("studio")}</Link>
               <Link href="/about">{t("about")}</Link>
               <Link href="/privacy">{t("privacy")}</Link>

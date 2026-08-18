@@ -1,5 +1,5 @@
 {
-  "sourceNote": "Curated starter set for Arabya. Expand with owner-supplied licensed Hisn al-Muslim editions later.",
+  "sourceNote": "Curated starter set for Arabya, expanded from Qur98/azkar (MIT) plus existing Arabya editions. Expand with owner-supplied licensed Hisn al-Muslim editions later.",
   "categories": [
     {
       "slug": "morning",
@@ -14,6 +14,13 @@
       "titleEn": "Evening remembrances",
       "descriptionAr": "أذكار مختارة تُقال في المساء.",
       "descriptionEn": "Selected remembrances for the evening."
+    },
+    {
+      "slug": "sleep",
+      "titleAr": "أذكار النوم",
+      "titleEn": "Before sleep",
+      "descriptionAr": "أذكار تُقال عند النوم.",
+      "descriptionEn": "Remembrances said before sleep."
     },
     {
       "slug": "after-salah",

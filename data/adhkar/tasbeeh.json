@@ -1,0 +1,11 @@
+{
+  "sourceNote": "Electronic tasbeeh phrases from Qur98/azkar, presented in Arabya.",
+  "phrases": [
+    { "id": "subhanallah", "textAr": "سُبْحَانَ اللَّهِ" },
+    { "id": "alhamdulillah", "textAr": "الْحَمْدُ لِلَّهِ" },
+    { "id": "allahu-akbar", "textAr": "اللَّهُ أَكْبَرُ" },
+    { "id": "tahlil", "textAr": "لَا إِلَهَ إِلَّا اللَّهُ" },
+    { "id": "istighfar", "textAr": "أَسْتَغْفِرُ اللَّهَ" },
+    { "id": "hawqala", "textAr": "لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ" }
+  ]
+}

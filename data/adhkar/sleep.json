@@ -1,0 +1,37 @@
+{
+  "slug": "sleep",
+  "items": [
+    {
+      "id": "sleep-1",
+      "textAr": "بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا.",
+      "repeat": 1,
+      "source": "البخاري",
+      "fadlAr": "من أذكار النوم.",
+      "fadlEn": "A remembrance said before sleep."
+    },
+    {
+      "id": "sleep-2",
+      "textAr": "سُبْحَانَ اللَّهِ.",
+      "repeat": 33,
+      "source": "البخاري ومسلم",
+      "fadlAr": "من تسبيح النوم.",
+      "fadlEn": "Tasbih before sleep."
+    },
+    {
+      "id": "sleep-3",
+      "textAr": "الْحَمْدُ لِلَّهِ.",
+      "repeat": 33,
+      "source": "البخاري ومسلم",
+      "fadlAr": "من تحميد النوم.",
+      "fadlEn": "Tahmid before sleep."
+    },
+    {
+      "id": "sleep-4",
+      "textAr": "اللَّهُ أَكْبَرُ.",
+      "repeat": 34,
+      "source": "البخاري ومسلم",
+      "fadlAr": "من تكبير النوم.",
+      "fadlEn": "Takbir before sleep."
+    }
+  ]
+}

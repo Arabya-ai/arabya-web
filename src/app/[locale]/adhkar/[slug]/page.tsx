@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
 import {
   getAdhkarCategories,
   getAdhkarCategory,
 } from "@/lib/adhkar";
 import { AdhkarCounterList } from "@/components/AdhkarCounterList";
+import { AdhkarLocalNav } from "@/components/AdhkarLocalNav";
 import { formatCount } from "@/lib/format";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
@@ -44,11 +44,7 @@ export default async function AdhkarCategoryPage({ params }: Props) {
 
   return (
     <div className="shell page-block adhkar-page">
-      <nav className="surah-nav" aria-label={t("navAria")}>
-        <Link href="/adhkar" className="nav-pill">
-          {t("backCategories")}
-        </Link>
-      </nav>
+      <AdhkarLocalNav locale={locale} current="hub" />
 
       <header className="asma-page-head">
         <h1>{title}</h1>

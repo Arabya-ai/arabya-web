@@ -1,0 +1,68 @@
+{
+  "sourceNote": "Starter duas adapted from Qur98/azkar (MIT) and well-known Quranic verses. Expand with owner-supplied licensed editions later.",
+  "items": [
+    {
+      "id": "dua-q-1",
+      "categoryAr": "قرآني",
+      "categoryEn": "Quranic",
+      "textAr": "رَبَّنَا تَقَبَّلْ مِنَّا إِنَّكَ أَنتَ السَّمِيعُ الْعَلِيمُ.",
+      "source": "البقرة: ١٢٧"
+    },
+    {
+      "id": "dua-q-2",
+      "categoryAr": "قرآني",
+      "categoryEn": "Quranic",
+      "textAr": "رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي.",
+      "source": "طه: ٢٥–٢٦"
+    },
+    {
+      "id": "dua-q-3",
+      "categoryAr": "قرآني",
+      "categoryEn": "Quranic",
+      "textAr": "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ.",
+      "source": "البقرة: ٢٠١"
+    },
+    {
+      "id": "dua-q-4",
+      "categoryAr": "قرآني",
+      "categoryEn": "Quranic",
+      "textAr": "رَبِّ زِدْنِي عِلْمًا.",
+      "source": "طه: ١١٤"
+    },
+    {
+      "id": "dua-q-5",
+      "categoryAr": "قرآني",
+      "categoryEn": "Quranic",
+      "textAr": "رَبِّ اغْفِرْ لِي وَلِوَالِدَيَّ.",
+      "source": "نوح: ٢٨"
+    },
+    {
+      "id": "dua-q-6",
+      "categoryAr": "قرآني",
+      "categoryEn": "Quranic",
+      "textAr": "رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا وَهَبْ لَنَا مِن لَّدُنكَ رَحْمَةً إِنَّكَ أَنتَ الْوَهَّابُ.",
+      "source": "آل عمران: ٨"
+    },
+    {
+      "id": "dua-q-7",
+      "categoryAr": "قرآني",
+      "categoryEn": "Quranic",
+      "textAr": "حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ.",
+      "source": "آل عمران: ١٧٣"
+    },
+    {
+      "id": "dua-n-1",
+      "categoryAr": "نبوي",
+      "categoryEn": "Prophetic",
+      "textAr": "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْهُدَى وَالتُّقَى وَالْعَفَافَ وَالْغِنَى.",
+      "source": "مسلم"
+    },
+    {
+      "id": "dua-n-2",
+      "categoryAr": "نبوي",
+      "categoryEn": "Prophetic",
+      "textAr": "اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ.",
+      "source": "أبو داود والنسائي"
+    }
+  ]
+}
