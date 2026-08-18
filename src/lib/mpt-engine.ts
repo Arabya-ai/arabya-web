@@ -1,6 +1,9 @@
 /** MoneyPrinterTurbo engine helpers — origin, SSRF-safe URLs, asset rewrite. */
 
+import path from "node:path";
+
 export const MPT_FILES_PREFIX = "/api/studio/ai/files";
+export const MPT_THUMB_MAX_BYTES = 8 * 1024 * 1024;
 
 const ALLOWED_PROTOCOLS = new Set(["http:", "https:"]);
 
@@ -100,4 +103,46 @@ export function rewriteMptValue(value: unknown): unknown {
 export function mptTaskFileUrl(relative: string): string {
   const trimmed = relative.replace(/^\/+/, "");
   return `${MPT_FILES_PREFIX}/${trimmed}`;
+}
+
+export function isSafeMaterialFilename(name: string): boolean {
+  return (
+    name.length > 0 &&
+    name.length <= 180 &&
+    name !== "." &&
+    name !== ".." &&
+    !name.includes("/") &&
+    !name.includes("\\") &&
+    /^[A-Za-z0-9._-]+$/.test(name)
+  );
+}
+
+export function mptMaterialImageContentType(filename: string): string | null {
+  const lower = filename.toLowerCase();
+  if (lower.endsWith(".png")) return "image/png";
+  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+  if (lower.endsWith(".webp")) return "image/webp";
+  if (lower.endsWith(".gif")) return "image/gif";
+  return null;
+}
+
+export function resolveMptLocalVideosDir(): string {
+  const fromEnv = process.env.MPT_LOCAL_VIDEOS_DIR?.trim();
+  if (fromEnv) return path.resolve(fromEnv);
+  return path.resolve(
+    process.cwd(),
+    "services/money-printer-turbo/storage/local_videos",
+  );
+}
+
+/** Absolute path inside the engine local-videos folder, or null if unsafe. */
+export function resolveMptLocalVideoFile(filename: string): string | null {
+  if (!isSafeMaterialFilename(filename)) return null;
+  const dir = resolveMptLocalVideosDir();
+  const resolved = path.resolve(dir, filename);
+  const relative = path.relative(dir, resolved);
+  if (!relative || relative.startsWith("..") || path.isAbsolute(relative)) {
+    return null;
+  }
+  return resolved;
 }

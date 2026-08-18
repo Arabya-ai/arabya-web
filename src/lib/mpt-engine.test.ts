@@ -1,9 +1,15 @@
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   getMptApiBase,
   isAllowedMptApiPath,
+  isSafeMaterialFilename,
   isSafeMptFilePath,
   joinMptUrl,
+  mptMaterialImageContentType,
+  resolveMptLocalVideoFile,
   rewriteMptValue,
 } from "@/lib/mpt-engine";
 
@@ -79,5 +85,29 @@ describe("rewriteMptValue", () => {
         "/workspace/services/money-printer-turbo/storage/tasks/abc/final-1.mp4",
       ),
     ).toBe("/api/studio/ai/files/abc/final-1.mp4");
+  });
+});
+
+describe("local material files", () => {
+  const prevDir = process.env.MPT_LOCAL_VIDEOS_DIR;
+
+  afterEach(() => {
+    if (prevDir === undefined) delete process.env.MPT_LOCAL_VIDEOS_DIR;
+    else process.env.MPT_LOCAL_VIDEOS_DIR = prevDir;
+  });
+
+  it("accepts basenames and image types only", () => {
+    expect(isSafeMaterialFilename("1.png")).toBe(true);
+    expect(isSafeMaterialFilename("../secret.png")).toBe(false);
+    expect(mptMaterialImageContentType("1.png")).toBe("image/png");
+    expect(mptMaterialImageContentType("1.png.mp4")).toBeNull();
+  });
+
+  it("resolves files inside the configured folder only", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "mpt-local-"));
+    process.env.MPT_LOCAL_VIDEOS_DIR = dir;
+    expect(resolveMptLocalVideoFile("1.png")).toBe(path.join(dir, "1.png"));
+    expect(resolveMptLocalVideoFile("../secret.png")).toBeNull();
+    expect(resolveMptLocalVideoFile("sub/a.png")).toBeNull();
   });
 });

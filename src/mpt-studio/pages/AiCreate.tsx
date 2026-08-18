@@ -10,6 +10,9 @@ import { Textarea } from "@/ayat-studio/components/ui/textarea";
 import { EngineBanner } from "@/mpt-studio/components/EngineBanner";
 import { mptGet, mptPost, unwrapData } from "@/mpt-studio/lib/client";
 import {
+  isEngineSampleMaterial,
+  isImageMaterial,
+  materialThumbPath,
   parseMptMaterials,
   preferredLocalMaterials,
   type MptMaterialFile,
@@ -60,6 +63,25 @@ const defaultForm: MptVideoBody = {
 
 function asMaterials(urls: string[]): MptVideoBody["video_materials"] {
   return urls.map((url) => ({ provider: "local", url }));
+}
+
+function LocalMaterialThumb({ file }: { file: string }) {
+  const [broken, setBroken] = useState(false);
+  if (!isImageMaterial(file) || broken) {
+    return (
+      <span className="mpt-materials-thumb mpt-materials-thumb--ph">
+        {isImageMaterial(file) ? "IMG" : "MP4"}
+      </span>
+    );
+  }
+  return (
+    <img
+      src={materialThumbPath(file)}
+      alt=""
+      className="mpt-materials-thumb"
+      onError={() => setBroken(true)}
+    />
+  );
 }
 
 export default function AiCreate() {
@@ -371,7 +393,17 @@ export default function AiCreate() {
                         checked={selectedFiles.has(item.file)}
                         onChange={(e) => toggleMaterial(item.file, e.target.checked)}
                       />
-                      <span>{item.name}</span>
+                      <LocalMaterialThumb file={item.file} />
+                      <span className="mpt-materials-meta">
+                        <span className="mpt-materials-name" dir="ltr">
+                          {item.file}
+                        </span>
+                        {isEngineSampleMaterial(item.file) ? (
+                          <span className="mpt-materials-badge">
+                            {t("localMaterialsSample")}
+                          </span>
+                        ) : null}
+                      </span>
                     </label>
                   ))}
                 </div>
