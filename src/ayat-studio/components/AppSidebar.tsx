@@ -35,14 +35,12 @@ export function AppSidebar() {
     <Sidebar
       collapsible="icon"
       side="right"
-      className="border-sidebar-border border-l"
+      className="studio-app-sidebar border-l"
     >
-      <SidebarContent className="relative overflow-x-hidden overflow-y-auto bg-sidebar">
-        <div className="pattern-stars absolute inset-0 opacity-30 pointer-events-none" />
-
+      <SidebarContent className="studio-app-sidebar__panel relative overflow-x-hidden overflow-y-auto">
         <Link
           href="/"
-          className="relative flex items-center gap-3 border-b border-sidebar-border px-4 py-5 hover:bg-sidebar-accent/30 transition-colors group"
+          className="studio-app-sidebar__brand"
           title="الصفحة الرئيسية — عربية"
         >
           <Image
@@ -54,60 +52,44 @@ export function AppSidebar() {
             sizes="36px"
           />
           {!collapsed && (
-            <div className="flex min-w-0 flex-col gap-1.5">
-              <span className="font-display font-bold leading-tight text-sidebar-foreground">
-                عربية ستوديو
-              </span>
-              <span className="text-[9px] leading-none tracking-widest text-accent/70">
-                ARABYA • STUDIO
-              </span>
+            <div className="studio-app-sidebar__brand-text">
+              <span className="studio-app-sidebar__brand-name">عربية ستوديو</span>
+              <span className="studio-app-sidebar__brand-kicker">Arabya Studio</span>
             </div>
           )}
         </Link>
 
-        <SidebarGroup className="relative pt-4">
+        <SidebarGroup className="relative pt-3">
           {!collapsed && (
-            <SidebarGroupLabel className="text-[10px] font-medium uppercase tracking-[0.2em] text-accent/70 px-3">
+            <SidebarGroupLabel className="studio-app-sidebar__label">
               القائمة
             </SidebarGroupLabel>
           )}
           <SidebarGroupContent>
-            <SidebarMenu className="gap-1 px-2">
+            <SidebarMenu className="studio-app-sidebar__menu">
               {items.map((item) => {
                 const href = "site" in item && item.site ? item.url : studioPath(item.url);
                 const isActive =
                   pathname === href ||
                   (href !== "/account" && pathname.startsWith(`${href}/`));
+                const body = (
+                  <>
+                    <item.icon className="h-4 w-4 shrink-0" aria-hidden />
+                    {!collapsed && <span>{item.title}</span>}
+                  </>
+                );
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
                       isActive={isActive}
-                      className={`relative rounded-lg transition-all duration-200 ${
-                        isActive
-                          ? "bg-accent/10 text-accent border border-accent/30 shadow-glow"
-                          : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-accent border border-transparent"
-                      }`}
+                      className="studio-app-sidebar__link"
                     >
                       {"site" in item && item.site ? (
-                        <Link href={item.url}>
-                          <item.icon className="h-4 w-4 shrink-0" />
-                          {!collapsed && (
-                            <span className="font-medium">{item.title}</span>
-                          )}
-                          {isActive && !collapsed && (
-                            <span className="absolute left-2 h-1.5 w-1.5 rounded-full bg-accent shadow-glow" />
-                          )}
-                        </Link>
+                        <Link href={item.url}>{body}</Link>
                       ) : (
                         <NavLink to={item.url} end>
-                          <item.icon className="h-4 w-4 shrink-0" />
-                          {!collapsed && (
-                            <span className="font-medium">{item.title}</span>
-                          )}
-                          {isActive && !collapsed && (
-                            <span className="absolute left-2 h-1.5 w-1.5 rounded-full bg-accent shadow-glow" />
-                          )}
+                          {body}
                         </NavLink>
                       )}
                     </SidebarMenuButton>
