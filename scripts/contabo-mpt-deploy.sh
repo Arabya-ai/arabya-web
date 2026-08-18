@@ -114,7 +114,15 @@ fi
 pm2 save
 
 sleep 3
-if curl -sf -o /dev/null http://127.0.0.1:8080/docs; then
+ok=0
+for i in $(seq 1 15); do
+  if curl -sf -o /dev/null http://127.0.0.1:8080/docs; then
+    ok=1
+    break
+  fi
+  sleep 2
+done
+if [[ "$ok" -eq 1 ]]; then
   echo "MPT API OK on :8080"
 else
   echo "WARN: MPT :8080 not responding — check: pm2 logs arabya-mpt-api --lines 40"
