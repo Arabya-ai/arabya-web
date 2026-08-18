@@ -1,5 +1,5 @@
 {
-  "sourceNote": "Curated starter set for Arabya, expanded from Qur98/azkar (MIT) plus existing Arabya editions. Expand with owner-supplied licensed Hisn al-Muslim editions later.",
+  "sourceNote": "Curated for Arabya from Qur98/azkar (MIT), rn0x/Adhkar-json, and sehalhussain/Hadith-Dua-assets (Hisn al-Muslim). Expand with owner-supplied licensed editions later.",
   "categories": [
     {
       "slug": "morning",
@@ -35,6 +35,27 @@
       "titleEn": "General dhikr",
       "descriptionAr": "تسبيح وتحميد وتهليل واستغفار.",
       "descriptionEn": "Tasbih, tahmid, tahlil, and istighfar."
+    },
+    {
+      "slug": "waking",
+      "titleAr": "أذكار الاستيقاظ",
+      "titleEn": "Upon waking",
+      "descriptionAr": "أذكار تُقال عند الاستيقاظ من النوم.",
+      "descriptionEn": "Remembrances upon waking from sleep."
+    },
+    {
+      "slug": "travel",
+      "titleAr": "أذكار السفر",
+      "titleEn": "Travel",
+      "descriptionAr": "أدعية وأذكار السفر والرجوع.",
+      "descriptionEn": "Supplications for travel and return."
+    },
+    {
+      "slug": "distress",
+      "titleAr": "أذكار الكرب والهم",
+      "titleEn": "Distress & anxiety",
+      "descriptionAr": "أدعية الهم والحزن والكرب.",
+      "descriptionEn": "Supplications for worry, grief, and hardship."
     }
   ]
 }

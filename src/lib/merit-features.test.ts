@@ -33,7 +33,7 @@ describe("getSurahStats", () => {
 describe("adhkar data", () => {
   it("loads categories and morning items", async () => {
     const cats = await getAdhkarCategories();
-    expect(cats.length).toBeGreaterThanOrEqual(5);
+    expect(cats.length).toBeGreaterThanOrEqual(8);
     expect(cats.some((c) => c.slug === "sleep")).toBe(true);
     expect(cats.every((c) => (c.itemCount ?? 0) > 0)).toBe(true);
     const morning = await getAdhkarCategory("morning");

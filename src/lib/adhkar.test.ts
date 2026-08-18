@@ -18,12 +18,11 @@ describe("adhkar loaders", () => {
     expect(isAdhkarToolSlug("duas")).toBe(true);
     expect(await getAdhkarCategory("duas")).toBeNull();
     expect(await getAdhkarCategory("tasbeeh")).toBeNull();
-    expect(await getAdhkarCategory("qibla")).toBeNull();
   });
 
-  it("loads duas and tasbeeh phrases", async () => {
+  it("loads expanded duas and categories", async () => {
     const duas = await getDuas();
-    expect(duas.length).toBeGreaterThanOrEqual(7);
+    expect(duas.length).toBeGreaterThanOrEqual(50);
     expect(duas[0].textAr.length).toBeGreaterThan(8);
     const phrases = await getTasbeehPhrases();
     expect(phrases.some((p) => p.id === "subhanallah")).toBe(true);
@@ -37,6 +36,8 @@ describe("adhkar loaders", () => {
     const slugs = cats.map((c) => c.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
     expect(slugs.some(isAdhkarToolSlug)).toBe(false);
+    expect(slugs).toContain("waking");
+    expect(slugs).toContain("travel");
   });
 });
 

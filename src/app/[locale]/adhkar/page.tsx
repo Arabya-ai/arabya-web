@@ -4,16 +4,10 @@ import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
 import { getAdhkarCategories } from "@/lib/adhkar";
 import { formatCount } from "@/lib/format";
+import { AdhkarHubClient } from "@/components/AdhkarHubClient";
 import { AdhkarLocalNav } from "@/components/AdhkarLocalNav";
-import { PrayerTimesCard } from "@/components/PrayerTimesCard";
 
 type Props = { params: Promise<{ locale: string }> };
-
-const TOOLS = [
-  { href: "/adhkar/duas", key: "duas" as const },
-  { href: "/adhkar/tasbeeh", key: "tasbeeh" as const },
-  { href: "/adhkar/qibla", key: "qibla" as const },
-] as const;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -42,18 +36,34 @@ export default async function AdhkarIndexPage({ params }: Props) {
         </div>
       </header>
 
+      <AdhkarHubClient
+        locale={locale}
+        categories={categories.map((c) => ({
+          slug: c.slug,
+          titleAr: c.titleAr,
+          titleEn: c.titleEn,
+          itemCount: c.itemCount ?? 0,
+          targetSum: c.targetSum ?? c.itemCount ?? 0,
+        }))}
+      />
+
       <section className="adhkar-tools" aria-labelledby="adhkar-tools-title">
         <h2 id="adhkar-tools-title">{t("toolsHeading")}</h2>
         <ul className="adhkar-tool-grid">
-          {TOOLS.map((tool) => (
-            <li key={tool.href}>
-              <Link href={tool.href} className="adhkar-tool-card">
-                <span className="adhkar-tool-mark" aria-hidden />
-                <span className="adhkar-tool-title">{t(`tools.${tool.key}`)}</span>
-                <span className="adhkar-tool-desc">{t(`tools.${tool.key}Desc`)}</span>
-              </Link>
-            </li>
-          ))}
+          <li>
+            <Link href="/adhkar/duas" className="adhkar-tool-card">
+              <span className="adhkar-tool-mark" aria-hidden />
+              <span className="adhkar-tool-title">{t("tools.duas")}</span>
+              <span className="adhkar-tool-desc">{t("tools.duasDesc")}</span>
+            </Link>
+          </li>
+          <li>
+            <Link href="/adhkar/tasbeeh" className="adhkar-tool-card">
+              <span className="adhkar-tool-mark" aria-hidden />
+              <span className="adhkar-tool-title">{t("tools.tasbeeh")}</span>
+              <span className="adhkar-tool-desc">{t("tools.tasbeehDesc")}</span>
+            </Link>
+          </li>
         </ul>
       </section>
 
@@ -90,8 +100,6 @@ export default async function AdhkarIndexPage({ params }: Props) {
           </ul>
         )}
       </section>
-
-      <PrayerTimesCard />
 
       <p className="adhkar-credit">{t("credit")}</p>
     </div>

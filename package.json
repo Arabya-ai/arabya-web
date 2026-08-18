@@ -30,6 +30,7 @@
     "build-surah-stats": "node scripts/build-surah-stats.mjs",
     "build-search-index": "node scripts/build-search-index.mjs",
     "validate-data": "node scripts/validate-data.mjs",
+    "expand-adhkar-sources": "node scripts/expand-adhkar-sources.mjs",
     "build-quality-queue": "node scripts/build-quality-queue.mjs",
     "import-irab-book": "node scripts/import-irab-book.mjs",
     "fetch-ia-item": "node scripts/fetch-ia-item.mjs",

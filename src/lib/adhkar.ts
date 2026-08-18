@@ -4,7 +4,7 @@ import path from "node:path";
 const dataRoot = path.join(process.cwd(), "data", "adhkar");
 
 /** Static tool routes under `/adhkar/*` — must not collide with category slugs. */
-export const ADHKAR_TOOL_SLUGS = ["duas", "tasbeeh", "qibla"] as const;
+export const ADHKAR_TOOL_SLUGS = ["duas", "tasbeeh"] as const;
 export type AdhkarToolSlug = (typeof ADHKAR_TOOL_SLUGS)[number];
 
 export function isAdhkarToolSlug(slug: string): slug is AdhkarToolSlug {
@@ -18,6 +18,7 @@ export type AdhkarCategoryMeta = {
   descriptionAr?: string;
   descriptionEn?: string;
   itemCount?: number;
+  targetSum?: number;
 };
 
 export type AdhkarItem = {
@@ -65,7 +66,12 @@ export async function getAdhkarCategories(): Promise<AdhkarCategoryMeta[]> {
   const withCounts = await Promise.all(
     categories.map(async (meta) => {
       const category = await getAdhkarCategory(meta.slug);
-      return { ...meta, itemCount: category?.items.length ?? 0 };
+      const items = category?.items ?? [];
+      const targetSum = items.reduce(
+        (n, item) => n + Math.max(1, Number(item.repeat) || 1),
+        0,
+      );
+      return { ...meta, itemCount: items.length, targetSum };
     }),
   );
   return withCounts;

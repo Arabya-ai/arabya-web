@@ -19,7 +19,7 @@ type QiblaPayload = {
 const CITY_KEY = STORAGE_KEYS.prayerCity;
 
 export function QiblaCompass() {
-  const t = useTranslations("Adhkar");
+  const t = useTranslations("Qibla");
   const tPrayer = useTranslations("Prayer");
   const locale = useLocale();
   const [city, setCity] = useState<string>(DEFAULT_PORTAL_CITY);

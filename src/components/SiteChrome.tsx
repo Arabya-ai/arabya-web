@@ -81,6 +81,9 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
         <Link href="/adhkar" role="menuitem" onClick={go()}>
           {t("adhkar")}
         </Link>
+        <Link href="/qibla" role="menuitem" onClick={go()}>
+          {t("qibla")}
+        </Link>
         <Link href="/tahfeez" role="menuitem" onClick={go()}>
           {t("tahfeez")}
         </Link>
@@ -219,6 +222,7 @@ export function SiteFooter({ credit }: { credit: string }) {
               <Link href="/roots">{t("roots")}</Link>
               <Link href="/asma">{t("asma")}</Link>
               <Link href="/adhkar">{t("adhkar")}</Link>
+              <Link href="/qibla">{t("qibla")}</Link>
               <Link href="/studio">{t("studio")}</Link>
               <Link href="/about">{t("about")}</Link>
               <Link href="/privacy">{t("privacy")}</Link>

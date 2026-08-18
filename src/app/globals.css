@@ -6886,6 +6886,102 @@ a.auth-btn--google {
   color: var(--brand-deep);
 }
 
+.adhkar-progress-hub {
+  margin: 1.5rem 0 2rem;
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--brand-soft) 35%, var(--surface));
+}
+
+.adhkar-progress-line {
+  margin: 0.35rem 0 0.65rem;
+  color: var(--muted);
+}
+
+.adhkar-progress-hub-bar {
+  margin-bottom: 0.85rem;
+}
+
+.adhkar-continue-link {
+  display: inline-flex;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  color: var(--brand-deep);
+  text-decoration: none;
+}
+
+.adhkar-continue-link:hover {
+  text-decoration: underline;
+}
+
+.adhkar-mini-progress,
+.adhkar-account-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.adhkar-mini-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+  font-weight: 600;
+}
+
+.adhkar-mini-row:hover {
+  color: var(--brand-deep);
+}
+
+.adhkar-category-progress {
+  position: sticky;
+  top: 4.5rem;
+  z-index: 2;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 92%, var(--brand-soft));
+  backdrop-filter: blur(6px);
+}
+
+.adhkar-dua-filters {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.adhkar-dua-search input,
+.adhkar-dua-filter-cat select {
+  width: 100%;
+  font: inherit;
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.adhkar-dua-count {
+  margin: 0 0 1rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.adhkar-account-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.qibla-page .qibla-panel {
+  margin-bottom: 1.5rem;
+}
+
 @media (max-width: 720px) {
   .adhkar-tool-grid {
     grid-template-columns: 1fr;

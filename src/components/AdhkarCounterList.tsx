@@ -7,6 +7,7 @@ import {
   getAdhkarCount,
   incrementAdhkarCount,
   resetAdhkarCount,
+  setLastAdhkarCategory,
 } from "@/lib/adhkar-progress";
 import { formatCount } from "@/lib/format";
 
@@ -72,7 +73,17 @@ function CounterCard({ item }: { item: AdhkarItem }) {
   );
 }
 
-export function AdhkarCounterList({ items }: { items: AdhkarItem[] }) {
+export function AdhkarCounterList({
+  items,
+  categorySlug,
+}: {
+  items: AdhkarItem[];
+  categorySlug?: string;
+}) {
+  useEffect(() => {
+    if (categorySlug) setLastAdhkarCategory(categorySlug);
+  }, [categorySlug]);
+
   return (
     <div className="adhkar-list">
       {items.map((item) => (

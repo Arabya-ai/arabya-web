@@ -50,6 +50,8 @@ CREATE TABLE IF NOT EXISTS reading_progress (
   user_id TEXT PRIMARY KEY,
   last_page INTEGER,
   habit_json TEXT NOT NULL DEFAULT '{}',
+  adhkar_json TEXT NOT NULL DEFAULT '{}',
+  tasbeeh_json TEXT NOT NULL DEFAULT '{"phraseId":"subhanallah","count":0}',
   updated_at INTEGER NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

@@ -19,7 +19,8 @@
 | `/ayah/[surah]/[verse]` | Per-ayah iʿrāb narrative |
 | `/juz`, `/root/[root]` | Juz hub + root concordance |
 | `/books`, `/books/[slug]` | Irab book catalog (licensed import later) |
-| `/adhkar`, `/adhkar/[slug]`, `/adhkar/duas`, `/adhkar/tasbeeh`, `/adhkar/qibla` | Daily adhkar hub (Git JSON under `data/adhkar`) |
+| `/adhkar`, `/adhkar/[slug]`, `/adhkar/duas`, `/adhkar/tasbeeh` | Daily adhkar hub (Git JSON under `data/adhkar`) |
+| `/qibla` | Qibla compass + prayer times (separate from adhkar) |
 | `/resources`, `/qiraat` | Hubs / placeholders |
 | `/hadith`, `/heritage` | **Placeholders only** — do not build full pipelines yet |
 | `/api/tafsir/...`, `/api/translation/...`, `/api/search`, `/api/study` | Local JSON APIs |

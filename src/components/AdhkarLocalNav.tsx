@@ -1,13 +1,12 @@
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 
-type AdhkarSection = "hub" | "duas" | "tasbeeh" | "qibla" | "category";
+type AdhkarSection = "hub" | "duas" | "tasbeeh" | "category";
 
-const LINKS: { href: string; key: "hub" | "duas" | "tasbeeh" | "qibla" }[] = [
+const LINKS: { href: string; key: "hub" | "duas" | "tasbeeh" }[] = [
   { href: "/adhkar", key: "hub" },
   { href: "/adhkar/duas", key: "duas" },
   { href: "/adhkar/tasbeeh", key: "tasbeeh" },
-  { href: "/adhkar/qibla", key: "qibla" },
 ];
 
 export async function AdhkarLocalNav({

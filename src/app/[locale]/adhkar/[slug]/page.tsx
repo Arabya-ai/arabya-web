@@ -6,7 +6,7 @@ import {
   getAdhkarCategories,
   getAdhkarCategory,
 } from "@/lib/adhkar";
-import { AdhkarCounterList } from "@/components/AdhkarCounterList";
+import { AdhkarCategoryShell } from "@/components/AdhkarCategoryShell";
 import { AdhkarLocalNav } from "@/components/AdhkarLocalNav";
 import { formatCount } from "@/lib/format";
 
@@ -56,7 +56,7 @@ export default async function AdhkarCategoryPage({ params }: Props) {
         </p>
       </header>
 
-      <AdhkarCounterList items={category.items} />
+      <AdhkarCategoryShell slug={slug} items={category.items} />
     </div>
   );
 }

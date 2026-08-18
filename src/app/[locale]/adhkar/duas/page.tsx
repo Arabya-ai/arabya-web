@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { resolveLocale } from "@/i18n/locale-params";
 import { getDuas } from "@/lib/adhkar";
 import { AdhkarLocalNav } from "@/components/AdhkarLocalNav";
+import { DuasExplorer } from "@/components/DuasExplorer";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -29,31 +30,7 @@ export default async function DuasPage({ params }: Props) {
         <p>{t("tools.duasDesc")}</p>
       </header>
 
-      {duas.length === 0 ? (
-        <p className="empty-state">{t("duasEmpty")}</p>
-      ) : (
-        <ul className="adhkar-dua-list">
-          {duas.map((dua) => {
-            const category =
-              locale === "en" ? dua.categoryEn : dua.categoryAr;
-            return (
-              <li key={dua.id}>
-                <article className="adhkar-card">
-                  <p className="adhkar-dua-cat">{category}</p>
-                  <p className="adhkar-card-text" lang="ar" dir="rtl">
-                    {dua.textAr}
-                  </p>
-                  {dua.source ? (
-                    <p className="adhkar-card-source">
-                      {t("sourceLabel", { source: dua.source })}
-                    </p>
-                  ) : null}
-                </article>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      <DuasExplorer duas={duas} />
     </div>
   );
 }
