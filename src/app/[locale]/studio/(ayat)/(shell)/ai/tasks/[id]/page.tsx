@@ -5,6 +5,8 @@ import { isSafeTaskId } from "@/lib/mpt-payload";
 import { notFound } from "next/navigation";
 import AiTaskDetail from "@/mpt-studio/pages/AiTaskDetail";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ locale: string; id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
