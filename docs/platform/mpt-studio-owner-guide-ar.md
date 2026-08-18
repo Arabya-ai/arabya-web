@@ -37,22 +37,35 @@
 
 Edge TTS للأصوات العربية لا يحتاج مفتاحًا.
 
-## مطلوب منك الآن (خطوة واحدة على Contabo)
+## مطلوب منك الآن (مرة واحدة — GitHub Secrets)
 
-افتح SSH على السيرفر ثم الصق في `/var/www/arabya-web/.env.production.local`:
+اذهب إلى **GitHub → arabya-web → Settings → Secrets and variables → Actions → Environment: Production** وأضف:
+
+| Secret | القيمة |
+|--------|--------|
+| `MPT_DAHL_API_KEYS` | `dahl_MXKfDh99X8tRDsADskujwoFUJUZckQ63A,dahl_G8LWDeCbzaALdbuZyb4viaBMgMx3tX4nD` |
+| `MPT_DAHL_MODELS` | `MiniMaxAI/MiniMax-M2.7,moonshotai/Kimi-K2.6,deepseek-ai/DeepSeek-V4-Flash-0731` |
+| `MONEYPRINTER_API_URL` | `http://127.0.0.1:8080` |
+
+ثم من **Actions → Deploy Contabo → Run workflow**.
+
+**أو** عبر SSH على Contabo:
 
 ```bash
-MONEYPRINTER_API_URL=http://127.0.0.1:8080
-MPT_DAHL_API_KEY=مفتاحك_الجديد_من_Dahl
-MPT_LLM_MODEL=MiniMaxAI/MiniMax-M2.7
+cd /var/www/arabya-web
+bash scripts/contabo-mpt-deploy.sh
+pm2 restart arabya-web --update-env
 ```
 
-ثم نفّذ:
+## التبديل التلقائي (Model Routing)
 
-```bash
-cd /var/www/arabya-web && bash scripts/contabo-mpt-deploy.sh && pm2 restart arabya-web
-```
+عند نفاد رصيد مفتاح Dahl أو فشل نموذج، المحرك يجرّب بالترتيب:
 
-أو أضف `MPT_DAHL_API_KEY` و `MONEYPRINTER_API_URL` في **GitHub → Settings → Secrets → Production** ثم أعد تشغيل workflow «Deploy Contabo».
+1. المفتاح التالي (إن وُجد أكثر من مفتاح)
+2. النموذج التالي: MiniMax M2.7 → Kimi K2.6 → DeepSeek V4
 
-**أمان:** المفتاح الذي أُرسل في الدردشة سابقًا يُفضّل إلغاؤه واستبداله بمفتاح جديد.
+## ملاحظة عن /studio/ai
+
+الصفحة **تتطلّب تسجيل الدخول** (Google). بدون حساب تُحوَّل إلى `/login` — وليست 404. إن ظهرت 404 فغالبًا قبل اكتمال آخر نشر؛ حدّث الصفحة بعد Deploy Contabo.
+
+**أمان:** لا تُرسل المفاتيح في الدردشة مرة أخرى — استخدم Secrets أو SSH فقط.
