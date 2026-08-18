@@ -22,15 +22,19 @@ function CounterCard({ item }: { item: AdhkarItem }) {
 
   const done = current >= target;
   const pct = Math.min(100, Math.round((current / target) * 100));
+  const fadl =
+    locale === "en"
+      ? item.fadlEn || item.fadlAr
+      : item.fadlAr || item.fadlEn;
 
   return (
     <article className={`adhkar-card${done ? " is-done" : ""}`}>
       <p className="adhkar-card-text" lang="ar" dir="rtl">
         {item.textAr}
       </p>
-      {item.fadlAr ? (
+      {fadl ? (
         <p className="adhkar-card-fadl">
-          <strong>{t("fadlLabel")}:</strong> {item.fadlAr}
+          <strong>{t("fadlLabel")}:</strong> {fadl}
         </p>
       ) : null}
       {item.source ? (
