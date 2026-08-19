@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { parseMptVideoBody } from "@/lib/mpt-payload";
 import { MPT_GENERATE_LIMIT, proxyMptJson, requireMptSession } from "@/lib/mpt-proxy";
+import { syncMptStockKeysFromEnv } from "@/lib/mpt-stock-keys";
 
 export const runtime = "nodejs";
 
@@ -18,6 +19,12 @@ export async function POST(request: Request) {
   const parsed = parseMptVideoBody(raw);
   if (!parsed.ok) {
     return NextResponse.json({ ok: false, error: parsed.error }, { status: 400 });
+  }
+
+  try {
+    syncMptStockKeysFromEnv();
+  } catch {
+    // Engine still tries env files / config.toml.
   }
 
   return proxyMptJson({

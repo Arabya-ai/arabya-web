@@ -1429,6 +1429,7 @@
     "errorScript": "Could not generate a script. Check the engine and LLM key.",
     "errorTerms": "Could not generate search terms.",
     "errorVideo": "Could not create the job. Check engine status and keys.",
+    "errorPexelsKey": "A Pexels API key is missing on the server. Add PEXELS_API_KEY, then retry.",
     "errorTasks": "Could not load tasks.",
     "errorTask": "Task missing or engine offline.",
     "errorDelete": "Could not delete the task (it may still be running).",

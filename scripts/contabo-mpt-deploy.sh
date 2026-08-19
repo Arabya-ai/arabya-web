@@ -84,12 +84,13 @@ if [[ -z "$PEXELS_KEYS" ]]; then
   echo "==> MPT: no Pexels keys in env — stock API generation needs PEXELS_API_KEY on the server"
 fi
 
-if [[ -n "$KEYS" || -n "$PEXELS_KEYS" || -n "$PIXABAY_KEYS" ]]; then
+if [[ -n "$KEYS" || -n "$PEXELS_KEYS" || -n "$PIXABAY_KEYS" || -f "$ENV_FILE" ]]; then
   echo "==> MPT: apply LLM/stock API keys from env (not Git)"
   export MPT_KEYS="$KEYS"
   export MPT_MODELS="$MODELS"
   export MPT_PEXELS_KEYS="$PEXELS_KEYS"
   export MPT_PIXABAY_KEYS="$PIXABAY_KEYS"
+  export MPT_ENV_FILE="$ENV_FILE"
   python3 - <<'PY'
 import os
 import re
@@ -101,6 +102,34 @@ keys = os.environ.get("MPT_KEYS", "").strip()
 models = os.environ.get("MPT_MODELS", "").strip()
 pexels = os.environ.get("MPT_PEXELS_KEYS", "").strip()
 pixabay = os.environ.get("MPT_PIXABAY_KEYS", "").strip()
+env_file = Path(os.environ.get("MPT_ENV_FILE", "")).expanduser()
+
+def dotenv_get(path: Path, names: list[str]) -> str:
+    if not path.is_file():
+        return ""
+    values = {}
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[7:].strip()
+        if "=" not in line:
+            continue
+        name, _, value = line.partition("=")
+        name = name.strip()
+        value = value.strip().strip('"').strip("'")
+        values[name] = value
+    for name in names:
+        raw = values.get(name, "").strip()
+        if raw:
+            return raw
+    return ""
+
+if not pexels:
+    pexels = dotenv_get(env_file, ["MPT_PEXELS_API_KEYS", "MPT_PEXELS_API_KEY", "PEXELS_API_KEYS", "PEXELS_API_KEY"])
+if not pixabay:
+    pixabay = dotenv_get(env_file, ["MPT_PIXABAY_API_KEYS", "MPT_PIXABAY_API_KEY", "PIXABAY_API_KEYS", "PIXABAY_API_KEY"])
 primary_model = models.split(",")[0].strip() if models else ""
 
 def set_field(name: str, value: str, body: str) -> str:
@@ -137,7 +166,27 @@ text = re.sub(r'^video_source = .*$', 'video_source = "pexels"', text, count=1, 
 text = set_list_field("pexels_api_keys", pexels, text)
 text = set_list_field("pixabay_api_keys", pixabay, text)
 path.write_text(text, encoding="utf-8")
+
+runtime = Path(".runtime-stock-keys.env")
+runtime_lines = ["# Written by contabo-mpt-deploy.sh — do not commit"]
+if pexels:
+    runtime_lines.append(f"PEXELS_API_KEY={pexels}")
+if pixabay:
+    runtime_lines.append(f"PIXABAY_API_KEY={pixabay}")
+if len(runtime_lines) > 1:
+    runtime.write_text("\n".join(runtime_lines) + "\n", encoding="utf-8")
+    runtime.chmod(0o600)
+    print(f"==> MPT: wrote stock keys for PM2 ({'pexels' if pexels else ''}{' pixabay' if pixabay else ''})".strip())
+else:
+    print("==> MPT: still no Pexels/Pixabay keys after reading .env.production.local")
 PY
+fi
+
+if [[ -f "$MPT_DIR/.runtime-stock-keys.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "$MPT_DIR/.runtime-stock-keys.env"
+  set +a
 fi
 
 mkdir -p storage/local_videos storage/tasks

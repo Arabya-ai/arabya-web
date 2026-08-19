@@ -39,6 +39,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# MPT stock-API keys written at runtime by Next (never commit)
+services/money-printer-turbo/.runtime-stock-keys.env
+
 # local acquisition staging (Internet Archive / owner drops)
 /incoming/
 

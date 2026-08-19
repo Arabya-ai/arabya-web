@@ -1,5 +1,6 @@
 import os
 import random
+import re
 import threading
 from pathlib import Path
 from typing import Any, Callable, List
@@ -154,6 +155,70 @@ def _get_tls_verify() -> bool:
     return bool(tls_verify)
 
 
+def _parse_dotenv_file(path: Path) -> dict[str, str]:
+    values: dict[str, str] = {}
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return values
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[7:].strip()
+        if "=" not in line:
+            continue
+        name, _, value = line.partition("=")
+        name = name.strip()
+        if not name or not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", name):
+            continue
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+            value = value[1:-1]
+        values[name] = value
+    return values
+
+
+def _stock_env_file_paths() -> list[Path]:
+    """Highest priority first. Next.js writes the runtime file on each generate."""
+    root = Path(config.root_dir).resolve()
+    arabya_root = root.parent.parent
+    return [
+        root / ".runtime-stock-keys.env",
+        arabya_root / ".env.production.local",
+        arabya_root / ".env.local",
+        root / ".env",
+    ]
+
+
+def _merge_dotenv_files(paths: list[Path]) -> dict[str, str]:
+    """First existing value wins so a later .env.local cannot hide production keys."""
+    file_values: dict[str, str] = {}
+    for path in paths:
+        for name, value in _parse_dotenv_file(path).items():
+            if name not in file_values:
+                file_values[name] = value
+    return file_values
+
+
+def _split_key_list(raw: Any) -> list[str]:
+    if isinstance(raw, str):
+        parts = raw.split(",")
+    elif isinstance(raw, (list, tuple)):
+        parts = [str(item) for item in raw]
+    else:
+        return []
+    out: list[str] = []
+    seen: set[str] = set()
+    for part in parts:
+        key = part.strip()
+        if key and key not in seen:
+            seen.add(key)
+            out.append(key)
+    return out
+
+
 def _keys_from_env(cfg_key: str) -> list[str]:
     """Allow Arabya server env (PEXELS_API_KEY) to feed MPT without Git secrets."""
     env_names = {
@@ -176,22 +241,20 @@ def _keys_from_env(cfg_key: str) -> list[str]:
             "COVERR_API_KEYS",
         ),
     }.get(cfg_key, ())
+    file_values = _merge_dotenv_files(_stock_env_file_paths())
     out: list[str] = []
     seen: set[str] = set()
     for name in env_names:
-        raw = os.environ.get(name, "").strip()
-        if not raw:
-            continue
-        for part in raw.split(","):
-            key = part.strip()
-            if key and key not in seen:
+        raw = os.environ.get(name, "").strip() or file_values.get(name, "").strip()
+        for key in _split_key_list(raw):
+            if key not in seen:
                 seen.add(key)
                 out.append(key)
     return out
 
 
 def get_api_key(cfg_key: str):
-    api_keys = config.app.get(cfg_key)
+    api_keys = _split_key_list(config.app.get(cfg_key))
     if not api_keys:
         api_keys = _keys_from_env(cfg_key)
     if not api_keys:
@@ -201,9 +264,8 @@ def get_api_key(cfg_key: str):
             "or export PEXELS_API_KEY / PIXABAY_API_KEY for the matching source.\n"
         )
 
-    # if only one key is provided, return it
-    if isinstance(api_keys, str):
-        return api_keys
+    if len(api_keys) == 1:
+        return api_keys[0]
 
     global _api_key_counter
     with _api_key_lock:

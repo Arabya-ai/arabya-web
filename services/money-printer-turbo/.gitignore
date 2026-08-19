@@ -35,6 +35,8 @@ resource/fonts/*.ttc
 venv/
 .venv
 
+.runtime-stock-keys.env
+
 # Debug and test files
 CLAUDE.md
 debug/

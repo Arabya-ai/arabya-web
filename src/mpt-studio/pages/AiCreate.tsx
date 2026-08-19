@@ -114,7 +114,11 @@ export default function AiCreate() {
     const { status, json } = await mptPost("/api/studio/ai/videos", form);
     setBusy(null);
     if (status >= 400) {
-      setError(t("errorVideo"));
+      const err =
+        json && typeof json === "object"
+          ? (json as { error?: string }).error
+          : undefined;
+      setError(err === "missing_pexels_key" ? t("errorPexelsKey") : t("errorVideo"));
       return;
     }
     const data = unwrapData(json) as { task_id?: string };

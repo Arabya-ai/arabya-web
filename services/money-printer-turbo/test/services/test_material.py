@@ -1069,5 +1069,70 @@ class TestCoverrProvider(unittest.TestCase):
         self.assertEqual(result, ["/tmp/coverr-saved.mp4"])
 
 
+class TestStockKeysFromEnvFiles(unittest.TestCase):
+    def test_parse_dotenv_and_pexels_file_fallback(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            env_path = Path(tmp) / ".env.production.local"
+            env_path.write_text('PEXELS_API_KEY="pex_file_key"\n', encoding="utf-8")
+            values = material._parse_dotenv_file(env_path)
+            self.assertEqual(values["PEXELS_API_KEY"], "pex_file_key")
+            with patch.object(
+                material,
+                "_stock_env_file_paths",
+                return_value=[env_path],
+            ), patch.dict(
+                os.environ,
+                {
+                    "PEXELS_API_KEY": "",
+                    "PEXELS_API_KEYS": "",
+                    "MPT_PEXELS_API_KEY": "",
+                    "MPT_PEXELS_API_KEYS": "",
+                },
+                clear=False,
+            ):
+                keys = material._keys_from_env("pexels_api_keys")
+            self.assertEqual(keys, ["pex_file_key"])
+
+    def test_get_api_key_uses_env_file_when_toml_list_is_empty(self):
+        original = config.app.get("pexels_api_keys")
+        config.app["pexels_api_keys"] = []
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                env_path = Path(tmp) / ".env.production.local"
+                env_path.write_text("PEXELS_API_KEY=from_production_file\n", encoding="utf-8")
+                with patch.object(
+                    material,
+                    "_stock_env_file_paths",
+                    return_value=[env_path],
+                ), patch.dict(
+                    os.environ,
+                    {
+                        "PEXELS_API_KEY": "",
+                        "PEXELS_API_KEYS": "",
+                        "MPT_PEXELS_API_KEY": "",
+                        "MPT_PEXELS_API_KEYS": "",
+                    },
+                    clear=False,
+                ):
+                    self.assertEqual(
+                        material.get_api_key("pexels_api_keys"),
+                        "from_production_file",
+                    )
+        finally:
+            if original is None:
+                config.app.pop("pexels_api_keys", None)
+            else:
+                config.app["pexels_api_keys"] = original
+
+    def test_runtime_file_wins_over_later_env_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            runtime = Path(tmp) / ".runtime-stock-keys.env"
+            later = Path(tmp) / ".env.local"
+            runtime.write_text("PEXELS_API_KEY=runtime_key\n", encoding="utf-8")
+            later.write_text("PEXELS_API_KEY=local_key\n", encoding="utf-8")
+            merged = material._merge_dotenv_files([runtime, later])
+            self.assertEqual(merged["PEXELS_API_KEY"], "runtime_key")
+
+
 if __name__ == "__main__":
     unittest.main()
