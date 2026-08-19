@@ -70,12 +70,14 @@ export default async function AyahIrabPage({ params }: Props) {
     notFound();
   }
 
+  const uiLocale = locale === "en" ? "en" : "ar";
+
   const [content, irab, meta, mushaf, claimsBundle] = await Promise.all([
     getSurah(surahId),
     getIrab(surahId),
     getSurahMeta(surahId),
     getMushafIndex(),
-    getIrabClaimsForAyah(surahId, verseNumber),
+    getIrabClaimsForAyah(surahId, verseNumber, uiLocale),
   ]);
 
   const ayah = content?.verses.find((v) => v.verseNumber === verseNumber);
@@ -95,7 +97,6 @@ export default async function AyahIrabPage({ params }: Props) {
   const surahTitle = getSurahDisplayTitle(surahId, locale);
   const verseLabel =
     locale === "en" ? String(verseNumber) : toArabicNumerals(verseNumber);
-  const uiLocale = locale === "en" ? "en" : "ar";
 
   return (
     <div className="shell page-block ayah-irab-page">

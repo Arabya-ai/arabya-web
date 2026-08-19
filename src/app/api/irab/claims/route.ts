@@ -2,11 +2,18 @@ import { NextResponse } from "next/server";
 import {
   getIrabClaimsForAyah,
   getIrabClaimsForWord,
+  type IrabClaimsLocale,
 } from "@/lib/irab-claims";
+import { getSurahMeta } from "@/lib/quran";
 import { parseWordId } from "@/lib/word-id";
+
+function parseLocale(raw: string | null): IrabClaimsLocale {
+  return raw === "en" ? "en" : "ar";
+}
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
+  const locale = parseLocale(url.searchParams.get("locale"));
   const wordId = url.searchParams.get("wordId")?.trim();
   const surahRaw = url.searchParams.get("surah");
   const verseRaw = url.searchParams.get("verse");
@@ -18,8 +25,8 @@ export async function GET(req: Request) {
         { status: 400 },
       );
     }
-    const claims = await getIrabClaimsForWord(wordId);
-    return NextResponse.json({ ok: true, wordId, claims });
+    const claims = await getIrabClaimsForWord(wordId, null, locale);
+    return NextResponse.json({ ok: true, wordId, locale, claims });
   }
 
   if (surahRaw != null && verseRaw != null) {
@@ -37,8 +44,15 @@ export async function GET(req: Request) {
         { status: 400 },
       );
     }
-    const bundle = await getIrabClaimsForAyah(surahId, verse);
-    const words: Record<string, typeof bundle.byWordId extends Map<string, infer V> ? V : never> =
+    const meta = await getSurahMeta(surahId);
+    if (!meta || verse > meta.versesCount) {
+      return NextResponse.json(
+        { ok: false, error: "Verse not in surah" },
+        { status: 404 },
+      );
+    }
+    const bundle = await getIrabClaimsForAyah(surahId, verse, locale);
+    const words: Record<string, (typeof bundle.byWordId extends Map<string, infer V> ? V : never)> =
       {};
     for (const [id, list] of bundle.byWordId) {
       words[id] = list;
@@ -47,6 +61,7 @@ export async function GET(req: Request) {
       ok: true,
       surahId,
       verse,
+      locale,
       words,
       ayahLevel: bundle.ayahLevel,
     });

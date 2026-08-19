@@ -34,4 +34,11 @@ describe("GET /api/irab/claims", () => {
     expect(data.ok).toBe(true);
     expect(Object.keys(data.words ?? {}).length).toBeGreaterThan(0);
   });
+
+  it("returns 404 for verse out of range", async () => {
+    const res = await GET(
+      new Request("http://local/api/irab/claims?surah=1&verse=999"),
+    );
+    expect(res.status).toBe(404);
+  });
 });

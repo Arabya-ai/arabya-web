@@ -879,3 +879,67 @@ main.studio-main-viewport #ayat-studio-root.ayat-studio {
 .ayat-studio .btn-arabya:disabled {
   opacity: 0.55;
 }
+
+.studio-timeline {
+  margin-top: 0.35rem;
+  width: 100%;
+  max-width: min(100%, 28rem);
+  margin-inline: auto;
+}
+
+.studio-timeline__track {
+  position: relative;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, hsl(var(--muted)) 55%, transparent);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.studio-timeline__progress {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: hsl(var(--accent));
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.studio-timeline__marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border: none;
+  padding: 0;
+  background: color-mix(in srgb, hsl(var(--accent)) 28%, transparent);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.studio-timeline__marker.is-active,
+.studio-timeline__marker:hover {
+  background: color-mix(in srgb, hsl(var(--accent)) 72%, transparent);
+}
+
+.studio-timeline__labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  justify-content: center;
+  margin-top: 0.35rem;
+}
+
+.studio-timeline__label {
+  border: 1px solid color-mix(in srgb, hsl(var(--accent)) 25%, transparent);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.62rem;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.studio-timeline__label.is-active {
+  color: hsl(var(--accent-foreground));
+  background: hsl(var(--accent));
+  border-color: hsl(var(--accent));
+}

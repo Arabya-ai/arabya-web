@@ -16,6 +16,8 @@ import { makeWordId, parseWordId } from "@/lib/word-id";
 const dataRoot = path.join(process.cwd(), "data");
 const claimsRoot = path.join(dataRoot, "irab-claims");
 
+export type IrabClaimsLocale = "ar" | "en";
+
 type StoredClaimRow = {
   text: string;
   evidence?: string;
@@ -27,6 +29,13 @@ type StoredClaimsFile = {
   sourceId: string;
   words?: Record<string, StoredClaimRow>;
   verses?: Record<string, StoredClaimRow>;
+};
+
+export type IrabClaimsLoadContext = {
+  locale: IrabClaimsLocale;
+  sources: IrabSourceMeta[];
+  sourceIds: string[];
+  storedBySource: Map<string, StoredClaimsFile | null>;
 };
 
 async function fileExists(filePath: string): Promise<boolean> {
@@ -70,6 +79,24 @@ async function loadStoredClaims(
   if (!(await fileExists(filePath))) return null;
   const raw = await readFile(filePath, "utf8");
   return JSON.parse(raw) as StoredClaimsFile;
+}
+
+export async function loadIrabClaimsContext(
+  surahId: number,
+  locale: IrabClaimsLocale = "ar",
+): Promise<IrabClaimsLoadContext> {
+  const sources = await listReadyIrabSources();
+  const sourceIds = await discoverClaimSourceIds();
+  const storedBySource = new Map<string, StoredClaimsFile | null>();
+  await Promise.all(
+    sourceIds.map(async (sourceId) => {
+      storedBySource.set(
+        sourceId,
+        await loadStoredClaims(sourceId, surahId),
+      );
+    }),
+  );
+  return { locale, sources, sourceIds, storedBySource };
 }
 
 function resolveSourceMeta(
@@ -124,9 +151,31 @@ export async function listReadyIrabSources(): Promise<IrabSourceMeta[]> {
   return listIrabSources(catalog).filter((s) => s.status === "ready");
 }
 
+function bookClaimsForWord(
+  wordId: string,
+  surahId: number,
+  ctx: IrabClaimsLoadContext,
+): IrabClaim[] {
+  const claims: IrabClaim[] = [];
+  for (const sourceId of ctx.sourceIds) {
+    const source = resolveSourceMeta(sourceId, ctx.sources);
+    if (!source) continue;
+    const file =
+      ctx.storedBySource.get(sourceId) ??
+      null;
+    const row = file?.words?.[wordId];
+    if (row?.text?.trim()) {
+      claims.push(storedWordClaim(source, wordId, row));
+    }
+  }
+  return claims;
+}
+
 export async function getIrabClaimsForWord(
   wordId: string,
   morph?: IrabWord | null,
+  locale: IrabClaimsLocale = "ar",
+  ctx?: IrabClaimsLoadContext,
 ): Promise<IrabClaim[]> {
   const parsed = parseWordId(wordId);
   if (!parsed) return [];
@@ -142,25 +191,17 @@ export async function getIrabClaimsForWord(
         ?.words.find((w) => w.position === parsed.position) ?? null;
   }
 
-  const qacText = narrativeIrab(m, "ar");
+  const qacText = narrativeIrab(m, locale);
   if (m && qacText && qacText !== "—") {
     claims.push(
       claimFromQacIrab(wordId, qacText, m.irab || m.irabText || undefined),
     );
   }
 
-  const sources = await listReadyIrabSources();
-  const sourceIds = await discoverClaimSourceIds();
-
-  for (const sourceId of sourceIds) {
-    const source = resolveSourceMeta(sourceId, sources);
-    if (!source) continue;
-    const file = await loadStoredClaims(sourceId, parsed.surahId);
-    const row = file?.words?.[wordId];
-    if (row?.text?.trim()) {
-      claims.push(storedWordClaim(source, wordId, row));
-    }
-  }
+  const loadCtx =
+    ctx ??
+    (await loadIrabClaimsContext(parsed.surahId, locale));
+  claims.push(...bookClaimsForWord(wordId, parsed.surahId, loadCtx));
 
   return claims;
 }
@@ -173,26 +214,26 @@ export type AyahIrabClaimsBundle = {
 export async function getIrabClaimsForAyah(
   surahId: number,
   verse: number,
+  locale: IrabClaimsLocale = "ar",
 ): Promise<AyahIrabClaimsBundle> {
   const byWordId = new Map<string, IrabClaim[]>();
   const irab = await getIrab(surahId);
   const irabVerse = irab?.verses.find((v) => v.verseNumber === verse);
+  const ctx = await loadIrabClaimsContext(surahId, locale);
 
   for (const w of irabVerse?.words ?? []) {
     const wordId = w.wordId ?? makeWordId(surahId, verse, w.position);
-    const claims = await getIrabClaimsForWord(wordId, w);
+    const claims = await getIrabClaimsForWord(wordId, w, locale, ctx);
     if (claims.length) byWordId.set(wordId, claims);
   }
 
   const ayahLevel: IrabClaim[] = [];
   const verseKey = `${surahId}:${verse}`;
-  const sources = await listReadyIrabSources();
-  const sourceIds = await discoverClaimSourceIds();
 
-  for (const sourceId of sourceIds) {
-    const source = resolveSourceMeta(sourceId, sources);
+  for (const sourceId of ctx.sourceIds) {
+    const source = resolveSourceMeta(sourceId, ctx.sources);
     if (!source) continue;
-    const file = await loadStoredClaims(sourceId, surahId);
+    const file = ctx.storedBySource.get(sourceId) ?? null;
     const row = file?.verses?.[verseKey];
     if (row?.text?.trim()) {
       ayahLevel.push(storedAyahClaim(source, verseKey, row));

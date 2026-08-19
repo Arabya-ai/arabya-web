@@ -170,7 +170,7 @@ export function WordStudyDock({
     void (async () => {
       try {
         const res = await apiGet(
-          `/api/irab/claims?wordId=${encodeURIComponent(wordId)}`,
+          `/api/irab/claims?wordId=${encodeURIComponent(wordId)}&locale=${locale}`,
           { cache: "no-store" },
         );
         const data = (await res.json()) as {
@@ -445,10 +445,16 @@ export function WordStudyDock({
                 ))}
               </select>
             ) : null}
-            {hasMorphPayload && irabBody ? (
-              <p className="layer-body">{irabBody}</p>
-            ) : irabClaimsLoading ? (
+            {irabClaimsLoading ? (
               <p className="layer-empty">{t("loading")}</p>
+            ) : irabBody ? (
+              <>
+                <p className="layer-body">{irabBody}</p>
+                {selectedIrabClaim?.evidence &&
+                selectedIrabClaim.evidence !== selectedIrabClaim.text ? (
+                  <p className="layer-hint">{selectedIrabClaim.evidence}</p>
+                ) : null}
+              </>
             ) : (
               <p className="layer-empty">
                 {t("noIrab")}

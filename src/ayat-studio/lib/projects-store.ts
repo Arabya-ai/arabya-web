@@ -5,6 +5,9 @@ import {
   STUDIO_TAFSIR_TEXT,
   STUDIO_TRANSLATION_TEXT,
 } from "@/lib/studio-default-colors";
+import type { CaptionPresetId } from "@/ayat-studio/lib/caption-presets";
+import type { ExportPresetId } from "@/ayat-studio/lib/export-presets";
+import { qualityToExportPresetId } from "@/ayat-studio/lib/export-presets";
 
 const PROJECTS_KEY = "ayat_projects";
 const EXPORTS_KEY = "ayat_exports";
@@ -77,6 +80,10 @@ export interface StoredProject {
   softNormalize?: boolean;
   pauseBetweenAyahsMs?: number;
   quality: "standard" | "high" | "ultra";
+  /** Platform-aware export matrix preset (Wave 5). */
+  exportPresetId?: ExportPresetId;
+  /** Typography bundle for in-frame captions (Wave 5). */
+  captionPresetId?: CaptionPresetId;
   status: "مسودة" | "مكتمل" | "جاري المعالجة" | "فشل";
   createdAt: string;
   transition?: TransitionId;
@@ -136,9 +143,21 @@ export function formatProjectDate(
 }
 
 function normalizeStoredProject(project: StoredProject): StoredProject {
+  let next = project;
   const createdAt = project.createdAt?.trim();
-  if (createdAt && Number.isFinite(Date.parse(createdAt))) return project;
-  return { ...project, createdAt: new Date(0).toISOString() };
+  if (!createdAt || !Number.isFinite(Date.parse(createdAt))) {
+    next = { ...next, createdAt: new Date(0).toISOString() };
+  }
+  if (!next.exportPresetId) {
+    next = {
+      ...next,
+      exportPresetId: qualityToExportPresetId(next.quality),
+    };
+  }
+  if (!next.captionPresetId) {
+    next = { ...next, captionPresetId: "classic-gold" };
+  }
+  return next;
 }
 
 function persistProjects(projects: StoredProject[]): void {
@@ -259,6 +278,8 @@ export function createDefaultProject(input: {
     softNormalize: true,
     pauseBetweenAyahsMs: 0,
     quality: "high",
+    exportPresetId: "youtube-1080",
+    captionPresetId: "classic-gold",
     status: "مسودة",
     createdAt: new Date().toISOString(),
     transition: "fade",

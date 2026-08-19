@@ -7,6 +7,7 @@ import {
 } from "@/lib/studio-default-colors";
 import type { StoredProject } from "./projects-store";
 import { reciters, surahs, aspectRatios } from "./quran-data";
+import { resolveExportPreset } from "./export-presets";
 import { fetchAyahs, fetchAndDecodeAudio } from "./quran-api";
 import { drawVisualizer, type VisualizerType } from "./visualizer";
 import { studioMediaUrl } from "./media-url";
@@ -78,10 +79,11 @@ export async function exportProjectToVideo({
   }
 
   const ratio = aspectRatios.find((r) => r.id === project.ratio) || aspectRatios[0];
+  const exportPreset = resolveExportPreset(project);
   let { width, height, scale } = resolveStudioExportSize(
     ratio.width,
     ratio.height,
-    project.quality,
+    exportPreset.quality,
   );
 
   onProgress?.(0, "جلب الآيات والصوت...");
@@ -183,7 +185,7 @@ export async function exportProjectToVideo({
     canvas.height = height;
     const ctx = canvas.getContext("2d", { alpha: false })!;
 
-    const fps = 30;
+    const fps = exportPreset.fps;
     const totalFrames = Math.ceil(totalDuration * fps);
     onProgress?.(12, "تحليل الصوت...");
     const freqPerFrame = await computeFreqPerFrame(audioBuffer, totalFrames, fps);
@@ -217,12 +219,7 @@ export async function exportProjectToVideo({
       codec: avcCodec,
       width,
       height,
-      bitrate:
-        project.quality === "ultra"
-          ? 16_000_000
-          : project.quality === "standard"
-            ? 4_000_000
-            : 8_000_000,
+      bitrate: exportPreset.videoBitrate,
       framerate: fps,
       avc: { format: "avc" },
     };
@@ -259,7 +256,7 @@ export async function exportProjectToVideo({
       codec: "mp4a.40.2",
       numberOfChannels: 2,
       sampleRate: audioSampleRate,
-      bitrate: 192_000,
+      bitrate: exportPreset.audioBitrate,
     });
 
     onProgress?.(15, "ترميز الفيديو والصوت...");
@@ -456,10 +453,11 @@ export async function exportProjectToPng(
   const tafsirMap = layers?.tafsirMap ?? null;
   const watermark = layers?.watermark ?? false;
   const ratio = aspectRatios.find((r) => r.id === project.ratio) || aspectRatios[0];
+  const exportPreset = resolveExportPreset(project);
   const { width, height } = resolveStudioExportSize(
     ratio.width,
     ratio.height,
-    project.quality,
+    exportPreset.quality,
   );
   const ayahs = await fetchAyahs(
     project.surahId,

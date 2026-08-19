@@ -58,11 +58,14 @@ type StudioAudioPreviewState = {
   muted: boolean;
   duration: number;
   error: string | null;
+  segments: { start: number; end: number }[];
   canvasRef: RefObject<HTMLCanvasElement | null>;
   progressStore: ProgressStore;
   play: () => Promise<void>;
   pause: () => void;
   toggleMute: () => void;
+  seek: (timeSec: number) => void;
+  seekToAyah: (index: number) => void;
 };
 
 const StudioAudioPreviewContext =
@@ -76,6 +79,15 @@ function useStudioAudioPreviewContext(): StudioAudioPreviewState {
     );
   }
   return ctx;
+}
+
+export function useStudioAudioPreview(): StudioAudioPreviewState {
+  return useStudioAudioPreviewContext();
+}
+
+export function useStudioProgress(): number {
+  const { progressStore } = useStudioAudioPreviewContext();
+  return useProgress(progressStore);
 }
 
 function useProgress(store: ProgressStore): number {
@@ -92,6 +104,9 @@ function useStudioAudioPreviewLogic(
   const [muted, setMuted] = useState(false);
   const [duration, setDuration] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [segments, setSegments] = useState<{ start: number; end: number }[]>(
+    [],
+  );
 
   const progressStoreRef = useRef<ProgressStore | null>(null);
   if (!progressStoreRef.current) {
@@ -251,6 +266,7 @@ function useStudioAudioPreviewLogic(
     setReady(false);
     bufferRef.current = null;
     segmentsRef.current = [];
+    setSegments([]);
     setDuration(0);
   }, [
     reciterId,
@@ -286,10 +302,12 @@ function useStudioAudioPreviewLogic(
         softNormalize,
       });
       bufferRef.current = buffer;
-      segmentsRef.current = segments.map((s) => ({
+      const mapped = segments.map((s) => ({
         start: s.start,
         end: s.end,
       }));
+      segmentsRef.current = mapped;
+      setSegments(mapped);
       setDuration(buffer.duration);
       setReady(true);
       return buffer;
@@ -400,6 +418,29 @@ function useStudioAudioPreviewLogic(
     });
   }, []);
 
+  const seek = useCallback(
+    (timeSec: number) => {
+      const buffer = bufferRef.current;
+      if (!buffer || buffer.duration <= 0) return;
+      const t = Math.min(Math.max(0, timeSec), Math.max(0, buffer.duration - 0.02));
+      startedAtSecRef.current = t;
+      progressStore.set(t / buffer.duration);
+      emitAyahIndex(t);
+      if (playingRef.current) {
+        void play();
+      }
+    },
+    [play, progressStore],
+  );
+
+  const seekToAyah = useCallback(
+    (index: number) => {
+      const seg = segmentsRef.current[index];
+      if (seg) seek(seg.start);
+    },
+    [seek],
+  );
+
   return useMemo(
     () => ({
       loading,
@@ -408,11 +449,14 @@ function useStudioAudioPreviewLogic(
       muted,
       duration,
       error,
+      segments,
       canvasRef,
       progressStore,
       play,
       pause,
       toggleMute,
+      seek,
+      seekToAyah,
     }),
     [
       loading,
@@ -421,10 +465,13 @@ function useStudioAudioPreviewLogic(
       muted,
       duration,
       error,
+      segments,
       progressStore,
       play,
       pause,
       toggleMute,
+      seek,
+      seekToAyah,
     ],
   );
 }
@@ -569,8 +616,16 @@ export function StudioAudioTransport({
     play,
     pause,
     toggleMute,
+    seek,
   } = useStudioAudioPreviewContext();
   const progress = useProgress(progressStore);
+
+  const onScrub = (clientX: number, track: HTMLDivElement) => {
+    if (!duration) return;
+    const rect = track.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    seek(ratio * duration);
+  };
 
   return (
     <>
@@ -599,7 +654,22 @@ export function StudioAudioTransport({
             <Play className="ml-0.5 h-3.5 w-3.5" />
           )}
         </button>
-        <div className="h-1 w-24 overflow-hidden rounded-full bg-muted/60">
+        <div
+          className="h-1 w-24 cursor-pointer overflow-hidden rounded-full bg-muted/60"
+          role="slider"
+          aria-valuemin={0}
+          aria-valuemax={Math.floor(duration)}
+          aria-valuenow={Math.floor(progress * duration)}
+          aria-label="تقدم التشغيل"
+          tabIndex={0}
+          onClick={(e) => onScrub(e.clientX, e.currentTarget)}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowLeft") seek(Math.max(0, progress * duration - 2));
+            if (e.key === "ArrowRight") {
+              seek(Math.min(duration, progress * duration + 2));
+            }
+          }}
+        >
           <div
             className="h-full bg-accent transition-all"
             style={{ width: `${progress * 100}%` }}

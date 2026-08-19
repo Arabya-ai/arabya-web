@@ -149,6 +149,19 @@ import {
   STUDIO_LAYER_TEXT_MAX_CHARS,
   type StudioEdition,
 } from "@/ayat-studio/lib/studio-layers";
+import { StudioTimeline } from "@/ayat-studio/components/StudioTimeline";
+import {
+  EXPORT_PRESETS,
+  exportPresetLabel,
+  resolveExportPreset,
+  type ExportPresetId,
+} from "@/ayat-studio/lib/export-presets";
+import {
+  CAPTION_PRESETS,
+  captionPresetLabel,
+  findCaptionPreset,
+  type CaptionPresetId,
+} from "@/ayat-studio/lib/caption-presets";
 
 function BrandLockupLabels({
   titlePx,
@@ -694,12 +707,8 @@ export default function Editor() {
     update({ status: "جاري المعالجة" });
 
     const exportId = crypto.randomUUID();
-    const qualityLabel =
-      project.quality === "standard"
-        ? "720p"
-        : project.quality === "ultra"
-          ? "4K"
-          : "1080p";
+    const preset = resolveExportPreset(project);
+    const qualityLabel = exportPresetLabel(preset, "ar");
 
     saveExport({
       id: exportId,
@@ -1281,6 +1290,31 @@ export default function Editor() {
           </EditorPanel>
 
           <EditorPanel title="تنسيق النص" icon={Type}>
+            <div>
+              <Label className="text-xs text-accent">نمط النص (Captions)</Label>
+              <Select
+                value={project.captionPresetId ?? "classic-gold"}
+                onValueChange={(v) => {
+                  const preset = findCaptionPreset(v);
+                  update({
+                    captionPresetId: v as CaptionPresetId,
+                    ...(preset?.patch ?? {}),
+                  });
+                }}
+              >
+                <SelectTrigger className="border-accent/20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CAPTION_PRESETS.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {captionPresetLabel(p, "ar")}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="custom">مخصص (الإعدادات الحالية)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <p className="text-[11px] text-accent/90 font-medium">نص الآية (ثابت المصدر)</p>
             <div>
               <Label className="text-xs text-accent">
@@ -1491,11 +1525,38 @@ export default function Editor() {
               </Select>
             </div>
             <div>
-              <Label className="text-xs text-accent">الجودة</Label>
+              <Label className="text-xs text-accent">إعداد التصدير / المنصة</Label>
+              <Select
+                value={project.exportPresetId ?? "youtube-1080"}
+                onValueChange={(v) => {
+                  const preset = EXPORT_PRESETS.find((p) => p.id === v);
+                  update({
+                    exportPresetId: v as ExportPresetId,
+                    quality: preset?.quality ?? project.quality,
+                  });
+                }}
+              >
+                <SelectTrigger className="border-accent/20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="max-h-80">
+                  {EXPORT_PRESETS.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {exportPresetLabel(p, "ar")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs text-accent">الجودة (احتياطي)</Label>
               <Select
                 value={project.quality}
                 onValueChange={(v) =>
-                  update({ quality: v as StoredProject["quality"] })
+                  update({
+                    quality: v as StoredProject["quality"],
+                    exportPresetId: "custom",
+                  })
                 }
               >
                 <SelectTrigger className="border-accent/20">
@@ -1892,6 +1953,12 @@ export default function Editor() {
             </div>
           </div>
           <div className="relative z-[1] w-full shrink-0 pb-1">
+            <StudioTimeline
+              ayahLabels={previewAyahs.map(
+                (a) => `${project.surahId}:${a.numberInSurah}`,
+              )}
+              activeAyahIndex={previewAyahIndex}
+            />
             <StudioAudioTransport controlsDock="below" />
           </div>
         </div>
