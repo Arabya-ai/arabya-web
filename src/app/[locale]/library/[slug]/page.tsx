@@ -4,6 +4,14 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
 import { LibraryPdfReader } from "@/components/LibraryPdfReader";
+import { LibraryWorkActions } from "@/components/library/LibraryWorkActions";
+import {
+  LibraryCoverPreview,
+  LibraryMetaTable,
+  LibraryRelatedBooks,
+  LibrarySidebar,
+} from "@/components/library/LibraryWorkParts";
+import { libraryCategoryLabel } from "@/lib/library/categories";
 import { getLibraryCatalog, getLibraryWork } from "@/lib/library";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
@@ -32,38 +40,129 @@ export default async function LibraryWorkPage({ params }: Props) {
   const work = await getLibraryWork(slug);
   if (!work) notFound();
 
+  const allWorks = await getLibraryCatalog();
   const title = locale === "en" && work.titleEn ? work.titleEn : work.title;
   const desc =
     locale === "en"
       ? work.descriptionEn || work.description
       : work.description;
+  const categoryLabel = libraryCategoryLabel(work.category, locale);
+  const pageUrl = `/library/${slug}`;
+
+  const metaLabels = {
+    bookName: t("metaBookName"),
+    author: t("metaAuthor"),
+    pages: t("metaPages"),
+    category: t("metaCategory"),
+    publisher: t("metaPublisher"),
+    edition: t("metaEdition"),
+    format: t("metaFormat"),
+    fileSize: t("metaFileSize"),
+  };
 
   return (
-    <div className="shell page-block library-work-page">
-      <p>
-        <Link href="/library" className="nav-pill">
-          {t("backCatalog")}
-        </Link>
-      </p>
+    <div className="library-page library-work-page-wrap">
+      <div className="shell shell--library library-work-layout">
+        <LibrarySidebar
+          locale={locale}
+          works={allWorks}
+          activeCategory={work.category}
+          labels={{
+            categoriesTitle: t("categoriesTitle"),
+            categorySearch: t("categorySearch"),
+            relatedTitle: t("relatedTitle"),
+            viewBook: t("viewBook"),
+            digitalBook: t("digitalBook"),
+            pageCount: t("pageCount"),
+          }}
+        />
 
-      <header className="asma-page-head">
-        <h1>{title}</h1>
-        {work.author ? <p>{work.author}</p> : null}
-        {desc ? <p>{desc}</p> : null}
-        {work.pageCount ? (
-          <p className="books-catalog-status">
-            {t("pageCount", { count: work.pageCount })}
+        <main className="library-work-main">
+          <nav className="library-breadcrumbs" aria-label="Breadcrumb">
+            <Link href="/">{t("breadcrumbHome")}</Link>
+            <span aria-hidden>/</span>
+            <Link href="/library">{t("title")}</Link>
+            <span aria-hidden>/</span>
+            <Link href={`/library?category=${work.category ?? "education"}`}>
+              {categoryLabel}
+            </Link>
+            <span aria-hidden>/</span>
+            <span aria-current="page">{title}</span>
+          </nav>
+
+          <header className="library-work-head">
+            <h1>{title}</h1>
+            <div className="library-work-subhead">
+              <span>{work.publisher || "عربية"}</span>
+              {work.publishedAt ? <span>{work.publishedAt}</span> : null}
+              {work.pageCount ? (
+                <span>{t("pageCount", { count: work.pageCount })}</span>
+              ) : null}
+            </div>
+          </header>
+
+          <section className="library-work-intro">
+            <LibraryCoverPreview
+              work={work}
+              locale={locale}
+              digitalBookLabel={t("digitalBook")}
+            />
+            <div className="library-work-intro-meta">
+              <LibraryMetaTable
+                locale={locale}
+                work={work}
+                labels={metaLabels}
+              />
+              <LibraryWorkActions
+                pdfUrl={work.pdfUrl}
+                pageUrl={pageUrl}
+                locale={locale}
+                labels={{
+                  download: t("download"),
+                  copyLink: t("copyLink"),
+                  share: t("share"),
+                  print: t("print"),
+                  copied: t("copied"),
+                }}
+              />
+            </div>
+          </section>
+
+          <section className="library-work-reader-section" aria-labelledby="library-reader-title">
+            <h2 id="library-reader-title">{t("readerTitle")}</h2>
+            <LibraryPdfReader pdfUrl={work.pdfUrl} title={title} />
+          </section>
+
+          {desc ? (
+            <section className="library-work-about" aria-labelledby="library-about-title">
+              <h2 id="library-about-title">{t("aboutTitle")}</h2>
+              <p>{desc}</p>
+            </section>
+          ) : null}
+
+          <LibraryRelatedBooks
+            locale={locale}
+            works={allWorks.filter(
+              (w) =>
+                w.id !== work.id &&
+                (w.category === work.category || !work.category),
+            )}
+            currentId={work.id}
+            labels={{
+              categoriesTitle: t("categoriesTitle"),
+              categorySearch: t("categorySearch"),
+              relatedTitle: t("relatedTitle"),
+              viewBook: t("viewBook"),
+              digitalBook: t("digitalBook"),
+              pageCount: t("pageCount"),
+            }}
+          />
+
+          <p className="library-back-link">
+            <Link href="/library">{t("backCatalog")}</Link>
           </p>
-        ) : null}
-      </header>
-
-      <LibraryPdfReader pdfUrl={work.pdfUrl} title={title} />
-
-      <p style={{ marginTop: "1rem" }}>
-        <a href={work.pdfUrl} target="_blank" rel="noreferrer" className="nav-pill">
-          {t("openNewTab")}
-        </a>
-      </p>
+        </main>
+      </div>
     </div>
   );
 }

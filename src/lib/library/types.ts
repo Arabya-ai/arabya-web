@@ -12,6 +12,11 @@ export type LibraryWorkMeta = {
   /** Public static path (`/library/foo.pdf`) or API (`/api/library/foo/file`). */
   pdfUrl: string;
   pageCount?: number;
+  fileSizeKb?: number;
+  publisher?: string;
+  edition?: string;
+  coverUrl?: string;
+  publishedAt?: string;
   license?: string;
   importedAt?: string;
 };
