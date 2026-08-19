@@ -15,6 +15,7 @@ type QiblaPayload = {
   direction: number;
   directionLabel: string;
   approxCity?: PortalCityId;
+  place?: { city?: string | null; country?: string | null; displayName?: string | null };
 };
 
 const CITY_KEY = STORAGE_KEYS.prayerCity;
@@ -53,31 +54,8 @@ export function QiblaCompass() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/qibla?city=${encodeURIComponent(cityId)}`);
-        const json = (await res.json()) as QiblaPayload & { error?: string };
-        if (!res.ok) {
-          setQibla(null);
-          setError(t("qiblaError"));
-          return;
-        }
-        setQibla(json);
-      } catch {
-        setQibla(null);
-        setError(t("qiblaError"));
-      } finally {
-        setLoading(false);
-      }
-    },
-    [t],
-  );
-
-  const loadCoords = useCallback(
-    async (lat: number, lon: number) => {
-      setLoading(true);
-      setError(null);
-      try {
         const res = await fetch(
-          `/api/qibla?lat=${encodeURIComponent(String(lat))}&lon=${encodeURIComponent(String(lon))}`,
+          `/api/qibla?city=${encodeURIComponent(cityId)}&lang=${encodeURIComponent(locale)}`,
         );
         const json = (await res.json()) as QiblaPayload & { error?: string };
         if (!res.ok) {
@@ -93,7 +71,32 @@ export function QiblaCompass() {
         setLoading(false);
       }
     },
-    [t],
+    [locale, t],
+  );
+
+  const loadCoords = useCallback(
+    async (lat: number, lon: number) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(
+          `/api/qibla?lat=${encodeURIComponent(String(lat))}&lon=${encodeURIComponent(String(lon))}&lang=${encodeURIComponent(locale)}`,
+        );
+        const json = (await res.json()) as QiblaPayload & { error?: string };
+        if (!res.ok) {
+          setQibla(null);
+          setError(t("qiblaError"));
+          return;
+        }
+        setQibla(json);
+      } catch {
+        setQibla(null);
+        setError(t("qiblaError"));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [locale, t],
   );
 
   useEffect(() => {
@@ -347,6 +350,11 @@ export function QiblaCompass() {
       {geoHint ? (
         <p className="prayer-status prayer-status--hint" role="status">
           {geoHint}
+        </p>
+      ) : null}
+      {qibla?.place?.displayName ? (
+        <p className="prayer-status prayer-status--hint" role="status">
+          {qibla.place.displayName}
         </p>
       ) : null}
       {loading ? <p className="prayer-status">{tPrayer("loading")}</p> : null}

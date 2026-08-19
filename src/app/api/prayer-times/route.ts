@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { resolvePortalLocationFromSearch } from "@/lib/portal-cities";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { reverseGeocodePlace } from "@/lib/reverse-geocode";
+import { readPrayerDefaults } from "@/lib/prayer-defaults-store";
 
 const GREGORIAN_MONTHS_AR: Record<number, string> = {
   1: "يناير",
@@ -73,12 +75,16 @@ export async function GET(req: Request) {
     );
   }
   const cfg = resolved.cfg;
+  const langRaw = searchParams.get("lang");
+  const locale = langRaw === "en" ? "en" : "ar";
+  const defaults = readPrayerDefaults();
 
   try {
     const url = new URL("https://api.aladhan.com/v1/timings");
     url.searchParams.set("latitude", String(cfg.latitude));
     url.searchParams.set("longitude", String(cfg.longitude));
-    url.searchParams.set("method", String(cfg.method));
+    url.searchParams.set("method", String(defaults.method || cfg.method));
+    url.searchParams.set("school", String(defaults.school));
 
     const res = await fetch(url.toString(), {
       next: { revalidate: 3600 },
@@ -154,12 +160,17 @@ export async function GET(req: Request) {
     ].filter(Boolean);
     const hijriEn = hijriEnParts.length ? hijriEnParts.join(" ") : null;
 
+    const place = await reverseGeocodePlace(cfg.latitude, cfg.longitude, locale);
+
     return NextResponse.json(
       {
         city: cfg.id,
+        method: defaults.method || cfg.method,
+        school: defaults.school,
         timezone: payload.data?.meta?.timezone ?? null,
         source: "api.aladhan.com",
         ...(cfg.approxCity ? { approxCity: cfg.approxCity } : {}),
+        ...(place ? { place } : {}),
         gregorian: {
           readable: payload.data?.date?.readable ?? null,
           ar: gregorianAr,

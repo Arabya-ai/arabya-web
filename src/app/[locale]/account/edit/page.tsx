@@ -53,6 +53,9 @@ export default async function AccountEditHubPage({ params }: Props) {
           <Link href="/account/edit/sources" className="account-panel-link">
             {t("sources")}
           </Link>
+          <Link href="/account/edit/adhkar-content" className="account-panel-link">
+            إدارة الأذكار والأدعية
+          </Link>
           <Link href="/studio" className="account-panel-link">
             {t("openStudio")}
           </Link>

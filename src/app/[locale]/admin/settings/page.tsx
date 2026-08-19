@@ -12,6 +12,7 @@ import { canAccessAdmin } from "@/lib/roles";
 import { getAuthEnvDiagnostics, isGoogleAuthConfigured } from "@/auth";
 import { isCloudSyncConfigured } from "@/lib/cloud-sync";
 import { AdminSettingsTabs } from "@/components/dashboard/AdminSettingsTabs";
+import { AdminPrayerDefaultsPanel } from "@/components/dashboard/AdminPrayerDefaultsPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,9 @@ export default async function AdminSettingsPage({ params, searchParams }: Props)
               <li dir="ltr">AUTH_URL: {authDiag.authUrl}</li>
             </ul>
             <p className="dash-muted">{t("superAdminNote")}</p>
+            <hr className="my-4 border-[var(--line)]" />
+            <h3 className="mb-2">الإعدادات الافتراضية لمواقيت الصلاة</h3>
+            <AdminPrayerDefaultsPanel />
           </section>
         ) : null}
 

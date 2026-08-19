@@ -21,6 +21,7 @@ type Timings = PrayerTimings;
 
 type PrayerPayload = {
   timezone?: string | null;
+  place?: { city?: string | null; country?: string | null; displayName?: string | null };
   gregorian: {
     ar: string | null;
     en?: string | null;
@@ -150,8 +151,12 @@ export function PrayerTimesCard() {
       setError(null);
       try {
         const [prayerRes, qiblaRes] = await Promise.all([
-          fetch(`/api/prayer-times?city=${encodeURIComponent(cityId)}`),
-          fetch(`/api/qibla?city=${encodeURIComponent(cityId)}`),
+          fetch(
+            `/api/prayer-times?city=${encodeURIComponent(cityId)}&lang=${encodeURIComponent(locale)}`,
+          ),
+          fetch(
+            `/api/qibla?city=${encodeURIComponent(cityId)}&lang=${encodeURIComponent(locale)}`,
+          ),
         ]);
         const prayerJson = (await prayerRes.json()) as PrayerPayload & {
           error?: string;
@@ -175,7 +180,7 @@ export function PrayerTimesCard() {
         setLoading(false);
       }
     },
-    [t],
+    [locale, t],
   );
 
   const loadCoords = useCallback(
@@ -185,10 +190,10 @@ export function PrayerTimesCard() {
       try {
         const [prayerRes, qiblaRes] = await Promise.all([
           fetch(
-            `/api/prayer-times?lat=${encodeURIComponent(String(lat))}&lon=${encodeURIComponent(String(lon))}`,
+            `/api/prayer-times?lat=${encodeURIComponent(String(lat))}&lon=${encodeURIComponent(String(lon))}&lang=${encodeURIComponent(locale)}`,
           ),
           fetch(
-            `/api/qibla?lat=${encodeURIComponent(String(lat))}&lon=${encodeURIComponent(String(lon))}`,
+            `/api/qibla?lat=${encodeURIComponent(String(lat))}&lon=${encodeURIComponent(String(lon))}&lang=${encodeURIComponent(locale)}`,
           ),
         ]);
         const prayerJson = (await prayerRes.json()) as PrayerPayload & {
@@ -213,7 +218,7 @@ export function PrayerTimesCard() {
         setLoading(false);
       }
     },
-    [t],
+    [locale, t],
   );
 
   const onCity = (id: string) => {
@@ -453,6 +458,11 @@ export function PrayerTimesCard() {
       {geoHint ? (
         <p className="prayer-status prayer-status--hint" role="status">
           {geoHint}
+        </p>
+      ) : null}
+      {data?.place?.displayName ? (
+        <p className="prayer-status prayer-status--hint" role="status">
+          {data.place.displayName}
         </p>
       ) : null}
 

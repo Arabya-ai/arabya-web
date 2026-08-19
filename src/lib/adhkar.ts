@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { readAdhkarContentOverride } from "@/lib/adhkar-content-store";
 
 const dataRoot = path.join(process.cwd(), "data", "adhkar");
 
@@ -28,6 +29,7 @@ export type AdhkarItem = {
   source?: string;
   fadlAr?: string;
   fadlEn?: string;
+  active?: boolean;
 };
 
 export type AdhkarCategory = AdhkarCategoryMeta & {
@@ -40,6 +42,7 @@ export type DuaItem = {
   categoryEn: string;
   textAr: string;
   source?: string;
+  active?: boolean;
 };
 
 export type TasbeehPhrase = {
@@ -86,16 +89,34 @@ export async function getAdhkarCategory(
   );
   const meta = (categories?.categories ?? []).find((c) => c.slug === slug);
   if (!meta) return null;
+  const override = readAdhkarContentOverride();
+  const overrideItems = override?.adhkarBySlug?.[slug];
   const parsed = await readJson<{ items?: AdhkarItem[] }>(`${slug}.json`);
-  const items = (parsed?.items ?? []).filter(
-    (item) => item.id && item.textAr && Number(item.repeat) > 0,
+  const sourceItems =
+    Array.isArray(overrideItems) && overrideItems.length > 0
+      ? overrideItems
+      : (parsed?.items ?? []);
+  const items = sourceItems.filter(
+    (item) =>
+      item.id &&
+      item.textAr &&
+      Number(item.repeat) > 0 &&
+      item.active !== false,
   );
   return { ...meta, items };
 }
 
 export async function getDuas(): Promise<DuaItem[]> {
+  const override = readAdhkarContentOverride();
+  if (Array.isArray(override?.duas) && override.duas.length > 0) {
+    return override.duas.filter(
+      (item) => item.id && item.textAr && item.active !== false,
+    );
+  }
   const parsed = await readJson<{ items?: DuaItem[] }>("duas.json");
-  return (parsed?.items ?? []).filter((item) => item.id && item.textAr);
+  return (parsed?.items ?? []).filter(
+    (item) => item.id && item.textAr && item.active !== false,
+  );
 }
 
 export async function getTasbeehPhrases(): Promise<TasbeehPhrase[]> {
