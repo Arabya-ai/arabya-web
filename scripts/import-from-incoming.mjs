@@ -48,12 +48,11 @@ async function main() {
   await access(resolved);
 
   const importer = path.join(root, "scripts", "import-irab-book.mjs");
+  const writeClaims = hasFlag("claims");
+  const childArgs = [importer, `--slug=${slug}`, `--from=${resolved}`];
+  if (writeClaims) childArgs.push("--claims");
   await new Promise((resolve, reject) => {
-    const child = spawn(
-      process.execPath,
-      [importer, `--slug=${slug}`, `--from=${resolved}`],
-      { stdio: "inherit", cwd: root },
-    );
+    const child = spawn(process.execPath, childArgs, { stdio: "inherit", cwd: root });
     child.on("exit", (code) => {
       if (code === 0) resolve();
       else reject(new Error(`import-irab-book exited ${code}`));

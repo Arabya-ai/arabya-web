@@ -11,6 +11,10 @@ import type {
   SourceUploadRow,
   SyncPayload,
 } from "@/lib/cloud-sync";
+import {
+  purgeStudyEntries,
+  purgeTahfeezSessions,
+} from "@/lib/history-retention";
 import type { StudyEntry } from "@/lib/study-archive";
 import { sanitizeAdhkarMap, sanitizeTasbeehState } from "@/lib/adhkar-sync";
 import {
@@ -203,7 +207,7 @@ function pullAll(db: SqliteDb, userId: string) {
     )
     .all(userId) as AyahNote[];
 
-  const study = db
+  const studyRaw = db
     .prepare(
       `SELECT id, kind, title, query, surah_id as surahId, verse,
               word_index as wordIndex, snippet, notes, href,
@@ -211,6 +215,16 @@ function pullAll(db: SqliteDb, userId: string) {
        FROM study_entries WHERE user_id = ? ORDER BY updated_at DESC`,
     )
     .all(userId) as StudyEntry[];
+  const study = purgeStudyEntries(studyRaw);
+  if (study.length !== studyRaw.length) {
+    const staleIds = studyRaw
+      .filter((row) => !study.some((s) => s.id === row.id))
+      .map((row) => row.id);
+    const del = db.prepare(
+      `DELETE FROM study_entries WHERE user_id = ? AND id = ?`,
+    );
+    for (const id of staleIds) del.run(userId, id);
+  }
 
   const progress = db
     .prepare(
@@ -323,7 +337,7 @@ function pushAll(db: SqliteDb, userId: string, payload: SyncPayload) {
          snippet, notes, href, created_at, updated_at
        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     );
-    for (const s of payload.study.slice(0, 200)) {
+    for (const s of purgeStudyEntries(payload.study).slice(0, 200)) {
       if (!s?.id || !s?.title) continue;
       const kind =
         s.kind === "word" || s.kind === "quick" || s.kind === "ayah"
@@ -987,11 +1001,11 @@ function parseTahfeezPortfolio(
       ...empty.stats,
       ...(JSON.parse(statsJson || "{}") as Partial<TahfeezPortfolioStats>),
     };
-    const sessions = JSON.parse(sessionsJson || "[]") as TahfeezSessionSummary[];
-    return {
-      stats,
-      sessions: Array.isArray(sessions) ? sessions.slice(0, 100) : [],
-    };
+    const raw = JSON.parse(sessionsJson || "[]") as TahfeezSessionSummary[];
+    const sessions = purgeTahfeezSessions(
+      Array.isArray(raw) ? raw : [],
+    ).slice(0, 100);
+    return { stats, sessions };
   } catch {
     return empty;
   }
@@ -1023,7 +1037,7 @@ export function localSaveTahfeezPortfolio(
   );
   const id = userIdFromEmail(user.email);
   const now = Date.now();
-  const sessions = (portfolio.sessions || []).slice(0, 100);
+  const sessions = purgeTahfeezSessions(portfolio.sessions || []).slice(0, 100);
   const stats: TahfeezPortfolioStats = {
     ...emptyTahfeezPortfolio().stats,
     ...portfolio.stats,
@@ -1046,10 +1060,9 @@ export function localAppendTahfeezSession(
   session: TahfeezSessionSummary,
 ): TahfeezPortfolio {
   const current = localGetTahfeezPortfolio(user.email);
-  const sessions = [session, ...current.sessions.filter((s) => s.id !== session.id)].slice(
-    0,
-    100,
-  );
+  const sessions = purgeTahfeezSessions(
+    [session, ...current.sessions.filter((s) => s.id !== session.id)],
+  ).slice(0, 100);
   const totalCorrect =
     current.stats.totalCorrectWords + (session.correct || 0);
   const totalWrong = current.stats.totalWrongWords + (session.wrong || 0);
@@ -1124,4 +1137,15 @@ export function localAdminListTahfeezSummaries(limit = 50): Array<{
       updatedAt: new Date(r.updatedAt).toISOString(),
     };
   });
+}
+
+export function localClearStudyEntries(email: string): void {
+  const db = getUserDb();
+  const userId = userIdFromEmail(email);
+  db.prepare(`DELETE FROM study_entries WHERE user_id = ?`).run(userId);
+}
+
+export function localClearTahfeezSessions(user: UserProfile): TahfeezPortfolio {
+  const empty = emptyTahfeezPortfolio();
+  return localSaveTahfeezPortfolio(user, empty);
 }

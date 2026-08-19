@@ -27,7 +27,9 @@ data/books/
 
 ## سكربت الاستيراد
 
-`npm run import-irab-book -- --slug=darwish --from=./incoming/darwish.json`
+`npm run import-irab-book -- --slug=darwish --from=./incoming/darwish.json --claims`
+
+**دليل المالك (Word → JSON + AnyPage):** [`owner-import-book-ar.md`](owner-import-book-ar.md)
 
 أو بعد التجهيز من قناة IA المحلية:
 

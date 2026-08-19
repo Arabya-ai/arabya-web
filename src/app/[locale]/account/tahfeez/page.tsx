@@ -12,6 +12,8 @@ import {
   isCloudSyncConfigured,
 } from "@/lib/cloud-sync";
 import { ArabyaPanel } from "@/components/ui/ArabyaPanel";
+import { TahfeezHistoryActions } from "@/components/dashboard/TahfeezHistoryActions";
+import { retentionDaysLabel } from "@/lib/history-retention";
 import { emptyTahfeezPortfolio } from "@/lib/tahfeez/types";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +36,9 @@ export default async function AccountTahfeezPage({ params }: Props) {
     ? await getTahfeezPortfolio(session.user.email!)
     : emptyTahfeezPortfolio();
   const stats = portfolio.stats;
+
+  const syncReady = isCloudSyncConfigured();
+  const weakSessions = portfolio.sessions.filter((s) => s.accuracy < 75);
 
   return (
     <DashboardShell
@@ -80,7 +85,36 @@ export default async function AccountTahfeezPage({ params }: Props) {
               {stats.pagesCompleted}
             </li>
           </ul>
+          <TahfeezHistoryActions
+            sessionCount={portfolio.sessions.length}
+            syncReady={syncReady}
+          />
+          <p className="dash-muted text-sm" style={{ marginTop: "0.5rem" }}>
+            {locale === "en"
+              ? `Sessions older than ${retentionDaysLabel("en")} are removed automatically.`
+              : `تُحذف الجلسات الأقدم من ${retentionDaysLabel("ar")} تلقائيًا.`}
+          </p>
         </ArabyaPanel>
+        {weakSessions.length > 0 ? (
+          <ArabyaPanel
+            as="div"
+            legacyDash
+            title={locale === "en" ? "Needs review" : "تحتاج مراجعة"}
+          >
+            <ul className="mt-3 space-y-2 text-sm">
+              {weakSessions.slice(0, 10).map((s) => (
+                <li key={s.id}>
+                  {s.surahName} · {s.ayahStart}–{s.ayahEnd} · {s.accuracy}%
+                </li>
+              ))}
+            </ul>
+            <p className="dash-muted text-sm">
+              <Link href="/tahfeez">
+                {locale === "en" ? "Repeat weak segments" : "أعد التسميع"}
+              </Link>
+            </p>
+          </ArabyaPanel>
+        ) : null}
         <ArabyaPanel
           as="div"
           legacyDash

@@ -7,8 +7,11 @@ import {
   deleteStudyEntry,
   readStudyEntries,
   updateStudyNotes,
+  clearAllStudyEntries,
   type StudyEntry,
 } from "@/lib/study-archive";
+import { retentionDaysLabel } from "@/lib/history-retention";
+import { notifyCloudSyncNeeded } from "@/lib/cloud-sync-client";
 import { ArabyaPanel, ArabyaPanelStack } from "@/components/ui/ArabyaPanel";
 import { toArabicNumerals } from "@/lib/format";
 
@@ -16,9 +19,9 @@ function formatCount(value: number, locale: string): string {
   return locale === "ar" ? toArabicNumerals(value) : String(value);
 }
 
-export function StudyArchivePanel() {
+export function StudyArchivePanel({ syncReady = false }: { syncReady?: boolean }) {
   const t = useTranslations("StudyArchive");
-  const locale = useLocale();
+  const locale = useLocale() as "ar" | "en";
   const [entries, setEntries] = useState<StudyEntry[]>([]);
   const [editing, setEditing] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
@@ -52,8 +55,52 @@ export function StudyArchivePanel() {
             <span className="library-count">({formatCount(entries.length, locale)})</span>
           </>
         }
-        muted={t("lead")}
+        muted={
+          <>
+            {t("lead")}{" "}
+            <span className="dash-muted">
+              ({t("retention", { days: retentionDaysLabel(locale) })})
+            </span>
+          </>
+        }
       />
+
+      {entries.length > 0 ? (
+        <div className="dash-row-actions">
+          <button
+            type="button"
+            className="danger"
+            onClick={() => {
+              const ok = window.confirm(t("confirmClearAll"));
+              if (!ok) return;
+              clearAllStudyEntries();
+              notifyCloudSyncNeeded();
+              reload();
+            }}
+          >
+            {t("clearAll")}
+          </button>
+          {syncReady ? (
+            <button
+              type="button"
+              className="danger"
+              onClick={async () => {
+                const ok = window.confirm(t("confirmClearAll"));
+                if (!ok) return;
+                try {
+                  await fetch("/api/account/history?scope=study", { method: "DELETE" });
+                  clearAllStudyEntries();
+                  reload();
+                } catch {
+                  window.alert(t("clearError"));
+                }
+              }}
+            >
+              {t("clearAllCloud")}
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
       {entries.length === 0 ? (
         <ArabyaPanel legacyDash muted={<>{t("empty")} <Link href="/study">{t("quickStudyLink")}</Link>.</>} />

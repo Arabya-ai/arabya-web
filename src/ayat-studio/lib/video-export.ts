@@ -7,7 +7,7 @@ import {
 } from "@/lib/studio-default-colors";
 import type { StoredProject } from "./projects-store";
 import { reciters, surahs, aspectRatios } from "./quran-data";
-import { resolveExportPreset } from "./export-presets";
+import { resolveExportPreset, resolveExportCodec } from "./export-presets";
 import { fetchAyahs, fetchAndDecodeAudio } from "./quran-api";
 import { drawVisualizer, type VisualizerType } from "./visualizer";
 import { studioMediaUrl } from "./media-url";
@@ -80,6 +80,8 @@ export async function exportProjectToVideo({
 
   const ratio = aspectRatios.find((r) => r.id === project.ratio) || aspectRatios[0];
   const exportPreset = resolveExportPreset(project);
+  const exportCodec = resolveExportCodec(project);
+  const useWebm = exportCodec === "vp9-webm";
   let { width, height, scale } = resolveStudioExportSize(
     ratio.width,
     ratio.height,
@@ -196,12 +198,23 @@ export async function exportProjectToVideo({
         e instanceof Error ? e : new Error(String(e || "encode_failed"));
     };
 
-    const muxer = new Muxer({
-      target: new ArrayBufferTarget(),
-      video: { codec: "avc", width, height, frameRate: fps },
-      audio: { codec: "aac", numberOfChannels: 2, sampleRate: audioSampleRate },
-      fastStart: "in-memory",
-    });
+    const webmMuxer = useWebm ? await import("webm-muxer") : null;
+    const muxer = useWebm
+      ? new webmMuxer!.Muxer({
+          target: new webmMuxer!.ArrayBufferTarget(),
+          video: { codec: "V_VP9", width, height, frameRate: fps },
+          audio: {
+            codec: "A_OPUS",
+            sampleRate: audioSampleRate,
+            numberOfChannels: 2,
+          },
+        })
+      : new Muxer({
+          target: new ArrayBufferTarget(),
+          video: { codec: "avc", width, height, frameRate: fps },
+          audio: { codec: "aac", numberOfChannels: 2, sampleRate: audioSampleRate },
+          fastStart: "in-memory",
+        });
 
     const videoEncoder = new VideoEncoder({
       output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
@@ -215,18 +228,26 @@ export async function exportProjectToVideo({
     else if (codedArea > 2_228_224) avcCodec = "avc1.640032";
     else if (codedArea > 2_097_152) avcCodec = "avc1.64002a";
 
-    let videoConfig: VideoEncoderConfig = {
-      codec: avcCodec,
-      width,
-      height,
-      bitrate: exportPreset.videoBitrate,
-      framerate: fps,
-      avc: { format: "avc" },
-    };
+    let videoConfig: VideoEncoderConfig = useWebm
+      ? {
+          codec: "vp09.00.10.08",
+          width,
+          height,
+          bitrate: exportPreset.videoBitrate,
+          framerate: fps,
+        }
+      : {
+          codec: avcCodec,
+          width,
+          height,
+          bitrate: exportPreset.videoBitrate,
+          framerate: fps,
+          avc: { format: "avc" },
+        };
 
     if (typeof VideoEncoder.isConfigSupported === "function") {
       let support = await VideoEncoder.isConfigSupported(videoConfig);
-      if (!support.supported && scale > 1) {
+      if (!support.supported && scale > 1 && !useWebm) {
         const fallback = resolveStudioExportSize(
           ratio.width,
           ratio.height,
@@ -242,7 +263,11 @@ export async function exportProjectToVideo({
         onProgress?.(14, "تم خفض الجودة إلى 1080p لدعم الجهاز...");
       }
       if (!support.supported) {
-        throw new Error("جهازك لا يدعم ترميز هذا المقاس. جرّب جودة عادية (720p).");
+        throw new Error(
+          useWebm
+            ? "جهازك لا يدعم ترميز WebM VP9. جرّب إعداد MP4."
+            : "جهازك لا يدعم ترميز هذا المقاس. جرّب جودة عادية (720p).",
+        );
       }
     }
 
@@ -252,12 +277,21 @@ export async function exportProjectToVideo({
       output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
       error: failEncode,
     });
-    audioEncoder.configure({
-      codec: "mp4a.40.2",
-      numberOfChannels: 2,
-      sampleRate: audioSampleRate,
-      bitrate: exportPreset.audioBitrate,
-    });
+    audioEncoder.configure(
+      useWebm
+        ? {
+            codec: "opus",
+            numberOfChannels: 2,
+            sampleRate: audioSampleRate,
+            bitrate: exportPreset.audioBitrate,
+          }
+        : {
+            codec: "mp4a.40.2",
+            numberOfChannels: 2,
+            sampleRate: audioSampleRate,
+            bitrate: exportPreset.audioBitrate,
+          },
+    );
 
     onProgress?.(15, "ترميز الفيديو والصوت...");
 
@@ -429,12 +463,14 @@ export async function exportProjectToVideo({
 
     onProgress?.(95, "إنهاء الملف...");
     muxer.finalize();
-    const target = muxer.target as ArrayBufferTarget;
-    const mp4Blob = new Blob([target.buffer], { type: "video/mp4" });
+    const target = muxer.target as { buffer: ArrayBuffer };
+    const outBlob = new Blob([target.buffer], {
+      type: useWebm ? "video/webm" : "video/mp4",
+    });
 
     await audioCtx.close().catch(() => {});
     onProgress?.(100, "اكتمل");
-    return mp4Blob;
+    return outBlob;
   } finally {
     cleanupMedia();
   }

@@ -11,6 +11,9 @@ import {
   type ReadingHabitState,
 } from "@/lib/reading-habit";
 import {
+  purgeStudyEntries,
+} from "@/lib/history-retention";
+import {
   readStudyEntries,
   writeStudyEntries,
   type StudyEntry,
@@ -70,7 +73,7 @@ export function applyCloudToLocal(data: {
   withCloudSyncSuppressed(() => {
     if (Array.isArray(data.bookmarks)) writeBookmarks(data.bookmarks);
     if (Array.isArray(data.notes)) writeAllNotes(data.notes);
-    if (Array.isArray(data.study)) writeStudyEntries(data.study);
+    if (Array.isArray(data.study)) writeStudyEntries(purgeStudyEntries(data.study));
 
     const habit = data.progress?.habit;
     if (habit && typeof habit === "object") {

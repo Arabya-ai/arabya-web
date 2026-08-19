@@ -1,5 +1,6 @@
-/** حفظ جلسات الدراسة في الحساب (localStorage + مزامنة D1). */
+/** حفظ جلسات الدراسة في الحساب (localStorage + مزامنة). */
 
+import { purgeStudyEntries } from "@/lib/history-retention";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 export type StudyEntry = {
@@ -30,15 +31,25 @@ export function readStudyEntries(): StudyEntry[] {
     const raw = localStorage.getItem(KEY);
     if (!raw) return [];
     const list = JSON.parse(raw) as StudyEntry[];
-    return Array.isArray(list) ? list : [];
+    if (!Array.isArray(list)) return [];
+    const purged = purgeStudyEntries(list);
+    if (purged.length !== list.length) {
+      localStorage.setItem(KEY, JSON.stringify(purged));
+    }
+    return purged;
   } catch {
     return [];
   }
 }
 
+export function clearAllStudyEntries() {
+  writeStudyEntries([]);
+}
+
 export function writeStudyEntries(list: StudyEntry[]) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(KEY, JSON.stringify(list.slice(0, MAX)));
+  const purged = purgeStudyEntries(list);
+  localStorage.setItem(KEY, JSON.stringify(purged.slice(0, MAX)));
   window.dispatchEvent(new Event("arabya-study-updated"));
   try {
     localStorage.setItem(STORAGE_KEYS.dataRev, String(Date.now()));
