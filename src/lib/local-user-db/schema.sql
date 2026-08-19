@@ -129,3 +129,23 @@ CREATE TABLE IF NOT EXISTS tahfeez_portfolio (
   updated_at INTEGER NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS book_import_jobs (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  slug TEXT NOT NULL,
+  filename TEXT,
+  source_kind TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'processing',
+  message TEXT,
+  verse_count INTEGER NOT NULL DEFAULT 0,
+  word_count INTEGER NOT NULL DEFAULT 0,
+  published INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_book_import_jobs_user ON book_import_jobs(user_id);
+CREATE INDEX IF NOT EXISTS idx_book_import_jobs_created ON book_import_jobs(created_at);

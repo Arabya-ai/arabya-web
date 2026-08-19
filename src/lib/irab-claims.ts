@@ -8,6 +8,7 @@ import {
   type IrabSourceMeta,
 } from "@/lib/claims";
 import { getBookCatalog } from "@/lib/books";
+import { getImportedClaimsRoot } from "@/lib/import-book/paths";
 import { narrativeIrab } from "@/lib/irab-narrative";
 import { getIrab } from "@/lib/quran";
 import type { IrabWord } from "@/lib/types";
@@ -15,6 +16,10 @@ import { makeWordId, parseWordId } from "@/lib/word-id";
 
 const dataRoot = path.join(process.cwd(), "data");
 const claimsRoot = path.join(dataRoot, "irab-claims");
+
+function importedClaimsRoot(): string {
+  return getImportedClaimsRoot();
+}
 
 export type IrabClaimsLocale = "ar" | "en";
 
@@ -47,8 +52,8 @@ async function fileExists(filePath: string): Promise<boolean> {
   }
 }
 
-async function readClaimsIndex(): Promise<string[]> {
-  const indexPath = path.join(claimsRoot, "index.json");
+async function readClaimsIndexFrom(root: string): Promise<string[]> {
+  const indexPath = path.join(root, "index.json");
   if (!(await fileExists(indexPath))) return [];
   const raw = await readFile(indexPath, "utf8");
   const parsed = JSON.parse(raw) as { sources?: { id: string }[] };
@@ -57,28 +62,39 @@ async function readClaimsIndex(): Promise<string[]> {
     .filter((id) => id && id !== QAC_IRAB_SOURCE.id);
 }
 
+async function readClaimsIndex(): Promise<string[]> {
+  const git = await readClaimsIndexFrom(claimsRoot);
+  const imported = await readClaimsIndexFrom(importedClaimsRoot());
+  return [...new Set([...git, ...imported])];
+}
+
 async function discoverClaimSourceIds(): Promise<string[]> {
   const fromIndex = await readClaimsIndex();
-  if (fromIndex.length) return fromIndex;
-  try {
-    const entries = await readdir(claimsRoot, { withFileTypes: true });
-    return entries
-      .filter((e) => e.isDirectory())
-      .map((e) => e.name)
-      .filter((id) => id !== QAC_IRAB_SOURCE.id);
-  } catch {
-    return [];
+  const ids = new Set(fromIndex);
+  for (const root of [claimsRoot, importedClaimsRoot()]) {
+    try {
+      const entries = await readdir(root, { withFileTypes: true });
+      for (const e of entries) {
+        if (e.isDirectory() && e.name !== QAC_IRAB_SOURCE.id) ids.add(e.name);
+      }
+    } catch {
+      /* ignore */
+    }
   }
+  return [...ids];
 }
 
 async function loadStoredClaims(
   sourceId: string,
   surahId: number,
 ): Promise<StoredClaimsFile | null> {
-  const filePath = path.join(claimsRoot, sourceId, `${surahId}.json`);
-  if (!(await fileExists(filePath))) return null;
-  const raw = await readFile(filePath, "utf8");
-  return JSON.parse(raw) as StoredClaimsFile;
+  for (const root of [claimsRoot, importedClaimsRoot()]) {
+    const filePath = path.join(root, sourceId, `${surahId}.json`);
+    if (!(await fileExists(filePath))) continue;
+    const raw = await readFile(filePath, "utf8");
+    return JSON.parse(raw) as StoredClaimsFile;
+  }
+  return null;
 }
 
 export async function loadIrabClaimsContext(
