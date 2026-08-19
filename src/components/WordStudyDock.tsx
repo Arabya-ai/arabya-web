@@ -191,7 +191,7 @@ export function WordStudyDock({
     return () => {
       cancelled = true;
     };
-  }, [wordId]);
+  }, [wordId, locale]);
 
   const qacNarrative = narrativeIrab(morph ?? null, locale);
   const lexicon = lexiconCardLines(morph ?? null, locale);
