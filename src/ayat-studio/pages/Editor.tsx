@@ -150,12 +150,21 @@ import {
   type StudioEdition,
 } from "@/ayat-studio/lib/studio-layers";
 import { StudioTimeline } from "@/ayat-studio/components/StudioTimeline";
+import { StudioKeyboardShortcuts } from "@/ayat-studio/components/StudioKeyboardShortcuts";
 import {
   EXPORT_PRESETS,
   exportPresetLabel,
+  resolveExportCodec,
   resolveExportPreset,
   type ExportPresetId,
 } from "@/ayat-studio/lib/export-presets";
+import {
+  buildCaptionCues,
+  cuesToSrt,
+  cuesToVtt,
+  downloadCaptionFile,
+} from "@/ayat-studio/lib/caption-export";
+import { fetchAndDecodeAudio } from "@/ayat-studio/lib/quran-api";
 import {
   CAPTION_PRESETS,
   captionPresetLabel,
@@ -737,7 +746,8 @@ export default function Editor() {
         },
       });
       const sizeMb = (blob.size / (1024 * 1024)).toFixed(1);
-      const url = downloadBlob(blob, `${project.title || "ayat"}.mp4`);
+      const ext = resolveExportCodec(project) === "vp9-webm" ? "webm" : "mp4";
+      const url = downloadBlob(blob, `${project.title || "ayat"}.${ext}`);
 
       saveExport({
         id: exportId,
@@ -781,6 +791,49 @@ export default function Editor() {
         ? "تعذّر جلب الصوت أو الآيات من الخادم. حدّث الصفحة وتأكد من تسجيل الدخول."
         : raw || "حدث خطأ أثناء التصدير";
       toast({ title: "فشل التصدير", description, variant: "destructive" });
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleExportCaptions = async (format: "srt" | "vtt") => {
+    setExporting(true);
+    try {
+      const ayahs = await fetchAyahs(
+        project.surahId,
+        project.ayahStart,
+        project.ayahEnd,
+        project.reciterId,
+      );
+      if (ayahs.length === 0) throw new Error("لم يتم العثور على آيات");
+      const audioCtx = new (window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext)();
+      const { segments } = await fetchAndDecodeAudio(ayahs, audioCtx, {
+        pauseBetweenAyahsMs: project.pauseBetweenAyahsMs ?? 0,
+        softNormalize: project.softNormalize ?? true,
+      });
+      await audioCtx.close().catch(() => {});
+      const cues = buildCaptionCues({
+        ayahNumbers: ayahs.map((a) => a.numberInSurah),
+        segments,
+        arabicTexts: ayahs.map((a) => a.text),
+        translationMap: project.translationEnabled ? translationMap : null,
+      });
+      if (cues.length === 0) throw new Error("لا توجد ترجمات أو نصوص للتصدير");
+      const base = `${project.title || "ayat"}-captions`;
+      if (format === "srt") {
+        downloadCaptionFile(cuesToSrt(cues), `${base}.srt`, "text/plain");
+      } else {
+        downloadCaptionFile(cuesToVtt(cues), `${base}.vtt`, "text/vtt");
+      }
+      toast({ title: "تم تصدير الترجمة", description: format.toUpperCase() });
+    } catch (err: unknown) {
+      toast({
+        title: "فشل تصدير الترجمة",
+        description: err instanceof Error ? err.message : "حدث خطأ",
+        variant: "destructive",
+      });
     } finally {
       setExporting(false);
     }
@@ -1533,6 +1586,7 @@ export default function Editor() {
                   update({
                     exportPresetId: v as ExportPresetId,
                     quality: preset?.quality ?? project.quality,
+                    exportCodec: preset?.codec,
                   });
                 }}
               >
@@ -1583,10 +1637,36 @@ export default function Editor() {
                 </>
               ) : (
                 <>
-                  <Download className="h-4 w-4" /> تصدير وتنزيل MP4
+                  <Download className="h-4 w-4" />{" "}
+                  {resolveExportCodec(project) === "vp9-webm"
+                    ? "تصدير WebM"
+                    : "تصدير MP4"}
                 </>
               )}
             </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={exporting || exportingPng}
+                onClick={() => void handleExportCaptions("srt")}
+              >
+                SRT
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={exporting || exportingPng}
+                onClick={() => void handleExportCaptions("vtt")}
+              >
+                VTT
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              اختصارات: مسافة تشغيل/إيقاف · ←/→ للتقديم · Home/End
+            </p>
             <Button
               variant="outline"
               size="lg"
@@ -1642,6 +1722,7 @@ export default function Editor() {
           });
         }}
       >
+        <StudioKeyboardShortcuts />
         <div className="studio-live-preview relative order-2 flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card))] p-2 shadow-deep sm:p-3 lg:order-2 lg:h-full lg:p-3">
           <div className="pattern-mihrab pointer-events-none absolute inset-0 overflow-hidden rounded-2xl opacity-20" />
           <div className="relative z-[1] mb-1 shrink-0 text-center text-[11px] tracking-widest uppercase text-accent/80 sm:text-xs">

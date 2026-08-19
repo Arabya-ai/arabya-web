@@ -14,6 +14,12 @@ import {
   PRAYER_GRID_KEYS,
   type PrayerTimings,
 } from "@/lib/next-prayer";
+import {
+  appendPrayerUserParams,
+  PRAYER_METHOD_OPTIONS,
+  readPrayerUserPrefs,
+  writePrayerUserPrefs,
+} from "@/lib/prayer-user-prefs";
 import { portalLocationSearchParams } from "@/lib/portal-location";
 
 type Timings = PrayerTimings;
@@ -66,11 +72,25 @@ export function PrayerTimesCard() {
     return () => window.clearInterval(id);
   }, []);
 
+  const [prefs, setPrefs] = useState(() =>
+    typeof window !== "undefined" ? readPrayerUserPrefs() : { method: 5, school: 0 as const },
+  );
+
+  useEffect(() => {
+    function refresh() {
+      setPrefs(readPrayerUserPrefs());
+    }
+    refresh();
+    window.addEventListener("arabya-prayer-prefs-updated", refresh);
+    return () => window.removeEventListener("arabya-prayer-prefs-updated", refresh);
+  }, []);
+
   const fetchPrayerData = useCallback(
     async (params: URLSearchParams) => {
       setLoading(true);
       setError(null);
       try {
+        appendPrayerUserParams(params);
         const [prayerRes, qiblaRes] = await Promise.all([
           fetch(`/api/prayer-times?${params.toString()}`),
           fetch(`/api/qibla?${params.toString()}`),
@@ -180,6 +200,55 @@ export function PrayerTimesCard() {
           >
             {loc.mode === "coords" ? t("useCity") : t("useCoords")}
           </button>
+        </div>
+        <div className="prayer-city-controls" style={{ marginTop: "0.5rem" }}>
+          <label className="prayer-city">
+            <span className="sr-only">
+              {locale === "en" ? "Calculation method" : "طريقة الحساب"}
+            </span>
+            <select
+              value={prefs.method}
+              aria-label={locale === "en" ? "Calculation method" : "طريقة الحساب"}
+              onChange={(e) => {
+                const method = Number(e.target.value);
+                writePrayerUserPrefs({ ...prefs, method });
+                if (loc.ready && loc.query) {
+                  const params = portalLocationSearchParams(loc.query, locale);
+                  void fetchPrayerData(params);
+                }
+              }}
+            >
+              {PRAYER_METHOD_OPTIONS.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {locale === "en" ? m.labelEn : m.labelAr}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="prayer-city">
+            <span className="sr-only">
+              {locale === "en" ? "Asr school" : "مذهب العصر"}
+            </span>
+            <select
+              value={prefs.school}
+              aria-label={locale === "en" ? "Asr school" : "مذهب العصر"}
+              onChange={(e) => {
+                const school = Number(e.target.value) === 1 ? 1 : 0;
+                writePrayerUserPrefs({ ...prefs, school });
+                if (loc.ready && loc.query) {
+                  const params = portalLocationSearchParams(loc.query, locale);
+                  void fetchPrayerData(params);
+                }
+              }}
+            >
+              <option value={0}>
+                {locale === "en" ? "Shafi (standard)" : "شافعي (معياري)"}
+              </option>
+              <option value={1}>
+                {locale === "en" ? "Hanafi" : "حنفي"}
+              </option>
+            </select>
+          </label>
         </div>
       </header>
 

@@ -78,13 +78,22 @@ export async function GET(req: Request) {
   const langRaw = searchParams.get("lang");
   const locale = langRaw === "en" ? "en" : "ar";
   const defaults = readPrayerDefaults();
+  const methodOverride = searchParams.get("method");
+  const schoolOverride = searchParams.get("school");
+  const method = methodOverride
+    ? Math.min(25, Math.max(0, Math.round(Number(methodOverride) || defaults.method)))
+    : defaults.method || cfg.method;
+  const school =
+    schoolOverride === "1" || schoolOverride === "0"
+      ? Number(schoolOverride)
+      : defaults.school;
 
   try {
     const url = new URL("https://api.aladhan.com/v1/timings");
     url.searchParams.set("latitude", String(cfg.latitude));
     url.searchParams.set("longitude", String(cfg.longitude));
-    url.searchParams.set("method", String(defaults.method || cfg.method));
-    url.searchParams.set("school", String(defaults.school));
+    url.searchParams.set("method", String(method));
+    url.searchParams.set("school", String(school));
 
     const res = await fetch(url.toString(), {
       next: { revalidate: 3600 },
@@ -170,8 +179,8 @@ export async function GET(req: Request) {
     return NextResponse.json(
       {
         city: cfg.id,
-        method: defaults.method || cfg.method,
-        school: defaults.school,
+        method,
+        school,
         timezone: payload.data?.meta?.timezone ?? null,
         source: "api.aladhan.com",
         ...(cfg.approxCity ? { approxCity: cfg.approxCity } : {}),

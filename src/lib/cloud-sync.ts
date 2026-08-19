@@ -18,6 +18,8 @@ import {
   localAdminSetRole,
   localAdminStats,
   localAppendTahfeezSession,
+  localClearStudyEntries,
+  localClearTahfeezSessions,
   localCreateRoleRequest,
   localFetchRoleStatus,
   localGetRoleRequest,
@@ -649,6 +651,25 @@ export async function adminGetSiteAppearance(actorEmail: string) {
     "/v1/admin/site-appearance",
     { actorEmail, action: "get" },
   );
+}
+
+export async function clearAccountHistory(
+  user: { email: string; name?: string | null; image?: string | null },
+  scope: "study" | "tahfeez" | "all",
+): Promise<{ ok: true; cleared: string[] }> {
+  if (!isLocalUserSyncEnabled()) {
+    throw new Error("not_configured");
+  }
+  const cleared: string[] = [];
+  if (scope === "study" || scope === "all") {
+    localClearStudyEntries(user.email);
+    cleared.push("study");
+  }
+  if (scope === "tahfeez" || scope === "all") {
+    localClearTahfeezSessions(user);
+    cleared.push("tahfeez");
+  }
+  return { ok: true, cleared };
 }
 
 export async function adminSetSiteAppearance(

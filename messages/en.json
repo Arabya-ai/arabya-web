@@ -641,7 +641,28 @@
     "cancel": "Cancel",
     "noNotes": "No notes yet.",
     "editNotes": "Edit notes",
-    "updatedAt": "Last updated: {date}"
+    "updatedAt": "Last updated: {date}",
+    "retention": "Auto-deleted after {days}",
+    "clearAll": "Delete all studies",
+    "clearAllCloud": "Also delete from cloud",
+    "confirmClearAll": "Delete all study history? This cannot be undone.",
+    "clearError": "Could not delete"
+  },
+  "AccountHistory": {
+    "title": "Saved history",
+    "lead": "Study archive and tahfeez sessions. You can clear anytime.",
+    "retention": "Records are kept for {days} only, then removed automatically.",
+    "studyCount": "Studies on this device: {count}",
+    "clearStudy": "Clear study archive",
+    "clearTahfeez": "Clear tahfeez sessions",
+    "clearAll": "Clear all history",
+    "cleared": "Cleared: {scope}",
+    "clearedLocalStudy": "Study archive cleared on this device.",
+    "busy": "Working…",
+    "error": "Could not clear",
+    "scope_study": "study",
+    "scope_tahfeez": "tahfeez",
+    "scope_all": "all"
   },
   "EditHub": {
     "metaTitle": "Edit",

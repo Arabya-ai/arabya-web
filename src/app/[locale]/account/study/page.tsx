@@ -9,6 +9,8 @@ import { auth } from "@/auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { StudyArchivePanel } from "@/components/dashboard/StudyArchivePanel";
 
+import { isCloudSyncConfigured } from "@/lib/cloud-sync";
+
 export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -26,6 +28,7 @@ export default async function AccountStudyPage({ params }: Props) {
   const session = await auth();
   if (!session?.user) redirectLocalized("/login", locale);
   const role = session.user.role ?? "user";
+  const syncReady = isCloudSyncConfigured();
 
   return (
     <DashboardShell
@@ -40,7 +43,7 @@ export default async function AccountStudyPage({ params }: Props) {
       backHref="/account"
       backLabel={t("backToOverview")}
     >
-      <StudyArchivePanel />
+      <StudyArchivePanel syncReady={syncReady} />
     </DashboardShell>
   );
 }

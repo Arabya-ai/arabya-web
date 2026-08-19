@@ -641,7 +641,28 @@
     "cancel": "إلغاء",
     "noNotes": "لا ملاحظات بعد.",
     "editNotes": "تعديل الملاحظات",
-    "updatedAt": "آخر تحديث: {date}"
+    "updatedAt": "آخر تحديث: {date}",
+    "retention": "يُحذف تلقائيًا بعد {days}",
+    "clearAll": "حذف كل الدراسات",
+    "clearAllCloud": "حذف من السحابة أيضًا",
+    "confirmClearAll": "حذف كل سجل الدراسة؟ لا يمكن التراجع.",
+    "clearError": "تعذّر الحذف"
+  },
+  "AccountHistory": {
+    "title": "سجل المحفوظات",
+    "lead": "أرشيف الدراسة وجلسات التحفيظ. يمكنك الحذف في أي وقت.",
+    "retention": "تُحفظ السجلات {days} فقط ثم تُحذف تلقائيًا.",
+    "studyCount": "دراسات محفوظة على هذا الجهاز: {count}",
+    "clearStudy": "تصفير أرشيف الدراسة",
+    "clearTahfeez": "تصفير جلسات التحفيظ",
+    "clearAll": "تصفير كل السجل",
+    "cleared": "تم التصفير: {scope}",
+    "clearedLocalStudy": "تم حذف أرشيف الدراسة من هذا الجهاز.",
+    "busy": "جاري…",
+    "error": "تعذّر التصفير",
+    "scope_study": "الدراسة",
+    "scope_tahfeez": "التحفيظ",
+    "scope_all": "الكل"
   },
   "EditHub": {
     "metaTitle": "تحرير",

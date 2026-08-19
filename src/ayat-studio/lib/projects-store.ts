@@ -82,6 +82,8 @@ export interface StoredProject {
   quality: "standard" | "high" | "ultra";
   /** Platform-aware export matrix preset (Wave 5). */
   exportPresetId?: ExportPresetId;
+  /** Override container codec when preset is custom. */
+  exportCodec?: "h264-mp4" | "vp9-webm";
   /** Typography bundle for in-frame captions (Wave 5). */
   captionPresetId?: CaptionPresetId;
   status: "مسودة" | "مكتمل" | "جاري المعالجة" | "فشل";

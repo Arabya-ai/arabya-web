@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { auth, signOut } from "@/auth";
+import { AccountHistoryPanel } from "@/components/AccountHistoryPanel";
 import { AccountLanguagePanel } from "@/components/AccountLanguagePanel";
 import { AccountPersonalData } from "@/components/AccountPersonalData";
 import { CloudSyncPanel } from "@/components/CloudSyncPanel";
@@ -131,6 +132,8 @@ export default async function AccountPage({ params }: Props) {
         <AccountLanguagePanel />
 
         {syncReady ? <CloudSyncPanel /> : null}
+
+        <AccountHistoryPanel syncReady={syncReady} />
 
         <RoleRequestPanel role={role} />
 
