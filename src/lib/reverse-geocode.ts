@@ -67,3 +67,21 @@ export async function reverseGeocodePlace(
     return null;
   }
 }
+
+export async function reverseGeocodePlaceBounded(
+  latitude: number,
+  longitude: number,
+  locale: "ar" | "en" = "ar",
+  maxWaitMs = 400,
+): Promise<ReversePlace | null> {
+  const boundedMs = Number.isFinite(maxWaitMs)
+    ? Math.max(100, Math.min(2000, Math.round(maxWaitMs)))
+    : 400;
+  const timeout = new Promise<null>((resolve) => {
+    setTimeout(() => resolve(null), boundedMs);
+  });
+  return Promise.race([
+    reverseGeocodePlace(latitude, longitude, locale),
+    timeout,
+  ]);
+}

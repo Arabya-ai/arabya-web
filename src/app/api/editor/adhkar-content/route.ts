@@ -9,6 +9,14 @@ import {
 import { readAdhkarContentOverride, writeAdhkarContentOverride } from "@/lib/adhkar-content-store";
 import { requireEditorial } from "@/lib/require-role";
 import { enforceRateLimitKey } from "@/lib/rate-limit";
+const MAX_EDITOR_BODY_BYTES = 120_000;
+
+function requestTooLarge(request: Request, maxBytes: number): boolean {
+  const raw = request.headers.get("content-length");
+  if (!raw) return false;
+  const bytes = Number(raw);
+  return Number.isFinite(bytes) && bytes > maxBytes;
+}
 
 type AdhkarPayload = {
   slug: string;
@@ -65,6 +73,9 @@ export async function PATCH(req: Request) {
   if ("error" in gate) return gate.error;
   const limited = enforceRateLimitKey("editor-adhkar-content", gate.email, 50);
   if (limited) return limited;
+  if (requestTooLarge(req, MAX_EDITOR_BODY_BYTES)) {
+    return NextResponse.json({ ok: false, error: "payload_too_large" }, { status: 413 });
+  }
 
   let body:
     | {

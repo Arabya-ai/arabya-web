@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { resolvePortalLocationFromSearch } from "@/lib/portal-cities";
 import { enforceRateLimit } from "@/lib/rate-limit";
-import { reverseGeocodePlace } from "@/lib/reverse-geocode";
+import { reverseGeocodePlaceBounded } from "@/lib/reverse-geocode";
 
 /** Qibla bearing from city coordinates via Aladhan (free, no key). */
 export async function GET(req: Request) {
@@ -42,7 +42,17 @@ export async function GET(req: Request) {
 
     const normalized = ((direction % 360) + 360) % 360;
 
-    const place = await reverseGeocodePlace(cfg.latitude, cfg.longitude, locale);
+    const place = await reverseGeocodePlaceBounded(
+      cfg.latitude,
+      cfg.longitude,
+      locale,
+      450,
+    );
+    const directionRounded = Math.round(normalized);
+    const directionLabel =
+      locale === "en"
+        ? `${directionRounded}° from north`
+        : `${directionRounded}° من الشمال`;
 
     return NextResponse.json(
       {
@@ -51,7 +61,7 @@ export async function GET(req: Request) {
         latitude: cfg.latitude,
         longitude: cfg.longitude,
         direction: Math.round(normalized * 10) / 10,
-        directionLabel: `${Math.round(normalized)}° من الشمال`,
+        directionLabel,
         ...(cfg.approxCity ? { approxCity: cfg.approxCity } : {}),
         ...(place ? { place } : {}),
       },

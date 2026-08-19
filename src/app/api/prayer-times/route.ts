@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { resolvePortalLocationFromSearch } from "@/lib/portal-cities";
 import { enforceRateLimit } from "@/lib/rate-limit";
-import { reverseGeocodePlace } from "@/lib/reverse-geocode";
+import { reverseGeocodePlaceBounded } from "@/lib/reverse-geocode";
 import { readPrayerDefaults } from "@/lib/prayer-defaults-store";
 
 const GREGORIAN_MONTHS_AR: Record<number, string> = {
@@ -160,7 +160,12 @@ export async function GET(req: Request) {
     ].filter(Boolean);
     const hijriEn = hijriEnParts.length ? hijriEnParts.join(" ") : null;
 
-    const place = await reverseGeocodePlace(cfg.latitude, cfg.longitude, locale);
+    const place = await reverseGeocodePlaceBounded(
+      cfg.latitude,
+      cfg.longitude,
+      locale,
+      450,
+    );
 
     return NextResponse.json(
       {
