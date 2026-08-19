@@ -275,8 +275,8 @@
 }
 
 .library-list .library-card-cover {
-  min-height: 180px;
-  height: 100%;
+  min-height: 0;
+  height: auto;
 }
 
 .library-list .library-card-body {
@@ -307,16 +307,24 @@
 
 .library-card-cover {
   position: relative;
-  min-height: 210px;
+  aspect-ratio: 210 / 297;
+  min-height: 0;
   overflow: hidden;
+  background: #fff;
+}
+
+.library-card-cover--has-image {
+  background: #f8faf9;
 }
 
 .library-card-cover-img,
 .library-work-cover-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center top;
   display: block;
+  background: #fff;
 }
 
 .library-card-cover-art {
@@ -633,7 +641,10 @@
   position: relative;
   border-radius: 14px;
   overflow: hidden;
-  min-height: 280px;
+  aspect-ratio: 210 / 297;
+  max-width: 220px;
+  margin-inline: auto;
+  background: #fff;
   box-shadow: 0 12px 28px color-mix(in srgb, var(--brand-deep) 12%, transparent);
 }
 

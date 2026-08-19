@@ -25,3 +25,11 @@ export function gitLibraryDataRoot(): string {
 export function gitLibraryPublicRoot(): string {
   return path.join(process.cwd(), "public", "library");
 }
+
+export function gitLibraryCoversDir(): string {
+  return path.join(process.cwd(), "public", "media", "library", "covers");
+}
+
+export function gitLibraryMediaDir(): string {
+  return path.join(process.cwd(), "public", "media", "library");
+}

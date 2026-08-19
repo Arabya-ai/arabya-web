@@ -29,6 +29,7 @@
     "build-mushaf-index": "node scripts/build-mushaf-index.mjs",
     "build-surah-stats": "node scripts/build-surah-stats.mjs",
     "build-search-index": "node scripts/build-search-index.mjs",
+    "generate-library-covers": "node scripts/generate-library-covers.mjs",
     "validate-data": "node scripts/validate-data.mjs",
     "expand-adhkar-sources": "node scripts/expand-adhkar-sources.mjs",
     "build-quality-queue": "node scripts/build-quality-queue.mjs",
