@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -15,6 +15,7 @@ describe("syncMptStockKeysFromEnv", () => {
       const result = syncMptStockKeysFromEnv(
         { PEXELS_API_KEY: "pex_test_one, pex_test_two" },
         filePath,
+        [],
       );
       expect(result).toEqual({ pexels: 2, pixabay: 0 });
       const text = readFileSync(filePath, "utf8");
@@ -29,10 +30,26 @@ describe("syncMptStockKeysFromEnv", () => {
     const dir = mkdtempSync(join(tmpdir(), "mpt-keys-"));
     const filePath = join(dir, "missing.env");
     try {
-      expect(syncMptStockKeysFromEnv({}, filePath)).toEqual({
+      expect(syncMptStockKeysFromEnv({}, filePath, [])).toEqual({
         pexels: 0,
         pixabay: 0,
       });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("reads a Pexels key from .env.production.local when process env is empty", () => {
+    const dir = mkdtempSync(join(tmpdir(), "mpt-keys-"));
+    const envFile = join(dir, ".env.production.local");
+    const filePath = join(dir, ".runtime-stock-keys.env");
+    try {
+      writeFileSync(envFile, 'PEXELS_API_KEY="pex_from_file"\n', "utf8");
+      const result = syncMptStockKeysFromEnv({}, filePath, [envFile]);
+      expect(result).toEqual({ pexels: 1, pixabay: 0 });
+      expect(readFileSync(filePath, "utf8")).toContain(
+        "PEXELS_API_KEY=pex_from_file",
+      );
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

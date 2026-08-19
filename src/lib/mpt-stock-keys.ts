@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { parseApiKeys } from "@/lib/api-keys";
 
@@ -7,17 +7,96 @@ export const MPT_RUNTIME_STOCK_KEYS_FILE = join(
   "services/money-printer-turbo/.runtime-stock-keys.env",
 );
 
+const PEXELS_ENV_NAMES = [
+  "PEXELS_API_KEY",
+  "PEXELS_API_KEYS",
+  "MPT_PEXELS_API_KEY",
+  "MPT_PEXELS_API_KEYS",
+] as const;
+
+const PIXABAY_ENV_NAMES = [
+  "PIXABAY_API_KEY",
+  "PIXABAY_API_KEYS",
+  "MPT_PIXABAY_API_KEY",
+  "MPT_PIXABAY_API_KEYS",
+] as const;
+
+export function defaultStockEnvFiles(cwd = process.cwd()): string[] {
+  return [
+    join(cwd, "services/money-printer-turbo/.runtime-stock-keys.env"),
+    join(cwd, ".env.production.local"),
+    join(cwd, ".env.production"),
+    join(cwd, ".env.local"),
+    join(cwd, ".env"),
+    join(cwd, "services/money-printer-turbo/.env"),
+  ];
+}
+
+export function parseDotenvText(text: string): Record<string, string> {
+  const values: Record<string, string> = {};
+  for (let raw of text.split(/\r?\n/)) {
+    let line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    if (line.startsWith("export ")) line = line.slice(7).trim();
+    const eq = line.indexOf("=");
+    if (eq <= 0) continue;
+    const name = line.slice(0, eq).trim();
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) continue;
+    let value = line.slice(eq + 1).trim();
+    if (
+      value.length >= 2 &&
+      value[0] === value[value.length - 1] &&
+      (value[0] === '"' || value[0] === "'")
+    ) {
+      value = value.slice(1, -1);
+    }
+    if (!(name in values)) values[name] = value;
+  }
+  return values;
+}
+
+export function mergeDotenvFiles(paths: string[]): Record<string, string> {
+  const values: Record<string, string> = {};
+  for (const filePath of paths) {
+    let text = "";
+    try {
+      text = readFileSync(filePath, "utf8");
+    } catch {
+      continue;
+    }
+    for (const [name, value] of Object.entries(parseDotenvText(text))) {
+      if (!(name in values)) values[name] = value;
+    }
+  }
+  return values;
+}
+
+function keysFromRecord(
+  record: Record<string, string | undefined>,
+  names: readonly string[],
+): string[] {
+  return parseApiKeys(...names.map((name) => record[name]));
+}
+
 function envLine(name: string, value: string): string {
   return `${name}=${value.replace(/\r?\n/g, "").trim()}\n`;
 }
 
-/** Copy Next.js stock-footage keys so the Python engine can fetch Pexels clips. */
+/** Copy Next.js / dotenv stock-footage keys so the Python engine can fetch Pexels clips. */
 export function syncMptStockKeysFromEnv(
   env: NodeJS.ProcessEnv = process.env,
   filePath = MPT_RUNTIME_STOCK_KEYS_FILE,
+  dotenvPaths: string[] | null = null,
 ): { pexels: number; pixabay: number } {
-  const pexels = parseApiKeys(env.PEXELS_API_KEY, env.PEXELS_API_KEYS);
-  const pixabay = parseApiKeys(env.PIXABAY_API_KEY, env.PIXABAY_API_KEYS);
+  const fileValues = mergeDotenvFiles(dotenvPaths ?? defaultStockEnvFiles());
+  const pexels =
+    keysFromRecord(env, PEXELS_ENV_NAMES).length > 0
+      ? keysFromRecord(env, PEXELS_ENV_NAMES)
+      : keysFromRecord(fileValues, PEXELS_ENV_NAMES);
+  const pixabay =
+    keysFromRecord(env, PIXABAY_ENV_NAMES).length > 0
+      ? keysFromRecord(env, PIXABAY_ENV_NAMES)
+      : keysFromRecord(fileValues, PIXABAY_ENV_NAMES);
   if (!pexels.length && !pixabay.length) {
     return { pexels: 0, pixabay: 0 };
   }

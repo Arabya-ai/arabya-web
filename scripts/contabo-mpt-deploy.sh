@@ -186,9 +186,9 @@ if pixabay:
 if len(runtime_lines) > 1:
     runtime.write_text("\n".join(runtime_lines) + "\n", encoding="utf-8")
     runtime.chmod(0o600)
-    print(f"==> MPT: wrote stock keys for PM2 ({'pexels' if pexels else ''}{' pixabay' if pixabay else ''})".strip())
+    print("==> MPT: PEXELS_CONFIGURED=yes")
 else:
-    print("==> MPT: still no Pexels/Pixabay keys after reading .env.production.local")
+    print("==> MPT: PEXELS_CONFIGURED=no (add Production secret PEXELS_API_KEY or put it in .env.production.local)")
 PY
 fi
 
