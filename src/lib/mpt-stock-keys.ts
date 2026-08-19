@@ -34,7 +34,7 @@ export function defaultStockEnvFiles(cwd = process.cwd()): string[] {
 
 export function parseDotenvText(text: string): Record<string, string> {
   const values: Record<string, string> = {};
-  for (let raw of text.split(/\r?\n/)) {
+  for (const raw of text.split(/\r?\n/)) {
     let line = raw.trim();
     if (!line || line.startsWith("#")) continue;
     if (line.startsWith("export ")) line = line.slice(7).trim();
