@@ -1,27 +1,25 @@
 /**
- * Smart tasmeeʿ shell — dark emerald dashboard matching product mock.
+ * Smart tasmeeʿ shell aligned with Arabya design tokens.
  * Scoped under .tahfeez-shell so it does not leak into the main site.
  */
 
 .tahfeez-shell {
-  --tz-bg: #071512;
-  --tz-panel: #0c1f1b;
-  --tz-panel-2: #102822;
-  --tz-line: rgba(94, 234, 212, 0.18);
-  --tz-teal: #2dd4bf;
-  --tz-teal-deep: #0f766e;
-  --tz-ink: #e7f8f3;
-  --tz-muted: rgba(231, 248, 243, 0.62);
-  --tz-good: #34d399;
-  --tz-warn: #fbbf24;
-  --tz-bad: #f87171;
-  --tz-glow: 0 0 28px rgba(45, 212, 191, 0.28);
+  --tz-bg: var(--bg);
+  --tz-panel: var(--surface);
+  --tz-panel-2: color-mix(in srgb, var(--surface) 80%, var(--surface-2));
+  --tz-line: color-mix(in srgb, var(--brand) 20%, var(--line));
+  --tz-teal: var(--brand);
+  --tz-teal-deep: var(--brand-deep);
+  --tz-ink: var(--ink);
+  --tz-muted: var(--muted);
+  --tz-good: #0f9a75;
+  --tz-warn: #b7791f;
+  --tz-bad: #cc4a5b;
+  --tz-glow: 0 10px 26px color-mix(in srgb, var(--brand) 18%, transparent);
   min-height: calc(100dvh - 4.5rem);
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(15, 118, 110, 0.35), transparent),
-    linear-gradient(180deg, #061411 0%, var(--tz-bg) 40%, #050f0d 100%);
   color: var(--tz-ink);
-  padding: 0.75rem 0.85rem 1.5rem;
+  padding-top: 0.35rem;
+  padding-bottom: 2rem;
 }
 
 .tahfeez-shell * {
@@ -34,11 +32,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 0.85rem;
-  padding: 0.65rem 0.9rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 0.95rem;
   border: 1px solid var(--tz-line);
   border-radius: 1rem;
-  background: linear-gradient(135deg, rgba(16, 40, 34, 0.95), rgba(7, 21, 18, 0.9));
+  background: color-mix(in srgb, var(--brand-soft) 34%, var(--tz-panel));
 }
 
 .tahfeez-brand {
@@ -64,18 +62,26 @@
 }
 
 .tahfeez-tabs button {
-  border: 0;
+  border: 1px solid transparent;
   background: transparent;
   color: var(--tz-muted);
   padding: 0.4rem 0.75rem;
   border-radius: 999px;
   cursor: pointer;
   font: inherit;
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
+}
+
+.tahfeez-tabs button:hover {
+  color: var(--tz-teal-deep);
+  border-color: color-mix(in srgb, var(--tz-teal) 30%, var(--tz-line));
+  background: color-mix(in srgb, var(--brand-soft) 40%, transparent);
 }
 
 .tahfeez-tabs button[aria-selected="true"] {
-  color: var(--tz-ink);
-  background: rgba(45, 212, 191, 0.14);
+  color: var(--tz-teal-deep);
+  background: color-mix(in srgb, var(--brand-soft) 55%, var(--tz-panel));
+  border-color: color-mix(in srgb, var(--tz-teal) 32%, var(--tz-line));
   box-shadow: inset 0 -2px 0 var(--tz-teal);
 }
 
@@ -97,13 +103,13 @@
   border-radius: 1.1rem;
   background: linear-gradient(165deg, var(--tz-panel) 0%, var(--tz-panel-2) 100%);
   padding: 0.9rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  box-shadow: var(--shadow);
 }
 
 .tahfeez-card h3 {
   margin: 0 0 0.65rem;
   font-size: 0.92rem;
-  color: var(--tz-teal);
+  color: var(--tz-teal-deep);
   font-weight: 600;
 }
 
@@ -119,10 +125,10 @@
   width: 88px;
   height: 88px;
   border-radius: 999px;
-  border: 2px solid rgba(45, 212, 191, 0.45);
+  border: 2px solid color-mix(in srgb, var(--tz-teal) 42%, var(--tz-line));
   background:
-    radial-gradient(circle at 30% 30%, rgba(45, 212, 191, 0.35), transparent 55%),
-    #0a1a16;
+    radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--tz-teal) 35%, transparent), transparent 55%),
+    color-mix(in srgb, var(--surface-2) 84%, var(--surface));
   display: grid;
   place-items: center;
   font-size: 1.6rem;
@@ -139,8 +145,8 @@
 .tahfeez-transport button,
 .tahfeez-action {
   border: 1px solid var(--tz-line);
-  background: rgba(45, 212, 191, 0.08);
-  color: var(--tz-ink);
+  background: color-mix(in srgb, var(--brand-soft) 50%, var(--surface));
+  color: var(--tz-teal-deep);
   border-radius: 999px;
   padding: 0.45rem 0.8rem;
   cursor: pointer;
@@ -149,14 +155,14 @@
 
 .tahfeez-transport button:hover,
 .tahfeez-action:hover {
-  background: rgba(45, 212, 191, 0.18);
+  background: color-mix(in srgb, var(--brand-soft) 68%, var(--surface));
 }
 
 .tahfeez-progress {
   width: 100%;
   height: 6px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--line) 75%, transparent);
   overflow: hidden;
 }
 
@@ -176,7 +182,7 @@
   border: 1px solid var(--tz-line);
   border-radius: 0.75rem;
   padding: 0.55rem;
-  background: rgba(0, 0, 0, 0.18);
+  background: color-mix(in srgb, var(--brand-soft) 26%, var(--surface));
 }
 
 .tahfeez-stat b {
@@ -197,7 +203,7 @@
   border-radius: 999px;
   display: grid;
   place-items: center;
-  background: conic-gradient(var(--tz-teal) calc(var(--p) * 1%), rgba(255, 255, 255, 0.08) 0);
+  background: conic-gradient(var(--tz-teal) calc(var(--p) * 1%), color-mix(in srgb, var(--line) 78%, transparent) 0);
   position: relative;
 }
 
@@ -206,7 +212,7 @@
   position: absolute;
   inset: 8px;
   border-radius: 999px;
-  background: var(--tz-panel);
+  background: var(--tz-panel-2);
 }
 
 .tahfeez-ring strong {
@@ -237,8 +243,8 @@
   border-radius: 1rem;
   padding: 1rem;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
-    rgba(0, 0, 0, 0.22);
+    linear-gradient(180deg, color-mix(in srgb, var(--brand-soft) 22%, transparent), transparent),
+    color-mix(in srgb, var(--surface) 88%, var(--surface-2));
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
@@ -254,8 +260,8 @@
 
 .tahfeez-ayah[data-hidden="true"] .tahfeez-word[data-status="pending"] {
   color: transparent;
-  text-shadow: 0 0 10px rgba(231, 248, 243, 0.35);
-  background: rgba(255, 255, 255, 0.06);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--brand-deep) 28%, transparent);
+  background: color-mix(in srgb, var(--brand-soft) 45%, transparent);
   border-radius: 0.35rem;
 }
 
@@ -298,9 +304,9 @@
   width: 74px;
   height: 74px;
   border-radius: 999px;
-  border: 2px solid rgba(45, 212, 191, 0.55);
-  background: radial-gradient(circle at 40% 30%, #14b8a6, #0f766e 70%);
-  color: white;
+  border: 2px solid color-mix(in srgb, var(--tz-teal) 52%, var(--tz-line));
+  background: radial-gradient(circle at 40% 30%, color-mix(in srgb, var(--tz-teal) 65%, white), var(--tz-teal-deep) 70%);
+  color: var(--on-brand);
   font-size: 1.5rem;
   cursor: pointer;
   box-shadow: var(--tz-glow);
@@ -373,7 +379,7 @@
   gap: 0.5rem;
   padding: 0.4rem 0.55rem;
   border-radius: 0.55rem;
-  background: rgba(0, 0, 0, 0.18);
+  background: color-mix(in srgb, var(--surface-2) 86%, var(--brand-soft));
   border: 1px solid transparent;
   font-size: 0.92rem;
 }
@@ -393,7 +399,7 @@
   width: 100%;
   border-radius: 0.65rem;
   border: 1px solid var(--tz-line);
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--surface-2);
   color: var(--tz-ink);
   padding: 0.45rem 0.55rem;
   font: inherit;
@@ -403,6 +409,13 @@
   font-size: 0.78rem;
   color: var(--tz-muted);
   line-height: 1.5;
+}
+
+.tahfeez-error {
+  margin-bottom: 0.75rem;
+  color: #b4233b;
+  border-color: color-mix(in srgb, #b4233b 25%, var(--tz-line));
+  background: color-mix(in srgb, #fbe6ea 78%, var(--tz-panel));
 }
 
 .tahfeez-login-gate {

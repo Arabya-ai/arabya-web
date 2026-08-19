@@ -536,7 +536,7 @@ export function TahfeezApp({
   const stats = portfolio.stats;
 
   return (
-    <div className="tahfeez-shell" dir={ar ? "rtl" : "ltr"}>
+    <main className="shell page-block tahfeez-shell" dir={ar ? "rtl" : "ltr"}>
       <header className="tahfeez-top">
         <div className="tahfeez-brand">
           <strong>{ar ? "تطبيق التسميع الذكي" : "Smart Recitation"}</strong>
@@ -572,11 +572,7 @@ export function TahfeezApp({
         </Link>
       </header>
 
-      {error ? (
-        <p className="tahfeez-card" style={{ color: "#fecaca", marginBottom: "0.75rem" }}>
-          {error}
-        </p>
-      ) : null}
+      {error ? <p className="tahfeez-card tahfeez-error">{error}</p> : null}
 
       {tab === "session" ? (
         <div className="tahfeez-grid">
@@ -849,6 +845,6 @@ export function TahfeezApp({
           </label>
         </div>
       ) : null}
-    </div>
+    </main>
   );
 }
