@@ -45,7 +45,8 @@ services/money-printer-turbo/.runtime-stock-keys.env
 # local acquisition staging (Internet Archive / owner drops)
 /incoming/
 
-# local scrape cache for quran-words import/fetch
+# Owner uploads (runtime on Contabo)
+/data/imported-books/
 /.cache/
 
 # local user sync (Contabo SQLite)
