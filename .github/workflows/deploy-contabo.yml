@@ -60,6 +60,9 @@ jobs:
           PEXELS_API_KEYS: ${{ secrets.PEXELS_API_KEYS }}
           PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
           PIXABAY_API_KEYS: ${{ secrets.PIXABAY_API_KEYS }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
@@ -99,6 +102,15 @@ jobs:
           fi
           if [ -n "${PIXABAY_API_KEYS:-}" ]; then
             REMOTE_ENV="${REMOTE_ENV} export PIXABAY_API_KEYS=$(printf %q "$PIXABAY_API_KEYS");"
+          fi
+          if [ -n "${OPENROUTER_API_KEY:-}" ]; then
+            REMOTE_ENV="${REMOTE_ENV} export OPENROUTER_API_KEY=$(printf %q "$OPENROUTER_API_KEY");"
+          fi
+          if [ -n "${GEMINI_API_KEY:-}" ]; then
+            REMOTE_ENV="${REMOTE_ENV} export GEMINI_API_KEY=$(printf %q "$GEMINI_API_KEY");"
+          fi
+          if [ -n "${GROQ_API_KEY:-}" ]; then
+            REMOTE_ENV="${REMOTE_ENV} export GROQ_API_KEY=$(printf %q "$GROQ_API_KEY");"
           fi
           ssh -i ~/.ssh/contabo_key -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
             "$SSH_USER@$SSH_HOST" \

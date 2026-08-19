@@ -420,6 +420,65 @@ def _generate_response(prompt: str, app_config=None) -> str:
         return f"Error: {_sanitize_error_message(e)}"
 
 
+# ---------------------------------------------------------------------------
+# Fallback chain — try multiple providers when the primary one fails.
+# ---------------------------------------------------------------------------
+
+_FALLBACK_ENV_SPECS: list[tuple[str, str, str, str]] = [
+    # (provider_id, env_key_name, default_model, default_base_url)
+    ("openrouter", "OPENROUTER_API_KEY", "openrouter/free", "https://openrouter.ai/api/v1"),
+    ("gemini", "GEMINI_API_KEY", "gemini-2.5-flash", ""),
+    ("groq", "GROQ_API_KEY", "llama-3.3-70b-versatile", "https://api.groq.com/openai/v1"),
+]
+
+
+def _build_fallback_configs() -> list[dict]:
+    """Build a list of provider config dicts from environment variables."""
+    import os
+    configs = []
+    for provider_id, env_key, default_model, default_base_url in _FALLBACK_ENV_SPECS:
+        api_key = os.environ.get(env_key, "").strip()
+        if not api_key:
+            api_key = config.app.get(f"{provider_id}_api_key", "").strip()
+        if not api_key:
+            continue
+        cfg = dict(config.app)
+        cfg["llm_provider"] = provider_id
+        cfg[f"{provider_id}_api_key"] = api_key
+        if default_model:
+            cfg.setdefault(f"{provider_id}_model_name", default_model)
+        if default_base_url:
+            cfg.setdefault(f"{provider_id}_base_url", default_base_url)
+        configs.append(cfg)
+    return configs
+
+
+def _generate_with_fallback(prompt: str, app_config=None) -> str:
+    """Try the primary provider, then fallback providers from env."""
+    result = _generate_response(prompt, app_config=app_config)
+    if result and not result.startswith("Error:"):
+        return result
+
+    primary_provider = (app_config or config.app).get("llm_provider", "?")
+    logger.warning(
+        f"primary provider [{primary_provider}] failed, trying fallbacks"
+    )
+
+    fallbacks = _build_fallback_configs()
+    for fb_cfg in fallbacks:
+        fb_provider = fb_cfg["llm_provider"]
+        if fb_provider == primary_provider:
+            continue
+        logger.info(f"fallback: trying [{fb_provider}]")
+        fb_result = _generate_response(prompt, app_config=fb_cfg)
+        if fb_result and not fb_result.startswith("Error:"):
+            logger.success(f"fallback [{fb_provider}] succeeded")
+            return fb_result
+        logger.warning(f"fallback [{fb_provider}] failed: {fb_result[:120] if fb_result else 'empty'}")
+
+    return result
+
+
 def test_connection() -> tuple[bool, str, float]:
     """
     使用当前 Provider 配置发起一次最小请求，验证实际生成链路是否可用。
@@ -564,16 +623,12 @@ def generate_script(
 
     for i in range(_max_retries):
         try:
-            if app_config is None:
-                response = _generate_response(prompt=prompt)
-            else:
-                response = _generate_response(prompt=prompt, app_config=app_config)
+            response = _generate_with_fallback(prompt=prompt, app_config=app_config)
             if response:
                 final_script = format_response(response)
             else:
                 logging.error("gpt returned an empty response")
 
-            # Some upstream providers may return quota errors as plain text.
             if final_script and "当日额度已消耗完" in final_script:
                 raise ValueError(final_script)
 
@@ -675,15 +730,8 @@ Please note that you must use English for generating video search terms; Chinese
     response = ""
     for i in range(_max_retries):
         try:
-            if app_config is None:
-                response = _generate_response(prompt)
-            else:
-                response = _generate_response(prompt, app_config=app_config)
+            response = _generate_with_fallback(prompt, app_config=app_config)
             if response.startswith("Error: "):
-                # generate_terms 的公开返回类型是 List[str]。如果把 Provider 的
-                # 错误文案原样返回，下游只做空值判断时会把非空字符串误认为成功，
-                # 素材下载循环还会按字符遍历错误文案，产生无意义的外部请求。
-                # 这里统一返回空列表，让任务编排层在真实故障位置立即结束任务。
                 logger.error(f"failed to generate video terms: {response}")
                 return []
             search_terms = json.loads(_strip_code_fence(response))
@@ -958,7 +1006,7 @@ def generate_social_metadata(
     response = ""
     for i in range(_max_retries):
         try:
-            response = _generate_response(prompt)
+            response = _generate_with_fallback(prompt)
             if isinstance(response, str) and "Error: " in response:
                 logger.error(f"failed to generate social metadata: {response}")
                 break

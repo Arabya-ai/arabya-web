@@ -244,7 +244,14 @@ LLM_PROVIDER_REGISTRY = (
         show_api_key=False,
         show_base_url=False,
     ),
-    # 其它推理与公共服务
+    # 聚合路由与公共服务
+    LLMProviderSpec(
+        "openrouter",
+        "OpenRouter",
+        api_key_url="https://openrouter.ai/keys",
+        default_model="openrouter/free",
+        default_base_url="https://openrouter.ai/api/v1",
+    ),
     LLMProviderSpec(
         "groq",
         "Groq",

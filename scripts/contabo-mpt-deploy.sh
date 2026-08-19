@@ -58,6 +58,15 @@ fi
 if [[ -n "${PIXABAY_API_KEYS:-}" ]]; then
   upsert_env "PIXABAY_API_KEYS" "$PIXABAY_API_KEYS"
 fi
+if [[ -n "${OPENROUTER_API_KEY:-}" ]]; then
+  upsert_env "OPENROUTER_API_KEY" "$OPENROUTER_API_KEY"
+fi
+if [[ -n "${GEMINI_API_KEY:-}" ]]; then
+  upsert_env "GEMINI_API_KEY" "$GEMINI_API_KEY"
+fi
+if [[ -n "${GROQ_API_KEY:-}" ]]; then
+  upsert_env "GROQ_API_KEY" "$GROQ_API_KEY"
+fi
 
 echo "==> MPT: ensure ffmpeg + Python venv"
 apt-get install -y ffmpeg python3-venv python3-pip >/dev/null 2>&1 || true
