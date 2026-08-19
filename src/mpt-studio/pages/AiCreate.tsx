@@ -7,6 +7,7 @@ import { Button } from "@/ayat-studio/components/ui/button";
 import { Input } from "@/ayat-studio/components/ui/input";
 import { Label } from "@/ayat-studio/components/ui/label";
 import { Textarea } from "@/ayat-studio/components/ui/textarea";
+import { CreatePreview } from "@/mpt-studio/components/CreatePreview";
 import { EngineBanner } from "@/mpt-studio/components/EngineBanner";
 import { mptPost, unwrapData } from "@/mpt-studio/lib/client";
 import { mptStudioPath } from "@/mpt-studio/lib/paths";
@@ -141,7 +142,8 @@ export default function AiCreate() {
         <p className="mpt-muted mt-2">{t("createLead")}</p>
       </div>
 
-      <form className="space-y-5" onSubmit={(event) => void generateVideo(event)}>
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-5">
+      <form className="min-w-0 flex-1 space-y-5" onSubmit={(event) => void generateVideo(event)}>
         <fieldset>
           <legend>{t("sectionTopic")}</legend>
           <div className="space-y-3">
@@ -356,6 +358,12 @@ export default function AiCreate() {
           {busy === "video" ? t("working") : t("submit")}
         </Button>
       </form>
+
+      {/* Live preview sidebar */}
+      <aside className="mpt-create-sidebar sticky top-4 hidden w-[260px] shrink-0 rounded-2xl border border-border bg-[hsl(var(--card)/0.55)] p-4 shadow-deep lg:block xl:w-[280px]">
+        <CreatePreview form={form} />
+      </aside>
+      </div>
     </div>
   );
 }
