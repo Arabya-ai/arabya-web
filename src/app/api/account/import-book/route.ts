@@ -6,7 +6,7 @@ import {
   googleSheetCsvExportUrl,
 } from "@/lib/import-book/parse-upload";
 import { slugifyBookTitle } from "@/lib/import-book/slug";
-import type { ImportSourceKind } from "@/lib/import-book/types";
+import type { BookKind, ImportSourceKind } from "@/lib/import-book/types";
 import { queueBookImportJob } from "@/lib/import-book/process-job";
 import { getUserDb, isLocalUserSyncEnabled } from "@/lib/local-user-db";
 import {
@@ -61,6 +61,7 @@ export async function POST(req: Request) {
   const contentType = req.headers.get("content-type") || "";
   let title = "";
   let slug: string | undefined;
+  let bookKind: BookKind = "irab";
   let googleSheetUrl: string | undefined;
   let buffer: Buffer | undefined;
   let filename = "upload";
@@ -71,6 +72,8 @@ export async function POST(req: Request) {
     title = String(form.get("title") || "").trim();
     const slugRaw = String(form.get("slug") || "").trim();
     slug = slugRaw ? slugifyBookTitle(slugRaw, slugRaw) : undefined;
+    const kindRaw = String(form.get("bookKind") || "").trim();
+    if (kindRaw === "reading") bookKind = "reading";
     googleSheetUrl = String(form.get("googleSheetUrl") || "").trim() || undefined;
     const file = form.get("file");
     if (file instanceof File && file.size > 0) {
@@ -83,6 +86,7 @@ export async function POST(req: Request) {
     let body: {
       title?: string;
       slug?: string;
+      bookKind?: BookKind;
       googleSheetUrl?: string;
     };
     try {
@@ -92,6 +96,7 @@ export async function POST(req: Request) {
     }
     title = String(body.title || "").trim();
     slug = body.slug ? slugifyBookTitle(body.slug) : undefined;
+    if (body.bookKind === "reading") bookKind = "reading";
     googleSheetUrl = String(body.googleSheetUrl || "").trim() || undefined;
     if (googleSheetUrl) sourceKind = "google_sheet";
   }
@@ -113,11 +118,19 @@ export async function POST(req: Request) {
     return apiError("unsupported_file_type", 400);
   }
 
+  if (bookKind === "reading") {
+    if (googleSheetUrl) return apiError("reading_pdf_only", 400);
+    if (!buffer || sourceKind !== "pdf") {
+      return apiError("reading_pdf_only", 400);
+    }
+  }
+
   const { jobId, slug: finalSlug } = queueBookImportJob({
     email: gate.email,
     role: gate.role,
     title,
     slug,
+    bookKind,
     buffer,
     filename,
     sourceKind,

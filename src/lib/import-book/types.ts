@@ -22,6 +22,8 @@ export type IrabBookPayload = {
   verses: IrabBookVerse[];
 };
 
+export type BookKind = "irab" | "reading";
+
 export type ImportSourceKind =
   | "json"
   | "csv"
@@ -42,6 +44,7 @@ export type BookImportJobRow = {
   title: string;
   slug: string;
   filename: string | null;
+  bookKind: BookKind;
   sourceKind: ImportSourceKind;
   status: BookImportJobStatus;
   message: string | null;

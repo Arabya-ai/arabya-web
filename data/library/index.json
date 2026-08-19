@@ -1,0 +1,17 @@
+{
+  "works": [
+    {
+      "id": "al-mukhtasar-al-nahw",
+      "title": "المختصر المفيد في علم النحو",
+      "titleEn": "Al-Mukhtasar Al-Mufeed in Arabic Grammar",
+      "author": "كتاب تعليمي — نحو",
+      "category": "nahw",
+      "description": "مختصر تعليمي في علم النحو العربي — للقراءة والمراجعة.",
+      "descriptionEn": "A concise educational book on Arabic grammar (nahw).",
+      "status": "ready",
+      "pdfUrl": "/media/library/al-mukhtasar-al-nahw.pdf",
+      "pageCount": 66,
+      "license": "owner"
+    }
+  ]
+}

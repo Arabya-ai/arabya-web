@@ -22,6 +22,11 @@ export default async function HeritageHubPage({ params }: Props) {
     <div className="shell page-block">
       <h1>{t("title")}</h1>
       <p>{t("lead")}</p>
+      <p>
+        <Link href="/library" className="nav-pill">
+          {t("libraryLink")}
+        </Link>
+      </p>
       <p className="layer-soon">{t("soon")}</p>
       <p>
         <Link href="/hadith">{t("hadithLink")}</Link> ·{" "}

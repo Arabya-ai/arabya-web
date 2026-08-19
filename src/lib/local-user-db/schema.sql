@@ -136,6 +136,7 @@ CREATE TABLE IF NOT EXISTS book_import_jobs (
   title TEXT NOT NULL,
   slug TEXT NOT NULL,
   filename TEXT,
+  book_kind TEXT NOT NULL DEFAULT 'irab',
   source_kind TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'processing',
   message TEXT,

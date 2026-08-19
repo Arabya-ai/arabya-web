@@ -63,7 +63,7 @@ function isStaticOrApi(pathname: string): boolean {
     pathname.startsWith("/api") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/brand") ||
-    /\.(?:ico|png|jpe?g|gif|webp|svg|css|js|map|txt|xml|json|woff2?|ttf|webmanifest)$/i.test(
+    /\.(?:ico|png|jpe?g|gif|webp|svg|css|js|map|txt|xml|json|woff2?|ttf|webmanifest|pdf)$/i.test(
       pathname,
     )
   );
@@ -118,6 +118,6 @@ export const config = {
   // Do not treat emails in CRM paths (user@domain.com) as static files.
   matcher: [
     "/api/:path*",
-    "/((?!_next|.*\\.(?:ico|png|jpe?g|gif|webp|svg|css|js|map|txt|xml|json|woff2?|ttf|webmanifest)$).*)",
+    "/((?!_next|.*\\.(?:ico|png|jpe?g|gif|webp|svg|css|js|map|txt|xml|json|woff2?|ttf|webmanifest|pdf)$).*)",
   ],
 };
