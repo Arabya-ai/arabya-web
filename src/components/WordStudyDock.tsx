@@ -33,6 +33,9 @@ import { tafsirDisplayName } from "@/lib/tafsir-label";
 import { MeaningLangSwitch } from "@/components/MeaningLangSwitch";
 import type { MeaningLang } from "@/hooks/mushaf-utils";
 import { studioCreateFromAyahHref } from "@/ayat-studio/lib/studio-paths";
+import { apiGet } from "@/lib/api-client";
+import type { IrabClaim } from "@/lib/claims";
+import { claimsHaveAlternates } from "@/lib/claims";
 
 export type VerseTranslationStatus =
   | "idle"
@@ -108,6 +111,7 @@ function layerHintKey(id: LayerId): string {
 export function WordStudyDock({
   verseKey,
   word,
+  wordId,
   morph,
   senseEntry = null,
   lexiconText = null,
@@ -132,6 +136,9 @@ export function WordStudyDock({
   const [tafsirSlug, setTafsirSlug] = useState(tafsirSources[0]?.slug ?? "");
   const [tafsirText, setTafsirText] = useState<string | null>(null);
   const [tafsirLoading, setTafsirLoading] = useState(false);
+  const [irabClaims, setIrabClaims] = useState<IrabClaim[]>([]);
+  const [irabSourceId, setIrabSourceId] = useState("qac");
+  const [irabClaimsLoading, setIrabClaimsLoading] = useState(false);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const baseId = useId();
 
@@ -153,6 +160,39 @@ export function WordStudyDock({
     });
   }, [verseKey, word, senseEntry?.sense]);
 
+  useEffect(() => {
+    if (!wordId) {
+      setIrabClaims([]);
+      return;
+    }
+    let cancelled = false;
+    setIrabClaimsLoading(true);
+    void (async () => {
+      try {
+        const res = await apiGet(
+          `/api/irab/claims?wordId=${encodeURIComponent(wordId)}`,
+          { cache: "no-store" },
+        );
+        const data = (await res.json()) as {
+          ok?: boolean;
+          claims?: IrabClaim[];
+        };
+        if (cancelled) return;
+        const list = data.ok ? data.claims ?? [] : [];
+        setIrabClaims(list);
+        const qac = list.find((c) => c.sourceId === "qac");
+        setIrabSourceId(qac?.sourceId ?? list[0]?.sourceId ?? "qac");
+      } catch {
+        if (!cancelled) setIrabClaims([]);
+      } finally {
+        if (!cancelled) setIrabClaimsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [wordId]);
+
   const qacNarrative = narrativeIrab(morph ?? null, locale);
   const lexicon = lexiconCardLines(morph ?? null, locale);
   const featureLabels = formatFeatureLabels(morph?.features, locale);
@@ -166,6 +206,19 @@ export function WordStudyDock({
         morph.irab ||
         morph.irabText),
   );
+
+  const selectedIrabClaim = useMemo(
+    () =>
+      irabClaims.find((c) => c.sourceId === irabSourceId) ??
+      irabClaims[0] ??
+      null,
+    [irabClaims, irabSourceId],
+  );
+  const irabBody =
+    selectedIrabClaim?.text ||
+    (irabClaimsLoading ? null : qacNarrative !== "—" ? qacNarrative : null);
+  const showIrabSourcePicker =
+    irabClaims.length > 1 && claimsHaveAlternates(irabClaims);
 
   const morphChips = useMemo(() => {
     const chips: { key: string; node: ReactNode }[] = [];
@@ -378,8 +431,24 @@ export function WordStudyDock({
           <>
             <h3>{t("wordIrabTitle")}</h3>
             <p className="layer-hint">{activeHint}</p>
-            {hasMorphPayload && qacNarrative && qacNarrative !== "—" ? (
-              <p className="layer-body">{qacNarrative}</p>
+            {showIrabSourcePicker ? (
+              <select
+                className="verse-trans-select"
+                value={irabSourceId}
+                onChange={(e) => setIrabSourceId(e.target.value)}
+                aria-label={t("irabSourceSelectAria")}
+              >
+                {irabClaims.map((c) => (
+                  <option key={c.id} value={c.sourceId}>
+                    {c.sourceLabel}
+                  </option>
+                ))}
+              </select>
+            ) : null}
+            {hasMorphPayload && irabBody ? (
+              <p className="layer-body">{irabBody}</p>
+            ) : irabClaimsLoading ? (
+              <p className="layer-empty">{t("loading")}</p>
             ) : (
               <p className="layer-empty">
                 {t("noIrab")}

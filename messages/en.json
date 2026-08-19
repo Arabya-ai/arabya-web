@@ -563,6 +563,7 @@
     "verseEditionAria": "Choose ayah translation edition",
     "tafsirTitle": "Ayah tafsir",
     "tafsirSelectAria": "Choose tafsir edition",
+    "irabSourceSelectAria": "Choose iʿrāb source",
     "tafsirLoadError": "Could not load tafsir.",
     "tafsirEmpty": "No tafsir for this ayah in this edition.",
     "noTafsirSources": "No tafsir editions loaded in this build.",
@@ -1321,7 +1322,9 @@
     "shareLabel": "Share iʿrāb",
     "shareHint": "Link to this ayah iʿrāb page.",
     "createImage": "Create image",
-    "createVideo": "Create video"
+    "createVideo": "Create video",
+    "bookIrabTitle": "Iʿrāb from licensed sources",
+    "multiSource": "Multiple sources"
   },
   "Surah": {
     "metaFallback": "Study surah",

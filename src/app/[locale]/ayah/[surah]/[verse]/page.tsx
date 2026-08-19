@@ -7,6 +7,10 @@ import { getMushafIndex } from "@/lib/mushaf";
 import { formatVerseKey, getMushafPageHref, toArabicNumerals } from "@/lib/format";
 import { normalizeForHafsFont } from "@/lib/quran-text";
 import { narrativeIrab } from "@/lib/irab-narrative";
+import { getIrabClaimsForAyah } from "@/lib/irab-claims";
+import { claimsHaveAlternates } from "@/lib/claims";
+import { makeWordId } from "@/lib/word-id";
+import { IrabClaimsCompare } from "@/components/IrabClaimsCompare";
 import { getSurahDisplayTitle } from "@/lib/surah-names";
 import { PageShareButton } from "@/components/PageShareButton";
 import { buildSocialMetadata } from "@/lib/og-meta";
@@ -66,11 +70,12 @@ export default async function AyahIrabPage({ params }: Props) {
     notFound();
   }
 
-  const [content, irab, meta, mushaf] = await Promise.all([
+  const [content, irab, meta, mushaf, claimsBundle] = await Promise.all([
     getSurah(surahId),
     getIrab(surahId),
     getSurahMeta(surahId),
     getMushafIndex(),
+    getIrabClaimsForAyah(surahId, verseNumber),
   ]);
 
   const ayah = content?.verses.find((v) => v.verseNumber === verseNumber);
@@ -90,6 +95,7 @@ export default async function AyahIrabPage({ params }: Props) {
   const surahTitle = getSurahDisplayTitle(surahId, locale);
   const verseLabel =
     locale === "en" ? String(verseNumber) : toArabicNumerals(verseNumber);
+  const uiLocale = locale === "en" ? "en" : "ar";
 
   return (
     <div className="shell page-block ayah-irab-page">
@@ -158,25 +164,55 @@ export default async function AyahIrabPage({ params }: Props) {
         </div>
       </header>
 
+      {claimsBundle.ayahLevel.length ? (
+        <section className="irab-claims-ayah-level" aria-label={t("bookIrabTitle")}>
+          <h2 className="irab-claims-ayah-level__title">{t("bookIrabTitle")}</h2>
+          <ul className="irab-claims-stack">
+            {claimsBundle.ayahLevel.map((c) => (
+              <li key={c.id} className="irab-claims-stack__item">
+                <span className="irab-claims-stack__source">{c.sourceLabel}</span>
+                <p className="irab-claims-stack__text">{c.text}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <ol className="ayah-irab-list">
         {ayah.words
           .filter((w) => !w.charType || w.charType === "word")
           .map((w) => {
             const morph = irabVerse?.words.find((x) => x.position === w.position);
+            const wordId =
+              morph?.wordId ?? makeWordId(surahId, verseNumber, w.position);
+            const claims = claimsBundle.byWordId.get(wordId) ?? [];
             const sense =
               locale === "en"
                 ? w.meaning || w.meaningAr || ""
                 : w.meaningAr || w.meaning || "";
+            const expanded = claimsHaveAlternates(claims);
+            const fallbackIrab = narrativeIrab(morph ?? null, uiLocale);
             return (
               <li key={w.position} className="ayah-irab-item">
                 <span className="ayah-irab-word">
                   {normalizeForHafsFont(w.text)}
                 </span>
                 <span className="ayah-irab-detail">
-                  {narrativeIrab(morph ?? null, locale)}
+                  {claims.length ? (
+                    <IrabClaimsCompare
+                      claims={claims}
+                      locale={uiLocale}
+                      expanded={expanded}
+                    />
+                  ) : (
+                    fallbackIrab
+                  )}
                 </span>
                 {sense ? (
                   <span className="ayah-irab-sense">{sense}</span>
+                ) : null}
+                {expanded ? (
+                  <span className="ayah-irab-alt-badge">{t("multiSource")}</span>
                 ) : null}
               </li>
             );

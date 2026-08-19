@@ -563,6 +563,7 @@
     "verseEditionAria": "اختر ترجمة الآية",
     "tafsirTitle": "تفسير الآية",
     "tafsirSelectAria": "اختر التفسير",
+    "irabSourceSelectAria": "اختر مصدر الإعراب",
     "tafsirLoadError": "تعذّر تحميل التفسير.",
     "tafsirEmpty": "لا يتوفر تفسير لهذه الآية في هذه الطبعة.",
     "noTafsirSources": "لا تتوفر تفاسير محمّلة في هذه النسخة.",
@@ -1321,7 +1322,9 @@
     "shareLabel": "مشاركة الإعراب",
     "shareHint": "رابط صفحة إعراب هذه الآية.",
     "createImage": "إنشاء صورة",
-    "createVideo": "إنشاء فيديو"
+    "createVideo": "إنشاء فيديو",
+    "bookIrabTitle": "إعراب من مصادر مرخّصة",
+    "multiSource": "مصادر متعددة"
   },
   "Surah": {
     "metaFallback": "دراسة سورة",

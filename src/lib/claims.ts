@@ -8,6 +8,8 @@ export type ClaimLayer =
   | "lexicon"
   | "translation";
 
+export type IrabClaimScope = "word" | "ayah";
+
 export type AnalysisClaim = {
   id: string;
   layer: ClaimLayer;
@@ -17,6 +19,14 @@ export type AnalysisClaim = {
   confidence?: "high" | "medium" | "low";
   license?: string;
   url?: string;
+};
+
+/** Word- or ayah-level iʿrāb claim with provenance (ADR-0002). */
+export type IrabClaim = AnalysisClaim & {
+  scope: IrabClaimScope;
+  wordId?: string;
+  verseKey?: string;
+  evidence?: string;
 };
 
 export type IrabSourceMeta = {
@@ -46,15 +56,27 @@ export function listIrabSources(
 export function claimFromQacIrab(
   wordId: string,
   text: string,
-): AnalysisClaim {
+  evidence?: string,
+): IrabClaim {
   return {
     id: `claim:${wordId}:syntax:qac`,
     layer: "syntax",
     sourceId: QAC_IRAB_SOURCE.id,
     sourceLabel: QAC_IRAB_SOURCE.label,
     text,
+    scope: "word",
+    wordId,
+    evidence,
     confidence: "high",
     license: QAC_IRAB_SOURCE.license,
     url: QAC_IRAB_SOURCE.url,
   };
+}
+
+/** True when multiple claims carry meaningfully different text. */
+export function claimsHaveAlternates(claims: IrabClaim[]): boolean {
+  const texts = new Set(
+    claims.map((c) => c.text.trim()).filter((t) => t && t !== "—"),
+  );
+  return texts.size > 1;
 }
