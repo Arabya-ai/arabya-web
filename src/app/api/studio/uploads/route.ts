@@ -4,6 +4,7 @@ import {
   studioCreateUpload,
   studioListUploads,
 } from "@/lib/cloud-sync";
+import { apiError, requestTooLarge } from "@/lib/api-error";
 import { enforceRateLimitKey } from "@/lib/rate-limit";
 import { requireSession } from "@/lib/require-role";
 import { canAccessEditorialTools } from "@/lib/roles";
@@ -11,23 +12,16 @@ import { canAccessEditorialTools } from "@/lib/roles";
 export const dynamic = "force-dynamic";
 const MAX_UPLOAD_JSON_BYTES = 600_000;
 
-function requestTooLarge(request: Request, maxBytes: number): boolean {
-  const raw = request.headers.get("content-length");
-  if (!raw) return false;
-  const bytes = Number(raw);
-  return Number.isFinite(bytes) && bytes > maxBytes;
-}
-
 export async function GET() {
   const gate = await requireSession();
   if ("error" in gate) return gate.error;
   const limited = enforceRateLimitKey("studio-uploads", gate.email, 60);
   if (limited) return limited;
   if (!canAccessEditorialTools(gate.role)) {
-    return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
+    return apiError("forbidden", 403);
   }
   if (!isCloudSyncConfigured()) {
-    return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
+    return apiError("not_configured", 503);
   }
   try {
     const data = await studioListUploads(gate.email);
@@ -37,7 +31,7 @@ export async function GET() {
         : data.uploads.filter((row) => row.uploaderId === gate.email);
     return NextResponse.json({ ok: true, uploads });
   } catch {
-    return NextResponse.json({ ok: false, error: "upstream_failed" }, { status: 502 });
+    return apiError("upstream_failed", 502);
   }
 }
 
@@ -47,23 +41,23 @@ export async function POST(request: Request) {
   const limited = enforceRateLimitKey("studio-uploads-post", gate.email, 30);
   if (limited) return limited;
   if (!canAccessEditorialTools(gate.role)) {
-    return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
+    return apiError("forbidden", 403);
   }
   if (!isCloudSyncConfigured()) {
-    return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
+    return apiError("not_configured", 503);
   }
   if (requestTooLarge(request, MAX_UPLOAD_JSON_BYTES)) {
-    return NextResponse.json({ ok: false, error: "payload_too_large" }, { status: 413 });
+    return apiError("payload_too_large", 413);
   }
 
   let body: { filename?: string; payload?: string; notes?: string; kind?: string };
   try {
     body = (await request.json()) as typeof body;
   } catch {
-    return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
+    return apiError("invalid_json", 400);
   }
   if (typeof body.payload === "string" && body.payload.length > 500_000) {
-    return NextResponse.json({ ok: false, error: "payload_too_large" }, { status: 413 });
+    return apiError("payload_too_large", 413);
   }
 
   try {
@@ -75,6 +69,6 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ ok: true, ...data });
   } catch {
-    return NextResponse.json({ ok: false, error: "upstream_failed" }, { status: 502 });
+    return apiError("upstream_failed", 502);
   }
 }

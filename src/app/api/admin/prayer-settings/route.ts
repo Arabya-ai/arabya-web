@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { enforceRateLimitKey } from "@/lib/rate-limit";
 import { requireAdmin } from "@/lib/require-role";
 import {
@@ -27,13 +28,10 @@ export async function PATCH(req: Request) {
   try {
     body = (await req.json()) as { method?: number; school?: number };
   } catch {
-    return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
+    return apiError("invalid_json", 400);
   }
   if (typeof body.method !== "number" || typeof body.school !== "number") {
-    return NextResponse.json(
-      { ok: false, error: "invalid_payload" },
-      { status: 400 },
-    );
+    return apiError("invalid_payload", 400);
   }
 
   const settings = writePrayerDefaults(gate.email, {

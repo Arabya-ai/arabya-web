@@ -7,16 +7,10 @@ import {
   type DuaItem,
 } from "@/lib/adhkar";
 import { readAdhkarContentOverride, writeAdhkarContentOverride } from "@/lib/adhkar-content-store";
+import { apiError, requestTooLarge } from "@/lib/api-error";
 import { requireEditorial } from "@/lib/require-role";
 import { enforceRateLimitKey } from "@/lib/rate-limit";
 const MAX_EDITOR_BODY_BYTES = 120_000;
-
-function requestTooLarge(request: Request, maxBytes: number): boolean {
-  const raw = request.headers.get("content-length");
-  if (!raw) return false;
-  const bytes = Number(raw);
-  return Number.isFinite(bytes) && bytes > maxBytes;
-}
 
 type AdhkarPayload = {
   slug: string;
@@ -74,7 +68,7 @@ export async function PATCH(req: Request) {
   const limited = enforceRateLimitKey("editor-adhkar-content", gate.email, 50);
   if (limited) return limited;
   if (requestTooLarge(req, MAX_EDITOR_BODY_BYTES)) {
-    return NextResponse.json({ ok: false, error: "payload_too_large" }, { status: 413 });
+    return apiError("payload_too_large", 413);
   }
 
   let body:
@@ -91,7 +85,7 @@ export async function PATCH(req: Request) {
   try {
     body = (await req.json()) as typeof body;
   } catch {
-    return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
+    return apiError("invalid_json", 400);
   }
 
   const { adhkarBySlug, duas } = await currentCollections();
@@ -113,10 +107,7 @@ export async function PATCH(req: Request) {
         active: true,
       };
       if (!next.id || !next.textAr) {
-        return NextResponse.json(
-          { ok: false, error: "invalid_item" },
-          { status: 400 },
-        );
+        return apiError("invalid_item", 400);
       }
       if (idx >= 0) list[idx] = next;
       else list.unshift(next);
@@ -138,10 +129,7 @@ export async function PATCH(req: Request) {
         active: true,
       };
       if (!next.id || !next.textAr || !next.categoryAr) {
-        return NextResponse.json(
-          { ok: false, error: "invalid_item" },
-          { status: 400 },
-        );
+        return apiError("invalid_item", 400);
       }
       if (idx >= 0) list[idx] = next;
       else list.unshift(next);
