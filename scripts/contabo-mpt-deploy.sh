@@ -126,10 +126,20 @@ def dotenv_get(path: Path, names: list[str]) -> str:
             return raw
     return ""
 
-if not pexels:
-    pexels = dotenv_get(env_file, ["MPT_PEXELS_API_KEYS", "MPT_PEXELS_API_KEY", "PEXELS_API_KEYS", "PEXELS_API_KEY"])
-if not pixabay:
-    pixabay = dotenv_get(env_file, ["MPT_PIXABAY_API_KEYS", "MPT_PIXABAY_API_KEY", "PIXABAY_API_KEYS", "PIXABAY_API_KEY"])
+stock_names_pexels = ["MPT_PEXELS_API_KEYS", "MPT_PEXELS_API_KEY", "PEXELS_API_KEYS", "PEXELS_API_KEY"]
+stock_names_pixabay = ["MPT_PIXABAY_API_KEYS", "MPT_PIXABAY_API_KEY", "PIXABAY_API_KEYS", "PIXABAY_API_KEY"]
+app_dir = env_file.parent if str(env_file) else Path("..")
+for candidate in (
+    env_file,
+    app_dir / ".env.production",
+    app_dir / ".env.local",
+    app_dir / ".env",
+    Path(".env"),
+):
+    if not pexels:
+        pexels = dotenv_get(candidate, stock_names_pexels)
+    if not pixabay:
+        pixabay = dotenv_get(candidate, stock_names_pixabay)
 primary_model = models.split(",")[0].strip() if models else ""
 
 def set_field(name: str, value: str, body: str) -> str:

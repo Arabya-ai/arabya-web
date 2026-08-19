@@ -32,3 +32,13 @@ export function syncMptStockKeysFromEnv(
   writeFileSync(filePath, lines, { encoding: "utf8", mode: 0o600 });
   return { pexels: pexels.length, pixabay: pixabay.length };
 }
+
+/** Block a Pexels/Pixabay job before MPT stalls at 5% with an empty key list. */
+export function stockKeyErrorForSource(
+  source: string,
+  counts: { pexels: number; pixabay: number },
+): "missing_pexels_key" | "missing_pixabay_key" | null {
+  if (source === "pexels" && counts.pexels === 0) return "missing_pexels_key";
+  if (source === "pixabay" && counts.pixabay === 0) return "missing_pixabay_key";
+  return null;
+}

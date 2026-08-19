@@ -118,7 +118,11 @@ export default function AiCreate() {
         json && typeof json === "object"
           ? (json as { error?: string }).error
           : undefined;
-      setError(err === "missing_pexels_key" ? t("errorPexelsKey") : t("errorVideo"));
+      setError(
+        err === "missing_pexels_key" || err === "missing_pixabay_key"
+          ? t("errorPexelsKey")
+          : t("errorVideo"),
+      );
       return;
     }
     const data = unwrapData(json) as { task_id?: string };

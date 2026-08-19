@@ -2,7 +2,10 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { syncMptStockKeysFromEnv } from "@/lib/mpt-stock-keys";
+import {
+  stockKeyErrorForSource,
+  syncMptStockKeysFromEnv,
+} from "@/lib/mpt-stock-keys";
 
 describe("syncMptStockKeysFromEnv", () => {
   it("writes Pexels keys for the Python engine", () => {
@@ -33,5 +36,17 @@ describe("syncMptStockKeysFromEnv", () => {
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+
+  it("flags Pexels jobs when Next.js has no key", () => {
+    expect(stockKeyErrorForSource("pexels", { pexels: 0, pixabay: 1 })).toBe(
+      "missing_pexels_key",
+    );
+    expect(stockKeyErrorForSource("pexels", { pexels: 1, pixabay: 0 })).toBe(
+      null,
+    );
+    expect(stockKeyErrorForSource("coverr", { pexels: 0, pixabay: 0 })).toBe(
+      null,
+    );
   });
 });

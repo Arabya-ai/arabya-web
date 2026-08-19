@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { parseMptVideoBody } from "@/lib/mpt-payload";
 import { MPT_GENERATE_LIMIT, proxyMptJson, requireMptSession } from "@/lib/mpt-proxy";
-import { syncMptStockKeysFromEnv } from "@/lib/mpt-stock-keys";
+import {
+  stockKeyErrorForSource,
+  syncMptStockKeysFromEnv,
+} from "@/lib/mpt-stock-keys";
 
 export const runtime = "nodejs";
 
@@ -21,10 +24,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: parsed.error }, { status: 400 });
   }
 
+  let synced = { pexels: 0, pixabay: 0 };
   try {
-    syncMptStockKeysFromEnv();
+    synced = syncMptStockKeysFromEnv();
   } catch {
     // Engine still tries env files / config.toml.
+  }
+  const stockError = stockKeyErrorForSource(parsed.body.video_source, synced);
+  if (stockError) {
+    return NextResponse.json({ ok: false, error: stockError }, { status: 400 });
   }
 
   return proxyMptJson({

@@ -187,7 +187,9 @@ def _stock_env_file_paths() -> list[Path]:
     return [
         root / ".runtime-stock-keys.env",
         arabya_root / ".env.production.local",
+        arabya_root / ".env.production",
         arabya_root / ".env.local",
+        arabya_root / ".env",
         root / ".env",
     ]
 
