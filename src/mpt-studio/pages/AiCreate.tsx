@@ -7,6 +7,7 @@ import { Button } from "@/ayat-studio/components/ui/button";
 import { Input } from "@/ayat-studio/components/ui/input";
 import { Label } from "@/ayat-studio/components/ui/label";
 import { Textarea } from "@/ayat-studio/components/ui/textarea";
+import { BackgroundSearch } from "@/mpt-studio/components/BackgroundSearch";
 import { CreatePreview } from "@/mpt-studio/components/CreatePreview";
 import { EngineBanner } from "@/mpt-studio/components/EngineBanner";
 import { mptPost, unwrapData } from "@/mpt-studio/lib/client";
@@ -69,69 +70,89 @@ export default function AiCreate() {
     setForm((prev) => ({ ...prev, ...partial }));
   }
 
+  function errorFromResponse(json: unknown, fallbackKey: string): string {
+    const err =
+      json && typeof json === "object"
+        ? (json as { error?: string }).error
+        : undefined;
+    if (err === "llm_blocked" || err === "engine_unreachable")
+      return t("errorLlmBlocked");
+    if (err === "missing_pexels_key" || err === "missing_pixabay_key")
+      return t("errorPexelsKey");
+    if (err === "engine_unconfigured") return t("errorEngineOff");
+    return t(fallbackKey);
+  }
+
   async function generateScript() {
     setError(null);
     setBusy("script");
-    const { status, json } = await mptPost("/api/studio/ai/scripts", {
-      video_subject: form.video_subject,
-      video_language: form.video_language,
-      paragraph_number: form.paragraph_number,
-    });
-    setBusy(null);
-    if (status >= 400) {
-      setError(t("errorScript"));
-      return;
+    try {
+      const { status, json } = await mptPost("/api/studio/ai/scripts", {
+        video_subject: form.video_subject,
+        video_language: form.video_language,
+        paragraph_number: form.paragraph_number,
+      });
+      if (status >= 400) {
+        setError(errorFromResponse(json, "errorScript"));
+        return;
+      }
+      const data = unwrapData(json) as { video_script?: string };
+      if (data?.video_script) patch({ video_script: data.video_script });
+      else setError(t("errorScript"));
+    } catch {
+      setError(t("errorLlmBlocked"));
+    } finally {
+      setBusy(null);
     }
-    const data = unwrapData(json) as { video_script?: string };
-    if (data?.video_script) patch({ video_script: data.video_script });
-    else setError(t("errorScript"));
   }
 
   async function generateTerms() {
     setError(null);
     setBusy("terms");
-    const { status, json } = await mptPost("/api/studio/ai/terms", {
-      video_subject: form.video_subject,
-      video_script: form.video_script,
-      amount: 5,
-    });
-    setBusy(null);
-    if (status >= 400) {
-      setError(t("errorTerms"));
-      return;
+    try {
+      const { status, json } = await mptPost("/api/studio/ai/terms", {
+        video_subject: form.video_subject,
+        video_script: form.video_script,
+        amount: 5,
+      });
+      if (status >= 400) {
+        setError(errorFromResponse(json, "errorTerms"));
+        return;
+      }
+      const data = unwrapData(json) as { video_terms?: string[] | string };
+      const terms = Array.isArray(data?.video_terms)
+        ? data.video_terms.join(", ")
+        : data?.video_terms || "";
+      if (terms) patch({ video_terms: terms });
+      else setError(t("errorTerms"));
+    } catch {
+      setError(t("errorLlmBlocked"));
+    } finally {
+      setBusy(null);
     }
-    const data = unwrapData(json) as { video_terms?: string[] | string };
-    const terms = Array.isArray(data?.video_terms)
-      ? data.video_terms.join(", ")
-      : data?.video_terms || "";
-    if (terms) patch({ video_terms: terms });
-    else setError(t("errorTerms"));
   }
 
   async function generateVideo(event: FormEvent) {
     event.preventDefault();
     setError(null);
     setBusy("video");
-    const { status, json } = await mptPost("/api/studio/ai/videos", form);
-    setBusy(null);
-    if (status >= 400) {
-      const err =
-        json && typeof json === "object"
-          ? (json as { error?: string }).error
-          : undefined;
-      setError(
-        err === "missing_pexels_key" || err === "missing_pixabay_key"
-          ? t("errorPexelsKey")
-          : t("errorVideo"),
-      );
-      return;
+    try {
+      const { status, json } = await mptPost("/api/studio/ai/videos", form);
+      if (status >= 400) {
+        setError(errorFromResponse(json, "errorVideo"));
+        return;
+      }
+      const data = unwrapData(json) as { task_id?: string };
+      if (data?.task_id) {
+        router.push(mptStudioPath(`/tasks/${data.task_id}`));
+        return;
+      }
+      setError(t("errorVideo"));
+    } catch {
+      setError(t("errorLlmBlocked"));
+    } finally {
+      setBusy(null);
     }
-    const data = unwrapData(json) as { task_id?: string };
-    if (data?.task_id) {
-      router.push(mptStudioPath(`/tasks/${data.task_id}`));
-      return;
-    }
-    setError(t("errorVideo"));
   }
 
   return (
@@ -360,8 +381,29 @@ export default function AiCreate() {
       </form>
 
       {/* Live preview sidebar */}
-      <aside className="mpt-create-sidebar sticky top-4 hidden w-[260px] shrink-0 rounded-2xl border border-border bg-[hsl(var(--card)/0.55)] p-4 shadow-deep lg:block xl:w-[280px]">
-        <CreatePreview form={form} />
+      <aside className="mpt-create-sidebar sticky top-4 hidden w-[280px] shrink-0 space-y-5 lg:block xl:w-[300px]">
+        <div className="rounded-2xl border border-border bg-[hsl(var(--card)/0.55)] p-4 shadow-deep">
+          <CreatePreview form={form} />
+        </div>
+        <div className="rounded-2xl border border-border bg-[hsl(var(--card)/0.55)] p-3 shadow-deep">
+          <BackgroundSearch
+            orientation={
+              form.video_aspect === "9:16"
+                ? "portrait"
+                : form.video_aspect === "1:1"
+                  ? "square"
+                  : "landscape"
+            }
+            onSelectPhoto={(url) => {
+              const existing = form.video_terms.trim();
+              if (!existing) patch({ video_terms: url });
+            }}
+            onSelectVideo={(url) => {
+              const existing = form.video_terms.trim();
+              if (!existing) patch({ video_terms: url });
+            }}
+          />
+        </div>
       </aside>
       </div>
     </div>

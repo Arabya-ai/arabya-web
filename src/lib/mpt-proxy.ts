@@ -44,6 +44,30 @@ async function readUpstreamJson(upstream: Response): Promise<unknown> {
   }
 }
 
+/**
+ * Detect LLM responses that contain Cloudflare challenge pages or raw HTML
+ * instead of real content. MPT returns 200 but the data field holds garbage.
+ */
+function detectLlmGarbage(payload: unknown): boolean {
+  if (!payload || typeof payload !== "object") return false;
+  const data = (payload as Record<string, unknown>).data;
+  if (!data || typeof data !== "object") return false;
+  const fields = data as Record<string, unknown>;
+  for (const value of Object.values(fields)) {
+    if (
+      typeof value === "string" &&
+      value.length > 50 &&
+      (value.includes("<!DOCTYPE") ||
+        value.includes("<html") ||
+        value.includes("Just a moment") ||
+        value.startsWith("Error: <!"))
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export async function proxyMptJson(opts: {
   method: string;
   pathname: string;
@@ -80,7 +104,14 @@ export async function proxyMptJson(opts: {
       redirect: "manual",
     });
 
-    const payload = rewriteMptValue(await readUpstreamJson(upstream));
+    const raw = await readUpstreamJson(upstream);
+    if (detectLlmGarbage(raw)) {
+      return NextResponse.json(
+        { ok: false, error: "llm_blocked", message: "LLM API returned an error page instead of content." },
+        { status: 502, headers: { "Cache-Control": "no-store" } },
+      );
+    }
+    const payload = rewriteMptValue(raw);
     return NextResponse.json(payload, {
       status: upstream.status,
       headers: { "Cache-Control": "no-store" },
