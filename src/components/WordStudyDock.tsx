@@ -197,15 +197,6 @@ export function WordStudyDock({
   const lexicon = lexiconCardLines(morph ?? null, locale);
   const featureLabels = formatFeatureLabels(morph?.features, locale);
   const posLabels = formatPosLabels(morph?.pos, morph?.features, locale);
-  const hasMorphPayload = Boolean(
-    morph &&
-      (morph.root ||
-        morph.lemma ||
-        morph.pos?.length ||
-        morph.features?.length ||
-        morph.irab ||
-        morph.irabText),
-  );
 
   const selectedIrabClaim = useMemo(
     () =>
