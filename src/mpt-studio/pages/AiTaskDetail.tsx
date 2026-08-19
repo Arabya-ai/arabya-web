@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Button } from "@/ayat-studio/components/ui/button";
 import { EngineBanner } from "@/mpt-studio/components/EngineBanner";
+import { VideoPreview } from "@/mpt-studio/components/VideoPreview";
 import {
   mptDelete,
   mptGet,
@@ -59,6 +60,7 @@ export default function AiTaskDetail({ taskId }: { taskId: string }) {
     ? task.videos
     : task?.combined_videos || [];
   const statusKey = mptTaskLabelKey(task?.state);
+  const isComplete = task?.state === MPT_TASK_COMPLETE;
 
   async function removeTask() {
     setError(null);
@@ -85,7 +87,7 @@ export default function AiTaskDetail({ taskId }: { taskId: string }) {
         </p>
       </div>
 
-      <progress max={100} value={task?.progress ?? 0} />
+      {!isComplete && <progress max={100} value={task?.progress ?? 0} />}
 
       {task?.error ? (
         <p className="text-sm text-destructive" role="alert">
@@ -99,21 +101,30 @@ export default function AiTaskDetail({ taskId }: { taskId: string }) {
         </p>
       ) : null}
 
-      {videos.map((src) => (
-        <div key={src} className="space-y-2">
-          <video
-            className="w-full max-w-md rounded-2xl border border-border bg-black"
-            src={src}
-            controls
-            playsInline
-          />
-          <Button variant="outline" asChild>
-            <a href={src} download>
-              {t("download")}
-            </a>
-          </Button>
+      {videos.length > 0 && (
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-[hsl(var(--card)/0.55)] p-3 shadow-deep sm:p-4">
+          <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl opacity-10 pattern-mihrab" />
+          <div className="relative z-[1] space-y-6">
+            {videos.map((src, idx) => (
+              <VideoPreview
+                key={src}
+                src={src}
+                title={
+                  videos.length > 1
+                    ? `${t("previewLabel")} ${idx + 1}`
+                    : t("previewLabel")
+                }
+                onDownload={() => {
+                  const a = document.createElement("a");
+                  a.href = src;
+                  a.download = "";
+                  a.click();
+                }}
+              />
+            ))}
+          </div>
         </div>
-      ))}
+      )}
 
       <div className="mpt-actions">
         <Button variant="outline" asChild>

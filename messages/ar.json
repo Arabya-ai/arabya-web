@@ -1443,7 +1443,15 @@
     "deleteTask": "حذف المهمة",
     "status_processing": "قيد المعالجة",
     "status_complete": "مكتمل",
-    "status_failed": "فشل"
+    "status_failed": "فشل",
+    "previewLabel": "معاينة الفيديو",
+    "previewPlay": "تشغيل",
+    "previewPause": "إيقاف",
+    "previewBack": "رجوع ١٠ ثوانٍ",
+    "previewForward": "تقديم ١٠ ثوانٍ",
+    "previewMute": "كتم الصوت",
+    "previewUnmute": "تشغيل الصوت",
+    "previewFullscreen": "ملء الشاشة"
   },
   "Pricing": {
     "metaTitle": "الخطط · عربية",

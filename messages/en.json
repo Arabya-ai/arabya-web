@@ -1443,7 +1443,15 @@
     "deleteTask": "Delete task",
     "status_processing": "Processing",
     "status_complete": "Complete",
-    "status_failed": "Failed"
+    "status_failed": "Failed",
+    "previewLabel": "Video Preview",
+    "previewPlay": "Play",
+    "previewPause": "Pause",
+    "previewBack": "Back 10 seconds",
+    "previewForward": "Forward 10 seconds",
+    "previewMute": "Mute",
+    "previewUnmute": "Unmute",
+    "previewFullscreen": "Fullscreen"
   },
   "Pricing": {
     "metaTitle": "Plans · Arabya",
