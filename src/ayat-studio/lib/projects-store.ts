@@ -1,5 +1,11 @@
 // Local storage based project store (no auth required)
 
+import {
+  STUDIO_PROGRESS_GOLD,
+  STUDIO_TAFSIR_TEXT,
+  STUDIO_TRANSLATION_TEXT,
+} from "@/lib/studio-default-colors";
+
 const PROJECTS_KEY = "ayat_projects";
 const EXPORTS_KEY = "ayat_exports";
 
@@ -238,12 +244,12 @@ export function createDefaultProject(input: {
     fontSize: 48,
     textColor: "#ffffff",
     surahLabelFontSize: 16,
-    surahLabelTextColor: "#C8A951",
+    surahLabelTextColor: STUDIO_PROGRESS_GOLD,
     surahLabelFontFamily: "IBM Plex Sans Arabic",
     translationFontSize: 22,
-    translationTextColor: "#f0e6d0",
+    translationTextColor: STUDIO_TRANSLATION_TEXT,
     tafsirFontSize: 18,
-    tafsirTextColor: "#d4c4a8",
+    tafsirTextColor: STUDIO_TAFSIR_TEXT,
     overlayPosition: "center",
     overlayOpacity: 40,
     volume: 80,
@@ -258,7 +264,7 @@ export function createDefaultProject(input: {
     transition: "fade",
     transitionDuration: 0.6,
     visualizer: "bars",
-    visualizerColor: "#C8A951",
+    visualizerColor: STUDIO_PROGRESS_GOLD,
     visualizerIntensity: 60,
     previewShowAyahOnly: false,
     previewShowNavBar: true,
@@ -268,7 +274,7 @@ export function createDefaultProject(input: {
     softVignette: true,
     reciterPosition: "bottom-right",
     progressBarStyle: "none",
-    progressBarColor: "#C8A951",
+    progressBarColor: STUDIO_PROGRESS_GOLD,
   };
   saveProject(project);
   return project;

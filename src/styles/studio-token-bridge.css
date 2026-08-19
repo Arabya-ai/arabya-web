@@ -49,8 +49,32 @@
   background: color-mix(in srgb, var(--studio-surface) 94%, var(--studio-brand-soft));
 }
 
-.mpt-studio-root .mpt-studio legend {
-  padding-inline: 0.4rem;
-  font-weight: 700;
-  color: var(--studio-ink);
+.studio-landing-preview-wrap {
+  background: radial-gradient(
+    circle at 50% 0%,
+    color-mix(in srgb, var(--brand-deep) 42%, transparent),
+    transparent 70%
+  );
 }
+
+.studio-landing-phone-frame {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ink) 88%, var(--brand-deep)) 0%,
+    color-mix(in srgb, var(--brand-deep) 35%, var(--surface)) 50%,
+    color-mix(in srgb, var(--ink) 92%, black) 100%
+  );
+}
+
+.studio-landing-quran-shadow {
+  text-shadow: 0 2px 18px color-mix(in srgb, var(--ink) 65%, transparent);
+}
+
+.studio-editor-stage-bg {
+  background: var(--ink);
+}
+
+.studio-landing-quote-shadow {
+  text-shadow: 0 0 30px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+

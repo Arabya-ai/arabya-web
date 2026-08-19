@@ -1,5 +1,10 @@
 // Real video export with audio using WebCodecs + mp4-muxer (true MP4 output)
 import { Muxer, ArrayBufferTarget } from "mp4-muxer";
+import {
+  STUDIO_PROGRESS_GOLD,
+  STUDIO_TAFSIR_TEXT,
+  STUDIO_TRANSLATION_TEXT,
+} from "@/lib/studio-default-colors";
 import type { StoredProject } from "./projects-store";
 import { reciters, surahs, aspectRatios } from "./quran-data";
 import { fetchAyahs, fetchAndDecodeAudio } from "./quran-api";
@@ -315,7 +320,7 @@ export async function exportProjectToVideo({
     const transition = project.transition || "fade";
     const transDur = project.transitionDuration ?? 0.6;
     const visualizer = (project.visualizer || "bars") as VisualizerType;
-    const visualizerColor = project.visualizerColor || "#C8A951";
+    const visualizerColor = project.visualizerColor || STUDIO_PROGRESS_GOLD;
     const visualizerIntensity = (project.visualizerIntensity ?? 60) / 100;
 
     for (let frame = 0; frame < totalFrames; frame++) {
@@ -388,7 +393,7 @@ export async function exportProjectToVideo({
         height,
         progress: timeSec / totalDuration,
         style: normalizeProgressBarStyle(project.progressBarStyle),
-        color: project.progressBarColor || "#C8A951",
+        color: project.progressBarColor || STUDIO_PROGRESS_GOLD,
       });
       if (watermark || project.brandSignature !== false) {
         drawBrandLockup(ctx, {
@@ -930,7 +935,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   if (translationText && trLineCount) {
     cursorY += stackGap;
     const trCenterY = cursorY + (trLineCount * trLineH) / 2;
-    ctx.fillStyle = project.translationTextColor || "#f0e6d0";
+    ctx.fillStyle = project.translationTextColor || STUDIO_TRANSLATION_TEXT;
     ctx.font = `${trSize}px "IBM Plex Sans Arabic", sans-serif`;
     ctx.direction = canvasTextDirection(translationText);
     ctx.shadowColor = "rgba(0,0,0,0.7)";
@@ -951,7 +956,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
   if (clippedTafsir && tfLineCount) {
     cursorY += stackGap;
     const tfCenterY = cursorY + (tfLineCount * tfLineH) / 2;
-    ctx.fillStyle = project.tafsirTextColor || "#d4c4a8";
+    ctx.fillStyle = project.tafsirTextColor || STUDIO_TAFSIR_TEXT;
     ctx.font = `${tfSize}px "IBM Plex Sans Arabic", sans-serif`;
     ctx.direction = canvasTextDirection(clippedTafsir);
     ctx.shadowColor = "rgba(0,0,0,0.7)";
@@ -1015,7 +1020,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, opts: DrawFrameOpts) {
     height,
     progress,
     style: normalizeProgressBarStyle(project.progressBarStyle),
-    color: project.progressBarColor || "#C8A951",
+    color: project.progressBarColor || STUDIO_PROGRESS_GOLD,
   });
 }
 

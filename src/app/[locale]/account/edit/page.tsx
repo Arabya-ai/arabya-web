@@ -7,6 +7,7 @@ import {
   redirectLocalized,
   resolveLocale,
 } from "@/i18n/locale-params";
+import { ArabyaPanel } from "@/components/ui/ArabyaPanel";
 import { canAccessEditorialTools } from "@/lib/roles";
 
 export const dynamic = "force-dynamic";
@@ -42,7 +43,7 @@ export default async function AccountEditHubPage({ params }: Props) {
       backHref="/account"
       backLabel={t("backAccount")}
     >
-      <section className="dash-card">
+      <ArabyaPanel legacyDash>
         <p className="text-sm text-[var(--muted)] leading-relaxed mb-4">
           {t("intro")}
         </p>
@@ -60,7 +61,7 @@ export default async function AccountEditHubPage({ params }: Props) {
             {t("openStudio")}
           </Link>
         </div>
-      </section>
+      </ArabyaPanel>
     </DashboardShell>
   );
 }

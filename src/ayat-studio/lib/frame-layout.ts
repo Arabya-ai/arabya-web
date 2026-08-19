@@ -187,7 +187,7 @@ export type SurahLabelFontId = (typeof SURAH_LABEL_FONTS)[number]["id"];
 
 export const DEFAULT_SURAH_LABEL_FONT: SurahLabelFontId =
   "IBM Plex Sans Arabic";
-export const DEFAULT_SURAH_LABEL_COLOR = "#C8A951";
+export { STUDIO_SURAH_LABEL_COLOR as DEFAULT_SURAH_LABEL_COLOR } from "@/lib/studio-default-colors";
 
 export const BRAND_LOCKUP_AR = "عربية ستوديو";
 export const BRAND_LOCKUP_EN = "ARABYA • STUDIO";

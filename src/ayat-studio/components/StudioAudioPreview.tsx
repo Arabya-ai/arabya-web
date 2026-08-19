@@ -16,6 +16,7 @@ import { Play, Pause, Volume2, VolumeX, Loader2 } from "lucide-react";
 import { fetchAyahs, fetchAndDecodeAudio } from "@/ayat-studio/lib/quran-api";
 import type { StoredProject } from "@/ayat-studio/lib/projects-store";
 import { drawVisualizer, type VisualizerType } from "@/ayat-studio/lib/visualizer";
+import { STUDIO_PROGRESS_GOLD } from "@/lib/studio-default-colors";
 import { ayahIndexAtTime } from "@/ayat-studio/lib/studio-preview";
 import {
   frameProgressBarTopPx,
@@ -210,7 +211,7 @@ function useStudioAudioPreviewLogic(
           canvas,
           data,
           type,
-          color: p.visualizerColor || "#C8A951",
+          color: p.visualizerColor || STUDIO_PROGRESS_GOLD,
           intensity: (p.visualizerIntensity ?? 60) / 100,
           time: elapsed,
         });
@@ -459,7 +460,7 @@ function StudioProgressBar({
   const style = normalizeProgressBarStyle(project.progressBarStyle);
   if (style === "none") return null;
 
-  const barColor = project.progressBarColor || "#C8A951";
+  const barColor = project.progressBarColor || STUDIO_PROGRESS_GOLD;
   const barTop = frameProgressBarTopPx(frameHeight);
   const barW = frameWidth * 0.7;
   const barLeft = (frameWidth - barW) / 2;

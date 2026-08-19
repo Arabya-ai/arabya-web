@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { ArabyaPanel } from "@/components/ui/ArabyaPanel";
 import type { UserRole } from "@/lib/roles";
 
 type RequestState = {
@@ -81,19 +82,14 @@ export function RoleRequestPanel({
 
   if (!loaded) {
     return (
-      <section id="role-request" className="dash-card">
-        <h2>{t("title")}</h2>
-        <p className="dash-muted">{t("loading")}</p>
-      </section>
+      <ArabyaPanel legacyDash id="role-request" title={t("title")} muted={t("loading")} />
     );
   }
 
   const status = request?.status;
 
   return (
-    <section id="role-request" className="dash-card">
-      <h2>{t("title")}</h2>
-      <p className="dash-muted">{t("lead")}</p>
+    <ArabyaPanel legacyDash id="role-request" title={t("title")} muted={t("lead")}>
 
       {!canRequest ? (
         <p className="dash-banner dash-banner--ok">{t("noRequestNeeded")}</p>
@@ -134,6 +130,6 @@ export function RoleRequestPanel({
           ) : null}
         </form>
       )}
-    </section>
+    </ArabyaPanel>
   );
 }

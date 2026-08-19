@@ -4,6 +4,7 @@ import { resolveLocale } from "@/i18n/locale-params";
 import { auth } from "@/auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { FavoritesLibrary } from "@/components/FavoritesLibrary";
+import { ArabyaPanel } from "@/components/ui/ArabyaPanel";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -51,9 +52,9 @@ export default async function FavoritesPage({ params }: Props) {
       backLabel={tAccount("backToOverview")}
     >
       <div className="dash-stack">
-        <section className="dash-card">
+        <ArabyaPanel legacyDash>
           <FavoritesLibrary mode="full" />
-        </section>
+        </ArabyaPanel>
       </div>
     </DashboardShell>
   );

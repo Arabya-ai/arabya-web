@@ -159,19 +159,12 @@ export default function Landing() {
               </div>
 
               {/* Preview */}
-              <div className="relative flex items-center justify-center p-10 md:p-14"
-                style={{ background: "radial-gradient(circle at 50% 0%, hsl(178 50% 18% / 0.4), transparent 70%)" }}>
+              <div className="relative flex items-center justify-center p-10 md:p-14 studio-landing-preview-wrap">
                 <div className="pattern-mihrab absolute inset-0 opacity-30" />
-                <div className="relative aspect-[9/16] w-56 rounded-2xl overflow-hidden border border-accent/30 shadow-deep"
-                  style={{
-                    background: "linear-gradient(180deg, hsl(200 50% 8%) 0%, hsl(178 50% 12%) 50%, hsl(200 50% 6%) 100%)",
-                  }}>
+                <div className="relative aspect-[9/16] w-56 rounded-2xl overflow-hidden border border-accent/30 shadow-deep studio-landing-phone-frame">
                   <div className="pattern-stars pointer-events-none absolute inset-0 opacity-50" aria-hidden />
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-5 text-center">
-                    <p
-                      className="font-quran text-xl leading-loose text-white md:text-2xl"
-                      style={{ textShadow: "0 2px 18px rgba(0,0,0,0.65)" }}
-                    >
+                    <p className="font-quran text-xl leading-loose text-white md:text-2xl studio-landing-quran-shadow">
                       الرَّحْمَٰنُ
                       <br />
                       عَلَّمَ ٱلْقُرْءَانَ
@@ -284,7 +277,7 @@ export default function Landing() {
           <div className="mx-auto max-w-3xl text-center glass-panel rounded-3xl p-12 md:p-16 border-gold relative overflow-hidden">
             <div className="pattern-mihrab absolute inset-0 opacity-40" />
             <ArabesqueMedallion size={56} className="relative mx-auto mb-6 text-accent" />
-            <p className="relative font-quran text-3xl leading-loose text-foreground md:text-4xl" style={{ textShadow: "0 0 30px rgba(200,169,81,0.3)" }}>
+            <p className="relative font-quran text-3xl leading-loose text-foreground md:text-4xl studio-landing-quote-shadow">
               ﴿ وَنُنَزِّلُ مِنَ ٱلْقُرْءَانِ مَا هُوَ شِفَآءٌ وَرَحْمَةٌ لِّلْمُؤْمِنِينَ ﴾
             </p>
             <p className="relative mt-6 text-sm tracking-widest text-accent">سورة الإسراء — آية ٨٢</p>

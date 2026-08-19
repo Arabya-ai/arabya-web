@@ -66,8 +66,7 @@ export function SourcesUploadPanel() {
 
   return (
     <ArabyaPanelStack>
-      <ArabyaPanel
-        title={t("uploadTitle")}
+      <ArabyaPanel legacyDash title={t("uploadTitle")}
         muted={
           <>
             {t("uploadLead")}{" "}
@@ -104,7 +103,7 @@ export function SourcesUploadPanel() {
         {okMsg ? <p className="dash-banner dash-banner--ok">{okMsg}</p> : null}
       </ArabyaPanel>
 
-      <ArabyaPanel title={t("uploadedTitle")}>
+      <ArabyaPanel legacyDash title={t("uploadedTitle")}>
         {uploads.length === 0 ? (
           <p className="dash-muted">{t("noUploads")}</p>
         ) : (

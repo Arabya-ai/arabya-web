@@ -8,6 +8,7 @@ import { auth } from "@/auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SourcesUploadPanel } from "@/components/dashboard/SourcesUploadPanel";
 import { canAccessEditorialTools } from "@/lib/roles";
+import { ArabyaPanel } from "@/components/ui/ArabyaPanel";
 import { isCloudSyncConfigured } from "@/lib/cloud-sync";
 
 export const dynamic = "force-dynamic";
@@ -48,14 +49,13 @@ export default async function AccountEditSourcesPage({ params }: Props) {
         ) : (
           <SourcesUploadPanel />
         )}
-        <section className="dash-card">
-          <h2>{t("localScriptsTitle")}</h2>
+        <ArabyaPanel legacyDash title={t("localScriptsTitle")}>
           <ul className="dash-list">
             <li>{t("scriptImportIrab")}</li>
             <li>{t("scriptImportIncoming")}</li>
             <li>{t("scriptFetchIa")}</li>
           </ul>
-        </section>
+        </ArabyaPanel>
       </div>
     </DashboardShell>
   );

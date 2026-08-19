@@ -8,7 +8,12 @@ import {
   getTasbeehState,
   type AdhkarCategorySnapshot,
 } from "@/lib/adhkar-progress";
-import { formatCount } from "@/lib/format";
+import { ArabyaPanel } from "@/components/ui/ArabyaPanel";
+import { toArabicNumerals } from "@/lib/format";
+
+function formatCount(value: number, locale: string): string {
+  return locale === "ar" ? toArabicNumerals(value) : String(value);
+}
 
 export function AccountAdhkarPanel({
   locale,
@@ -49,9 +54,7 @@ export function AccountAdhkarPanel({
   const totalTargets = rows.reduce((n, r) => n + r.prog.total, 0);
 
   return (
-    <section className="dash-card">
-      <h2>{t("adhkarTitle")}</h2>
-      <p>{t("adhkarLead")}</p>
+    <ArabyaPanel legacyDash title={t("adhkarTitle")} muted={t("adhkarLead")}>
       {!syncReady ? (
         <p className="dash-muted">{t("adhkarLocalOnly")}</p>
       ) : (
@@ -84,6 +87,6 @@ export function AccountAdhkarPanel({
           {t("adhkarOpenHub")}
         </Link>
       </div>
-    </section>
+    </ArabyaPanel>
   );
 }

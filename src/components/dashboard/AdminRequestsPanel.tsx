@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
+import { ArabyaPanel, ArabyaPanelStack } from "@/components/ui/ArabyaPanel";
 import type { RoleRequestRow } from "@/lib/cloud-sync";
 
 export function AdminRequestsPanel() {
@@ -54,12 +55,12 @@ export function AdminRequestsPanel() {
   if (error) return <p className="dash-banner dash-banner--warn">{error}</p>;
 
   return (
-    <div className="dash-stack">
+    <ArabyaPanelStack className="dash-stack">
       {requests.length === 0 ? (
         <p className="dash-muted">{t("noPendingRequests")}</p>
       ) : (
         requests.map((r) => (
-          <article key={r.id} className="dash-card">
+          <ArabyaPanel key={r.id} as="article" legacyDash>
             <div className="dash-user-cell">
               {r.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -96,9 +97,9 @@ export function AdminRequestsPanel() {
                 {t("reject")}
               </button>
             </div>
-          </article>
+          </ArabyaPanel>
         ))
       )}
-    </div>
+    </ArabyaPanelStack>
   );
 }

@@ -7,6 +7,7 @@ import {
 
 import { auth } from "@/auth";
 import { AccountPersonalData } from "@/components/AccountPersonalData";
+import { ArabyaPanel } from "@/components/ui/ArabyaPanel";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { isCloudSyncConfigured } from "@/lib/cloud-sync";
 
@@ -42,15 +43,11 @@ export default async function AccountStatsPage({ params }: Props) {
       backLabel={t("backToOverview")}
     >
       <div className="dash-stack">
-        <section className="dash-card">
-          <h2>{t("personalStatsTitle")}</h2>
-          <p className="dash-muted">
-            {isCloudSyncConfigured() ? t("dataCloudSync") : t("dataLocalOnly")}
-          </p>
+        <ArabyaPanel legacyDash title={t("personalStatsTitle")} muted={isCloudSyncConfigured() ? t("dataCloudSync") : t("dataLocalOnly")}>
           <div className="account-grid account-grid--personal">
             <AccountPersonalData />
           </div>
-        </section>
+        </ArabyaPanel>
       </div>
     </DashboardShell>
   );

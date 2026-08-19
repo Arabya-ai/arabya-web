@@ -1,3 +1,7 @@
+/**
+ * @deprecated Legacy standalone stylesheet — not imported by the app.
+ * Studio tokens live in `src/ayat-studio/theme.css` + `src/styles/studio-token-bridge.css`.
+ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

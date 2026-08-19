@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { ArabyaPanel, ArabyaPanelStack } from "@/components/ui/ArabyaPanel";
 
 type Category = {
   slug: string;
@@ -189,11 +190,10 @@ export function AdhkarContentManager() {
   }
 
   return (
-    <div className="dash-stack">
+    <ArabyaPanelStack className="dash-stack">
       {msg ? <p className="dash-banner">{msg}</p> : null}
 
-      <section className="dash-card">
-        <h2>إدارة الأذكار (admin + editor)</h2>
+      <ArabyaPanel legacyDash title="إدارة الأذكار (admin + editor)">
         <label className="appearance-field">
           <span>الفئة</span>
           <select value={slug} onChange={(e) => setSlug(e.target.value)}>
@@ -273,10 +273,9 @@ export function AdhkarContentManager() {
             حفظ الذكر
           </button>
         </div>
-      </section>
+      </ArabyaPanel>
 
-      <section className="dash-card">
-        <h2>إدارة الأدعية (admin + editor)</h2>
+      <ArabyaPanel legacyDash title="إدارة الأدعية (admin + editor)">
         <div className="dash-list">
           {duas.slice(0, 15).map((item) => (
             <div key={item.id} className="dash-actions">
@@ -343,7 +342,7 @@ export function AdhkarContentManager() {
             حفظ الدعاء
           </button>
         </div>
-      </section>
-    </div>
+      </ArabyaPanel>
+    </ArabyaPanelStack>
   );
 }

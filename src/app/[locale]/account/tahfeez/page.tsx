@@ -11,6 +11,7 @@ import {
   getTahfeezPortfolio,
   isCloudSyncConfigured,
 } from "@/lib/cloud-sync";
+import { ArabyaPanel } from "@/components/ui/ArabyaPanel";
 import { emptyTahfeezPortfolio } from "@/lib/tahfeez/types";
 
 export const dynamic = "force-dynamic";
@@ -48,15 +49,16 @@ export default async function AccountTahfeezPage({ params }: Props) {
       backLabel={t("backToAccount")}
     >
       <div className="dash-stack">
-        <div className="dash-card dash-card--accent">
+        <ArabyaPanel as="div" accent legacyDash>
           <p>
             <Link href="/tahfeez">{t("openSession")}</Link>
           </p>
-        </div>
-        <div className="dash-card">
-          <h2 className="text-lg font-semibold">
-            {locale === "en" ? "Summary" : "ملخص"}
-          </h2>
+        </ArabyaPanel>
+        <ArabyaPanel
+          as="div"
+          legacyDash
+          title={locale === "en" ? "Summary" : "ملخص"}
+        >
           <ul className="mt-3 space-y-2 text-sm">
             <li>
               {locale === "en" ? "Sessions" : "الجلسات"}: {stats.totalSessions}
@@ -78,11 +80,12 @@ export default async function AccountTahfeezPage({ params }: Props) {
               {stats.pagesCompleted}
             </li>
           </ul>
-        </div>
-        <div className="dash-card">
-          <h2 className="text-lg font-semibold">
-            {locale === "en" ? "Recent sessions" : "آخر الجلسات"}
-          </h2>
+        </ArabyaPanel>
+        <ArabyaPanel
+          as="div"
+          legacyDash
+          title={locale === "en" ? "Recent sessions" : "آخر الجلسات"}
+        >
           <ul className="mt-3 space-y-2 text-sm">
             {portfolio.sessions.length === 0 ? (
               <li className="text-muted-foreground">
@@ -98,7 +101,7 @@ export default async function AccountTahfeezPage({ params }: Props) {
               ))
             )}
           </ul>
-        </div>
+        </ArabyaPanel>
       </div>
     </DashboardShell>
   );

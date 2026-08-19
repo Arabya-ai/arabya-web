@@ -13,6 +13,7 @@ import { getAuthEnvDiagnostics, isGoogleAuthConfigured } from "@/auth";
 import { isCloudSyncConfigured } from "@/lib/cloud-sync";
 import { AdminSettingsTabs } from "@/components/dashboard/AdminSettingsTabs";
 import { AdminPrayerDefaultsPanel } from "@/components/dashboard/AdminPrayerDefaultsPanel";
+import { ArabyaPanel, ArabyaPanelStack } from "@/components/ui/ArabyaPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -53,12 +54,11 @@ export default async function AdminSettingsPage({ params, searchParams }: Props)
       backHref="/admin"
       backLabel={t("backToStats")}
     >
-      <div className="dash-stack">
+      <ArabyaPanelStack className="dash-stack">
         <AdminSettingsTabs active={tab} />
 
         {tab === "services" ? (
-          <section className="dash-card" aria-labelledby="admin-tab-services">
-            <h2 id="admin-tab-services">{t("servicesTitle")}</h2>
+          <ArabyaPanel legacyDash aria-labelledby="admin-tab-services" titleId="admin-tab-services" title={t("servicesTitle")}>
             <ul className="dash-list">
               <li>
                 {t("googleOAuth")}:{" "}
@@ -77,23 +77,30 @@ export default async function AdminSettingsPage({ params, searchParams }: Props)
             <hr className="my-4 border-[var(--line)]" />
             <h3 className="mb-2">الإعدادات الافتراضية لمواقيت الصلاة</h3>
             <AdminPrayerDefaultsPanel />
-          </section>
+          </ArabyaPanel>
         ) : null}
 
         {tab === "appearance" ? (
-          <section className="dash-card" aria-labelledby="admin-tab-appearance">
-            <h2 id="admin-tab-appearance">{t("appearanceTitle")}</h2>
+          <ArabyaPanel
+            legacyDash
+            aria-labelledby="admin-tab-appearance"
+            titleId="admin-tab-appearance"
+            title={t("appearanceTitle")}
+          >
             <AdminAppearancePanel />
-          </section>
+          </ArabyaPanel>
         ) : null}
 
         {tab === "content" ? (
-          <section className="dash-card" aria-labelledby="admin-tab-content">
-            <h2 id="admin-tab-content">{t("contentTitle")}</h2>
-            <p className="dash-muted">{t("contentLead")}</p>
-          </section>
+          <ArabyaPanel
+            legacyDash
+            aria-labelledby="admin-tab-content"
+            titleId="admin-tab-content"
+            title={t("contentTitle")}
+            muted={t("contentLead")}
+          />
         ) : null}
-      </div>
+      </ArabyaPanelStack>
     </DashboardShell>
   );
 }

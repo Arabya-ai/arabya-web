@@ -10,6 +10,7 @@ import { AdminStatsCards } from "@/components/dashboard/AdminStatsCards";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { canAccessAdmin } from "@/lib/roles";
 import { isCloudSyncConfigured } from "@/lib/cloud-sync";
+import { ArabyaPanel } from "@/components/ui/ArabyaPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -48,14 +49,13 @@ export default async function AdminPage({ params }: Props) {
         ) : (
           <AdminStatsCards />
         )}
-        <section className="dash-card">
-          <h2>{t("whatYouCanDo")}</h2>
+        <ArabyaPanel legacyDash title={t("whatYouCanDo")}>
           <ul className="dash-list">
             <li>{t("actionReviewUsers")}</li>
             <li>{t("actionApproveRequests")}</li>
             <li>{t("actionReviewAudit")}</li>
           </ul>
-        </section>
+        </ArabyaPanel>
       </div>
     </DashboardShell>
   );

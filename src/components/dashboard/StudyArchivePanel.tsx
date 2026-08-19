@@ -9,6 +9,7 @@ import {
   updateStudyNotes,
   type StudyEntry,
 } from "@/lib/study-archive";
+import { ArabyaPanel, ArabyaPanelStack } from "@/components/ui/ArabyaPanel";
 import { toArabicNumerals } from "@/lib/format";
 
 function formatCount(value: number, locale: string): string {
@@ -43,25 +44,22 @@ export function StudyArchivePanel() {
   }
 
   return (
-    <div className="dash-stack">
-      <section className="dash-card">
-        <h2>
-          {t("title")}{" "}
-          <span className="library-count">({formatCount(entries.length, locale)})</span>
-        </h2>
-        <p className="dash-muted">{t("lead")}</p>
-      </section>
+    <ArabyaPanelStack className="dash-stack">
+      <ArabyaPanel legacyDash
+        title={
+          <>
+            {t("title")}{" "}
+            <span className="library-count">({formatCount(entries.length, locale)})</span>
+          </>
+        }
+        muted={t("lead")}
+      />
 
       {entries.length === 0 ? (
-        <section className="dash-card">
-          <p className="dash-muted">
-            {t("empty")}{" "}
-            <Link href="/study">{t("quickStudyLink")}</Link>.
-          </p>
-        </section>
+        <ArabyaPanel legacyDash muted={<>{t("empty")} <Link href="/study">{t("quickStudyLink")}</Link>.</>} />
       ) : (
         entries.map((e) => (
-          <article key={e.id} className="dash-card study-archive-card">
+          <ArabyaPanel key={e.id} as="article" legacyDash className="study-archive-card">
             <div className="study-archive-head">
               <div>
                 <p className="dash-kicker">{kindLabel(e.kind)}</p>
@@ -131,9 +129,9 @@ export function StudyArchivePanel() {
                 date: new Date(e.updatedAt).toLocaleString(locale),
               })}
             </p>
-          </article>
+          </ArabyaPanel>
         ))
       )}
-    </div>
+    </ArabyaPanelStack>
   );
 }

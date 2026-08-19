@@ -7,7 +7,8 @@ import {
   persistUiLocale,
   readStoredUiLocale,
 } from "@/components/LocaleSwitcher";
-import { type AppLocale } from "@/i18n/routing";
+import { ArabyaPanel } from "@/components/ui/ArabyaPanel";
+import type { AppLocale } from "@/lib/plans";
 
 /**
  * Account setting: UI language for all roles.
@@ -37,9 +38,7 @@ export function AccountLanguagePanel() {
   };
 
   return (
-    <section className="dash-card" id="ui-language">
-      <h2>{t("languageTitle")}</h2>
-      <p className="dash-muted">{t("languageHint")}</p>
+    <ArabyaPanel legacyDash id="ui-language" title={t("languageTitle")} muted={t("languageHint")}>
       <div className="dash-actions" role="group" aria-label={t("languageTitle")}>
         {(["ar", "en"] as const).map((code) => (
           <button
@@ -54,6 +53,6 @@ export function AccountLanguagePanel() {
         ))}
       </div>
       {note ? <p className="dash-muted">{note}</p> : null}
-    </section>
+    </ArabyaPanel>
   );
 }

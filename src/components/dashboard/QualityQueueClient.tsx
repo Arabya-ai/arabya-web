@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import type { QualityCoverage, QualityQueueItem } from "@/lib/quality-scan";
 import { apiGet } from "@/lib/api-client";
+import { ArabyaPanel } from "@/components/ui/ArabyaPanel";
 import { toArabicNumerals } from "@/lib/format";
 
 function formatCount(value: number, locale: string): string {
@@ -80,8 +81,7 @@ export function QualityQueueClient({
       </div>
 
       {coverage ? (
-        <section className="dash-card quality-coverage" aria-label={t("coverageTitle")}>
-          <h2>{t("coverageTitle")}</h2>
+        <ArabyaPanel legacyDash className="quality-coverage" aria-label={t("coverageTitle")} title={t("coverageTitle")}>
           <div className="quality-coverage-stats">
             <div className="quality-coverage-stat">
               <strong>{formatPct(coverage.meaningArPct, locale)}%</strong>
@@ -133,28 +133,29 @@ export function QualityQueueClient({
               </ul>
             </div>
           ) : null}
-        </section>
+        </ArabyaPanel>
       ) : null}
 
       {error ? <p className="dash-banner dash-banner--warn">{error}</p> : null}
       {busy && !scanned ? (
-        <section className="dash-card">
+        <ArabyaPanel legacyDash>
           <p className="dash-muted">{t("scanningLead")}</p>
-        </section>
+        </ArabyaPanel>
       ) : null}
       {!busy && scanned && items.length === 0 ? (
-        <section className="dash-card">
-          <h2>{t("noIssuesTitle")}</h2>
-          <p className="dash-muted">{t("noIssuesLead")}</p>
-        </section>
+        <ArabyaPanel legacyDash title={t("noIssuesTitle")} muted={t("noIssuesLead")} />
       ) : null}
       {items.map((item) => (
-        <article key={item.id} className="dash-card">
+        <ArabyaPanel
+          as="article"
+          key={item.id}
+          legacyDash
+          title={locale === "en" ? item.titleEn || item.title : item.title}
+        >
           <p className="dash-kicker">{t("priority", { priority: item.priority })}</p>
-          <h2>{locale === "en" ? item.titleEn || item.title : item.title}</h2>
           <p className="dash-muted">{item.surahHint}</p>
           <p>{locale === "en" ? item.noteEn || item.note : item.note}</p>
-        </article>
+        </ArabyaPanel>
       ))}
     </div>
   );

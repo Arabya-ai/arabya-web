@@ -13,6 +13,7 @@ import {
 } from "@/i18n/locale-params";
 import { isCloudSyncConfigured } from "@/lib/cloud-sync";
 import { canAccessAdmin, canAccessEditorialTools } from "@/lib/roles";
+import { ArabyaPanel } from "@/components/ui/ArabyaPanel";
 import { planLabel } from "@/lib/plans";
 import type { AppLocale } from "@/lib/plans";
 
@@ -55,8 +56,7 @@ export default async function AccountPage({ params }: Props) {
       userImage={user.image}
     >
       <div className="dash-stack">
-        <section className="dash-card dash-card--accent">
-          <h2>{t("shortcuts")}</h2>
+        <ArabyaPanel accent legacyDash title={t("shortcuts")}>
           <div className="account-hub">
             <Link href="/tahfeez" className="account-hub-card">
               <strong>{t("tahfeez")}</strong>
@@ -108,10 +108,9 @@ export default async function AccountPage({ params }: Props) {
               </Link>
             ) : null}
           </div>
-        </section>
+        </ArabyaPanel>
 
-        <section className="dash-card">
-          <h2>{t("personalTitle")}</h2>
+        <ArabyaPanel legacyDash title={t("personalTitle")}>
           <p className="dash-muted" dir="ltr">
             {user.email}
           </p>
@@ -127,7 +126,7 @@ export default async function AccountPage({ params }: Props) {
           <div className="account-grid account-grid--personal">
             <AccountPersonalData />
           </div>
-        </section>
+        </ArabyaPanel>
 
         <AccountLanguagePanel />
 

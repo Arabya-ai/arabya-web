@@ -126,6 +126,11 @@ import {
   type ProgressBarStyle,
   type ReciterPosition,
 } from "@/ayat-studio/lib/frame-layout";
+import {
+  STUDIO_PROGRESS_GOLD,
+  STUDIO_TAFSIR_TEXT,
+  STUDIO_TRANSLATION_TEXT,
+} from "@/lib/studio-default-colors";
 import { Link } from "@/i18n/navigation";
 import { useStudioPreviewSrc } from "@/ayat-studio/hooks/use-studio-preview-src";
 import { ArabyaMarkIcon } from "@/ayat-studio/components/IslamicDecor";
@@ -407,13 +412,13 @@ export default function Editor() {
       softVignette: p.softVignette ?? true,
       reciterPosition: normalizeReciterPosition(p.reciterPosition),
       progressBarStyle: normalizeProgressBarStyle(p.progressBarStyle),
-      progressBarColor: p.progressBarColor || "#C8A951",
+      progressBarColor: p.progressBarColor || STUDIO_PROGRESS_GOLD,
       translationSlug: p.translationSlug || "saheeh-en",
       tafsirSlug: p.tafsirSlug || "muyassar",
       translationFontSize: p.translationFontSize ?? 22,
-      translationTextColor: p.translationTextColor || "#f0e6d0",
+      translationTextColor: p.translationTextColor || STUDIO_TRANSLATION_TEXT,
       tafsirFontSize: p.tafsirFontSize ?? 18,
-      tafsirTextColor: p.tafsirTextColor || "#d4c4a8",
+      tafsirTextColor: p.tafsirTextColor || STUDIO_TAFSIR_TEXT,
       surahLabelFontSize: p.surahLabelFontSize ?? DEFAULT_SURAH_LABEL_FONT_SIZE,
       surahLabelTextColor: p.surahLabelTextColor || DEFAULT_SURAH_LABEL_COLOR,
       surahLabelFontFamily: normalizeSurahLabelFont(p.surahLabelFontFamily),
@@ -1132,7 +1137,7 @@ export default function Editor() {
               {normalizeProgressBarStyle(project.progressBarStyle) !== "none" && (
                 <ColorPickerField
                   label="لون شريط التقدم"
-                  value={project.progressBarColor || "#C8A951"}
+                  value={project.progressBarColor || STUDIO_PROGRESS_GOLD}
                   onChange={(hex) => update({ progressBarColor: hex })}
                 />
               )}
@@ -1177,7 +1182,7 @@ export default function Editor() {
             </div>
             <ColorPickerField
               label="لون المؤثر"
-              value={project.visualizerColor || "#C8A951"}
+              value={project.visualizerColor || STUDIO_PROGRESS_GOLD}
               onChange={(hex) => update({ visualizerColor: hex })}
             />
           </EditorPanel>
@@ -1348,7 +1353,7 @@ export default function Editor() {
               </div>
               <ColorPickerField
                 label="لون الترجمة"
-                value={project.translationTextColor || "#f0e6d0"}
+                value={project.translationTextColor || STUDIO_TRANSLATION_TEXT}
                 onChange={(hex) => update({ translationTextColor: hex })}
               />
             </div>
@@ -1368,7 +1373,7 @@ export default function Editor() {
               </div>
               <ColorPickerField
                 label="لون التفسير"
-                value={project.tafsirTextColor || "#d4c4a8"}
+                value={project.tafsirTextColor || STUDIO_TAFSIR_TEXT}
                 onChange={(hex) => update({ tafsirTextColor: hex })}
               />
             </div>
@@ -1648,11 +1653,8 @@ export default function Editor() {
                   </div>
                 )}
                 <div
-                  className="pointer-events-none absolute inset-0 z-[2]"
-                  style={{
-                    background: "#000",
-                    opacity: project.overlayOpacity / 100,
-                  }}
+                  className="pointer-events-none absolute inset-0 z-[2] studio-editor-stage-bg"
+                  style={{ opacity: project.overlayOpacity / 100 }}
                 />
                 {(project.softVignette ?? true) && (
                   <div
@@ -1760,7 +1762,7 @@ export default function Editor() {
                           project.translationFontSize ?? 22,
                           frameWidth,
                         )}px`,
-                        color: project.translationTextColor || "#f0e6d0",
+                        color: project.translationTextColor || STUDIO_TRANSLATION_TEXT,
                         textShadow: "0 1px 8px rgba(0,0,0,0.7)",
                         lineHeight: STUDIO_TRANSLATION_LINE_HEIGHT,
                         width: `${(STUDIO_LAYER_WIDTH_RATIO / STUDIO_AYAH_WIDTH_RATIO) * 100}%`,
@@ -1786,7 +1788,7 @@ export default function Editor() {
                           project.tafsirFontSize ?? 18,
                           frameWidth,
                         )}px`,
-                        color: project.tafsirTextColor || "#d4c4a8",
+                        color: project.tafsirTextColor || STUDIO_TAFSIR_TEXT,
                         textShadow: "0 1px 8px rgba(0,0,0,0.7)",
                         lineHeight: STUDIO_TAFSIR_LINE_HEIGHT,
                         width: `${(STUDIO_LAYER_WIDTH_RATIO / STUDIO_AYAH_WIDTH_RATIO) * 100}%`,

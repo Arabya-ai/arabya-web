@@ -7,6 +7,7 @@ import {
 
 import { auth } from "@/auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { ArabyaPanel } from "@/components/ui/ArabyaPanel";
 import {
   adminGetPortfolio,
   isCloudSyncConfigured,
@@ -95,7 +96,7 @@ export default async function AdminMemberFilePage({ params }: Props) {
       backLabel={t("backToUsers")}
     >
       <div className="dash-stack">
-        <section className="dash-card">
+        <ArabyaPanel legacyDash>
           <div className="dash-user-cell" style={{ gap: "1rem" }}>
             {u.image ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -129,10 +130,9 @@ export default async function AdminMemberFilePage({ params }: Props) {
               </dl>
             </div>
           </div>
-        </section>
+        </ArabyaPanel>
 
-        <section className="dash-card">
-          <h2>{t("recitationTitle")}</h2>
+        <ArabyaPanel legacyDash title={t("recitationTitle")}>
           {tahfeez ? (
             <>
               <ul className="dash-list">
@@ -167,10 +167,9 @@ export default async function AdminMemberFilePage({ params }: Props) {
           ) : (
             <p className="dash-muted">{t("noRecitation")}</p>
           )}
-        </section>
+        </ArabyaPanel>
 
-        <section className="dash-card">
-          <h2>{t("bookmarksTitle", { count: data.bookmarkCount })}</h2>
+        <ArabyaPanel legacyDash title={t("bookmarksTitle", { count: data.bookmarkCount })}>
           {bookmarks.length === 0 ? (
             <p className="dash-muted">{t("noBookmarks")}</p>
           ) : (
@@ -194,10 +193,9 @@ export default async function AdminMemberFilePage({ params }: Props) {
               })}
             </ul>
           )}
-        </section>
+        </ArabyaPanel>
 
-        <section className="dash-card">
-          <h2>{t("notesTitle", { count: data.noteCount })}</h2>
+        <ArabyaPanel legacyDash title={t("notesTitle", { count: data.noteCount })}>
           {notes.length === 0 ? (
             <p className="dash-muted">{t("noNotes")}</p>
           ) : (
@@ -217,14 +215,14 @@ export default async function AdminMemberFilePage({ params }: Props) {
               })}
             </ul>
           )}
-        </section>
+        </ArabyaPanel>
 
-        <section className="dash-card">
-          <h2>
-            {t("studyTitle", {
-              count: Array.isArray(data.study) ? data.study.length : 0,
-            })}
-          </h2>
+        <ArabyaPanel
+          legacyDash
+          title={t("studyTitle", {
+            count: Array.isArray(data.study) ? data.study.length : 0,
+          })}
+        >
           {!Array.isArray(data.study) || data.study.length === 0 ? (
             <p className="dash-muted">{t("noStudy")}</p>
           ) : (
@@ -239,7 +237,7 @@ export default async function AdminMemberFilePage({ params }: Props) {
                 ))}
             </ul>
           )}
-        </section>
+        </ArabyaPanel>
 
         <p className="dash-muted">{t("cloudFootnote")}</p>
       </div>
