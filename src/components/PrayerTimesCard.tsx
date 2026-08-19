@@ -36,6 +36,20 @@ type QiblaPayload = {
 };
 
 const CITY_KEY = STORAGE_KEYS.prayerCity;
+const COORDS_KEY = STORAGE_KEYS.prayerCoords;
+
+type Coords = { lat: number; lon: number };
+type LocationMode = "city" | "coords";
+
+function parseCoords(latRaw: string, lonRaw: string): Coords | null {
+  if (latRaw.trim() === "" || lonRaw.trim() === "") return null;
+  const lat = Number(latRaw);
+  const lon = Number(lonRaw);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  if (lat < -90 || lat > 90) return null;
+  if (lon < -180 || lon > 180) return null;
+  return { lat, lon };
+}
 
 function formatTime(t: string, locale: string): string {
   const m = t.match(/^(\d{1,2}):(\d{2})/);
@@ -49,6 +63,10 @@ export function PrayerTimesCard() {
   const t = useTranslations("Prayer");
   const locale = useLocale();
   const [city, setCity] = useState<string>(DEFAULT_PORTAL_CITY);
+  const [mode, setMode] = useState<LocationMode>("city");
+  const [coords, setCoords] = useState<Coords | null>(null);
+  const [latInput, setLatInput] = useState("");
+  const [lonInput, setLonInput] = useState("");
   const [data, setData] = useState<PrayerPayload | null>(null);
   const [qibla, setQibla] = useState<QiblaPayload | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,14 +76,67 @@ export function PrayerTimesCard() {
   const [geoHint, setGeoHint] = useState<string | null>(null);
 
   useEffect(() => {
+    let loadedFromCoords = false;
+
+    const loadInitialCity = (cityId: string) => {
+      setMode("city");
+      setCoords(null);
+      setLatInput("");
+      setLonInput("");
+      setCity(cityId);
+      void loadCity(cityId);
+    };
+
     try {
-      const saved = localStorage.getItem(CITY_KEY);
-      if (saved && PORTAL_CITY_LIST.some((c) => c.id === saved)) {
-        setCity(saved);
+      const savedCoordsRaw = localStorage.getItem(COORDS_KEY);
+      if (savedCoordsRaw) {
+        const parsed = JSON.parse(savedCoordsRaw) as {
+          lat?: unknown;
+          lon?: unknown;
+        };
+        if (
+          typeof parsed?.lat === "number" &&
+          typeof parsed?.lon === "number" &&
+          parsed.lat >= -90 &&
+          parsed.lat <= 90 &&
+          parsed.lon >= -180 &&
+          parsed.lon <= 180
+        ) {
+          const nearest = nearestPortalCity(parsed.lat, parsed.lon);
+          setMode("coords");
+          setCoords({ lat: parsed.lat, lon: parsed.lon });
+          setCity(nearest.id);
+          setLatInput(String(parsed.lat));
+          setLonInput(String(parsed.lon));
+          setGeoHint(
+            t("geoMatched", {
+              city: t(`cities.${nearest.id}` as `cities.${PortalCityId}`),
+            }),
+          );
+          loadedFromCoords = true;
+          void loadCoords(parsed.lat, parsed.lon);
+        }
       }
     } catch {
       /* ignore */
     }
+
+    if (loadedFromCoords) return;
+
+    try {
+      const saved = localStorage.getItem(CITY_KEY);
+      const initialCity =
+        saved && PORTAL_CITY_LIST.some((c) => c.id === saved)
+          ? saved
+          : DEFAULT_PORTAL_CITY;
+      setGeoHint(null);
+      loadInitialCity(initialCity);
+    } catch {
+      setGeoHint(null);
+      loadInitialCity(DEFAULT_PORTAL_CITY);
+    }
+  // Intentionally run once on mount; actual fetch handlers are closures.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -73,49 +144,92 @@ export function PrayerTimesCard() {
     return () => window.clearInterval(id);
   }, []);
 
-  const load = useCallback(async (cityId: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [prayerRes, qiblaRes] = await Promise.all([
-        fetch(`/api/prayer-times?city=${encodeURIComponent(cityId)}`),
-        fetch(`/api/qibla?city=${encodeURIComponent(cityId)}`),
-      ]);
-      const prayerJson = (await prayerRes.json()) as PrayerPayload & {
-        error?: string;
-      };
-      if (!prayerRes.ok) {
+  const loadCity = useCallback(
+    async (cityId: string) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const [prayerRes, qiblaRes] = await Promise.all([
+          fetch(`/api/prayer-times?city=${encodeURIComponent(cityId)}`),
+          fetch(`/api/qibla?city=${encodeURIComponent(cityId)}`),
+        ]);
+        const prayerJson = (await prayerRes.json()) as PrayerPayload & {
+          error?: string;
+        };
+        if (!prayerRes.ok) {
+          setData(null);
+          setError(t("errorFetch"));
+          return;
+        }
+        setData(prayerJson);
+        if (qiblaRes.ok) {
+          setQibla((await qiblaRes.json()) as QiblaPayload);
+        } else {
+          setQibla(null);
+        }
+      } catch {
         setData(null);
-        setError(t("errorFetch"));
-        return;
-      }
-      setData(prayerJson);
-      if (qiblaRes.ok) {
-        setQibla((await qiblaRes.json()) as QiblaPayload);
-      } else {
         setQibla(null);
+        setError(t("errorConnection"));
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      setData(null);
-      setQibla(null);
-      setError(t("errorConnection"));
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
+    },
+    [t],
+  );
 
-  useEffect(() => {
-    void load(city);
-  }, [city, load]);
+  const loadCoords = useCallback(
+    async (lat: number, lon: number) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const [prayerRes, qiblaRes] = await Promise.all([
+          fetch(
+            `/api/prayer-times?lat=${encodeURIComponent(String(lat))}&lon=${encodeURIComponent(String(lon))}`,
+          ),
+          fetch(
+            `/api/qibla?lat=${encodeURIComponent(String(lat))}&lon=${encodeURIComponent(String(lon))}`,
+          ),
+        ]);
+        const prayerJson = (await prayerRes.json()) as PrayerPayload & {
+          error?: string;
+        };
+        if (!prayerRes.ok) {
+          setData(null);
+          setError(t("errorFetch"));
+          return;
+        }
+        setData(prayerJson);
+        if (qiblaRes.ok) {
+          setQibla((await qiblaRes.json()) as QiblaPayload);
+        } else {
+          setQibla(null);
+        }
+      } catch {
+        setData(null);
+        setQibla(null);
+        setError(t("errorConnection"));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [t],
+  );
 
   const onCity = (id: string) => {
-    setCity(id);
+    setMode("city");
+    setCoords(null);
+    setLatInput("");
+    setLonInput("");
     setGeoHint(null);
+    setError(null);
+    setCity(id);
     try {
       localStorage.setItem(CITY_KEY, id);
     } catch {
       /* ignore */
     }
+    void loadCity(id);
   };
 
   const onUseLocation = () => {
@@ -127,17 +241,30 @@ export function PrayerTimesCard() {
     setGeoHint(null);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const nearest = nearestPortalCity(
-          pos.coords.latitude,
-          pos.coords.longitude,
-        );
-        onCity(nearest.id);
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        const nearest = nearestPortalCity(lat, lon);
+
+        setMode("coords");
+        setCoords({ lat, lon });
+        setCity(nearest.id);
+        setLatInput(String(lat));
+        setLonInput(String(lon));
+
+        try {
+          localStorage.setItem(CITY_KEY, nearest.id);
+          localStorage.setItem(COORDS_KEY, JSON.stringify({ lat, lon }));
+        } catch {
+          /* ignore */
+        }
+
         setGeoHint(
           t("geoMatched", {
             city: t(`cities.${nearest.id}` as `cities.${PortalCityId}`),
           }),
         );
         setGeoBusy(false);
+        void loadCoords(lat, lon);
       },
       () => {
         setGeoHint(t("geoDenied"));
@@ -146,6 +273,53 @@ export function PrayerTimesCard() {
       { enableHighAccuracy: false, timeout: 12000, maximumAge: 300000 },
     );
   };
+
+  const onCalculateCoords = useCallback(() => {
+    const parsed = parseCoords(latInput, lonInput);
+    if (!parsed) {
+      setData(null);
+      setQibla(null);
+      setError(t("coordsInvalid"));
+      return;
+    }
+    const nearest = nearestPortalCity(parsed.lat, parsed.lon);
+    setMode("coords");
+    setCoords(parsed);
+    setCity(nearest.id);
+    setGeoHint(
+      t("geoMatched", {
+        city: t(`cities.${nearest.id}` as `cities.${PortalCityId}`),
+      }),
+    );
+    setError(null);
+    try {
+      localStorage.setItem(CITY_KEY, nearest.id);
+      localStorage.setItem(COORDS_KEY, JSON.stringify(parsed));
+    } catch {
+      /* ignore */
+    }
+    void loadCoords(parsed.lat, parsed.lon);
+  }, [latInput, lonInput, loadCoords, t]);
+
+  const onToggleMode = useCallback(() => {
+    if (mode === "city") {
+      setMode("coords");
+      setGeoHint(null);
+      setError(null);
+      if (coords) {
+        void loadCoords(coords.lat, coords.lon);
+      }
+      return;
+    }
+
+    setMode("city");
+    setCoords(null);
+    setGeoHint(null);
+    setError(null);
+    setLatInput("");
+    setLonInput("");
+    void loadCity(city);
+  }, [city, coords, loadCity, loadCoords, mode]);
 
   const next = useMemo(() => {
     if (!data?.timings) return null;
@@ -188,6 +362,7 @@ export function PrayerTimesCard() {
               value={city}
               onChange={(e) => onCity(e.target.value)}
               aria-label={t("citySelect")}
+              disabled={mode === "coords"}
             >
               {PORTAL_CITY_LIST.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -204,8 +379,59 @@ export function PrayerTimesCard() {
           >
             {geoBusy ? t("geoLoading") : t("useLocation")}
           </button>
+          <button
+            type="button"
+            className="nav-pill"
+            onClick={onToggleMode}
+            aria-pressed={mode === "coords"}
+          >
+            {mode === "coords" ? t("useCity") : t("useCoords")}
+          </button>
         </div>
       </header>
+
+      {mode === "coords" ? (
+        <form
+          className="prayer-coords-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            onCalculateCoords();
+          }}
+        >
+          <p className="prayer-coords-hint">{t("coordsHint")}</p>
+          <div className="prayer-coords-grid">
+            <label className="prayer-coords-field">
+              <span className="prayer-coords-label">{t("latLabel")}</span>
+              <input
+                className="prayer-coords-input"
+                inputMode="decimal"
+                name="lat"
+                value={latInput}
+                placeholder={t("latPlaceholder")}
+                onChange={(e) => setLatInput(e.target.value)}
+              />
+            </label>
+            <label className="prayer-coords-field">
+              <span className="prayer-coords-label">{t("lonLabel")}</span>
+              <input
+                className="prayer-coords-input"
+                inputMode="decimal"
+                name="lon"
+                value={lonInput}
+                placeholder={t("lonPlaceholder")}
+                onChange={(e) => setLonInput(e.target.value)}
+              />
+            </label>
+            <button
+              type="submit"
+              className="prayer-geo-btn"
+              disabled={geoBusy || loading}
+            >
+              {t("coordsCalculate")}
+            </button>
+          </div>
+        </form>
+      ) : null}
 
       {hijri || gregorian ? (
         <div className="prayer-dates" aria-label={t("date")}>

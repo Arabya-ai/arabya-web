@@ -17,6 +17,7 @@ describe("STORAGE_KEYS", () => {
     expect(STORAGE_KEYS.adhkarProgress).toBe("arabya-adhkar-progress");
     expect(STORAGE_KEYS.tasbeeh).toBe("arabya-tasbeeh");
     expect(STORAGE_KEYS.prayerCity).toBe("arabya-prayer-city");
+    expect(STORAGE_KEYS.prayerCoords).toBe("arabya-prayer-coords");
     expect(readingHabitPagesKey("2026-07-25")).toBe(
       "arabya-reading-habit:pages:2026-07-25",
     );

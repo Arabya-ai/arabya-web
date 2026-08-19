@@ -5483,6 +5483,57 @@ html[data-theme="dark"] .mushaf-word.is-sync {
   color: var(--brand-deep);
 }
 
+.prayer-coords-form {
+  width: 100%;
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.prayer-coords-hint {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.prayer-coords-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.65rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.prayer-coords-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.prayer-coords-label {
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--brand-deep);
+}
+
+.prayer-coords-input {
+  font: inherit;
+  font-weight: 700;
+  min-height: 2.5rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+  width: 11.5rem;
+}
+
+@media (max-width: 560px) {
+  .prayer-coords-input {
+    width: 100%;
+  }
+}
+
 .prayer-hijri {
   margin: 0;
   font-weight: 700;

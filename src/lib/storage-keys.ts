@@ -8,6 +8,7 @@
 export const STORAGE_KEYS = {
   theme: "arabya-theme",
   prayerCity: "arabya-prayer-city",
+  prayerCoords: "arabya-prayer-coords",
   bookmarks: "arabya-bookmarks",
   ayahNotes: "arabya-ayah-notes",
   studyArchive: "arabya-study-archive-v1",
