@@ -3,7 +3,8 @@
 export const MPT_ASPECTS = ["9:16", "16:9", "1:1"] as const;
 export type MptAspect = (typeof MPT_ASPECTS)[number];
 
-export const MPT_SOURCES = ["pexels", "pixabay", "coverr", "local"] as const;
+/** Stock APIs only — local engine folders are not a generation path. */
+export const MPT_SOURCES = ["pexels", "pixabay", "coverr"] as const;
 export type MptSource = (typeof MPT_SOURCES)[number];
 
 export const MPT_CONCAT_MODES = ["random", "sequential"] as const;
@@ -19,20 +20,6 @@ const HEX = /^#([0-9A-Fa-f]{6})$/;
 function asRecord(raw: unknown): Record<string, unknown> {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
   return raw as Record<string, unknown>;
-}
-
-function parseLocalMaterials(
-  raw: unknown,
-): { provider: string; url: string }[] | undefined {
-  if (!Array.isArray(raw)) return undefined;
-  const out: { provider: string; url: string }[] = [];
-  for (const item of raw.slice(0, 12)) {
-    const rec = asRecord(item);
-    const url = clipString(rec.url || rec.file || rec.name, 180);
-    if (!url || url.length > 180 || !/^[A-Za-z0-9._-]+$/.test(url)) continue;
-    out.push({ provider: "local", url });
-  }
-  return out.length ? out : undefined;
 }
 
 function clipString(value: unknown, max: number, fallback = ""): string {
@@ -77,7 +64,6 @@ export type MptVideoBody = {
   stroke_color: string;
   stroke_width: number;
   paragraph_number: number;
-  video_materials?: { provider: string; url: string }[];
 };
 
 export function parseMptVideoBody(raw: unknown): ParseResult<MptVideoBody> {
@@ -94,10 +80,6 @@ export function parseMptVideoBody(raw: unknown): ParseResult<MptVideoBody> {
   }
 
   const video_source = oneOf(input.video_source, MPT_SOURCES, "pexels");
-  const video_materials = parseLocalMaterials(input.video_materials);
-  if (video_source === "local" && !video_materials) {
-    return { ok: false, error: "missing_materials" };
-  }
 
   return {
     ok: true,
@@ -132,7 +114,6 @@ export function parseMptVideoBody(raw: unknown): ParseResult<MptVideoBody> {
       stroke_color,
       stroke_width: clipNumber(input.stroke_width, 0, 4, 1.5),
       paragraph_number: clipNumber(input.paragraph_number, 1, 5, 1),
-      ...(video_materials ? { video_materials } : {}),
     },
   };
 }

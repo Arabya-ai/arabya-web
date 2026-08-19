@@ -56,6 +56,10 @@ jobs:
           MPT_DAHL_API_KEYS: ${{ secrets.MPT_DAHL_API_KEYS }}
           MPT_DAHL_MODELS: ${{ secrets.MPT_DAHL_MODELS }}
           MONEYPRINTER_API_URL: ${{ secrets.MONEYPRINTER_API_URL }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          PEXELS_API_KEYS: ${{ secrets.PEXELS_API_KEYS }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          PIXABAY_API_KEYS: ${{ secrets.PIXABAY_API_KEYS }}
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh
@@ -83,6 +87,18 @@ jobs:
           fi
           if [ -n "${MONEYPRINTER_API_URL:-}" ]; then
             REMOTE_ENV="${REMOTE_ENV} export MONEYPRINTER_API_URL=$(printf %q "$MONEYPRINTER_API_URL");"
+          fi
+          if [ -n "${PEXELS_API_KEY:-}" ]; then
+            REMOTE_ENV="${REMOTE_ENV} export PEXELS_API_KEY=$(printf %q "$PEXELS_API_KEY");"
+          fi
+          if [ -n "${PEXELS_API_KEYS:-}" ]; then
+            REMOTE_ENV="${REMOTE_ENV} export PEXELS_API_KEYS=$(printf %q "$PEXELS_API_KEYS");"
+          fi
+          if [ -n "${PIXABAY_API_KEY:-}" ]; then
+            REMOTE_ENV="${REMOTE_ENV} export PIXABAY_API_KEY=$(printf %q "$PIXABAY_API_KEY");"
+          fi
+          if [ -n "${PIXABAY_API_KEYS:-}" ]; then
+            REMOTE_ENV="${REMOTE_ENV} export PIXABAY_API_KEYS=$(printf %q "$PIXABAY_API_KEYS");"
           fi
           ssh -i ~/.ssh/contabo_key -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
             "$SSH_USER@$SSH_HOST" \

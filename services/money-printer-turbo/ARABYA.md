@@ -18,7 +18,7 @@ docker compose -f docker-compose.mpt.yml up --build
 أو من هذا المجلد بعد `uv sync` أو `pip install -r requirements.txt`:
 
 ```bash
-cp config.example.toml config.toml   # ثم أضف مفاتيح LLM/Pexels
+cp config.example.toml config.toml   # ثم أضف مفاتيح LLM وPexels
 python main.py                       # http://127.0.0.1:8080/docs
 ```
 
@@ -26,7 +26,10 @@ python main.py                       # http://127.0.0.1:8080/docs
 
 ```
 MONEYPRINTER_API_URL=http://127.0.0.1:8080
+PEXELS_API_KEY=...
 ```
+
+التوليد يجلب المشاهد من Pexels عبر API. لا تعتمد على مجلد `storage/local_videos`.
 
 ملفات `resource/songs/*.mp3` والخطوط الصينية الضخمة `*.ttc` غير مضمّنة في Git (حجم وترخيص). إن احتجتها انسخها من المستودع الأصلي إلى نفس المسارات.
 

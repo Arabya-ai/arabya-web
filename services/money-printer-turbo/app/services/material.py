@@ -154,12 +154,51 @@ def _get_tls_verify() -> bool:
     return bool(tls_verify)
 
 
+def _keys_from_env(cfg_key: str) -> list[str]:
+    """Allow Arabya server env (PEXELS_API_KEY) to feed MPT without Git secrets."""
+    env_names = {
+        "pexels_api_keys": (
+            "MPT_PEXELS_API_KEY",
+            "MPT_PEXELS_API_KEYS",
+            "PEXELS_API_KEY",
+            "PEXELS_API_KEYS",
+        ),
+        "pixabay_api_keys": (
+            "MPT_PIXABAY_API_KEY",
+            "MPT_PIXABAY_API_KEYS",
+            "PIXABAY_API_KEY",
+            "PIXABAY_API_KEYS",
+        ),
+        "coverr_api_keys": (
+            "MPT_COVERR_API_KEY",
+            "MPT_COVERR_API_KEYS",
+            "COVERR_API_KEY",
+            "COVERR_API_KEYS",
+        ),
+    }.get(cfg_key, ())
+    out: list[str] = []
+    seen: set[str] = set()
+    for name in env_names:
+        raw = os.environ.get(name, "").strip()
+        if not raw:
+            continue
+        for part in raw.split(","):
+            key = part.strip()
+            if key and key not in seen:
+                seen.add(key)
+                out.append(key)
+    return out
+
+
 def get_api_key(cfg_key: str):
     api_keys = config.app.get(cfg_key)
+    if not api_keys:
+        api_keys = _keys_from_env(cfg_key)
     if not api_keys:
         raise ValueError(
             f"\n\n##### {cfg_key} is not set #####\n\n"
             f"Please set it in the config.toml file: {config.config_file}\n"
+            "or export PEXELS_API_KEY / PIXABAY_API_KEY for the matching source.\n"
         )
 
     # if only one key is provided, return it

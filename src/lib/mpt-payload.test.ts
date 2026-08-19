@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import {
   isSafeTaskId,
+  MPT_SOURCES,
   parseMptScriptBody,
   parseMptTermsBody,
   parseMptVideoBody,
@@ -17,20 +20,26 @@ describe("parseMptVideoBody", () => {
     expect(parsed.body.voice_name).toContain("ar-SA");
   });
 
-  it("requires local materials when source is local", () => {
-    expect(
-      parseMptVideoBody({ video_subject: "topic", video_source: "local" }).ok,
-    ).toBe(false);
+  it("does not offer a local engine-folder source", () => {
+    expect(MPT_SOURCES).toEqual(["pexels", "pixabay", "coverr"]);
+    const createPage = readFileSync(
+      resolve(__dirname, "../mpt-studio/pages/AiCreate.tsx"),
+      "utf8",
+    );
+    expect(createPage).not.toContain("local_videos");
+    expect(createPage).not.toContain("source_local");
+  });
+
+  it("maps a legacy local source to Pexels and drops folder files", () => {
     const parsed = parseMptVideoBody({
       video_subject: "topic",
       video_source: "local",
-      video_materials: [{ url: "clip-1.png" }],
+      video_materials: [{ url: "1.png" }],
     });
     expect(parsed.ok).toBe(true);
     if (!parsed.ok) return;
-    expect(parsed.body.video_materials).toEqual([
-      { provider: "local", url: "clip-1.png" },
-    ]);
+    expect(parsed.body.video_source).toBe("pexels");
+    expect(parsed.body).not.toHaveProperty("video_materials");
   });
 
   it("rejects non-hex colors and clamps counts", () => {
