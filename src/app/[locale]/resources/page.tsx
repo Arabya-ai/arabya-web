@@ -52,6 +52,16 @@ export default async function ResourcesPage({ params }: Props) {
       </section>
 
       <section className="resource-block">
+        <h2>{t("libraryTitle")}</h2>
+        <p>{t("libraryLead")}</p>
+        <p>
+          <Link href="/library" className="nav-pill">
+            {t("libraryOpen")}
+          </Link>
+        </p>
+      </section>
+
+      <section className="resource-block">
         <h2>{t("pdfTitle")}</h2>
         <p>{t("pdfLead")}</p>
         <ul>

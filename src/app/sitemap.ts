@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { getLibraryCatalog } from "@/lib/library";
 import { getMushafIndex } from "@/lib/mushaf";
 import { getSurahs } from "@/lib/quran";
 
@@ -6,7 +7,11 @@ const base = "https://www.arabya.org";
 
 /** Full sitemap: home, tools, all 604 mushaf pages, surah read pages */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [index, surahs] = await Promise.all([getMushafIndex(), getSurahs()]);
+  const [index, surahs, libraryWorks] = await Promise.all([
+    getMushafIndex(),
+    getSurahs(),
+    getLibraryCatalog(),
+  ]);
   const total = index.totalPages || 604;
 
   const staticPages: MetadataRoute.Sitemap = [
@@ -21,6 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/study`, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/asma`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/resources`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/library`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/pricing`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/adhkar`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/adhkar/duas`, changeFrequency: "monthly", priority: 0.5 },
@@ -43,5 +49,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.65,
   }));
 
-  return [...staticPages, ...mushafPages, ...surahReads];
+  const libraryPages: MetadataRoute.Sitemap = libraryWorks.map((w) => ({
+    url: `${base}/library/${w.id}`,
+    changeFrequency: "monthly" as const,
+    priority: 0.65,
+  }));
+
+  return [...staticPages, ...libraryPages, ...mushafPages, ...surahReads];
 }

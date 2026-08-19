@@ -79,6 +79,16 @@ function migrateUserDb(db: SqliteDb) {
       `ALTER TABLE reading_progress ADD COLUMN tasbeeh_json TEXT NOT NULL DEFAULT '{"phraseId":"subhanallah","count":0}'`,
     );
   }
+
+  const jobCols = db
+    .prepare(`PRAGMA table_info(book_import_jobs)`)
+    .all() as Array<{ name: string }>;
+  const jobNames = new Set(jobCols.map((c) => c.name));
+  if (!jobNames.has("book_kind")) {
+    db.exec(
+      `ALTER TABLE book_import_jobs ADD COLUMN book_kind TEXT NOT NULL DEFAULT 'irab'`,
+    );
+  }
 }
 
 export function getUserDb(): SqliteDb {

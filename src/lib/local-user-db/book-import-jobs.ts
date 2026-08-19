@@ -4,6 +4,7 @@ type SqliteDb = ReturnType<typeof getUserDb>;
 import type {
   BookImportJobRow,
   BookImportJobStatus,
+  BookKind,
   ImportSourceKind,
 } from "@/lib/import-book/types";
 
@@ -18,6 +19,8 @@ function mapRow(row: Record<string, unknown>): BookImportJobRow {
     title: String(row.title),
     slug: String(row.slug),
     filename: row.filename != null ? String(row.filename) : null,
+    bookKind: (String(row.book_kind ?? row.bookKind ?? "irab") ||
+      "irab") as BookKind,
     sourceKind: String(row.source_kind ?? row.sourceKind) as ImportSourceKind,
     status: String(row.status) as BookImportJobStatus,
     message: row.message != null ? String(row.message) : null,
@@ -36,6 +39,7 @@ export function createBookImportJob(
     title: string;
     slug: string;
     filename?: string | null;
+    bookKind?: BookKind;
     sourceKind: ImportSourceKind;
   },
 ): BookImportJobRow {
@@ -43,15 +47,16 @@ export function createBookImportJob(
   const now = Date.now();
   db.prepare(
     `INSERT INTO book_import_jobs (
-       id, user_id, title, slug, filename, source_kind, status,
+       id, user_id, title, slug, filename, book_kind, source_kind, status,
        verse_count, word_count, published, created_at, updated_at
-     ) VALUES (?, ?, ?, ?, ?, ?, 'processing', 0, 0, 0, ?, ?)`,
+     ) VALUES (?, ?, ?, ?, ?, ?, ?, 'processing', 0, 0, 0, ?, ?)`,
   ).run(
     id,
     input.userId,
     input.title.slice(0, 200),
     input.slug.slice(0, 64),
     input.filename ? input.filename.slice(0, 200) : null,
+    input.bookKind ?? "irab",
     input.sourceKind,
     now,
     now,

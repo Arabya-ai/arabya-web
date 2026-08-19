@@ -3,15 +3,18 @@
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { BookImportJobRow } from "@/lib/import-book/types";
+import type { BookImportJobRow, BookKind } from "@/lib/import-book/types";
 import { ArabyaPanel, ArabyaPanelStack } from "@/components/ui/ArabyaPanel";
 
-const ACCEPT =
+const ACCEPT_IRAB =
   ".docx,.pdf,.xlsx,.xls,.csv,.json,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,application/json";
+
+const ACCEPT_READING = ".pdf,application/pdf";
 
 export function OwnerBookUploadPanel({ syncReady }: { syncReady: boolean }) {
   const t = useTranslations("BookImport");
   const locale = useLocale();
+  const [bookKind, setBookKind] = useState<BookKind>("reading");
   const [title, setTitle] = useState("");
   const [sheetUrl, setSheetUrl] = useState("");
   const [busy, setBusy] = useState(false);
@@ -54,7 +57,12 @@ export function OwnerBookUploadPanel({ syncReady }: { syncReady: boolean }) {
       setError(t("titleRequired"));
       return;
     }
-    if (!file && !sheetUrl.trim()) {
+    if (bookKind === "reading") {
+      if (!file) {
+        setError(t("readingFileRequired"));
+        return;
+      }
+    } else if (!file && !sheetUrl.trim()) {
       setError(t("fileOrSheetRequired"));
       return;
     }
@@ -63,7 +71,10 @@ export function OwnerBookUploadPanel({ syncReady }: { syncReady: boolean }) {
     try {
       const form = new FormData();
       form.set("title", title.trim());
-      if (sheetUrl.trim()) form.set("googleSheetUrl", sheetUrl.trim());
+      form.set("bookKind", bookKind);
+      if (bookKind === "irab" && sheetUrl.trim()) {
+        form.set("googleSheetUrl", sheetUrl.trim());
+      }
       if (file) form.set("file", file);
       const res = await fetch("/api/account/import-book", {
         method: "POST",
@@ -97,17 +108,51 @@ export function OwnerBookUploadPanel({ syncReady }: { syncReady: boolean }) {
     );
   }
 
+  const isReading = bookKind === "reading";
+
   return (
     <ArabyaPanelStack className="dash-stack">
       <ArabyaPanel legacyDash title={t("title")} muted={t("lead")}>
         <div className="dash-form">
+          <fieldset className="owner-upload-kind">
+            <legend>{t("bookKindLabel")}</legend>
+            <label>
+              <input
+                type="radio"
+                name="bookKind"
+                value="reading"
+                checked={bookKind === "reading"}
+                onChange={() => {
+                  setBookKind("reading");
+                  setSheetUrl("");
+                  if (fileRef.current) fileRef.current.value = "";
+                }}
+              />
+              {t("bookKindReading")}
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="bookKind"
+                value="irab"
+                checked={bookKind === "irab"}
+                onChange={() => setBookKind("irab")}
+              />
+              {t("bookKindIrab")}
+            </label>
+          </fieldset>
+
+          <p className="dash-muted">{isReading ? t("readingLead") : t("irabLead")}</p>
+
           <label>
             {t("bookTitle")}
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={t("bookTitlePlaceholder")}
+              placeholder={
+                isReading ? t("readingTitlePlaceholder") : t("bookTitlePlaceholder")
+              }
               maxLength={200}
             />
           </label>
@@ -125,12 +170,12 @@ export function OwnerBookUploadPanel({ syncReady }: { syncReady: boolean }) {
           >
             <strong>{t("dropLabel")}</strong>
             <p className="dash-muted" style={{ margin: "0.5rem 0 0" }}>
-              {t("formats")}
+              {isReading ? t("readingFormats") : t("formats")}
             </p>
             <input
               ref={fileRef}
               type="file"
-              accept={ACCEPT}
+              accept={isReading ? ACCEPT_READING : ACCEPT_IRAB}
               hidden
               disabled={busy}
               onChange={(e) => {
@@ -140,30 +185,38 @@ export function OwnerBookUploadPanel({ syncReady }: { syncReady: boolean }) {
             />
           </label>
 
-          <label>
-            {t("googleSheet")}
-            <input
-              type="url"
-              dir="ltr"
-              value={sheetUrl}
-              onChange={(e) => setSheetUrl(e.target.value)}
-              placeholder="https://docs.google.com/spreadsheets/d/..."
-            />
-          </label>
-          {sheetUrl.trim() ? (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => void submit(null)}
-            >
-              {busy ? t("busy") : t("importSheet")}
-            </button>
-          ) : null}
+          {!isReading ? (
+            <>
+              <label>
+                {t("googleSheet")}
+                <input
+                  type="url"
+                  dir="ltr"
+                  value={sheetUrl}
+                  onChange={(e) => setSheetUrl(e.target.value)}
+                  placeholder="https://docs.google.com/spreadsheets/d/..."
+                />
+              </label>
+              {sheetUrl.trim() ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void submit(null)}
+                >
+                  {busy ? t("busy") : t("importSheet")}
+                </button>
+              ) : null}
 
-          <details className="dash-muted" style={{ marginTop: "0.75rem" }}>
-            <summary>{t("excelHelpTitle")}</summary>
-            <p>{t("excelHelp")}</p>
-          </details>
+              <details className="dash-muted" style={{ marginTop: "0.75rem" }}>
+                <summary>{t("excelHelpTitle")}</summary>
+                <p>{t("excelHelp")}</p>
+              </details>
+            </>
+          ) : (
+            <p className="dash-muted">
+              <Link href="/library">{t("browseLibrary")}</Link>
+            </p>
+          )}
         </div>
         {error ? <p className="dash-banner dash-banner--warn">{error}</p> : null}
       </ArabyaPanel>
@@ -180,9 +233,15 @@ export function OwnerBookUploadPanel({ syncReady }: { syncReady: boolean }) {
                 {job.status === "ready" && job.published ? (
                   <>
                     {" · "}
-                    <Link href={`/books/${job.slug}`}>{t("viewBook")}</Link>
-                    {" · "}
-                    <Link href="/mushaf/1">{t("tryMushaf")}</Link>
+                    {job.bookKind === "reading" ? (
+                      <Link href={`/library/${job.slug}`}>{t("viewLibrary")}</Link>
+                    ) : (
+                      <>
+                        <Link href={`/books/${job.slug}`}>{t("viewBook")}</Link>
+                        {" · "}
+                        <Link href="/mushaf/1">{t("tryMushaf")}</Link>
+                      </>
+                    )}
                   </>
                 ) : null}
                 <br />

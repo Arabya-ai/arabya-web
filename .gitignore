@@ -47,6 +47,7 @@ services/money-printer-turbo/.runtime-stock-keys.env
 
 # Owner uploads (runtime on Contabo)
 /data/imported-books/
+/data/imported-library/
 /.cache/
 
 # local user sync (Contabo SQLite)
