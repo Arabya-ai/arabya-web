@@ -40,10 +40,10 @@
 }
 
 .mpt-studio fieldset {
-  border: 1px solid hsl(var(--border));
-  border-radius: 1rem;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--panel-radius);
   padding: 1rem 1.1rem 1.15rem;
-  background: hsl(var(--card) / 0.55);
+  background: color-mix(in srgb, var(--panel) 94%, var(--accent-soft));
 }
 
 .mpt-studio legend {

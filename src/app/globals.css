@@ -2,6 +2,7 @@
 @plugin "tailwindcss-animate";
 
 @import "../styles/studio-token-bridge.css";
+@import "../styles/arabya-panels.css";
 
 @font-face {
   font-family: "UthmanicHafs";

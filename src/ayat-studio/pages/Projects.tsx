@@ -81,8 +81,7 @@ export default function Projects() {
               <Card key={p.id} className="group relative overflow-hidden border-accent/15 bg-card/50 backdrop-blur-sm hover-lift">
                 <CardContent className="p-0">
                   <div
-                    className="relative flex h-40 items-center justify-center cursor-pointer overflow-hidden"
-                    style={{ background: "linear-gradient(135deg, hsl(178 50% 18%) 0%, hsl(200 40% 8%) 100%)" }}
+                    className="relative flex h-40 items-center justify-center cursor-pointer overflow-hidden arabya-panel-thumb"
                     onClick={() => router.push(studioPath(`/editor/${p.id}`))}
                   >
                     <div className="pattern-stars pointer-events-none absolute inset-0 opacity-50" aria-hidden />

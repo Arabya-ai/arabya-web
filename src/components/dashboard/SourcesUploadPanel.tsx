@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import type { SourceUploadRow } from "@/lib/cloud-sync";
+import { ArabyaPanel, ArabyaPanelStack } from "@/components/ui/ArabyaPanel";
 
 export function SourcesUploadPanel() {
   const t = useTranslations("Studio");
@@ -64,13 +65,16 @@ export function SourcesUploadPanel() {
   }
 
   return (
-    <div className="dash-stack">
-      <section className="dash-card">
-        <h2>{t("uploadTitle")}</h2>
-        <p className="dash-muted">
-          {t("uploadLead")}{" "}
-          <code>import-irab-book</code> / <code>import-from-incoming</code>
-        </p>
+    <ArabyaPanelStack>
+      <ArabyaPanel
+        title={t("uploadTitle")}
+        muted={
+          <>
+            {t("uploadLead")}{" "}
+            <code>import-irab-book</code> / <code>import-from-incoming</code>
+          </>
+        }
+      >
         <div className="dash-form">
           <label>
             {t("editorNotes")}
@@ -98,10 +102,9 @@ export function SourcesUploadPanel() {
         </div>
         {error ? <p className="dash-banner dash-banner--warn">{error}</p> : null}
         {okMsg ? <p className="dash-banner dash-banner--ok">{okMsg}</p> : null}
-      </section>
+      </ArabyaPanel>
 
-      <section className="dash-card">
-        <h2>{t("uploadedTitle")}</h2>
+      <ArabyaPanel title={t("uploadedTitle")}>
         {uploads.length === 0 ? (
           <p className="dash-muted">{t("noUploads")}</p>
         ) : (
@@ -116,7 +119,7 @@ export function SourcesUploadPanel() {
             ))}
           </ul>
         )}
-      </section>
-    </div>
+      </ArabyaPanel>
+    </ArabyaPanelStack>
   );
 }

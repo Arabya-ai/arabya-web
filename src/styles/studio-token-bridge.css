@@ -35,3 +35,22 @@
 .mpt-studio-root .mpt-banner[data-state="login"] {
   background: color-mix(in srgb, var(--studio-brand-soft) 45%, var(--studio-surface));
 }
+
+#ayat-studio-root.ayat-studio {
+  background: var(--studio-bg);
+  color: var(--studio-ink);
+}
+
+.mpt-studio-root .mpt-studio fieldset,
+.mpt-studio-root .mpt-studio .mpt-panel {
+  border: 1px solid var(--panel-border);
+  border-radius: var(--panel-radius);
+  padding: 1rem 1.1rem 1.15rem;
+  background: color-mix(in srgb, var(--studio-surface) 94%, var(--studio-brand-soft));
+}
+
+.mpt-studio-root .mpt-studio legend {
+  padding-inline: 0.4rem;
+  font-weight: 700;
+  color: var(--studio-ink);
+}

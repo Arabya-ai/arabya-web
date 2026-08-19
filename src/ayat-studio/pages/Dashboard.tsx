@@ -137,8 +137,7 @@ export default function Dashboard() {
               return (
                 <Link key={p.id} href={studioPath(`/editor/${p.id}`)} className="group">
                   <Card className="relative overflow-hidden border-accent/15 bg-card/50 backdrop-blur-sm hover-lift cursor-pointer h-full">
-                    <div className="relative h-28 overflow-hidden"
-                      style={{ background: "linear-gradient(135deg, hsl(178 50% 18%) 0%, hsl(200 40% 8%) 100%)" }}>
+                    <div className="relative h-28 overflow-hidden arabya-panel-thumb">
                       <div className="pattern-stars pointer-events-none absolute inset-0 opacity-50" aria-hidden />
                       <div className="absolute inset-0 flex items-center justify-center">
                         <ArabesqueMedallion size={56} className="text-accent/60" />

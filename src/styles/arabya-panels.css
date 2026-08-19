@@ -1,0 +1,89 @@
+/**
+ * Shared panel primitives for account / admin / studio surfaces.
+ * Dashboard `.dash-card` aliases these tokens in dashboard-shell.css.
+ */
+
+:root {
+  --panel-radius: 18px;
+  --panel-radius-sm: 16px;
+  --panel-border: color-mix(in srgb, var(--brand) 10%, var(--line));
+  --panel-border-hover: color-mix(in srgb, var(--brand) 22%, var(--line));
+  --panel-border-focus: color-mix(in srgb, var(--brand) 28%, var(--line));
+  --panel-bg: color-mix(in srgb, var(--surface) 97%, var(--brand-soft));
+  --panel-bg-accent: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--brand-soft) 80%, var(--surface)),
+    var(--surface)
+  );
+  --panel-inset: color-mix(in srgb, var(--surface) 40%, transparent);
+  --panel-shadow-hover: 0 12px 28px color-mix(in srgb, var(--brand) 10%, transparent);
+  --panel-thumb-bg: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--brand-deep) 28%, var(--bg-accent)) 0%,
+    var(--bg) 100%
+  );
+}
+
+.arabya-panel-stack {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.arabya-panel {
+  padding: 1.2rem 1.25rem;
+  border-radius: var(--panel-radius);
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  box-shadow: 0 1px 0 var(--panel-inset) inset;
+  min-width: 0;
+}
+
+.arabya-panel--accent {
+  background: var(--panel-bg-accent);
+  border-color: color-mix(in srgb, var(--brand) 22%, var(--line));
+}
+
+.arabya-panel__title {
+  margin: 0 0 0.45rem;
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.arabya-panel__muted {
+  margin: 0 0 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.arabya-panel-thumb {
+  background: var(--panel-thumb-bg);
+}
+
+/* Studio (shadcn HSL) — same primitive, local token mapping */
+.ayat-studio .arabya-panel,
+.mpt-studio-root .arabya-panel {
+  border-radius: calc(var(--radius) * 1.05);
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card) / 0.92);
+  color: hsl(var(--card-foreground));
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--studio-surface) 55%, transparent) inset;
+}
+
+.ayat-studio .arabya-panel--accent,
+.mpt-studio-root .arabya-panel--accent {
+  border-color: color-mix(in srgb, var(--studio-brand) 24%, hsl(var(--border)));
+  background: color-mix(in srgb, var(--studio-brand-soft) 42%, hsl(var(--card)));
+}
+
+.ayat-studio .arabya-panel__title,
+.mpt-studio-root .arabya-panel__title {
+  color: hsl(var(--card-foreground));
+}
+
+.ayat-studio .arabya-panel__muted,
+.mpt-studio-root .arabya-panel__muted {
+  color: hsl(var(--muted-foreground));
+}

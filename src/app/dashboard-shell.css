@@ -589,10 +589,10 @@
 
 .dash-card {
   padding: 1.2rem 1.25rem;
-  border-radius: 18px;
-  border: 1px solid color-mix(in srgb, var(--brand) 10%, var(--line));
-  background: color-mix(in srgb, var(--surface) 97%, var(--brand-soft));
-  box-shadow: 0 1px 0 color-mix(in srgb, #fff 40%, transparent) inset;
+  border-radius: var(--panel-radius);
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  box-shadow: 0 1px 0 var(--panel-inset) inset;
   transition:
     transform 0.22s var(--dash-ease),
     box-shadow 0.22s var(--dash-ease),
@@ -602,19 +602,18 @@
 
 .dash-card:hover {
   transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--brand) 22%, var(--line));
+  border-color: var(--panel-border-hover);
   box-shadow:
-    0 1px 0 color-mix(in srgb, #fff 40%, transparent) inset,
-    0 12px 28px color-mix(in srgb, var(--brand) 10%, transparent);
+    0 1px 0 var(--panel-inset) inset,
+    var(--panel-shadow-hover);
 }
 
 .dash-card:focus-within {
-  border-color: color-mix(in srgb, var(--brand) 28%, var(--line));
+  border-color: var(--panel-border-focus);
 }
 
 .dash-card--accent {
-  background:
-    linear-gradient(145deg, color-mix(in srgb, var(--brand-soft) 80%, var(--surface)), var(--surface));
+  background: var(--panel-bg-accent);
   border-color: color-mix(in srgb, var(--brand) 22%, var(--line));
 }
 
