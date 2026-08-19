@@ -3,6 +3,7 @@
 
 @import "../styles/studio-token-bridge.css";
 @import "../styles/arabya-panels.css";
+@import "../styles/library.css";
 
 @font-face {
   font-family: "UthmanicHafs";
@@ -2614,33 +2615,6 @@ html[data-theme="dark"] .surah-ornament-wing::after {
 .books-catalog-muted {
   font-size: 0.85rem;
   color: color-mix(in srgb, var(--ink) 55%, transparent);
-}
-
-.library-work-page {
-  max-width: 960px;
-}
-
-.library-reader {
-  margin-top: 1rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-}
-
-.library-reader-frame {
-  display: block;
-  width: 100%;
-  min-height: 75vh;
-  border: 0;
-  background: #f4f4f4;
-}
-
-.library-reader-fallback {
-  display: none;
-  padding: 1rem;
-  text-align: center;
 }
 
 .owner-upload-kind {
