@@ -33,7 +33,11 @@ export function LibraryBookCard({
   return (
     <article className="library-card">
       <Link href={`/library/${work.id}`} className="library-card-cover-link">
-        <div className={`library-card-cover ${categoryCoverTone(work.category)}`}>
+        <div
+          className={`library-card-cover ${categoryCoverTone(work.category)}${
+            work.coverUrl ? " library-card-cover--has-image" : ""
+          }`}
+        >
           {work.coverUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
