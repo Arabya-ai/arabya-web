@@ -433,39 +433,53 @@ def search_videos_pexels(
             if duration < minimum_duration:
                 continue
             video_files = v["video_files"]
-            # loop through each url to determine the best quality
+            # Pick the best quality file that matches the aspect ratio.
+            # Prefer exact resolution, then closest larger, then any match.
+            best_file = None
+            best_score = -1
             for video in video_files:
-                w = int(video["width"])
-                h = int(video["height"])
-                if (
-                    _matches_video_aspect(w, h, aspect)
-                    and w == video_width
-                    and h == video_height
-                ):
-                    item = MaterialInfo()
-                    item.provider = "pexels"
-                    item.url = video["link"]
-                    item.duration = duration
-                    item.source_info = {
-                        "provider": "pexels",
-                        "search_term": search_term,
-                        "asset_id": (
-                            str(v.get("id")) if v.get("id") is not None else None
+                w = int(video.get("width") or 0)
+                h = int(video.get("height") or 0)
+                if w <= 0 or h <= 0:
+                    continue
+                if not _matches_video_aspect(w, h, aspect):
+                    continue
+                long_side = max(w, h)
+                if w == video_width and h == video_height:
+                    score = 10000
+                elif long_side >= min(video_width, video_height):
+                    score = 5000 - abs(long_side - max(video_width, video_height))
+                else:
+                    score = long_side
+                if score > best_score:
+                    best_score = score
+                    best_file = video
+            if best_file is not None:
+                bw = int(best_file.get("width") or 0)
+                bh = int(best_file.get("height") or 0)
+                item = MaterialInfo()
+                item.provider = "pexels"
+                item.url = best_file["link"]
+                item.duration = duration
+                item.source_info = {
+                    "provider": "pexels",
+                    "search_term": search_term,
+                    "asset_id": (
+                        str(v.get("id")) if v.get("id") is not None else None
+                    ),
+                    "source_page": _safe_public_url(v.get("url")),
+                    "creator": _creator_info(v.get("user")),
+                    "rendition": {
+                        "id": (
+                            str(best_file.get("id"))
+                            if best_file.get("id") is not None
+                            else None
                         ),
-                        "source_page": _safe_public_url(v.get("url")),
-                        "creator": _creator_info(v.get("user")),
-                        "rendition": {
-                            "id": (
-                                str(video.get("id"))
-                                if video.get("id") is not None
-                                else None
-                            ),
-                            "width": w,
-                            "height": h,
-                        },
-                    }
-                    video_items.append(item)
-                    break
+                        "width": bw,
+                        "height": bh,
+                    },
+                }
+                video_items.append(item)
         return video_items
     except Exception as e:
         logger.error(
