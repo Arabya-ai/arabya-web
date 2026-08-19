@@ -229,6 +229,11 @@ export default function AiCreate() {
                   {busy === "script" ? t("working") : t("generateScript")}
                 </Button>
               </div>
+              {error && busy === null && (
+                <p className="mt-1 text-sm text-destructive" role="alert">
+                  {error}
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="mpt-terms">{t("terms")}</Label>
