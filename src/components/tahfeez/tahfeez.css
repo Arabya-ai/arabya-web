@@ -12,9 +12,9 @@
   --tz-teal-deep: var(--brand-deep);
   --tz-ink: var(--ink);
   --tz-muted: var(--muted);
-  --tz-good: #0f9a75;
-  --tz-warn: #b7791f;
-  --tz-bad: #cc4a5b;
+  --tz-good: var(--status-good);
+  --tz-warn: var(--status-warn);
+  --tz-bad: var(--status-bad);
   --tz-glow: 0 10px 26px color-mix(in srgb, var(--brand) 18%, transparent);
   min-height: calc(100dvh - 4.5rem);
   color: var(--tz-ink);

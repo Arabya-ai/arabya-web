@@ -1,6 +1,8 @@
 ﻿@import "tailwindcss";
 @plugin "tailwindcss-animate";
 
+@import "./styles/studio-token-bridge.css";
+
 @font-face {
   font-family: "UthmanicHafs";
   src:
@@ -54,6 +56,20 @@
   --surah-plaque-glow: #fffef8;
   --surah-gold: #c4a035;
   --surah-title-ink: #1a1a1a;
+  --status-good: #0f9a75;
+  --status-warn: #b7791f;
+  --status-bad: #cc4a5b;
+  --status-good-soft: #ecfdf5;
+  --status-warn-soft: #fffbeb;
+  --status-bad-soft: #fef2f2;
+  --panel: var(--surface);
+  --panel-muted: var(--surface-2);
+  --text-primary: var(--ink);
+  --text-muted: var(--muted);
+  --border-subtle: var(--line);
+  --accent: var(--brand);
+  --accent-deep: var(--brand-deep);
+  --accent-soft: var(--brand-soft);
   color-scheme: light;
 }
 
@@ -89,6 +105,12 @@ html[data-theme="dark"] {
   --surah-plaque-glow: #223530;
   --surah-gold: #b8952c;
   --surah-title-ink: #eef6f2;
+  --status-good: #34d399;
+  --status-warn: #fbbf24;
+  --status-bad: #f87171;
+  --status-good-soft: #12332e;
+  --status-warn-soft: #2a2418;
+  --status-bad-soft: #2a1518;
   color-scheme: dark;
 }
 

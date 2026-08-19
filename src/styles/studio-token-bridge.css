@@ -1,0 +1,37 @@
+/**
+ * Bridges Arabya core tokens into studio surfaces (Ayat + MPT).
+ * Keeps shadcn HSL triplets while aligning hex/semantic aliases with :root.
+ */
+
+.ayat-studio,
+.ayat-studio-portal,
+.mpt-studio-root {
+  --studio-bg: var(--bg);
+  --studio-ink: var(--ink);
+  --studio-surface: var(--surface);
+  --studio-muted: var(--muted);
+  --studio-line: var(--line);
+  --studio-brand: var(--brand);
+  --studio-brand-deep: var(--brand-deep);
+  --studio-brand-soft: var(--brand-soft);
+  --studio-status-good: var(--status-good);
+  --studio-status-warn: var(--status-warn);
+  --studio-status-bad: var(--status-bad);
+}
+
+.mpt-studio-root .mpt-studio {
+  color: var(--studio-ink);
+}
+
+.mpt-studio-root .mpt-banner[data-state="online"] {
+  background: color-mix(in srgb, var(--studio-brand-soft) 55%, var(--studio-surface));
+}
+
+.mpt-studio-root .mpt-banner[data-state="offline"],
+.mpt-studio-root .mpt-banner[data-state="unconfigured"] {
+  background: color-mix(in srgb, var(--status-bad-soft) 70%, var(--studio-surface));
+}
+
+.mpt-studio-root .mpt-banner[data-state="login"] {
+  background: color-mix(in srgb, var(--studio-brand-soft) 45%, var(--studio-surface));
+}
