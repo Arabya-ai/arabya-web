@@ -1,7 +1,7 @@
 ﻿@import "tailwindcss";
 @plugin "tailwindcss-animate";
 
-@import "./styles/studio-token-bridge.css";
+@import "../styles/studio-token-bridge.css";
 
 @font-face {
   font-family: "UthmanicHafs";
