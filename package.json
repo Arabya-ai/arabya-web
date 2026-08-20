@@ -32,6 +32,8 @@
     "generate-library-covers": "node scripts/generate-library-covers.mjs",
     "validate-data": "node scripts/validate-data.mjs",
     "expand-adhkar-sources": "node scripts/expand-adhkar-sources.mjs",
+    "import-hadith-oss": "node scripts/import-hadith-oss.mjs",
+    "import-oss-json-pack": "node scripts/import-oss-json-pack.mjs",
     "build-quality-queue": "node scripts/build-quality-queue.mjs",
     "import-irab-book": "node scripts/import-irab-book.mjs",
     "fetch-ia-item": "node scripts/fetch-ia-item.mjs",

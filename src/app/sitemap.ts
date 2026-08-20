@@ -2,16 +2,21 @@ import type { MetadataRoute } from "next";
 import { getLibraryCatalog } from "@/lib/library";
 import { getMushafIndex } from "@/lib/mushaf";
 import { getSurahs } from "@/lib/quran";
+import { listHadithCollections } from "@/lib/hadith";
+import { listHeritageWorks } from "@/lib/heritage";
 
 const base = "https://www.arabya.org";
 
-/** Full sitemap: home, tools, all 604 mushaf pages, surah read pages */
+/** Full sitemap: home, tools, mushaf, library, hadith collections, heritage */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [index, surahs, libraryWorks] = await Promise.all([
-    getMushafIndex(),
-    getSurahs(),
-    getLibraryCatalog(),
-  ]);
+  const [index, surahs, libraryWorks, hadithCollections, heritageWorks] =
+    await Promise.all([
+      getMushafIndex(),
+      getSurahs(),
+      getLibraryCatalog(),
+      listHadithCollections(),
+      listHeritageWorks(),
+    ]);
   const total = index.totalPages || 604;
 
   const staticPages: MetadataRoute.Sitemap = [
@@ -61,5 +66,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.65,
   }));
 
-  return [...staticPages, ...libraryPages, ...mushafPages, ...surahReads];
+  const hadithPages: MetadataRoute.Sitemap = hadithCollections.map((c) => ({
+    url: `${base}/hadith/${c.slug}`,
+    changeFrequency: "monthly" as const,
+    priority: 0.65,
+  }));
+
+  const heritagePages: MetadataRoute.Sitemap = heritageWorks.map((w) => ({
+    url: `${base}/heritage/${w.slug}`,
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+
+  return [
+    ...staticPages,
+    ...libraryPages,
+    ...hadithPages,
+    ...heritagePages,
+    ...mushafPages,
+    ...surahReads,
+  ];
 }

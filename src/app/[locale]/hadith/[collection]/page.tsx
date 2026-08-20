@@ -3,10 +3,15 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
-import { getHadithCollection, listHadithCollections } from "@/lib/hadith";
+import {
+  getHadithCollection,
+  listHadithCollections,
+  paginateHadithItems,
+} from "@/lib/hadith";
 
 type Props = {
   params: Promise<{ locale: string; collection: string }>;
+  searchParams: Promise<{ page?: string }>;
 };
 
 export async function generateStaticParams() {
@@ -29,13 +34,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function HadithCollectionPage({ params }: Props) {
+export default async function HadithCollectionPage({
+  params,
+  searchParams,
+}: Props) {
   const locale = await resolveLocale(params);
   const { collection: slug } = await params;
+  const sp = await searchParams;
   const t = await getTranslations({ locale, namespace: "Hadith" });
   const collection = await getHadithCollection(slug);
   if (!collection) notFound();
 
+  const pageNum = Math.max(1, Number(sp.page) || 1);
+  const page = paginateHadithItems(collection.items, pageNum, 40);
   const title = locale === "en" ? collection.titleEn : collection.titleAr;
 
   return (
@@ -54,14 +65,22 @@ export default async function HadithCollectionPage({ params }: Props) {
           ? collection.descriptionEn
           : collection.descriptionAr}
       </p>
+      <p className="hadith-count">
+        {t("itemCount", { count: page.total })}
+        {page.totalPages > 1
+          ? ` · ${t("pageOf", { page: page.page, total: page.totalPages })}`
+          : null}
+      </p>
 
-      <ol className="hadith-item-list">
-        {collection.items.map((item) => (
+      <ol className="hadith-item-list" start={(page.page - 1) * page.pageSize + 1}>
+        {page.items.map((item) => (
           <li key={item.id}>
             <Link href={`/hadith/${collection.slug}/${item.number}`}>
               <span className="hadith-item-num">#{item.number}</span>
               <span className="hadith-item-text" dir="rtl" lang="ar">
-                {item.arabic}
+                {item.arabic.length > 280
+                  ? `${item.arabic.slice(0, 280)}…`
+                  : item.arabic}
               </span>
               {item.grade ? (
                 <span className="hadith-item-grade">{item.grade}</span>
@@ -70,6 +89,27 @@ export default async function HadithCollectionPage({ params }: Props) {
           </li>
         ))}
       </ol>
+
+      {page.totalPages > 1 ? (
+        <nav className="hadith-pager" aria-label={t("pagerAria")}>
+          {page.page > 1 ? (
+            <Link
+              href={`/hadith/${collection.slug}?page=${page.page - 1}`}
+              className="nav-pill"
+            >
+              {t("prevPage")}
+            </Link>
+          ) : null}
+          {page.page < page.totalPages ? (
+            <Link
+              href={`/hadith/${collection.slug}?page=${page.page + 1}`}
+              className="nav-pill"
+            >
+              {t("nextPage")}
+            </Link>
+          ) : null}
+        </nav>
+      ) : null}
     </div>
   );
 }

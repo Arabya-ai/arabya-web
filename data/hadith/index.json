@@ -1,30 +1,93 @@
 {
   "updatedAt": "2026-08-20",
-  "sourceNote": "عيّنة Git-first للهيكلة؛ المتون عربية شائعة للتعلّم. التوسعة من مصادر مفتوحة مرخّصة عند توجيه المالك (مثل hadith-api).",
+  "sourceNote": "Full Arabic editions from fawazahmed0/hadith-api (awesome-islamic list). Git-first under data/hadith.",
+  "importedFrom": [
+    {
+      "project": "fawazahmed0/hadith-api",
+      "url": "https://github.com/fawazahmed0/hadith-api",
+      "listId": 245
+    }
+  ],
   "collections": [
     {
       "slug": "bukhari",
       "titleAr": "صحيح البخاري",
       "titleEn": "Sahih al-Bukhari",
-      "descriptionAr": "عيّنة مختصرة من صحيح البخاري — الهيكل جاهز للتوسعة.",
-      "descriptionEn": "Small curated sample from Sahih al-Bukhari — expandable.",
-      "itemCount": 8
+      "descriptionAr": "متن عربي كامل مستورد من fawazahmed0/hadith-api (ara-bukhari).",
+      "descriptionEn": "Full Arabic matn imported from fawazahmed0/hadith-api (ara-bukhari).",
+      "itemCount": 7580
     },
     {
       "slug": "muslim",
       "titleAr": "صحيح مسلم",
       "titleEn": "Sahih Muslim",
-      "descriptionAr": "عيّنة مختصرة من صحيح مسلم.",
-      "descriptionEn": "Small curated sample from Sahih Muslim.",
-      "itemCount": 6
+      "descriptionAr": "متن عربي كامل مستورد من fawazahmed0/hadith-api (ara-muslim).",
+      "descriptionEn": "Full Arabic matn imported from fawazahmed0/hadith-api (ara-muslim).",
+      "itemCount": 7360
     },
     {
-      "slug": "nawawi40",
+      "slug": "nasai",
+      "titleAr": "سنن النسائي",
+      "titleEn": "Sunan an-Nasaʾi",
+      "descriptionAr": "متن عربي كامل مستورد من fawazahmed0/hadith-api (ara-nasai).",
+      "descriptionEn": "Full Arabic matn imported from fawazahmed0/hadith-api (ara-nasai).",
+      "itemCount": 5679
+    },
+    {
+      "slug": "abudawud",
+      "titleAr": "سنن أبي داود",
+      "titleEn": "Sunan Abu Dawud",
+      "descriptionAr": "متن عربي كامل مستورد من fawazahmed0/hadith-api (ara-abudawud).",
+      "descriptionEn": "Full Arabic matn imported from fawazahmed0/hadith-api (ara-abudawud).",
+      "itemCount": 5272
+    },
+    {
+      "slug": "ibnmajah",
+      "titleAr": "سنن ابن ماجه",
+      "titleEn": "Sunan Ibn Majah",
+      "descriptionAr": "متن عربي كامل مستورد من fawazahmed0/hadith-api (ara-ibnmajah).",
+      "descriptionEn": "Full Arabic matn imported from fawazahmed0/hadith-api (ara-ibnmajah).",
+      "itemCount": 4338
+    },
+    {
+      "slug": "tirmidhi",
+      "titleAr": "جامع الترمذي",
+      "titleEn": "Jamiʿ at-Tirmidhi",
+      "descriptionAr": "متن عربي كامل مستورد من fawazahmed0/hadith-api (ara-tirmidhi).",
+      "descriptionEn": "Full Arabic matn imported from fawazahmed0/hadith-api (ara-tirmidhi).",
+      "itemCount": 3924
+    },
+    {
+      "slug": "malik",
+      "titleAr": "موطأ مالك",
+      "titleEn": "Muwatta Malik",
+      "descriptionAr": "متن عربي كامل مستورد من fawazahmed0/hadith-api (ara-malik).",
+      "descriptionEn": "Full Arabic matn imported from fawazahmed0/hadith-api (ara-malik).",
+      "itemCount": 1829
+    },
+    {
+      "slug": "nawawi",
       "titleAr": "الأربعون النووية",
       "titleEn": "Nawawi Forty",
-      "descriptionAr": "مختارات من الأربعين النووية — مناسبة للبدء.",
-      "descriptionEn": "Selections from al-Nawawi’s Forty Hadith.",
-      "itemCount": 5
+      "descriptionAr": "متن عربي كامل مستورد من fawazahmed0/hadith-api (ara-nawawi).",
+      "descriptionEn": "Full Arabic matn imported from fawazahmed0/hadith-api (ara-nawawi).",
+      "itemCount": 42
+    },
+    {
+      "slug": "dehlawi",
+      "titleAr": "بلوغ المرام / دهلوى",
+      "titleEn": "Dehlawi",
+      "descriptionAr": "متن عربي كامل مستورد من fawazahmed0/hadith-api (ara-dehlawi).",
+      "descriptionEn": "Full Arabic matn imported from fawazahmed0/hadith-api (ara-dehlawi).",
+      "itemCount": 40
+    },
+    {
+      "slug": "qudsi",
+      "titleAr": "الأحاديث القدسية",
+      "titleEn": "Hadith Qudsi",
+      "descriptionAr": "متن عربي كامل مستورد من fawazahmed0/hadith-api (ara-qudsi).",
+      "descriptionEn": "Full Arabic matn imported from fawazahmed0/hadith-api (ara-qudsi).",
+      "itemCount": 40
     }
   ]
 }

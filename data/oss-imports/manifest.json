@@ -1,0 +1,42 @@
+{
+  "updatedAt": "2026-08-20",
+  "note": "Full data imports from open JSON/APIs in the awesome-islamic 320 list. Quran mushaf text was NOT replaced (already Git-first complete under data/surahs).",
+  "imported": [
+    {
+      "project": "fawazahmed0/hadith-api",
+      "url": "https://github.com/fawazahmed0/hadith-api",
+      "path": "data/hadith",
+      "collections": 10,
+      "hadiths": 36104
+    },
+    {
+      "project": "rn0x/Adhkar-json",
+      "url": "https://github.com/rn0x/Adhkar-json",
+      "path": "data/adhkar/*.json",
+      "via": "scripts/expand-adhkar-sources.mjs"
+    },
+    {
+      "project": "rn0x/hisn_almuslim_json",
+      "url": "https://github.com/rn0x/hisn_almuslim_json",
+      "path": "data/adhkar/hisn-almuslim-full.json",
+      "items": 298
+    },
+    {
+      "project": "sehalhussain/Hadith-Dua-assets",
+      "path": "data/adhkar/duas.json",
+      "via": "scripts/expand-adhkar-sources.mjs"
+    },
+    {
+      "project": "rn0x/Names_Of_Allah_Json",
+      "url": "https://github.com/rn0x/Names_Of_Allah_Json",
+      "path": "data/asma/names-of-allah-rn0x.json"
+    }
+  ],
+  "notImportedAsStaticData": [
+    "Mobile/Flutter/Android/iOS apps (no redistributable corpus — UX deferred)",
+    "Telegram/Discord bots (deferred by owner)",
+    "Prayer calculators (runtime Aladhan/adhan — live API already)",
+    "Duplicate Quran JSON APIs (mushaf already complete)",
+    "sunnah.com/api requires server keys — used fawazahmed0 CDN as open dump"
+  ]
+}

@@ -3,24 +3,14 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
-import { getHadithItem, listHadithCollections } from "@/lib/hadith";
+import { getHadithItem } from "@/lib/hadith";
 
 type Props = {
   params: Promise<{ locale: string; collection: string; number: string }>;
 };
 
-export async function generateStaticParams() {
-  const collections = await listHadithCollections();
-  const params: { collection: string; number: string }[] = [];
-  for (const meta of collections) {
-    const { getHadithCollection } = await import("@/lib/hadith");
-    const full = await getHadithCollection(meta.slug);
-    for (const item of full?.items ?? []) {
-      params.push({ collection: meta.slug, number: String(item.number) });
-    }
-  }
-  return params;
-}
+/** Dynamic — full catalogs are too large for static generation of every hadith. */
+export const dynamicParams = true;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, collection: slug, number } = await params;

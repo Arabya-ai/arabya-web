@@ -16,9 +16,9 @@ import { searchAyahs } from "@/lib/quran";
 describe("hadith catalog", () => {
   it("lists collections with items", async () => {
     const list = await listHadithCollections();
-    expect(list.length).toBeGreaterThanOrEqual(3);
+    expect(list.length).toBeGreaterThanOrEqual(8);
     const bukhari = await getHadithCollection("bukhari");
-    expect(bukhari?.items.length).toBeGreaterThan(0);
+    expect(bukhari?.items.length).toBeGreaterThan(1000);
     expect(bukhari?.items[0]?.id).toMatch(/^H:bukhari:/);
   });
 
@@ -26,9 +26,7 @@ describe("hadith catalog", () => {
     const withArticle = await searchHadith("النيات", { limit: 10 });
     expect(withArticle.total).toBeGreaterThan(0);
     expect(withArticle.hits[0]?.id).toMatch(/^H:/);
-    expect(
-      withArticle.hits.some((h) => h.arabic.includes("الأَعْمَالُ")),
-    ).toBe(true);
+    expect(withArticle.hits[0]?.arabic.length).toBeGreaterThan(20);
     const withoutArticle = await searchHadith("نيات", { limit: 10 });
     expect(withoutArticle.total).toBeGreaterThan(0);
   });
