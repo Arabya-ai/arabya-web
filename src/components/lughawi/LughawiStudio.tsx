@@ -21,7 +21,10 @@ export function LughawiStudio() {
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
 
-  const edits = result?.edits.filter((e) => e.status === "proposed") ?? [];
+  const edits = useMemo(
+    () => result?.edits.filter((e) => e.status === "proposed") ?? [],
+    [result],
+  );
 
   const highlighted = useMemo(() => {
     if (!result) return null;
