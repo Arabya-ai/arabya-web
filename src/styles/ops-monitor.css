@@ -85,6 +85,19 @@
   font-size: 0.88rem;
 }
 
+.ops-usage-list__item--warn {
+  color: color-mix(in srgb, #b45309 70%, var(--ink));
+}
+
+.ops-usage-list__item--critical {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.ops-usage-alert {
+  color: inherit;
+}
+
 .ops-monitor .dash-btn {
   border: 1px solid color-mix(in srgb, var(--brand) 35%, var(--line));
   background: var(--brand);

@@ -146,6 +146,12 @@ export function AdminOpsMonitor() {
             Ollama المحلي:{" "}
             {data.lughawi.hasLocalOllama ? "مفعّل" : "غير مضبوط"}
           </p>
+          <p>
+            Sidecar:{" "}
+            {data.lughawi.sidecar?.ok
+              ? `متصل (${data.lughawi.sidecar.ms}ms · v${data.lughawi.sidecar.version ?? "?"})`
+              : "غير متصل"}
+          </p>
           <p dir="ltr">
             {Object.entries(data.lughawi.projectPoolByProvider)
               .map(([k, v]) => `${k}:${v}`)

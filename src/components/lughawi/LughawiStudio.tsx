@@ -225,6 +225,9 @@ export function LughawiStudio() {
                     ? "/api/lughawi/tashkeel"
                     : "/api/lughawi/tafqeet";
           const body: Record<string, unknown> = { text, locale: "ar" };
+          if (next === "proofread") {
+            body.proofMode = proofMode;
+          }
           if (next === "rewrite") body.style = "fusha";
           if (next === "translate") body.targetLang = targetLang;
           if (next === "tashkeel") {
@@ -261,7 +264,7 @@ export function LughawiStudio() {
         }
       });
     },
-    [t, text, targetLang, tashkeelLevel],
+    [t, text, targetLang, tashkeelLevel, proofMode],
   );
 
   async function sendFeedback(edit: LughawiEdit, decision: "accepted" | "rejected") {
@@ -1043,6 +1046,14 @@ export function LughawiStudio() {
               </span>
             ) : null}
           </div>
+          {result?.meta.eloquence ? (
+            <div className="lughawi-eloquence" title={result.meta.eloquence.summaryAr}>
+              <span className="lughawi-eloquence-score">
+                {t("eloquenceScore")}: {result.meta.eloquence.score}
+              </span>
+              <span className="lughawi-eloquence-note">{result.meta.eloquence.summaryAr}</span>
+            </div>
+          ) : null}
         </aside>
       </div>
     </section>
