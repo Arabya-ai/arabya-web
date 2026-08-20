@@ -102,6 +102,31 @@ export type ResolvedPortalLocation = PortalCity & {
 };
 
 /**
+ * Read lat/lon from search params.
+ * Canonical: `lat` + `lon`. Aliases: `latitude`, `longitude` / `lng`.
+ * Short names win when both forms are present.
+ */
+export function readPortalCoordParams(searchParams: URLSearchParams): {
+  latRaw: string | null;
+  lonRaw: string | null;
+  hasAny: boolean;
+} {
+  const latRaw =
+    searchParams.get("lat") ?? searchParams.get("latitude");
+  const lonRaw =
+    searchParams.get("lon") ??
+    searchParams.get("longitude") ??
+    searchParams.get("lng");
+  const hasAny =
+    searchParams.has("lat") ||
+    searchParams.has("lon") ||
+    searchParams.has("latitude") ||
+    searchParams.has("longitude") ||
+    searchParams.has("lng");
+  return { latRaw, lonRaw, hasAny };
+}
+
+/**
  * Resolve city / GPS from request search params.
  * - Invalid city or coords → error code (callers return HTTP 400).
  * - Empty params → default Cairo (UI default).
@@ -112,14 +137,10 @@ export function resolvePortalLocationFromSearch(
   | { ok: true; cfg: ResolvedPortalLocation }
   | { ok: false; code: "invalid_city" | "invalid_coordinates" } {
   const cityRaw = searchParams.get("city");
-  const hasLat = searchParams.has("lat");
-  const hasLon = searchParams.has("lon");
+  const { latRaw, lonRaw, hasAny } = readPortalCoordParams(searchParams);
 
-  if (hasLat || hasLon) {
-    const coords = parsePortalCoords(
-      searchParams.get("lat"),
-      searchParams.get("lon"),
-    );
+  if (hasAny) {
+    const coords = parsePortalCoords(latRaw, lonRaw);
     if (!coords) return { ok: false, code: "invalid_coordinates" };
     const nearest = nearestPortalCity(coords.latitude, coords.longitude);
     return {

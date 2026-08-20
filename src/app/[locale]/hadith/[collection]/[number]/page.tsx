@@ -42,6 +42,13 @@ export default async function HadithItemPage({ params }: Props) {
     item.arabic,
   );
 
+  const idx = collection.items.findIndex((h) => h.id === item.id);
+  const prev = idx > 0 ? collection.items[idx - 1] : null;
+  const next =
+    idx >= 0 && idx < collection.items.length - 1
+      ? collection.items[idx + 1]
+      : null;
+
   return (
     <div className="shell page-block hadith-page">
       <nav className="library-breadcrumbs" aria-label="Breadcrumb">
@@ -87,6 +94,27 @@ export default async function HadithItemPage({ params }: Props) {
           arabic={item.arabic}
         />
       </article>
+
+      <nav className="hadith-item-pager" aria-label={t("hadithPagerAria")}>
+        {prev ? (
+          <Link href={`/hadith/${collection.slug}/${prev.number}`}>
+            {t("prevHadith")}
+          </Link>
+        ) : (
+          <span className="books-catalog-muted" aria-hidden>
+            —
+          </span>
+        )}
+        {next ? (
+          <Link href={`/hadith/${collection.slug}/${next.number}`}>
+            {t("nextHadith")}
+          </Link>
+        ) : (
+          <span className="books-catalog-muted" aria-hidden>
+            —
+          </span>
+        )}
+      </nav>
 
       <p>
         <Link href={`/hadith/${collection.slug}`}>{t("backCollection")}</Link>

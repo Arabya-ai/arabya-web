@@ -59,4 +59,41 @@ describe("resolvePortalLocationFromSearch", () => {
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.cfg.id).toBe("makkah");
   });
+
+  it("accepts latitude/longitude aliases (no silent Cairo)", () => {
+    const sp = new URLSearchParams({
+      latitude: "24.7136",
+      longitude: "46.6753",
+    });
+    const r = resolvePortalLocationFromSearch(sp);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.cfg.latitude).toBeCloseTo(24.7136);
+      expect(r.cfg.longitude).toBeCloseTo(46.6753);
+      expect(r.cfg.approxCity).toBe("riyadh");
+    }
+  });
+
+  it("accepts lng as longitude alias", () => {
+    const sp = new URLSearchParams({ lat: "21.3891", lng: "39.8579" });
+    const r = resolvePortalLocationFromSearch(sp);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.cfg.approxCity).toBe("makkah");
+    }
+  });
+
+  it("prefers short lat/lon when both forms are present", () => {
+    const sp = new URLSearchParams({
+      lat: "21.3891",
+      lon: "39.8579",
+      latitude: "30.0444",
+      longitude: "31.2357",
+    });
+    const r = resolvePortalLocationFromSearch(sp);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.cfg.approxCity).toBe("makkah");
+    }
+  });
 });

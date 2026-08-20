@@ -72,6 +72,9 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
         <Link href="/roots" role="menuitem" onClick={go()}>
           {t("roots")}
         </Link>
+        <Link href="/qiraat" role="menuitem" onClick={go()}>
+          {t("qiraat")}
+        </Link>
         <Link href="/asma" role="menuitem" onClick={go()}>
           {t("asma")}
         </Link>
@@ -96,11 +99,17 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
         <Link href="/library" role="menuitem" onClick={go()}>
           {t("library")}
         </Link>
+        <Link href="/books" role="menuitem" onClick={go()}>
+          {t("books")}
+        </Link>
         <Link href="/hadith" role="menuitem" onClick={go()}>
           {t("hadith")}
         </Link>
         <Link href="/heritage" role="menuitem" onClick={go()}>
           {t("heritage")}
+        </Link>
+        <Link href="/resources" role="menuitem" onClick={go()}>
+          {t("resources")}
         </Link>
         <Link href="/lughawi" role="menuitem" onClick={go()}>
           {t("lughawi")}
@@ -232,13 +241,18 @@ export function SiteFooter({ credit }: { credit: string }) {
               <Link href="/mushaf/1">{t("mushaf")}</Link>
               <Link href="/juz">{t("juz")}</Link>
               <Link href="/roots">{t("roots")}</Link>
+              <Link href="/qiraat">{t("qiraat")}</Link>
               <Link href="/asma">{t("asma")}</Link>
+              <Link href="/reciters">{t("reciters")}</Link>
+              <Link href="/study">{t("study")}</Link>
               <Link href="/adhkar">{t("adhkar")}</Link>
               <Link href="/qibla">{t("qibla")}</Link>
               <Link href="/studio">{t("studio")}</Link>
               <Link href="/library">{t("library")}</Link>
+              <Link href="/books">{t("books")}</Link>
               <Link href="/hadith">{t("hadith")}</Link>
               <Link href="/heritage">{t("heritage")}</Link>
+              <Link href="/resources">{t("resources")}</Link>
               <Link href="/about">{t("about")}</Link>
               <Link href="/privacy">{t("privacy")}</Link>
               <Link href="/terms">{t("terms")}</Link>
