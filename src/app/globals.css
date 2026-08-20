@@ -7372,6 +7372,13 @@ a.auth-btn--google {
   margin-top: 0.75rem;
 }
 
+.hadith-sense-preview {
+  margin: 0.35rem 0 0.15rem;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
 .hadith-layer-panel {
   margin-top: 0.75rem;
 }

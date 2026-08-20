@@ -259,6 +259,216 @@
       "titleEn": "Couplet · meter sample 36",
       "textAr": "وَوَراءَ الثَّأرِ منّي ابنُ أُختٍ · مَصِعٌ عُقدَتُهُ ما تُحَلُّ",
       "meter": "فعلاتنْ فاعلنْ فاعلاتنْ"
+    },
+    {
+      "id": "TW:ashaar-arudi:37",
+      "titleAr": "شطران · المتنبي",
+      "titleEn": "Couplet · al-Mutanabbi",
+      "textAr": "على قدر أهل العزم تأتي العزائم · وتأتي على قدر الكرام المكارم",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:ashaar-arudi:38",
+      "titleAr": "شطران · المتنبي",
+      "titleEn": "Couplet · al-Mutanabbi",
+      "textAr": "الخيل والليل والبيداء تعرفني · والسيف والرمح والقرطاس والقلم",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:ashaar-arudi:39",
+      "titleAr": "شطران · أبو تمام",
+      "titleEn": "Couplet · Abu Tammam",
+      "textAr": "السيف أصدق إنباءً من الكتب · في حده الحد بين الجد واللعب",
+      "meter": "الكامل"
+    },
+    {
+      "id": "TW:ashaar-arudi:40",
+      "titleAr": "شطران · البحتري",
+      "titleEn": "Couplet · al-Buhturi",
+      "textAr": "أتاك الربيع الطلق يختال ضاحكاً · من الحسن حتى كاد أن يتكلما",
+      "meter": "الخفيف"
+    },
+    {
+      "id": "TW:ashaar-arudi:41",
+      "titleAr": "شطران · الشافعي",
+      "titleEn": "Couplet · al-Shafiʿi",
+      "textAr": "ما في المقام لذي عقل وذي أدب · من راحة فدع الأوطان واغترب",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:ashaar-arudi:42",
+      "titleAr": "شطران · الشافعي",
+      "titleEn": "Couplet · al-Shafiʿi",
+      "textAr": "سافر تجد عوضاً عمن تفارقه · وانصب فإن لذيذ العيش في النصب",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:ashaar-arudi:43",
+      "titleAr": "شطران · ابن الفارض",
+      "titleEn": "Couplet · Ibn al-Farid",
+      "textAr": "سقتني حميّا الحب راحة مقلتي · وكأسي محيّا من عن الحسن جلت",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:ashaar-arudi:44",
+      "titleAr": "شطران · ابن الرومي",
+      "titleEn": "Couplet · Ibn al-Rumi",
+      "textAr": "أحسن إلى الناس تستعبد قلوبهم · فطالما استعبد الإنسان إحسان",
+      "meter": "الكامل"
+    },
+    {
+      "id": "TW:ashaar-arudi:45",
+      "titleAr": "شطران · صالح بن عبد القدوس",
+      "titleEn": "Couplet · Salih b. Abd al-Quddus",
+      "textAr": "المرء يجمع والزمان يفرق · ويظل يرقع والتفرق يخرق",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:ashaar-arudi:46",
+      "titleAr": "شطران · أبو العتاهية",
+      "titleEn": "Couplet · Abu al-Atahiya",
+      "textAr": "لدوا للموت وابنوا للخراب · فكلكم يصير إلى تباب",
+      "meter": "مجزوء الكامل"
+    },
+    {
+      "id": "TW:ashaar-arudi:47",
+      "titleAr": "شطران · علي بن أبي طالب (منسوب)",
+      "titleEn": "Couplet · Ali (attributed)",
+      "textAr": "الناس من جهة التمثال أكفاء · أبوهم آدم والأم حواء",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:ashaar-arudi:48",
+      "titleAr": "شطران · ابن زيدون",
+      "titleEn": "Couplet · Ibn Zaydun",
+      "textAr": "أضحى التنائي بديلاً من تدانينا · وناب عن طيب لقيانا تجافينا",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:ashaar-arudi:49",
+      "titleAr": "شطران · جرير",
+      "titleEn": "Couplet · Jarir",
+      "textAr": "إن العيون التي في طرفها حور · قتلننا ثم لم يحيين قتلانا",
+      "meter": "الكامل"
+    },
+    {
+      "id": "TW:ashaar-arudi:50",
+      "titleAr": "شطران · الفرزدق",
+      "titleEn": "Couplet · al-Farazdaq",
+      "textAr": "هذا الذي تعرف البطحاء وطأته · والبيت يعرفه والحل والحرم",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:ashaar-arudi:51",
+      "titleAr": "شطران · كعب بن زهير",
+      "titleEn": "Couplet · Kaʿb b. Zuhayr",
+      "textAr": "بانت سعاد فقلبي اليوم متبول · متيم إثرها لم يفد مكبول",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:ashaar-arudi:52",
+      "titleAr": "شطران · عنترة",
+      "titleEn": "Couplet · Antarah",
+      "textAr": "وإذا صحوت فما أقصر عن ندى · وكما علمت شمائلي وتكرمي",
+      "meter": "الكامل"
+    },
+    {
+      "id": "TW:ashaar-arudi:53",
+      "titleAr": "شطران · طرفة بن العبد",
+      "titleEn": "Couplet · Tarafa",
+      "textAr": "ستبدي لك الأيام ما كنت جاهلاً · ويأتيك بالأخبار من لم تزوّد",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:ashaar-arudi:54",
+      "titleAr": "شطران · زهير بن أبي سلمى",
+      "titleEn": "Couplet · Zuhayr",
+      "textAr": "ومن يجعل المعروف من دون عرضه · يفره ومن لا يتق الشتم يشتم",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:ashaar-arudi:55",
+      "titleAr": "شطران · لبيد بن ربيعة",
+      "titleEn": "Couplet · Labid",
+      "textAr": "ألا كل شيء ما خلا الله باطل · وكل نعيم لا محالة زائل",
+      "meter": "الكامل"
+    },
+    {
+      "id": "TW:ashaar-arudi:56",
+      "titleAr": "شطران · النابغة الذبياني",
+      "titleEn": "Couplet · al-Nabigha",
+      "textAr": "فإنك كالليل الذي هو مدركي · وإن خلت أن المنتأى عنك واسع",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:ashaar-arudi:57",
+      "titleAr": "شطران · الخنساء",
+      "titleEn": "Couplet · al-Khansa",
+      "textAr": "وإن صخراً لتأتم الهداة به · كأنه علم في رأسه نار",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:ashaar-arudi:58",
+      "titleAr": "شطران · حاتم الطائي (منسوب)",
+      "titleEn": "Couplet · Hatim (attributed)",
+      "textAr": "أماوي إن المال غاد ورائح · ويبقى من المال الأحاديث والذكر",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:ashaar-arudi:59",
+      "titleAr": "شطران · بشار بن برد",
+      "titleEn": "Couplet · Bashshar",
+      "textAr": "يا قوم أذني لبعض الحي عاشقة · والأذن تعشق قبل العين أحيانا",
+      "meter": "الكامل"
+    },
+    {
+      "id": "TW:ashaar-arudi:60",
+      "titleAr": "شطران · أبو نواس",
+      "titleEn": "Couplet · Abu Nuwas",
+      "textAr": "دع عنك لومي فإن اللوم إغراء · وداوني بالتي كانت هي الداء",
+      "meter": "الخفيف"
+    },
+    {
+      "id": "TW:ashaar-arudi:61",
+      "titleAr": "شطران · المتنبي",
+      "titleEn": "Couplet · al-Mutanabbi",
+      "textAr": "إذا غامرت في شرف مروم · فلا تقنع بما دون النجوم",
+      "meter": "الوافر"
+    },
+    {
+      "id": "TW:ashaar-arudi:62",
+      "titleAr": "شطران · امرؤ القيس",
+      "titleEn": "Couplet · Imruʾ al-Qays",
+      "textAr": "قفا نبك من ذكرى حبيب ومنزل · بسقط اللوى بين الدخول فحومل",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:ashaar-arudi:63",
+      "titleAr": "شطران · امرؤ القيس",
+      "titleEn": "Couplet · Imruʾ al-Qays",
+      "textAr": "مكر مفر مقبل مدبر معاً · كجلمود صخر حطه السيل من عل",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:ashaar-arudi:64",
+      "titleAr": "شطران · عنترة",
+      "titleEn": "Couplet · Antarah",
+      "textAr": "هل غادر الشعراء من متردم · أم هل عرفت الدار بعد توهم",
+      "meter": "الكامل"
+    },
+    {
+      "id": "TW:ashaar-arudi:65",
+      "titleAr": "شطران · زهير",
+      "titleEn": "Couplet · Zuhayr",
+      "textAr": "ومن هاب أسباب المنايا ينلنه · وإن يرق أسباب السماء بسلم",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:ashaar-arudi:66",
+      "titleAr": "شطران · لبيد",
+      "titleEn": "Couplet · Labid",
+      "textAr": "عفت الديار محلها فمقامها · بمنى تأبد غولها فرجامها",
+      "meter": "الكامل"
     }
   ]
 }

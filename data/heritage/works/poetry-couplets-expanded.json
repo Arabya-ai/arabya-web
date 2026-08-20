@@ -1,0 +1,222 @@
+{
+  "slug": "poetry-couplets-expanded",
+  "titleAr": "مختارات شعرية موسّعة",
+  "titleEn": "Expanded poetry anthology (sample)",
+  "kind": "poetry",
+  "source": "arabya-editorial / classical attributions (educational)",
+  "license": "public-domain-text-educational",
+  "descriptionAr": "عيّنة أكبر من أبيات كلاسيكية منسوبة تقليدياً — للعرض والدراسة، وليست ديواناً كاملاً.",
+  "descriptionEn": "Larger educational sample of traditionally attributed classical couplets — not a full diwan.",
+  "passages": [
+    {
+      "id": "TW:poetry-couplets-expanded:1",
+      "titleAr": "المتنبي · على قدر أهل العزم",
+      "titleEn": "al-Mutanabbi · On the measure of resolve",
+      "textAr": "على قدر أهل العزم تأتي العزائم · وتأتي على قدر الكرام المكارم",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:2",
+      "titleAr": "المتنبي · الخيل والليل",
+      "titleEn": "al-Mutanabbi · Horses and night",
+      "textAr": "الخيل والليل والبيداء تعرفني · والسيف والرمح والقرطاس والقلم",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:3",
+      "titleAr": "أبو تمام · السيف أصدق",
+      "titleEn": "Abu Tammam · The sword is truer",
+      "textAr": "السيف أصدق إنباءً من الكتب · في حده الحد بين الجد واللعب",
+      "meter": "الكامل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:4",
+      "titleAr": "البحتري · الربيع الطلق",
+      "titleEn": "al-Buhturi · Open spring",
+      "textAr": "أتاك الربيع الطلق يختال ضاحكاً · من الحسن حتى كاد أن يتكلما",
+      "meter": "الخفيف"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:5",
+      "titleAr": "الشافعي · ما في المقام",
+      "titleEn": "al-Shafiʿi · No rest in staying",
+      "textAr": "ما في المقام لذي عقل وذي أدب · من راحة فدع الأوطان واغترب",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:6",
+      "titleAr": "الشافعي · سافر تجد عوضاً",
+      "titleEn": "al-Shafiʿi · Travel and find replacement",
+      "textAr": "سافر تجد عوضاً عمن تفارقه · وانصب فإن لذيذ العيش في النصب",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:7",
+      "titleAr": "ابن الفارض · سقتني حميّا الحب",
+      "titleEn": "Ibn al-Farid · Love’s wine",
+      "textAr": "سقتني حميّا الحب راحة مقلتي · وكأسي محيّا من عن الحسن جلت",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:8",
+      "titleAr": "ابن الرومي · أحسن إلى الناس",
+      "titleEn": "Ibn al-Rumi · Do good to people",
+      "textAr": "أحسن إلى الناس تستعبد قلوبهم · فطالما استعبد الإنسان إحسان",
+      "meter": "الكامل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:9",
+      "titleAr": "صالح بن عبد القدوس · المرء يجمع",
+      "titleEn": "Salih b. Abd al-Quddus · Man gathers",
+      "textAr": "المرء يجمع والزمان يفرق · ويظل يرقع والتفرق يخرق",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:10",
+      "titleAr": "أبو العتاهية · لدوا للموت",
+      "titleEn": "Abu al-Atahiya · Beget for death",
+      "textAr": "لدوا للموت وابنوا للخراب · فكلكم يصير إلى تباب",
+      "meter": "مجزوء الكامل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:11",
+      "titleAr": "علي بن أبي طالب (منسوب) · الناس أكفاء",
+      "titleEn": "Ali (attributed) · People are equals",
+      "textAr": "الناس من جهة التمثال أكفاء · أبوهم آدم والأم حواء",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:12",
+      "titleAr": "ابن زيدون · أضحى التنائي",
+      "titleEn": "Ibn Zaydun · Distance replaced nearness",
+      "textAr": "أضحى التنائي بديلاً من تدانينا · وناب عن طيب لقيانا تجافينا",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:13",
+      "titleAr": "جرير · إن العيون",
+      "titleEn": "Jarir · Those eyes",
+      "textAr": "إن العيون التي في طرفها حور · قتلننا ثم لم يحيين قتلانا",
+      "meter": "الكامل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:14",
+      "titleAr": "الفرزدق · هذا الذي تعرف البطحاء",
+      "titleEn": "al-Farazdaq · He whom Batha knows",
+      "textAr": "هذا الذي تعرف البطحاء وطأته · والبيت يعرفه والحل والحرم",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:15",
+      "titleAr": "كعب بن زهير · بانت سعاد",
+      "titleEn": "Kaʿb b. Zuhayr · Suʿad departed",
+      "textAr": "بانت سعاد فقلبي اليوم متبول · متيم إثرها لم يفد مكبول",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:16",
+      "titleAr": "عنترة · إذا صحوت",
+      "titleEn": "Antarah · When I sober",
+      "textAr": "وإذا صحوت فما أقصر عن ندى · وكما علمت شمائلي وتكرمي",
+      "meter": "الكامل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:17",
+      "titleAr": "طرفة بن العبد · ستبدي لك الأيام",
+      "titleEn": "Tarafa · Days will show you",
+      "textAr": "ستبدي لك الأيام ما كنت جاهلاً · ويأتيك بالأخبار من لم تزوّد",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:18",
+      "titleAr": "زهير بن أبي سلمى · ومن يجعل المعروف",
+      "titleEn": "Zuhayr · Whoever puts kindness",
+      "textAr": "ومن يجعل المعروف من دون عرضه · يفره ومن لا يتق الشتم يشتم",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:19",
+      "titleAr": "لبيد بن ربيعة · ألا كل شيء",
+      "titleEn": "Labid · All but Allah is vain",
+      "textAr": "ألا كل شيء ما خلا الله باطل · وكل نعيم لا محالة زائل",
+      "meter": "الكامل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:20",
+      "titleAr": "النابغة الذبياني · فإنك كالليل",
+      "titleEn": "al-Nabigha · You are like the night",
+      "textAr": "فإنك كالليل الذي هو مدركي · وإن خلت أن المنتأى عنك واسع",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:21",
+      "titleAr": "الخنساء · وإن صخراً",
+      "titleEn": "al-Khansa · And Sakhr",
+      "textAr": "وإن صخراً لتأتم الهداة به · كأنه علم في رأسه نار",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:22",
+      "titleAr": "حاتم الطائي (منسوب) · أماوي إن المال",
+      "titleEn": "Hatim (attributed) · O Mawiyya, wealth",
+      "textAr": "أماوي إن المال غاد ورائح · ويبقى من المال الأحاديث والذكر",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:23",
+      "titleAr": "بشار بن برد · الأذن تعشق",
+      "titleEn": "Bashshar · The ear loves",
+      "textAr": "يا قوم أذني لبعض الحي عاشقة · والأذن تعشق قبل العين أحيانا",
+      "meter": "الكامل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:24",
+      "titleAr": "أبو نواس · دع عنك لومي",
+      "titleEn": "Abu Nuwas · Leave off blame",
+      "textAr": "دع عنك لومي فإن اللوم إغراء · وداوني بالتي كانت هي الداء",
+      "meter": "الخفيف"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:25",
+      "titleAr": "المتنبي · إذا غامرت في شرف",
+      "titleEn": "al-Mutanabbi · If you venture for honor",
+      "textAr": "إذا غامرت في شرف مروم · فلا تقنع بما دون النجوم",
+      "meter": "الوافر"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:26",
+      "titleAr": "امرؤ القيس · قفا نبك",
+      "titleEn": "Imruʾ al-Qays · Stop, let us weep",
+      "textAr": "قفا نبك من ذكرى حبيب ومنزل · بسقط اللوى بين الدخول فحومل",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:27",
+      "titleAr": "امرؤ القيس · مكر مفر",
+      "titleEn": "Imruʾ al-Qays · Wheeling and fleeing",
+      "textAr": "مكر مفر مقبل مدبر معاً · كجلمود صخر حطه السيل من عل",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:28",
+      "titleAr": "عنترة · هل غادر الشعراء",
+      "titleEn": "Antarah · Have poets left",
+      "textAr": "هل غادر الشعراء من متردم · أم هل عرفت الدار بعد توهم",
+      "meter": "الكامل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:29",
+      "titleAr": "زهير · ومن هاب أسباب المنايا",
+      "titleEn": "Zuhayr · Whoever fears death’s causes",
+      "textAr": "ومن هاب أسباب المنايا ينلنه · وإن يرق أسباب السماء بسلم",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:poetry-couplets-expanded:30",
+      "titleAr": "لبيد · عفت الديار",
+      "titleEn": "Labid · The dwellings faded",
+      "textAr": "عفت الديار محلها فمقامها · بمنى تأبد غولها فرجامها",
+      "meter": "الكامل"
+    }
+  ]
+}
