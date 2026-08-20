@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
-import { resolveProjectAi, runAiChat } from "@/lib/lughawi/ai-gateway";
-import { getUserApiKey } from "@/lib/lughawi/credentials-store";
+import { runAiAuto } from "@/lib/lughawi/ai-gateway";
+import { resolveLughawiAiCandidates } from "@/lib/lughawi/resolve-ai";
 import { getQuota, tryChargeQuota } from "@/lib/lughawi/quota-store";
 import type { ProofreadResponse, RewriteStyle } from "@/lib/lughawi/types";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -22,7 +22,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "يلزم تسجيل الدخول", code: "auth" }, { status: 401 });
   }
 
-  let body: { text?: string; style?: RewriteStyle; provider?: string; locale?: string };
+  let body: {
+    text?: string;
+    style?: RewriteStyle;
+    provider?: string;
+    locale?: string;
+  };
   try {
     body = (await req.json()) as typeof body;
   } catch {
@@ -37,16 +42,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "أدخل نصًا" }, { status: 400 });
   }
 
-  const userKey = getUserApiKey(email, body.provider);
-  const project = resolveProjectAi();
-  let apiKey: string | undefined;
-  let provider: string | undefined;
-  let chargeProject = false;
+  const { candidates, chargeProject, mode } = resolveLughawiAiCandidates({
+    userId: email,
+    mode: body.provider ?? "auto",
+  });
 
-  if (userKey) {
-    apiKey = userKey.apiKey;
-    provider = userKey.provider;
-  } else if (project) {
+  if (!candidates.length) {
+    return NextResponse.json(
+      {
+        error:
+          "لا مفتاح متاح. أضف مفتاحك في إعدادات لغوي أو اضبط مفاتيح مشروع مدقق العربية على الخادم.",
+        code: "no_key",
+      },
+      { status: 402 },
+    );
+  }
+
+  if (chargeProject) {
     const quota = getQuota(email);
     if (quota.remainingChars < text.length) {
       return NextResponse.json(
@@ -58,24 +70,11 @@ export async function POST(req: Request) {
         { status: 402 },
       );
     }
-    apiKey = project.apiKey;
-    provider = project.provider;
-    chargeProject = true;
-  } else {
-    return NextResponse.json(
-      {
-        error:
-          "لا مفتاح متاح. أضف مفتاحك في إعدادات لغوي أو اضبط مفتاح مشروع مدقق العربية على الخادم.",
-        code: "no_key",
-      },
-      { status: 402 },
-    );
   }
 
   try {
-    const { text: out } = await runAiChat({
-      provider: provider!,
-      apiKey: apiKey!,
+    const { text: out, provider, model, attempts } = await runAiAuto({
+      candidates,
       system:
         "أنت مدقق لغوي عربي فصيح محترف. أعد النص المطلوب فقط دون شرح أو علامات اقتباس.",
       user: `${STYLE_PROMPT[style]}\n\nالنص:\n${text}`,
@@ -96,8 +95,8 @@ export async function POST(req: Request) {
           suggestion: out || text,
           explanation:
             locale === "en"
-              ? "AI reformulation"
-              : "إعادة صياغة بالذكاء الاصطناعي مع الحفاظ على المعنى.",
+              ? `AI reformulation (${mode}${model ? ` · ${model}` : ""})`
+              : `إعادة صياغة بالذكاء الاصطناعي (${mode}${model ? ` · ${model}` : ""}).`,
           confidence: 0.75,
           source: "ai",
           status: "proposed",
@@ -105,10 +104,11 @@ export async function POST(req: Request) {
       ],
       protectedSpans: [],
       meta: {
-        engine: "lughawi-ai",
+        engine: "lughawi-ai-auto",
         usedAi: true,
         quotaCharged: chargeProject ? text.length : 0,
         provider,
+        warning: attempts && attempts > 1 ? `Auto حاول ${attempts} مزودين` : undefined,
       },
     };
     return NextResponse.json(payload);

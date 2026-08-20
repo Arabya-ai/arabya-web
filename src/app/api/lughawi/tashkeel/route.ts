@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
-import { resolveProjectAi, runAiChat } from "@/lib/lughawi/ai-gateway";
-import { getUserApiKey } from "@/lib/lughawi/credentials-store";
+import { runAiAuto } from "@/lib/lughawi/ai-gateway";
 import { applyLocalTashkeel } from "@/lib/lughawi/engines/tashkeel-engine";
+import { resolveLughawiAiCandidates } from "@/lib/lughawi/resolve-ai";
 import { getQuota, tryChargeQuota } from "@/lib/lughawi/quota-store";
 import type { ProofreadResponse, TashkeelLevel } from "@/lib/lughawi/types";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -46,6 +46,7 @@ export async function POST(req: Request) {
         engine: "lughawi-tashkeel-local",
         usedAi: false,
         quotaCharged: 0,
+        offline: true,
         warning:
           coverage < 0.5
             ? "تشكيل محلي جزئي — فعّل الذكاء الاصطناعي لتغطية أوسع."
@@ -58,40 +59,6 @@ export async function POST(req: Request) {
   const session = await auth();
   const email = session?.user?.email?.trim().toLowerCase();
   if (!email) {
-    return NextResponse.json(
-      {
-        ...({
-          original: text,
-          result: local.result,
-          edits: [],
-          protectedSpans: [],
-          meta: {
-            engine: "lughawi-tashkeel-local",
-            usedAi: false,
-            quotaCharged: 0,
-            warning: "سجّل الدخول واستخدم الحصة أو مفتاحك لتشكيل أوسع.",
-          },
-        } satisfies ProofreadResponse),
-      },
-    );
-  }
-
-  const userKey = getUserApiKey(email, body.provider);
-  const project = resolveProjectAi();
-  let apiKey: string | undefined;
-  let provider: string | undefined;
-  let charge = false;
-  if (userKey) {
-    apiKey = userKey.apiKey;
-    provider = userKey.provider;
-  } else if (project) {
-    if (getQuota(email).remainingChars < text.length) {
-      return NextResponse.json({ error: "quota", code: "quota_exhausted" }, { status: 402 });
-    }
-    apiKey = project.apiKey;
-    provider = project.provider;
-    charge = true;
-  } else {
     return NextResponse.json({
       original: text,
       result: local.result,
@@ -101,9 +68,35 @@ export async function POST(req: Request) {
         engine: "lughawi-tashkeel-local",
         usedAi: false,
         quotaCharged: 0,
+        offline: true,
+        warning: "سجّل الدخول واستخدم الحصة أو مفتاحك لتشكيل أوسع.",
+      },
+    } satisfies ProofreadResponse);
+  }
+
+  const { candidates, chargeProject } = resolveLughawiAiCandidates({
+    userId: email,
+    mode: body.provider ?? "auto",
+  });
+
+  if (!candidates.length) {
+    return NextResponse.json({
+      original: text,
+      result: local.result,
+      edits: [],
+      protectedSpans: [],
+      meta: {
+        engine: "lughawi-tashkeel-local",
+        usedAi: false,
+        quotaCharged: 0,
+        offline: true,
         warning: "لا مفتاح AI — أُرجع التشكيل المحلي.",
       },
     } satisfies ProofreadResponse);
+  }
+
+  if (chargeProject && getQuota(email).remainingChars < text.length) {
+    return NextResponse.json({ error: "quota", code: "quota_exhausted" }, { status: 402 });
   }
 
   try {
@@ -115,23 +108,23 @@ export async function POST(req: Request) {
           : level === "endings"
             ? "تشكيل أواخر الكلمات فقط"
             : "تشكيل إلزامي أساسي";
-    const { text: out } = await runAiChat({
-      provider: provider!,
-      apiKey: apiKey!,
+    const { text: out, provider, attempts } = await runAiAuto({
+      candidates,
       system: "أضف التشكيل للنص العربي حسب المطلوب. أعد النص المشكّل فقط.",
       user: `${levelHint}:\n${text}`,
     });
-    if (charge) tryChargeQuota(email, text.length);
+    if (chargeProject) tryChargeQuota(email, text.length);
     return NextResponse.json({
       original: text,
       result: out || local.result,
       edits: [],
       protectedSpans: [],
       meta: {
-        engine: "lughawi-tashkeel-ai",
+        engine: "lughawi-tashkeel-auto",
         usedAi: true,
-        quotaCharged: charge ? text.length : 0,
+        quotaCharged: chargeProject ? text.length : 0,
         provider,
+        warning: attempts && attempts > 1 ? `Auto حاول ${attempts} مزودين` : undefined,
       },
     } satisfies ProofreadResponse);
   } catch (e) {
@@ -144,6 +137,7 @@ export async function POST(req: Request) {
         engine: "lughawi-tashkeel-local",
         usedAi: false,
         quotaCharged: 0,
+        offline: true,
         warning: e instanceof Error ? e.message : "AI tashkeel failed",
       },
     } satisfies ProofreadResponse);

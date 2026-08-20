@@ -28,6 +28,8 @@ export function LughawiSettings() {
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [authed, setAuthed] = useState(true);
+  const [poolCount, setPoolCount] = useState(0);
+  const [poolProviders, setPoolProviders] = useState<string[]>([]);
 
   function refresh() {
     startTransition(async () => {
@@ -44,10 +46,16 @@ export function LughawiSettings() {
       if (p.ok) {
         const data = (await p.json()) as {
           providers: ProviderRow[];
-          defaultProvider: AiProviderId | null;
+          defaultProvider: AiProviderId | null | "auto";
+          projectPoolCount?: number;
+          projectPoolProviders?: string[];
         };
         setProviders(data.providers);
-        if (data.defaultProvider) setSelected(data.defaultProvider);
+        setPoolCount(data.projectPoolCount ?? 0);
+        setPoolProviders(data.projectPoolProviders ?? []);
+        if (data.defaultProvider && data.defaultProvider !== "auto") {
+          setSelected(data.defaultProvider);
+        }
       }
     });
   }
@@ -97,6 +105,19 @@ export function LughawiSettings() {
   return (
     <div className="lughawi-settings">
       <h2>{t("settingsTitle")}</h2>
+      <p className="lughawi-muted" style={{ margin: 0 }}>
+        {t("autoModeHelp")}
+      </p>
+      {poolCount > 0 ? (
+        <p className="lughawi-quota">
+          {t("projectPoolLine", {
+            count: poolCount,
+            list: poolProviders.join(" · "),
+          })}
+        </p>
+      ) : (
+        <p className="lughawi-warn">{t("projectPoolEmpty")}</p>
+      )}
       {quota ? (
         <p className="lughawi-quota">
           {t("quotaLine", {

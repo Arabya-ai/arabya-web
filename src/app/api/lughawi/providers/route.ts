@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { resolveProjectAiPool } from "@/lib/lughawi/ai-gateway";
 import { listProviderStatus } from "@/lib/lughawi/credentials-store";
 import { AI_PROVIDERS } from "@/lib/lughawi/types";
 import { NextResponse } from "next/server";
@@ -20,9 +21,20 @@ export async function GET() {
       isDefault: s?.isDefault ?? false,
     };
   });
+  const projectPool = resolveProjectAiPool().map((s) => ({
+    provider: s.provider,
+    hasKey: true,
+    model: s.model ?? null,
+  }));
   const defaultProvider =
     providers.find((p) => p.isDefault)?.id ??
     providers.find((p) => p.configured)?.id ??
-    null;
-  return NextResponse.json({ providers, defaultProvider });
+    "auto";
+  return NextResponse.json({
+    auto: true,
+    providers,
+    defaultProvider,
+    projectPoolCount: projectPool.length,
+    projectPoolProviders: projectPool.map((p) => p.provider),
+  });
 }

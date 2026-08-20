@@ -1,7 +1,7 @@
 import {
   lughawiCredentialsSecret,
-  lughawiProjectApiKey,
-  lughawiProjectProvider,
+  lughawiProjectAiPool,
+  type ProjectAiSlot,
 } from "@/lib/lughawi/config";
 import type { AiProviderId } from "@/lib/lughawi/types";
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
@@ -12,16 +12,34 @@ export interface AiChatParams {
   system: string;
   user: string;
   maxTokens?: number;
+  model?: string;
 }
 
 export interface AiChatResult {
   text: string;
   provider: string;
+  model?: string;
+  attempts?: number;
+}
+
+export interface AiCandidate {
+  provider: AiProviderId;
+  apiKey: string;
+  model?: string;
+  source: "user" | "project";
 }
 
 function isProvider(id: string): id is AiProviderId {
   return ["openai", "anthropic", "google", "groq", "openrouter"].includes(id);
 }
+
+const DEFAULT_MODELS: Record<AiProviderId, string> = {
+  openai: "gpt-4o-mini",
+  groq: "llama-3.3-70b-versatile",
+  openrouter: "openai/gpt-4o-mini",
+  anthropic: "claude-3-5-haiku-latest",
+  google: "gemini-2.0-flash",
+};
 
 /** Encrypt user API keys at rest (AES-256-GCM). */
 export function encryptSecret(plain: string): string {
@@ -88,6 +106,7 @@ async function chatAnthropic(
   system: string,
   user: string,
   maxTokens: number,
+  model: string,
 ): Promise<string> {
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -97,7 +116,7 @@ async function chatAnthropic(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "claude-3-5-haiku-latest",
+      model,
       max_tokens: maxTokens,
       system,
       messages: [{ role: "user", content: user }],
@@ -118,8 +137,9 @@ async function chatGoogle(
   system: string,
   user: string,
   maxTokens: number,
+  model: string,
 ): Promise<string> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -145,13 +165,14 @@ export async function runAiChat(params: AiChatParams): Promise<AiChatResult> {
   if (!isProvider(provider)) {
     throw new Error(`Unsupported provider: ${params.provider}`);
   }
+  const model = params.model?.trim() || DEFAULT_MODELS[provider];
 
   let text = "";
   if (provider === "openai") {
     text = await chatOpenAiCompatible(
       "https://api.openai.com/v1",
       params.apiKey,
-      "gpt-4o-mini",
+      model,
       params.system,
       params.user,
       maxTokens,
@@ -160,7 +181,7 @@ export async function runAiChat(params: AiChatParams): Promise<AiChatResult> {
     text = await chatOpenAiCompatible(
       "https://api.groq.com/openai/v1",
       params.apiKey,
-      "llama-3.3-70b-versatile",
+      model,
       params.system,
       params.user,
       maxTokens,
@@ -169,24 +190,116 @@ export async function runAiChat(params: AiChatParams): Promise<AiChatResult> {
     text = await chatOpenAiCompatible(
       "https://openrouter.ai/api/v1",
       params.apiKey,
-      "openai/gpt-4o-mini",
+      model,
       params.system,
       params.user,
       maxTokens,
     );
   } else if (provider === "anthropic") {
-    text = await chatAnthropic(params.apiKey, params.system, params.user, maxTokens);
+    text = await chatAnthropic(
+      params.apiKey,
+      params.system,
+      params.user,
+      maxTokens,
+      model,
+    );
   } else if (provider === "google") {
-    text = await chatGoogle(params.apiKey, params.system, params.user, maxTokens);
+    text = await chatGoogle(
+      params.apiKey,
+      params.system,
+      params.user,
+      maxTokens,
+      model,
+    );
   }
 
-  return { text, provider };
+  return { text, provider, model };
 }
 
+/** @deprecated prefer resolveProjectAiPool / runAiAuto */
 export function resolveProjectAi():
   | { provider: string; apiKey: string }
   | undefined {
-  const apiKey = lughawiProjectApiKey();
-  if (!apiKey) return undefined;
-  return { provider: lughawiProjectProvider(), apiKey };
+  const pool = lughawiProjectAiPool();
+  const first = pool[0];
+  if (!first) return undefined;
+  return { provider: first.provider, apiKey: first.apiKey };
+}
+
+export function resolveProjectAiPool(): ProjectAiSlot[] {
+  return lughawiProjectAiPool();
+}
+
+/**
+ * Cursor-like Auto: try candidates in order; on failure rotate to next
+ * provider/model/key until one succeeds.
+ */
+export async function runAiAuto(input: {
+  system: string;
+  user: string;
+  maxTokens?: number;
+  candidates: AiCandidate[];
+}): Promise<AiChatResult> {
+  const errors: string[] = [];
+  let attempts = 0;
+  for (const c of input.candidates) {
+    attempts += 1;
+    try {
+      const result = await runAiChat({
+        provider: c.provider,
+        apiKey: c.apiKey,
+        model: c.model,
+        system: input.system,
+        user: input.user,
+        maxTokens: input.maxTokens,
+      });
+      return { ...result, attempts };
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      errors.push(`${c.provider}: ${msg.slice(0, 120)}`);
+    }
+  }
+  throw new Error(
+    errors.length
+      ? `Auto exhausted all providers. ${errors.join(" | ")}`
+      : "No AI candidates configured",
+  );
+}
+
+export function buildAutoCandidates(opts: {
+  userCandidates?: AiCandidate[];
+  preferProvider?: string | null;
+  /** When true, only user keys (no project pool). */
+  userOnly?: boolean;
+}): AiCandidate[] {
+  const out: AiCandidate[] = [];
+  const prefer = opts.preferProvider?.toLowerCase();
+
+  const user = [...(opts.userCandidates ?? [])];
+  if (prefer) {
+    user.sort((a, b) =>
+      a.provider === prefer ? -1 : b.provider === prefer ? 1 : 0,
+    );
+  }
+  out.push(...user);
+
+  if (!opts.userOnly) {
+    for (const slot of lughawiProjectAiPool()) {
+      out.push({
+        provider: slot.provider,
+        apiKey: slot.apiKey,
+        model: slot.model,
+        source: "project",
+      });
+    }
+  }
+
+  // Dedupe identical provider+last8
+  const seen = new Set<string>();
+  return out.filter((c) => {
+    const k = `${c.provider}:${c.apiKey.slice(-8)}:${c.model ?? ""}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
 }
