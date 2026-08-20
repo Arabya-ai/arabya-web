@@ -135,31 +135,31 @@ export function LughawiStudio() {
   }
 
   function decide(id: string, decision: "accepted" | "rejected") {
-    if (!result) return;
-    const edit = result.edits.find((e) => e.id === id);
-    if (!edit) return;
+    setResult((prev) => {
+      if (!prev) return prev;
+      const edit = prev.edits.find((e) => e.id === id && e.status === "proposed");
+      if (!edit) return prev;
 
-    void sendFeedback(edit, decision);
+      void sendFeedback(edit, decision);
 
-    if (decision === "rejected") {
-      const nextEdits = result.edits.map((e) =>
-        e.id === id ? { ...e, status: "rejected" as const } : e,
-      );
-      setResult({ ...result, edits: nextEdits });
-      setFlash(t("rejectedFlash", { word: edit.original }));
-      return;
-    }
+      if (decision === "rejected") {
+        setFlash(t("rejectedFlash", { word: edit.original }));
+        return {
+          ...prev,
+          edits: prev.edits.filter((e) => e.id !== id),
+        };
+      }
 
-    // Accept: apply onto current working text (result.result which starts as original).
-    const applied = applySingleEdit(result.result, result.edits, id, "accepted");
-    setText(applied.text);
-    setResult({
-      ...result,
-      original: applied.text,
-      result: applied.text,
-      edits: applied.edits,
+      const applied = applySingleEdit(prev.result, prev.edits, id, "accepted");
+      setText(applied.text);
+      setFlash(t("acceptedFlash", { from: edit.original, to: edit.suggestion }));
+      return {
+        ...prev,
+        original: applied.text,
+        result: applied.text,
+        edits: applied.edits,
+      };
     });
-    setFlash(t("acceptedFlash", { from: edit.original, to: edit.suggestion }));
   }
 
   function acceptAll() {
@@ -354,10 +354,20 @@ export function LughawiStudio() {
                   <p>{edit.explanation}</p>
                 </div>
                 <div className="lughawi-edit-actions">
-                  <button type="button" onClick={() => decide(edit.id, "accepted")}>
+                  <button
+                    type="button"
+                    data-edit-id={edit.id}
+                    data-decision="accepted"
+                    onClick={() => decide(edit.id, "accepted")}
+                  >
                     {t("accept")}
                   </button>
-                  <button type="button" onClick={() => decide(edit.id, "rejected")}>
+                  <button
+                    type="button"
+                    data-edit-id={edit.id}
+                    data-decision="rejected"
+                    onClick={() => decide(edit.id, "rejected")}
+                  >
                     {t("reject")}
                   </button>
                 </div>
