@@ -47,7 +47,6 @@ function normalizeArabicSearch(input) {
 /** Parse OHD lines: "num","text..." (text may contain commas; quotes rarely escaped). */
 function parseOhdCsv(text) {
   const items = [];
-  const re = /^"(\d+)",\s*"(.*)"\s*$/s;
   // Split on newlines that start a new numbered record
   const chunks = text.split(/\n(?="\d+",)/);
   for (const chunk of chunks) {

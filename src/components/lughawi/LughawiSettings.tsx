@@ -1,6 +1,7 @@
 "use client";
 
 import { AI_PROVIDERS, type AiProviderId } from "@/lib/lughawi/types";
+import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 
@@ -62,7 +63,6 @@ export function LughawiSettings() {
 
   useEffect(() => {
     refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount once
   }, []);
 
   function saveKey() {
@@ -95,9 +95,9 @@ export function LughawiSettings() {
     return (
       <div className="lughawi-settings">
         <p>{t("loginForQuota")}</p>
-        <a href="/login" className="nav-pill">
+        <Link href="/login" className="nav-pill">
           {t("login")}
-        </a>
+        </Link>
       </div>
     );
   }

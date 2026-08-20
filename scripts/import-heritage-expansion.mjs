@@ -35,7 +35,6 @@ async function fetchText(url) {
 
 function parseSimpleCsv(text) {
   const lines = text.trim().split(/\r?\n/);
-  const header = lines[0].split(",");
   // Columns: ,original_shatr,arudi_style,tafilaat,pattern — first empty key
   const rows = [];
   for (let i = 1; i < lines.length; i++) {

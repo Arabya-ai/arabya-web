@@ -122,7 +122,6 @@ export function HadithWordStudy({ collection, number, arabic }: Props) {
             <button
               key={tok.wordId}
               type="button"
-              role="listitem"
               className={
                 active
                   ? "hadith-token hadith-token--active"
