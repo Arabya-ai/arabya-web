@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { withResolvedCover } from "@/lib/library/covers";
 import {
   getImportedLibraryRoot,
   gitLibraryDataRoot,
@@ -50,7 +51,9 @@ export async function getLibraryCatalog(): Promise<LibraryWorkMeta[]> {
     loadGitCatalog(),
     loadImportedCatalog(),
   ]);
-  return mergeWorks(gitWorks, importedWorks).filter((w) => w.status === "ready");
+  return mergeWorks(gitWorks, importedWorks)
+    .filter((w) => w.status === "ready")
+    .map(withResolvedCover);
 }
 
 export async function getLibraryWork(
@@ -67,9 +70,9 @@ export async function getLibraryWork(
   const importedMeta = await readJsonFile<LibraryWorkMeta>(
     path.join(getImportedLibraryRoot(), slug, "meta.json"),
   );
-  if (importedMeta) return { ...work, ...importedMeta };
+  if (importedMeta) return withResolvedCover({ ...work, ...importedMeta });
 
-  return work;
+  return withResolvedCover(work);
 }
 
 export function resolveLibraryPdfPath(slug: string): string | null {
