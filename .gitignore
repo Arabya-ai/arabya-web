@@ -55,6 +55,9 @@ data/user-data.sqlite
 data/user-data.sqlite-wal
 data/user-data.sqlite-shm
 
+# لغوي runtime quota / encrypted BYOK keys
+/.data/
+
 # MoneyPrinterTurbo engine runtime (keep source; ignore secrets/output/media)
 services/money-printer-turbo/storage/
 services/money-printer-turbo/.venv/

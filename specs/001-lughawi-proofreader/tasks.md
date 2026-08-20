@@ -21,9 +21,9 @@
 
 **Purpose**: هيكل المجلدات والإعدادات المشتركة
 
-- [ ] T001 إنشاء هيكل `src/lib/lughawi/` و`src/components/lughawi/` و`src/app/[locale]/lughawi/` و`src/styles/lughawi.css` و`src/app/api/lughawi/` وفق `plan.md`
-- [ ] T002 [P] إضافة متغيرات البيئة الموثّقة في `.env.example` (`LUGHAWI_*` حصة 15000، مفتاح مشروع، رابط محرك)
-- [ ] T003 [P] تحديث قرارات المالك في `specs/001-lughawi-proofreader/{spec,plan,quickstart,research,contracts}.md` (تم جزئيًا — التحقق)
+- [x] T001 إنشاء هيكل `src/lib/lughawi/` و`src/components/lughawi/` و`src/app/[locale]/lughawi/` و`src/styles/lughawi.css` و`src/app/api/lughawi/` وفق `plan.md`
+- [x] T002 [P] إضافة متغيرات البيئة الموثّقة في `.env.example` (`LUGHAWI_*` حصة 15000، مفتاح مشروع، رابط محرك)
+- [x] T003 [P] تحديث قرارات المالك في `specs/001-lughawi-proofreader/{spec,plan,quickstart,research,contracts}.md` (تم جزئيًا — التحقق)
 
 ---
 
@@ -31,13 +31,13 @@
 
 **Purpose**: أنواع مشتركة، قواعد، تطبيع، حماية قرآن خفيفة، عقد استجابة موحّد — قبل أي قصة مستخدم
 
-- [ ] T004 تعريف الأنواع المشتركة في `src/lib/lughawi/types.ts` (Edit, ProtectedSpan, ProofreadResponse, modes)
-- [ ] T005 [P] تطبيع عربي أساسي في `src/lib/lughawi/normalize.ts`
-- [ ] T006 [P] كشف مقاطع قرآنية محمية بسيط في `src/lib/lughawi/quran-guard.ts` (مطابقة من بيانات محلية خفيفة أو أنماط آيات قصيرة)
-- [ ] T007 دمج مراحل بلا تعارض في `src/lib/lughawi/pipeline.ts` (أولوية: حماية > قواعد > نحو > ترقيم > AI)
-- [ ] T008 قوالب ملاحظات القواعد في `src/lib/lughawi/rules/notes.ts` + فهرس أنواع الأخطاء
-- [ ] T009 إعدادات الحصة الافتراضية `LUGHAWI_MONTHLY_QUOTA_CHARS=15000` في `src/lib/lughawi/config.ts`
-- [ ] T010 اختبارات وحدة تأسيسية في `src/lib/lughawi/pipeline.test.ts`
+- [x] T004 تعريف الأنواع المشتركة في `src/lib/lughawi/types.ts` (Edit, ProtectedSpan, ProofreadResponse, modes)
+- [x] T005 [P] تطبيع عربي أساسي في `src/lib/lughawi/normalize.ts`
+- [x] T006 [P] كشف مقاطع قرآنية محمية بسيط في `src/lib/lughawi/quran-guard.ts` (مطابقة من بيانات محلية خفيفة أو أنماط آيات قصيرة)
+- [x] T007 دمج مراحل بلا تعارض في `src/lib/lughawi/pipeline.ts` (أولوية: حماية > قواعد > نحو > ترقيم > AI)
+- [x] T008 قوالب ملاحظات القواعد في `src/lib/lughawi/rules/notes.ts` + فهرس أنواع الأخطاء
+- [x] T009 إعدادات الحصة الافتراضية `LUGHAWI_MONTHLY_QUOTA_CHARS=15000` في `src/lib/lughawi/config.ts`
+- [x] T010 اختبارات وحدة تأسيسية في `src/lib/lughawi/pipeline.test.ts`
 
 **Checkpoint**: يمكن استدعاء `proofreadLocal(text)` وإرجاع edits بدون واجهة
 
@@ -49,14 +49,14 @@
 
 **Independent Test**: `/lughawi` + لصق «انا ذهبت الى المدرسه» → اقتراحات همزة/إلى/ة
 
-- [ ] T011 [P] [US1] قواعد إملاء في `src/lib/lughawi/rules/spelling.ts` (همزة أنا/إلى، تاء مربوطة شائعة، ألف فارقة مبسّطة، مسافات)
-- [ ] T012 [US1] ربط القواعد بالخط في `src/lib/lughawi/engines/spelling-engine.ts`
-- [ ] T013 [US1] مسار API `POST` في `src/app/api/lughawi/proofread/route.ts` وفق العقد
-- [ ] T014 [US1] مكوّن محرر مستلهم من arabiccorrector في `src/components/lughawi/LughawiStudio.tsx` (textarea، عدّاد أحرف، زر دقّق، نتيجة، تمييز تعديلات، tooltip شرح)
-- [ ] T015 [US1] صفحة `src/app/[locale]/lughawi/page.tsx` بهوية عربیا + استيراد `lughawi.css`
-- [ ] T016 [US1] أنماط عربیا (تيل، RTL، بدون أرجواني) في `src/styles/lughawi.css` مستلهمة من هيكل المنافسين
-- [ ] T017 [P] [US1] مفاتيح i18n `Lughawi` في `messages/ar.json` و`messages/en.json`
-- [ ] T018 [US1] اختبار `src/lib/lughawi/rules/spelling.test.ts` لعيّنات ذهبية ≥10
+- [x] T011 [P] [US1] قواعد إملاء في `src/lib/lughawi/rules/spelling.ts` (همزة أنا/إلى، تاء مربوطة شائعة، ألف فارقة مبسّطة، مسافات)
+- [x] T012 [US1] ربط القواعد بالخط في `src/lib/lughawi/engines/spelling-engine.ts`
+- [x] T013 [US1] مسار API `POST` في `src/app/api/lughawi/proofread/route.ts` وفق العقد
+- [x] T014 [US1] مكوّن محرر مستلهم من arabiccorrector في `src/components/lughawi/LughawiStudio.tsx` (textarea، عدّاد أحرف، زر دقّق، نتيجة، تمييز تعديلات، tooltip شرح)
+- [x] T015 [US1] صفحة `src/app/[locale]/lughawi/page.tsx` بهوية عربیا + استيراد `lughawi.css`
+- [x] T016 [US1] أنماط عربیا (تيل، RTL، بدون أرجواني) في `src/styles/lughawi.css` مستلهمة من هيكل المنافسين
+- [x] T017 [P] [US1] مفاتيح i18n `Lughawi` في `messages/ar.json` و`messages/en.json`
+- [x] T018 [US1] اختبار `src/lib/lughawi/rules/spelling.test.ts` لعيّنات ذهبية ≥10
 
 **Checkpoint**: MVP يعمل محليًا بدون مفتاح AI
 
@@ -68,11 +68,11 @@
 
 **Independent Test**: جملة بخطأ توافق/إنّ → تصحيح + explanation
 
-- [ ] T019 [P] [US2] قواعد نحو أساسية في `src/lib/lughawi/rules/grammar.ts`
-- [ ] T020 [US2] دمج النحو في `pipeline.ts` وعرض نوع `grammar` في الواجهة
-- [ ] T021 [US2] تحسين بطاقة الملاحظة في `src/components/lughawi/EditTooltip.tsx`
-- [ ] T022 [US2] قبول/رفض تعديل فردي وتحديث النص الناتج في `LughawiStudio.tsx`
-- [ ] T023 [US2] اختبارات `src/lib/lughawi/rules/grammar.test.ts`
+- [x] T019 [P] [US2] قواعد نحو أساسية في `src/lib/lughawi/rules/grammar.ts`
+- [x] T020 [US2] دمج النحو في `pipeline.ts` وعرض نوع `grammar` في الواجهة
+- [x] T021 [US2] تحسين بطاقة الملاحظة في `src/components/lughawi/EditTooltip.tsx`
+- [x] T022 [US2] قبول/رفض تعديل فردي وتحديث النص الناتج في `LughawiStudio.tsx`
+- [x] T023 [US2] اختبارات `src/lib/lughawi/rules/grammar.test.ts`
 
 ---
 
@@ -82,12 +82,12 @@
 
 **Independent Test**: واجهة إعدادات تعرض 15000؛ حفظ مفتاح (وضع تخزين آمن)؛ رفض AI عند النفاد بلا مفتاح
 
-- [ ] T024 [US3] تخزين حصص في الذاكرة/ملف محلي آمن أولًا مع واجهة جاهزة لـ SQLite في `src/lib/lughawi/quota-store.ts`
-- [ ] T025 [US3] تشفير/حفظ مفاتيح المزودين في `src/lib/lughawi/credentials-store.ts` (لا تُرجع المفتاح كاملًا)
-- [ ] T026 [P] [US3] `GET/PUT/DELETE` في `src/app/api/lughawi/quota/route.ts` و`providers/route.ts` و`providers/[id]/key/route.ts`
-- [ ] T027 [US3] بوابة AI موحّدة في `src/lib/lughawi/ai-gateway.ts` (openai, anthropic, google, groq, openrouter)
-- [ ] T028 [US3] لوحة إعدادات في `src/components/lughawi/LughawiSettings.tsx` + تبويب في الاستوديو
-- [ ] T029 [US3] فرض الحصة قبل مسارات rewrite/AI في الـ API
+- [x] T024 [US3] تخزين حصص في الذاكرة/ملف محلي آمن أولًا مع واجهة جاهزة لـ SQLite في `src/lib/lughawi/quota-store.ts`
+- [x] T025 [US3] تشفير/حفظ مفاتيح المزودين في `src/lib/lughawi/credentials-store.ts` (لا تُرجع المفتاح كاملًا)
+- [x] T026 [P] [US3] `GET/PUT/DELETE` في `src/app/api/lughawi/quota/route.ts` و`providers/route.ts` و`providers/[id]/key/route.ts`
+- [x] T027 [US3] بوابة AI موحّدة في `src/lib/lughawi/ai-gateway.ts` (openai, anthropic, google, groq, openrouter)
+- [x] T028 [US3] لوحة إعدادات في `src/components/lughawi/LughawiSettings.tsx` + تبويب في الاستوديو
+- [x] T029 [US3] فرض الحصة قبل مسارات rewrite/AI في الـ API
 
 ---
 
@@ -97,10 +97,10 @@
 
 **Independent Test**: أزرار تصحيح / إعادة صياغة / ترجمة / تشكيل تعمل؛ أوضاع التشكيل الأربعة
 
-- [ ] T030 [US4] واجهة أزرار الأوضاع مستنسخة من arabiccorrector في `LughawiStudio.tsx`
-- [ ] T031 [US4] `POST /api/lughawi/rewrite` و`/tashkeel` و`/translate` في `src/app/api/lughawi/`
-- [ ] T032 [US4] محرك تشكيل مبسّط/احتياطي في `src/lib/lughawi/engines/tashkeel-engine.ts` (+ مسار AI عند التوفر)
-- [ ] T033 [US4] قسم أوضاع التشكيل بأسلوب صححلي في الصفحة التسويقية/الاستوديو
+- [x] T030 [US4] واجهة أزرار الأوضاع مستنسخة من arabiccorrector في `LughawiStudio.tsx`
+- [x] T031 [US4] `POST /api/lughawi/rewrite` و`/tashkeel` و`/translate` في `src/app/api/lughawi/`
+- [x] T032 [US4] محرك تشكيل مبسّط/احتياطي في `src/lib/lughawi/engines/tashkeel-engine.ts` (+ مسار AI عند التوفر)
+- [x] T033 [US4] قسم أوضاع التشكيل بأسلوب صححلي في الصفحة التسويقية/الاستوديو
 
 ---
 
@@ -110,9 +110,9 @@
 
 **Independent Test**: لصق آية معروفة → protectedSpans؛ رابط يعمل
 
-- [ ] T034 [US5] تقوية `quran-guard.ts` وعيّنات من `/data` خفيفة
-- [ ] T035 [US5] عرض المقاطع المحمية في الواجهة + روابط `/mushaf` أو `/ayah/...`
-- [ ] T036 [P] [US5] زر «تحليل كلمة» يفتح طبقة مبسطة أو يوجّه لـ `/study`
+- [x] T034 [US5] تقوية `quran-guard.ts` وعيّنات من `/data` خفيفة
+- [x] T035 [US5] عرض المقاطع المحمية في الواجهة + روابط `/mushaf` أو `/ayah/...`
+- [x] T036 [P] [US5] زر «تحليل كلمة» يفتح طبقة مبسطة أو يوجّه لـ `/study`
 
 ---
 
@@ -122,12 +122,12 @@
 
 **Independent Test**: خدماتنا → لغوي؛ صفحات الميزات/الأخطاء/الأسئلة تعمل
 
-- [ ] T037 [US6] إضافة رابط **لغوي** في `src/components/SiteChrome.tsx` + مفتاح `Nav.lughawi`
-- [ ] T038 [P] [US6] أقسام تسويقية في `/lughawi`: ماذا نقدّم، كيف يعمل، لمن، أخطاء شائعة، أسئلة شائعة (هيكل arabiccorrector)
-- [ ] T039 [P] [US6] صفحة `src/app/[locale]/lughawi/features/page.tsx` مستلهمة من ميزات صححلي (إملاء، نحو، أوضاع تشكيل)
-- [ ] T040 [P] [US6] صفحة `src/app/[locale]/lughawi/mistakes/page.tsx` للأخطاء الشائعة
-- [ ] T041 [US6] إدراج `/lughawi` في `src/app/sitemap.ts`
-- [ ] T042 [US6] بطاقة لغوي في صفحة اختيارية `src/app/[locale]/services/page.tsx` إن لزم لتجميع خدمات عربية
+- [x] T037 [US6] إضافة رابط **لغوي** في `src/components/SiteChrome.tsx` + مفتاح `Nav.lughawi`
+- [x] T038 [P] [US6] أقسام تسويقية في `/lughawi`: ماذا نقدّم، كيف يعمل، لمن، أخطاء شائعة، أسئلة شائعة (هيكل arabiccorrector)
+- [x] T039 [P] [US6] صفحة `src/app/[locale]/lughawi/features/page.tsx` مستلهمة من ميزات صححلي (إملاء، نحو، أوضاع تشكيل)
+- [x] T040 [P] [US6] صفحة `src/app/[locale]/lughawi/mistakes/page.tsx` للأخطاء الشائعة
+- [x] T041 [US6] إدراج `/lughawi` في `src/app/sitemap.ts`
+- [x] T042 [US6] بطاقة لغوي في صفحة اختيارية `src/app/[locale]/services/page.tsx` إن لزم لتجميع خدمات عربية
 
 ---
 
@@ -135,19 +135,19 @@
 
 **Goal**: ترقيم، تفقيط، عقد داخلي مستقر
 
-- [ ] T043 [P] [US7] محرك ترقيم في `src/lib/lughawi/rules/punctuation.ts`
-- [ ] T044 [P] [US7] تفقيط أرقام في `src/lib/lughawi/engines/tafqeet.ts`
-- [ ] T045 [US7] زر تفقيط في الواجهة + مسار API عند الحاجة
-- [ ] T046 [US7] توثيق العقد النهائي في `specs/001-lughawi-proofreader/contracts/lughawi-api.md` ليطابق التنفيذ
+- [x] T043 [P] [US7] محرك ترقيم في `src/lib/lughawi/rules/punctuation.ts`
+- [x] T044 [P] [US7] تفقيط أرقام في `src/lib/lughawi/engines/tafqeet.ts`
+- [x] T045 [US7] زر تفقيط في الواجهة + مسار API عند الحاجة
+- [x] T046 [US7] توثيق العقد النهائي في `specs/001-lughawi-proofreader/contracts/lughawi-api.md` ليطابق التنفيذ
 
 ---
 
 ## Phase 10: Polish
 
-- [ ] T047 [P] استيراد CSS في التخطيط العام إن لزم (`src/app/globals.css` أو layout)
-- [ ] T048 تشغيل `npm run test` لمسارات lughawi وإصلاح الانحدارات
-- [ ] T049 التحقق المحلي: `curl` لـ proofread + فتح `/lughawi` (HTTP 200)
-- [ ] T050 تحديث علامة المهام المكتملة في `tasks.md` بعد التنفيذ
+- [x] T047 [P] استيراد CSS في التخطيط العام إن لزم (`src/app/globals.css` أو layout)
+- [x] T048 تشغيل `npm run test` لمسارات lughawi وإصلاح الانحدارات
+- [x] T049 التحقق المحلي: `curl` لـ proofread + فتح `/lughawi` (HTTP 200)
+- [x] T050 تحديث علامة المهام المكتملة في `tasks.md` بعد التنفيذ
 
 ---
 

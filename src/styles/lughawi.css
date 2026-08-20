@@ -1,0 +1,437 @@
+/* لغوي — Arabya brand (teal), competitor UX structure without purple SaaS look */
+
+.lughawi-page {
+  --lughawi-glow: color-mix(in srgb, var(--brand) 16%, transparent);
+}
+
+.lughawi-hero {
+  position: relative;
+  padding: 2.5rem 0 1.5rem;
+  margin-bottom: 1.25rem;
+  background:
+    radial-gradient(120% 80% at 100% 0%, var(--lughawi-glow), transparent 55%),
+    radial-gradient(90% 60% at 0% 100%, color-mix(in srgb, var(--brand-deep) 10%, transparent), transparent 50%);
+  border-bottom: 1px solid color-mix(in srgb, var(--brand) 18%, var(--line));
+}
+
+.lughawi-hero h1 {
+  font-size: clamp(2rem, 4vw, 2.85rem);
+  font-weight: 700;
+  color: var(--brand-deep);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  margin: 0.35rem 0;
+}
+
+.lughawi-kicker {
+  margin: 0;
+  color: var(--brand);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.lughawi-hero-lead {
+  max-width: 42rem;
+  color: var(--muted);
+  line-height: 1.7;
+  margin: 0.5rem 0 0;
+}
+
+.lughawi-studio {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0 2.5rem;
+}
+
+.lughawi-toolbar,
+.lughawi-subbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.lughawi-toolbar button,
+.lughawi-subbar button,
+.lughawi-edit-actions button,
+.lughawi-provider-form button,
+.lughawi-copy {
+  appearance: none;
+  border: 1px solid color-mix(in srgb, var(--brand) 35%, var(--line));
+  background: var(--surface);
+  color: var(--brand-deep);
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, border-color 0.2s;
+}
+
+.lughawi-toolbar button:hover:not(:disabled),
+.lughawi-subbar button:hover:not(:disabled) {
+  background: var(--brand-soft);
+  border-color: var(--brand);
+}
+
+.lughawi-toolbar button.is-active,
+.lughawi-subbar button.is-active {
+  background: var(--brand-deep);
+  color: var(--on-brand);
+  border-color: var(--brand-deep);
+}
+
+.lughawi-toolbar button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.lughawi-toolbar-ghost {
+  margin-inline-start: auto;
+}
+
+.lughawi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .lughawi-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lughawi-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--brand) 14%, var(--line));
+  border-radius: calc(var(--radius) + 2px);
+  padding: 1rem;
+  box-shadow: var(--shadow);
+  min-height: 18rem;
+}
+
+.lughawi-panel-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.lughawi-count {
+  font-weight: 500;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.lughawi-panel textarea {
+  flex: 1;
+  min-height: 14rem;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  font: inherit;
+  font-size: 1.1rem;
+  line-height: 1.85;
+  background: color-mix(in srgb, var(--brand) 3%, var(--surface));
+  color: var(--ink);
+}
+
+.lughawi-panel textarea:focus {
+  outline: 2px solid color-mix(in srgb, var(--brand) 45%, transparent);
+  outline-offset: 1px;
+}
+
+.lughawi-result {
+  font-size: 1.1rem;
+  line-height: 1.9;
+  white-space: pre-wrap;
+}
+
+.lughawi-mark {
+  position: relative;
+  background: color-mix(in srgb, var(--brand) 18%, transparent);
+  border-bottom: 2px solid var(--brand);
+  border-radius: 3px;
+  cursor: help;
+}
+
+.lughawi-mark--grammar {
+  background: color-mix(in srgb, #ca8a04 22%, transparent);
+  border-bottom-color: #a16207;
+}
+
+.lughawi-mark--punctuation {
+  background: color-mix(in srgb, var(--brand-cyan) 25%, transparent);
+}
+
+.lughawi-mark.is-active {
+  background: color-mix(in srgb, var(--brand) 32%, transparent);
+}
+
+.lughawi-tip {
+  position: absolute;
+  z-index: 5;
+  inset-inline-start: 0;
+  top: calc(100% + 6px);
+  min-width: 14rem;
+  max-width: 20rem;
+  padding: 0.65rem 0.75rem;
+  background: var(--ink);
+  color: #f8fafc;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--ink) 35%, transparent);
+  display: grid;
+  gap: 0.25rem;
+}
+
+.lughawi-tip strong {
+  color: var(--brand-cyan);
+}
+
+.lughawi-edits {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem 1.15rem;
+}
+
+.lughawi-edits h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.15rem;
+  color: var(--brand-deep);
+}
+
+.lughawi-edits ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.lughawi-edits li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--brand) 4%, var(--surface-2));
+}
+
+.lughawi-edits li.is-rejected {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
+.lughawi-edits p {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.lughawi-edit-actions {
+  display: flex;
+  gap: 0.35rem;
+  align-items: flex-start;
+}
+
+.lughawi-settings {
+  border: 1px dashed color-mix(in srgb, var(--brand) 40%, var(--line));
+  border-radius: var(--radius);
+  padding: 1rem;
+  background: var(--brand-soft);
+  display: grid;
+  gap: 0.75rem;
+}
+
+.lughawi-settings h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--brand-deep);
+}
+
+.lughawi-provider-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: end;
+}
+
+.lughawi-provider-form label,
+.lughawi-subbar label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.lughawi-provider-form input,
+.lughawi-provider-form select,
+.lughawi-subbar select {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.45rem 0.65rem;
+  font: inherit;
+  background: var(--surface);
+  color: var(--ink);
+  min-width: 12rem;
+}
+
+.lughawi-provider-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.lughawi-provider-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.92rem;
+}
+
+.lughawi-sections {
+  display: grid;
+  gap: 2.5rem;
+  margin: 2.5rem 0 3rem;
+}
+
+.lughawi-sections section h2 {
+  color: var(--brand-deep);
+  margin: 0 0 0.5rem;
+  font-size: 1.45rem;
+}
+
+.lughawi-sections section > p {
+  color: var(--muted);
+  max-width: 40rem;
+  line-height: 1.7;
+}
+
+.lughawi-feature-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.5rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 700px) {
+  .lughawi-feature-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lughawi-feature-row article {
+  padding: 0.25rem 0;
+  border-top: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
+}
+
+.lughawi-feature-row h3 {
+  margin: 0.75rem 0 0.35rem;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.lughawi-feature-row p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.lughawi-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+  counter-reset: step;
+}
+
+@media (max-width: 800px) {
+  .lughawi-steps {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lughawi-steps article {
+  padding: 1rem;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--brand) 5%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
+}
+
+.lughawi-steps article::before {
+  counter-increment: step;
+  content: counter(step);
+  display: inline-flex;
+  width: 1.75rem;
+  height: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--brand-deep);
+  color: var(--on-brand);
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.lughawi-faq details {
+  border-bottom: 1px solid var(--line);
+  padding: 0.75rem 0;
+}
+
+.lughawi-faq summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.lughawi-faq p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.lughawi-local-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+}
+
+.lughawi-muted,
+.lughawi-status {
+  color: var(--muted);
+}
+
+.lughawi-error {
+  color: #b91c1c;
+}
+
+.lughawi-warn {
+  color: #a16207;
+  font-size: 0.92rem;
+}
+
+.lughawi-protected {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.lughawi-protected a {
+  margin-inline-start: 0.5rem;
+  color: var(--brand-deep);
+}

@@ -32,6 +32,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/adhkar/duas`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/adhkar/tasbeeh`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/qibla`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/lughawi`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${base}/lughawi/features`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/lughawi/mistakes`, changeFrequency: "monthly", priority: 0.5 },
   ];
 
   const mushafPages: MetadataRoute.Sitemap = Array.from(
