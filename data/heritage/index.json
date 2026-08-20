@@ -1,6 +1,6 @@
 {
   "updatedAt": "2026-08-20",
-  "sourceNote": "تراث تعليمي + مختارات شعرية من الملك العام — قابل للتوسعة من مصادر المالك.",
+  "sourceNote": "تراث موسّع: Ashaar عروض + عيّنة موسوعة تاريخية + شعراء ملك عام + كتالوج بن باز (بيانات).",
   "works": [
     {
       "slug": "qafiyah-intro",
@@ -12,12 +12,19 @@
       "passageCount": 4
     },
     {
+      "slug": "ashaar-arudi",
+      "titleAr": "شواهد عروضية (أشعار)",
+      "titleEn": "Prosody samples (Ashaar)",
+      "kind": "prosody",
+      "descriptionAr": "شطور مشكولة مع تفعيلات من مشروع Ashaar — أساس طبقة العروض/البلاغة.",
+      "descriptionEn": "Vocalized hemistichs with meters from ARBML/Ashaar — prosody/rhetoric layer.",
+      "passageCount": 36
+    },
+    {
       "slug": "mutanabbi-samples",
       "titleAr": "مختارات من المتنبي",
       "titleEn": "Selections from al-Mutanabbi",
       "kind": "poetry",
-      "descriptionAr": "أبيات تعليمية من الملك العام للواجهة والطبقات.",
-      "descriptionEn": "Public-domain educational couplets for UI and layers.",
       "passageCount": 3
     },
     {
@@ -25,8 +32,6 @@
       "titleAr": "مختارات من امرئ القيس",
       "titleEn": "Selections from Imruʾ al-Qays",
       "kind": "poetry",
-      "descriptionAr": "معلقات وأبيات مشهورة من الملك العام.",
-      "descriptionEn": "Famous Muʿallaqa lines from the public domain.",
       "passageCount": 3
     },
     {
@@ -34,18 +39,59 @@
       "titleAr": "مختارات من أبي تمام",
       "titleEn": "Selections from Abu Tammam",
       "kind": "poetry",
-      "descriptionAr": "مختارات من فتح عمورية وما جاورها.",
-      "descriptionEn": "Selections around the Amorium ode.",
       "passageCount": 3
+    },
+    {
+      "slug": "zuhayr",
+      "titleAr": "مختارات من زهير بن أبي سلمى",
+      "titleEn": "Selections from Zuhayr",
+      "kind": "poetry",
+      "descriptionAr": "أبيات مشهورة من المعلقات — ملك عام.",
+      "descriptionEn": "Famous Muʿallaqa lines — public domain.",
+      "passageCount": 2
+    },
+    {
+      "slug": "labid",
+      "titleAr": "مختارات من لبيد بن ربيعة",
+      "titleEn": "Selections from Labīd",
+      "kind": "poetry",
+      "descriptionAr": "من معلّقة لبيد — نص تعليمي ملك عام.",
+      "descriptionEn": "From Labīd’s Muʿallaqa — educational PD text.",
+      "passageCount": 2
+    },
+    {
+      "slug": "antarah",
+      "titleAr": "مختارات من عنترة",
+      "titleEn": "Selections from ʿAntarah",
+      "kind": "poetry",
+      "descriptionAr": "أبيات فروسية مشهورة من الملك العام.",
+      "descriptionEn": "Famous heroic lines from the public domain.",
+      "passageCount": 2
+    },
+    {
+      "slug": "buhturi",
+      "titleAr": "مختارات من البحتري",
+      "titleEn": "Selections from al-Buḥturī",
+      "kind": "poetry",
+      "descriptionAr": "أبيات وصفية من التراث العباسي — ملك عام.",
+      "descriptionEn": "Descriptive Abbasid lines — public domain.",
+      "passageCount": 2
     },
     {
       "slug": "nahw-aphorisms",
       "titleAr": "حكم نحوية قصيرة",
       "titleEn": "Short grammar aphorisms",
       "kind": "prose",
-      "descriptionAr": "جمل تراثية قصيرة تربط النحو بالمكتبة التعليمية.",
-      "descriptionEn": "Short heritage lines linking grammar to the library hub.",
       "passageCount": 3
+    },
+    {
+      "slug": "siyar-sample",
+      "titleAr": "مختارات من موسوعة السيرة والتاريخ",
+      "titleEn": "Sīrah & history encyclopedia sample",
+      "kind": "prose",
+      "descriptionAr": "عيّنة محدودة (60 حدثًا) من موسوعة تاريخية مفتوحة — ليس الملف الكامل.",
+      "descriptionEn": "Bounded sample (60 events) from an open historical encyclopedia — not the full dump.",
+      "passageCount": 60
     }
   ]
 }

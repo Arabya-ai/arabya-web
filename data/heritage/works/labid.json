@@ -1,0 +1,26 @@
+{
+  "slug": "labid",
+  "titleAr": "مختارات من لبيد بن ربيعة",
+  "titleEn": "Selections from Labīd",
+  "kind": "poetry",
+  "descriptionAr": "من معلّقة لبيد — نص تعليمي ملك عام.",
+  "descriptionEn": "From Labīd’s Muʿallaqa — educational PD text.",
+  "passages": [
+    {
+      "id": "TW:labid:1",
+      "titleAr": "عفت الديار",
+      "titleEn": "The abodes faded",
+      "textAr": "عَفَتِ الدِّيارُ مَحَلُّها فَمُقامُها · بِمِنًى تَأَبَّدَ غَولُها فَرِجامُها",
+      "meter": "الكامل"
+    },
+    {
+      "id": "TW:labid:2",
+      "titleAr": "إن التقى",
+      "titleEn": "When piety",
+      "textAr": "إِنَّ التَّقِيَّ هُوَ التَّقِيُّ وَإِنَّهُ · ما عاشَ مِن خَلقِ الإِلَهِ بِمُخلَدِ",
+      "meter": "الكامل"
+    }
+  ],
+  "source": "arabya-editorial-public-domain",
+  "license": "public-domain-text-educational"
+}

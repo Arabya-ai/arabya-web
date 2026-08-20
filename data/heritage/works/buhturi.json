@@ -1,0 +1,26 @@
+{
+  "slug": "buhturi",
+  "titleAr": "مختارات من البحتري",
+  "titleEn": "Selections from al-Buḥturī",
+  "kind": "poetry",
+  "descriptionAr": "أبيات وصفية من التراث العباسي — ملك عام.",
+  "descriptionEn": "Descriptive Abbasid lines — public domain.",
+  "passages": [
+    {
+      "id": "TW:buhturi:1",
+      "titleAr": "أتاك الربيع",
+      "titleEn": "Spring has come",
+      "textAr": "أَتاكَ الرَّبيعُ الطَّلقُ يَختالُ ضاحِكاً · مِنَ الحُسنِ حَتّى كادَ أَن يَتَكَلَّما",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:buhturi:2",
+      "titleAr": "إذا أرقت",
+      "titleEn": "When sleepless",
+      "textAr": "إذا أَرِقتَ وَأَمضى اللَيلُ ساهِرَهُ · فَإِنَّ في الصُبحِ لِلساهِرِ أَوطانا",
+      "meter": "البسيط"
+    }
+  ],
+  "source": "arabya-editorial-public-domain",
+  "license": "public-domain-text-educational"
+}

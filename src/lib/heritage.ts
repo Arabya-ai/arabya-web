@@ -19,6 +19,7 @@ export type HeritagePassage = {
   titleEn: string;
   textAr: string;
   meter?: string | null;
+  dateNote?: string;
 };
 
 export type HeritageWork = HeritageWorkMeta & {

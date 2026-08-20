@@ -1,0 +1,26 @@
+{
+  "slug": "antarah",
+  "titleAr": "مختارات من عنترة",
+  "titleEn": "Selections from ʿAntarah",
+  "kind": "poetry",
+  "descriptionAr": "أبيات فروسية مشهورة من الملك العام.",
+  "descriptionEn": "Famous heroic lines from the public domain.",
+  "passages": [
+    {
+      "id": "TW:antarah:1",
+      "titleAr": "هل غادر الشعراء",
+      "titleEn": "Have the poets left",
+      "textAr": "هَل غادَرَ الشُّعَراءُ مِن مُتَرَدَّمِ · أَم هَل عَرَفتَ الدارَ بَعدَ تَوَهُّمِ",
+      "meter": "الكامل"
+    },
+    {
+      "id": "TW:antarah:2",
+      "titleAr": "يدعون عنتر",
+      "titleEn": "They call Antarah",
+      "textAr": "يَدعونَ عَنتَرَ وَالرِّماحُ كَأَنَّها · أَشطانُ بِئرٍ في لَبانِ الأَدهَمِ",
+      "meter": "الكامل"
+    }
+  ],
+  "source": "arabya-editorial-public-domain",
+  "license": "public-domain-text-educational"
+}

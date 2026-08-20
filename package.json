@@ -34,6 +34,8 @@
     "expand-adhkar-sources": "node scripts/expand-adhkar-sources.mjs",
     "import-hadith-oss": "node scripts/import-hadith-oss.mjs",
     "import-open-hadith-data": "node scripts/import-open-hadith-data.mjs",
+    "build-hadith-isnad": "node scripts/build-hadith-isnad-overlay.mjs",
+    "import-heritage-expansion": "node scripts/import-heritage-expansion.mjs",
     "import-oss-json-pack": "node scripts/import-oss-json-pack.mjs",
     "build-quality-queue": "node scripts/build-quality-queue.mjs",
     "import-irab-book": "node scripts/import-irab-book.mjs",

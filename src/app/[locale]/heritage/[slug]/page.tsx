@@ -56,6 +56,9 @@ export default async function HeritageWorkPage({ params }: Props) {
                 {t("meter", { meter: p.meter })}
               </p>
             ) : null}
+            {p.dateNote ? (
+              <p className="heritage-meter">{p.dateNote}</p>
+            ) : null}
             <p className="heritage-text" dir="rtl" lang="ar">
               {p.textAr}
             </p>

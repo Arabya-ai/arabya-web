@@ -1,16 +1,22 @@
 {
   "updatedAt": "2026-08-20",
-  "note": "Full data imports from open JSON/APIs/CSV in the awesome-islamic 320 list. Quran mushaf text was NOT replaced.",
+  "note": "Full data imports from open JSON/APIs/CSV fit-checked for Arabya. Quran mushaf text was NOT replaced. Large gated corpora (hadith-kg, Ifta Kaggle, Diwan full) stay deferred.",
   "imported": [
     {
       "project": "fawazahmed0/hadith-api",
       "path": "data/hadith/collections/*",
-      "hadithsApprox": 36104
+      "hadithsApprox": 36104,
+      "also": "eng editions → narratorEn in isnad overlays"
     },
     {
       "project": "mhashim6/Open-Hadith-Data",
       "path": "data/hadith/collections/ahmad.json + darimi.json",
       "hadithsApprox": 29730
+    },
+    {
+      "project": "arabya isnad overlay (matn parse + eng Narrated)",
+      "path": "data/hadith/isnad/*.json",
+      "note": "Structured narrators[] / narratorEn keyed by number"
     },
     {
       "project": "rn0x/Adhkar-json + hisn_almuslim_json",
@@ -21,12 +27,31 @@
       "path": "data/asma/names-of-allah-rn0x.json"
     },
     {
-      "project": "heritage editorial (public-domain poetry)",
+      "project": "ARBML/Ashaar ashaar_arudi.csv",
+      "path": "data/heritage/works/ashaar-arudi.json"
+    },
+    {
+      "project": "rn0x/Historical_Encyclopedia (sample 60)",
+      "path": "data/heritage/works/siyar-sample.json"
+    },
+    {
+      "project": "rn0x/binbaz_database books_ar (catalog only)",
+      "path": "data/heritage/catalogs/binbaz-books.json"
+    },
+    {
+      "project": "heritage editorial public-domain poetry",
       "path": "data/heritage/works/*"
     }
   ],
+  "deferred": [
+    "emadjumaah/hadith-kg (~1.6GB SQLite)",
+    "JehadOumer Ifta chain_of_narrators (Kaggle)",
+    "HF classical_arabic_poetry (gated)",
+    "NoorBayan/Diwan full (~500k poems)"
+  ],
   "totals": {
     "hadithCollections": 12,
-    "hadithsApprox": 65834
+    "hadithsApprox": 65834,
+    "heritageWorks": 11
   }
 }

@@ -4,6 +4,8 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
 import { getHadithItem } from "@/lib/hadith";
+import { getHadithIsnad } from "@/lib/hadith-isnad";
+import { HadithWordStudy } from "@/components/HadithWordStudy";
 
 type Props = {
   params: Promise<{ locale: string; collection: string; number: string }>;
@@ -33,8 +35,8 @@ export default async function HadithItemPage({ params }: Props) {
 
   const { collection, item } = hit;
   const title = locale === "en" ? collection.titleEn : collection.titleAr;
-  const chapter =
-    locale === "en" ? item.chapterEn : item.chapterAr;
+  const chapter = locale === "en" ? item.chapterEn : item.chapterAr;
+  const isnad = await getHadithIsnad(collection.slug, item.number);
 
   return (
     <div className="shell page-block hadith-page">
@@ -53,10 +55,33 @@ export default async function HadithItemPage({ params }: Props) {
           {item.grade ? ` · ${item.grade}` : ""}
         </p>
         <p className="hadith-article-id">{item.id}</p>
-        <blockquote className="hadith-matn" dir="rtl" lang="ar">
-          {item.arabic}
-        </blockquote>
-        <p className="layer-hint">{t("wordLayersSoon")}</p>
+
+        {isnad ? (
+          <section className="hadith-isnad" aria-label={t("isnadTitle")}>
+            <h2 className="hadith-isnad-title">{t("isnadTitle")}</h2>
+            {isnad.narrators.length > 0 ? (
+              <ol className="hadith-isnad-chain" dir="rtl" lang="ar">
+                {isnad.narrators.map((name, i) => (
+                  <li key={`${name}-${i}`}>{name}</li>
+                ))}
+              </ol>
+            ) : null}
+            {isnad.narratorEn ? (
+              <p className="hadith-isnad-en" lang="en">
+                {t("narratorEn", { name: isnad.narratorEn })}
+              </p>
+            ) : null}
+            <p className="layer-hint">{t("isnadSource", { source: isnad.source })}</p>
+          </section>
+        ) : (
+          <p className="layer-hint">{t("isnadMissing")}</p>
+        )}
+
+        <HadithWordStudy
+          collection={collection.slug}
+          number={item.number}
+          arabic={item.arabic}
+        />
       </article>
 
       <p>

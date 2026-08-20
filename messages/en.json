@@ -1364,7 +1364,15 @@
     "heritageLink": "Heritage & poetry",
     "indexLink": "Index",
     "backCollection": "Back to collection",
-    "wordLayersSoon": "Morphology, syntax, and semantics layers for these words will generalize from the Quran engine."
+    "wordLayersSoon": "Morphology, syntax, and semantics layers for these words will generalize from the Quran engine.",
+    "wordStudyLead": "Tap a word in the matn to open its study layers (HW:… Word IDs). Full morph/syntax data generalizes gradually from the Quran engine.",
+    "tokensAria": "Matn words for analysis",
+    "wordLayersAwaiting": "All six layers are wired in the UI — morph/syntax payloads for this word fill in later without breaking the mushaf.",
+    "semanticsAwaiting": "The semantics layer for this hadith word is not available yet.",
+    "isnadTitle": "Isnād",
+    "narratorEn": "Narrator (source English): {name}",
+    "isnadSource": "Field source: {source}",
+    "isnadMissing": "No structured isnād fields for this number yet — the matn may lack a classical ḥaddathanā chain."
   },
   "Heritage": {
     "metaTitle": "Heritage & poetry · Arabya",
@@ -1383,7 +1391,9 @@
     "backHub": "Back to heritage catalog",
     "libraryLink": "Educational library (PDF books)",
     "hadithLink": "Hadith",
-    "indexLink": "Index"
+    "indexLink": "Index",
+    "binbazCatalog": "Ibn Bāz books catalog (open metadata)",
+    "binbazCatalogLead": "Titles and links from rn0x/binbaz_database — full multi‑MB fatwa dumps stay deferred."
   },
   "IbadahEvents": {
     "title": "Upcoming Hijri observances",

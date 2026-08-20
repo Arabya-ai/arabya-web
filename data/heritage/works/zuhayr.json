@@ -1,0 +1,26 @@
+{
+  "slug": "zuhayr",
+  "titleAr": "مختارات من زهير بن أبي سلمى",
+  "titleEn": "Selections from Zuhayr",
+  "kind": "poetry",
+  "descriptionAr": "أبيات مشهورة من المعلقات — ملك عام.",
+  "descriptionEn": "Famous Muʿallaqa lines — public domain.",
+  "passages": [
+    {
+      "id": "TW:zuhayr:1",
+      "titleAr": "ومن لا يصانع",
+      "titleEn": "Who does not flatter",
+      "textAr": "وَمَنْ لا يُصانِعْ في أُمورٍ كَثيرَةٍ · يُضَرَّسْ بِأَنيابٍ وَيوطَأْ بِمَنسِمِ",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:zuhayr:2",
+      "titleAr": "سئمت تكاليف",
+      "titleEn": "I grew weary of life’s burdens",
+      "textAr": "سَئِمتُ تَكاليفَ الحَياةِ وَمَن يَعِشْ · ثَمانينَ حَولاً لا أَبا لَكَ يَسأَمِ",
+      "meter": "الطويل"
+    }
+  ],
+  "source": "arabya-editorial-public-domain",
+  "license": "public-domain-text-educational"
+}
