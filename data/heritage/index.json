@@ -1,6 +1,6 @@
 {
   "updatedAt": "2026-08-20",
-  "sourceNote": "تراث موسّع: Ashaar عروض + عيّنة موسوعة تاريخية + شعراء ملك عام + كتالوج بن باز (بيانات).",
+  "sourceNote": "تراث موسّع: Ashaar عروض + مختارات شعراء + مختارات موسّعة + عيّنة سِيَر + كتالوج بن باز.",
   "works": [
     {
       "slug": "qafiyah-intro",
@@ -92,6 +92,15 @@
       "descriptionAr": "عيّنة محدودة (60 حدثًا) من موسوعة تاريخية مفتوحة — ليس الملف الكامل.",
       "descriptionEn": "Bounded sample (60 events) from an open historical encyclopedia — not the full dump.",
       "passageCount": 60
+    },
+    {
+      "slug": "poetry-couplets-expanded",
+      "titleAr": "مختارات شعرية موسّعة",
+      "titleEn": "Expanded poetry anthology (sample)",
+      "kind": "poetry",
+      "descriptionAr": "عيّنة أكبر من أبيات كلاسيكية منسوبة تقليدياً — للعرض والدراسة، وليست ديواناً كاملاً.",
+      "descriptionEn": "Larger educational sample of traditionally attributed classical couplets — not a full diwan.",
+      "passageCount": 30
     }
   ]
 }
