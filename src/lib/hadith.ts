@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { normalizeArabicSearch } from "@/lib/quran";
+import { expandSearchQueryVariants, normalizeArabicSearch } from "@/lib/quran";
 
 const dataRoot = path.join(process.cwd(), "data", "hadith");
 
@@ -95,6 +95,7 @@ export async function searchHadith(
 ): Promise<{ hits: HadithSearchHit[]; total: number }> {
   const q = normalizeArabicSearch(query);
   if (q.length < 2) return { hits: [], total: 0 };
+  const variants = expandSearchQueryVariants(q);
   const limit = Math.min(Math.max(options.limit ?? 20, 1), 100);
   const metas = await listHadithCollections();
   const hits: HadithSearchHit[] = [];
@@ -107,7 +108,11 @@ export async function searchHadith(
       const hay = normalizeArabicSearch(
         `${item.arabic} ${item.chapterAr ?? ""} ${item.id}`,
       );
-      if (!hay.includes(q) && !item.id.toLowerCase().includes(query.trim().toLowerCase())) {
+      const textMatch = variants.some((v) => hay.includes(v));
+      if (
+        !textMatch &&
+        !item.id.toLowerCase().includes(query.trim().toLowerCase())
+      ) {
         continue;
       }
       hits.push({

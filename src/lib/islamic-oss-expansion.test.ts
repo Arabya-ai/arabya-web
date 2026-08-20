@@ -23,10 +23,14 @@ describe("hadith catalog", () => {
   });
 
   it("searches arabic matn", async () => {
-    const { hits, total } = await searchHadith("النيات", { limit: 10 });
-    expect(total).toBeGreaterThan(0);
-    expect(hits[0]?.id).toMatch(/^H:/);
-    expect(hits.some((h) => h.arabic.includes("الأَعْمَالُ"))).toBe(true);
+    const withArticle = await searchHadith("النيات", { limit: 10 });
+    expect(withArticle.total).toBeGreaterThan(0);
+    expect(withArticle.hits[0]?.id).toMatch(/^H:/);
+    expect(
+      withArticle.hits.some((h) => h.arabic.includes("الأَعْمَالُ")),
+    ).toBe(true);
+    const withoutArticle = await searchHadith("نيات", { limit: 10 });
+    expect(withoutArticle.total).toBeGreaterThan(0);
   });
 });
 
