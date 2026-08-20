@@ -31,6 +31,10 @@ export function LughawiSettings() {
   const [authed, setAuthed] = useState(true);
   const [poolCount, setPoolCount] = useState(0);
   const [poolProviders, setPoolProviders] = useState<string[]>([]);
+  const [poolByProvider, setPoolByProvider] = useState<Record<string, number>>(
+    {},
+  );
+  const [poolHasLocal, setPoolHasLocal] = useState(false);
 
   function refresh() {
     startTransition(async () => {
@@ -50,10 +54,14 @@ export function LughawiSettings() {
           defaultProvider: AiProviderId | null | "auto";
           projectPoolCount?: number;
           projectPoolProviders?: string[];
+          projectPoolByProvider?: Record<string, number>;
+          projectPoolHasLocal?: boolean;
         };
         setProviders(data.providers);
         setPoolCount(data.projectPoolCount ?? 0);
         setPoolProviders(data.projectPoolProviders ?? []);
+        setPoolByProvider(data.projectPoolByProvider ?? {});
+        setPoolHasLocal(Boolean(data.projectPoolHasLocal));
         if (data.defaultProvider && data.defaultProvider !== "auto") {
           setSelected(data.defaultProvider);
         }
@@ -112,8 +120,11 @@ export function LughawiSettings() {
         <p className="lughawi-quota">
           {t("projectPoolLine", {
             count: poolCount,
-            list: poolProviders.join(" · "),
+            list: Object.entries(poolByProvider)
+              .map(([k, n]) => `${k}×${n}`)
+              .join(" · ") || poolProviders.join(" · "),
           })}
+          {poolHasLocal ? ` · ${t("projectPoolLocal")}` : ""}
         </p>
       ) : (
         <p className="lughawi-warn">{t("projectPoolEmpty")}</p>

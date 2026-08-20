@@ -1795,6 +1795,7 @@
     "keysHelpBody": "For Arabya’s free quota, the admin sets one or more project keys on the server. To go beyond that, create a key from Groq, Google AI Studio, OpenRouter, OpenAI, or Anthropic, then paste it here — encrypted for you only.",
     "autoModeHelp": "Auto mode (Cursor-like): if one provider fails, the next is tried automatically — your keys first, then Arabya project keys.",
     "projectPoolLine": "Arabya project pool ready: {count} key(s) ({list}).",
+    "projectPoolLocal": "plus local Ollama fallback on the server",
     "projectPoolEmpty": "Project key pool not configured yet — local proofreading works; smart rewrite needs your key or project keys.",
     "featuresTitle": "What Lughawi offers",
     "featuresLead": "A full Arabic proofreading product with Arabya identity — not a generic SaaS dashboard.",

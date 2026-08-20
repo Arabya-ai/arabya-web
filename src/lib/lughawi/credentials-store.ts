@@ -52,11 +52,12 @@ export function listProviderStatus(userId: string): {
 }[] {
   const file = load();
   const ids: AiProviderId[] = [
+    "google",
+    "openrouter",
     "openai",
     "anthropic",
-    "google",
     "groq",
-    "openrouter",
+    "ollama",
   ];
   return ids.map((id) => {
     const row = file.rows.find((r) => r.userId === userId && r.provider === id);

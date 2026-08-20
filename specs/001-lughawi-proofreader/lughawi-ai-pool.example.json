@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "slots": [
+    {
+      "provider": "google",
+      "apiKey": "AIza_REPLACE_ME_1",
+      "label": "gmail-1"
+    },
+    {
+      "provider": "google",
+      "apiKey": "AIza_REPLACE_ME_2",
+      "label": "gmail-2"
+    },
+    {
+      "provider": "openai",
+      "apiKey": "sk-REPLACE_ME_1",
+      "label": "openai-1"
+    },
+    {
+      "provider": "anthropic",
+      "apiKey": "sk-ant-REPLACE_ME_1",
+      "label": "claude-1"
+    },
+    {
+      "provider": "ollama",
+      "apiKey": "ollama",
+      "baseUrl": "http://127.0.0.1:11434/v1",
+      "model": "llama3.2",
+      "label": "contabo-local"
+    }
+  ]
+}

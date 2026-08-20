@@ -1,5 +1,6 @@
-/** Runtime config for لغوي (project quota + multi-provider Auto pool). */
+/** Runtime config for لغوي (project quota + multi-key Auto pool). */
 
+import { existsSync, readFileSync } from "node:fs";
 import type { AiProviderId } from "@/lib/lughawi/types";
 
 export function lughawiMonthlyQuotaChars(): number {
@@ -32,48 +33,123 @@ export function lughawiCredentialsSecret(): string {
 }
 
 const PROVIDERS: AiProviderId[] = [
-  "groq",
   "google",
   "openrouter",
   "openai",
   "anthropic",
+  "groq",
+  "ollama",
 ];
 
 export interface ProjectAiSlot {
   provider: AiProviderId;
   apiKey: string;
   model?: string;
+  /** OpenAI-compatible base URL (ollama / local proxy). */
+  baseUrl?: string;
+  /** Optional owner label (e.g. gmail-3) — never expose secrets. */
+  label?: string;
+}
+
+interface PoolFile {
+  version?: number;
+  slots?: Array<{
+    provider?: string;
+    apiKey?: string;
+    key?: string;
+    model?: string;
+    baseUrl?: string;
+    label?: string;
+  }>;
+}
+
+function splitKeys(raw: string | undefined): string[] {
+  if (!raw?.trim()) return [];
+  // Support comma OR newline OR | as separators (many keys from many accounts).
+  return raw
+    .split(/[\n,|]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function poolFilePath(): string {
+  return (
+    process.env.LUGHAWI_PROJECT_AI_POOL_FILE?.trim() ||
+    "/var/lib/arabya/lughawi-ai-pool.json"
+  );
+}
+
+function loadPoolFile(): ProjectAiSlot[] {
+  const path = poolFilePath();
+  try {
+    if (!existsSync(path)) return [];
+    const json = JSON.parse(readFileSync(path, "utf8")) as PoolFile;
+    const out: ProjectAiSlot[] = [];
+    for (const row of json.slots ?? []) {
+      const provider = (row.provider ?? "").trim().toLowerCase();
+      const apiKey = (row.apiKey ?? row.key ?? "").trim();
+      if (!provider || !apiKey) continue;
+      if (!PROVIDERS.includes(provider as AiProviderId)) continue;
+      out.push({
+        provider: provider as AiProviderId,
+        apiKey,
+        model: row.model?.trim() || undefined,
+        baseUrl: row.baseUrl?.trim() || undefined,
+        label: row.label?.trim() || undefined,
+      });
+    }
+    return out;
+  } catch {
+    return [];
+  }
 }
 
 /**
- * Build the project Auto pool from env.
+ * Build the project Auto pool from env + optional JSON file.
  *
- * Supported forms:
- * - LUGHAWI_PROJECT_AI_KEY + LUGHAWI_PROJECT_AI_PROVIDER (single)
- * - LUGHAWI_GROQ_API_KEY / LUGHAWI_GOOGLE_API_KEY / LUGHAWI_OPENAI_API_KEY /
- *   LUGHAWI_ANTHROPIC_API_KEY / LUGHAWI_OPENROUTER_API_KEY
- * - LUGHAWI_PROJECT_AI_POOL=groq:key1|google:key2|openai:key3
- * - Optional models: LUGHAWI_GROQ_MODEL, LUGHAWI_OPENAI_MODEL, …
+ * Many keys / many accounts:
+ * - LUGHAWI_GOOGLE_API_KEYS=key1,key2,key3
+ * - LUGHAWI_OPENAI_API_KEYS=sk-a,sk-b
+ * - LUGHAWI_ANTHROPIC_API_KEYS=...
+ * - LUGHAWI_OPENROUTER_API_KEYS=...
+ * - LUGHAWI_GROQ_API_KEYS=...
+ * - LUGHAWI_PROJECT_AI_POOL=google:key1|google:key2|openai:sk-...
+ * - LUGHAWI_PROJECT_AI_POOL_FILE=/var/lib/arabya/lughawi-ai-pool.json
+ * - Local fallback: LUGHAWI_OLLAMA_BASE_URL=http://127.0.0.1:11434/v1
  */
 export function lughawiProjectAiPool(): ProjectAiSlot[] {
   const slots: ProjectAiSlot[] = [];
   const seen = new Set<string>();
 
-  function add(provider: string, apiKey: string | undefined, model?: string) {
+  function add(
+    provider: string,
+    apiKey: string | undefined,
+    model?: string,
+    baseUrl?: string,
+    label?: string,
+  ) {
     const p = provider.trim().toLowerCase();
     const key = apiKey?.trim();
     if (!key) return;
     if (!PROVIDERS.includes(p as AiProviderId)) return;
-    const id = `${p}:${key.slice(-8)}`;
+    const id = `${p}:${key.slice(-12)}:${baseUrl ?? ""}`;
     if (seen.has(id)) return;
     seen.add(id);
     slots.push({
       provider: p as AiProviderId,
       apiKey: key,
       model: model?.trim() || undefined,
+      baseUrl: baseUrl?.trim() || undefined,
+      label: label?.trim() || undefined,
     });
   }
 
+  // 1) JSON file on Contabo (best for 20–50 keys)
+  for (const s of loadPoolFile()) {
+    add(s.provider, s.apiKey, s.model, s.baseUrl, s.label);
+  }
+
+  // 2) Compact pool string
   const poolRaw = process.env.LUGHAWI_PROJECT_AI_POOL?.trim();
   if (poolRaw) {
     for (const part of poolRaw.split("|")) {
@@ -83,41 +159,74 @@ export function lughawiProjectAiPool(): ProjectAiSlot[] {
     }
   }
 
-  add("groq", process.env.LUGHAWI_GROQ_API_KEY, process.env.LUGHAWI_GROQ_MODEL);
-  add(
-    "google",
-    process.env.LUGHAWI_GOOGLE_API_KEY,
-    process.env.LUGHAWI_GOOGLE_MODEL,
-  );
-  add(
-    "openrouter",
-    process.env.LUGHAWI_OPENROUTER_API_KEY,
-    process.env.LUGHAWI_OPENROUTER_MODEL,
-  );
-  add(
-    "openai",
-    process.env.LUGHAWI_OPENAI_API_KEY,
-    process.env.LUGHAWI_OPENAI_MODEL,
-  );
-  add(
-    "anthropic",
-    process.env.LUGHAWI_ANTHROPIC_API_KEY,
-    process.env.LUGHAWI_ANTHROPIC_MODEL,
-  );
+  // 3) Multi-key env vars (comma / newline / |)
+  for (const k of splitKeys(process.env.LUGHAWI_GOOGLE_API_KEYS)) {
+    add("google", k, process.env.LUGHAWI_GOOGLE_MODEL);
+  }
+  for (const k of splitKeys(process.env.LUGHAWI_OPENAI_API_KEYS)) {
+    add("openai", k, process.env.LUGHAWI_OPENAI_MODEL);
+  }
+  for (const k of splitKeys(process.env.LUGHAWI_ANTHROPIC_API_KEYS)) {
+    add("anthropic", k, process.env.LUGHAWI_ANTHROPIC_MODEL);
+  }
+  for (const k of splitKeys(process.env.LUGHAWI_OPENROUTER_API_KEYS)) {
+    add("openrouter", k, process.env.LUGHAWI_OPENROUTER_MODEL);
+  }
+  for (const k of splitKeys(process.env.LUGHAWI_GROQ_API_KEYS)) {
+    add("groq", k, process.env.LUGHAWI_GROQ_MODEL);
+  }
 
-  // Legacy single-key pair last (or first if pool empty — add always as fallback)
+  // 4) Single-key legacy vars
+  add("google", process.env.LUGHAWI_GOOGLE_API_KEY, process.env.LUGHAWI_GOOGLE_MODEL);
+  add("openrouter", process.env.LUGHAWI_OPENROUTER_API_KEY, process.env.LUGHAWI_OPENROUTER_MODEL);
+  add("openai", process.env.LUGHAWI_OPENAI_API_KEY, process.env.LUGHAWI_OPENAI_MODEL);
+  add("anthropic", process.env.LUGHAWI_ANTHROPIC_API_KEY, process.env.LUGHAWI_ANTHROPIC_MODEL);
+  add("groq", process.env.LUGHAWI_GROQ_API_KEY, process.env.LUGHAWI_GROQ_MODEL);
   add(lughawiProjectProvider(), lughawiProjectApiKey());
 
-  // Prefer fast/cheap providers first for Auto (Cursor-like routing bias)
+  // 5) Local Ollama / OpenAI-compatible on Contabo (always-on fallback)
+  const ollamaUrl =
+    process.env.LUGHAWI_OLLAMA_BASE_URL?.trim() ||
+    process.env.LUGHAWI_LOCAL_AI_BASE_URL?.trim();
+  if (ollamaUrl) {
+    add(
+      "ollama",
+      process.env.LUGHAWI_OLLAMA_API_KEY?.trim() || "ollama",
+      process.env.LUGHAWI_OLLAMA_MODEL?.trim() || "llama3.2",
+      ollamaUrl.replace(/\/$/, ""),
+      "contabo-local",
+    );
+  }
+
+  // Prefer free/cloud-fast first; local last as safety net
   const order: Record<string, number> = {
-    groq: 0,
-    google: 1,
-    openrouter: 2,
+    google: 0,
+    openrouter: 1,
+    groq: 2,
     openai: 3,
     anthropic: 4,
+    ollama: 5,
   };
   slots.sort(
     (a, b) => (order[a.provider] ?? 9) - (order[b.provider] ?? 9),
   );
   return slots;
+}
+
+/** Summarize pool for status UI (no secrets). */
+export function lughawiProjectAiPoolSummary(): {
+  total: number;
+  byProvider: Record<string, number>;
+  hasLocal: boolean;
+} {
+  const pool = lughawiProjectAiPool();
+  const byProvider: Record<string, number> = {};
+  for (const s of pool) {
+    byProvider[s.provider] = (byProvider[s.provider] ?? 0) + 1;
+  }
+  return {
+    total: pool.length,
+    byProvider,
+    hasLocal: pool.some((s) => s.provider === "ollama"),
+  };
 }
