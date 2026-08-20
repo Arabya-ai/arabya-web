@@ -62,3 +62,4 @@ cd /var/www/arabya-web && bash scripts/contabo-deploy.sh
 - Google OAuth: `docs/platform/contabo-google-and-updates-ar.md`
 - PM2: `deploy/contabo/ecosystem.config.cjs`
 - Bootstrap أول مرة: `scripts/contabo-bootstrap.sh`
+- قطع إشارة Vercel الحمراء على GitHub (مرة واحدةحدة): `docs/platform/disconnect-vercel-github-ar.md`

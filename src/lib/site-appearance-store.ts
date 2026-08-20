@@ -150,7 +150,7 @@ export async function saveAdminSiteAppearance(
     try {
       await writeSiteAppearanceFile(next);
     } catch {
-      /* Vercel FS is read-only — cloud is source of truth */
+      /* Contabo/local FS may be read-only in some layouts — cloud/DB is source of truth */
     }
     revalidateSiteAppearance();
     return {

@@ -2,7 +2,13 @@
 
 ## Cursor Cloud specific instructions
 
-`arabya-web` is a Next.js 15 (App Router, Turbopack) + React 19 + TypeScript + Tailwind 4 app. Package manager is **npm** (`package-lock.json`). There is **no database and no required `.env`** for local/dev — Quran content ships as static JSON under `/data` (read by `src/lib/quran.ts`, mushaf helpers, and API routes).
+`arabya-web` is a Next.js 15 (App Router, Turbopack) + React 19 + TypeScript + Tailwind 4 app. Package manager is **npm** (`package-lock.json`). Local/dev needs **no required `.env`** for Quran reading — content ships as static JSON under `/data`. Production accounts/keys use **SQLite on Contabo** (`scripts/contabo-ensure-dbs.sh`).
+
+### Hosting (hard)
+- **Production = Contabo VPS only** (PM2 + Nginx). Domains `arabya.org` / `arabyaai.com`.
+- **Never deploy or ask the owner to use Vercel.** A red Vercel GitHub check is a leftover GitHub App — not Contabo failure. One-time owner steps: `docs/platform/disconnect-vercel-github-ar.md`.
+- After merge to `main`: Contabo deploy via Action **Deploy Contabo** or on the server: `cd /var/www/arabya-web && bash scripts/contabo-deploy.sh` (runs `npm ci`, `build`, `contabo-ensure-dbs.sh`, PM2 restart).
+- Meaningful workflows: **CI** + **Deploy Contabo** only (see `.github/workflows/`).
 
 ### Commands
 - `npm install` — dependencies
@@ -11,6 +17,7 @@
 - Data-prep only (optional; hit Quran.com / Corpus): `fetch-data`, `fetch-tafsirs`, `fetch-translations`, `build-irab`, `build-mushaf-index`, `build-search-index`, `import-irab-book`
 - **Translations:** use `npm run fetch-translations` → `scripts/fetch-new-translations.mjs` (extends `data/translations/index.json`). Do **not** run `npm run fetch-translations-legacy` on production data — it can wipe the expanded edition index.
 - **Sync Worker:** do **not** add `"arabya-web": "file:../.."` under `workers/arabya-sync` — that junction breaks `next build` (Turbopack infinite loop). The worker is standalone.
+- **Contabo DBs:** `bash scripts/contabo-ensure-dbs.sh` (also invoked by `contabo-deploy.sh`)
 
 ### Product surface (beyond mushaf reader)
 | Route | Role |
@@ -24,6 +31,7 @@
 | `/resources`, `/qiraat` | Hubs / qiraʾat index + tajweed legend |
 | `/hadith`, `/hadith/[collection]`, `/api/hadith/search` | Hadith hub (Git JSON under `data/hadith`) — parallel with Quran |
 | `/heritage`, `/heritage/[slug]` | Heritage & poetry passages (Git JSON under `data/heritage`) — parallel with Quran |
+| `/lughawi` | Arabic MSA proofreader (لغوي) |
 | `/studio` | Ayah video studio (browser WebCodecs) |
 | `/studio/ai` | Independent AI short-video UI; Python engine in `services/money-printer-turbo` |
 | `/api/tafsir/...`, `/api/translation/...`, `/api/search`, `/api/study` | Local JSON APIs |
@@ -37,12 +45,12 @@ Never add `"arabya-web": "file:../.."` to `workers/arabya-sync/package.json`. np
 Both share `.next`. A concurrent build causes `Internal Server Error` with `ENOENT ... _buildManifest.js.tmp`. Fix: stop all `next` processes, `rm -rf .next`, restart `npm run dev`.
 
 ### npm audit / postcss
-Next 15.5.x (and stable 16.2.x) still vendors `postcss@8.4.31` (GHSA-qx2v-qp2m-jg93). Vercel notes this is **not exploitable** for normal Next apps (PostCSS runs at build time). Do **not** run `npm audit fix --force` (downgrades Next to v9).
+Next 15.5.x (and stable 16.2.x) still vendors `postcss@8.4.31` (GHSA-qx2v-qp2m-jg93). This is **not exploitable** for normal Next apps (PostCSS runs at build time). Do **not** run `npm audit fix --force` (downgrades Next to v9).
 
 This repo uses `"overrides": { "postcss": "^8.5.10" }` to silence the advisory safely until a stable Next release ships the bump (landed on canary `16.3.0-canary.6+` only so far). After upgrading Next past that line, the override can be removed if nested postcss is already ≥ 8.5.10.
 
 ### Sanity check
-Open `/mushaf/1`, select a word, switch study tabs (الكلمات / الإعراب / تفاسير), confirm dock layers load. Run `npm run test` (Vitest) before merging.
+Open `/mushaf/1`, select a word, switch study tabs (الكلمات / الإعراب / تفاسير), confirm dock layers load. Run `npm run test` (Vitest) before merging. On Contabo after deploy, open `/lughawi` and confirm layout does not overlap.
 
 ### Irab books
 `/books` and `import-irab-book` are ready for owner-supplied files and for import/scraping pipelines when the owner directs. Catalog entries may stay `awaiting` until content is imported.

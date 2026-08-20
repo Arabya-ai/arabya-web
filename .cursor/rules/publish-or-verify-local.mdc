@@ -1,13 +1,13 @@
 ---
-description: After meaningful changes, always publish to main or verify local works
+description: After meaningful changes, publish to Contabo (or verify local)
 alwaysApply: true
 ---
 
-# Publish or verify local
+# Publish on Contabo or verify local
 
-After finishing meaningful product/code changes in this repo:
+Production is **Contabo only** (never Vercel). After meaningful product/code changes:
 
-1. **Prefer publish:** commit (when the user asked or when continuing an agreed ship), push to `main`, confirm CI is green, and briefly confirm production (`https://www.arabya.org`) responds for the touched surface when practical.
-2. **If not publishing yet:** start or reuse `npm run dev`, then verify the changed routes/APIs on localhost (at least HTTP 200 / no crash) before ending the turn.
-3. Do not leave the user with “fixed locally, unshipped” unless they explicitly asked to skip deploy.
-4. Tell the user which of the two was done (pushed commit SHA + CI, or local URL/port checked).
+1. **Prefer Contabo publish:** merge/push to `main`, wait for GitHub **CI** + **Deploy Contabo** (or run `bash scripts/contabo-deploy.sh` on the VPS), confirm `https://www.arabya.org` for the touched surface. `contabo-deploy.sh` already runs `contabo-ensure-dbs.sh`.
+2. **If not publishing yet:** start or reuse `npm run dev`, verify changed routes/APIs on localhost (HTTP 200 / no crash).
+3. Do not leave “fixed locally, unshipped” unless the owner explicitly asked to skip Contabo deploy.
+4. Tell the owner Contabo SHA/deploy status or the local URL checked — never a Vercel URL.
