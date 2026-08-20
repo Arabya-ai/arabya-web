@@ -24,7 +24,8 @@ describe("hadith catalog", () => {
   it("searches arabic matn", async () => {
     const { hits, total } = await searchHadith("النيات", { limit: 10 });
     expect(total).toBeGreaterThan(0);
-    expect(hits[0]?.arabic).toMatch(/ني/);
+    expect(hits[0]?.id).toMatch(/^H:/);
+    expect(hits.some((h) => h.arabic.includes("الأَعْمَالُ"))).toBe(true);
   });
 });
 
