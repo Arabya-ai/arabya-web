@@ -49,6 +49,12 @@ describe("enrichHadithToken", () => {
     expect(r.matchStatus).toBe("none");
   });
 
+  it("strips Arabic comma glued to tokens", async () => {
+    const r = await enrichHadithToken("بِالنِّيَّاتِ،");
+    expect(r.matchStatus).toBe("gloss");
+    expect(r.root).toBe("نوي");
+  });
+
   it("handles empty input", async () => {
     const r = await enrichHadithToken("   ");
     expect(r.matchStatus).toBe("none");

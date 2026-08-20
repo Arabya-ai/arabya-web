@@ -121,7 +121,13 @@ function lookupCoreGloss(norm: string) {
 export async function enrichHadithToken(
   surface: string,
 ): Promise<HadithWordEnrichment> {
-  const norm = normalizeArabicToken(surface);
+  // Arabic punctuation (U+060C etc.) sits in the Arabic block — strip it
+  // before normalize so tokens like «بِالنِّيَّاتِ،» still match.
+  const cleaned = String(surface || "").replace(
+    /[\u060C\u061B\u061F\u06D4\u066A-\u066D\u06DD]/g,
+    "",
+  );
+  const norm = normalizeArabicToken(cleaned);
   if (!norm) {
     return {
       matchStatus: "none",

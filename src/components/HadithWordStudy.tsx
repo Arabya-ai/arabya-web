@@ -53,11 +53,13 @@ function tokenizeMatn(
   const tokens: HadithToken[] = [];
   let pos = 1;
   for (const piece of raw) {
-    const cleaned = piece.replace(/^[^\u0600-\u06FF]+|[^\u0600-\u06FF]+$/g, "");
+    const cleaned = piece
+      .replace(/^[^\u0600-\u06FF]+|[^\u0600-\u06FF]+$/g, "")
+      .replace(/[\u060C\u061B\u061F\u06D4]+$/g, "");
     if (!/[\u0600-\u06FF]/.test(cleaned)) continue;
     tokens.push({
       position: pos,
-      text: piece,
+      text: cleaned,
       wordId: makeHadithWordId(collection, number, pos),
     });
     pos += 1;
@@ -192,6 +194,11 @@ export function HadithWordStudy({ collection, number, arabic }: Props) {
             <p className="word-dock-ar" dir="rtl" lang="ar">
               {selected.text}
             </p>
+            {!loading && enrichment?.sense ? (
+              <p className="hadith-sense-preview" dir="rtl" lang="ar">
+                {enrichment.sense}
+              </p>
+            ) : null}
             <p className="layer-hint">{th("wordLayersAnalogyNote")}</p>
           </header>
 
