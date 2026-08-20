@@ -49,9 +49,34 @@ const DEFAULT_MODELS: Record<AiProviderId, string> = {
   groq: "llama-3.3-70b-versatile",
   openrouter: "openai/gpt-4o-mini",
   anthropic: "claude-3-5-haiku-latest",
-  google: "gemini-2.0-flash",
+  /** gemini-2.0-flash was retired → 404; prefer 2.5 Flash. */
+  google: "gemini-2.5-flash",
   ollama: "llama3.2",
 };
+
+const GOOGLE_MODEL_FALLBACKS = [
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+  "gemini-1.5-flash",
+] as const;
+
+/** Short Arabic message for UI — never dump raw provider JSON. */
+export function humanizeAiError(msg: string): string {
+  const m = msg || "";
+  if (/404|no longer ava|not found|is not found/i.test(m)) {
+    return "نموذج Google غير متاح أو قديم — حدّثنا الافتراضي إلى Gemini 2.5. أعد المحاولة.";
+  }
+  if (/401|403|API[_ ]?key|invalid|permission/i.test(m)) {
+    return "مفتاح Google مرفوض أو منتهٍ — راجع تبويب المفاتيح في /admin/ops.";
+  }
+  if (/429|quota|rate|resource.?exhausted/i.test(m)) {
+    return "حصة Google ممتلئة مؤقتاً — أضف مفتاحاً آخر أو انتظر قليلاً.";
+  }
+  if (/exhausted all providers/i.test(m)) {
+    return "Auto جرّب كل المفاتيح المتاحة ولم ينجح — التدقيق المحلي ما زال يعمل.";
+  }
+  return "تعذّر إكمال Auto — التدقيق المحلي ما زال يعمل.";
+}
 
 /** Encrypt user API keys at rest (AES-256-GCM). */
 export function encryptSecret(plain: string): string {
@@ -227,13 +252,35 @@ export async function runAiChat(params: AiChatParams): Promise<AiChatResult> {
       model,
     );
   } else if (provider === "google") {
-    text = await chatGoogle(
-      params.apiKey,
-      params.system,
-      params.user,
-      maxTokens,
-      model,
-    );
+    const preferred = [
+      params.model?.trim(),
+      process.env.LUGHAWI_GOOGLE_MODEL?.trim(),
+      DEFAULT_MODELS.google,
+      ...GOOGLE_MODEL_FALLBACKS,
+    ].filter((x): x is string => Boolean(x));
+    const tried = new Set<string>();
+    let lastErr: Error | null = null;
+    for (const m of preferred) {
+      if (tried.has(m)) continue;
+      tried.add(m);
+      try {
+        text = await chatGoogle(
+          params.apiKey,
+          params.system,
+          params.user,
+          maxTokens,
+          m,
+        );
+        return { text, provider, model: m };
+      } catch (e) {
+        lastErr = e instanceof Error ? e : new Error(String(e));
+        // Only rotate on model-not-found; auth/quota should fail fast.
+        if (!/404|no longer ava|not found/i.test(lastErr.message)) {
+          throw lastErr;
+        }
+      }
+    }
+    throw lastErr ?? new Error("Google AI failed");
   }
 
   return { text, provider, model };
