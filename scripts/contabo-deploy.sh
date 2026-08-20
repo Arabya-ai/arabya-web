@@ -18,14 +18,20 @@ echo "==> Install & build"
 npm ci
 npm run build
 
-if [[ "${ARABYA_USER_SYNC_ENABLED:-}" == "1" || "${ARABYA_USER_SYNC_ENABLED:-}" == "true" ]]; then
-  echo "==> Ensure user SQLite DB"
-  DB_PATH="${ARABYA_USER_DB_PATH:-/var/lib/arabya/user-data.sqlite}"
-  mkdir -p "$(dirname "$DB_PATH")"
-  ARABYA_USER_DB_PATH="$DB_PATH" npm run init-user-db
-  IMPORT_DIR="${ARABYA_IMPORTED_BOOKS_DIR:-/var/lib/arabya/imported-books}"
-  LIBRARY_DIR="${ARABYA_IMPORTED_LIBRARY_DIR:-/var/lib/arabya/imported-library}"
-  mkdir -p "$IMPORT_DIR" "$IMPORT_DIR/irab-claims" "$LIBRARY_DIR"
+echo "==> Ensure Contabo databases & runtime stores"
+if [[ -f scripts/contabo-ensure-dbs.sh ]]; then
+  bash scripts/contabo-ensure-dbs.sh
+else
+  # Fallback for older trees
+  if [[ "${ARABYA_USER_SYNC_ENABLED:-}" == "1" || "${ARABYA_USER_SYNC_ENABLED:-}" == "true" ]]; then
+    echo "==> Ensure user SQLite DB"
+    DB_PATH="${ARABYA_USER_DB_PATH:-/var/lib/arabya/user-data.sqlite}"
+    mkdir -p "$(dirname "$DB_PATH")"
+    ARABYA_USER_DB_PATH="$DB_PATH" npm run init-user-db
+    IMPORT_DIR="${ARABYA_IMPORTED_BOOKS_DIR:-/var/lib/arabya/imported-books}"
+    LIBRARY_DIR="${ARABYA_IMPORTED_LIBRARY_DIR:-/var/lib/arabya/imported-library}"
+    mkdir -p "$IMPORT_DIR" "$IMPORT_DIR/irab-claims" "$LIBRARY_DIR"
+  fi
 fi
 
 echo "==> MoneyPrinterTurbo engine"
