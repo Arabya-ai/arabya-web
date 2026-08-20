@@ -12,6 +12,22 @@ cd "$APP_DIR"
 echo "==> Fetch $BRANCH"
 git fetch origin "$BRANCH"
 git checkout "$BRANCH"
+
+# Learning may have dirtied tracked seed file on older builds — backup + reset so pull can proceed.
+LEARNED="data/lughawi/learned-corrections.json"
+if [[ -f "$LEARNED" ]] && ! git diff --quiet -- "$LEARNED" 2>/dev/null; then
+  BACKUP="/root/lughawi-learned-backup-$(date +%F-%H%M%S).json"
+  echo "==> Local changes in $LEARNED — backing up to $BACKUP then resetting for pull"
+  cp -a "$LEARNED" "$BACKUP"
+  git checkout -- "$LEARNED"
+fi
+
+# Any other unexpected local edits: stash (keep deploy unblocked)
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "==> Stashing other local working-tree changes before pull"
+  git stash push -u -m "contabo-deploy-auto-$(date +%F-%H%M%S)" || true
+fi
+
 git pull --ff-only origin "$BRANCH"
 
 echo "==> Install & build"

@@ -160,6 +160,15 @@ export function recordFeedback(input: {
 
 /** Write active pairs into data/lughawi/learned-corrections.json for Git history. */
 export function syncSeedFromRuntime(): void {
+  // Contabo/production must not dirty the Git working tree — that blocks deploys.
+  // Runtime learning stays in .data/lughawi-learning.json; promote to Git only when
+  // an operator explicitly sets LUGHAWI_WRITE_GIT_SEED=1 (or in non-production).
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.LUGHAWI_WRITE_GIT_SEED !== "1"
+  ) {
+    return;
+  }
   const merged = loadLearning();
   const seed: LearningFile = {
     version: 1,
