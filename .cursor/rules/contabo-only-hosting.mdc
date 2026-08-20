@@ -1,0 +1,23 @@
+---
+description: Production is Contabo only — never Vercel
+alwaysApply: true
+---
+
+# Contabo only (hard rule)
+
+Production for Arabya is **Contabo VPS only** (PM2 + Nginx).
+
+## Forbidden
+- Do not deploy, configure, or ask the owner to act on Vercel.
+- Do not treat a red Vercel GitHub check as a blocker.
+
+## Required
+- Ship path: merge to `main` → Contabo deploy.
+- After every merge the owner completes: **immediately** send Contabo PuTTY deploy command + Ctrl+F5 URL — never wait for them to ask.
+- Command:
+
+```bash
+cd /var/www/arabya-web && git fetch origin main && git checkout main && git pull --ff-only origin main && bash scripts/contabo-deploy.sh
+```
+
+- Databases: `scripts/contabo-ensure-dbs.sh` (via contabo-deploy.sh).

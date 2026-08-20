@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { runAiAuto } from "@/lib/lughawi/ai-gateway";
+import { humanizeAiError, runAiAuto } from "@/lib/lughawi/ai-gateway";
 import { countArabicWords } from "@/lib/lughawi/config";
 import { resolveLughawiAiCandidates } from "@/lib/lughawi/resolve-ai";
 import { getQuota, tryChargeQuota } from "@/lib/lughawi/quota-store";
@@ -117,6 +117,6 @@ export async function POST(req: Request) {
     return NextResponse.json(payload);
   } catch (e) {
     const msg = e instanceof Error ? e.message : "AI failed";
-    return NextResponse.json({ error: msg }, { status: 502 });
+    return NextResponse.json({ error: humanizeAiError(msg) }, { status: 502 });
   }
 }

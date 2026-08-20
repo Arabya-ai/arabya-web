@@ -1816,6 +1816,7 @@
     "offlineMode": "التدقيق المحلي يعمل دائمًا · Auto يكمل بالمفاتيح عند التوفر",
     "engineVersion": "محرك {version}",
     "autoReady": "مفاتيح المشروع جاهزة — Auto يساعد في التدقيق والإعادة والصياغة",
+    "autoOk": "اكتمل Auto بنجاح عبر مفاتيح المشروع أو مفتاحك",
     "shortcutHint": "اختصار: Ctrl+Enter أو ⌘+Enter للتصحيح السريع",
     "trySample": "جرّب مثالًا:",
     "samplesLabel": "أمثلة جاهزة",

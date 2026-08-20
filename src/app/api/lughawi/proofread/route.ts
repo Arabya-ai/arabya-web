@@ -1,5 +1,8 @@
 import { auth } from "@/auth";
-import { buildAutoCandidates } from "@/lib/lughawi/ai-gateway";
+import {
+  buildAutoCandidates,
+  humanizeAiError,
+} from "@/lib/lughawi/ai-gateway";
 import { enrichProofreadWithAi } from "@/lib/lughawi/ai-proofread";
 import { lughawiMaxGuestChars, countArabicWords } from "@/lib/lughawi/config";
 import { proofreadLocal } from "@/lib/lughawi/pipeline";
@@ -114,7 +117,7 @@ export async function POST(req: Request) {
       ...result,
       meta: {
         ...result.meta,
-        warning: `التدقيق المحلي جاهز · Auto تعذّر: ${msg.slice(0, 120)}`,
+        warning: humanizeAiError(msg),
       },
     };
   }

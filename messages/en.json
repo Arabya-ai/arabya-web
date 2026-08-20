@@ -1816,6 +1816,7 @@
     "offlineMode": "Offline rules always run · Auto adds AI when keys are available",
     "engineVersion": "engine {version}",
     "autoReady": "Project keys ready — Auto assists proofread, rewrite, and more",
+    "autoOk": "Auto completed successfully with project or your keys",
     "shortcutHint": "Shortcut: Ctrl+Enter or ⌘+Enter for quick correct",
     "trySample": "Try a sample:",
     "samplesLabel": "Ready samples",

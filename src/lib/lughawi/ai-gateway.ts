@@ -49,9 +49,46 @@ const DEFAULT_MODELS: Record<AiProviderId, string> = {
   groq: "llama-3.3-70b-versatile",
   openrouter: "openai/gpt-4o-mini",
   anthropic: "claude-3-5-haiku-latest",
-  google: "gemini-2.0-flash",
+  /**
+   * Always prefer the newest stable Gemini Flash.
+   * Override only via LUGHAWI_GOOGLE_MODEL or per-slot model in /admin/ops.
+   */
+  google: "gemini-3.7-flash",
   ollama: "llama3.2",
 };
+
+/**
+ * Newest → older. Used as default + automatic 404 fallbacks.
+ * When Google ships a newer Flash GA, put it first here and as `DEFAULT_MODELS.google`.
+ */
+const GOOGLE_MODELS_NEWEST_FIRST = [
+  "gemini-3.7-flash",
+  "gemini-3.6-flash",
+  "gemini-3.5-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-2.5-flash",
+] as const;
+
+/** @deprecated alias — use GOOGLE_MODELS_NEWEST_FIRST */
+const GOOGLE_MODEL_FALLBACKS = GOOGLE_MODELS_NEWEST_FIRST;
+
+/** Short Arabic message for UI — never dump raw provider JSON. */
+export function humanizeAiError(msg: string): string {
+  const m = msg || "";
+  if (/404|no longer ava|not found|is not found/i.test(m)) {
+    return "نموذج Google غير متاح أو قديم — نستخدم أحدث Gemini المتاح تلقائياً. أعد المحاولة.";
+  }
+  if (/401|403|API[_ ]?key|invalid|permission/i.test(m)) {
+    return "مفتاح Google مرفوض أو منتهٍ — راجع تبويب المفاتيح في /admin/ops.";
+  }
+  if (/429|quota|rate|resource.?exhausted/i.test(m)) {
+    return "حصة Google ممتلئة مؤقتاً — أضف مفتاحاً آخر أو انتظر قليلاً.";
+  }
+  if (/exhausted all providers/i.test(m)) {
+    return "Auto جرّب كل المفاتيح المتاحة ولم ينجح — التدقيق المحلي ما زال يعمل.";
+  }
+  return "تعذّر إكمال Auto — التدقيق المحلي ما زال يعمل.";
+}
 
 /** Encrypt user API keys at rest (AES-256-GCM). */
 export function encryptSecret(plain: string): string {
@@ -227,13 +264,35 @@ export async function runAiChat(params: AiChatParams): Promise<AiChatResult> {
       model,
     );
   } else if (provider === "google") {
-    text = await chatGoogle(
-      params.apiKey,
-      params.system,
-      params.user,
-      maxTokens,
-      model,
-    );
+    // Explicit slot/env override first, then newest→older Flash list.
+    const preferred = [
+      params.model?.trim(),
+      process.env.LUGHAWI_GOOGLE_MODEL?.trim(),
+      ...GOOGLE_MODELS_NEWEST_FIRST,
+    ].filter((x): x is string => Boolean(x));
+    const tried = new Set<string>();
+    let lastErr: Error | null = null;
+    for (const m of preferred) {
+      if (tried.has(m)) continue;
+      tried.add(m);
+      try {
+        text = await chatGoogle(
+          params.apiKey,
+          params.system,
+          params.user,
+          maxTokens,
+          m,
+        );
+        return { text, provider, model: m };
+      } catch (e) {
+        lastErr = e instanceof Error ? e : new Error(String(e));
+        // Only rotate on model-not-found; auth/quota should fail fast.
+        if (!/404|no longer ava|not found/i.test(lastErr.message)) {
+          throw lastErr;
+        }
+      }
+    }
+    throw lastErr ?? new Error("Google AI failed");
   }
 
   return { text, provider, model };
