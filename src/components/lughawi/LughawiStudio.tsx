@@ -1,6 +1,6 @@
 "use client";
 
-import { ENGINE_STAGES } from "@/lib/lughawi/engine/core";
+import { stageLabelAr } from "@/lib/lughawi/engine/stages-meta";
 import type { EditType, LughawiEdit, ProofreadResponse, TashkeelLevel } from "@/lib/lughawi/types";
 import { applySingleEdit } from "@/lib/lughawi/pipeline-client";
 import { useTranslations } from "next-intl";
@@ -486,9 +486,7 @@ export function LughawiStudio() {
                   {showTrace ? (
                     <ul>
                       {result.meta.stages.map((s) => {
-                        const label =
-                          ENGINE_STAGES.find((st) => st.id === s.id)?.labelAr ??
-                          s.id;
+                        const label = stageLabelAr(s.id);
                         return (
                           <li key={`${s.id}-${s.ms}`}>
                             <span>{label}</span>

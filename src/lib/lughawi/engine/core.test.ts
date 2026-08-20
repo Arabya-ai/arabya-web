@@ -1,4 +1,8 @@
-import { ENGINE_STAGES, LUGHAWI_ENGINE_VERSION, runProofreadEngine } from "@/lib/lughawi/engine/core";
+import {
+  LUGHAWI_ENGINE_VERSION,
+  runProofreadEngine,
+} from "@/lib/lughawi/engine/core";
+import { ENGINE_STAGE_META } from "@/lib/lughawi/engine/stages-meta";
 import { collectGrammarEdits } from "@/lib/lughawi/rules/grammar";
 import { collectStyleEdits } from "@/lib/lughawi/rules/style";
 import { describe, expect, it } from "vitest";
@@ -6,9 +10,9 @@ import { describe, expect, it } from "vitest";
 describe("lughawi engine core", () => {
   it("exposes a versioned staged registry", () => {
     expect(LUGHAWI_ENGINE_VERSION).toMatch(/^\d+\.\d+\.\d+$/);
-    expect(ENGINE_STAGES.some((s) => s.id === "spelling")).toBe(true);
-    expect(ENGINE_STAGES.some((s) => s.id === "grammar")).toBe(true);
-    expect(ENGINE_STAGES.some((s) => s.id === "style")).toBe(true);
+    expect(ENGINE_STAGE_META.some((s) => s.id === "spelling")).toBe(true);
+    expect(ENGINE_STAGE_META.some((s) => s.id === "grammar")).toBe(true);
+    expect(ENGINE_STAGE_META.some((s) => s.id === "style")).toBe(true);
   });
 
   it("returns stage telemetry and ranked edits", () => {

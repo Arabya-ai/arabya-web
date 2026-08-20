@@ -1,12 +1,21 @@
 /**
  * Lughawi Engine Core — staged proofread pipeline modeled after
  * production NLP/AI inference stacks (normalize → guard → stages → merge → rank).
+ *
+ * Server-only: spelling stage touches learning-store (node:fs).
+ * Client UI must import labels from `./stages-meta` only.
  */
 
 import {
   findProtectedQuranSpans,
   isInsideProtected,
 } from "@/lib/lughawi/quran-guard";
+import {
+  ENGINE_STAGE_META,
+  LUGHAWI_ENGINE_VERSION,
+  type EngineStageId,
+  type EngineStageMeta,
+} from "@/lib/lughawi/engine/stages-meta";
 import { applyEdits, mergeEdits } from "@/lib/lughawi/pipeline-merge";
 import { collectGrammarEdits } from "@/lib/lughawi/rules/grammar";
 import { collectPunctuationEdits } from "@/lib/lughawi/rules/punctuation";
@@ -20,67 +29,28 @@ import type {
   ProtectedSpan,
 } from "@/lib/lughawi/types";
 
-export const LUGHAWI_ENGINE_VERSION = "1.1.0";
+export { LUGHAWI_ENGINE_VERSION, type EngineStageId };
+export type { EngineStageMeta };
 
-export type EngineStageId =
-  | "guard"
-  | "spelling"
-  | "grammar"
-  | "style"
-  | "punctuation"
-  | "merge"
-  | "rank";
-
-export interface EngineStage {
-  id: EngineStageId;
-  labelAr: string;
-  labelEn: string;
+export interface EngineStage extends EngineStageMeta {
   /** Ordered stages that emit edits (guard is meta-only). */
   run?: (text: string, locale: "ar" | "en") => LughawiEdit[];
 }
 
+const STAGE_RUNNERS: Partial<
+  Record<EngineStageId, (text: string, locale: "ar" | "en") => LughawiEdit[]>
+> = {
+  grammar: collectGrammarEdits,
+  spelling: collectSpellingEdits,
+  style: collectStyleEdits,
+  punctuation: collectPunctuationEdits,
+};
+
 /** Registry — same idea as model pipeline stages in AI engines. */
-export const ENGINE_STAGES: EngineStage[] = [
-  {
-    id: "guard",
-    labelAr: "حماية النص القرآني",
-    labelEn: "Quran guard",
-  },
-  {
-    id: "grammar",
-    labelAr: "نحو واتفاق",
-    labelEn: "Grammar & agreement",
-    run: collectGrammarEdits,
-  },
-  {
-    id: "spelling",
-    labelAr: "إملاء ومعجم",
-    labelEn: "Spelling & lexicon",
-    run: collectSpellingEdits,
-  },
-  {
-    id: "style",
-    labelAr: "أسلوب وتنسيق",
-    labelEn: "Style & spacing",
-    run: collectStyleEdits,
-  },
-  {
-    id: "punctuation",
-    labelAr: "ترقيم",
-    labelEn: "Punctuation",
-    run: collectPunctuationEdits,
-  },
-  {
-    id: "merge",
-    labelAr: "دمج التعارضات",
-    labelEn: "Conflict merge",
-  },
-  {
-    id: "rank",
-    labelAr: "ترتيب الثقة",
-    labelEn: "Confidence rank",
-  },
-];
+export const ENGINE_STAGES: EngineStage[] = ENGINE_STAGE_META.map((meta) => ({
+  ...meta,
+  run: STAGE_RUNNERS[meta.id],
+}));
 
 function filterProtected(
   edits: LughawiEdit[],
