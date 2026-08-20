@@ -31,18 +31,26 @@ fi
 git pull --ff-only origin "$BRANCH"
 
 echo "==> Install & build"
-# Fresh tree avoids half-broken node_modules after npm allowScripts skips
-# native postinstalls (sharp / swc / better-sqlite3) on Contabo's npm.
-rm -rf node_modules
+# Fresh tree avoids half-broken node_modules after interrupted installs
+# (missing next/dist/compiled/babel/code-frame breaks Turbopack/webpack).
+rm -rf node_modules .next
 npm ci
 
 if [[ ! -f node_modules/sharp/package.json ]] || ! node -e "require('sharp')" >/dev/null 2>&1; then
   echo "==> Native modules incomplete — rebuilding sharp/sqlite/swc"
   npm rebuild sharp better-sqlite3 @swc/core unrs-resolver @parcel/watcher || true
 fi
-if [[ ! -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
+
+# Detect incomplete Next install (common Contabo failure modes)
+if [[ ! -f node_modules/next/dist/lib/verify-typescript-setup.js ]] || \
+   [[ ! -f node_modules/next/dist/compiled/babel/code-frame.js ]]; then
   echo "==> Next.js install looks incomplete — reinstalling next"
-  npm install next@"$(node -p "require('./package.json').dependencies.next")" --no-save
+  npm install next@"$(node -p "require('./package.json').dependencies.next")" --no-save --include=optional
+fi
+if [[ ! -f node_modules/next/dist/compiled/babel/code-frame.js ]]; then
+  echo "ERROR: next/dist/compiled/babel/code-frame still missing after reinstall."
+  echo "Try: rm -rf node_modules package-lock.json && npm install && npm run build"
+  exit 1
 fi
 if [[ ! -f node_modules/sharp/package.json ]]; then
   echo "ERROR: sharp still missing after rebuild. Check npm version / allowScripts on Contabo."
