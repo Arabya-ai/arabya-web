@@ -88,3 +88,20 @@ curl -sI -H "Host: www.arabya.org" http://127.0.0.1:3000/lughawi | head -5
 ## 6) مفاتيح لغوي AI (اختياري بعد النشر)
 
 انظر: `OWNER-KEYS-AR.md`
+
+---
+
+## 7) إن فشل السحب بسبب `learned-corrections.json`
+
+التعلّم القديم كتب داخل ملف Git على السيرفر فمنع `git pull`.
+
+**الصق هذا الآن في PuTTY (ينسخ نسخة احتياطية ثم ينشر):**
+
+```bash
+cd /var/www/arabya-web
+cp -a data/lughawi/learned-corrections.json "/root/lughawi-learned-backup-$(date +%F-%H%M).json"
+git checkout -- data/lughawi/learned-corrections.json
+git pull --ff-only origin main
+bash scripts/contabo-ensure-dbs.sh
+bash scripts/contabo-deploy.sh
+```
