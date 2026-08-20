@@ -109,7 +109,7 @@ export function HadithWordStudy({ collection, number, arabic }: Props) {
       try {
         const res = await apiGet(
           `/api/hadith/word-enrich?text=${encodeURIComponent(selected.text)}`,
-          { cache: "force-cache" },
+          { cache: "no-store" },
         );
         const data = (await res.json()) as {
           ok?: boolean;
