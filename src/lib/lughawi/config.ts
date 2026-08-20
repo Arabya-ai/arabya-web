@@ -1,12 +1,31 @@
 /** Runtime config for لغوي (project quota + multi-key Auto pool). */
 
+import { listAdminPoolDecrypted } from "@/lib/lughawi/admin-pool-store";
 import { existsSync, readFileSync } from "node:fs";
 import type { AiProviderId } from "@/lib/lughawi/types";
 
-export function lughawiMonthlyQuotaChars(): number {
-  const raw = Number(process.env.LUGHAWI_MONTHLY_QUOTA_CHARS ?? "15000");
-  if (!Number.isFinite(raw) || raw < 0) return 15_000;
+/** Monthly free words on project/admin keys (default 1500). */
+export function lughawiMonthlyQuotaWords(): number {
+  const fromWords = Number(process.env.LUGHAWI_MONTHLY_QUOTA_WORDS ?? "");
+  if (Number.isFinite(fromWords) && fromWords > 0) return Math.floor(fromWords);
+  // Legacy: chars env ≈ words when owner still uses old var (~15000 chars → keep as chars/4 heuristic only if WORDS unset)
+  const raw = Number(process.env.LUGHAWI_MONTHLY_QUOTA_CHARS ?? "1500");
+  if (!Number.isFinite(raw) || raw < 0) return 1_500;
+  // If someone still has 15000 chars configured, treat as words only when WORDS unset and value looks like old default
+  if (!process.env.LUGHAWI_MONTHLY_QUOTA_WORDS && raw === 15_000) return 1_500;
+  if (!process.env.LUGHAWI_MONTHLY_QUOTA_WORDS && raw > 5_000) return 1_500;
   return Math.floor(raw);
+}
+
+/** @deprecated prefer lughawiMonthlyQuotaWords — kept for APIs that still speak "chars" as units */
+export function lughawiMonthlyQuotaChars(): number {
+  return lughawiMonthlyQuotaWords();
+}
+
+export function countArabicWords(text: string): number {
+  const trimmed = text.trim();
+  if (!trimmed) return 0;
+  return trimmed.split(/\s+/).filter(Boolean).length;
 }
 
 export function lughawiMaxGuestChars(): number {
@@ -144,7 +163,16 @@ export function lughawiProjectAiPool(): ProjectAiSlot[] {
     });
   }
 
-  // 1) JSON file on Contabo (best for 20–50 keys)
+  // 0) Super-admin UI pool (encrypted on disk) — preferred source of truth
+  try {
+    for (const s of listAdminPoolDecrypted()) {
+      add(s.provider, s.apiKey, s.model, s.baseUrl, s.label);
+    }
+  } catch {
+    /* ignore corrupt store */
+  }
+
+  // 1) JSON file on Contabo (legacy plaintext pool)
   for (const s of loadPoolFile()) {
     add(s.provider, s.apiKey, s.model, s.baseUrl, s.label);
   }

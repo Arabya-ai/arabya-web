@@ -1,4 +1,9 @@
-import { lughawiMonthlyQuotaChars } from "@/lib/lughawi/config";
+/**
+ * Quota store — free tier counted in **words** (default 1500/month on project keys).
+ * Field names keep `*Chars` for API compatibility but units are words.
+ */
+
+import { lughawiMonthlyQuotaWords } from "@/lib/lughawi/config";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
@@ -48,25 +53,36 @@ export function getQuota(userId: string): {
   limitChars: number;
   usedChars: number;
   remainingChars: number;
+  /** Same numbers — words unit (preferred for UI). */
+  limitWords: number;
+  usedWords: number;
+  remainingWords: number;
+  unit: "words";
 } {
   const period = periodNow();
-  const limit = lughawiMonthlyQuotaChars();
+  const limit = lughawiMonthlyQuotaWords();
   const file = load();
   const row = file.rows.find((r) => r.userId === userId && r.period === period);
   const used = row?.usedChars ?? 0;
+  const limitWords = row?.limitChars ?? limit;
+  const remaining = Math.max(0, limitWords - used);
   return {
     period,
-    limitChars: row?.limitChars ?? limit,
+    limitChars: limitWords,
     usedChars: used,
-    remainingChars: Math.max(0, (row?.limitChars ?? limit) - used),
+    remainingChars: remaining,
+    limitWords,
+    usedWords: used,
+    remainingWords: remaining,
+    unit: "words",
   };
 }
 
-/** Charge chars; returns false if insufficient. */
-export function tryChargeQuota(userId: string, chars: number): boolean {
-  if (chars <= 0) return true;
+/** Charge word units; returns false if insufficient. */
+export function tryChargeQuota(userId: string, words: number): boolean {
+  if (words <= 0) return true;
   const period = periodNow();
-  const limit = lughawiMonthlyQuotaChars();
+  const limit = lughawiMonthlyQuotaWords();
   const file = load();
   let row = file.rows.find((r) => r.userId === userId && r.period === period);
   if (!row) {
@@ -79,9 +95,30 @@ export function tryChargeQuota(userId: string, chars: number): boolean {
     };
     file.rows.push(row);
   }
-  if (row.usedChars + chars > row.limitChars) return false;
-  row.usedChars += chars;
+  if (row.usedChars + words > row.limitChars) return false;
+  row.usedChars += words;
   row.updatedAt = new Date().toISOString();
   save(file);
   return true;
+}
+
+/** Top consumers this period (for admin reports). */
+export function quotaLeaderboard(limit = 50): Array<{
+  userId: string;
+  period: string;
+  usedWords: number;
+  limitWords: number;
+}> {
+  const period = periodNow();
+  const file = load();
+  return file.rows
+    .filter((r) => r.period === period)
+    .map((r) => ({
+      userId: r.userId,
+      period: r.period,
+      usedWords: r.usedChars,
+      limitWords: r.limitChars,
+    }))
+    .sort((a, b) => b.usedWords - a.usedWords)
+    .slice(0, limit);
 }
