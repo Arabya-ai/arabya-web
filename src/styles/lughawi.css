@@ -1,64 +1,102 @@
-/* لغوي — Arabya teal engine studio; calm motion, clear hierarchy */
+/* لغوي — premium Arabya teal workspace (Sahehly-inspired structure, not copy) */
 
 .lughawi-page {
-  --lughawi-glow: color-mix(in srgb, var(--brand) 16%, transparent);
+  --lughawi-glow: color-mix(in srgb, var(--brand) 18%, transparent);
   --lughawi-ink-soft: color-mix(in srgb, var(--ink) 72%, var(--muted));
+  --lughawi-spell: #b45309;
+  --lughawi-grammar: #047857;
+  --lughawi-punct: #0e7490;
+  --lughawi-style: #0f766e;
   scroll-behavior: smooth;
+}
+
+.lughawi-ico {
+  width: 1.05rem;
+  height: 1.05rem;
+  flex-shrink: 0;
+  stroke-width: 2;
+}
+
+.lughawi-ico--spin {
+  animation: lughawi-spin 0.9s linear infinite;
+}
+
+@keyframes lughawi-spin {
+  to { transform: rotate(360deg); }
 }
 
 .lughawi-hero {
   position: relative;
-  padding: 2.75rem 0 1.75rem;
-  margin-bottom: 0.5rem;
+  isolation: isolate;
+  padding: clamp(2.5rem, 5vw, 3.5rem) 0 2rem;
+  margin-bottom: 0.35rem;
+  overflow: hidden;
   background:
-    radial-gradient(120% 80% at 100% 0%, var(--lughawi-glow), transparent 55%),
-    radial-gradient(90% 60% at 0% 100%, color-mix(in srgb, var(--brand-deep) 10%, transparent), transparent 50%),
-    linear-gradient(180deg, color-mix(in srgb, var(--brand) 4%, var(--surface)) 0%, transparent 100%);
-  border-bottom: 1px solid color-mix(in srgb, var(--brand) 18%, var(--line));
+    radial-gradient(90% 70% at 100% -10%, var(--lughawi-glow), transparent 55%),
+    radial-gradient(70% 50% at -5% 110%, color-mix(in srgb, var(--brand-deep) 14%, transparent), transparent 52%),
+    linear-gradient(165deg, color-mix(in srgb, var(--brand) 7%, var(--surface)) 0%, transparent 62%);
+  border-bottom: 1px solid color-mix(in srgb, var(--brand) 16%, var(--line));
+}
+
+.lughawi-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath fill='none' stroke='%230f766e' stroke-opacity='0.07' stroke-width='1' d='M0 60h120M60 0v120'/%3E%3C/svg%3E");
+  pointer-events: none;
 }
 
 .lughawi-hero h1 {
-  font-size: clamp(2.15rem, 4.5vw, 3.1rem);
+  font-size: clamp(2.35rem, 5vw, 3.35rem);
   font-weight: 700;
   color: var(--brand-deep);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
   text-wrap: balance;
-  margin: 0.35rem 0;
-  line-height: 1.15;
+  margin: 0.4rem 0;
+  line-height: 1.12;
 }
 
 .lughawi-kicker {
   margin: 0;
   color: var(--brand);
   font-weight: 600;
-  font-size: 0.95rem;
-  letter-spacing: 0.01em;
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
 }
 
 .lughawi-hero-lead {
-  max-width: 40rem;
+  max-width: 38rem;
   color: var(--muted);
-  line-height: 1.75;
-  margin: 0.55rem 0 0;
+  line-height: 1.8;
+  margin: 0.65rem 0 0;
   text-wrap: pretty;
+  font-size: 1.05rem;
 }
 
 .lughawi-studio {
   display: grid;
-  gap: 0.9rem;
-  margin: 1.25rem 0 2.5rem;
+  gap: 1.1rem;
+  margin: 1.35rem 0 2.75rem;
   animation: lughawi-fade-in 0.45s ease both;
 }
 
 @keyframes lughawi-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.lughawi-workspace {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem 1.05rem 1.15rem;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--surface) 92%, var(--brand-soft));
+  border: 1px solid color-mix(in srgb, var(--brand) 14%, var(--line));
+  box-shadow:
+    0 1px 0 color-mix(in srgb, white 55%, transparent) inset,
+    0 18px 40px color-mix(in srgb, var(--brand-deep) 7%, transparent);
 }
 
 .lughawi-status-bar {
@@ -73,8 +111,8 @@
   display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.45rem;
-  padding: 0.4rem 0.85rem;
+  gap: 0.4rem;
+  padding: 0.42rem 0.85rem;
   border-radius: 999px;
   background: var(--brand-soft);
   color: var(--brand-deep);
@@ -101,12 +139,11 @@
   gap: 0.45rem;
   align-items: center;
   position: sticky;
-  top: 0.5rem;
+  top: 0.45rem;
   z-index: 4;
-  padding: 0.45rem;
-  margin-inline: -0.25rem;
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  backdrop-filter: blur(10px);
+  padding: 0.5rem;
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  backdrop-filter: blur(12px);
   border: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
   border-radius: 16px;
 }
@@ -118,20 +155,19 @@
 .lughawi-copy,
 .lughawi-sample-chip {
   appearance: none;
-  border: 1px solid color-mix(in srgb, var(--brand) 28%, var(--line));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid color-mix(in srgb, var(--brand) 26%, var(--line));
   background: var(--surface);
   color: var(--brand-deep);
   border-radius: 12px;
-  padding: 0.55rem 1rem;
+  padding: 0.58rem 1rem;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    background 0.2s ease,
-    transform 0.15s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    color 0.2s ease;
+  transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
 }
 
 .lughawi-toolbar button:hover:not(:disabled),
@@ -163,11 +199,11 @@
   background: var(--brand-deep);
   color: var(--on-brand);
   border-color: var(--brand-deep);
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--brand-deep) 22%, transparent);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--brand-deep) 24%, transparent);
 }
 
 .lughawi-primary {
-  background: color-mix(in srgb, var(--brand) 12%, var(--surface)) !important;
+  background: color-mix(in srgb, var(--brand) 14%, var(--surface)) !important;
   border-color: var(--brand) !important;
 }
 
@@ -181,9 +217,7 @@
   cursor: not-allowed;
 }
 
-.lughawi-toolbar-ghost {
-  margin-inline-start: auto;
-}
+.lughawi-toolbar-ghost { margin-inline-start: auto; }
 
 .lughawi-samples {
   display: flex;
@@ -193,16 +227,66 @@
 }
 
 .lughawi-samples-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   color: var(--muted);
   font-size: 0.9rem;
   font-weight: 500;
 }
 
 .lughawi-sample-chip {
-  padding: 0.4rem 0.8rem;
+  padding: 0.4rem 0.85rem;
   font-size: 0.88rem;
   font-weight: 500;
   border-radius: 999px;
+}
+
+.lughawi-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.15rem;
+}
+
+.lughawi-legend-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-inline-end: 0.25rem;
+}
+
+.lughawi-legend-item {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.lughawi-legend-item--spelling {
+  color: var(--lughawi-spell);
+  background: color-mix(in srgb, var(--lughawi-spell) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--lughawi-spell) 28%, transparent);
+}
+
+.lughawi-legend-item--grammar {
+  color: var(--lughawi-grammar);
+  background: color-mix(in srgb, var(--lughawi-grammar) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--lughawi-grammar) 28%, transparent);
+}
+
+.lughawi-legend-item--punctuation {
+  color: var(--lughawi-punct);
+  background: color-mix(in srgb, var(--lughawi-punct) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--lughawi-punct) 28%, transparent);
+}
+
+.lughawi-legend-item--style {
+  color: var(--brand-deep);
+  background: color-mix(in srgb, var(--brand-deep) 8%, var(--surface));
+  border-color: color-mix(in srgb, var(--brand-deep) 22%, transparent);
 }
 
 .lughawi-grid {
@@ -213,13 +297,8 @@
 }
 
 @media (max-width: 900px) {
-  .lughawi-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .lughawi-toolbar {
-    position: static;
-  }
+  .lughawi-grid { grid-template-columns: 1fr; }
+  .lughawi-toolbar { position: static; }
 }
 
 .lughawi-panel {
@@ -227,17 +306,17 @@
   flex-direction: column;
   gap: 0.55rem;
   background: var(--surface);
-  border: 1px solid color-mix(in srgb, var(--brand) 14%, var(--line));
+  border: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
   border-radius: 18px;
   padding: 1rem 1.05rem 1.05rem;
-  box-shadow: 0 10px 28px color-mix(in srgb, var(--brand-deep) 6%, transparent);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--brand-deep) 5%, transparent);
   min-height: 18rem;
   transition: border-color 0.2s ease, box-shadow 0.25s ease;
 }
 
 .lughawi-panel:focus-within {
-  border-color: color-mix(in srgb, var(--brand) 35%, var(--line));
-  box-shadow: 0 12px 32px color-mix(in srgb, var(--brand-deep) 10%, transparent);
+  border-color: color-mix(in srgb, var(--brand) 38%, var(--line));
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--brand-deep) 10%, transparent);
 }
 
 .lughawi-panel-label {
@@ -247,6 +326,12 @@
   gap: 0.75rem;
   font-weight: 600;
   color: var(--ink);
+}
+
+.lughawi-panel-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .lughawi-panel-tools {
@@ -271,8 +356,8 @@
   border-radius: 14px;
   padding: 0.95rem 1.05rem;
   font: inherit;
-  font-size: 1.12rem;
-  line-height: 1.9;
+  font-size: 1.14rem;
+  line-height: 1.95;
   background: color-mix(in srgb, var(--brand) 3.5%, var(--surface));
   color: var(--ink);
   transition: background 0.2s ease, border-color 0.2s ease;
@@ -284,14 +369,11 @@
   background: var(--surface);
 }
 
-.lughawi-hint {
-  font-size: 0.8rem;
-  color: var(--muted);
-}
+.lughawi-hint { font-size: 0.8rem; color: var(--muted); }
 
 .lughawi-result {
-  font-size: 1.12rem;
-  line-height: 1.95;
+  font-size: 1.14rem;
+  line-height: 2;
   white-space: pre-wrap;
   min-height: 8rem;
 }
@@ -299,35 +381,51 @@
 .lughawi-empty {
   margin: auto 0;
   text-align: center;
-  padding: 2rem 1rem;
+  padding: 2.4rem 1rem;
+  display: grid;
+  justify-items: center;
+  gap: 0.55rem;
+}
+
+.lughawi-empty-ico {
+  width: 2rem;
+  height: 2rem;
+  color: var(--brand);
+  opacity: 0.7;
 }
 
 .lughawi-mark {
   position: relative;
-  background: color-mix(in srgb, var(--brand) 18%, transparent);
-  border-bottom: 2px solid var(--brand);
+  background: color-mix(in srgb, var(--brand) 16%, transparent);
+  border-bottom: 2.5px solid var(--brand);
   border-radius: 3px;
   cursor: pointer;
   transition: background 0.15s ease;
 }
 
+.lughawi-mark--spelling {
+  background: color-mix(in srgb, var(--lughawi-spell) 16%, transparent);
+  border-bottom-color: var(--lughawi-spell);
+}
+
 .lughawi-mark--grammar {
-  background: color-mix(in srgb, #ca8a04 22%, transparent);
-  border-bottom-color: #a16207;
+  background: color-mix(in srgb, var(--lughawi-grammar) 16%, transparent);
+  border-bottom-color: var(--lughawi-grammar);
 }
 
 .lughawi-mark--punctuation {
-  background: color-mix(in srgb, var(--brand-cyan, #0d9488) 25%, transparent);
-  border-bottom-color: color-mix(in srgb, var(--brand-cyan, #0d9488) 80%, var(--brand));
+  background: color-mix(in srgb, var(--lughawi-punct) 16%, transparent);
+  border-bottom-color: var(--lughawi-punct);
 }
 
 .lughawi-mark--style {
-  background: color-mix(in srgb, var(--brand-deep) 12%, transparent);
+  background: color-mix(in srgb, var(--brand-deep) 10%, transparent);
   border-bottom-style: dashed;
+  border-bottom-color: var(--brand-deep);
 }
 
 .lughawi-mark.is-active {
-  background: color-mix(in srgb, var(--brand) 34%, transparent);
+  background: color-mix(in srgb, var(--brand) 30%, transparent);
 }
 
 .lughawi-tip {
@@ -350,14 +448,8 @@
 }
 
 @keyframes lughawi-tip-in {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
 }
 
 .lughawi-tip strong {
@@ -384,21 +476,12 @@
   animation: lughawi-shimmer 1.2s ease-in-out infinite;
 }
 
-.lughawi-skeleton span:nth-child(2) {
-  width: 86%;
-}
-
-.lughawi-skeleton span:nth-child(3) {
-  width: 72%;
-}
+.lughawi-skeleton span:nth-child(2) { width: 86%; }
+.lughawi-skeleton span:nth-child(3) { width: 72%; }
 
 @keyframes lughawi-shimmer {
-  0% {
-    background-position: 100% 0;
-  }
-  100% {
-    background-position: -100% 0;
-  }
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }
 
 .lughawi-trace {
@@ -435,17 +518,12 @@
   gap: 0.75rem;
 }
 
-.lughawi-trace code {
-  font-size: 0.8rem;
-  color: var(--brand-deep);
-}
-
 .lughawi-edits {
   background: var(--surface);
   border: 1px solid color-mix(in srgb, var(--brand) 14%, var(--line));
-  border-radius: 18px;
-  padding: 1.05rem 1.15rem;
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--brand-deep) 5%, transparent);
+  border-radius: 20px;
+  padding: 1.1rem 1.2rem;
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--brand-deep) 5%, transparent);
 }
 
 .lughawi-flash {
@@ -502,7 +580,7 @@
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  padding: 0.85rem 0.95rem;
+  padding: 0.9rem 1rem;
   border-radius: 14px;
   background: color-mix(in srgb, var(--brand) 4%, var(--surface-2, var(--surface)));
   border: 1px solid transparent;
@@ -530,14 +608,19 @@
   color: var(--brand-deep);
 }
 
+.lughawi-type--spelling {
+  background: color-mix(in srgb, var(--lughawi-spell) 14%, var(--surface));
+  color: var(--lughawi-spell);
+}
+
 .lughawi-type--grammar {
-  background: color-mix(in srgb, #ca8a04 18%, var(--surface));
-  color: #854d0e;
+  background: color-mix(in srgb, var(--lughawi-grammar) 14%, var(--surface));
+  color: var(--lughawi-grammar);
 }
 
 .lughawi-type--punctuation {
-  background: color-mix(in srgb, var(--brand-cyan, #0d9488) 16%, var(--surface));
-  color: color-mix(in srgb, var(--brand-deep) 70%, #0f766e);
+  background: color-mix(in srgb, var(--lughawi-punct) 14%, var(--surface));
+  color: var(--lughawi-punct);
 }
 
 .lughawi-type--style {
@@ -554,8 +637,8 @@
 .lughawi-edit-pair {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.35rem;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .lughawi-edit-pair code {
@@ -565,9 +648,11 @@
   text-decoration-color: color-mix(in srgb, #b91c1c 45%, transparent);
 }
 
-.lughawi-arrow {
+.lughawi-arrow-ico {
+  width: 0.95rem;
+  height: 0.95rem;
   color: var(--muted);
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
 .lughawi-edits p {
@@ -650,14 +735,14 @@
 
 .lughawi-sections {
   display: grid;
-  gap: 2.75rem;
-  margin: 2.75rem 0 3rem;
+  gap: 2.85rem;
+  margin: 2.85rem 0 3rem;
 }
 
 .lughawi-sections section h2 {
   color: var(--brand-deep);
   margin: 0 0 0.5rem;
-  font-size: 1.45rem;
+  font-size: 1.5rem;
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
@@ -665,7 +750,44 @@
 .lughawi-sections section > p {
   color: var(--muted);
   max-width: 40rem;
-  line-height: 1.7;
+  line-height: 1.75;
+}
+
+.lughawi-method-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.1rem;
+}
+
+@media (max-width: 800px) {
+  .lughawi-method-row { grid-template-columns: 1fr; }
+}
+
+.lughawi-method-row article {
+  padding: 1.15rem 1.2rem 1.3rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--brand) 5%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
+}
+
+.lughawi-method-row h3 {
+  margin: 0.55rem 0 0.4rem;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.lughawi-method-row p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+  font-size: 0.95rem;
+}
+
+.lughawi-method-ico {
+  width: 1.35rem;
+  height: 1.35rem;
+  color: var(--brand-deep);
 }
 
 .lughawi-feature-row {
@@ -676,13 +798,11 @@
 }
 
 @media (max-width: 700px) {
-  .lughawi-feature-row {
-    grid-template-columns: 1fr;
-  }
+  .lughawi-feature-row { grid-template-columns: 1fr; }
 }
 
 .lughawi-feature-row article {
-  padding: 0.85rem 0;
+  padding: 0.95rem 0;
   border-top: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
 }
 
@@ -690,12 +810,22 @@
   margin: 0.15rem 0 0.35rem;
   font-size: 1.05rem;
   color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .lughawi-feature-row p {
   margin: 0;
   color: var(--muted);
   line-height: 1.65;
+}
+
+.lughawi-feat-ico {
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--brand);
+  flex-shrink: 0;
 }
 
 .lughawi-steps {
@@ -707,13 +837,11 @@
 }
 
 @media (max-width: 800px) {
-  .lughawi-steps {
-    grid-template-columns: 1fr;
-  }
+  .lughawi-steps { grid-template-columns: 1fr; }
 }
 
 .lughawi-steps article {
-  padding: 1.05rem 1.1rem 1.2rem;
+  padding: 1.05rem 1.1rem 1.25rem;
   border-radius: 16px;
   background: color-mix(in srgb, var(--brand) 5%, var(--surface));
   border: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
@@ -753,9 +881,7 @@
   list-style: none;
 }
 
-.lughawi-faq summary::-webkit-details-marker {
-  display: none;
-}
+.lughawi-faq summary::-webkit-details-marker { display: none; }
 
 .lughawi-faq summary::after {
   content: "+";
@@ -765,9 +891,7 @@
   font-weight: 700;
 }
 
-.lughawi-faq details[open] summary::after {
-  content: "−";
-}
+.lughawi-faq details[open] summary::after { content: "−"; }
 
 .lughawi-faq p {
   color: var(--muted);
@@ -780,7 +904,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
-  margin: 1rem 0 0;
+  margin: 1.15rem 0 0;
 }
 
 .lughawi-local-nav .nav-pill.is-current {
@@ -790,8 +914,12 @@
 }
 
 .lughawi-muted,
+.lughawi-status { color: var(--muted); }
+
 .lughawi-status {
-  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .lughawi-error {
@@ -802,10 +930,7 @@
   background: color-mix(in srgb, #b91c1c 8%, var(--surface));
 }
 
-.lughawi-warn {
-  color: #a16207;
-  font-size: 0.92rem;
-}
+.lughawi-warn { color: #a16207; font-size: 0.92rem; }
 
 .lughawi-protected {
   margin: 0.5rem 0 0;
@@ -825,7 +950,8 @@
   .lughawi-flash,
   .lughawi-settings,
   .lughawi-steps article,
-  .lughawi-skeleton span {
+  .lughawi-skeleton span,
+  .lughawi-ico--spin {
     animation: none !important;
     transition: none !important;
   }
