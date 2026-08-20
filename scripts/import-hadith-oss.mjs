@@ -90,6 +90,24 @@ function toItems(bookSlug, payload) {
   }).filter((i) => i.number > 0 && i.arabic);
 }
 
+function normalizeArabicSearch(input) {
+  return String(input || "")
+    .normalize("NFKD")
+    .replace(/\u0670/g, "ا")
+    .replace(/\u06E5/g, "و")
+    .replace(/[\u06E6\u06E7]/g, "ي")
+    .replace(
+      /[\u064B-\u065F\u06D6-\u06ED\u0640\u06DE-\u06E4\u06E8-\u06ED\u0610-\u061A\u08F0-\u08FF]/g,
+      "",
+    )
+    .replace(/[ٱأإآ]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/[^\u0621-\u064A0-9:\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 async function main() {
   await fs.mkdir(COL_DIR, { recursive: true });
   console.log("Fetching editions catalog…");
@@ -148,10 +166,14 @@ async function main() {
         id: item.id,
         collection: bookSlug,
         number: item.number,
-        arabic: item.arabic,
+        arabic:
+          item.arabic.length > 220
+            ? `${item.arabic.slice(0, 220)}…`
+            : item.arabic,
         titleAr: titles.ar,
         titleEn: titles.en,
         href: `/hadith/${bookSlug}/${item.number}`,
+        norm: normalizeArabicSearch(item.arabic),
       });
     }
 
