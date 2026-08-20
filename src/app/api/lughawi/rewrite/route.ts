@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { runAiAuto } from "@/lib/lughawi/ai-gateway";
+import { countArabicWords } from "@/lib/lughawi/config";
 import { resolveLughawiAiCandidates } from "@/lib/lughawi/resolve-ai";
 import { getQuota, tryChargeQuota } from "@/lib/lughawi/quota-store";
 import type { ProofreadResponse, RewriteStyle } from "@/lib/lughawi/types";
@@ -51,19 +52,21 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error:
-          "لا مفتاح متاح. أضف مفتاحك في إعدادات لغوي أو اضبط مفاتيح مشروع مدقق العربية على الخادم.",
+          "لا مفتاح متاح. من إعدادات لغوي الصق مفتاحك الخاص، أو اطلب من المدير إضافة مفاتيح المشروع من لوحة المراقبة.",
         code: "no_key",
       },
       { status: 402 },
     );
   }
 
+  const words = countArabicWords(text);
   if (chargeProject) {
     const quota = getQuota(email);
-    if (quota.remainingChars < text.length) {
+    if (quota.remainingWords < words) {
       return NextResponse.json(
         {
-          error: "نفدت الحصة الشهرية المجانية. أضف مفتاح API الخاص بك.",
+          error:
+            "انتهت الكلمات المجانية هذا الشهر (1500 كلمة على مفاتيح عربية). الصق مفتاحك الخاص في إعدادات لغوي للمتابعة مجانًا على حسابك.",
           code: "quota_exhausted",
           quota,
         },
@@ -79,7 +82,7 @@ export async function POST(req: Request) {
         "أنت مدقق لغوي عربي فصيح محترف. أعد النص المطلوب فقط دون شرح أو علامات اقتباس.",
       user: `${STYLE_PROMPT[style]}\n\nالنص:\n${text}`,
     });
-    if (chargeProject && !tryChargeQuota(email, text.length)) {
+    if (chargeProject && !tryChargeQuota(email, words)) {
       return NextResponse.json({ error: "quota", code: "quota_exhausted" }, { status: 402 });
     }
     const payload: ProofreadResponse = {
@@ -106,7 +109,7 @@ export async function POST(req: Request) {
       meta: {
         engine: "lughawi-ai-auto",
         usedAi: true,
-        quotaCharged: chargeProject ? text.length : 0,
+        quotaCharged: chargeProject ? words : 0,
         provider,
         warning: attempts && attempts > 1 ? `Auto حاول ${attempts} مزودين` : undefined,
       },

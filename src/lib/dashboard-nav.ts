@@ -125,6 +125,12 @@ export function unifiedDashNav(role: UserRole): DashNavItem[] {
         icon: "settings",
         group: "groupAdmin",
       },
+      {
+        href: "/admin/ops",
+        label: "opsMonitor",
+        icon: "shield",
+        group: "groupAdmin",
+      },
     );
   }
 

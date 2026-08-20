@@ -6,12 +6,10 @@ import {
 } from "@/i18n/locale-params";
 
 import { auth } from "@/auth";
-import { AdminStatsCards } from "@/components/dashboard/AdminStatsCards";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { Link } from "@/i18n/navigation";
+import { AdminKeysManager } from "@/components/ops/AdminKeysManager";
+import { AdminOpsMonitor } from "@/components/ops/AdminOpsMonitor";
 import { canAccessAdmin } from "@/lib/roles";
-import { isCloudSyncConfigured } from "@/lib/cloud-sync";
-import { ArabyaPanel } from "@/components/ui/ArabyaPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -20,10 +18,10 @@ type Props = { params: Promise<{ locale: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Admin" });
-  return { title: t("metaStatsTitle") };
+  return { title: t("opsMetaTitle") };
 }
 
-export default async function AdminPage({ params }: Props) {
+export default async function AdminOpsPage({ params }: Props) {
   const locale = await resolveLocale(params);
   const t = await getTranslations("Admin");
 
@@ -36,33 +34,17 @@ export default async function AdminPage({ params }: Props) {
       area="admin"
       role={session.user.role}
       kicker={t("kicker")}
-      title={t("statsTitle")}
-      subtitle={t("statsSubtitle")}
+      title={t("opsTitle")}
+      subtitle={t("opsSubtitle")}
       userName={session.user.name}
       userEmail={session.user.email}
       userImage={session.user.image}
-      backHref="/account"
-      backLabel={t("backToAccount")}
+      backHref="/admin"
+      backLabel={t("backToStats")}
     >
       <div className="dash-stack">
-        {!isCloudSyncConfigured() ? (
-          <p className="dash-banner dash-banner--warn">{t("d1DisabledStats")}</p>
-        ) : (
-          <AdminStatsCards />
-        )}
-        <ArabyaPanel legacyDash title={t("whatYouCanDo")}>
-          <ul className="dash-list">
-            <li>{t("actionReviewUsers")}</li>
-            <li>{t("actionApproveRequests")}</li>
-            <li>{t("actionReviewAudit")}</li>
-            <li>
-              <Link href="/admin/ops">{t("opsTitle")}</Link>
-            </li>
-            <li>
-              <Link href="/account/edit/library">{t("actionLibraryImport")}</Link>
-            </li>
-          </ul>
-        </ArabyaPanel>
+        <AdminKeysManager />
+        <AdminOpsMonitor />
       </div>
     </DashboardShell>
   );

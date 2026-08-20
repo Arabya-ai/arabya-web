@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { runAiAuto } from "@/lib/lughawi/ai-gateway";
+import { countArabicWords } from "@/lib/lughawi/config";
 import { applyLocalTashkeel } from "@/lib/lughawi/engines/tashkeel-engine";
 import { resolveLughawiAiCandidates } from "@/lib/lughawi/resolve-ai";
 import { getQuota, tryChargeQuota } from "@/lib/lughawi/quota-store";
@@ -95,8 +96,15 @@ export async function POST(req: Request) {
     } satisfies ProofreadResponse);
   }
 
-  if (chargeProject && getQuota(email).remainingChars < text.length) {
-    return NextResponse.json({ error: "quota", code: "quota_exhausted" }, { status: 402 });
+  if (chargeProject && getQuota(email).remainingWords < countArabicWords(text)) {
+    return NextResponse.json(
+      {
+        error:
+          "انتهت الكلمات المجانية. الصق مفتاحك الخاص في إعدادات لغوي للمتابعة.",
+        code: "quota_exhausted",
+      },
+      { status: 402 },
+    );
   }
 
   try {
@@ -108,12 +116,13 @@ export async function POST(req: Request) {
           : level === "endings"
             ? "تشكيل أواخر الكلمات فقط"
             : "تشكيل إلزامي أساسي";
+    const words = countArabicWords(text);
     const { text: out, provider, attempts } = await runAiAuto({
       candidates,
       system: "أضف التشكيل للنص العربي حسب المطلوب. أعد النص المشكّل فقط.",
       user: `${levelHint}:\n${text}`,
     });
-    if (chargeProject) tryChargeQuota(email, text.length);
+    if (chargeProject) tryChargeQuota(email, words);
     return NextResponse.json({
       original: text,
       result: out || local.result,
@@ -122,7 +131,7 @@ export async function POST(req: Request) {
       meta: {
         engine: "lughawi-tashkeel-auto",
         usedAi: true,
-        quotaCharged: chargeProject ? text.length : 0,
+        quotaCharged: chargeProject ? words : 0,
         provider,
         warning: attempts && attempts > 1 ? `Auto حاول ${attempts} مزودين` : undefined,
       },

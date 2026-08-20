@@ -27,6 +27,22 @@ function overlaps(
   return aStart < bEnd && bStart < aEnd;
 }
 
+export function searchKnownAyahs(query: string): {
+  surah: number;
+  ayah: number;
+  text: string;
+  href: string;
+}[] {
+  const q = normalizeArabicForMatch(query);
+  if (q.length < 2) return [];
+  return KNOWN_AYAHS.filter((a) =>
+    normalizeArabicForMatch(a.text).includes(q),
+  ).map((a) => ({
+    ...a,
+    href: `/ayah/${a.surah}/${a.ayah}`,
+  }));
+}
+
 /** Find protected Quran spans in original text (display offsets). */
 export function findProtectedQuranSpans(text: string): ProtectedSpan[] {
   const spans: ProtectedSpan[] = [];

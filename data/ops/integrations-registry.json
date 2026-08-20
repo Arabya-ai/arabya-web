@@ -1,0 +1,177 @@
+{
+  "version": 1,
+  "updatedAt": "2026-08-20",
+  "noteAr": "سجل المشاريع والأدوات الخارجية المدمجة أو المخططة داخل عربية/لغوي. يُحدَّث يدويًا عند كل دمج، ولوحة السوبر أدمن تقرأه يوميًا.",
+  "integrations": [
+    {
+      "id": "camel-tools",
+      "nameAr": "CAMeL Tools",
+      "nameEn": "CAMeL Tools",
+      "role": "morphology",
+      "license": "MIT",
+      "repo": "https://github.com/CAMeL-Lab/camel_tools",
+      "docs": "https://camel-tools.readthedocs.io/",
+      "features": ["صرف", "تحليل صرفي", "تقطيع", "NER", "مشاعر", "لهجات"],
+      "status": "planned_sidecar",
+      "lughawiStage": "morphology",
+      "watch": true,
+      "checkUrl": null,
+      "notesAr": "أساس الصرف العربي. يُشغَّل كـ sidecar بايثون على Contabo — لا يُحقن في حزمة Next.js."
+    },
+    {
+      "id": "camel-arabic-gec",
+      "nameAr": "CAMeL Arabic GEC",
+      "nameEn": "CAMeL Arabic GEC / GED",
+      "role": "gec",
+      "license": "MIT (research code)",
+      "repo": "https://github.com/CAMeL-Lab/arabic-gec",
+      "docs": "https://huggingface.co/collections/CAMeL-Lab/arabic-ged-and-gec-6541e5996be058da06556994",
+      "features": ["كشف أخطاء نحوية", "تصحيح GEC", "نماذج AraBART / CAMeLBERT"],
+      "status": "planned_sidecar",
+      "lughawiStage": "gec",
+      "watch": true,
+      "hfModels": [
+        "CAMeL-Lab/arabart-qalb14-gec-ged-13",
+        "CAMeL-Lab/camelbert-msa-qalb14-ged-13"
+      ],
+      "notesAr": "نماذج Hugging Face للتصحيح النحوي. تتطلب GPU أو CPU قوي على Contabo."
+    },
+    {
+      "id": "camel-text-editing",
+      "nameAr": "CAMeL Text Editing (SWEET)",
+      "nameEn": "CAMeL text-editing GEC",
+      "role": "gec",
+      "license": "MIT",
+      "repo": "https://github.com/CAMeL-Lab/text-editing",
+      "docs": "https://huggingface.co/collections/CAMeL-Lab/text-editing-683efe7eb17f9390d191ae1f",
+      "features": ["تصحيح عبر تحرير نصي", "نماذج BERT للوسم"],
+      "status": "planned_sidecar",
+      "lughawiStage": "gec",
+      "watch": true,
+      "notesAr": "ACL 2025 — أسلوب تحرير أدق من seq2seq الكامل."
+    },
+    {
+      "id": "areta",
+      "nameAr": "ARETA",
+      "nameEn": "Arabic Error Type Annotation",
+      "role": "error_typing",
+      "license": "MIT",
+      "repo": "https://github.com/CAMeL-Lab/arabic_error_type_annotation",
+      "docs": "https://aclanthology.org/2021.conll-1.47.pdf",
+      "features": ["تصنيف أنواع الأخطاء", "شرح القاعدة للمستخدم", "وسم ALC"],
+      "status": "planned_sidecar",
+      "lughawiStage": "explain",
+      "watch": true,
+      "notesAr": "يربط الاقتراح بفئة خطأ مفهومة للمستخدم (مثل همزة / تاء مربوطة)."
+    },
+    {
+      "id": "bayan",
+      "nameAr": "BAYAN",
+      "nameEn": "BAYAN Arabic Writing Assistant",
+      "role": "full_pipeline",
+      "license": "MIT",
+      "repo": "https://github.com/mohamedatef24/BAYAN",
+      "docs": "https://github.com/mohamedatef24/BAYAN",
+      "features": [
+        "إملاء",
+        "نحو",
+        "ترقيم",
+        "تلخيص",
+        "إكمال تلقائي",
+        "لهجة→فصحى",
+        "تدقيق آيات"
+      ],
+      "status": "planned_sidecar",
+      "lughawiStage": "pipeline",
+      "watch": true,
+      "notesAr": "مرجع معماري كامل بأسلوب Grammarly. نقتبس الأنماط والـ API لا النسخ البصري حرفًا."
+    },
+    {
+      "id": "farasa",
+      "nameAr": "Farasa",
+      "nameEn": "Farasa (QCRI)",
+      "role": "diacritization",
+      "license": "Research (تجاري يحتاج إذن)",
+      "repo": "https://github.com/MagedSaeed/farasapy",
+      "docs": "https://farasa.qcri.org/",
+      "features": ["تشكيل", "تقطيع", "POS", "NER", "تصحيح إملائي"],
+      "status": "research_only",
+      "lughawiStage": "tashkeel",
+      "watch": true,
+      "notesAr": "الاستخدام التجاري لـ Farasa الأصلي مقيد — نفضّل CATT المفتوح أو نماذج محلية للإنتاج."
+    },
+    {
+      "id": "catt",
+      "nameAr": "CATT",
+      "nameEn": "Character-based Arabic Tashkeel Transformer",
+      "role": "diacritization",
+      "license": "Apache-2.0",
+      "repo": "https://github.com/abjadai/catt",
+      "docs": "https://arxiv.org/abs/2407.03236",
+      "features": ["تشكيل عصبي متقدم", "أفضل من GPT-4-turbo على معايير CATT"],
+      "status": "planned_sidecar",
+      "lughawiStage": "tashkeel",
+      "watch": true,
+      "notesAr": "مرشّح أول للتشكيل المحلي المجاني على Contabo."
+    },
+    {
+      "id": "pyarabic",
+      "nameAr": "PyArabic",
+      "nameEn": "PyArabic",
+      "role": "normalize",
+      "license": "GPL-3.0",
+      "repo": "https://github.com/linuxscout/pyarabic",
+      "docs": "https://github.com/linuxscout/pyarabic",
+      "features": ["تطبيع", "إزالة تشكيل", "أرقام عربية"],
+      "status": "planned_sidecar",
+      "lughawiStage": "normalize",
+      "watch": false,
+      "notesAr": "مساعد خفيف للتطبيع داخل الـ sidecar."
+    },
+    {
+      "id": "ollama-local",
+      "nameAr": "Ollama (محلي Contabo)",
+      "nameEn": "Ollama local LLM",
+      "role": "llm_local",
+      "license": "MIT (Ollama)",
+      "repo": "https://github.com/ollama/ollama",
+      "docs": "https://ollama.com/",
+      "features": ["نماذج محلية مجانية", "ملاذ أخير عند نفاد المفاتيح"],
+      "status": "wired",
+      "lughawiStage": "ai",
+      "watch": true,
+      "checkUrl": "http://127.0.0.1:11434/api/tags",
+      "notesAr": "مضبوط عبر LUGHAWI_OLLAMA_BASE_URL في مجمّع Auto."
+    },
+    {
+      "id": "lughawi-rules",
+      "nameAr": "محرك قواعد لغوي",
+      "nameEn": "Lughawi rules engine",
+      "role": "rules",
+      "license": "Project",
+      "repo": "internal:src/lib/lughawi",
+      "docs": "specs/001-lughawi-proofreader/STATUS-AR.md",
+      "features": ["إملاء", "نحو", "أسلوب", "ترقيم", "حماية قرآن", "تعلّم"],
+      "status": "wired",
+      "lughawiStage": "core",
+      "watch": false,
+      "notesAr": "المحرك الأوفلاين الحالي lughawi-engine@1.2.0."
+    }
+  ],
+  "competitors": [
+    {
+      "id": "qalam",
+      "nameAr": "قلم",
+      "url": "https://qalam.ai",
+      "parityDoc": "specs/001-lughawi-proofreader/QALAM-PARITY-AR.md",
+      "notesAr": "أكبر مرجع واجهات في هذه المرحلة (حساب مجاني)."
+    },
+    {
+      "id": "sahehly",
+      "nameAr": "صحح لي",
+      "url": "https://sahehly.com",
+      "parityDoc": null,
+      "notesAr": "لقطات الشاشة قادمة لاحقًا من المالك."
+    }
+  ]
+}

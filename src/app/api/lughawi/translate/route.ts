@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { runAiAuto } from "@/lib/lughawi/ai-gateway";
+import { countArabicWords } from "@/lib/lughawi/config";
 import { resolveLughawiAiCandidates } from "@/lib/lughawi/resolve-ai";
 import { getQuota, tryChargeQuota } from "@/lib/lughawi/quota-store";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -39,10 +40,26 @@ export async function POST(req: Request) {
     mode: body.provider ?? "auto",
   });
   if (!candidates.length) {
-    return NextResponse.json({ error: "no_key", code: "no_key" }, { status: 402 });
+    return NextResponse.json(
+      {
+        error:
+          "لا مفتاح متاح. الصق مفتاحك في إعدادات لغوي أو أضف مفاتيح المشروع من لوحة المدير.",
+        code: "no_key",
+      },
+      { status: 402 },
+    );
   }
-  if (chargeProject && getQuota(email).remainingChars < text.length) {
-    return NextResponse.json({ error: "quota", code: "quota_exhausted" }, { status: 402 });
+  const words = countArabicWords(text);
+  if (chargeProject && getQuota(email).remainingWords < words) {
+    return NextResponse.json(
+      {
+        error:
+          "انتهت الكلمات المجانية. الصق مفتاحك الخاص في إعدادات لغوي للمتابعة.",
+        code: "quota_exhausted",
+        quota: getQuota(email),
+      },
+      { status: 402 },
+    );
   }
 
   try {
@@ -51,7 +68,7 @@ export async function POST(req: Request) {
       system: `Translate Arabic to ${LANGS[target]}. Return only the translation.`,
       user: text,
     });
-    if (chargeProject) tryChargeQuota(email, text.length);
+    if (chargeProject) tryChargeQuota(email, words);
     return NextResponse.json({
       original: text,
       result: out,
@@ -60,7 +77,7 @@ export async function POST(req: Request) {
       meta: {
         engine: "lughawi-translate-auto",
         usedAi: true,
-        quotaCharged: chargeProject ? text.length : 0,
+        quotaCharged: chargeProject ? words : 0,
         provider,
         warning: attempts && attempts > 1 ? `Auto حاول ${attempts} مزودين` : undefined,
       },

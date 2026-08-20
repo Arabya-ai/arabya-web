@@ -4,6 +4,11 @@ import {
   type ProjectAiSlot,
 } from "@/lib/lughawi/config";
 import type { AiProviderId } from "@/lib/lughawi/types";
+import {
+  recordAiFailure,
+  recordAiSuccess,
+  slotHealthScore,
+} from "@/lib/ops/usage-meter";
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
 
 export interface AiChatParams {
@@ -260,7 +265,17 @@ export async function runAiAuto(input: {
 }): Promise<AiChatResult> {
   const errors: string[] = [];
   let attempts = 0;
-  for (const c of input.candidates) {
+  // Prefer healthier / higher-remaining-token slots first.
+  const ordered = [...input.candidates].sort((a, b) => {
+    const ha = slotHealthScore({ provider: a.provider, apiKey: a.apiKey });
+    const hb = slotHealthScore({ provider: b.provider, apiKey: b.apiKey });
+    if (hb !== ha) return hb - ha;
+    // Keep user BYOK ahead of project when scores tie.
+    if (a.source !== b.source) return a.source === "user" ? -1 : 1;
+    return 0;
+  });
+
+  for (const c of ordered) {
     attempts += 1;
     try {
       const result = await runAiChat({
@@ -272,9 +287,22 @@ export async function runAiAuto(input: {
         user: input.user,
         maxTokens: input.maxTokens,
       });
+      recordAiSuccess({
+        provider: c.provider,
+        apiKey: c.apiKey,
+        label: c.label,
+        promptChars: input.system.length + input.user.length,
+        completionChars: result.text.length,
+      });
       return { ...result, attempts, source: c.source };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
+      recordAiFailure({
+        provider: c.provider,
+        apiKey: c.apiKey,
+        label: c.label,
+        error: msg,
+      });
       errors.push(`${c.provider}: ${msg.slice(0, 120)}`);
     }
   }
@@ -285,7 +313,7 @@ export async function runAiAuto(input: {
   );
 }
 
-/** Round-robin so 10 Google keys / 10 OpenAI keys share load evenly. */
+/** Round-robin so many keys share load when health scores are equal. */
 let projectRotate = 0;
 
 function rotateSlots(slots: ProjectAiSlot[]): ProjectAiSlot[] {
@@ -294,6 +322,10 @@ function rotateSlots(slots: ProjectAiSlot[]): ProjectAiSlot[] {
   return [...slots.slice(start), ...slots.slice(0, start)];
 }
 
+/**
+ * Build Auto candidates: user BYOK → project pool (token-health sorted at
+ * call time) → local Ollama already included in pool when configured.
+ */
 export function buildAutoCandidates(opts: {
   userCandidates?: AiCandidate[];
   preferProvider?: string | null;
@@ -313,7 +345,13 @@ export function buildAutoCandidates(opts: {
 
   if (!opts.userOnly) {
     const rotated = rotateSlots(lughawiProjectAiPool());
-    for (const slot of rotated) {
+    // Soft-sort by remaining token budget before round-robin order is consumed.
+    const byHealth = [...rotated].sort((a, b) => {
+      const ha = slotHealthScore({ provider: a.provider, apiKey: a.apiKey });
+      const hb = slotHealthScore({ provider: b.provider, apiKey: b.apiKey });
+      return hb - ha;
+    });
+    for (const slot of byHealth) {
       out.push({
         provider: slot.provider,
         apiKey: slot.apiKey,

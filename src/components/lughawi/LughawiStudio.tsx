@@ -1,18 +1,25 @@
 "use client";
 
 import { stageLabelAr } from "@/lib/lughawi/engine/stages-meta";
+import { stripTashkeel } from "@/lib/lughawi/normalize";
+import { findProtectedQuranSpans, searchKnownAyahs } from "@/lib/lughawi/quran-guard";
 import type { EditType, LughawiEdit, ProofreadResponse, TashkeelLevel } from "@/lib/lughawi/types";
 import { applySingleEdit } from "@/lib/lughawi/pipeline-client";
 import { LughawiSettings } from "@/components/lughawi/LughawiSettings";
 import {
   ArrowLeftRight,
+  BookOpen,
   Check,
   CheckCheck,
   ClipboardCopy,
   Eraser,
+  FileText,
+  FolderOpen,
   Languages,
   Loader2,
+  Puzzle,
   RotateCcw,
+  Search,
   Settings2,
   Sparkles,
   SpellCheck2,
@@ -22,6 +29,8 @@ import {
   ShieldCheck,
   Zap,
   X,
+  BookMarked,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
@@ -37,6 +46,20 @@ import {
 
 type Action = "proofread" | "rewrite" | "translate" | "tashkeel" | "tafqeet";
 
+type WorkspaceModule =
+  | "editor"
+  | "quran"
+  | "tafqeetPanel"
+  | "ocr"
+  | "documents"
+  | "translation"
+  | "addons"
+  | "plagiarism"
+  | "style"
+  | "dictionary"
+  | "templates"
+  | "settings";
+
 const SAMPLES = [
   "انا ذهبت الى المدرسه ، وكتبت الرساله? هناك يوجد مشكله في النص",
   "يجب ان نراجع هذا المدرسة قبل ان ننشر الصفحه",
@@ -51,6 +74,25 @@ const TYPE_CLASS: Record<EditType, string> = {
   style: "style",
   tashkeel: "tashkeel",
   other: "other",
+};
+
+const FILTER_TYPES: EditType[] = [
+  "spelling",
+  "grammar",
+  "style",
+  "morphology",
+  "punctuation",
+  "other",
+];
+
+const ALL_TYPES_ON: Record<EditType, boolean> = {
+  spelling: true,
+  grammar: true,
+  morphology: true,
+  punctuation: true,
+  style: true,
+  tashkeel: true,
+  other: true,
 };
 
 export function LughawiStudio() {
@@ -71,16 +113,34 @@ export function LughawiStudio() {
   const [engineVersion, setEngineVersion] = useState<string | null>(null);
   const [poolCount, setPoolCount] = useState(0);
   const [history, setHistory] = useState<string[]>([]);
+  const [module, setModule] = useState<WorkspaceModule>("editor");
+  const [typeFilter, setTypeFilter] = useState(ALL_TYPES_ON);
+  const [proofMode, setProofMode] = useState<"full" | "spelling">("full");
+  const [quranQuery, setQuranQuery] = useState("");
+  const [quranHits, setQuranHits] = useState<
+    ReturnType<typeof searchKnownAyahs>
+  >([]);
 
-  const edits = result?.edits.filter((e) => e.status === "proposed") ?? [];
+  const allEdits = result?.edits.filter((e) => e.status === "proposed") ?? [];
+  const edits = allEdits.filter((e) => {
+    if (typeFilter[e.type] === false) return false;
+    if (proofMode === "spelling") return e.type === "spelling";
+    return true;
+  });
 
   const editStats = useMemo(() => {
     const counts: Record<string, number> = {};
-    for (const e of edits) {
+    for (const e of allEdits) {
       counts[e.type] = (counts[e.type] ?? 0) + 1;
     }
     return counts;
-  }, [edits]);
+  }, [allEdits]);
+
+  const wordCount = useMemo(() => {
+    const trimmed = text.trim();
+    if (!trimmed) return 0;
+    return trimmed.split(/\s+/).filter(Boolean).length;
+  }, [text]);
 
   useEffect(() => {
     void fetch("/api/lughawi/status")
@@ -252,7 +312,10 @@ export function LughawiStudio() {
 
   function acceptAll() {
     if (!result) return;
-    const pendingEdits = result.edits.filter((e) => e.status === "proposed");
+    const pendingEdits = result.edits.filter(
+      (e) => e.status === "proposed" && typeFilter[e.type] !== false,
+    );
+    if (pendingEdits.length === 0) return;
     setHistory((h) => [...h.slice(-19), result.result]);
     let workingText = result.result;
     let workingEdits = [...result.edits];
@@ -267,7 +330,7 @@ export function LughawiStudio() {
       ...result,
       original: workingText,
       result: workingText,
-      edits: [],
+      edits: workingEdits.filter((e) => e.status === "proposed"),
     });
     setFlash(t("acceptedAllFlash"));
   }
@@ -288,6 +351,32 @@ export function LughawiStudio() {
     setResult(null);
     setError(null);
     setFlash(null);
+  }
+
+  function removeDiacritics() {
+    const next = stripTashkeel(text);
+    if (next === text) {
+      setFlash(t("noTashkeelFlash"));
+      return;
+    }
+    setHistory((h) => [...h.slice(-19), text]);
+    setText(next);
+    setResult(null);
+    setFlash(t("removedTashkeelFlash"));
+  }
+
+  function checkVerses() {
+    const spans = findProtectedQuranSpans(text);
+    if (spans.length === 0) {
+      setFlash(t("noVerseFlash"));
+      return;
+    }
+    setFlash(t("verseFoundFlash", { count: spans.length }));
+    if (!result) run("proofread");
+  }
+
+  function toggleType(type: EditType) {
+    setTypeFilter((prev) => ({ ...prev, [type]: !prev[type] }));
   }
 
   function copyResult() {
@@ -348,10 +437,197 @@ export function LughawiStudio() {
     },
   ];
 
+  const modules: {
+    id: WorkspaceModule;
+    label: string;
+    icon: ReactNode;
+    soon?: boolean;
+  }[] = [
+    {
+      id: "editor",
+      label: t("module.correct"),
+      icon: <SpellCheck2 className="lughawi-ico" aria-hidden />,
+    },
+    {
+      id: "quran",
+      label: t("module.quran"),
+      icon: <BookOpen className="lughawi-ico" aria-hidden />,
+    },
+    {
+      id: "tafqeetPanel",
+      label: t("module.tafqeet"),
+      icon: <Hash className="lughawi-ico" aria-hidden />,
+    },
+    {
+      id: "translation",
+      label: t("module.translation"),
+      icon: <Languages className="lughawi-ico" aria-hidden />,
+    },
+    {
+      id: "ocr",
+      label: t("module.ocr"),
+      icon: <FileText className="lughawi-ico" aria-hidden />,
+    },
+    {
+      id: "documents",
+      label: t("module.documents"),
+      icon: <FolderOpen className="lughawi-ico" aria-hidden />,
+      soon: true,
+    },
+    {
+      id: "addons",
+      label: t("module.addons"),
+      icon: <Puzzle className="lughawi-ico" aria-hidden />,
+      soon: true,
+    },
+    {
+      id: "plagiarism",
+      label: t("module.plagiarism"),
+      icon: <Search className="lughawi-ico" aria-hidden />,
+      soon: true,
+    },
+    {
+      id: "style",
+      label: t("module.style"),
+      icon: <SlidersHorizontal className="lughawi-ico" aria-hidden />,
+      soon: true,
+    },
+    {
+      id: "dictionary",
+      label: t("module.dictionary"),
+      icon: <BookMarked className="lughawi-ico" aria-hidden />,
+      soon: true,
+    },
+    {
+      id: "templates",
+      label: t("module.templates"),
+      icon: <BookMarked className="lughawi-ico" aria-hidden />,
+      soon: true,
+    },
+    {
+      id: "settings",
+      label: t("settings"),
+      icon: <Settings2 className="lughawi-ico" aria-hidden />,
+    },
+  ];
+
   return (
     <section className="lughawi-studio" aria-label={t("studioLabel")}>
-      <div className="lughawi-workspace">
+      <div className="lughawi-shell">
+        <nav className="lughawi-rail lughawi-rail--nav" aria-label={t("modulesNav")}>
+          {modules.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              className={`lughawi-rail-btn${module === m.id ? " is-active" : ""}`}
+              onClick={() => {
+                setModule(m.id);
+                if (m.id === "settings") setShowSettings(true);
+                else setShowSettings(false);
+                if (m.id === "translation") setAction("translate");
+                if (m.id === "tafqeetPanel") setAction("tafqeet");
+                if (m.id === "editor") setAction("proofread");
+              }}
+            >
+              {m.icon}
+              <span>{m.label}</span>
+              {m.soon ? <span className="lughawi-rail-badge">{t("soon")}</span> : null}
+            </button>
+          ))}
+        </nav>
+
+        <div className="lughawi-main-col">
+          {module === "quran" ? (
+            <div className="lughawi-workspace">
+              <h2 className="lughawi-panel-title">{t("module.quran")}</h2>
+              <p className="lughawi-muted">{t("quranAssistHelp")}</p>
+              <textarea
+                value={quranQuery}
+                onChange={(e) => setQuranQuery(e.target.value)}
+                rows={4}
+                placeholder={t("quranSearchPlaceholder")}
+                dir="rtl"
+              />
+              <button
+                type="button"
+                className="lughawi-primary"
+                onClick={() => setQuranHits(searchKnownAyahs(quranQuery))}
+              >
+                {t("quranSearch")}
+              </button>
+              <ul className="lughawi-protected">
+                {quranHits.map((h) => (
+                  <li key={`${h.surah}-${h.ayah}`}>
+                    <strong>
+                      {h.surah}:{h.ayah}
+                    </strong>{" "}
+                    {h.text}{" "}
+                    <button
+                      type="button"
+                      className="lughawi-copy"
+                      onClick={() => {
+                        void navigator.clipboard.writeText(h.text);
+                        setFlash(t("copied"));
+                      }}
+                    >
+                      {t("copy")}
+                    </button>{" "}
+                    <a href={h.href}>{t("openAyah")}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : module === "ocr" ? (
+            <div className="lughawi-module-placeholder">
+              <p>{t("ocrHelp")}</p>
+            </div>
+          ) : module === "tafqeetPanel" ? (
+            <div className="lughawi-workspace">
+              <div className="lughawi-toolbar">
+                <button
+                  type="button"
+                  className="lughawi-primary"
+                  onClick={() => {
+                    setModule("editor");
+                    setAction("tafqeet");
+                    if (text.trim()) run("tafqeet");
+                  }}
+                  disabled={pending || !text.trim()}
+                >
+                  <Hash className="lughawi-ico" aria-hidden />
+                  {t("actionTafqeet")}
+                </button>
+              </div>
+              <p className="lughawi-muted">{t("moduleComingSoon", { name: t("module.tafqeet") })}</p>
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                rows={8}
+                placeholder={t("placeholder")}
+                dir="rtl"
+              />
+            </div>
+          ) : module !== "editor" &&
+            module !== "settings" &&
+            module !== "translation" ? (
+            <div className="lughawi-module-placeholder">
+              <p>
+                {t("moduleComingSoon", {
+                  name: t(`module.${module}` as "module.documents"),
+                })}
+              </p>
+            </div>
+          ) : (
+            <div className="lughawi-workspace">
         <div className="lughawi-status-bar">
+          <p className="lughawi-mode-pill" role="status">
+            <span>
+              {t("charLimitLabel")} {text.length.toLocaleString("ar-EG")}
+            </span>
+            <span>
+              {t("maxLabel")} {8000}
+            </span>
+          </p>
           <p className="lughawi-mode-pill" role="status">
             <ShieldCheck className="lughawi-ico" aria-hidden />
             <span>{t("offlineMode")}</span>
@@ -367,6 +643,31 @@ export function LughawiStudio() {
               {t("autoReady")}
             </p>
           ) : null}
+        </div>
+
+        <div className="lughawi-subbar" role="group" aria-label={t("proofModeTitle")}>
+          <button
+            type="button"
+            className={proofMode === "full" ? "is-active" : undefined}
+            onClick={() => setProofMode("full")}
+          >
+            {t("proofModeFull")}
+          </button>
+          <button
+            type="button"
+            className={proofMode === "spelling" ? "is-active" : undefined}
+            onClick={() => setProofMode("spelling")}
+          >
+            {t("proofModeSpelling")}
+          </button>
+          <button
+            type="button"
+            className="lughawi-primary"
+            onClick={() => run("proofread")}
+            disabled={pending || !text.trim()}
+          >
+            {t("startCorrect")}
+          </button>
         </div>
 
         <div className="lughawi-toolbar" role="toolbar" aria-label={t("studioLabel")}>
@@ -390,7 +691,30 @@ export function LughawiStudio() {
           <button
             type="button"
             className="lughawi-toolbar-ghost"
-            onClick={() => setShowSettings((v) => !v)}
+            onClick={checkVerses}
+            disabled={!text.trim()}
+            title={t("actionVerse")}
+          >
+            <BookOpen className="lughawi-ico" aria-hidden />
+            <span>{t("actionVerse")}</span>
+          </button>
+          <button
+            type="button"
+            className="lughawi-toolbar-ghost"
+            onClick={removeDiacritics}
+            disabled={!text.trim()}
+            title={t("actionStripTashkeel")}
+          >
+            <Eraser className="lughawi-ico" aria-hidden />
+            <span>{t("actionStripTashkeel")}</span>
+          </button>
+          <button
+            type="button"
+            className="lughawi-toolbar-ghost"
+            onClick={() => {
+              setShowSettings((v) => !v);
+              setModule("settings");
+            }}
             aria-expanded={showSettings}
           >
             <Settings2 className="lughawi-ico" aria-hidden />
@@ -464,8 +788,9 @@ export function LughawiStudio() {
               [
                 "spelling",
                 "grammar",
-                "punctuation",
                 "style",
+                "morphology",
+                "punctuation",
               ] as const
             ).map((key) =>
               editStats[key] ? (
@@ -614,7 +939,6 @@ export function LughawiStudio() {
             ) : null}
           </div>
         </div>
-      </div>
 
       {edits.length > 0 ? (
         <div className="lughawi-edits">
@@ -679,6 +1003,48 @@ export function LughawiStudio() {
           </ul>
         </div>
       ) : null}
+            </div>
+          )}
+        </div>
+
+        <aside className="lughawi-rail lughawi-rail--analysis" aria-label={t("analysisNav")}>
+          <button
+            type="button"
+            className="lughawi-primary"
+            onClick={acceptAll}
+            disabled={edits.length === 0 || pending}
+          >
+            <CheckCheck className="lughawi-ico" aria-hidden />
+            {t("correctAll")}
+          </button>
+          <ul className="lughawi-cat-list">
+            {FILTER_TYPES.map((type) => (
+              <li key={type}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={typeFilter[type] !== false}
+                    onChange={() => toggleType(type)}
+                  />
+                  <span className={`lughawi-cat-dot lughawi-cat-dot--${TYPE_CLASS[type]}`} />
+                  <span>{typeLabel(type)}</span>
+                </label>
+                <span className="lughawi-cat-count">{editStats[type] ?? 0}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="lughawi-wordcount">
+            <span>
+              {t("wordCount")}: {wordCount.toLocaleString("ar-EG")}
+            </span>
+            {allEdits.length > 0 ? (
+              <span className="lughawi-error-badge" title={t("issuesCount")}>
+                {allEdits.length}
+              </span>
+            ) : null}
+          </div>
+        </aside>
+      </div>
     </section>
   );
 }
