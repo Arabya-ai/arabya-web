@@ -20,6 +20,8 @@
 **Constraints**: عدم كسر المصحف/التلاوة؛ عدم تسريب مفاتيح؛ ضيف بدون إجبار حساب للمسار المحلي؛ حدود معدل للحصة  
 **Scale/Scope**: إطلاق تدريجي (P1 محلي+واجهة+حصة/BYOK هيكليًا → P2 نحو/صياغة/تشكيل → P3 تفقيط/API عام/امتداد متصفح)
 
+**Owner decisions (2026-08-20)**: حصة شهرية **15,000** حرف؛ اسم القائمة **لغوي**؛ استنساخ هيكل واجهات arabiccorrector + صححلي مع الحفاظ على هوية عربیا.
+
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*

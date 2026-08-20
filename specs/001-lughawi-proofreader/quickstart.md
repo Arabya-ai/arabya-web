@@ -8,7 +8,7 @@
 ## للمستفيد غير التقني — ترتيب العمل
 
 1. الموافقة على المواصفة في `specs/001-lughawi-proofreader/spec.md`.
-2. تأكيد أو تغيير الحصة المجانية الافتراضية (حاليًا مقترحة: 30,000 حرف/شهر).
+2. الحصة المجانية المعتمدة: **15,000 حرف/شهر** (قابلة للتغيير لاحقًا).
 3. بعد بناء المرحلة B/C: تجربة `https://www.arabya.org/lughawi` (أو المحلي).
 4. عند تفعيل الحصة: وضع مفتاح مشروع «مدقق العربية» في إعدادات الخادم (مرة واحدة، لا يُشارك مع الزوار).
 5. كل مستخدم يريد تجاوز الحصة: يدخل مفتاحه من إعدادات لغوي.
@@ -28,7 +28,7 @@ cd services/lughawi-engine && python -m uvicorn app.main:app --port 8091
 - `LUGHAWI_ENGINE_URL=http://127.0.0.1:8091`
 - `LUGHAWI_PROJECT_AI_PROVIDER=openai` (أو openrouter…)
 - `LUGHAWI_PROJECT_AI_KEY=…`  # حصة مدقق العربية — سرّ خادم
-- `LUGHAWI_MONTHLY_QUOTA_CHARS=30000`
+- `LUGHAWI_MONTHLY_QUOTA_CHARS=15000`
 - `LUGHAWI_CREDENTIALS_SECRET=…`  # تشفير مفاتيح المستخدم
 
 اختبار عقد بسيط بعد التنفيذ:

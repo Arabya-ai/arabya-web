@@ -103,7 +103,7 @@ All JSON; UTF-8; Arabic explanations default.
 ```json
 {
   "period": "2026-08",
-  "limitChars": 30000,
+  "limitChars": 15000,
   "usedChars": 1200,
   "remainingChars": 28800
 }
