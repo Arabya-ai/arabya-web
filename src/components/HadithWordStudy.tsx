@@ -1,10 +1,14 @@
 "use client";
 
-import { useId, useRef, useState, type KeyboardEvent } from "react";
-import { useTranslations } from "next-intl";
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { makeHadithWordId } from "@/lib/word-id";
 import { nextTabIndex } from "@/lib/tablist";
 import { stripTashkeel } from "@/lib/tahfeez/normalize";
+import { formatFeatureLabels, formatPosLabels } from "@/lib/morph-labels";
+import { apiGet } from "@/lib/api-client";
+import type { HadithWordEnrichment } from "@/lib/hadith-word-enrich";
 
 const LAYER_IDS = [
   "syntax",
@@ -40,7 +44,6 @@ function tokenizeMatn(
     .map((w) => w.replace(/^[^\u0600-\u06FF]+|[^\u0600-\u06FF]+$/g, ""))
     .filter((w) => /[\u0600-\u06FF]/.test(w));
 
-  // Keep display tokens aligned with original whitespace segments when possible.
   const raw = arabic
     .replace(/<br\s*\/?>/gi, " ")
     .replace(/<[^>]+>/g, " ")
@@ -60,7 +63,6 @@ function tokenizeMatn(
     pos += 1;
   }
 
-  // Fallback if HTML/punctuation left us empty.
   if (!tokens.length && parts.length) {
     return parts.map((text, i) => ({
       position: i + 1,
@@ -83,13 +85,49 @@ function layerHintKey(id: LayerId): string {
 export function HadithWordStudy({ collection, number, arabic }: Props) {
   const t = useTranslations("WordDock");
   const th = useTranslations("Hadith");
+  const locale = useLocale() === "en" ? "en" : "ar";
   const tokens = tokenizeMatn(collection, number, arabic);
   const [selected, setSelected] = useState<HadithToken | null>(
     tokens[0] ?? null,
   );
-  const [layer, setLayer] = useState<LayerId>("syntax");
+  const [layer, setLayer] = useState<LayerId>("morphology");
+  const [enrichment, setEnrichment] = useState<HadithWordEnrichment | null>(
+    null,
+  );
+  const [loading, setLoading] = useState(false);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const baseId = useId();
+
+  useEffect(() => {
+    if (!selected) {
+      setEnrichment(null);
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    void (async () => {
+      try {
+        const res = await apiGet(
+          `/api/hadith/word-enrich?text=${encodeURIComponent(selected.text)}`,
+          { cache: "force-cache" },
+        );
+        const data = (await res.json()) as {
+          ok?: boolean;
+          enrichment?: HadithWordEnrichment;
+        };
+        if (!cancelled) {
+          setEnrichment(data.ok ? data.enrichment ?? null : null);
+        }
+      } catch {
+        if (!cancelled) setEnrichment(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selected]);
 
   const layers = LAYER_IDS.map((id) => ({
     id,
@@ -104,6 +142,17 @@ export function HadithWordStudy({ collection, number, arabic }: Props) {
     setLayer(layers[next].id);
     tabRefs.current[next]?.focus();
   }
+
+  const posLabels = formatPosLabels(enrichment?.pos, enrichment?.features, locale);
+  const featureLabels = formatFeatureLabels(enrichment?.features, locale);
+  const hasMorph =
+    enrichment &&
+    (enrichment.root ||
+      enrichment.lemma ||
+      enrichment.particleLabelAr ||
+      (enrichment.pos && enrichment.pos.length > 0));
+  const hasSense = Boolean(enrichment?.sense?.trim());
+  const hasLexicon = Boolean(enrichment?.lexiconText?.trim());
 
   return (
     <div className="hadith-word-study">
@@ -143,7 +192,7 @@ export function HadithWordStudy({ collection, number, arabic }: Props) {
             <p className="word-dock-ar" dir="rtl" lang="ar">
               {selected.text}
             </p>
-            <p className="layer-hint">{th("wordLayersAwaiting")}</p>
+            <p className="layer-hint">{th("wordLayersAnalogyNote")}</p>
           </header>
 
           <div
@@ -185,19 +234,78 @@ export function HadithWordStudy({ collection, number, arabic }: Props) {
                 className="hadith-layer-panel"
               >
                 <p className="layer-hint">{L.hint}</p>
-                <p className="layer-hint">
-                  {L.id === "rhetoric"
-                    ? t("rhetoricAwaiting")
-                    : L.id === "morphology"
-                      ? t("noMorph")
-                      : L.id === "lexicon"
-                        ? t("noLexicon")
-                        : L.id === "syntax"
-                          ? t("noIrab")
-                          : L.id === "translation"
-                            ? t("noWordTranslation")
-                            : th("semanticsAwaiting")}
-                </p>
+                {loading ? <p className="layer-hint">{t("loading")}</p> : null}
+
+                {!loading && L.id === "morphology" ? (
+                  hasMorph ? (
+                    <div className="morph-facts--inline">
+                      {enrichment?.root ? (
+                        <Link
+                          href={`/root/${encodeURIComponent(enrichment.root)}`}
+                          className="morph-chip"
+                        >
+                          {t("morphRootChip", { root: enrichment.root })}
+                        </Link>
+                      ) : null}
+                      {enrichment?.lemma ? (
+                        <span className="morph-chip">
+                          {t("morphLemmaChip", { lemma: enrichment.lemma })}
+                        </span>
+                      ) : null}
+                      {enrichment?.particleLabelAr ? (
+                        <span className="morph-chip">
+                          {locale === "en"
+                            ? enrichment.particleLabelEn
+                            : enrichment.particleLabelAr}
+                        </span>
+                      ) : null}
+                      {posLabels ? (
+                        <span className="morph-chip">{posLabels}</span>
+                      ) : null}
+                      {featureLabels ? (
+                        <span className="morph-chip">{featureLabels}</span>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <p className="layer-hint">{t("noMorph")}</p>
+                  )
+                ) : null}
+
+                {!loading && L.id === "semantics" ? (
+                  hasSense ? (
+                    <p dir="rtl" lang="ar">
+                      {enrichment?.sense}
+                    </p>
+                  ) : (
+                    <p className="layer-hint">{th("semanticsAwaiting")}</p>
+                  )
+                ) : null}
+
+                {!loading && L.id === "lexicon" ? (
+                  hasLexicon ? (
+                    <p dir="rtl" lang="ar" className="heritage-text">
+                      {enrichment?.lexiconText}
+                    </p>
+                  ) : (
+                    <p className="layer-hint">{t("noLexicon")}</p>
+                  )
+                ) : null}
+
+                {!loading && L.id === "syntax" ? (
+                  <p className="layer-hint">{th("syntaxAnalogyNote")}</p>
+                ) : null}
+
+                {!loading && L.id === "rhetoric" ? (
+                  <p className="layer-hint">{t("rhetoricAwaiting")}</p>
+                ) : null}
+
+                {!loading && L.id === "translation" ? (
+                  <p className="layer-hint">{t("noWordTranslation")}</p>
+                ) : null}
+
+                {!loading && enrichment?.disclaimer ? (
+                  <p className="layer-hint">{enrichment.disclaimer}</p>
+                ) : null}
               </div>
             ) : null,
           )}
