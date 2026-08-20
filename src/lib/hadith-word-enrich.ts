@@ -4,6 +4,7 @@ import { normalizeArabicToken } from "@/lib/tahfeez/normalize";
 import { getQuranWordsLexicon } from "@/lib/word-senses";
 import { HADITH_PARTICLES } from "@/lib/hadith-particles";
 import { HADITH_CORE_GLOSS } from "@/lib/hadith-core-gloss";
+import { rhetoricForToken } from "@/lib/hadith-rhetoric";
 
 export type HadithWordEnrichment = {
   matchStatus: "exact" | "particle" | "gloss" | "none";
@@ -16,6 +17,12 @@ export type HadithWordEnrichment = {
   pos?: string[];
   features?: string[];
   sense?: string | null;
+  /** Short Arabic gloss for the translation tab */
+  translationAr?: string | null;
+  /** Short English gloss for the translation tab */
+  translationEn?: string | null;
+  rhetoricAr?: string | null;
+  rhetoricEn?: string | null;
   lexiconText?: string | null;
   lexiconKey?: string | null;
   sampleWordId?: string | null;
@@ -62,7 +69,20 @@ async function loadSurfaceIndex(): Promise<SurfaceIndex | null> {
 }
 
 const DISCLAIMER =
-  "الصرف والدلالة هنا بالقياس على أشكال قرآنية مطابقة أو معجم حديث أساسي موجز أو أدوات مغلقة — وليست إعرابًا خاصًا بسياق الحديث.";
+  "الصرف والدلالة والترجمة المختصرة هنا بالقياس على أشكال قرآنية أو معجم حديث أساسي أو أدوات مغلقة — وليست إعرابًا خاصًا بسياق الحديث ولا ترجمة معتمدة لكل رواية.";
+
+function attachRhetoric(
+  surface: string,
+  base: HadithWordEnrichment,
+  fromGloss?: { rhetoricAr?: string; rhetoricEn?: string },
+): HadithWordEnrichment {
+  const note = rhetoricForToken(surface);
+  return {
+    ...base,
+    rhetoricAr: fromGloss?.rhetoricAr || note?.ar || null,
+    rhetoricEn: fromGloss?.rhetoricEn || note?.en || null,
+  };
+}
 
 /** Candidate keys: strip ال, clitics, and light pronominal suffixes. */
 function candidateKeys(norm: string): string[] {
@@ -83,13 +103,11 @@ function candidateKeys(norm: string): string[] {
   };
   stripPrefix(norm);
 
-  // Pronominal / object suffixes (once)
   const suffixRe = /(هما|هم|هن|كم|كن|نا|ني|ها|ه|ك|ي)$/;
   const m = norm.match(suffixRe);
   if (m && norm.length - m[1].length >= 2) {
     const base = norm.slice(0, -m[1].length);
     stripPrefix(base);
-    // هجرة + ة written as هجرت + ه → try ت→ه (ة normalized to ه)
     if (base.endsWith("ت") && base.length > 3) {
       push(base.slice(0, -1) + "ه");
     }
@@ -121,8 +139,6 @@ function lookupCoreGloss(norm: string) {
 export async function enrichHadithToken(
   surface: string,
 ): Promise<HadithWordEnrichment> {
-  // Arabic punctuation (U+060C etc.) sits in the Arabic block — strip it
-  // before normalize so tokens like «بِالنِّيَّاتِ،» still match.
   const cleaned = String(surface || "").replace(
     /[\u060C\u061B\u061F\u06D4\u066A-\u066D\u06DD]/g,
     "",
@@ -139,16 +155,18 @@ export async function enrichHadithToken(
 
   const particle = HADITH_PARTICLES[norm];
   if (particle) {
-    return {
+    return attachRhetoric(surface, {
       matchStatus: "particle",
       matchKind: "closed-class-particle",
       particleLabelAr: particle.labelAr,
       particleLabelEn: particle.labelEn,
       lemma: norm,
       sense: particle.labelAr,
+      translationAr: particle.labelAr,
+      translationEn: particle.labelEn,
       disclaimer: DISCLAIMER,
       source: "arabya-closed-class-particles",
-    };
+    });
   }
 
   const index = await loadSurfaceIndex();
@@ -160,43 +178,56 @@ export async function enrichHadithToken(
       const lex = await getQuranWordsLexicon();
       lexiconText = lex?.entries?.[lexiconKey]?.text?.trim() || null;
     }
-    return {
+    const sense = hit.sense ?? null;
+    return attachRhetoric(surface, {
       matchStatus: "exact",
       matchKind: "quran-surface-analogy",
       root: hit.root ?? null,
       lemma: hit.lemma ?? null,
       pos: hit.pos ?? [],
       features: hit.features ?? [],
-      sense: hit.sense ?? null,
+      sense,
+      translationAr: sense,
+      translationEn: hit.lemma
+        ? `Lemma (Quran analogy): ${hit.lemma}`
+        : hit.root
+          ? `Root (Quran analogy): ${hit.root}`
+          : null,
       lexiconKey,
       lexiconText,
       sampleWordId: hit.sampleWordId ?? null,
       disclaimer: index?.disclaimer || DISCLAIMER,
       source: index?.source || "quran-surface-analogy",
-    };
+    });
   }
 
   const glossHit = lookupCoreGloss(norm);
   if (glossHit) {
     const { g } = glossHit;
-    return {
-      matchStatus: "gloss",
-      matchKind: "hadith-core-gloss",
-      root: g.root ?? null,
-      lemma: g.lemma ?? null,
-      pos: g.pos ?? [],
-      sense: g.senseAr,
-      lexiconText: g.senseAr,
-      lexiconKey: g.root ?? g.lemma ?? null,
-      disclaimer: DISCLAIMER,
-      source: "arabya-hadith-core-gloss",
-    };
+    return attachRhetoric(
+      surface,
+      {
+        matchStatus: "gloss",
+        matchKind: "hadith-core-gloss",
+        root: g.root ?? null,
+        lemma: g.lemma ?? null,
+        pos: g.pos ?? [],
+        sense: g.senseAr,
+        translationAr: g.senseAr,
+        translationEn: g.senseEn,
+        lexiconText: g.senseAr,
+        lexiconKey: g.root ?? g.lemma ?? null,
+        disclaimer: DISCLAIMER,
+        source: "arabya-hadith-core-gloss",
+      },
+      { rhetoricAr: g.rhetoricAr, rhetoricEn: g.rhetoricEn },
+    );
   }
 
-  return {
+  return attachRhetoric(surface, {
     matchStatus: "none",
     matchKind: "quran-surface-analogy",
     disclaimer: DISCLAIMER,
     source: index?.source || "quran-surface-index-missing",
-  };
+  });
 }

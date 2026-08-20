@@ -155,6 +155,16 @@ export function HadithWordStudy({ collection, number, arabic }: Props) {
       (enrichment.pos && enrichment.pos.length > 0));
   const hasSense = Boolean(enrichment?.sense?.trim());
   const hasLexicon = Boolean(enrichment?.lexiconText?.trim());
+  const hasRhetoric = Boolean(
+    (locale === "en" ? enrichment?.rhetoricEn : enrichment?.rhetoricAr)?.trim(),
+  );
+  const translationText =
+    locale === "en"
+      ? enrichment?.translationEn?.trim() || enrichment?.particleLabelEn?.trim()
+      : enrichment?.translationAr?.trim() ||
+        enrichment?.sense?.trim() ||
+        enrichment?.particleLabelAr?.trim();
+  const hasTranslation = Boolean(translationText);
 
   return (
     <div className="hadith-word-study">
@@ -303,11 +313,25 @@ export function HadithWordStudy({ collection, number, arabic }: Props) {
                 ) : null}
 
                 {!loading && L.id === "rhetoric" ? (
-                  <p className="layer-hint">{t("rhetoricAwaiting")}</p>
+                  hasRhetoric ? (
+                    <p dir={locale === "en" ? "ltr" : "rtl"} lang={locale}>
+                      {locale === "en"
+                        ? enrichment?.rhetoricEn
+                        : enrichment?.rhetoricAr}
+                    </p>
+                  ) : (
+                    <p className="layer-hint">{th("rhetoricAwaiting")}</p>
+                  )
                 ) : null}
 
                 {!loading && L.id === "translation" ? (
-                  <p className="layer-hint">{t("noWordTranslation")}</p>
+                  hasTranslation ? (
+                    <p dir={locale === "en" ? "ltr" : "rtl"} lang={locale}>
+                      {translationText}
+                    </p>
+                  ) : (
+                    <p className="layer-hint">{t("noWordTranslation")}</p>
+                  )
                 ) : null}
 
                 {!loading && enrichment?.disclaimer ? (

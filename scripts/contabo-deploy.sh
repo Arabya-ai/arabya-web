@@ -31,7 +31,24 @@ fi
 git pull --ff-only origin "$BRANCH"
 
 echo "==> Install & build"
+# Fresh tree avoids half-broken node_modules after npm allowScripts skips
+# native postinstalls (sharp / swc / better-sqlite3) on Contabo's npm.
+rm -rf node_modules
 npm ci
+
+if [[ ! -f node_modules/sharp/package.json ]] || ! node -e "require('sharp')" >/dev/null 2>&1; then
+  echo "==> Native modules incomplete — rebuilding sharp/sqlite/swc"
+  npm rebuild sharp better-sqlite3 @swc/core unrs-resolver @parcel/watcher || true
+fi
+if [[ ! -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
+  echo "==> Next.js install looks incomplete — reinstalling next"
+  npm install next@"$(node -p "require('./package.json').dependencies.next")" --no-save
+fi
+if [[ ! -f node_modules/sharp/package.json ]]; then
+  echo "ERROR: sharp still missing after rebuild. Check npm version / allowScripts on Contabo."
+  exit 1
+fi
+
 npm run build
 
 echo "==> Ensure Contabo databases & runtime stores"
