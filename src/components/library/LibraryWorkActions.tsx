@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { Check, Copy, ExternalLink, Printer, Share2 } from "lucide-react";
+import { isExternalLibraryPdfUrl } from "@/lib/library/google-drive";
 
 type Props = {
   pdfUrl: string;
@@ -48,11 +49,19 @@ export function LibraryWorkActions({
     void copyLink();
   }, [copyLink, pageUrl]);
 
+  const external = isExternalLibraryPdfUrl(pdfUrl);
+
   return (
     <div className="library-work-actions">
-      <a href={pdfUrl} download className="library-work-download">
-        {labels.download}
-      </a>
+      {external ? (
+        <a href={pdfUrl} target="_blank" rel="noreferrer" className="library-work-download">
+          {locale === "en" ? "Open in Google Drive" : "فتح في Google Drive"}
+        </a>
+      ) : (
+        <a href={pdfUrl} download className="library-work-download">
+          {labels.download}
+        </a>
+      )}
       <div className="library-work-secondary-actions">
         <button type="button" onClick={() => void copyLink()}>
           {copied ? <Check size={16} aria-hidden /> : <Copy size={16} aria-hidden />}

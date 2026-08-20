@@ -9,8 +9,12 @@ export type LibraryWorkMeta = {
   description?: string;
   descriptionEn?: string;
   status: LibraryWorkStatus;
-  /** Public static path (`/library/foo.pdf`) or API (`/api/library/foo/file`). */
+  /** Local static/API path or external preview URL (e.g. Google Drive). */
   pdfUrl: string;
+  /** When set, PDF is hosted externally (Google Drive) — not on server disk. */
+  externalSource?: "google_drive";
+  /** Original share link (Google Drive) for admin reference. */
+  externalUrl?: string;
   pageCount?: number;
   fileSizeKb?: number;
   publisher?: string;

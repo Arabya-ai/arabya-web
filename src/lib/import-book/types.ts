@@ -30,7 +30,8 @@ export type ImportSourceKind =
   | "xlsx"
   | "docx"
   | "pdf"
-  | "google_sheet";
+  | "google_sheet"
+  | "google_drive";
 
 export type BookImportJobStatus =
   | "processing"

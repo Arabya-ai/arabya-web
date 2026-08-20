@@ -21,6 +21,7 @@ const contentSecurityPolicy = [
   // blob: Studio preview/export; https: Pexels/Vimeo CDN fallbacks for <video>
   "media-src 'self' blob: data: https:",
   "connect-src 'self' https://cloudflareinsights.com https://api.quran.com https://accounts.google.com https://images.pexels.com https://videos.pexels.com https://player.vimeo.com https://cdn.pixabay.com https://pixabay.com https://i.vimeocdn.com",
+  "frame-src 'self' https://drive.google.com https://docs.google.com blob:",
   "upgrade-insecure-requests",
 ].join("; ");
 

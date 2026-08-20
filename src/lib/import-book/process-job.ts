@@ -13,8 +13,10 @@ import {
   createBookImportJob,
   updateBookImportJob,
 } from "@/lib/local-user-db/book-import-jobs";
-import { importReadingBookToDisk } from "@/lib/library/import-to-disk";
+import { importReadingBookToDisk, importReadingBookFromDrive } from "@/lib/library/import-to-disk";
 import { countPdfPages } from "@/lib/library/pdf-meta";
+import { resolveGoogleDriveUrls } from "@/lib/library/google-drive";
+import { normalizeLibraryCategory } from "@/lib/library/categories";
 
 const ERROR_AR: Record<string, string> = {
   unsupported_file_type:
@@ -31,7 +33,21 @@ const ERROR_AR: Record<string, string> = {
   invalid_google_sheet_url: "رابط Google Sheets غير صحيح.",
   google_sheet_fetch_failed:
     "تعذّر جلب Google Sheets. اجعل الملف «أي شخص لديه الرابط».",
+  invalid_google_drive_url:
+    "رابط Google Drive غير صحيح. الصق رابط مشاركة ملف PDF.",
   payload_too_large: "الملف كبير جدًا (الحد 15 ميغابايت).",
+};
+
+export type ReadingBookImportMeta = {
+  titleEn?: string;
+  author?: string;
+  category?: string;
+  description?: string;
+  descriptionEn?: string;
+  publisher?: string;
+  publishedAt?: string;
+  pageCount?: number;
+  license?: string;
 };
 
 function userIdFromEmail(email: string): string {
@@ -47,17 +63,55 @@ async function runReadingImport(input: {
   jobId: string;
   title: string;
   slug: string;
-  buffer: Buffer;
+  buffer?: Buffer;
+  googleDriveUrl?: string;
+  meta: ReadingBookImportMeta;
   publish: boolean;
 }) {
   const db = getUserDb();
-  const pageCount = await countPdfPages(input.buffer);
-  await importReadingBookToDisk({
+  const shared = {
     slug: input.slug,
     title: input.title,
+    titleEn: input.meta.titleEn,
+    author: input.meta.author,
+    category: normalizeLibraryCategory(input.meta.category),
+    description: input.meta.description,
+    descriptionEn: input.meta.descriptionEn,
+    publisher: input.meta.publisher,
+    publishedAt: input.meta.publishedAt,
+    license: input.meta.license,
+    publish: input.publish,
+  };
+
+  if (input.googleDriveUrl) {
+    const resolved = resolveGoogleDriveUrls(input.googleDriveUrl);
+    if (!resolved) throw new Error("invalid_google_drive_url");
+    await importReadingBookFromDrive({
+      ...shared,
+      previewUrl: resolved.previewUrl,
+      shareUrl: input.googleDriveUrl.trim(),
+      thumbnailUrl: resolved.thumbnailUrl,
+      pageCount: input.meta.pageCount,
+    });
+    updateBookImportJob(db, input.jobId, {
+      status: input.publish ? "ready" : "pending_review",
+      message: input.publish
+        ? "تم النشر — عرض من Google Drive"
+        : "تم الحفظ — بانتظار مراجعة المدير (Google Drive)",
+      verseCount: input.meta.pageCount ?? 0,
+      wordCount: 0,
+      published: input.publish,
+    });
+    return;
+  }
+
+  if (!input.buffer) throw new Error("reading_pdf_only");
+  const pageCount =
+    input.meta.pageCount ?? (await countPdfPages(input.buffer));
+  await importReadingBookToDisk({
+    ...shared,
     pdfBuffer: input.buffer,
     pageCount,
-    publish: input.publish,
   });
   updateBookImportJob(db, input.jobId, {
     status: input.publish ? "ready" : "pending_review",
@@ -126,12 +180,25 @@ async function runImportJob(input: {
   filename?: string;
   sourceKind: ImportSourceKind;
   googleSheetUrl?: string;
+  googleDriveUrl?: string;
+  readingMeta?: ReadingBookImportMeta;
 }) {
   const db = getUserDb();
   try {
     const publish = canAutoPublish(input.role, input.email);
 
     if (input.bookKind === "reading") {
+      if (input.sourceKind === "google_drive" && input.googleDriveUrl) {
+        await runReadingImport({
+          jobId: input.jobId,
+          title: input.title,
+          slug: input.slug,
+          googleDriveUrl: input.googleDriveUrl,
+          meta: input.readingMeta ?? {},
+          publish,
+        });
+        return;
+      }
       if (input.sourceKind !== "pdf" || !input.buffer) {
         throw new Error("reading_pdf_only");
       }
@@ -140,6 +207,7 @@ async function runImportJob(input: {
         title: input.title,
         slug: input.slug,
         buffer: input.buffer,
+        meta: input.readingMeta ?? {},
         publish,
       });
       return;
@@ -176,6 +244,8 @@ export function queueBookImportJob(input: {
   filename?: string;
   sourceKind: ImportSourceKind;
   googleSheetUrl?: string;
+  googleDriveUrl?: string;
+  readingMeta?: ReadingBookImportMeta;
 }): { jobId: string; slug: string } {
   const db = getUserDb();
   const userId = userIdFromEmail(input.email);
@@ -185,7 +255,7 @@ export function queueBookImportJob(input: {
     userId,
     title: input.title,
     slug,
-    filename: input.filename ?? input.googleSheetUrl ?? null,
+    filename: input.filename ?? input.googleDriveUrl ?? input.googleSheetUrl ?? null,
     bookKind,
     sourceKind: input.sourceKind,
   });
@@ -203,6 +273,8 @@ export function queueBookImportJob(input: {
       filename: input.filename,
       sourceKind: input.sourceKind,
       googleSheetUrl: input.googleSheetUrl,
+      googleDriveUrl: input.googleDriveUrl,
+      readingMeta: input.readingMeta,
     });
   });
 

@@ -7,7 +7,11 @@ import {
 } from "@/lib/import-book/parse-upload";
 import { slugifyBookTitle } from "@/lib/import-book/slug";
 import type { BookKind, ImportSourceKind } from "@/lib/import-book/types";
-import { queueBookImportJob } from "@/lib/import-book/process-job";
+import {
+  queueBookImportJob,
+  type ReadingBookImportMeta,
+} from "@/lib/import-book/process-job";
+import { resolveGoogleDriveUrls } from "@/lib/library/google-drive";
 import { getUserDb, isLocalUserSyncEnabled } from "@/lib/local-user-db";
 import {
   getBookImportJob,
@@ -49,6 +53,32 @@ export async function GET(req: Request) {
   return NextResponse.json({ ok: true, jobs });
 }
 
+function parseReadingMeta(form: FormData | Record<string, unknown>): ReadingBookImportMeta {
+  const get = (key: string) => {
+    const v =
+      form instanceof FormData
+        ? String(form.get(key) || "").trim()
+        : String((form as Record<string, unknown>)[key] || "").trim();
+    return v || undefined;
+  };
+  const pageRaw = form instanceof FormData ? form.get("pageCount") : (form as Record<string, unknown>).pageCount;
+  const pageCount =
+    pageRaw != null && String(pageRaw).trim()
+      ? Number.parseInt(String(pageRaw), 10)
+      : undefined;
+  return {
+    titleEn: get("titleEn"),
+    author: get("author"),
+    category: get("category"),
+    description: get("description"),
+    descriptionEn: get("descriptionEn"),
+    publisher: get("publisher"),
+    publishedAt: get("publishedAt"),
+    license: get("license"),
+    pageCount: Number.isFinite(pageCount) ? pageCount : undefined,
+  };
+}
+
 export async function POST(req: Request) {
   const gate = await requireSession();
   if ("error" in gate) return gate.error;
@@ -63,9 +93,11 @@ export async function POST(req: Request) {
   let slug: string | undefined;
   let bookKind: BookKind = "irab";
   let googleSheetUrl: string | undefined;
+  let googleDriveUrl: string | undefined;
   let buffer: Buffer | undefined;
   let filename = "upload";
   let sourceKind: ImportSourceKind | null = null;
+  let readingMeta: ReadingBookImportMeta = {};
 
   if (contentType.includes("multipart/form-data")) {
     const form = await req.formData();
@@ -75,6 +107,8 @@ export async function POST(req: Request) {
     const kindRaw = String(form.get("bookKind") || "").trim();
     if (kindRaw === "reading") bookKind = "reading";
     googleSheetUrl = String(form.get("googleSheetUrl") || "").trim() || undefined;
+    googleDriveUrl = String(form.get("googleDriveUrl") || "").trim() || undefined;
+    readingMeta = parseReadingMeta(form);
     const file = form.get("file");
     if (file instanceof File && file.size > 0) {
       if (file.size > MAX_BYTES) return apiError("payload_too_large", 413);
@@ -88,6 +122,16 @@ export async function POST(req: Request) {
       slug?: string;
       bookKind?: BookKind;
       googleSheetUrl?: string;
+      googleDriveUrl?: string;
+      titleEn?: string;
+      author?: string;
+      category?: string;
+      description?: string;
+      descriptionEn?: string;
+      publisher?: string;
+      publishedAt?: string;
+      pageCount?: number;
+      license?: string;
     };
     try {
       body = (await req.json()) as typeof body;
@@ -98,7 +142,10 @@ export async function POST(req: Request) {
     slug = body.slug ? slugifyBookTitle(body.slug) : undefined;
     if (body.bookKind === "reading") bookKind = "reading";
     googleSheetUrl = String(body.googleSheetUrl || "").trim() || undefined;
+    googleDriveUrl = String(body.googleDriveUrl || "").trim() || undefined;
+    readingMeta = parseReadingMeta(body);
     if (googleSheetUrl) sourceKind = "google_sheet";
+    if (googleDriveUrl) sourceKind = "google_drive";
   }
 
   if (!title || title.length < 2) {
@@ -110,8 +157,18 @@ export async function POST(req: Request) {
       return apiError("invalid_google_sheet_url", 400);
     }
     sourceKind = "google_sheet";
-  } else if (!buffer) {
-    return apiError("file_required", 400);
+  }
+
+  if (googleDriveUrl) {
+    if (!resolveGoogleDriveUrls(googleDriveUrl)) {
+      return apiError("invalid_google_drive_url", 400);
+    }
+    sourceKind = "google_drive";
+  }
+
+  if (!sourceKind) {
+    if (!buffer) return apiError("file_required", 400);
+    sourceKind = detectKindFromFilename(filename);
   }
 
   if (!sourceKind) {
@@ -120,9 +177,13 @@ export async function POST(req: Request) {
 
   if (bookKind === "reading") {
     if (googleSheetUrl) return apiError("reading_pdf_only", 400);
-    if (!buffer || sourceKind !== "pdf") {
+    if (sourceKind === "google_drive") {
+      /* drive link only — no file required */
+    } else if (!buffer || sourceKind !== "pdf") {
       return apiError("reading_pdf_only", 400);
     }
+  } else if (!buffer && !googleSheetUrl) {
+    return apiError("file_required", 400);
   }
 
   const { jobId, slug: finalSlug } = queueBookImportJob({
@@ -135,6 +196,8 @@ export async function POST(req: Request) {
     filename,
     sourceKind,
     googleSheetUrl,
+    googleDriveUrl,
+    readingMeta,
   });
 
   return NextResponse.json({

@@ -73,6 +73,12 @@ export function unifiedDashNav(role: UserRole): DashNavItem[] {
         group: "groupEdit",
       },
       {
+        href: "/account/edit/library",
+        label: "libraryImport",
+        icon: "book",
+        group: "groupEdit",
+      },
+      {
         href: "/account/edit/queue",
         label: "queue",
         icon: "queue",
@@ -89,6 +95,12 @@ export function unifiedDashNav(role: UserRole): DashNavItem[] {
 
   if (canAccessAdmin(role)) {
     items.push(
+      {
+        href: "/account/edit/library",
+        label: "libraryImport",
+        icon: "book",
+        group: "groupAdmin",
+      },
       {
         href: "/admin",
         label: "adminStats",

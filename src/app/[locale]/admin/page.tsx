@@ -8,6 +8,7 @@ import {
 import { auth } from "@/auth";
 import { AdminStatsCards } from "@/components/dashboard/AdminStatsCards";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { Link } from "@/i18n/navigation";
 import { canAccessAdmin } from "@/lib/roles";
 import { isCloudSyncConfigured } from "@/lib/cloud-sync";
 import { ArabyaPanel } from "@/components/ui/ArabyaPanel";
@@ -54,6 +55,9 @@ export default async function AdminPage({ params }: Props) {
             <li>{t("actionReviewUsers")}</li>
             <li>{t("actionApproveRequests")}</li>
             <li>{t("actionReviewAudit")}</li>
+            <li>
+              <Link href="/account/edit/library">{t("actionLibraryImport")}</Link>
+            </li>
           </ul>
         </ArabyaPanel>
       </div>

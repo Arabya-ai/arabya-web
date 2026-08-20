@@ -760,6 +760,34 @@
   font-size: 0.9rem;
 }
 
+.owner-upload-meta-grid {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+}
+
+.owner-upload-kind {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+}
+
+.owner-upload-kind legend {
+  font-weight: 700;
+  padding: 0 0.35rem;
+}
+
+.owner-upload-kind label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  margin: 0;
+}
+
 .dash-table-wrap {
   overflow-x: auto;
   border-radius: 16px;
