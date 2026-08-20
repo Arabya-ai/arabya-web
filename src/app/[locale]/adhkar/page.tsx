@@ -58,6 +58,13 @@ export default async function AdhkarIndexPage({ params }: Props) {
             </Link>
           </li>
           <li>
+            <Link href="/adhkar/hisn" className="adhkar-tool-card">
+              <span className="adhkar-tool-mark" aria-hidden />
+              <span className="adhkar-tool-title">{t("tools.hisn")}</span>
+              <span className="adhkar-tool-desc">{t("tools.hisnDesc")}</span>
+            </Link>
+          </li>
+          <li>
             <Link href="/adhkar/tasbeeh" className="adhkar-tool-card">
               <span className="adhkar-tool-mark" aria-hidden />
               <span className="adhkar-tool-title">{t("tools.tasbeeh")}</span>

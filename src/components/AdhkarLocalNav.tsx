@@ -1,11 +1,12 @@
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 
-type AdhkarSection = "hub" | "duas" | "tasbeeh" | "category";
+type AdhkarSection = "hub" | "duas" | "tasbeeh" | "hisn" | "category";
 
-const LINKS: { href: string; key: "hub" | "duas" | "tasbeeh" }[] = [
+const LINKS: { href: string; key: "hub" | "duas" | "hisn" | "tasbeeh" }[] = [
   { href: "/adhkar", key: "hub" },
   { href: "/adhkar/duas", key: "duas" },
+  { href: "/adhkar/hisn", key: "hisn" },
   { href: "/adhkar/tasbeeh", key: "tasbeeh" },
 ];
 

@@ -62,6 +62,8 @@
     "create": "Create",
     "studio": "Studio",
     "library": "Library",
+    "hadith": "Hadith",
+    "heritage": "Heritage",
     "pricing": "Plans",
     "lughawi": "Lughawi"
   },
@@ -100,7 +102,9 @@
       "makkah": "Meccan",
       "madinah": "Medinan"
     },
-    "juz": "Juz {n}"
+    "juz": "Juz {n}",
+    "surahFilterAll": "All surahs",
+    "surahFilterAria": "Filter ayah results by surah"
   },
   "Prayer": {
     "title": "Prayer times & qibla",
@@ -1289,7 +1293,9 @@
       "qalun": "Awaiting licensed files from the owner.",
       "shubah": "Awaiting licensed files from the owner.",
       "tajweed-color": "Color tajwīd display after visual data is licensed."
-    }
+    },
+    "tajweedLegendTitle": "Tajweed rules reference",
+    "tajweedLegendLead": "A short educational guide with symbolic colors — the full color-coded mushaf unlocks after visual data is licensed."
   },
   "Books": {
     "metaTitle": "Iʿrāb books",
@@ -1340,21 +1346,69 @@
   },
   "Hadith": {
     "metaTitle": "Hadith · Arabya",
-    "metaDescription": "Later phase — word-by-word analysis of hadith texts",
+    "metaDescription": "Full hadith collections with Arabic search — word-level analysis expands over time",
+    "kicker": "Full Arabic matn",
     "title": "Hadith",
-    "lead": "The next phase after the six Quran analysis layers are solid: the same word engine, Word IDs, and Claims on hadith texts.",
-    "doc": "Documentation: <code>docs/spec/entities-hadith-heritage.md</code>",
-    "indexLink": "Index"
+    "lead": "Full Arabic hadith collections imported from open sources on the 320 list — with Arabic search across all matn.",
+    "collectionsTitle": "Collections",
+    "itemCount": "{count} hadiths",
+    "pageOf": "Page {page} of {total}",
+    "pagerAria": "Collection pages",
+    "prevPage": "Previous",
+    "nextPage": "Next",
+    "searchLabel": "Search texts",
+    "searchPlaceholder": "Search a word from the matn…",
+    "searching": "Searching…",
+    "searchEmpty": "No matching results.",
+    "provenance": "Primary matn source: fawazahmed0/hadith-api. Adhkar/Hisn from rn0x. Quran text was not replaced (already complete under data/).",
+    "heritageLink": "Heritage & poetry",
+    "indexLink": "Index",
+    "backCollection": "Back to collection",
+    "wordLayersSoon": "Morphology, syntax, and semantics layers for these words will generalize from the Quran engine.",
+    "wordStudyLead": "Tap a word in the matn to open its study layers (HW:… Word IDs). Full morph/syntax data generalizes gradually from the Quran engine.",
+    "tokensAria": "Matn words for analysis",
+    "wordLayersAwaiting": "All six layers are wired in the UI — morph/syntax payloads for this word fill in later without breaking the mushaf.",
+    "semanticsAwaiting": "The semantics layer for this hadith word is not available yet.",
+    "isnadTitle": "Isnād",
+    "narratorEn": "Narrator (source English): {name}",
+    "isnadSource": "Field source: {source}",
+    "isnadMissing": "No structured isnād fields for this number yet — the matn may lack a classical ḥaddathanā chain."
   },
   "Heritage": {
     "metaTitle": "Heritage & poetry · Arabya",
-    "metaDescription": "Distant phase — word-by-word heritage analysis from al-Shāmila Library",
+    "metaDescription": "Heritage passages and prosody — the same word-by-word layers, gradually",
+    "kicker": "Poetry · prosody · prose",
     "title": "Poetry & heritage",
-    "lead": "After Quran and hadith: import from al-Shāmila Library and other sources and analyze every word with the same layers (morphology · syntax · semantics · rhetoric · lexicon · translation).",
-    "soon": "Data acquisition via files or import/scraping when needed — with source attribution.",
-    "libraryLink": "Educational library (ready PDF books)",
+    "lead": "A short catalog (prosody, poetry selections, grammar aphorisms) in Arabya’s identity — linked to the educational library.",
+    "kind": {
+      "prosody": "Prosody",
+      "poetry": "Poetry",
+      "prose": "Prose"
+    },
+    "passageCount": "{count} passages",
+    "meter": "Meter: {meter}",
+    "wordLayersSoon": "TW:… Word IDs and analysis layers are added gradually without breaking the mushaf.",
+    "backHub": "Back to heritage catalog",
+    "libraryLink": "Educational library (PDF books)",
     "hadithLink": "Hadith",
-    "indexLink": "Index"
+    "indexLink": "Index",
+    "binbazCatalog": "Ibn Bāz books catalog (open metadata)",
+    "binbazCatalogLead": "Titles and links from rn0x/binbaz_database — full multi‑MB fatwa dumps stay deferred.",
+    "remoteSiyarTitle": "Sīrah & history encyclopedia (live from source)",
+    "remoteSiyarLead": "Browse thousands of events from rn0x’s GitHub repo through Arabya UI — the full ~12MB dump is not stored in this repository.",
+    "remoteSource": "Live source: {source}",
+    "remoteSearchLabel": "Search encyclopedia",
+    "remoteSearchPlaceholder": "Word from title or text…",
+    "remoteSearch": "Search",
+    "remoteLoading": "Fetching from upstream…",
+    "remoteError": "Could not reach the upstream source — try again later.",
+    "remotePagerAria": "Remote encyclopedia pages",
+    "remotePageOf": "Page {page} of {total} · {count} events"
+  },
+  "IbadahEvents": {
+    "title": "Upcoming Hijri observances",
+    "lead": "Fixed month/day reminders beside prayer times — does not change prayer calculation.",
+    "today": "Approx. Hijri today: {date}"
   },
   "Favorites": {
     "metaTitle": "Favorites archive",
@@ -1455,9 +1509,18 @@
       "hub": "Adhkar",
       "duas": "Duas",
       "duasDesc": "Selected Quranic and prophetic supplications.",
+      "hisn": "Hisn al-Muslim",
+      "hisnDesc": "Full Hisn al-Muslim by category — from an open JSON source.",
       "tasbeeh": "Tasbeeh",
       "tasbeehDesc": "A simple counter stored on your device."
-    }
+    },
+    "hisnMetaTitle": "Hisn al-Muslim · Arabya",
+    "hisnMetaDescription": "Full Hisn al-Muslim remembrances and duas by category",
+    "hisnSearch": "Search Hisn al-Muslim",
+    "hisnSearchPlaceholder": "Search category or text…",
+    "hisnStats": "{categories} categories · {items} texts",
+    "hisnCategoriesAria": "Hisn al-Muslim categories",
+    "hisnEmpty": "No Hisn al-Muslim results."
   },
   "Qibla": {
     "metaTitle": "Qibla · Arabya",

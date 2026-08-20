@@ -1,27 +1,37 @@
-# كيانات الحديث والتراث (مسودة — مرحلة E)
+# كيانات الحديث والتراث
 
-لا تُنفَّذ بالكامل قبل تثبيت طبقات القرآن الست في الواجهة.
+مفعّل للتنفيذ المتوازي مع القرآن (موافقة توسعة OSS 2026-08-20).
 
 ## Hadith
 
 | الحقل | الوصف |
 |-------|--------|
-| `hadithId` | معرّف مستقر (مثلاً `H:bukhari:1:1`) |
-| `collection` | البخاري، مسلم… |
-| `words[]` | نفس نموذج الكلمة + Word IDs `HW:…` |
-| طبقات | صرف · نحو · دلالة · بلاغة · معجم · ترجمة |
+| `hadithId` | معرّف مستقر (مثلاً `H:bukhari:1`) |
+| `collection` | البخاري، مسلم… (`slug` في `data/hadith/index.json`) |
+| `number` | رقم داخل المجموعة |
+| `arabic` | متن عربي |
+| `grade` | اختياري (صحيح / حسن…) مع `source` |
+| `words[]` | واجهة: توكنات على المتن + Word IDs `HW:{collection}:{number}:{PPP}` |
+| طبقات | صرف · نحو · دلالة · بلاغة · معجم · ترجمة (Claims عند الاختلاف) — UI جاهز؛ بيانات الصرف تُملأ تدريجيًا |
+| `isnad` | حي: `narrators[]` من المتن + `narratorEn` من CDN (بدون dump إسناد في Git) |
 
-## Heritage / Poetry (المكتبة الشاملة)
+ملفات: `data/hadith/index.json` · `data/hadith/collections/*.json` · `src/lib/hadith.ts` · `src/lib/hadith-isnad.ts` · `/api/hadith/search` · `/api/hadith/remote-enrich` · `/api/remote/siyar`.
+
+## Heritage / Poetry
 
 | الحقل | الوصف |
 |-------|--------|
-| `workId` | كتاب/ديوان |
-| `passageId` | مقطع |
-| `words[]` | `TW:…` Word IDs |
-| `license` | حالة الترخيص/المصدر عند توفره |
+| `workId` | كتاب/ديوان (`slug`) |
+| `passageId` | مقطع داخل العمل |
+| `textAr` | نص المقطع |
+| `meter` / `prosody` | اختياري (عروض) |
+| `words[]` | لاحقًا: `TW:…` Word IDs |
+| `license` | حالة الترخيص/المصدر |
+
+ملفات: `data/heritage/index.json` · `data/heritage/works/*.json` · `src/lib/heritage.ts`.
 
 ## مبادئ مشتركة مع القرآن
 
-- Claims + provenance لكل طبقة
-- جلب البيانات: APIs، ملفات، أو استيراد/سكرابينج عند توجيه المالك (لا حظر سكرابينج)
-- محرّك تحليل واحد في `src/lib/` يُعمَّم لاحقًا
+- Claims + provenance لكل طبقة عند توفر مصادر متعددة
+- جلب البيانات: APIs، ملفات المالك، أو استيراد/سكرابينج عند توجيه المالك
+- محرّك تحليل واحد في `src/lib/` يُعمَّم تدريجيًا — لا تكسر المصحف أو الأذكار أو المكتبة

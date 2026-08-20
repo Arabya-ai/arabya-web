@@ -7182,3 +7182,404 @@ a.auth-btn--google {
 .reciter-detail-hero h1 {
   margin: 0;
 }
+
+/* —— Islamic OSS expansion: search facet, hadith, heritage, tajweed, events —— */
+.index-search-simple {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.index-surah-filter select {
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.55rem 0.85rem;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.hadith-page .hadith-search,
+.heritage-page,
+.qibla-page .hijri-events-panel {
+  margin-block: 1.25rem;
+}
+
+.hadith-search input {
+  width: 100%;
+  min-height: 2.85rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.65rem 0.9rem;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.hadith-collection-grid,
+.heritage-work-grid {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+}
+
+.hadith-collection-card,
+.heritage-work-card {
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--line));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--brand-soft) 55%, var(--surface));
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 140ms ease, transform 140ms ease;
+}
+
+.hadith-collection-card:hover,
+.heritage-work-card:hover {
+  border-color: var(--brand);
+  transform: translateY(-1px);
+}
+
+.hadith-hit-list,
+.hadith-item-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.hadith-hit-list a,
+.hadith-item-list a {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  text-decoration: none;
+  color: inherit;
+}
+
+.hadith-hit-meta,
+.hadith-item-num,
+.hadith-item-grade,
+.heritage-kind,
+.heritage-meter,
+.heritage-passage-id,
+.hadith-article-id {
+  font-size: 0.85rem;
+  color: var(--brand-deep);
+}
+
+.hadith-matn,
+.heritage-text {
+  font-size: 1.2rem;
+  line-height: 1.9;
+  margin: 0.75rem 0;
+}
+
+.hadith-article {
+  padding: 1rem 0;
+}
+
+.hadith-isnad {
+  margin: 1rem 0 1.25rem;
+  padding: 0.85rem 1rem;
+  border-inline-start: 3px solid var(--brand);
+  background: color-mix(in srgb, var(--brand-soft) 55%, transparent);
+}
+
+.hadith-isnad-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  color: var(--brand-deep);
+}
+
+.hadith-isnad-chain {
+  margin: 0.35rem 0 0.5rem;
+  padding-inline-start: 1.25rem;
+  line-height: 1.7;
+}
+
+.hadith-isnad-en {
+  margin: 0.35rem 0;
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+
+.hadith-word-study {
+  margin-top: 1.25rem;
+}
+
+.hadith-word-study-lead {
+  margin: 0 0 0.75rem;
+  color: var(--muted, var(--brand-deep));
+  font-size: 0.95rem;
+}
+
+.hadith-matn-tokens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.45rem;
+  margin: 0.5rem 0 1rem;
+  line-height: 2;
+  font-size: 1.15rem;
+}
+
+.hadith-token {
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  padding: 0.1rem 0.25rem;
+  border-radius: 0.35rem;
+  cursor: pointer;
+}
+
+.hadith-token:hover,
+.hadith-token:focus-visible {
+  border-color: var(--brand);
+  background: var(--select, var(--brand-soft));
+  outline: none;
+}
+
+.hadith-token--active {
+  border-color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 18%, transparent);
+  color: var(--brand-deep);
+  font-weight: 600;
+}
+
+.hadith-word-dock {
+  margin-top: 0.75rem;
+}
+
+.hadith-layer-panel {
+  margin-top: 0.75rem;
+}
+
+.heritage-binbaz {
+  margin: 2rem 0 1rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.heritage-binbaz-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.heritage-binbaz-list a {
+  color: var(--brand-deep);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.remote-siyar {
+  margin: 2.5rem 0 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.remote-siyar-search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0 1rem;
+}
+
+.remote-siyar-search input {
+  flex: 1 1 14rem;
+  min-width: 0;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.remote-siyar-search button {
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--brand);
+  border-radius: var(--radius);
+  background: var(--brand);
+  color: #fff;
+  cursor: pointer;
+}
+
+.remote-siyar-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.tajweed-legend {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.tajweed-legend-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.tajweed-legend-list li {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.tajweed-swatch {
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 4px;
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+}
+
+.hijri-events-panel {
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--brand) 20%, var(--line));
+  background: color-mix(in srgb, var(--brand-soft) 40%, var(--surface));
+}
+
+.hijri-events-panel h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  color: var(--brand-deep);
+}
+
+.hijri-events-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.hijri-events-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-block: 0.35rem;
+  border-bottom: 1px dashed color-mix(in srgb, var(--brand) 18%, var(--line));
+}
+
+.hijri-events-list li:last-child {
+  border-bottom: 0;
+}
+
+.heritage-passages {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.heritage-passage {
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.heritage-passage h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+}
+
+/* Hisn al-Muslim explorer */
+.hisn-explorer {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.hisn-layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(12rem, 16rem) 1fr;
+}
+
+@media (max-width: 800px) {
+  .hisn-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hisn-cat-list {
+  display: grid;
+  gap: 0.35rem;
+  max-height: min(70vh, 36rem);
+  overflow: auto;
+  padding: 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--brand-soft) 35%, var(--surface));
+}
+
+.hisn-cat-btn {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: start;
+  border: 0;
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.hisn-cat-btn.is-active,
+.hisn-cat-btn:hover {
+  background: color-mix(in srgb, var(--brand) 14%, var(--surface));
+}
+
+.hisn-cat-count {
+  opacity: 0.7;
+  font-size: 0.85rem;
+}
+
+.hisn-items h2 {
+  margin: 0 0 0.75rem;
+  color: var(--brand-deep);
+  font-size: 1.15rem;
+}
+
+.hadith-pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}

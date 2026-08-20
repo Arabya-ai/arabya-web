@@ -53,6 +53,7 @@ export function SurahIndex({
   const [searching, setSearching] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+  const [surahFilter, setSurahFilter] = useState<number | "">("");
 
   useEffect(() => {
     setBookmarks(readBookmarks());
@@ -74,7 +75,7 @@ export function SurahIndex({
 
   useEffect(() => {
     setShowAll(false);
-  }, [query]);
+  }, [query, surahFilter]);
 
   useEffect(() => {
     const q = query.trim();
@@ -92,6 +93,7 @@ export function SurahIndex({
         const params = new URLSearchParams({ q });
         if (showAll) params.set("all", "1");
         else params.set("limit", String(PREVIEW_LIMIT));
+        if (surahFilter !== "") params.set("surah", String(surahFilter));
         const res = await fetch(`/api/search?${params}`);
         if (!res.ok) return;
         const data = (await res.json()) as {
@@ -118,7 +120,7 @@ export function SurahIndex({
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [query, showAll]);
+  }, [query, showAll, surahFilter]);
 
   const showSearchPanel =
     query.trim().length >= 2 &&
@@ -143,6 +145,25 @@ export function SurahIndex({
           aria-label={t("ariaLabel")}
           maxLength={120}
         />
+        <label className="index-surah-filter">
+          <span className="visually-hidden">{t("surahFilterAria")}</span>
+          <select
+            value={surahFilter === "" ? "" : String(surahFilter)}
+            onChange={(e) => {
+              const v = e.target.value;
+              setSurahFilter(v ? Number(v) : "");
+            }}
+            aria-label={t("surahFilterAria")}
+          >
+            <option value="">{t("surahFilterAll")}</option>
+            {surahs.map((s) => (
+              <option key={s.id} value={s.id}>
+                {formatCount(s.id, locale)}.{" "}
+                {getSurahDisplayName(s.id, locale === "en" ? "en" : "ar")}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       {bookmarks.length ? (

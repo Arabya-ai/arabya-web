@@ -1,0 +1,1247 @@
+{
+  "updatedAt": "2026-08-20",
+  "source": "rn0x/binbaz_database (database/books_ar.json)",
+  "license": "see rn0x/binbaz_database LICENSE",
+  "note": "Catalog metadata only — full fatwa JSON dumps deferred (multi-MB).",
+  "books": [
+    {
+      "id": 1,
+      "titleAr": "مجموع فتاوى ومقالات متنوعة - الشويعر",
+      "sourceUrl": "https://binbaz.org.sa/books/15/مجموع-فتاوى-ومقالات-متنوعة---الشويعر",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/مجموع الفتاوى .png",
+      "pdfCount": 30
+    },
+    {
+      "id": 2,
+      "titleAr": "شرح كتاب التوحيد",
+      "sourceUrl": "https://binbaz.org.sa/books/216/شرح-كتاب-التوحيد",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/series.books.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 3,
+      "titleAr": "التحقيق والإيضاح لكثير من مسائل الحج والعمرة",
+      "sourceUrl": "https://binbaz.org.sa/books/219/التحقيق-والايضاح-لكثير-من-مساىل-الحج-والعمرة",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/series.books.png",
+      "pdfCount": 5
+    },
+    {
+      "id": 4,
+      "titleAr": "الفوائد الجلية في المباحث الفرضية",
+      "sourceUrl": "https://binbaz.org.sa/books/218/الفواىد-الجلية-في-المباحث-الفرضية",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/الفوائد الجلية 22.png",
+      "pdfCount": 3
+    },
+    {
+      "id": 5,
+      "titleAr": "حكم إعفاء اللحية وخبرالآحاد",
+      "sourceUrl": "https://binbaz.org.sa/books/217/حكم-اعفاء-اللحية-وخبرالاحاد",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/series.books.png",
+      "pdfCount": 2
+    },
+    {
+      "id": 6,
+      "titleAr": "مجموع فتاوى سماحة الشيخ ابن باز إعداد عبدالله الطيار وأحمد بن باز",
+      "sourceUrl": "https://binbaz.org.sa/books/18/مجموع-فتاوى-سماحة-الشيخ-ابن-باز-اعداد-عبدالله-الطيار-واحمد-بن-باز",
+      "coverUrl": "https://binbaz.org.sa/img/series-books.png",
+      "pdfCount": 7
+    },
+    {
+      "id": 7,
+      "titleAr": "الفوائد العلمية من الدروس البازية على كتاب بلوغ المرام",
+      "sourceUrl": "https://binbaz.org.sa/books/21/الفواىد-العلمية-من-الدروس-البازية-على-كتاب-بلوغ-المرام",
+      "coverUrl": "https://binbaz.org.sa/img/series-books.png",
+      "pdfCount": 2
+    },
+    {
+      "id": 8,
+      "titleAr": "الإيجاز في بعض ما اختلف فيه الألباني وابن عثيمين وابن باز",
+      "sourceUrl": "https://binbaz.org.sa/books/22/الايجاز-في-بعض-ما-اختلف-فيه-الالباني-وابن-عثيمين-وابن-باز",
+      "coverUrl": "https://binbaz.org.sa/img/series-books.png",
+      "pdfCount": 2
+    },
+    {
+      "id": 9,
+      "titleAr": "التعليقات البازية على شرح الطحاوية",
+      "sourceUrl": "https://binbaz.org.sa/books/23/التعليقات-البازية-على-شرح-الطحاوية",
+      "coverUrl": "https://binbaz.org.sa/img/series-books.png",
+      "pdfCount": 2
+    },
+    {
+      "id": 10,
+      "titleAr": "مجموعة مطويات",
+      "sourceUrl": "https://binbaz.org.sa/books/215/مجموعة-مطويات",
+      "coverUrl": "https://binbaz.org.sa/img/series-books.png",
+      "pdfCount": 8
+    },
+    {
+      "id": 11,
+      "titleAr": "الحلل الإبريزية من التعليقات البازية على صحيح البخاري",
+      "sourceUrl": "https://binbaz.org.sa/books/24/الحلل-الابريزية-من-التعليقات-البازية-على-صحيح-البخاري",
+      "coverUrl": "https://binbaz.org.sa/img/series-books.png",
+      "pdfCount": 4
+    },
+    {
+      "id": 12,
+      "titleAr": "‫الفتاوى الذهبية في الرقى الشرعية",
+      "sourceUrl": "https://binbaz.org.sa/books/27/الفتاوى-الذهبية-في-الرقى-الشرعية",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/الفتاوى الذهبية1.png",
+      "pdfCount": 2
+    },
+    {
+      "id": 13,
+      "titleAr": "فتاوى مجلة الدعوة",
+      "sourceUrl": "https://binbaz.org.sa/books/26/فتاوى-مجلة-الدعوة",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/series.books.png",
+      "pdfCount": 4
+    },
+    {
+      "id": 14,
+      "titleAr": "الرسائل البازية الرمضانية",
+      "sourceUrl": "https://binbaz.org.sa/books/25/الرساىل-البازية-الرمضانية",
+      "coverUrl": "https://binbaz.org.sa/img/series-books.png",
+      "pdfCount": 4
+    },
+    {
+      "id": 15,
+      "titleAr": "فتاوى الأئمة النجدية حول قضايا الأمة المصيرية",
+      "sourceUrl": "https://binbaz.org.sa/books/32/فتاوى-الاىمة-النجدية-حول-قضايا-الامة-المصيرية",
+      "coverUrl": "https://binbaz.org.sa/img/series-books.png",
+      "pdfCount": 4
+    },
+    {
+      "id": 16,
+      "titleAr": "‫فتاوى إسلامية جمع وترتيب محمد عبدالعزيز المسند",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/15894",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/الأدلة النقلية والحسية.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 17,
+      "titleAr": "‫فتاوى إسلامية جمع وترتيب محمد عبدالعزيز المسند",
+      "sourceUrl": "https://binbaz.org.sa/books/31/فتاوى-اسلامية-جمع-وترتيب-محمد-عبدالعزيز-المسند",
+      "coverUrl": "https://binbaz.org.sa/img/series-books.png",
+      "pdfCount": 4
+    },
+    {
+      "id": 18,
+      "titleAr": "زاد المعاد في هدي خير العباد",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/218",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 19,
+      "titleAr": "زاد المعاد في هدي خير العباد",
+      "sourceUrl": "https://binbaz.org.sa/books/30/زاد-المعاد-في-هدي-خير-العباد",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/زاد المعاد في هدي خير العباد33.png",
+      "pdfCount": 3
+    },
+    {
+      "id": 20,
+      "titleAr": "تعليقات سماحة الشيخ ابن باز على مجموعة من الكتب",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/217",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 21,
+      "titleAr": "تعليقات سماحة الشيخ ابن باز على مجموعة من الكتب",
+      "sourceUrl": "https://binbaz.org.sa/books/29/تعليقات-سماحة-الشيخ-ابن-باز-على-مجموعة-من-الكتب",
+      "coverUrl": "https://binbaz.org.sa/img/series-books.png",
+      "pdfCount": 3
+    },
+    {
+      "id": 22,
+      "titleAr": "الفوائد العلمية من الدروس البازية للسليمان",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/219",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/single.book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 23,
+      "titleAr": "الفوائد العلمية من الدروس البازية للسليمان",
+      "sourceUrl": "https://binbaz.org.sa/books/28/الفواىد-العلمية-من-الدروس-البازية-للسليمان",
+      "coverUrl": "https://binbaz.org.sa/img/series-books.png",
+      "pdfCount": 8
+    },
+    {
+      "id": 24,
+      "titleAr": "الأخوة والأخلاق الإسلامية",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/223",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/single.book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 25,
+      "titleAr": "الاختيارات العلمية في مسائل الحج والعمرة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/247",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/single.book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 26,
+      "titleAr": "أقسام التوحيد",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/226",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/single.book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 27,
+      "titleAr": "اعبدوا الله واجتنبوا الطاغوت",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/225",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/single.book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 28,
+      "titleAr": "الدعوة إلى الله وأخلاق الدعاة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/241",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 29,
+      "titleAr": "الدين الخالص",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/242",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 30,
+      "titleAr": "الردود البازية في بعض المسائل العقدية",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/17540",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 31,
+      "titleAr": "الرسائل والفتاوى النسائية",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/244",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 32,
+      "titleAr": "الرسول صلى الله عليه وسلم مكانته حقوقه وجوب اتباع سنته",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/245",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 33,
+      "titleAr": "الركن الأول من أركان الإسلام",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/246",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 34,
+      "titleAr": "الدروس المهمة لعامة الأمة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/240",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 35,
+      "titleAr": "الجواب الصحيح في أحكام صلاة التراويح",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/239",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 36,
+      "titleAr": "التوسل المشروع والتوسل الممنوع",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/238",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 37,
+      "titleAr": "التبرج وخطره",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/230",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 38,
+      "titleAr": "البدع وآثارها السيئة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/228",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 39,
+      "titleAr": "الإمام محمد بن عبدالوهاب دعوته وسيرته",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/227",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 40,
+      "titleAr": "البر والصلة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/229",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 41,
+      "titleAr": "التحذير من الإسراف والتبذير",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/231",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 42,
+      "titleAr": "التحذير من البدع",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/232",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/التحذير من البدع.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 43,
+      "titleAr": "التعليقات البازية على زاد المعاد",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/17627",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 44,
+      "titleAr": "التوبة إلى الله والضراعة إليه عند نزول المصائب",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/237",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 45,
+      "titleAr": "التحذير من فتنة القبور",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/233",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 46,
+      "titleAr": "التحفة الكريمة في بيان كثير من الأحاديث الموضوعة والسقيمة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/234",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 47,
+      "titleAr": "أحكام الجنائز",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/251",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 48,
+      "titleAr": "أحكام الجمعة والجماعة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/250",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 49,
+      "titleAr": "أحكام المريض",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/254",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 50,
+      "titleAr": "أحكام السحر والسحرة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/265",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 51,
+      "titleAr": "أحكام المسافر",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/253",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 52,
+      "titleAr": "أخطاء في العقيدة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/263",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 53,
+      "titleAr": "أفحكم الجاهلية يبغون؟",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/17824",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 54,
+      "titleAr": "الأجوبة المفيدة عن بعض مسائل العقيدة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/17829",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 55,
+      "titleAr": "الأحاديث الضعيفة والموضوعة التي حكم عليها ابن باز في مجموع الفتاوى",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/261",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 56,
+      "titleAr": "الطراز للأحاديث التي حكم عليها الشيخ ابن باز",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/16020",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 57,
+      "titleAr": "الشرح الممتاز على متن شروط الصلاة وأركانها وواجباتها",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/291",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 58,
+      "titleAr": "الشريعة الإسلامية ومحاسنها وضرورة البشر إليها",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/292",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 59,
+      "titleAr": "العقيدة الصحيحة وما يضادها",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/294",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 60,
+      "titleAr": "العلاج والرقى",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/296",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 61,
+      "titleAr": "الفتاوى الشرعية على المشكل في المسائل الطبية",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/297",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 62,
+      "titleAr": "الفوائد المتنوعة في العقائد والتفسير والحديث والتاريخ وغير ذلك",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/298",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 63,
+      "titleAr": "القوادح في العقيدة ووسائل السلامة منها",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/312",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 64,
+      "titleAr": "الكفارات في الحج",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/16482",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 65,
+      "titleAr": "الكواكب الدرية من تعليقات الشيخ ابن باز على الفتوى الحموية",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/405",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 66,
+      "titleAr": "الممتاز من رسائل الإمام ابن باز",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/17054",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 67,
+      "titleAr": "المجموع المفيد الممتاز من كتب العلامة ابن باز",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/404",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 68,
+      "titleAr": "النصح والتذكير بفريضة الزكاة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/402",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 69,
+      "titleAr": "المختار من فتاوى الأئمة الأعلام",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/406",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 70,
+      "titleAr": "أهمية العلم في محاربة الأفكار الهدامة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/408",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 71,
+      "titleAr": "المعلوم من واجب العلاقة بين الحاكم والمحكوم",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/407",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 72,
+      "titleAr": "بيان ما تشرع زيارته وما لا تشرع زيارته من مساجد المدينة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/16394",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 73,
+      "titleAr": "بيان التوحيد",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/409",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 74,
+      "titleAr": "تحفة الإخوان بأجوبة مهمة تتعلق بأركان الإسلام",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/414",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 75,
+      "titleAr": "تحفة الإخوان بتراجم بعض الأعيان",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/415",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 76,
+      "titleAr": "تحقيق التوحيد وتخليصه من شوائب الشرك",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/419",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 77,
+      "titleAr": "تحفة الأخيار",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/416",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 78,
+      "titleAr": "حواشي وتعليقات الشيخ ابن باز على كتاب التبصير في معالم الدين",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/423",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 79,
+      "titleAr": "تعليق الشيخ ابن باز على كتاب التبصير في معالم الدين",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/421",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 80,
+      "titleAr": "تعليق الشيخ ابن باز على مقدمة تفسير ابن كثير وتفسير سورة الفاتحة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/425",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 81,
+      "titleAr": "تعليقات الشيخ ابن باز على حاشية ابن مانع على العقيدة الواسطية",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/17871",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 82,
+      "titleAr": "تعليق الشيخ ابن باز على كتاب فضل الإسلام",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/427",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 83,
+      "titleAr": "تعليقات الشيخ ابن باز على الرسالة الحموية الكبرى",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/428",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 84,
+      "titleAr": "توجيهات وفتاوى مهمة لنساء الأمة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/429",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 85,
+      "titleAr": "ثلاث رسائل في الصلاة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/430",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 86,
+      "titleAr": "حاشية الشيخ ابن باز على بلوغ المرام",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/432",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 87,
+      "titleAr": "حاشية الدروس المهمة لعامة الأمة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/431",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 88,
+      "titleAr": "ثلاثون سؤالا في الصيام",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/433",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 89,
+      "titleAr": "حديث الصباح",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/16885",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 90,
+      "titleAr": "حديث المساء",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/16799",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 91,
+      "titleAr": "حراسة التوحيد",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/435",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/حراسة التوحيد.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 92,
+      "titleAr": "حكم السحر والكهانة وما يتعلق بها",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/438",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 93,
+      "titleAr": "حكم السفور والحجاب ونكاح الشغار",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/442",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 94,
+      "titleAr": "حكم الصلح مع اليهود في ضوء الشريعة الإسلامية",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/441",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 95,
+      "titleAr": "حكم المستهزئين بالأنبياء والمرسلين",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/445",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 96,
+      "titleAr": "خطر التبرج والسفور على الفرد والمجتمع",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/446",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 97,
+      "titleAr": "دروس وفتاوى في المسجد الحرام",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/16736",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 98,
+      "titleAr": "خير الدعاء دعاء يوم عرفة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/451",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 99,
+      "titleAr": "خطر مشاركة المرأة للرجل في ميدان عمله",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/448",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 100,
+      "titleAr": "دليل الزوجين",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/16734",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 101,
+      "titleAr": "رسالة في التبرك والتوسل والقبور",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/453",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 102,
+      "titleAr": "رسالة في تعظيم شأن الصلاة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/455",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 103,
+      "titleAr": "رسالة في نواقض الإسلام وقوادحه",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/456",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 104,
+      "titleAr": "رسالتان في الصلاة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/457",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 105,
+      "titleAr": "رسالتان موجزتان في الزكاة والصيام",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/458",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 106,
+      "titleAr": "رسائل وتوجيهات في الأفراح والأعراس",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/459",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 107,
+      "titleAr": "زيارة القبور بين المشروع والممنوع",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/490",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 108,
+      "titleAr": "سبعون فتوى في احترام القرآن",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/492",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 109,
+      "titleAr": "سبل السلام شرح نواقض الإسلام",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/16608",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 110,
+      "titleAr": "شرح الأصول الثلاثة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/495",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 111,
+      "titleAr": "سؤالات ابن وهف لابن باز",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/494",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 112,
+      "titleAr": "شرح العقيدة الواسطية",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/496",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 113,
+      "titleAr": "شرح القواعد الأربع",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/497",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 114,
+      "titleAr": "الإفهام في شرح عمدة الأحكام",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/498",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 115,
+      "titleAr": "شرح كشف الشبهات",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/499",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 116,
+      "titleAr": "ضعف المسلمين أمام عدوهم",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/501",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 117,
+      "titleAr": "صفة الحج",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/353",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 118,
+      "titleAr": "عمل المسلم",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/502",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 119,
+      "titleAr": "فتاوى الزكاة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/505",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 120,
+      "titleAr": "فتاوى الحج",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/504",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 121,
+      "titleAr": "عوامل إصلاح المجتمع",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/503",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 122,
+      "titleAr": "فتاوى المرأة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/508",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 123,
+      "titleAr": "فتاوى الصيام",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/506",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 124,
+      "titleAr": "فتاوى النظر والخلوة والاختلاط والمصافحة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/507",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 125,
+      "titleAr": "فتاوى في أحكام قصر وجمع الصلاة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/511",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 126,
+      "titleAr": "فتاوى عن صلاة الفجر",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/509",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 127,
+      "titleAr": "فتاوى للمسافرين والمغتربين لابن باز وابن عثيمين",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/513",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 128,
+      "titleAr": "فتاوى مهمة تتعلق بالصيام والزكاة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/517",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 129,
+      "titleAr": "فتاوى مهمة تتعلق بالصلاة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/15893",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 130,
+      "titleAr": "فتاوى مختارة تتعلق بالصيام",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/516",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 131,
+      "titleAr": "فتاوى مهمة تتعلق بالعقيدة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/16731",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 132,
+      "titleAr": "فتاوى مهمة لعموم الأمة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/522",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 133,
+      "titleAr": "فتوى في حكم شرب الدخان",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/524",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 134,
+      "titleAr": "فتاوى وتنبيهات ونصائح",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/526",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 135,
+      "titleAr": "فتاوى وتقريرات علمية للتويجري",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/16498",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 136,
+      "titleAr": "فقه وفتاوى البيوع",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/533",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 137,
+      "titleAr": "فضل صيام رمضان وقيامه",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/528",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 138,
+      "titleAr": "فضل الجهاد والمجاهدين",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/527",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 139,
+      "titleAr": "في روضة القرآن الكريم",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/530",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 140,
+      "titleAr": "كيف نحقق التوحيد",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/532",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 141,
+      "titleAr": "محمد صلى الله عليه وسلم بين الجافي والغالي",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/536",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 142,
+      "titleAr": "كيفية صلاة النبي صلى الله عليه وسلم وأحكام صلاة المريض وطهارته",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/534",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/كيفية صلاة النبي.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 143,
+      "titleAr": "محاضرة في أصول الإيمان",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/535",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 144,
+      "titleAr": "مسائل أبي عمر السدحان للإمام ابن باز",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/538",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 145,
+      "titleAr": "مسؤولية طالب العلم دار القاسم",
+      "sourceUrl": "https://binbaz.org.sa/books/202/مسوولية-طالب-العلم-دار-القاسم",
+      "coverUrl": "https://binbaz.org.sa/img/series-books.png",
+      "pdfCount": 2
+    },
+    {
+      "id": 146,
+      "titleAr": "منسك الإمام ابن باز للمطيري",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/563",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 147,
+      "titleAr": "وجوب الاعتصام بكتاب الله عز وجل وسنة رسوله صلى الله عليه وسلم",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/566",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 148,
+      "titleAr": "منهاج الكرامة في شرح كتاب الاستقامة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/568",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 149,
+      "titleAr": "وجوب العمل بسنة الرسول صلى الله عليه وسلم وكفر من أنكرها",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/570",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 150,
+      "titleAr": "وجوب الأمر بالمعروف والنهي عن المنكر",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/567",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 151,
+      "titleAr": "إتحاف أهل الإسلام بخلاصة فتاوى رمضان",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/576",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 152,
+      "titleAr": "أشياء لا تفسد الصوم",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/577",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 153,
+      "titleAr": "أسئلة وأجوبة مختارة من فتاوى الشيخ",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/603",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 154,
+      "titleAr": "الاختيارات الفقهية من الفتاوى البازية لفقيهي",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/15897",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 155,
+      "titleAr": "الأسئلة اليامية عن العقيدة الإسماعيلية",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/604",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 156,
+      "titleAr": "التعليقات البازية على نزهة النظر شرح نخبة الفكر",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/606",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 157,
+      "titleAr": "الدرة اليتيمة في تخريج أحاديث التحفة الكريمة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/15896",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 158,
+      "titleAr": "الدرر البهية من الفوائد البازية (كتاب الصيام)",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/607",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 159,
+      "titleAr": "الدرر الثرية من الفتاوى البازية",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/620",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 160,
+      "titleAr": "فتاوى شئون الأطفال",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/613",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 161,
+      "titleAr": "مسائل الحج والعمرة من مجموع الفتاوى",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/610",
+      "coverUrl": "https://files.zadapps.info/binbaz.org.sa/مسائل الحج والعمرة.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 162,
+      "titleAr": "فتاوى عاجلة لمنسوبي الصحة",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/17624",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 163,
+      "titleAr": "نقد القومية العربية على ضوء الإسلام والواقع",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/616",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 164,
+      "titleAr": "التعليقات البازية على كتاب التوحيد",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/17537",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 165,
+      "titleAr": "كيفية صلاة النبي صلى الله عليه وسلم",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/10507",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 166,
+      "titleAr": "شرح كتاب وظائف رمضان",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/23048",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 167,
+      "titleAr": "الفوائد المتنوعة للشيخ عبدالعزيز ابن باز",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/30958",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 168,
+      "titleAr": "فتاوى واختيارات العلامة ابن باز في الأضحية",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/30961",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 169,
+      "titleAr": "اختيارات الشيخ وآرائه في قضايا معاصرة - 1",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/31652",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 170,
+      "titleAr": "اختيارات الشيخ وآرائه في قضايا معاصرة - 2",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/31653",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 171,
+      "titleAr": "مجالس العشر الأواخر",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/31654",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 172,
+      "titleAr": "مجالس شهر رمضان",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/31655",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 173,
+      "titleAr": "الدرر الثرية من الفتاوى البازية",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/31656",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 174,
+      "titleAr": "المجموع المفيد الممتاز من كتب العلامة ابن باز",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/31657",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 175,
+      "titleAr": "المنتقى من فتاوى الأئمة الأعلام",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/31946",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 176,
+      "titleAr": "شرح الأربعين النووية",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/32534",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    },
+    {
+      "id": 177,
+      "titleAr": "شرح عمدة الأحكام",
+      "sourceUrl": "https://binbaz.org.sa/books/pdf/32535",
+      "coverUrl": "https://binbaz.org.sa/img/single-book.png",
+      "pdfCount": 1
+    }
+  ]
+}

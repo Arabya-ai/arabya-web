@@ -1,0 +1,209 @@
+"use client";
+
+import { useId, useRef, useState, type KeyboardEvent } from "react";
+import { useTranslations } from "next-intl";
+import { makeHadithWordId } from "@/lib/word-id";
+import { nextTabIndex } from "@/lib/tablist";
+import { stripTashkeel } from "@/lib/tahfeez/normalize";
+
+const LAYER_IDS = [
+  "syntax",
+  "morphology",
+  "semantics",
+  "rhetoric",
+  "lexicon",
+  "translation",
+] as const;
+
+type LayerId = (typeof LAYER_IDS)[number];
+
+export type HadithToken = {
+  position: number;
+  text: string;
+  wordId: string;
+};
+
+type Props = {
+  collection: string;
+  number: number;
+  arabic: string;
+};
+
+function tokenizeMatn(
+  collection: string,
+  number: number,
+  arabic: string,
+): HadithToken[] {
+  const parts = stripTashkeel(arabic)
+    .replace(/<[^>]+>/g, " ")
+    .split(/\s+/)
+    .map((w) => w.replace(/^[^\u0600-\u06FF]+|[^\u0600-\u06FF]+$/g, ""))
+    .filter((w) => /[\u0600-\u06FF]/.test(w));
+
+  // Keep display tokens aligned with original whitespace segments when possible.
+  const raw = arabic
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+
+  const tokens: HadithToken[] = [];
+  let pos = 1;
+  for (const piece of raw) {
+    const cleaned = piece.replace(/^[^\u0600-\u06FF]+|[^\u0600-\u06FF]+$/g, "");
+    if (!/[\u0600-\u06FF]/.test(cleaned)) continue;
+    tokens.push({
+      position: pos,
+      text: piece,
+      wordId: makeHadithWordId(collection, number, pos),
+    });
+    pos += 1;
+  }
+
+  // Fallback if HTML/punctuation left us empty.
+  if (!tokens.length && parts.length) {
+    return parts.map((text, i) => ({
+      position: i + 1,
+      text,
+      wordId: makeHadithWordId(collection, number, i + 1),
+    }));
+  }
+  return tokens;
+}
+
+function layerHintKey(id: LayerId): string {
+  if (id === "morphology") return "morphologyHint";
+  if (id === "semantics") return "semanticsHint";
+  if (id === "rhetoric") return "rhetoricHint";
+  if (id === "lexicon") return "lexiconHint";
+  if (id === "syntax") return "syntaxHint";
+  return "translationHint";
+}
+
+export function HadithWordStudy({ collection, number, arabic }: Props) {
+  const t = useTranslations("WordDock");
+  const th = useTranslations("Hadith");
+  const tokens = tokenizeMatn(collection, number, arabic);
+  const [selected, setSelected] = useState<HadithToken | null>(
+    tokens[0] ?? null,
+  );
+  const [layer, setLayer] = useState<LayerId>("syntax");
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const baseId = useId();
+
+  const layers = LAYER_IDS.map((id) => ({
+    id,
+    label: t(id),
+    hint: t(layerHintKey(id) as "syntaxHint"),
+  }));
+
+  function onTabKeyDown(e: KeyboardEvent<HTMLButtonElement>, index: number) {
+    const next = nextTabIndex(e.key, index, layers.length);
+    if (next == null) return;
+    e.preventDefault();
+    setLayer(layers[next].id);
+    tabRefs.current[next]?.focus();
+  }
+
+  return (
+    <div className="hadith-word-study">
+      <p className="hadith-word-study-lead">{th("wordStudyLead")}</p>
+
+      <div
+        className="hadith-matn-tokens"
+        dir="rtl"
+        lang="ar"
+        role="list"
+        aria-label={th("tokensAria")}
+      >
+        {tokens.map((tok) => {
+          const active = selected?.wordId === tok.wordId;
+          return (
+            <button
+              key={tok.wordId}
+              type="button"
+              role="listitem"
+              className={
+                active
+                  ? "hadith-token hadith-token--active"
+                  : "hadith-token"
+              }
+              aria-pressed={active}
+              onClick={() => setSelected(tok)}
+            >
+              {tok.text}
+            </button>
+          );
+        })}
+      </div>
+
+      {selected ? (
+        <section className="word-dock hadith-word-dock" aria-live="polite">
+          <header className="word-dock-main">
+            <p className="word-dock-key">{selected.wordId}</p>
+            <p className="word-dock-ar" dir="rtl" lang="ar">
+              {selected.text}
+            </p>
+            <p className="layer-hint">{th("wordLayersAwaiting")}</p>
+          </header>
+
+          <div
+            className="layer-rail"
+            role="tablist"
+            aria-label={t("layersAria")}
+          >
+            {layers.map((L, index) => {
+              const selectedTab = layer === L.id;
+              return (
+                <button
+                  key={L.id}
+                  ref={(el) => {
+                    tabRefs.current[index] = el;
+                  }}
+                  type="button"
+                  role="tab"
+                  id={`${baseId}-tab-${L.id}`}
+                  aria-selected={selectedTab}
+                  aria-controls={`${baseId}-panel-${L.id}`}
+                  tabIndex={selectedTab ? 0 : -1}
+                  className={`layer-chip ${selectedTab ? "is-active" : ""}`}
+                  onClick={() => setLayer(L.id)}
+                  onKeyDown={(e) => onTabKeyDown(e, index)}
+                >
+                  {L.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {layers.map((L) =>
+            layer === L.id ? (
+              <div
+                key={L.id}
+                role="tabpanel"
+                id={`${baseId}-panel-${L.id}`}
+                aria-labelledby={`${baseId}-tab-${L.id}`}
+                className="hadith-layer-panel"
+              >
+                <p className="layer-hint">{L.hint}</p>
+                <p className="layer-hint">
+                  {L.id === "rhetoric"
+                    ? t("rhetoricAwaiting")
+                    : L.id === "morphology"
+                      ? t("noMorph")
+                      : L.id === "lexicon"
+                        ? t("noLexicon")
+                        : L.id === "syntax"
+                          ? t("noIrab")
+                          : L.id === "translation"
+                            ? t("noWordTranslation")
+                            : th("semanticsAwaiting")}
+                </p>
+              </div>
+            ) : null,
+          )}
+        </section>
+      ) : null}
+    </div>
+  );
+}

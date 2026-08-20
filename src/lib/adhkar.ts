@@ -5,7 +5,7 @@ import { readAdhkarContentOverride } from "@/lib/adhkar-content-store";
 const dataRoot = path.join(process.cwd(), "data", "adhkar");
 
 /** Static tool routes under `/adhkar/*` — must not collide with category slugs. */
-export const ADHKAR_TOOL_SLUGS = ["duas", "tasbeeh"] as const;
+export const ADHKAR_TOOL_SLUGS = ["duas", "tasbeeh", "hisn"] as const;
 export type AdhkarToolSlug = (typeof ADHKAR_TOOL_SLUGS)[number];
 
 export function isAdhkarToolSlug(slug: string): slug is AdhkarToolSlug {
@@ -114,9 +114,68 @@ export async function getDuas(): Promise<DuaItem[]> {
     );
   }
   const parsed = await readJson<{ items?: DuaItem[] }>("duas.json");
-  return (parsed?.items ?? []).filter(
+  const base = (parsed?.items ?? []).filter(
     (item) => item.id && item.textAr && item.active !== false,
   );
+  const hisn = await getHisnAlMuslimItems();
+  if (!hisn.length) return base;
+  const seen = new Set(base.map((d) => d.textAr.slice(0, 100)));
+  const merged = [...base];
+  for (const item of hisn) {
+    const key = item.textAr.slice(0, 100);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(item);
+  }
+  return merged;
+}
+
+export type HisnCategory = {
+  categoryAr: string;
+  items: DuaItem[];
+};
+
+export async function getHisnAlMuslimItems(): Promise<DuaItem[]> {
+  const parsed = await readJson<{
+    items?: Array<{
+      id: string;
+      categoryAr: string;
+      textAr: string;
+      repeat?: number;
+      source?: string;
+      active?: boolean;
+    }>;
+  }>("hisn-almuslim-full.json");
+  return (parsed?.items ?? [])
+    .filter(
+      (item) =>
+        item.id &&
+        item.textAr &&
+        item.active !== false &&
+        item.categoryAr !== "المقدمة" &&
+        item.categoryAr !== "فضل الذكر",
+    )
+    .map((item) => ({
+      id: item.id,
+      categoryAr: item.categoryAr,
+      categoryEn: "Hisn al-Muslim",
+      textAr: item.textAr,
+      source: item.source || "حصن المسلم",
+      active: item.active,
+    }));
+}
+
+export async function getHisnCategories(): Promise<HisnCategory[]> {
+  const items = await getHisnAlMuslimItems();
+  const map = new Map<string, DuaItem[]>();
+  for (const item of items) {
+    const list = map.get(item.categoryAr) ?? [];
+    list.push(item);
+    map.set(item.categoryAr, list);
+  }
+  return [...map.entries()]
+    .map(([categoryAr, catItems]) => ({ categoryAr, items: catItems }))
+    .sort((a, b) => a.categoryAr.localeCompare(b.categoryAr, "ar"));
 }
 
 export async function getTasbeehPhrases(): Promise<TasbeehPhrase[]> {

@@ -196,6 +196,7 @@ export async function GET(req: Request) {
         hijri: hijri
           ? {
               day: hijri.day,
+              month: hijri.month?.number ?? null,
               monthAr: hijri.month?.ar,
               monthEn:
                 hijri.month?.number != null

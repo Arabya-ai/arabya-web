@@ -28,10 +28,15 @@ export async function GET(req: Request) {
     : Number.isFinite(rawLimit) && rawLimit > 0
       ? Math.min(Math.floor(rawLimit), ALL_CAP)
       : PREVIEW_LIMIT;
+  const rawSurah = Number(searchParams.get("surah"));
+  const surahId =
+    Number.isInteger(rawSurah) && rawSurah >= 1 && rawSurah <= 114
+      ? rawSurah
+      : undefined;
 
   if (!q) {
     return NextResponse.json(
-      { query: "", hits: [], total: 0, root: null },
+      { query: "", hits: [], total: 0, root: null, surahId: surahId ?? null },
       {
         headers: {
           "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
@@ -41,7 +46,7 @@ export async function GET(req: Request) {
   }
 
   const [result, rootEntry] = await Promise.all([
-    searchAyahs(q, { limit }),
+    searchAyahs(q, { limit, surahId }),
     findRootByQuery(q),
   ]);
 
@@ -59,6 +64,7 @@ export async function GET(req: Request) {
       hits: result.hits,
       total: result.total,
       root,
+      surahId: surahId ?? null,
     },
     {
       headers: {

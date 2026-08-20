@@ -21,8 +21,9 @@
 | `/books`, `/books/[slug]` | Irab book catalog (licensed import later) |
 | `/adhkar`, `/adhkar/[slug]`, `/adhkar/duas`, `/adhkar/tasbeeh` | Daily adhkar hub (Git JSON under `data/adhkar`) |
 | `/qibla` | Qibla compass + prayer times (separate from adhkar) |
-| `/resources`, `/qiraat` | Hubs / placeholders |
-| `/hadith`, `/heritage` | **Placeholders only** — do not build full pipelines yet |
+| `/resources`, `/qiraat` | Hubs / qiraʾat index + tajweed legend |
+| `/hadith`, `/hadith/[collection]`, `/api/hadith/search` | Hadith hub (Git JSON under `data/hadith`) — parallel with Quran |
+| `/heritage`, `/heritage/[slug]` | Heritage & poetry passages (Git JSON under `data/heritage`) — parallel with Quran |
 | `/studio` | Ayah video studio (browser WebCodecs) |
 | `/studio/ai` | Independent AI short-video UI; Python engine in `services/money-printer-turbo` |
 | `/api/tafsir/...`, `/api/translation/...`, `/api/search`, `/api/study` | Local JSON APIs |

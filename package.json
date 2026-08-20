@@ -32,6 +32,11 @@
     "generate-library-covers": "node scripts/generate-library-covers.mjs",
     "validate-data": "node scripts/validate-data.mjs",
     "expand-adhkar-sources": "node scripts/expand-adhkar-sources.mjs",
+    "import-hadith-oss": "node scripts/import-hadith-oss.mjs",
+    "import-open-hadith-data": "node scripts/import-open-hadith-data.mjs",
+    "build-hadith-isnad": "node scripts/build-hadith-isnad-overlay.mjs",
+    "import-heritage-expansion": "node scripts/import-heritage-expansion.mjs",
+    "import-oss-json-pack": "node scripts/import-oss-json-pack.mjs",
     "build-quality-queue": "node scripts/build-quality-queue.mjs",
     "import-irab-book": "node scripts/import-irab-book.mjs",
     "fetch-ia-item": "node scripts/fetch-ia-item.mjs",
@@ -41,7 +46,9 @@
     "import-quran-words-tafseer": "node scripts/import-quran-words-tafseer-json.mjs",
     "build-word-senses-from-cache": "node scripts/build-word-senses-from-cache.mjs",
     "attach-lexicon-by-root": "node scripts/attach-lexicon-by-root.mjs",
-    "init-user-db": "node scripts/init-local-user-db.mjs"
+    "init-user-db": "node scripts/init-local-user-db.mjs",
+    "verify-oss-imports": "node scripts/verify-oss-imports.mjs",
+    "verify-oss-imports:live": "node scripts/verify-oss-imports.mjs --live"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.20",

@@ -1,0 +1,45 @@
+{
+  "updatedAt": "2026-08-20",
+  "note": "Prefer live remote display for oversized corpora. Quran mushaf text was NOT replaced. Imports kept bounded and verified via npm run verify-oss-imports.",
+  "importedLocal": [
+    {
+      "project": "fawazahmed0/hadith-api (ara editions)",
+      "path": "data/hadith/collections/*",
+      "hadithsApprox": 36104
+    },
+    {
+      "project": "mhashim6/Open-Hadith-Data",
+      "path": "data/hadith/collections/ahmad.json + darimi.json",
+      "hadithsApprox": 29730
+    },
+    {
+      "project": "rn0x adhkar/hisn + Names of Allah",
+      "path": "data/adhkar + data/asma"
+    },
+    {
+      "project": "ARBML/Ashaar + PD poets + binbaz catalog meta",
+      "path": "data/heritage"
+    }
+  ],
+  "liveRemoteNoGitDump": [
+    {
+      "project": "fawazahmed0 eng/ara per-hadith CDN",
+      "via": "/api/hadith/remote-enrich + live isnad narratorEn"
+    },
+    {
+      "project": "rn0x/Historical_Encyclopedia history.json (~12MB)",
+      "via": "/api/remote/siyar + RemoteSiyarBrowser"
+    }
+  ],
+  "deferred": [
+    "emadjumaah/hadith-kg (~1.6GB SQLite — needs separate host)",
+    "JehadOumer Ifta chain_of_narrators (Kaggle)",
+    "HF classical_arabic_poetry (gated)",
+    "NoorBayan/Diwan full (~500k poems)"
+  ],
+  "totals": {
+    "hadithCollections": 12,
+    "hadithsApprox": 65834,
+    "heritageWorksLocal": 11
+  }
+}

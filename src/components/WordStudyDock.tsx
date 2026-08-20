@@ -72,6 +72,7 @@ const LAYER_IDS = [
   "syntax",
   "morphology",
   "semantics",
+  "rhetoric",
   "lexicon",
   "translation",
   "tafsir",
@@ -102,6 +103,7 @@ function parseVerseKey(verseKey: string): { surahId: number; verse: number } {
 function layerHintKey(id: LayerId): string {
   if (id === "morphology") return "morphologyHint";
   if (id === "semantics") return "semanticsHint";
+  if (id === "rhetoric") return "rhetoricHint";
   if (id === "lexicon") return "lexiconHint";
   if (id === "syntax") return "syntaxHint";
   if (id === "translation") return "translationHint";
@@ -503,6 +505,14 @@ export function WordStudyDock({
                 {t("shortGlossLabel")}: {fallbackSense}
               </p>
             ) : null}
+          </>
+        ) : null}
+
+        {layer === "rhetoric" ? (
+          <>
+            <h3>{t("rhetoricTitle")}</h3>
+            <p className="layer-hint">{activeHint}</p>
+            <p className="layer-empty">{t("rhetoricAwaiting")}</p>
           </>
         ) : null}
 

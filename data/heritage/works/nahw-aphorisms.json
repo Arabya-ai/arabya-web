@@ -1,0 +1,31 @@
+{
+  "slug": "nahw-aphorisms",
+  "titleAr": "حكم نحوية قصيرة",
+  "titleEn": "Short grammar aphorisms",
+  "kind": "prose",
+  "source": "arabya-editorial",
+  "license": "CC0-structure",
+  "passages": [
+    {
+      "id": "TW:nahw-aphorisms:1",
+      "titleAr": "الإعراب فرع المعنى",
+      "titleEn": "Iʿrāb follows meaning",
+      "textAr": "الإعراب فرع المعنى؛ فلا يُحكم على موقع الكلمة قبل فهم دلالتها في السياق.",
+      "meter": null
+    },
+    {
+      "id": "TW:nahw-aphorisms:2",
+      "titleAr": "العامل والمعمول",
+      "titleEn": "Governor and governed",
+      "textAr": "كل معمول له عامل؛ وطلب العامل باب واسع في أبواب النحو.",
+      "meter": null
+    },
+    {
+      "id": "TW:nahw-aphorisms:3",
+      "titleAr": "الأصل في الكلام",
+      "titleEn": "Default speech order",
+      "textAr": "الأصل في الكلام الرتبة: الفعل ثم الفاعل ثم المفعول، وما خرج عن ذلك فله مسوغ.",
+      "meter": null
+    }
+  ]
+}

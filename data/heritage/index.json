@@ -1,0 +1,97 @@
+{
+  "updatedAt": "2026-08-20",
+  "sourceNote": "تراث موسّع: Ashaar عروض + عيّنة موسوعة تاريخية + شعراء ملك عام + كتالوج بن باز (بيانات).",
+  "works": [
+    {
+      "slug": "qafiyah-intro",
+      "titleAr": "مدخل إلى العروض والقافية",
+      "titleEn": "Intro to prosody & rhyme",
+      "kind": "prosody",
+      "descriptionAr": "شروح قصيرة لمصطلحات العروض مفيدة لطبقة البلاغة/الشعر.",
+      "descriptionEn": "Short prosody terms useful for rhetoric/poetry layers.",
+      "passageCount": 4
+    },
+    {
+      "slug": "ashaar-arudi",
+      "titleAr": "شواهد عروضية (أشعار)",
+      "titleEn": "Prosody samples (Ashaar)",
+      "kind": "prosody",
+      "descriptionAr": "شطور مشكولة مع تفعيلات من مشروع Ashaar — أساس طبقة العروض/البلاغة.",
+      "descriptionEn": "Vocalized hemistichs with meters from ARBML/Ashaar — prosody/rhetoric layer.",
+      "passageCount": 36
+    },
+    {
+      "slug": "mutanabbi-samples",
+      "titleAr": "مختارات من المتنبي",
+      "titleEn": "Selections from al-Mutanabbi",
+      "kind": "poetry",
+      "passageCount": 3
+    },
+    {
+      "slug": "imru-al-qays",
+      "titleAr": "مختارات من امرئ القيس",
+      "titleEn": "Selections from Imruʾ al-Qays",
+      "kind": "poetry",
+      "passageCount": 3
+    },
+    {
+      "slug": "abu-tammam",
+      "titleAr": "مختارات من أبي تمام",
+      "titleEn": "Selections from Abu Tammam",
+      "kind": "poetry",
+      "passageCount": 3
+    },
+    {
+      "slug": "zuhayr",
+      "titleAr": "مختارات من زهير بن أبي سلمى",
+      "titleEn": "Selections from Zuhayr",
+      "kind": "poetry",
+      "descriptionAr": "أبيات مشهورة من المعلقات — ملك عام.",
+      "descriptionEn": "Famous Muʿallaqa lines — public domain.",
+      "passageCount": 2
+    },
+    {
+      "slug": "labid",
+      "titleAr": "مختارات من لبيد بن ربيعة",
+      "titleEn": "Selections from Labīd",
+      "kind": "poetry",
+      "descriptionAr": "من معلّقة لبيد — نص تعليمي ملك عام.",
+      "descriptionEn": "From Labīd’s Muʿallaqa — educational PD text.",
+      "passageCount": 2
+    },
+    {
+      "slug": "antarah",
+      "titleAr": "مختارات من عنترة",
+      "titleEn": "Selections from ʿAntarah",
+      "kind": "poetry",
+      "descriptionAr": "أبيات فروسية مشهورة من الملك العام.",
+      "descriptionEn": "Famous heroic lines from the public domain.",
+      "passageCount": 2
+    },
+    {
+      "slug": "buhturi",
+      "titleAr": "مختارات من البحتري",
+      "titleEn": "Selections from al-Buḥturī",
+      "kind": "poetry",
+      "descriptionAr": "أبيات وصفية من التراث العباسي — ملك عام.",
+      "descriptionEn": "Descriptive Abbasid lines — public domain.",
+      "passageCount": 2
+    },
+    {
+      "slug": "nahw-aphorisms",
+      "titleAr": "حكم نحوية قصيرة",
+      "titleEn": "Short grammar aphorisms",
+      "kind": "prose",
+      "passageCount": 3
+    },
+    {
+      "slug": "siyar-sample",
+      "titleAr": "مختارات من موسوعة السيرة والتاريخ",
+      "titleEn": "Sīrah & history encyclopedia sample",
+      "kind": "prose",
+      "descriptionAr": "عيّنة محدودة (60 حدثًا) من موسوعة تاريخية مفتوحة — ليس الملف الكامل.",
+      "descriptionEn": "Bounded sample (60 events) from an open historical encyclopedia — not the full dump.",
+      "passageCount": 60
+    }
+  ]
+}
