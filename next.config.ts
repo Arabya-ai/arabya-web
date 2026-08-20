@@ -38,6 +38,11 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Contabo `next build` must not fail on flaky ESLint flat-config resolves.
+  // Keep `npm run lint` in CI for quality; production deploy prioritizes a green build.
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   serverExternalPackages: ["@resvg/resvg-js", "better-sqlite3"],
   experimental: {
     // Tree-shake heavy barrels so home/mushaf ship less unused JS.

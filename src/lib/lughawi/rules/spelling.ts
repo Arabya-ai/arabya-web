@@ -57,7 +57,24 @@ export const BUILTIN_SPELLING: { from: string; to: string; ruleId: string; confi
   { from: "انتن", to: "أنتن", ruleId: "hamza-ana" },
   { from: "نحن", to: "نحن", ruleId: "hamza-ana", confidence: 0 }, // noop marker skipped
   { from: "الى", to: "إلى", ruleId: "ila-preposition" },
-  { from: "علي", to: "على", ruleId: "ila-preposition", confidence: 0.5 },
+  // NEVER blind-map علي→على (اسم عَلِيّ). Context rule handles على→علي below.
+  { from: "فى", to: "في", ruleId: "ya-preposition" },
+  { from: "احمد", to: "أحمد", ruleId: "name-hamza" },
+  { from: "ابراهيم", to: "إبراهيم", ruleId: "name-hamza" },
+  { from: "اسماعيل", to: "إسماعيل", ruleId: "name-hamza" },
+  { from: "اسحاق", to: "إسحاق", ruleId: "name-hamza", confidence: 0.85 },
+  { from: "ايوب", to: "أيوب", ruleId: "name-hamza", confidence: 0.85 },
+  { from: "الياس", to: "إلياس", ruleId: "name-hamza", confidence: 0.8 },
+  { from: "امين", to: "أمين", ruleId: "name-hamza", confidence: 0.8 },
+  { from: "ايمن", to: "أيمن", ruleId: "name-hamza", confidence: 0.85 },
+  { from: "امل", to: "أمل", ruleId: "name-hamza", confidence: 0.75 },
+  { from: "اسامة", to: "أسامة", ruleId: "name-hamza", confidence: 0.85 },
+  { from: "انس", to: "أنس", ruleId: "name-hamza", confidence: 0.8 },
+  { from: "اكرم", to: "أكرم", ruleId: "name-hamza", confidence: 0.8 },
+  { from: "اشرف", to: "أشرف", ruleId: "name-hamza", confidence: 0.8 },
+  { from: "امجد", to: "أمجد", ruleId: "name-hamza", confidence: 0.8 },
+  { from: "اديب", to: "أديب", ruleId: "name-hamza", confidence: 0.75 },
+  { from: "اسعد", to: "أسعد", ruleId: "name-hamza", confidence: 0.75 },
   { from: "الان", to: "الآن", ruleId: "hamza-ana" },
   { from: "اولا", to: "أولًا", ruleId: "hamza-ana", confidence: 0.75 },
   { from: "ثانيا", to: "ثانيًا", ruleId: "hamza-ana", confidence: 0.75 },
@@ -188,7 +205,16 @@ export function collectSpellingEdits(
     (p) => p.from !== p.to && (p.confidence ?? 1) > 0,
   ).flatMap((p) => {
     const rows = [{ ...p, learned: false as const }];
-    if (!p.from.startsWith("ال") && !p.to.startsWith("ال")) {
+    const skipAl =
+      p.ruleId === "ya-preposition" ||
+      p.ruleId === "ila-preposition" ||
+      p.ruleId === "name-ali" ||
+      p.from.length <= 2;
+    if (
+      !skipAl &&
+      !p.from.startsWith("ال") &&
+      !p.to.startsWith("ال")
+    ) {
       rows.push({
         ...p,
         from: `ال${p.from}`,
@@ -286,6 +312,33 @@ export function collectSpellingEdits(
         locale,
         nextId("sp", seq),
         0.95,
+      ),
+    );
+  }
+
+  // على → علي when it is clearly a person name after meeting/address verbs.
+  const nameAliRe =
+    /(?<![\u0600-\u06FFa-zA-Z0-9])(قابل|قابلت|زرت|زار|رأيت|رأى|لقيت|لَقيت|كلمت|كلّمت|سميت|سمّيت|اسمه|يدعى|يُدعى|مع)\s+على(?![\u0600-\u06FFa-zA-Z0-9])/g;
+  let nm: RegExpExecArray | null;
+  while ((nm = nameAliRe.exec(text)) !== null) {
+    const full = nm[0]!;
+    const start = nm.index + full.lastIndexOf("على");
+    const end = start + "على".length;
+    const key = `${start}:${end}`;
+    if (claimed.has(key)) continue;
+    if (isPairSuppressed("على", "علي")) continue;
+    claimed.add(key);
+    seq += 1;
+    edits.push(
+      wordEdit(
+        text,
+        start,
+        end,
+        "علي",
+        "name-ali",
+        locale,
+        nextId("sp", seq),
+        0.88,
       ),
     );
   }

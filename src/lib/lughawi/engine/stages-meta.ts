@@ -1,6 +1,6 @@
 /** Client-safe stage metadata — no Node/fs imports. */
 
-export const LUGHAWI_ENGINE_VERSION = "1.3.0";
+export const LUGHAWI_ENGINE_VERSION = "1.3.1";
 
 export type EngineStageId =
   | "guard"
