@@ -24,9 +24,12 @@ export default async function LughawiFeaturesPage({ params }: Props) {
         <p className="lughawi-kicker">{t("kicker")}</p>
         <h1>{t("featuresPageTitle")}</h1>
         <p className="lughawi-hero-lead">{t("featuresPageLead")}</p>
-        <nav className="lughawi-local-nav">
+        <nav className="lughawi-local-nav" aria-label={t("title")}>
           <Link href="/lughawi" className="nav-pill">
             {t("navTool")}
+          </Link>
+          <Link href="/lughawi/features" className="nav-pill is-current" aria-current="page">
+            {t("navFeatures")}
           </Link>
           <Link href="/lughawi/mistakes" className="nav-pill">
             {t("navMistakes")}

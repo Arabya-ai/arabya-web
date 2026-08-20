@@ -3,6 +3,15 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
 import { LughawiStudio } from "@/components/lughawi/LughawiStudio";
+import {
+  BookOpenCheck,
+  BrainCircuit,
+  Languages,
+  Scale,
+  Sparkles,
+  SpellCheck2,
+  WandSparkles,
+} from "lucide-react";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -26,7 +35,7 @@ export default async function LughawiPage({ params }: Props) {
         <h1>{t("title")}</h1>
         <p className="lughawi-hero-lead">{t("lead")}</p>
         <nav className="lughawi-local-nav" aria-label={t("title")}>
-          <Link href="/lughawi" className="nav-pill">
+          <Link href="/lughawi" className="nav-pill is-current" aria-current="page">
             {t("navTool")}
           </Link>
           <Link href="/lughawi/features" className="nav-pill">
@@ -42,24 +51,72 @@ export default async function LughawiPage({ params }: Props) {
 
       <div className="lughawi-sections">
         <section>
+          <h2>{t("methodTitle")}</h2>
+          <p>{t("methodLead")}</p>
+          <div className="lughawi-method-row">
+            <article>
+              <Scale className="lughawi-method-ico" aria-hidden />
+              <h3>{t("methodRulesTitle")}</h3>
+              <p>{t("methodRulesBody")}</p>
+            </article>
+            <article>
+              <BrainCircuit className="lughawi-method-ico" aria-hidden />
+              <h3>{t("methodLearnTitle")}</h3>
+              <p>{t("methodLearnBody")}</p>
+            </article>
+            <article>
+              <Sparkles className="lughawi-method-ico" aria-hidden />
+              <h3>{t("methodAutoTitle")}</h3>
+              <p>{t("methodAutoBody")}</p>
+            </article>
+          </div>
+        </section>
+
+        <section>
           <h2>{t("featuresTitle")}</h2>
           <p>{t("featuresLead")}</p>
           <div className="lughawi-feature-row">
             <article>
-              <h3>{t("featCorrectTitle")}</h3>
+              <h3>
+                <SpellCheck2 className="lughawi-feat-ico" aria-hidden />
+                {t("featCorrectTitle")}
+              </h3>
               <p>{t("featCorrectBody")}</p>
             </article>
             <article>
-              <h3>{t("featRewriteTitle")}</h3>
+              <h3>
+                <WandSparkles className="lughawi-feat-ico" aria-hidden />
+                {t("featRewriteTitle")}
+              </h3>
               <p>{t("featRewriteBody")}</p>
             </article>
             <article>
-              <h3>{t("featTashkeelTitle")}</h3>
+              <h3>
+                <Sparkles className="lughawi-feat-ico" aria-hidden />
+                {t("featTashkeelTitle")}
+              </h3>
               <p>{t("featTashkeelBody")}</p>
             </article>
             <article>
-              <h3>{t("featTranslateTitle")}</h3>
+              <h3>
+                <Languages className="lughawi-feat-ico" aria-hidden />
+                {t("featTranslateTitle")}
+              </h3>
               <p>{t("featTranslateBody")}</p>
+            </article>
+            <article>
+              <h3>
+                <BookOpenCheck className="lughawi-feat-ico" aria-hidden />
+                {t("featQuranTitle")}
+              </h3>
+              <p>{t("featQuranBody")}</p>
+            </article>
+            <article>
+              <h3>
+                <BrainCircuit className="lughawi-feat-ico" aria-hidden />
+                {t("featLearnTitle")}
+              </h3>
+              <p>{t("featLearnBody")}</p>
             </article>
           </div>
         </section>
@@ -134,6 +191,10 @@ export default async function LughawiPage({ params }: Props) {
           <details>
             <summary>{t("faqStoreQ")}</summary>
             <p>{t("faqStoreA")}</p>
+          </details>
+          <details>
+            <summary>{t("faqVsQ")}</summary>
+            <p>{t("faqVsA")}</p>
           </details>
         </section>
 

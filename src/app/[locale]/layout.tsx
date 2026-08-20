@@ -152,6 +152,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       </head>
       <body
         className={`${cairo.variable} ${plexArabic.variable} ${jakarta.variable} ${naskh.variable} ${amiri.variable} ${tajawal.variable} ${reemKufi.variable} antialiased`}
+        suppressHydrationWarning
       >
         <NextIntlClientProvider messages={messages}>
           <SyncUiLocaleFromPath />
