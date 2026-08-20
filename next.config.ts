@@ -45,6 +45,11 @@ const nextConfig: NextConfig = {
   },
   serverExternalPackages: ["@resvg/resvg-js", "better-sqlite3"],
   experimental: {
+    // Next 15.5.x can throw on Contabo/self-host:
+    //   TypeError: __webpack.WebpackError is not a constructor
+    // during minify-webpack-plugin (seen with Node 24 / broken webpack interop).
+    // Disabling server minify keeps Contabo builds green; client still minifies via SWC.
+    serverMinification: false,
     // Tree-shake heavy barrels so home/mushaf ship less unused JS.
     optimizePackageImports: [
       "lucide-react",
