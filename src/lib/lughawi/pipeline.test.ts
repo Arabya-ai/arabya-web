@@ -12,6 +12,20 @@ describe("lughawi spelling", () => {
     expect(suggestions).toContain("إلى");
     expect(suggestions).toContain("المدرسة");
   });
+
+  it("fixes hamza, في, علي name, and ta-marbuta in a short sentence", () => {
+    const text = "احمد قابل على فى المدرسه";
+    const edits = collectSpellingEdits(text, "ar");
+    const map = Object.fromEntries(
+      edits.map((e) => [e.original, e.suggestion]),
+    );
+    expect(map["احمد"]).toBe("أحمد");
+    expect(map["على"]).toBe("علي");
+    expect(map["فى"]).toBe("في");
+    expect(map["المدرسه"]).toBe("المدرسة");
+    const res = proofreadLocal(text, { locale: "ar" });
+    expect(res.result).toBe("أحمد قابل علي في المدرسة");
+  });
 });
 
 describe("lughawi pipeline", () => {

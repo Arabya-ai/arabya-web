@@ -1,14 +1,25 @@
-import { NextResponse } from "next/server";
-import { lughawiMaxGuestChars } from "@/lib/lughawi/config";
+import { auth } from "@/auth";
+import { buildAutoCandidates } from "@/lib/lughawi/ai-gateway";
+import { enrichProofreadWithAi } from "@/lib/lughawi/ai-proofread";
+import { lughawiMaxGuestChars, countArabicWords } from "@/lib/lughawi/config";
 import { proofreadLocal } from "@/lib/lughawi/pipeline";
+import { resolveLughawiAiCandidates } from "@/lib/lughawi/resolve-ai";
+import { getQuota, tryChargeQuota } from "@/lib/lughawi/quota-store";
 import type { ProofMode } from "@/lib/lughawi/types";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   const limited = enforceRateLimit(req, { prefix: "lughawi-proofread", limit: 40 });
   if (limited) return limited;
 
-  let body: { text?: string; locale?: string; mode?: string; proofMode?: string };
+  let body: {
+    text?: string;
+    locale?: string;
+    mode?: string;
+    proofMode?: string;
+    useAi?: boolean;
+  };
   try {
     body = (await req.json()) as typeof body;
   } catch {
@@ -19,6 +30,7 @@ export async function POST(req: Request) {
   const locale = body.locale === "en" ? "en" : "ar";
   const proofMode: ProofMode =
     body.proofMode === "spelling" ? "spelling" : "full";
+  const wantAi = body.useAi !== false;
   const max = lughawiMaxGuestChars();
 
   if (!text.trim()) {
@@ -39,10 +51,73 @@ export async function POST(req: Request) {
     );
   }
 
-  const result = proofreadLocal(text, {
+  let result = proofreadLocal(text, {
     locale,
     mode: "proofread",
     proofMode,
   });
+
+  if (!wantAi) {
+    return NextResponse.json(result);
+  }
+
+  const session = await auth();
+  const email = session?.user?.email?.trim().toLowerCase();
+  const banned = session?.error === "Banned";
+
+  let candidates = buildAutoCandidates({ userCandidates: [] });
+  let chargeProject = false;
+
+  if (email && !banned) {
+    const resolved = resolveLughawiAiCandidates({
+      userId: email,
+      mode: "auto",
+    });
+    candidates = resolved.candidates;
+    chargeProject = resolved.chargeProject;
+  }
+
+  if (!candidates.length) {
+    return NextResponse.json(result);
+  }
+
+  const words = countArabicWords(text);
+  if (chargeProject && email) {
+    const quota = getQuota(email);
+    if (quota.remainingWords < words) {
+      return NextResponse.json({
+        ...result,
+        meta: {
+          ...result.meta,
+          warning:
+            "انتهت الكلمات المجانية على مفاتيح المشروع — عُرض التدقيق المحلي. الصق مفتاحك في الإعدادات أو انتظر الشهر القادم.",
+        },
+      });
+    }
+  }
+
+  try {
+    result = await enrichProofreadWithAi(result, candidates);
+    if (chargeProject && email && result.meta.usedAi) {
+      tryChargeQuota(email, words);
+      result = {
+        ...result,
+        meta: {
+          ...result.meta,
+          quotaCharged: words,
+        },
+      };
+    }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "AI failed";
+    result = {
+      ...result,
+      meta: {
+        ...result.meta,
+        warning: `التدقيق المحلي جاهز · Auto تعذّر: ${msg.slice(0, 120)}`,
+      },
+    };
+  }
+
   return NextResponse.json(result);
 }
