@@ -14,6 +14,11 @@
   scroll-behavior: smooth;
 }
 
+/* Studio needs room for 3 columns — default .shell is only 920px and caused overlap. */
+.shell.lughawi-page {
+  width: min(1280px, calc(100% - 1.5rem));
+}
+
 .lughawi-ico {
   width: 1.05rem;
   height: 1.05rem;
@@ -106,6 +111,9 @@
   z-index: 0;
   isolation: isolate;
   min-width: 0;
+  overflow: hidden;
+  container-type: inline-size;
+  container-name: lughawi-workspace;
 }
 
 .lughawi-chrome {
@@ -311,10 +319,17 @@
 
 .lughawi-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 1rem;
   align-items: stretch;
   min-width: 0;
+  width: 100%;
+}
+
+@container lughawi-workspace (max-width: 620px) {
+  .lughawi-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .lughawi-panel {
@@ -327,6 +342,9 @@
   padding: 1rem 1.05rem 1.05rem;
   box-shadow: 0 10px 28px color-mix(in srgb, var(--brand-deep) 5%, transparent);
   min-height: 18rem;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   transition: border-color 0.2s ease, box-shadow 0.25s ease;
 }
 
@@ -991,7 +1009,7 @@
 /* —— Qalam-inspired shell (Arabya brand) —— */
 .lughawi-shell {
   display: grid;
-  grid-template-columns: 13rem minmax(0, 1fr) 14.5rem;
+  grid-template-columns: 12rem minmax(0, 1fr) 13.5rem;
   gap: 1rem;
   align-items: start;
   isolation: isolate;
@@ -1014,6 +1032,7 @@
   overflow: auto;
   z-index: 2;
   align-self: start;
+  min-width: 0;
 }
 
 .lughawi-rail--nav .lughawi-rail-btn {
@@ -1183,7 +1202,7 @@
 
 @media (max-width: 1100px) {
   .lughawi-shell {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .lughawi-rail {
     position: static;
@@ -1205,5 +1224,7 @@
 }
 
 @media (max-width: 900px) {
-  .lughawi-grid { grid-template-columns: 1fr; }
+  .lughawi-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
