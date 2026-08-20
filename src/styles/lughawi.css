@@ -92,7 +92,8 @@
 }
 
 .lughawi-workspace {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.85rem;
   padding: 1rem 1.05rem 1.15rem;
   border-radius: 22px;
@@ -101,6 +102,16 @@
   box-shadow:
     0 1px 0 color-mix(in srgb, white 55%, transparent) inset,
     0 18px 40px color-mix(in srgb, var(--brand-deep) 7%, transparent);
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  min-width: 0;
+}
+
+.lughawi-chrome {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
 }
 
 .lughawi-status-bar {
@@ -142,12 +153,11 @@
   flex-wrap: wrap;
   gap: 0.45rem;
   align-items: center;
-  position: sticky;
-  top: 0.45rem;
-  z-index: 4;
+  /* Never sticky — multiple sticky bars at the same top pile on top of each other. */
+  position: relative;
+  z-index: 1;
   padding: 0.5rem;
-  background: color-mix(in srgb, var(--surface) 90%, transparent);
-  backdrop-filter: blur(12px);
+  background: color-mix(in srgb, var(--surface) 96%, var(--brand-soft));
   border: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
   border-radius: 16px;
 }
@@ -221,7 +231,13 @@
   cursor: not-allowed;
 }
 
-.lughawi-toolbar-ghost { margin-inline-start: auto; }
+.lughawi-toolbar-meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  margin-inline-start: auto;
+}
 
 .lughawi-samples {
   display: flex;
@@ -298,11 +314,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
   align-items: stretch;
-}
-
-@media (max-width: 900px) {
-  .lughawi-grid { grid-template-columns: 1fr; }
-  .lughawi-toolbar { position: static; }
+  min-width: 0;
 }
 
 .lughawi-panel {
@@ -979,20 +991,29 @@
 /* —— Qalam-inspired shell (Arabya brand) —— */
 .lughawi-shell {
   display: grid;
-  grid-template-columns: 13.5rem minmax(0, 1fr) 15.5rem;
-  gap: 0.85rem;
+  grid-template-columns: 13rem minmax(0, 1fr) 14.5rem;
+  gap: 1rem;
   align-items: start;
+  isolation: isolate;
+  width: 100%;
+  min-width: 0;
 }
 
 .lughawi-rail {
   position: sticky;
-  top: 0.75rem;
-  display: grid;
+  top: 4.75rem;
+  display: flex;
+  flex-direction: column;
   gap: 0.45rem;
   padding: 0.75rem 0.65rem;
   border-radius: 16px;
-  background: color-mix(in srgb, var(--surface) 96%, var(--brand-soft));
+  background: var(--surface);
   border: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--brand-deep) 5%, transparent);
+  max-height: calc(100dvh - 5.5rem);
+  overflow: auto;
+  z-index: 2;
+  align-self: start;
 }
 
 .lughawi-rail--nav .lughawi-rail-btn {
@@ -1129,6 +1150,11 @@
 
 .lughawi-main-col {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  position: relative;
+  z-index: 1;
 }
 
 .lughawi-module-placeholder {
@@ -1161,13 +1187,23 @@
   }
   .lughawi-rail {
     position: static;
+    max-height: none;
+    overflow: visible;
   }
   .lughawi-rail--nav {
     display: flex;
+    flex-direction: row;
     flex-wrap: wrap;
     gap: 0.35rem;
   }
   .lughawi-rail--nav .lughawi-rail-btn {
     width: auto;
   }
+  .lughawi-rail--analysis {
+    order: 3;
+  }
+}
+
+@media (max-width: 900px) {
+  .lughawi-grid { grid-template-columns: 1fr; }
 }
