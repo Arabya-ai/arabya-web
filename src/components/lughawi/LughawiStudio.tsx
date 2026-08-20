@@ -622,390 +622,430 @@ export function LughawiStudio() {
             </div>
           ) : (
             <div className="lughawi-workspace">
-        <div className="lughawi-status-bar">
-          <p className="lughawi-mode-pill" role="status">
-            <span>
-              {t("charLimitLabel")} {text.length.toLocaleString("ar-EG")}
-            </span>
-            <span>
-              {t("maxLabel")} {8000}
-            </span>
-          </p>
-          <p className="lughawi-mode-pill" role="status">
-            <ShieldCheck className="lughawi-ico" aria-hidden />
-            <span>{t("offlineMode")}</span>
-            {engineVersion ? (
-              <span className="lughawi-engine-ver">
-                {t("engineVersion", { version: engineVersion })}
-              </span>
-            ) : null}
-          </p>
-          {poolCount > 0 ? (
-            <p className="lughawi-mode-pill lughawi-mode-pill--soft">
-              <Zap className="lughawi-ico" aria-hidden />
-              {t("autoReady")}
-            </p>
-          ) : null}
-        </div>
-
-        <div className="lughawi-subbar" role="group" aria-label={t("proofModeTitle")}>
-          <button
-            type="button"
-            className={proofMode === "full" ? "is-active" : undefined}
-            onClick={() => setProofMode("full")}
-          >
-            {t("proofModeFull")}
-          </button>
-          <button
-            type="button"
-            className={proofMode === "spelling" ? "is-active" : undefined}
-            onClick={() => setProofMode("spelling")}
-          >
-            {t("proofModeSpelling")}
-          </button>
-          <button
-            type="button"
-            className="lughawi-primary"
-            onClick={() => run("proofread")}
-            disabled={pending || !text.trim()}
-          >
-            {t("startCorrect")}
-          </button>
-        </div>
-
-        <div className="lughawi-toolbar" role="toolbar" aria-label={t("studioLabel")}>
-          {actions.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={[
-                item.primary ? "lughawi-primary" : "",
-                action === item.id ? "is-active" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              onClick={() => run(item.id)}
-              disabled={pending || !text.trim()}
-            >
-              {item.icon}
-              <span>{item.label}</span>
-            </button>
-          ))}
-          <button
-            type="button"
-            className="lughawi-toolbar-ghost"
-            onClick={checkVerses}
-            disabled={!text.trim()}
-            title={t("actionVerse")}
-          >
-            <BookOpen className="lughawi-ico" aria-hidden />
-            <span>{t("actionVerse")}</span>
-          </button>
-          <button
-            type="button"
-            className="lughawi-toolbar-ghost"
-            onClick={removeDiacritics}
-            disabled={!text.trim()}
-            title={t("actionStripTashkeel")}
-          >
-            <Eraser className="lughawi-ico" aria-hidden />
-            <span>{t("actionStripTashkeel")}</span>
-          </button>
-          <button
-            type="button"
-            className="lughawi-toolbar-ghost"
-            onClick={() => {
-              setShowSettings((v) => !v);
-              setModule("settings");
-            }}
-            aria-expanded={showSettings}
-          >
-            <Settings2 className="lughawi-ico" aria-hidden />
-            <span>{t("settings")}</span>
-          </button>
-        </div>
-
-        {action === "tashkeel" ? (
-          <div className="lughawi-subbar" role="group" aria-label={t("tashkeelModes")}>
-            {(["full", "partial", "endings", "mandatory"] as TashkeelLevel[]).map(
-              (level) => (
-                <button
-                  key={level}
-                  type="button"
-                  className={tashkeelLevel === level ? "is-active" : undefined}
-                  onClick={() => setTashkeelLevel(level)}
-                >
-                  {t(`tashkeel.${level}`)}
-                </button>
-              ),
-            )}
-          </div>
-        ) : null}
-
-        {action === "translate" ? (
-          <div className="lughawi-subbar">
-            <label>
-              {t("targetLang")}
-              <select
-                value={targetLang}
-                onChange={(e) => setTargetLang(e.target.value)}
-              >
-                <option value="en">English</option>
-                <option value="fr">Français</option>
-                <option value="de">Deutsch</option>
-                <option value="es">Español</option>
-                <option value="tr">Türkçe</option>
-              </select>
-            </label>
-          </div>
-        ) : null}
-
-        {showSettings ? <LughawiSettings /> : null}
-
-        {!text && !result ? (
-          <div className="lughawi-samples" aria-label={t("samplesLabel")}>
-            <span className="lughawi-samples-label">
-              <TextCursorInput className="lughawi-ico" aria-hidden />
-              {t("trySample")}
-            </span>
-            {SAMPLES.map((sample, i) => (
-              <button
-                key={i}
-                type="button"
-                className="lughawi-sample-chip"
-                onClick={() => {
-                  setText(sample);
-                  setResult(null);
-                }}
-              >
-                {t("sampleN", { n: i + 1 })}
-              </button>
-            ))}
-          </div>
-        ) : null}
-
-        {edits.length > 0 ? (
-          <div className="lughawi-legend" aria-label={t("legendTitle")}>
-            <span className="lughawi-legend-title">{t("legendTitle")}</span>
-            {(
-              [
-                "spelling",
-                "grammar",
-                "style",
-                "morphology",
-                "punctuation",
-              ] as const
-            ).map((key) =>
-              editStats[key] ? (
-                <span key={key} className={`lughawi-legend-item lughawi-legend-item--${key}`}>
-                  {t(`editType.${key}`)} · {editStats[key]}
-                </span>
-              ) : null,
-            )}
-          </div>
-        ) : null}
-
-        <div className="lughawi-grid">
-          <label className="lughawi-panel">
-            <span className="lughawi-panel-label">
-              <span className="lughawi-panel-title">
-                <TextCursorInput className="lughawi-ico" aria-hidden />
-                {t("inputLabel")}
-              </span>
-              <span className="lughawi-panel-tools">
-                <span className="lughawi-count">
-                  {text.length.toLocaleString("ar-EG")} {t("chars")}
-                </span>
-                {history.length > 0 ? (
-                  <button type="button" className="lughawi-copy" onClick={undo}>
-                    <RotateCcw className="lughawi-ico" aria-hidden />
-                    {t("undo")}
-                  </button>
-                ) : null}
-                <button
-                  type="button"
-                  className="lughawi-copy"
-                  onClick={clearAll}
-                  disabled={!text && !result}
-                >
-                  <Eraser className="lughawi-ico" aria-hidden />
-                  {t("clear")}
-                </button>
-              </span>
-            </span>
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={onTextKeyDown}
-              rows={12}
-              placeholder={t("placeholder")}
-              dir="rtl"
-              spellCheck={false}
-              aria-describedby={`${studioId}-hint`}
-            />
-            <span id={`${studioId}-hint`} className="lughawi-hint">
-              {t("shortcutHint")}
-            </span>
-          </label>
-
-          <div className="lughawi-panel lughawi-panel--out">
-            <div className="lughawi-panel-label">
-              <span className="lughawi-panel-title">
-                <SpellCheck2 className="lughawi-ico" aria-hidden />
-                {t("outputLabel")}
-              </span>
-              <button
-                type="button"
-                className="lughawi-copy"
-                onClick={copyResult}
-                disabled={!result && !text}
-              >
-                {copied ? (
-                  <Check className="lughawi-ico" aria-hidden />
-                ) : (
-                  <ClipboardCopy className="lughawi-ico" aria-hidden />
-                )}
-                {copied ? t("copied") : t("copy")}
-              </button>
-            </div>
-            {pending ? (
-              <div className="lughawi-skeleton" aria-busy="true" aria-live="polite">
-                <span />
-                <span />
-                <span />
-                <p className="lughawi-status">
-                  <Loader2 className="lughawi-ico lughawi-ico--spin" aria-hidden />
-                  {t("processing")}
-                </p>
-              </div>
-            ) : null}
-            {error ? <p className="lughawi-error" role="alert">{error}</p> : null}
-            {flash ? <p className="lughawi-flash" role="status">{flash}</p> : null}
-            {!pending && result ? (
-              <>
-                <div className="lughawi-result" dir="rtl">
-                  {highlighted}
+              <div className="lughawi-chrome">
+                <div className="lughawi-status-bar">
+                  <p className="lughawi-mode-pill" role="status">
+                    <span>
+                      {t("charLimitLabel")} {text.length.toLocaleString("ar-EG")}
+                    </span>
+                    <span>
+                      {t("maxLabel")} {8000}
+                    </span>
+                  </p>
+                  <p className="lughawi-mode-pill" role="status">
+                    <ShieldCheck className="lughawi-ico" aria-hidden />
+                    <span>{t("offlineMode")}</span>
+                    {engineVersion ? (
+                      <span className="lughawi-engine-ver">
+                        {t("engineVersion", { version: engineVersion })}
+                      </span>
+                    ) : null}
+                  </p>
+                  {poolCount > 0 ? (
+                    <p className="lughawi-mode-pill lughawi-mode-pill--soft">
+                      <Zap className="lughawi-ico" aria-hidden />
+                      {t("autoReady")}
+                    </p>
+                  ) : null}
                 </div>
-                {result.meta.stages && result.meta.stages.length > 0 ? (
-                  <div className="lughawi-trace">
+
+                <div
+                  className="lughawi-subbar"
+                  role="group"
+                  aria-label={t("proofModeTitle")}
+                >
+                  <button
+                    type="button"
+                    className={proofMode === "full" ? "is-active" : undefined}
+                    onClick={() => setProofMode("full")}
+                  >
+                    {t("proofModeFull")}
+                  </button>
+                  <button
+                    type="button"
+                    className={proofMode === "spelling" ? "is-active" : undefined}
+                    onClick={() => setProofMode("spelling")}
+                  >
+                    {t("proofModeSpelling")}
+                  </button>
+                  <button
+                    type="button"
+                    className="lughawi-primary"
+                    onClick={() => run("proofread")}
+                    disabled={pending || !text.trim()}
+                  >
+                    {t("startCorrect")}
+                  </button>
+                </div>
+
+                <div
+                  className="lughawi-toolbar"
+                  role="toolbar"
+                  aria-label={t("studioLabel")}
+                >
+                  {actions.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={[
+                        item.primary ? "lughawi-primary" : "",
+                        action === item.id ? "is-active" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      onClick={() => run(item.id)}
+                      disabled={pending || !text.trim()}
+                    >
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                  <div className="lughawi-toolbar-meta">
                     <button
                       type="button"
-                      className="lughawi-trace-toggle"
-                      onClick={() => setShowTrace((v) => !v)}
-                      aria-expanded={showTrace}
+                      onClick={checkVerses}
+                      disabled={!text.trim()}
+                      title={t("actionVerse")}
                     >
-                      {t("engineTrace", {
-                        count: edits.length,
-                        ms: result.meta.totalMs ?? 0,
-                      })}
+                      <BookOpen className="lughawi-ico" aria-hidden />
+                      <span>{t("actionVerse")}</span>
                     </button>
-                    {showTrace ? (
-                      <ul>
-                        {result.meta.stages.map((s) => {
-                          const label = stageLabelAr(s.id);
-                          return (
-                            <li key={`${s.id}-${s.ms}`}>
-                              <span>{label}</span>
-                              <span>
-                                {s.editCount} {t("traceEdits")} · {s.ms}{" "}
-                                {t("traceMs")}
-                              </span>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    ) : null}
+                    <button
+                      type="button"
+                      onClick={removeDiacritics}
+                      disabled={!text.trim()}
+                      title={t("actionStripTashkeel")}
+                    >
+                      <Eraser className="lughawi-ico" aria-hidden />
+                      <span>{t("actionStripTashkeel")}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowSettings((v) => !v);
+                        setModule("settings");
+                      }}
+                      aria-expanded={showSettings}
+                    >
+                      <Settings2 className="lughawi-ico" aria-hidden />
+                      <span>{t("settings")}</span>
+                    </button>
                   </div>
-                ) : null}
-                {result.meta.warning ? (
-                  <p className="lughawi-warn">{result.meta.warning}</p>
-                ) : null}
-                {result.protectedSpans.length > 0 ? (
-                  <ul className="lughawi-protected">
-                    {result.protectedSpans.map((s, i) => (
-                      <li key={`${s.start}-${i}`}>
-                        {t("protectedQuran")}
-                        {s.href ? (
-                          <a href={s.href}>{t("openAyah")}</a>
-                        ) : null}
+                </div>
+              </div>
+
+              {action === "tashkeel" ? (
+                <div
+                  className="lughawi-subbar"
+                  role="group"
+                  aria-label={t("tashkeelModes")}
+                >
+                  {(
+                    ["full", "partial", "endings", "mandatory"] as TashkeelLevel[]
+                  ).map((level) => (
+                    <button
+                      key={level}
+                      type="button"
+                      className={tashkeelLevel === level ? "is-active" : undefined}
+                      onClick={() => setTashkeelLevel(level)}
+                    >
+                      {t(`tashkeel.${level}`)}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
+              {action === "translate" ? (
+                <div className="lughawi-subbar">
+                  <label>
+                    {t("targetLang")}
+                    <select
+                      value={targetLang}
+                      onChange={(e) => setTargetLang(e.target.value)}
+                    >
+                      <option value="en">English</option>
+                      <option value="fr">Français</option>
+                      <option value="de">Deutsch</option>
+                      <option value="es">Español</option>
+                      <option value="tr">Türkçe</option>
+                    </select>
+                  </label>
+                </div>
+              ) : null}
+
+              {showSettings ? <LughawiSettings /> : null}
+
+              {!text && !result ? (
+                <div className="lughawi-samples" aria-label={t("samplesLabel")}>
+                  <span className="lughawi-samples-label">
+                    <TextCursorInput className="lughawi-ico" aria-hidden />
+                    {t("trySample")}
+                  </span>
+                  {SAMPLES.map((sample, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      className="lughawi-sample-chip"
+                      onClick={() => {
+                        setText(sample);
+                        setResult(null);
+                      }}
+                    >
+                      {t("sampleN", { n: i + 1 })}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
+              {edits.length > 0 ? (
+                <div className="lughawi-legend" aria-label={t("legendTitle")}>
+                  <span className="lughawi-legend-title">{t("legendTitle")}</span>
+                  {(
+                    [
+                      "spelling",
+                      "grammar",
+                      "style",
+                      "morphology",
+                      "punctuation",
+                    ] as const
+                  ).map((key) =>
+                    editStats[key] ? (
+                      <span
+                        key={key}
+                        className={`lughawi-legend-item lughawi-legend-item--${key}`}
+                      >
+                        {t(`editType.${key}`)} · {editStats[key]}
+                      </span>
+                    ) : null,
+                  )}
+                </div>
+              ) : null}
+
+              <div className="lughawi-grid">
+                <label className="lughawi-panel">
+                  <span className="lughawi-panel-label">
+                    <span className="lughawi-panel-title">
+                      <TextCursorInput className="lughawi-ico" aria-hidden />
+                      {t("inputLabel")}
+                    </span>
+                    <span className="lughawi-panel-tools">
+                      <span className="lughawi-count">
+                        {text.length.toLocaleString("ar-EG")} {t("chars")}
+                      </span>
+                      {history.length > 0 ? (
+                        <button type="button" className="lughawi-copy" onClick={undo}>
+                          <RotateCcw className="lughawi-ico" aria-hidden />
+                          {t("undo")}
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        className="lughawi-copy"
+                        onClick={clearAll}
+                        disabled={!text && !result}
+                      >
+                        <Eraser className="lughawi-ico" aria-hidden />
+                        {t("clear")}
+                      </button>
+                    </span>
+                  </span>
+                  <textarea
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    onKeyDown={onTextKeyDown}
+                    rows={12}
+                    placeholder={t("placeholder")}
+                    dir="rtl"
+                    spellCheck={false}
+                    aria-describedby={`${studioId}-hint`}
+                  />
+                  <span id={`${studioId}-hint`} className="lughawi-hint">
+                    {t("shortcutHint")}
+                  </span>
+                </label>
+
+                <div className="lughawi-panel lughawi-panel--out">
+                  <div className="lughawi-panel-label">
+                    <span className="lughawi-panel-title">
+                      <SpellCheck2 className="lughawi-ico" aria-hidden />
+                      {t("outputLabel")}
+                    </span>
+                    <button
+                      type="button"
+                      className="lughawi-copy"
+                      onClick={copyResult}
+                      disabled={!result && !text}
+                    >
+                      {copied ? (
+                        <Check className="lughawi-ico" aria-hidden />
+                      ) : (
+                        <ClipboardCopy className="lughawi-ico" aria-hidden />
+                      )}
+                      {copied ? t("copied") : t("copy")}
+                    </button>
+                  </div>
+                  {pending ? (
+                    <div
+                      className="lughawi-skeleton"
+                      aria-busy="true"
+                      aria-live="polite"
+                    >
+                      <span />
+                      <span />
+                      <span />
+                      <p className="lughawi-status">
+                        <Loader2
+                          className="lughawi-ico lughawi-ico--spin"
+                          aria-hidden
+                        />
+                        {t("processing")}
+                      </p>
+                    </div>
+                  ) : null}
+                  {error ? (
+                    <p className="lughawi-error" role="alert">
+                      {error}
+                    </p>
+                  ) : null}
+                  {flash ? (
+                    <p className="lughawi-flash" role="status">
+                      {flash}
+                    </p>
+                  ) : null}
+                  {!pending && result ? (
+                    <>
+                      <div className="lughawi-result" dir="rtl">
+                        {highlighted}
+                      </div>
+                      {result.meta.stages && result.meta.stages.length > 0 ? (
+                        <div className="lughawi-trace">
+                          <button
+                            type="button"
+                            className="lughawi-trace-toggle"
+                            onClick={() => setShowTrace((v) => !v)}
+                            aria-expanded={showTrace}
+                          >
+                            {t("engineTrace", {
+                              count: edits.length,
+                              ms: result.meta.totalMs ?? 0,
+                            })}
+                          </button>
+                          {showTrace ? (
+                            <ul>
+                              {result.meta.stages.map((s) => {
+                                const label = stageLabelAr(s.id);
+                                return (
+                                  <li key={`${s.id}-${s.ms}`}>
+                                    <span>{label}</span>
+                                    <span>
+                                      {s.editCount} {t("traceEdits")} · {s.ms}{" "}
+                                      {t("traceMs")}
+                                    </span>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          ) : null}
+                        </div>
+                      ) : null}
+                      {result.meta.warning ? (
+                        <p className="lughawi-warn">{result.meta.warning}</p>
+                      ) : null}
+                      {result.protectedSpans.length > 0 ? (
+                        <ul className="lughawi-protected">
+                          {result.protectedSpans.map((s, i) => (
+                            <li key={`${s.start}-${i}`}>
+                              {t("protectedQuran")}
+                              {s.href ? (
+                                <a href={s.href}>{t("openAyah")}</a>
+                              ) : null}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </>
+                  ) : null}
+                  {!pending && !result ? (
+                    <div className="lughawi-empty">
+                      <Sparkles className="lughawi-empty-ico" aria-hidden />
+                      <p className="lughawi-muted">{t("outputEmpty")}</p>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+
+              {edits.length > 0 ? (
+                <div className="lughawi-edits">
+                  <div className="lughawi-edits-head">
+                    <h2>
+                      {t("editsTitle")}
+                      <span className="lughawi-edits-count">{edits.length}</span>
+                    </h2>
+                    <button
+                      type="button"
+                      className="lughawi-primary"
+                      onClick={acceptAll}
+                    >
+                      <CheckCheck className="lughawi-ico" aria-hidden />
+                      {t("acceptAll")}
+                    </button>
+                  </div>
+                  <ul>
+                    {edits.map((edit) => (
+                      <li
+                        key={edit.id}
+                        id={`${studioId}-edit-${edit.id}`}
+                        className={hoverId === edit.id ? "is-active" : undefined}
+                        onMouseEnter={() => setHoverId(edit.id)}
+                        onMouseLeave={() => setHoverId(null)}
+                      >
+                        <div className="lughawi-edit-body">
+                          <div className="lughawi-edit-meta">
+                            <span
+                              className={`lughawi-type lughawi-type--${TYPE_CLASS[edit.type]}`}
+                            >
+                              {typeLabel(edit.type)}
+                            </span>
+                            <span className="lughawi-conf">
+                              {Math.round(edit.confidence * 100)}%
+                            </span>
+                          </div>
+                          <div className="lughawi-edit-pair">
+                            <code>{edit.original}</code>
+                            <ArrowLeftRight
+                              className="lughawi-arrow-ico"
+                              aria-hidden
+                            />
+                            <strong>{edit.suggestion}</strong>
+                          </div>
+                          <p>{edit.explanation}</p>
+                        </div>
+                        <div className="lughawi-edit-actions">
+                          <button
+                            type="button"
+                            data-edit-id={edit.id}
+                            data-decision="accepted"
+                            onClick={() => decide(edit.id, "accepted")}
+                          >
+                            <Check className="lughawi-ico" aria-hidden />
+                            {t("accept")}
+                          </button>
+                          <button
+                            type="button"
+                            className="lughawi-reject"
+                            data-edit-id={edit.id}
+                            data-decision="rejected"
+                            onClick={() => decide(edit.id, "rejected")}
+                          >
+                            <X className="lughawi-ico" aria-hidden />
+                            {t("reject")}
+                          </button>
+                        </div>
                       </li>
                     ))}
                   </ul>
-                ) : null}
-              </>
-            ) : null}
-            {!pending && !result ? (
-              <div className="lughawi-empty">
-                <Sparkles className="lughawi-empty-ico" aria-hidden />
-                <p className="lughawi-muted">{t("outputEmpty")}</p>
-              </div>
-            ) : null}
-          </div>
-        </div>
-
-      {edits.length > 0 ? (
-        <div className="lughawi-edits">
-          <div className="lughawi-edits-head">
-            <h2>
-              {t("editsTitle")}
-              <span className="lughawi-edits-count">{edits.length}</span>
-            </h2>
-            <button type="button" className="lughawi-primary" onClick={acceptAll}>
-              <CheckCheck className="lughawi-ico" aria-hidden />
-              {t("acceptAll")}
-            </button>
-          </div>
-          <ul>
-            {edits.map((edit) => (
-              <li
-                key={edit.id}
-                id={`${studioId}-edit-${edit.id}`}
-                className={hoverId === edit.id ? "is-active" : undefined}
-                onMouseEnter={() => setHoverId(edit.id)}
-                onMouseLeave={() => setHoverId(null)}
-              >
-                <div className="lughawi-edit-body">
-                  <div className="lughawi-edit-meta">
-                    <span className={`lughawi-type lughawi-type--${TYPE_CLASS[edit.type]}`}>
-                      {typeLabel(edit.type)}
-                    </span>
-                    <span className="lughawi-conf">
-                      {Math.round(edit.confidence * 100)}%
-                    </span>
-                  </div>
-                  <div className="lughawi-edit-pair">
-                    <code>{edit.original}</code>
-                    <ArrowLeftRight className="lughawi-arrow-ico" aria-hidden />
-                    <strong>{edit.suggestion}</strong>
-                  </div>
-                  <p>{edit.explanation}</p>
                 </div>
-                <div className="lughawi-edit-actions">
-                  <button
-                    type="button"
-                    data-edit-id={edit.id}
-                    data-decision="accepted"
-                    onClick={() => decide(edit.id, "accepted")}
-                  >
-                    <Check className="lughawi-ico" aria-hidden />
-                    {t("accept")}
-                  </button>
-                  <button
-                    type="button"
-                    className="lughawi-reject"
-                    data-edit-id={edit.id}
-                    data-decision="rejected"
-                    onClick={() => decide(edit.id, "rejected")}
-                  >
-                    <X className="lughawi-ico" aria-hidden />
-                    {t("reject")}
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
+              ) : null}
             </div>
           )}
         </div>
