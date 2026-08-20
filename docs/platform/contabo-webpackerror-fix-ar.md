@@ -8,14 +8,15 @@ TypeError: __webpack.WebpackError is not a constructor
 ```
 
 ## السبب
-يحدث مع Next 15.5.x عند:
-- تشغيل **Node 24** بدل **Node 22**، أو
-- `node_modules` ناقص/تالف بعد تثبيت متقطع
+مع Next 15.5.x يظهر الخطأ غالبًا عندما:
+1. يفشل **تصغير** جزء من البناء (ذاكرة منخفضة / Node غير 22)، ثم
+2. يحاول Next لف الخطأ بـ `WebpackError` لكن المُنشئ غير مربوط على واجهة webpack المصدَّرة — فيُخفى السبب الحقيقي خلف `is not a constructor`.
 
 ## الإصلاح في الكود (بعد دمج هذا الطلب)
-- `experimental.serverMinification: false` في `next.config.ts`
-- `engines.node = 22.x`
-- فحص Node + سلامة webpack داخل `scripts/contabo-deploy.sh`
+- رفع `WebpackError` في `next.config.ts` حتى يظهر الخطأ الحقيقي إن وُجد
+- `experimental.serverMinification: false`
+- تثبيت `engines.node = 22.x` + فحص في `contabo-deploy.sh`
+- `NODE_OPTIONS=--max-old-space-size=4096` أثناء البناء على السيرفر
 
 ## مطلوب منك الآن على السيرفر (PuTTY)
 
