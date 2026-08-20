@@ -48,6 +48,9 @@ export default async function AccountEditHubPage({ params }: Props) {
           {t("intro")}
         </p>
         <div className="dash-actions">
+          <Link href="/account/edit/library" className="account-panel-link">
+            {t("libraryImport")}
+          </Link>
           <Link href="/account/edit/queue" className="account-panel-link">
             {t("queue")}
           </Link>
