@@ -4,22 +4,23 @@ import { normalizeArabicToken } from "@/lib/tahfeez/normalize";
 import { getQuranWordsLexicon } from "@/lib/word-senses";
 import { HADITH_PARTICLES } from "@/lib/hadith-particles";
 import { HADITH_CORE_GLOSS } from "@/lib/hadith-core-gloss";
+import { HADITH_NAMES } from "@/lib/hadith-names";
 import { rhetoricForToken } from "@/lib/hadith-rhetoric";
+import { candidateKeys } from "@/lib/hadith-token-keys";
 
 export type HadithWordEnrichment = {
-  matchStatus: "exact" | "particle" | "gloss" | "none";
+  matchStatus: "exact" | "particle" | "gloss" | "name" | "none";
   matchKind:
     | "quran-surface-analogy"
     | "closed-class-particle"
-    | "hadith-core-gloss";
+    | "hadith-core-gloss"
+    | "hadith-name-label";
   root?: string | null;
   lemma?: string | null;
   pos?: string[];
   features?: string[];
   sense?: string | null;
-  /** Short Arabic gloss for the translation tab */
   translationAr?: string | null;
-  /** Short English gloss for the translation tab */
   translationEn?: string | null;
   rhetoricAr?: string | null;
   rhetoricEn?: string | null;
@@ -69,7 +70,7 @@ async function loadSurfaceIndex(): Promise<SurfaceIndex | null> {
 }
 
 const DISCLAIMER =
-  "الصرف والدلالة والترجمة المختصرة هنا بالقياس على أشكال قرآنية أو معجم حديث أساسي أو أدوات مغلقة — وليست إعرابًا خاصًا بسياق الحديث ولا ترجمة معتمدة لكل رواية.";
+  "الصرف والدلالة والترجمة المختصرة هنا بالقياس على أشكال قرآنية أو معجم حديث أساسي أو أدوات/أسماء إسناد شائعة — وليست إعرابًا خاصًا بسياق الحديث ولا ترجمة معتمدة لكل رواية.";
 
 function attachRhetoric(
   surface: string,
@@ -85,36 +86,7 @@ function attachRhetoric(
 }
 
 /** Candidate keys: strip ال, clitics, and light pronominal suffixes. */
-function candidateKeys(norm: string): string[] {
-  const keys: string[] = [];
-  const push = (k: string) => {
-    if (k && k.length >= 2 && !keys.includes(k)) keys.push(k);
-  };
-  push(norm);
-
-  const stripPrefix = (s: string) => {
-    push(s);
-    if (s.startsWith("ال") && s.length > 3) push(s.slice(2));
-    if (/^[وفبلسك]/.test(s) && s.length > 2) {
-      const rest = s.slice(1);
-      push(rest);
-      if (rest.startsWith("ال") && rest.length > 3) push(rest.slice(2));
-    }
-  };
-  stripPrefix(norm);
-
-  const suffixRe = /(هما|هم|هن|كم|كن|نا|ني|ها|ه|ك|ي)$/;
-  const m = norm.match(suffixRe);
-  if (m && norm.length - m[1].length >= 2) {
-    const base = norm.slice(0, -m[1].length);
-    stripPrefix(base);
-    if (base.endsWith("ت") && base.length > 3) {
-      push(base.slice(0, -1) + "ه");
-    }
-  }
-
-  return keys;
-}
+// candidateKeys imported from hadith-token-keys
 
 function lookupSurface(
   index: SurfaceIndex | null,
@@ -136,6 +108,22 @@ function lookupCoreGloss(norm: string) {
   return null;
 }
 
+function lookupParticle(norm: string) {
+  for (const key of candidateKeys(norm)) {
+    const p = HADITH_PARTICLES[key];
+    if (p) return { key, p };
+  }
+  return null;
+}
+
+function lookupName(norm: string) {
+  for (const key of candidateKeys(norm)) {
+    const n = HADITH_NAMES[key];
+    if (n) return { key, n };
+  }
+  return null;
+}
+
 export async function enrichHadithToken(
   surface: string,
 ): Promise<HadithWordEnrichment> {
@@ -153,19 +141,37 @@ export async function enrichHadithToken(
     };
   }
 
-  const particle = HADITH_PARTICLES[norm];
-  if (particle) {
+  const particleHit = lookupParticle(norm);
+  if (particleHit) {
+    const { p } = particleHit;
     return attachRhetoric(surface, {
       matchStatus: "particle",
       matchKind: "closed-class-particle",
-      particleLabelAr: particle.labelAr,
-      particleLabelEn: particle.labelEn,
-      lemma: norm,
-      sense: particle.labelAr,
-      translationAr: particle.labelAr,
-      translationEn: particle.labelEn,
+      particleLabelAr: p.labelAr,
+      particleLabelEn: p.labelEn,
+      lemma: particleHit.key,
+      sense: p.labelAr,
+      translationAr: p.labelAr,
+      translationEn: p.labelEn,
       disclaimer: DISCLAIMER,
       source: "arabya-closed-class-particles",
+    });
+  }
+
+  const nameHit = lookupName(norm);
+  if (nameHit) {
+    const { n } = nameHit;
+    return attachRhetoric(surface, {
+      matchStatus: "name",
+      matchKind: "hadith-name-label",
+      lemma: nameHit.key,
+      sense: n.labelAr,
+      translationAr: n.labelAr,
+      translationEn: n.labelEn,
+      particleLabelAr: n.labelAr,
+      particleLabelEn: n.labelEn,
+      disclaimer: DISCLAIMER,
+      source: "arabya-hadith-name-labels",
     });
   }
 

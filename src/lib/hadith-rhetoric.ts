@@ -3,6 +3,7 @@
  * not full classical balāgha for every token.
  */
 import { normalizeArabicToken } from "@/lib/tahfeez/normalize";
+import { candidateKeys } from "@/lib/hadith-token-keys";
 
 export type RhetoricNote = {
   ar: string;
@@ -41,10 +42,15 @@ const BY_NORM: Record<string, RhetoricNote> = {
     ar: "فعل القول يفتح حكاية المتن أو حلقة السند.",
     en: "Speech verb introducing narration or chain link.",
   },
+  فقال: {
+    kind: "formula",
+    ar: "استمرار الحوار بصيغة «فقال» في سرد المتن.",
+    en: "Narrative continuity with fa- + qāla.",
+  },
   الا: {
     kind: "emphasis",
-    ar: "«ألا» الاستفتاحية للتنبيه وتوكيد ما بعدها.",
-    en: "Attention particle emphasizing what follows.",
+    ar: "«ألا» الاستفتاحية للتنبيه وتوكيد ما بعدها (أو استثناء بحسب السياق).",
+    en: "Attention / exceptive particle by context.",
   },
   كالراعي: {
     kind: "simile",
@@ -76,17 +82,27 @@ const BY_NORM: Record<string, RhetoricNote> = {
     ar: "محور جوامع الكلم: النية تُميّز العمل.",
     en: "Intention distinguishes the deed.",
   },
+  صلي: {
+    kind: "formula",
+    ar: "صيغة تعظيم نبوي ضمن سلسلة الصلاة والسلام.",
+    en: "Prophetic honorific within the ṣalāh-and-salām formula.",
+  },
+  وسلم: {
+    kind: "formula",
+    ar: "تتمة صيغة الصلاة والسلام على النبي ﷺ.",
+    en: "Completion of the ṣalāh-and-salām formula.",
+  },
 };
 
-/** Resolve rhetoric for a surface token (normalized). */
+/** Resolve rhetoric for a surface token (normalized + clitics). */
 export function rhetoricForToken(surface: string): RhetoricNote | null {
   const norm = normalizeArabicToken(
     String(surface || "").replace(/[\u060C\u061B\u061F\u06D4]/g, ""),
   );
   if (!norm) return null;
-  if (BY_NORM[norm]) return BY_NORM[norm];
-  if (norm.startsWith("ك") && norm.length > 2 && BY_NORM[norm.slice(1)]) {
-    return BY_NORM[norm.slice(1)];
+  for (const key of candidateKeys(norm)) {
+    const hit = BY_NORM[key];
+    if (hit) return hit;
   }
   return null;
 }
