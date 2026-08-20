@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
 import { LibraryHubClient } from "@/components/library/LibraryHubClient";
 import { libraryCategoryLabel } from "@/lib/library/categories";
+import { listAllLibraryCategories } from "@/lib/library/custom-categories";
 import { getLibraryCatalog } from "@/lib/library";
 
 type Props = {
@@ -25,9 +26,10 @@ export default async function LibraryIndexPage({ params, searchParams }: Props) 
   const { category } = await searchParams;
   const t = await getTranslations({ locale, namespace: "Library" });
   const works = await getLibraryCatalog();
+  const categories = await listAllLibraryCategories();
   const activeCategory = category?.trim() || undefined;
   const categoryLabel = activeCategory
-    ? libraryCategoryLabel(activeCategory, locale)
+    ? libraryCategoryLabel(activeCategory, locale, categories)
     : null;
 
   return (
@@ -67,6 +69,7 @@ export default async function LibraryIndexPage({ params, searchParams }: Props) 
           key={activeCategory ?? "all"}
           locale={locale}
           works={works}
+          extraCategories={categories}
           initialCategory={activeCategory}
           labels={{
             filterPlaceholder: t("filterPlaceholder"),

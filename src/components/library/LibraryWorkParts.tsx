@@ -4,6 +4,7 @@ import {
   categoryCoverTone,
   libraryCategoryLabel,
   normalizeLibraryCategory,
+  type LibraryCategoryMeta,
 } from "@/lib/library/categories";
 import type { LibraryWorkMeta } from "@/lib/library/types";
 import { LibraryBookCard } from "@/components/library/LibraryBookCard";
@@ -11,6 +12,7 @@ import { LibraryBookCard } from "@/components/library/LibraryBookCard";
 type Props = {
   locale: string;
   works: LibraryWorkMeta[];
+  extraCategories?: LibraryCategoryMeta[];
   activeCategory?: string;
   labels: {
     categoriesTitle: string;
@@ -25,6 +27,7 @@ type Props = {
 export function LibrarySidebar({
   locale,
   works,
+  extraCategories = LIBRARY_CATEGORIES,
   activeCategory,
   labels,
 }: Props) {
@@ -49,7 +52,7 @@ export function LibrarySidebar({
           <span>{locale === "en" ? "All books" : "كل الكتب"}</span>
           <span className="library-sidebar-count">{works.length}</span>
         </Link>
-        {LIBRARY_CATEGORIES.filter((c) => (counts.get(c.id) ?? 0) > 0).map(
+        {extraCategories.filter((c) => (counts.get(c.id) ?? 0) > 0).map(
           (c) => (
             <Link
               key={c.id}
@@ -108,10 +111,12 @@ export function LibraryRelatedBooks({
 export function LibraryMetaTable({
   locale,
   work,
+  extraCategories,
   labels,
 }: {
   locale: string;
   work: LibraryWorkMeta;
+  extraCategories?: LibraryCategoryMeta[];
   labels: Record<string, string>;
 }) {
   const title = locale === "en" && work.titleEn ? work.titleEn : work.title;
@@ -119,7 +124,7 @@ export function LibraryMetaTable({
     [labels.bookName, title],
     [labels.author, work.author || "—"],
     [labels.pages, work.pageCount ? String(work.pageCount) : "—"],
-    [labels.category, libraryCategoryLabel(work.category, locale)],
+    [labels.category, libraryCategoryLabel(work.category, locale, extraCategories)],
     [labels.publisher, work.publisher || "عربية"],
     [labels.edition, work.edition || "—"],
     [labels.format, "PDF"],

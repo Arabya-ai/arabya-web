@@ -12,6 +12,7 @@ import {
   LibrarySidebar,
 } from "@/components/library/LibraryWorkParts";
 import { libraryCategoryLabel } from "@/lib/library/categories";
+import { listAllLibraryCategories } from "@/lib/library/custom-categories";
 import { getLibraryCatalog, getLibraryWork } from "@/lib/library";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
@@ -41,12 +42,13 @@ export default async function LibraryWorkPage({ params }: Props) {
   if (!work) notFound();
 
   const allWorks = await getLibraryCatalog();
+  const categories = await listAllLibraryCategories();
   const title = locale === "en" && work.titleEn ? work.titleEn : work.title;
   const desc =
     locale === "en"
       ? work.descriptionEn || work.description
       : work.description;
-  const categoryLabel = libraryCategoryLabel(work.category, locale);
+  const categoryLabel = libraryCategoryLabel(work.category, locale, categories);
   const pageUrl = `/library/${slug}`;
 
   const metaLabels = {
@@ -66,6 +68,7 @@ export default async function LibraryWorkPage({ params }: Props) {
         <LibrarySidebar
           locale={locale}
           works={allWorks}
+          extraCategories={categories}
           activeCategory={work.category}
           labels={{
             categoriesTitle: t("categoriesTitle"),
@@ -111,6 +114,7 @@ export default async function LibraryWorkPage({ params }: Props) {
               <LibraryMetaTable
                 locale={locale}
                 work={work}
+                extraCategories={categories}
                 labels={metaLabels}
               />
               <LibraryWorkActions

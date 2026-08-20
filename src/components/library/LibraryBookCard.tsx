@@ -8,6 +8,7 @@ import {
 import {
   categoryCoverTone,
   libraryCategoryLabel,
+  type LibraryCategoryMeta,
 } from "@/lib/library/categories";
 import type { LibraryWorkMeta } from "@/lib/library/types";
 
@@ -17,6 +18,7 @@ type Props = {
   viewBookLabel: string;
   digitalBookLabel: string;
   pageCountLabel?: string;
+  extraCategories?: LibraryCategoryMeta[];
 };
 
 export function LibraryBookCard({
@@ -25,9 +27,10 @@ export function LibraryBookCard({
   viewBookLabel,
   digitalBookLabel,
   pageCountLabel,
+  extraCategories,
 }: Props) {
   const title = locale === "en" && work.titleEn ? work.titleEn : work.title;
-  const category = libraryCategoryLabel(work.category, locale);
+  const category = libraryCategoryLabel(work.category, locale, extraCategories);
   const publisher = work.publisher || "عربية";
 
   return (

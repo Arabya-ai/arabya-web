@@ -25,6 +25,14 @@ describe("unifiedDashNav", () => {
 
     expect(adminHrefs).toContain("/admin/users");
     expect(adminHrefs).not.toContain("/admin/tahfeez");
+    expect(adminHrefs).not.toContain("/account/edit/library");
     expect(nav.filter((item) => item.href === "/account")).toHaveLength(1);
+  });
+
+  it("keeps library upload under site editing only", () => {
+    const nav = unifiedDashNav("admin");
+    const libraryItems = nav.filter((item) => item.href === "/account/edit/library");
+    expect(libraryItems).toHaveLength(1);
+    expect(libraryItems[0]?.group).toBe("groupEdit");
   });
 });

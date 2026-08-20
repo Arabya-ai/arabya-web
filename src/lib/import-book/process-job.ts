@@ -107,7 +107,9 @@ async function runReadingImport(input: {
 
   if (!input.buffer) throw new Error("reading_pdf_only");
   const pageCount =
-    input.meta.pageCount ?? (await countPdfPages(input.buffer));
+    input.meta.pageCount && input.meta.pageCount > 0
+      ? input.meta.pageCount
+      : await countPdfPages(input.buffer);
   await importReadingBookToDisk({
     ...shared,
     pdfBuffer: input.buffer,

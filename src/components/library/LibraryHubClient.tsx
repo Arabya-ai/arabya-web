@@ -7,6 +7,7 @@ import {
   LIBRARY_CATEGORIES,
   libraryCategoryLabel,
   normalizeLibraryCategory,
+  type LibraryCategoryMeta,
 } from "@/lib/library/categories";
 import type { LibraryWorkMeta } from "@/lib/library/types";
 
@@ -16,6 +17,7 @@ type SortMode = "latest" | "title";
 type Props = {
   locale: string;
   works: LibraryWorkMeta[];
+  extraCategories?: LibraryCategoryMeta[];
   labels: {
     filterPlaceholder: string;
     sortLatest: string;
@@ -38,6 +40,7 @@ const PAGE_SIZE = 12;
 export function LibraryHubClient({
   locale,
   works,
+  extraCategories = LIBRARY_CATEGORIES,
   labels,
   initialCategory,
 }: Props) {
@@ -155,7 +158,7 @@ export function LibraryHubClient({
           {locale === "en" ? "All" : "الكل"}
           <span>{works.length}</span>
         </button>
-        {LIBRARY_CATEGORIES.filter((c) => (categoryCounts.get(c.id) ?? 0) > 0).map(
+        {extraCategories.filter((c) => (categoryCounts.get(c.id) ?? 0) > 0).map(
           (c) => (
             <button
               key={c.id}
@@ -184,6 +187,7 @@ export function LibraryHubClient({
               key={work.id}
               work={work}
               locale={locale}
+              extraCategories={extraCategories}
               viewBookLabel={labels.viewBook}
               digitalBookLabel={labels.digitalBook}
               pageCountLabel={
@@ -218,6 +222,7 @@ export function LibraryHubClient({
 export function libraryCategoryLabelForBreadcrumb(
   id: string | undefined,
   locale: string,
+  extras: LibraryCategoryMeta[] = [],
 ): string {
-  return libraryCategoryLabel(id, locale);
+  return libraryCategoryLabel(id, locale, extras);
 }

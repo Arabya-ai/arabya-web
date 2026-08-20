@@ -4,13 +4,24 @@
   --dash-ease: cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
   display: grid;
-  grid-template-columns: minmax(14rem, 16.5rem) minmax(0, 1fr);
-  gap: 1.35rem;
+  grid-template-columns: minmax(15rem, 17.25rem) minmax(0, 1fr);
+  gap: 1.5rem;
   align-items: start;
-  padding-block: 1.35rem 2.25rem;
+  padding-block: 1.5rem 2.6rem;
   font-family: var(--font-dash);
   isolation: isolate;
-  /* لا تستخدم overflow:hidden هنا — يكسر sticky للسايدبار */
+}
+
+.dash-shell::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cpath fill='%230f766e' d='M36 4l4 12h12l-10 7 4 12-10-7-10 7 4-12-10-7h12z'/%3E%3C/svg%3E");
+  background-size: 72px 72px;
+  mask-image: linear-gradient(180deg, #000 0%, transparent 78%);
 }
 
 .dash-shell :lang(en),
@@ -60,21 +71,35 @@
 .dash-sidebar {
   display: grid;
   gap: 1rem;
-  padding: 1.15rem;
-  border-radius: 22px;
-  border: 1px solid color-mix(in srgb, var(--brand) 16%, var(--line));
+  padding: 1.2rem 1.1rem 1.3rem;
+  border-radius: 26px;
+  border: 1px solid color-mix(in srgb, var(--brand) 18%, var(--line));
   background:
-    linear-gradient(160deg, color-mix(in srgb, var(--surface) 88%, var(--brand-soft)) 0%, var(--surface) 55%),
+    linear-gradient(180deg, color-mix(in srgb, var(--brand-deep) 8%, var(--surface)) 0%, var(--surface) 38%),
     var(--surface);
   box-shadow:
-    0 1px 0 color-mix(in srgb, #fff 55%, transparent) inset,
-    var(--shadow);
+    0 1px 0 color-mix(in srgb, #fff 70%, transparent) inset,
+    0 18px 40px color-mix(in srgb, var(--brand-deep) 8%, transparent);
   transform-style: preserve-3d;
   animation: dash-rise 0.55s var(--dash-ease) both;
-  /* بدون تمرير داخلي — القائمة تتحرك مع تمرير الصفحة */
-  position: static;
+  position: relative;
   max-height: none;
   overflow: visible;
+}
+
+.dash-sidebar::before {
+  content: "";
+  position: absolute;
+  inset-inline: 1.1rem;
+  top: 5.6rem;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--surah-gold, #c4a574) 55%, var(--brand)) 30%,
+    color-mix(in srgb, var(--brand) 35%, var(--line)) 70%,
+    transparent
+  );
 }
 
 .dash-sidebar-top {
@@ -521,19 +546,31 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.2rem 1.3rem;
-  border-radius: 22px;
-  border: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
+  padding: 1.35rem 1.45rem 1.45rem;
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--brand) 14%, var(--line));
   background:
+    radial-gradient(420px 160px at 0% 0%, color-mix(in srgb, var(--surah-gold, #c4a574) 16%, transparent), transparent 60%),
     radial-gradient(520px 180px at 100% 0%, var(--glow), transparent 65%),
     linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--brand-soft) 70%, var(--surface)) 0%,
-      var(--surface) 58%
+      145deg,
+      color-mix(in srgb, var(--brand-soft) 78%, var(--surface)) 0%,
+      var(--surface) 62%
     );
   box-shadow:
     0 1px 0 color-mix(in srgb, #fff 50%, transparent) inset,
     var(--shadow);
+}
+
+.dash-header h1 {
+  margin: 0;
+  font-family: var(--font-title), var(--font-dash);
+  font-size: clamp(1.5rem, 1.15rem + 1.2vw, 2.15rem);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.28;
+  text-wrap: balance;
+  color: var(--ink);
 }
 
 .dash-header-kicker {
@@ -542,15 +579,6 @@
   font-weight: 800;
   letter-spacing: 0.03em;
   color: var(--brand-deep);
-}
-
-.dash-header h1 {
-  margin: 0;
-  font-size: clamp(1.45rem, 1.15rem + 1.1vw, 2.05rem);
-  font-weight: 800;
-  letter-spacing: -0.015em;
-  line-height: 1.22;
-  text-wrap: balance;
 }
 
 .dash-header-sub {
@@ -1576,4 +1604,135 @@ html[data-theme="dark"] .dash-header-badge {
   gap: 0.5rem;
   align-items: center;
 }
+
+.library-editor-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surah-gold, #c4a574) 14%, var(--brand-soft));
+  color: var(--brand-deep);
+  font-weight: 700;
+}
+
+.library-editor-banner button {
+  font: inherit;
+  font-weight: 700;
+  border: 0;
+  background: transparent;
+  color: var(--brand-deep);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.library-manage-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.library-manage-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
+  background: color-mix(in srgb, var(--brand-soft) 45%, var(--surface));
+}
+
+.library-manage-item p {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.library-manage-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.library-manage-actions a,
+.library-manage-actions button {
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--line));
+  background: var(--surface);
+  color: var(--brand-deep);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.library-manage-actions button:hover,
+.library-manage-actions a:hover {
+  background: var(--brand-soft);
+}
+
+.library-manage-danger {
+  border-color: color-mix(in srgb, #b91c1c 35%, var(--line)) !important;
+  color: #9f1239 !important;
+}
+
+.library-category-field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.library-category-add {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.library-category-add input {
+  flex: 1;
+}
+
+.library-category-add button {
+  white-space: nowrap;
+}
+
+.library-field-hint {
+  font-weight: 500;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.owner-upload-drop {
+  display: block;
+  padding: 1.35rem 1rem;
+  border: 1.5px dashed color-mix(in srgb, var(--brand) 40%, var(--line));
+  border-radius: 16px;
+  text-align: center;
+  cursor: pointer;
+  background: color-mix(in srgb, var(--brand-soft) 50%, var(--surface));
+}
+
+.owner-upload-drop:hover {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.dash-nav-group-label {
+  position: relative;
+}
+
+.dash-nav-group + .dash-nav-group {
+  margin-top: 0.55rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid color-mix(in srgb, var(--brand) 10%, var(--line));
+}
+
 

@@ -75,7 +75,7 @@ function parseReadingMeta(form: FormData | Record<string, unknown>): ReadingBook
     publisher: get("publisher"),
     publishedAt: get("publishedAt"),
     license: get("license"),
-    pageCount: Number.isFinite(pageCount) ? pageCount : undefined,
+    pageCount: Number.isFinite(pageCount) && (pageCount as number) > 0 ? pageCount : undefined,
   };
 }
 

@@ -1,15 +1,5 @@
-export type LibraryCategoryId =
-  | "nahw"
-  | "sarf"
-  | "balagha"
-  | "lugha"
-  | "usul"
-  | "tafsir"
-  | "education"
-  | "other";
-
 export type LibraryCategoryMeta = {
-  id: LibraryCategoryId;
+  id: string;
   labelAr: string;
   labelEn: string;
 };
@@ -28,15 +18,16 @@ export const LIBRARY_CATEGORIES: LibraryCategoryMeta[] = [
 export function libraryCategoryLabel(
   id: string | undefined,
   locale: string,
+  extras: LibraryCategoryMeta[] = [],
 ): string {
-  const cat = LIBRARY_CATEGORIES.find((c) => c.id === id);
-  if (!cat) return locale === "en" ? "General" : "عام";
+  const cat = [...LIBRARY_CATEGORIES, ...extras].find((c) => c.id === id);
+  if (!cat) return id || (locale === "en" ? "General" : "عام");
   return locale === "en" ? cat.labelEn : cat.labelAr;
 }
 
-export function normalizeLibraryCategory(id?: string): LibraryCategoryId {
-  const hit = LIBRARY_CATEGORIES.find((c) => c.id === id);
-  return hit?.id ?? "education";
+export function normalizeLibraryCategory(id?: string): string {
+  const trimmed = id?.trim();
+  return trimmed || "education";
 }
 
 export function categoryCoverTone(id: string | undefined): string {
