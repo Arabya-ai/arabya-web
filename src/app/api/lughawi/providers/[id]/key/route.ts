@@ -7,11 +7,12 @@ import type { AiProviderId } from "@/lib/lughawi/types";
 import { NextResponse } from "next/server";
 
 const IDS: AiProviderId[] = [
+  "google",
+  "openrouter",
   "openai",
   "anthropic",
-  "google",
   "groq",
-  "openrouter",
+  "ollama",
 ];
 
 type Ctx = { params: Promise<{ id: string }> };

@@ -24,7 +24,9 @@ export type AiProviderId =
   | "anthropic"
   | "google"
   | "groq"
-  | "openrouter";
+  | "openrouter"
+  /** Local OpenAI-compatible server on Contabo (Ollama / vLLM / LocalAI). */
+  | "ollama";
 
 export interface LughawiEdit {
   id: string;
@@ -94,9 +96,14 @@ export const AI_PROVIDERS: {
   label: string;
   labelAr: string;
 }[] = [
-  { id: "openai", label: "OpenAI", labelAr: "OpenAI" },
-  { id: "anthropic", label: "Anthropic", labelAr: "Anthropic" },
   { id: "google", label: "Google Gemini", labelAr: "Google Gemini" },
-  { id: "groq", label: "Groq", labelAr: "Groq" },
   { id: "openrouter", label: "OpenRouter", labelAr: "OpenRouter" },
+  { id: "openai", label: "OpenAI", labelAr: "OpenAI" },
+  { id: "anthropic", label: "Anthropic Claude", labelAr: "Anthropic (Claude)" },
+  { id: "groq", label: "Groq", labelAr: "Groq" },
+  {
+    id: "ollama",
+    label: "Local (Ollama)",
+    labelAr: "محلي على السيرفر (Ollama)",
+  },
 ];

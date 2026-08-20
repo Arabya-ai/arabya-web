@@ -13,6 +13,7 @@ export interface AiChatParams {
   user: string;
   maxTokens?: number;
   model?: string;
+  baseUrl?: string;
 }
 
 export interface AiChatResult {
@@ -20,17 +21,22 @@ export interface AiChatResult {
   provider: string;
   model?: string;
   attempts?: number;
+  source?: "user" | "project";
 }
 
 export interface AiCandidate {
   provider: AiProviderId;
   apiKey: string;
   model?: string;
+  baseUrl?: string;
   source: "user" | "project";
+  label?: string;
 }
 
 function isProvider(id: string): id is AiProviderId {
-  return ["openai", "anthropic", "google", "groq", "openrouter"].includes(id);
+  return ["openai", "anthropic", "google", "groq", "openrouter", "ollama"].includes(
+    id,
+  );
 }
 
 const DEFAULT_MODELS: Record<AiProviderId, string> = {
@@ -39,6 +45,7 @@ const DEFAULT_MODELS: Record<AiProviderId, string> = {
   openrouter: "openai/gpt-4o-mini",
   anthropic: "claude-3-5-haiku-latest",
   google: "gemini-2.0-flash",
+  ollama: "llama3.2",
 };
 
 /** Encrypt user API keys at rest (AES-256-GCM). */
@@ -75,7 +82,7 @@ async function chatOpenAiCompatible(
   user: string,
   maxTokens: number,
 ): Promise<string> {
-  const res = await fetch(`${baseUrl}/chat/completions`, {
+  const res = await fetch(`${baseUrl.replace(/\/$/, "")}/chat/completions`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -195,6 +202,17 @@ export async function runAiChat(params: AiChatParams): Promise<AiChatResult> {
       params.user,
       maxTokens,
     );
+  } else if (provider === "ollama") {
+    text = await chatOpenAiCompatible(
+      params.baseUrl ||
+        process.env.LUGHAWI_OLLAMA_BASE_URL?.trim() ||
+        "http://127.0.0.1:11434/v1",
+      params.apiKey || "ollama",
+      model,
+      params.system,
+      params.user,
+      maxTokens,
+    );
   } else if (provider === "anthropic") {
     text = await chatAnthropic(
       params.apiKey,
@@ -249,11 +267,12 @@ export async function runAiAuto(input: {
         provider: c.provider,
         apiKey: c.apiKey,
         model: c.model,
+        baseUrl: c.baseUrl,
         system: input.system,
         user: input.user,
         maxTokens: input.maxTokens,
       });
-      return { ...result, attempts };
+      return { ...result, attempts, source: c.source };
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       errors.push(`${c.provider}: ${msg.slice(0, 120)}`);
@@ -264,6 +283,15 @@ export async function runAiAuto(input: {
       ? `Auto exhausted all providers. ${errors.join(" | ")}`
       : "No AI candidates configured",
   );
+}
+
+/** Round-robin so 10 Google keys / 10 OpenAI keys share load evenly. */
+let projectRotate = 0;
+
+function rotateSlots(slots: ProjectAiSlot[]): ProjectAiSlot[] {
+  if (slots.length <= 1) return slots;
+  const start = projectRotate++ % slots.length;
+  return [...slots.slice(start), ...slots.slice(0, start)];
 }
 
 export function buildAutoCandidates(opts: {
@@ -284,20 +312,23 @@ export function buildAutoCandidates(opts: {
   out.push(...user);
 
   if (!opts.userOnly) {
-    for (const slot of lughawiProjectAiPool()) {
+    const rotated = rotateSlots(lughawiProjectAiPool());
+    for (const slot of rotated) {
       out.push({
         provider: slot.provider,
         apiKey: slot.apiKey,
         model: slot.model,
+        baseUrl: slot.baseUrl,
         source: "project",
+        label: slot.label,
       });
     }
   }
 
-  // Dedupe identical provider+last8
+  // Dedupe identical provider+key tail+model+baseUrl
   const seen = new Set<string>();
   return out.filter((c) => {
-    const k = `${c.provider}:${c.apiKey.slice(-8)}:${c.model ?? ""}`;
+    const k = `${c.provider}:${c.apiKey.slice(-12)}:${c.model ?? ""}:${c.baseUrl ?? ""}`;
     if (seen.has(k)) return false;
     seen.add(k);
     return true;

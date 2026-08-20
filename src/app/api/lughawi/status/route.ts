@@ -3,15 +3,19 @@ import {
   LUGHAWI_ENGINE_VERSION,
 } from "@/lib/lughawi/engine/stages-meta";
 import { learningStats } from "@/lib/lughawi/learning-store";
-import { resolveProjectAiPool } from "@/lib/lughawi/ai-gateway";
+import { lughawiProjectAiPoolSummary } from "@/lib/lughawi/config";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  let poolCount = 0;
+  let summary = {
+    total: 0,
+    byProvider: {} as Record<string, number>,
+    hasLocal: false,
+  };
   try {
-    poolCount = resolveProjectAiPool().length;
+    summary = lughawiProjectAiPoolSummary();
   } catch {
-    poolCount = 0;
+    /* ignore */
   }
 
   return NextResponse.json({
@@ -25,7 +29,9 @@ export async function GET() {
       })),
     },
     learning: learningStats(),
-    projectPoolCount: poolCount,
-    note: "Core proofread runs offline via staged engine. AI rewrite/translate need keys.",
+    projectPoolCount: summary.total,
+    projectPoolByProvider: summary.byProvider,
+    projectPoolHasLocal: summary.hasLocal,
+    note: "Core proofread runs offline. AI Auto uses user keys then multi-key project pool then local Ollama.",
   });
 }
