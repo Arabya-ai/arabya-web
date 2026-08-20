@@ -4,6 +4,7 @@ import {
   humanizeAiError,
 } from "@/lib/lughawi/ai-gateway";
 import { enrichProofreadWithAi } from "@/lib/lughawi/ai-proofread";
+import { enrichProofreadWithSidecar } from "@/lib/lughawi/sidecar-enrich";
 import { lughawiMaxGuestChars, countArabicWords } from "@/lib/lughawi/config";
 import { proofreadLocal } from "@/lib/lughawi/pipeline";
 import { resolveLughawiAiCandidates } from "@/lib/lughawi/resolve-ai";
@@ -54,11 +55,19 @@ export async function POST(req: Request) {
     );
   }
 
+  // Layer 1: offline TypeScript rules
   let result = proofreadLocal(text, {
     locale,
     mode: "proofread",
     proofMode,
   });
+
+  // Layer 2: Contabo sidecar rule-NLP (Stanza/PyArabic/CAMeL) + optional neural GEC
+  try {
+    result = await enrichProofreadWithSidecar(result);
+  } catch {
+    // Sidecar is optional — keep local rules.
+  }
 
   if (!wantAi) {
     return NextResponse.json(result);
@@ -99,6 +108,7 @@ export async function POST(req: Request) {
     }
   }
 
+  // Layer 3: cloud / local LLM enrichment (Gemini Auto pool, Ollama Llama-3.1-8B, …)
   try {
     result = await enrichProofreadWithAi(result, candidates);
     if (chargeProject && email && result.meta.usedAi) {

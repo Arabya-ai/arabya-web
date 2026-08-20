@@ -1,38 +1,35 @@
 """
 Lughawi NLP sidecar — localhost only (default 127.0.0.1:8091).
 
-Real CAMeL / CATT / GEC packages are optional. Without them we still expose
-honest endpoints with lightweight fallbacks so Next.js can wire health + UX.
+Foundation stack (install via scripts/contabo-lughawi-sidecar-deps.sh):
+  - PyArabic + Stanford Stanza + CAMeL Tools  → rule-based / morph NLP
+  - Optional HF AraBART GEC                   → contextual grammar
+  - Optional CATT                             → neural tashkeel
+
+Without heavy packages the service still boots with honest fallbacks.
 """
 
 from __future__ import annotations
 
 import json
-import re
+import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+# Allow `python app.py` from this directory
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from engines.capabilities import probe  # noqa: E402
+from engines.gec import gec_neural  # noqa: E402
+from engines.morph import analyze_morph  # noqa: E402
+from engines.rules_nlp import rules_nlp_edits  # noqa: E402
+from engines.tashkeel import tashkeel as run_tashkeel  # noqa: E402
+
 HOST = "127.0.0.1"
 PORT = 8091
-VERSION = "0.2.0"
-
-# Optional heavy deps — never required to boot.
-_HAS_CAMEL = False
-try:
-    import camel_tools  # type: ignore  # noqa: F401
-
-    _HAS_CAMEL = True
-except Exception:
-    _HAS_CAMEL = False
-
-_HAS_CATT = False
-try:
-    import catt  # type: ignore  # noqa: F401
-
-    _HAS_CATT = True
-except Exception:
-    _HAS_CATT = False
+VERSION = "0.3.0"
 
 
 def _json_bytes(obj: Any) -> bytes:
@@ -40,68 +37,44 @@ def _json_bytes(obj: Any) -> bytes:
 
 
 def health_payload() -> dict[str, Any]:
+    caps = probe()
+    morph = "camel" if caps["camel"] else "heuristic"
+    rules = []
+    if caps["pyarabic"]:
+        rules.append("pyarabic")
+    if caps["stanza"]:
+        rules.append("stanza")
+    rules.append("builtin")
+    gec = "arabart" if caps["transformers"] else "rules-nlp"
     return {
         "ok": True,
         "service": "lughawi-sidecar",
         "version": VERSION,
+        "capabilities": caps,
         "tools": {
-            "morph": "camel" if _HAS_CAMEL else "heuristic",
-            "tashkeel": "catt" if _HAS_CATT else "passthrough",
-            "gec": "stub",
+            "morph": morph,
+            "rules_nlp": "+".join(rules),
+            "tashkeel": "catt" if caps["catt"] else "passthrough",
+            "gec": gec,
+        },
+        "foundation": {
+            "ruleBasedNlp": True,
+            "stanza": caps["stanza"],
+            "camel": caps["camel"],
+            "pyarabic": caps["pyarabic"],
+            "neuralGec": caps["transformers"],
+            "noteAr": (
+                "الأساس: قواعد NLP (Stanza/PyArabic/CAMeL) + GEC اختياري. "
+                "النماذج اللغوية المحلية عبر Ollama على Contabo منفصلة."
+            ),
         },
     }
 
 
-def morph_heuristic(text: str) -> list[dict[str, str]]:
-    tokens: list[dict[str, str]] = []
-    for raw in re.findall(r"[\u0600-\u06FF]+|[A-Za-z0-9]+", text):
-        pos = "NOUN"
-        note = "تقدير خفيف — ثبّت CAMeL Tools للتحليل الكامل"
-        if raw.startswith(("ال",)):
-            pos = "NOUN"
-            note = "اسم معرّف بأل (تقدير)"
-        elif raw in {"في", "من", "إلى", "على", "عن", "ب", "ل", "ك"}:
-            pos = "PREP"
-            note = "حرف جر شائع"
-        elif raw in {"و", "ف", "ثم", "أو", "أم"}:
-            pos = "CONJ"
-            note = "حرف عطف"
-        elif raw.endswith(("ون", "ين", "ات", "ان")):
-            pos = "NOUN"
-            note = "جمع/مثنى محتمل"
-        tokens.append(
-            {
-                "surface": raw,
-                "lemma": raw.lstrip("والفبلك"),
-                "pos": pos,
-                "note": note,
-            }
-        )
-    return tokens
-
-
-def tashkeel_passthrough(text: str, level: str) -> dict[str, Any]:
-    # Without CATT we do not invent diacritics — return input + clear engine tag.
-    return {
-        "ok": True,
-        "text": text,
-        "engine": "sidecar-tashkeel-passthrough",
-        "level": level,
-        "warning": "CATT غير مثبت — أعد النص كما هو. ثبّت CATT على Contabo للتشكيل العصبي.",
-    }
-
-
-def gec_stub(text: str) -> dict[str, Any]:
-    return {
-        "ok": True,
-        "text": text,
-        "edits": [],
-        "engine": "sidecar-gec-stub",
-        "warning": "نموذج GEC غير محمّل بعد — استخدم محرك قواعد لغوي في Next.",
-    }
-
-
 class Handler(BaseHTTPRequestHandler):
+    def log_message(self, fmt: str, *args: Any) -> None:  # quieter PM2 logs
+        sys.stderr.write("%s - %s\n" % (self.address_string(), fmt % args))
+
     def _send(self, code: int, obj: Any) -> None:
         raw = _json_bytes(obj)
         self.send_response(code)
@@ -124,66 +97,66 @@ class Handler(BaseHTTPRequestHandler):
         if path in ("/health", "/"):
             self._send(200, health_payload())
             return
-        self._send(404, {"ok": False, "error": "not_found"})
+        self._send(404, {"ok": False, "error": "not found"})
 
     def do_POST(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
         try:
             body = self._read_json()
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             self._send(400, {"ok": False, "error": str(e)})
             return
 
         text = body.get("text") if isinstance(body.get("text"), str) else ""
+        if path != "/health" and not text.strip():
+            self._send(400, {"ok": False, "error": "text required"})
+            return
+
         if path == "/morph":
-            if not text.strip():
-                self._send(400, {"ok": False, "error": "text required"})
-                return
-            tokens = morph_heuristic(text)
+            tokens, engine = analyze_morph(text)
+            self._send(200, {"ok": True, "tokens": tokens, "engine": engine})
+            return
+
+        if path == "/tashkeel":
+            level = body.get("level") if isinstance(body.get("level"), str) else "full"
+            self._send(200, run_tashkeel(text, level))
+            return
+
+        if path == "/rules-nlp":
+            self._send(200, rules_nlp_edits(text))
+            return
+
+        if path == "/gec":
+            # Foundation: always run rule-based NLP; neural GEC merges on top when loaded.
+            base = rules_nlp_edits(text)
+            neural = gec_neural(text)
+            edits = list(base.get("edits") or [])
+            # Prefer span-local rule edits; only append neural if it produced something
+            # and rules found nothing spanning the whole text.
+            for e in neural.get("edits") or []:
+                edits.append(e)
+            engines = [base.get("engine"), neural.get("engine")]
             self._send(
                 200,
                 {
                     "ok": True,
-                    "tokens": tokens,
-                    "engine": "camel" if _HAS_CAMEL else "sidecar-morph-heuristic",
+                    "text": text,
+                    "edits": edits,
+                    "engine": "+".join(str(x) for x in engines if x),
+                    "warning": neural.get("warning"),
+                    "tokens": base.get("tokens") or [],
                 },
             )
             return
 
-        if path == "/tashkeel":
-            if not text.strip():
-                self._send(400, {"ok": False, "error": "text required"})
-                return
-            level = body.get("level") if isinstance(body.get("level"), str) else "full"
-            if _HAS_CATT:
-                # Placeholder hook — real CATT call when package + model present.
-                self._send(
-                    200,
-                    {
-                        "ok": True,
-                        "text": text,
-                        "engine": "catt-pending-wire",
-                        "level": level,
-                        "warning": "حزمة CATT موجودة لكن الربط الكامل يُفعَّل بعد ضبط الأوزان.",
-                    },
-                )
-                return
-            self._send(200, tashkeel_passthrough(text, level))
-            return
+        self._send(404, {"ok": False, "error": "not found"})
 
-        if path == "/gec":
-            if not text.strip():
-                self._send(400, {"ok": False, "error": "text required"})
-                return
-            self._send(200, gec_stub(text))
-            return
 
-        self._send(404, {"ok": False, "error": "not_found"})
-
-    def log_message(self, fmt: str, *args: Any) -> None:  # noqa: A003
-        return
+def main() -> None:
+    httpd = HTTPServer((HOST, PORT), Handler)
+    print(f"lughawi-sidecar {VERSION} on http://{HOST}:{PORT}", flush=True)
+    httpd.serve_forever()
 
 
 if __name__ == "__main__":
-    print(f"lughawi-sidecar {VERSION} on http://{HOST}:{PORT}")
-    HTTPServer((HOST, PORT), Handler).serve_forever()
+    main()

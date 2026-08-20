@@ -120,3 +120,51 @@ export async function sidecarMorph(
     clearTimeout(timer);
   }
 }
+
+export interface SidecarGecEdit {
+  id?: string;
+  start?: number;
+  end?: number;
+  type?: string;
+  original?: string;
+  suggestion?: string;
+  ruleId?: string;
+  explanation?: string;
+  confidence?: number;
+  source?: string;
+  status?: string;
+}
+
+/** Rule-based NLP + optional neural GEC from Contabo sidecar. */
+export async function sidecarGec(
+  text: string,
+  timeoutMs = 12_000,
+): Promise<{ edits: SidecarGecEdit[]; engine: string; warning?: string } | null> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${baseUrl()}/gec`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+      signal: ctrl.signal,
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as {
+      ok?: boolean;
+      edits?: SidecarGecEdit[];
+      engine?: string;
+      warning?: string;
+    };
+    if (!json.ok) return null;
+    return {
+      edits: Array.isArray(json.edits) ? json.edits : [],
+      engine: json.engine ?? "sidecar-gec",
+      warning: typeof json.warning === "string" ? json.warning : undefined,
+    };
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}

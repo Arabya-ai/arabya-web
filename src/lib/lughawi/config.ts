@@ -220,7 +220,7 @@ export function lughawiProjectAiPool(): ProjectAiSlot[] {
     add(
       "ollama",
       process.env.LUGHAWI_OLLAMA_API_KEY?.trim() || "ollama",
-      process.env.LUGHAWI_OLLAMA_MODEL?.trim() || "llama3.2",
+      process.env.LUGHAWI_OLLAMA_MODEL?.trim() || "llama3.1:8b",
       ollamaUrl.replace(/\/$/, ""),
       "contabo-local",
     );

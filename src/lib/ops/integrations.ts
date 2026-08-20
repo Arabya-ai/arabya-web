@@ -5,6 +5,9 @@ import { join } from "node:path";
 
 export type IntegrationStatus =
   | "wired"
+  | "wired_sidecar"
+  | "optional_sidecar"
+  | "optional_local"
   | "planned_sidecar"
   | "research_only"
   | "deferred";
