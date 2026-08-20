@@ -6,7 +6,7 @@ import {
   formatHijriEventDate,
   type HijriEvent,
   upcomingHijriEvents,
-} from "@/lib/hijri-events";
+} from "@/lib/hijri-events-core";
 
 type Props = {
   events: HijriEvent[];

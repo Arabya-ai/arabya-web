@@ -10,6 +10,7 @@ import {
   listHijriEvents,
   formatHijriEventDate,
 } from "@/lib/hijri-events";
+import type { HijriEvent } from "@/lib/hijri-events-core";
 import { searchAyahs } from "@/lib/quran";
 
 describe("hadith catalog", () => {
