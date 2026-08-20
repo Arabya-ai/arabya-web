@@ -16,19 +16,28 @@ import {
 describe("adhkar loaders", () => {
   it("rejects tool slugs as categories", async () => {
     expect(isAdhkarToolSlug("duas")).toBe(true);
+    expect(isAdhkarToolSlug("hisn")).toBe(true);
     expect(await getAdhkarCategory("duas")).toBeNull();
     expect(await getAdhkarCategory("tasbeeh")).toBeNull();
+    expect(await getAdhkarCategory("hisn")).toBeNull();
   });
 
   it("loads expanded duas and categories", async () => {
     const duas = await getDuas();
-    expect(duas.length).toBeGreaterThanOrEqual(50);
+    expect(duas.length).toBeGreaterThanOrEqual(200);
     expect(duas[0].textAr.length).toBeGreaterThan(8);
     const phrases = await getTasbeehPhrases();
     expect(phrases.some((p) => p.id === "subhanallah")).toBe(true);
     const sleep = await getAdhkarCategory("sleep");
     expect(sleep?.items.length).toBeGreaterThan(0);
     expect(sleep?.items[0].id).toBe("sleep-1");
+  });
+
+  it("loads Hisn al-Muslim categories", async () => {
+    const { getHisnCategories } = await import("@/lib/adhkar");
+    const cats = await getHisnCategories();
+    expect(cats.length).toBeGreaterThan(50);
+    expect(cats[0].items.length).toBeGreaterThan(0);
   });
 
   it("keeps category slugs unique from tools", async () => {

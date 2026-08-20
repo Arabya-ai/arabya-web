@@ -1,0 +1,31 @@
+{
+  "slug": "abu-tammam",
+  "titleAr": "مختارات من أبي تمام",
+  "titleEn": "Selections from Abu Tammam",
+  "kind": "poetry",
+  "source": "arabya-editorial-public-domain",
+  "license": "public-domain-text-educational",
+  "passages": [
+    {
+      "id": "TW:abu-tammam:1",
+      "titleAr": "السيف أصدق",
+      "titleEn": "The sword is truer",
+      "textAr": "السَّيْفُ أَصْدَقُ إِنْبَاءً مِنَ الكُتُبِ · فِي حَدِّهِ الحَدُّ بَيْنَ الجِدِّ وَاللَّعِبِ",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:abu-tammam:2",
+      "titleAr": "فتح عمورية",
+      "titleEn": "Conquest of Amorium",
+      "textAr": "بِيضُ الصَّفَائِحِ لا سُودُ الصَّحَائِفِ فِي · مُتُونِهِنَّ جِلَاءُ الشَّكِّ وَالرِّيَبِ",
+      "meter": "البسيط"
+    },
+    {
+      "id": "TW:abu-tammam:3",
+      "titleAr": "رُبَّ قَصِيدَةٍ",
+      "titleEn": "Many a poem",
+      "textAr": "رُبَّ قَصِيدَةٍ كَانَتْ أَلَذَّ مِنَ الغِنَى · وَأَلَذَّ مِنْ طِيبِ الحَيَاةِ وَأَحْلَى",
+      "meter": "الكامل"
+    }
+  ]
+}

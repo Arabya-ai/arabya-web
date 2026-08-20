@@ -1,0 +1,31 @@
+{
+  "slug": "imru-al-qays",
+  "titleAr": "مختارات من امرئ القيس",
+  "titleEn": "Selections from Imruʾ al-Qays",
+  "kind": "poetry",
+  "source": "arabya-editorial-public-domain",
+  "license": "public-domain-text-educational",
+  "passages": [
+    {
+      "id": "TW:imru-al-qays:1",
+      "titleAr": "قفا نبك",
+      "titleEn": "Stop, let us weep",
+      "textAr": "قِفَا نَبْكِ مِنْ ذِكْرَى حَبِيبٍ وَمَنْزِلِ · بِسِقْطِ اللِّوَى بَيْنَ الدَّخُولِ فَحَوْمَلِ",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:imru-al-qays:2",
+      "titleAr": "وليل كموج البحر",
+      "titleEn": "A night like a sea wave",
+      "textAr": "وَلَيْلٍ كَمَوْجِ البَحْرِ أَرْخَى سُدُولَهُ · عَلَيَّ بِأَنْوَاعِ الهُمُومِ لِيَبْتَلِي",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:imru-al-qays:3",
+      "titleAr": "مكر مفر",
+      "titleEn": "Wheeling and charging",
+      "textAr": "مِكَرٍّ مِفَرٍّ مُقْبِلٍ مُدْبِرٍ مَعًا · كَجُلْمُودِ صَخْرٍ حَطَّهُ السَّيْلُ مِنْ عَلِ",
+      "meter": "الطويل"
+    }
+  ]
+}

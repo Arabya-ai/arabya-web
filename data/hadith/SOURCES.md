@@ -2,9 +2,15 @@
 
 | مشروع (قائمة الـ320) | الاستخدام |
 |---|---|
-| [fawazahmed0/hadith-api](https://github.com/fawazahmed0/hadith-api) | متون عربية كاملة لكل المجموعات أدناه |
-| sunnah.com/api · gadingnst/hadith-api · Open-Hadith-Data · hadith-json | مراجع بنية/ترخيص — الاستيراد الأساسي عبر hadith-api CDN |
+| [fawazahmed0/hadith-api](https://github.com/fawazahmed0/hadith-api) | متون عربية كاملة للمجموعات الأساسية |
+| [mhashim6/Open-Hadith-Data](https://github.com/mhashim6/Open-Hadith-Data) | مسند أحمد + سنن الدارمي (CSV) |
+| sunnah.com/api · gadingnst/hadith-api · hadith-json | مراجع بنية/ترخيص |
 
-المجموعات المستوردة: bukhari (7580) · muslim (7360) · nasai (5679) · abudawud (5272) · ibnmajah (4338) · tirmidhi (3924) · malik (1829) · nawawi (42) · dehlawi (40) · qudsi (40)
+أعد الاستيراد:
 
-آخر تشغيل: 2026-08-20T12:26:55.106Z
+```bash
+npm run import-hadith-oss
+npm run import-open-hadith-data
+```
+
+آخر تحديث: 2026-08-20

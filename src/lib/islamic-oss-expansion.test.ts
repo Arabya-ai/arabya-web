@@ -16,10 +16,12 @@ import { searchAyahs } from "@/lib/quran";
 describe("hadith catalog", () => {
   it("lists collections with items", async () => {
     const list = await listHadithCollections();
-    expect(list.length).toBeGreaterThanOrEqual(8);
+    expect(list.length).toBeGreaterThanOrEqual(10);
     const bukhari = await getHadithCollection("bukhari");
     expect(bukhari?.items.length).toBeGreaterThan(1000);
     expect(bukhari?.items[0]?.id).toMatch(/^H:bukhari:/);
+    const ahmad = await getHadithCollection("ahmad");
+    expect(ahmad?.items.length).toBeGreaterThan(1000);
   });
 
   it("searches arabic matn", async () => {
@@ -35,7 +37,9 @@ describe("hadith catalog", () => {
 describe("heritage catalog", () => {
   it("loads prosody and poetry works", async () => {
     const works = await listHeritageWorks();
+    expect(works.length).toBeGreaterThanOrEqual(5);
     expect(works.some((w) => w.slug === "qafiyah-intro")).toBe(true);
+    expect(works.some((w) => w.slug === "imru-al-qays")).toBe(true);
     const work = await getHeritageWork("mutanabbi-samples");
     expect(work?.passages.length).toBeGreaterThan(0);
     expect(work?.passages[0]?.id).toMatch(/^TW:/);

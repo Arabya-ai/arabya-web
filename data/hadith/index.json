@@ -6,9 +6,22 @@
       "project": "fawazahmed0/hadith-api",
       "url": "https://github.com/fawazahmed0/hadith-api",
       "listId": 245
+    },
+    {
+      "project": "mhashim6/Open-Hadith-Data",
+      "url": "https://github.com/mhashim6/Open-Hadith-Data",
+      "listId": 246
     }
   ],
   "collections": [
+    {
+      "slug": "ahmad",
+      "titleAr": "مسند أحمد",
+      "titleEn": "Musnad Ahmad",
+      "descriptionAr": "متن عربي مستورد من Open-Hadith-Data (ahmad).",
+      "descriptionEn": "Arabic matn imported from Open-Hadith-Data (ahmad).",
+      "itemCount": 26363
+    },
     {
       "slug": "bukhari",
       "titleAr": "صحيح البخاري",
@@ -56,6 +69,14 @@
       "descriptionAr": "متن عربي كامل مستورد من fawazahmed0/hadith-api (ara-tirmidhi).",
       "descriptionEn": "Full Arabic matn imported from fawazahmed0/hadith-api (ara-tirmidhi).",
       "itemCount": 3924
+    },
+    {
+      "slug": "darimi",
+      "titleAr": "سنن الدارمي",
+      "titleEn": "Sunan al-Darimi",
+      "descriptionAr": "متن عربي مستورد من Open-Hadith-Data (darimi).",
+      "descriptionEn": "Arabic matn imported from Open-Hadith-Data (darimi).",
+      "itemCount": 3367
     },
     {
       "slug": "malik",

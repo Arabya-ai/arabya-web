@@ -7379,3 +7379,70 @@ a.auth-btn--google {
   margin: 0 0 0.35rem;
   font-size: 1.05rem;
 }
+
+/* Hisn al-Muslim explorer */
+.hisn-explorer {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.hisn-layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(12rem, 16rem) 1fr;
+}
+
+@media (max-width: 800px) {
+  .hisn-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hisn-cat-list {
+  display: grid;
+  gap: 0.35rem;
+  max-height: min(70vh, 36rem);
+  overflow: auto;
+  padding: 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--brand-soft) 35%, var(--surface));
+}
+
+.hisn-cat-btn {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: start;
+  border: 0;
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.hisn-cat-btn.is-active,
+.hisn-cat-btn:hover {
+  background: color-mix(in srgb, var(--brand) 14%, var(--surface));
+}
+
+.hisn-cat-count {
+  opacity: 0.7;
+  font-size: 0.85rem;
+}
+
+.hisn-items h2 {
+  margin: 0 0 0.75rem;
+  color: var(--brand-deep);
+  font-size: 1.15rem;
+}
+
+.hadith-pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}

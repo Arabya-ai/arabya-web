@@ -1,6 +1,6 @@
 {
   "updatedAt": "2026-08-20",
-  "sourceNote": "عيّنات تراثية وتعليمية — عروض/شعر وقطع أدبية قصيرة بهيكل Word IDs لاحقًا.",
+  "sourceNote": "تراث تعليمي + مختارات شعرية من الملك العام — قابل للتوسعة من مصادر المالك.",
   "works": [
     {
       "slug": "qafiyah-intro",
@@ -16,8 +16,26 @@
       "titleAr": "مختارات من المتنبي",
       "titleEn": "Selections from al-Mutanabbi",
       "kind": "poetry",
-      "descriptionAr": "أبيات تعليمية منسوبة — للتجربة الواجهة قبل الاستيراد الكامل.",
-      "descriptionEn": "Educational couplets for UI before full imports.",
+      "descriptionAr": "أبيات تعليمية من الملك العام للواجهة والطبقات.",
+      "descriptionEn": "Public-domain educational couplets for UI and layers.",
+      "passageCount": 3
+    },
+    {
+      "slug": "imru-al-qays",
+      "titleAr": "مختارات من امرئ القيس",
+      "titleEn": "Selections from Imruʾ al-Qays",
+      "kind": "poetry",
+      "descriptionAr": "معلقات وأبيات مشهورة من الملك العام.",
+      "descriptionEn": "Famous Muʿallaqa lines from the public domain.",
+      "passageCount": 3
+    },
+    {
+      "slug": "abu-tammam",
+      "titleAr": "مختارات من أبي تمام",
+      "titleEn": "Selections from Abu Tammam",
+      "kind": "poetry",
+      "descriptionAr": "مختارات من فتح عمورية وما جاورها.",
+      "descriptionEn": "Selections around the Amorium ode.",
       "passageCount": 3
     },
     {

@@ -166,10 +166,6 @@ async function main() {
         id: item.id,
         collection: bookSlug,
         number: item.number,
-        arabic:
-          item.arabic.length > 220
-            ? `${item.arabic.slice(0, 220)}…`
-            : item.arabic,
         titleAr: titles.ar,
         titleEn: titles.en,
         href: `/hadith/${bookSlug}/${item.number}`,

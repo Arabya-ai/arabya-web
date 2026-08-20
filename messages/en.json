@@ -1489,9 +1489,18 @@
       "hub": "Adhkar",
       "duas": "Duas",
       "duasDesc": "Selected Quranic and prophetic supplications.",
+      "hisn": "Hisn al-Muslim",
+      "hisnDesc": "Full Hisn al-Muslim by category — from an open JSON source.",
       "tasbeeh": "Tasbeeh",
       "tasbeehDesc": "A simple counter stored on your device."
-    }
+    },
+    "hisnMetaTitle": "Hisn al-Muslim · Arabya",
+    "hisnMetaDescription": "Full Hisn al-Muslim remembrances and duas by category",
+    "hisnSearch": "Search Hisn al-Muslim",
+    "hisnSearchPlaceholder": "Search category or text…",
+    "hisnStats": "{categories} categories · {items} texts",
+    "hisnCategoriesAria": "Hisn al-Muslim categories",
+    "hisnEmpty": "No Hisn al-Muslim results."
   },
   "Qibla": {
     "metaTitle": "Qibla · Arabya",

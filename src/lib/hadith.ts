@@ -157,11 +157,11 @@ export async function searchHadith(
   const variants = expandSearchQueryVariants(q);
   const limit = Math.min(Math.max(options.limit ?? 20, 1), 100);
   const index = await getSearchIndex();
-  const hits: HadithSearchHit[] = [];
+  const matched: SearchIndexRow[] = [];
 
   for (const row of index) {
     if (options.collection && row.collection !== options.collection) continue;
-    const hay = row.norm || normalizeArabicSearch(row.arabic);
+    const hay = row.norm || normalizeArabicSearch(row.arabic || "");
     const textMatch = variants.some((v) => hay.includes(v));
     if (
       !textMatch &&
@@ -169,36 +169,29 @@ export async function searchHadith(
     ) {
       continue;
     }
+    matched.push(row);
+  }
+
+  const total = matched.length;
+  const page = matched.slice(0, limit);
+  const hits: HadithSearchHit[] = [];
+  for (const row of page) {
+    let arabic = row.arabic || "";
+    if (!arabic || arabic.endsWith("…")) {
+      const col = await getHadithCollection(row.collection);
+      const full = col?.items.find((i) => i.number === row.number);
+      if (full?.arabic) arabic = full.arabic;
+    }
     hits.push({
       id: row.id,
       collection: row.collection,
       number: row.number,
-      arabic: row.arabic,
+      arabic,
       titleAr: row.titleAr,
       titleEn: row.titleEn,
       href: row.href,
     });
-    if (hits.length >= limit * 5) {
-      // collect enough for total estimate then stop early for huge matches
-      break;
-    }
   }
 
-  // Accurate total when under cap; otherwise re-scan count only
-  let total = hits.length;
-  if (hits.length >= limit * 5) {
-    total = 0;
-    for (const row of index) {
-      if (options.collection && row.collection !== options.collection) continue;
-      const hay = row.norm || normalizeArabicSearch(row.arabic);
-      if (
-        variants.some((v) => hay.includes(v)) ||
-        row.id.toLowerCase().includes(query.trim().toLowerCase())
-      ) {
-        total += 1;
-      }
-    }
-  }
-
-  return { hits: hits.slice(0, limit), total };
+  return { hits, total };
 }

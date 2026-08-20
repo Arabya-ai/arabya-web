@@ -1489,9 +1489,18 @@
       "hub": "الأذكار",
       "duas": "الأدعية",
       "duasDesc": "أدعية قرآنية ونبوية مختارة.",
+      "hisn": "حصن المسلم",
+      "hisnDesc": "كتاب حصن المسلم كاملاً بفئاته — من مصدر JSON مفتوح.",
       "tasbeeh": "المسبحة",
       "tasbeehDesc": "عدّاد تسبيح بسيط محفوظ على جهازك."
-    }
+    },
+    "hisnMetaTitle": "حصن المسلم · عربية",
+    "hisnMetaDescription": "أذكار وأدعية حصن المسلم كاملة مرتبة بالفئات",
+    "hisnSearch": "بحث في حصن المسلم",
+    "hisnSearchPlaceholder": "ابحث في الفئة أو النص…",
+    "hisnStats": "{categories} فئة · {items} نصًا",
+    "hisnCategoriesAria": "فئات حصن المسلم",
+    "hisnEmpty": "لا نتائج في حصن المسلم."
   },
   "Qibla": {
     "metaTitle": "اتجاه القبلة · عربية",
