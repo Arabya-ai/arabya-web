@@ -1,4 +1,4 @@
-export type LibraryWorkStatus = "ready" | "pending_review" | "awaiting";
+export type LibraryWorkStatus = "ready" | "pending_review" | "awaiting" | "deleted";
 
 export type LibraryWorkMeta = {
   id: string;

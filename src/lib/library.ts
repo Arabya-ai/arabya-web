@@ -1,26 +1,17 @@
-import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { withResolvedCover } from "@/lib/library/covers";
+import { readJsonFile } from "@/lib/library/json-file";
 import {
   getImportedLibraryRoot,
   gitLibraryDataRoot,
 } from "@/lib/library/paths";
 import type { LibraryCatalog, LibraryWorkMeta } from "@/lib/library/types";
 
-async function readJsonFile<T>(filePath: string): Promise<T | null> {
-  try {
-    const raw = await readFile(filePath, "utf8");
-    return JSON.parse(raw) as T;
-  } catch {
-    return null;
-  }
-}
-
 async function loadGitCatalog(): Promise<LibraryWorkMeta[]> {
   const parsed = await readJsonFile<LibraryCatalog>(
     path.join(gitLibraryDataRoot(), "index.json"),
   );
-  return (parsed?.works ?? []).filter((w) => w.id && w.status === "ready");
+  return (parsed?.works ?? []).filter((w) => w.id);
 }
 
 async function loadImportedCatalog(): Promise<LibraryWorkMeta[]> {
@@ -46,36 +37,42 @@ function mergeWorks(
   );
 }
 
-export async function getLibraryCatalog(): Promise<LibraryWorkMeta[]> {
+async function mergedCatalog(): Promise<LibraryWorkMeta[]> {
   const [gitWorks, importedWorks] = await Promise.all([
     loadGitCatalog(),
     loadImportedCatalog(),
   ]);
-  return mergeWorks(gitWorks, importedWorks)
+  return mergeWorks(gitWorks, importedWorks);
+}
+
+export async function getLibraryCatalog(): Promise<LibraryWorkMeta[]> {
+  return (await mergedCatalog())
     .filter((w) => w.status === "ready")
+    .map(withResolvedCover);
+}
+
+/** Editor/admin list: published + pending, excluding deleted tombstones. */
+export async function getLibraryCatalogForEditors(): Promise<LibraryWorkMeta[]> {
+  return (await mergedCatalog())
+    .filter((w) => w.status !== "deleted")
     .map(withResolvedCover);
 }
 
 export async function getLibraryWork(
   slug: string,
 ): Promise<LibraryWorkMeta | null> {
-  const [gitWorks, importedWorks] = await Promise.all([
-    loadGitCatalog(),
-    loadImportedCatalog(),
-  ]);
-  const merged = mergeWorks(gitWorks, importedWorks);
-  const work = merged.find((w) => w.id === slug);
+  const work = (await mergedCatalog()).find((w) => w.id === slug);
   if (!work || work.status !== "ready") return null;
 
   const importedMeta = await readJsonFile<LibraryWorkMeta>(
     path.join(getImportedLibraryRoot(), slug, "meta.json"),
   );
+  if (importedMeta?.status === "deleted") return null;
   if (importedMeta) return withResolvedCover({ ...work, ...importedMeta });
 
   return withResolvedCover(work);
 }
 
 export function resolveLibraryPdfPath(slug: string): string | null {
-  const importedPath = path.join(getImportedLibraryRoot(), slug, "book.pdf");
-  return importedPath;
+  return path.join(getImportedLibraryRoot(), slug, "book.pdf");
 }

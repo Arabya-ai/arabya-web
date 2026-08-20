@@ -4,7 +4,9 @@ import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { BookImportJobRow, BookKind } from "@/lib/import-book/types";
-import { LIBRARY_CATEGORIES } from "@/lib/library/categories";
+import type { LibraryCategoryMeta } from "@/lib/library/categories";
+import { LIBRARY_CATEGORIES, libraryCategoryLabel } from "@/lib/library/categories";
+import type { LibraryWorkMeta } from "@/lib/library/types";
 import { ArabyaPanel, ArabyaPanelStack } from "@/components/ui/ArabyaPanel";
 
 const ACCEPT_IRAB =
@@ -37,7 +39,12 @@ export function OwnerBookUploadPanel({ syncReady, editorial = false }: Props) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [jobs, setJobs] = useState<BookImportJobRow[]>([]);
+  const [works, setWorks] = useState<LibraryWorkMeta[]>([]);
+  const [categories, setCategories] = useState<LibraryCategoryMeta[]>([]);
+  const [newCategory, setNewCategory] = useState("");
+  const [editingSlug, setEditingSlug] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -51,10 +58,33 @@ export function OwnerBookUploadPanel({ syncReady, editorial = false }: Props) {
     }
   }, []);
 
+  const loadWorks = useCallback(async () => {
+    if (!editorial) return;
+    try {
+      const res = await fetch("/api/account/library-works", { cache: "no-store" });
+      const data = (await res.json()) as { ok?: boolean; works?: LibraryWorkMeta[] };
+      if (data.ok && data.works) setWorks(data.works);
+    } catch {
+      /* ignore */
+    }
+  }, [editorial]);
+
+  const loadCategories = useCallback(async () => {
+    try {
+      const res = await fetch("/api/account/library-categories", { cache: "no-store" });
+      const data = (await res.json()) as { ok?: boolean; categories?: LibraryCategoryMeta[] };
+      if (data.ok && data.categories) setCategories(data.categories);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   useEffect(() => {
     if (!syncReady) return;
     void loadJobs();
-  }, [loadJobs, syncReady]);
+    void loadWorks();
+    void loadCategories();
+  }, [loadJobs, loadWorks, loadCategories, syncReady]);
 
   useEffect(() => {
     const hasProcessing = jobs.some((j) => j.status === "processing");
@@ -71,6 +101,7 @@ export function OwnerBookUploadPanel({ syncReady, editorial = false }: Props) {
   }, [jobs, loadJobs]);
 
   function resetForm() {
+    setEditingSlug(null);
     setTitle("");
     setTitleEn("");
     setSlug("");
@@ -82,7 +113,76 @@ export function OwnerBookUploadPanel({ syncReady, editorial = false }: Props) {
     setSheetUrl("");
     setDriveUrl("");
     setSelectedFile(null);
+    setBookKind("reading");
     if (fileRef.current) fileRef.current.value = "";
+  }
+
+  function startEdit(work: LibraryWorkMeta) {
+    setEditingSlug(work.id);
+    setBookKind("reading");
+    setTitle(work.title);
+    setTitleEn(work.titleEn || "");
+    setSlug(work.id);
+    setAuthor(work.author || "");
+    setCategory(work.category || "education");
+    setDescription(work.description || "");
+    setPublisher(work.publisher || "عربية");
+    setPageCount(work.pageCount ? String(work.pageCount) : "");
+    setDriveUrl(work.externalUrl || "");
+    setReadingDelivery(work.externalSource === "google_drive" ? "drive" : "upload");
+    setSelectedFile(null);
+    setError(null);
+    setNotice(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function addCategory() {
+    const labelAr = newCategory.trim();
+    if (labelAr.length < 2) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/account/library-categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ labelAr }),
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        category?: LibraryCategoryMeta;
+        error?: string;
+      };
+      if (!res.ok || !data.ok || !data.category) {
+        throw new Error(data.error || t("uploadFailed"));
+      }
+      setCategories((prev) =>
+        prev.some((c) => c.id === data.category!.id) ? prev : [...prev, data.category!],
+      );
+      setCategory(data.category.id);
+      setNewCategory("");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t("uploadFailed"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function removeWork(work: LibraryWorkMeta) {
+    if (!window.confirm(t("deleteConfirm", { title: work.title }))) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/account/library-works/${work.id}`, { method: "DELETE" });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok || !data.ok) throw new Error(data.error || t("deleteFailed"));
+      if (editingSlug === work.id) resetForm();
+      await loadWorks();
+      setNotice(t("deleteOk"));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t("deleteFailed"));
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function submit() {
@@ -94,23 +194,26 @@ export function OwnerBookUploadPanel({ syncReady, editorial = false }: Props) {
     const isReading = bookKind === "reading";
     const useDrive = isReading && readingDelivery === "drive";
 
-    if (isReading) {
-      if (useDrive) {
-        if (!driveUrl.trim()) {
-          setError(t("driveUrlRequired"));
+    if (!editingSlug) {
+      if (isReading) {
+        if (useDrive) {
+          if (!driveUrl.trim()) {
+            setError(t("driveUrlRequired"));
+            return;
+          }
+        } else if (!selectedFile) {
+          setError(t("readingFileRequired"));
           return;
         }
-      } else if (!selectedFile) {
-        setError(t("readingFileRequired"));
+      } else if (!selectedFile && !sheetUrl.trim()) {
+        setError(t("fileOrSheetRequired"));
         return;
       }
-    } else if (!selectedFile && !sheetUrl.trim()) {
-      setError(t("fileOrSheetRequired"));
-      return;
     }
 
     setBusy(true);
     setError(null);
+    setNotice(null);
     try {
       const form = new FormData();
       form.set("title", title.trim());
@@ -122,25 +225,22 @@ export function OwnerBookUploadPanel({ syncReady, editorial = false }: Props) {
       if (description.trim()) form.set("description", description.trim());
       if (publisher.trim()) form.set("publisher", publisher.trim());
       if (pageCount.trim()) form.set("pageCount", pageCount.trim());
-
-      if (bookKind === "irab" && sheetUrl.trim()) {
-        form.set("googleSheetUrl", sheetUrl.trim());
-      }
-      if (useDrive) {
-        form.set("googleDriveUrl", driveUrl.trim());
-      }
+      if (bookKind === "irab" && sheetUrl.trim()) form.set("googleSheetUrl", sheetUrl.trim());
+      if (useDrive && driveUrl.trim()) form.set("googleDriveUrl", driveUrl.trim());
       if (selectedFile) form.set("file", selectedFile);
 
-      const res = await fetch("/api/account/import-book", {
-        method: "POST",
+      const url = editingSlug
+        ? `/api/account/library-works/${editingSlug}`
+        : "/api/account/import-book";
+      const res = await fetch(url, {
+        method: editingSlug ? "PATCH" : "POST",
         body: form,
       });
-      const data = (await res.json()) as { ok?: boolean; error?: string; message?: string };
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error || t("uploadFailed"));
-      }
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok || !data.ok) throw new Error(data.error || t("uploadFailed"));
       resetForm();
-      await loadJobs();
+      await Promise.all([loadJobs(), loadWorks()]);
+      setNotice(editingSlug ? t("updateOk") : t("createOk"));
     } catch (e) {
       setError(e instanceof Error ? e.message : t("uploadFailed"));
     } finally {
@@ -156,50 +256,103 @@ export function OwnerBookUploadPanel({ syncReady, editorial = false }: Props) {
   }
 
   if (!syncReady) {
-    return (
-      <ArabyaPanel legacyDash title={t("title")} muted={t("syncRequired")} />
-    );
+    return <ArabyaPanel legacyDash title={t("title")} muted={t("syncRequired")} />;
   }
 
   const isReading = bookKind === "reading";
   const useDrive = isReading && readingDelivery === "drive";
+  const cats = categories.length ? categories : LIBRARY_CATEGORIES;
 
   return (
-    <ArabyaPanelStack className="dash-stack">
-      <ArabyaPanel legacyDash title={t("title")} muted={editorial ? t("editorialLead") : t("lead")}>
-        <div className="dash-form">
-          <fieldset className="owner-upload-kind">
-            <legend>{t("bookKindLabel")}</legend>
-            <label>
-              <input
-                type="radio"
-                name="bookKind"
-                value="reading"
-                checked={bookKind === "reading"}
-                onChange={() => {
-                  setBookKind("reading");
-                  setSheetUrl("");
-                  setSelectedFile(null);
-                  if (fileRef.current) fileRef.current.value = "";
-                }}
-              />
-              {t("bookKindReading")}
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="bookKind"
-                value="irab"
-                checked={bookKind === "irab"}
-                onChange={() => {
-                  setBookKind("irab");
-                  setDriveUrl("");
-                  setReadingDelivery("upload");
-                }}
-              />
-              {t("bookKindIrab")}
-            </label>
-          </fieldset>
+    <ArabyaPanelStack className="dash-stack library-editor">
+      {editorial ? (
+        <ArabyaPanel
+          legacyDash
+          title={t("manageTitle")}
+          muted={t("manageLead")}
+        >
+          {works.length === 0 ? (
+            <p className="dash-muted">{t("manageEmpty")}</p>
+          ) : (
+            <ul className="library-manage-list">
+              {works.map((work) => (
+                <li key={work.id} className="library-manage-item">
+                  <div>
+                    <strong>{work.title}</strong>
+                    <p>
+                      {libraryCategoryLabel(work.category, locale, cats)}
+                      {work.pageCount ? ` · ${work.pageCount} ${t("pagesUnit")}` : ""}
+                      {work.externalSource === "google_drive" ? ` · ${t("viaDrive")}` : ""}
+                    </p>
+                  </div>
+                  <div className="library-manage-actions">
+                    <Link href={`/library/${work.id}`}>{t("viewLibrary")}</Link>
+                    <button type="button" onClick={() => startEdit(work)} disabled={busy}>
+                      {t("editBook")}
+                    </button>
+                    <button
+                      type="button"
+                      className="library-manage-danger"
+                      onClick={() => void removeWork(work)}
+                      disabled={busy}
+                    >
+                      {t("deleteBook")}
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </ArabyaPanel>
+      ) : null}
+
+      <ArabyaPanel
+        legacyDash
+        title={editingSlug ? t("editTitle") : t("title")}
+        muted={editorial ? t("editorialLead") : t("lead")}
+      >
+        <div className="dash-form library-editor-form">
+          {editingSlug ? (
+            <p className="library-editor-banner">
+              {t("editingBanner", { title })}
+              <button type="button" onClick={resetForm}>
+                {t("cancelEdit")}
+              </button>
+            </p>
+          ) : (
+            <fieldset className="owner-upload-kind">
+              <legend>{t("bookKindLabel")}</legend>
+              <label>
+                <input
+                  type="radio"
+                  name="bookKind"
+                  value="reading"
+                  checked={bookKind === "reading"}
+                  onChange={() => {
+                    setBookKind("reading");
+                    setSheetUrl("");
+                    setSelectedFile(null);
+                    if (fileRef.current) fileRef.current.value = "";
+                  }}
+                />
+                {t("bookKindReading")}
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="bookKind"
+                  value="irab"
+                  checked={bookKind === "irab"}
+                  onChange={() => {
+                    setBookKind("irab");
+                    setDriveUrl("");
+                    setReadingDelivery("upload");
+                  }}
+                />
+                {t("bookKindIrab")}
+              </label>
+            </fieldset>
+          )}
 
           <p className="dash-muted">{isReading ? t("readingLead") : t("irabLead")}</p>
 
@@ -242,16 +395,32 @@ export function OwnerBookUploadPanel({ syncReady, editorial = false }: Props) {
             </label>
 
             {isReading ? (
-              <label>
-                {t("category")}
-                <select value={category} onChange={(e) => setCategory(e.target.value)}>
-                  {LIBRARY_CATEGORIES.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {locale === "en" ? cat.labelEn : cat.labelAr}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <div className="library-category-field">
+                <label>
+                  {t("category")}
+                  <select value={category} onChange={(e) => setCategory(e.target.value)}>
+                    {cats.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {locale === "en" ? cat.labelEn : cat.labelAr}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {editorial ? (
+                  <div className="library-category-add">
+                    <input
+                      type="text"
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value)}
+                      placeholder={t("newCategoryPlaceholder")}
+                      maxLength={40}
+                    />
+                    <button type="button" disabled={busy || newCategory.trim().length < 2} onClick={() => void addCategory()}>
+                      {t("addCategory")}
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             ) : null}
 
             {editorial ? (
@@ -264,6 +433,7 @@ export function OwnerBookUploadPanel({ syncReady, editorial = false }: Props) {
                   onChange={(e) => setSlug(e.target.value)}
                   placeholder={t("slugPlaceholder")}
                   maxLength={80}
+                  disabled={Boolean(editingSlug)}
                 />
               </label>
             ) : null}
@@ -288,8 +458,9 @@ export function OwnerBookUploadPanel({ syncReady, editorial = false }: Props) {
                   min={1}
                   value={pageCount}
                   onChange={(e) => setPageCount(e.target.value)}
-                  placeholder="66"
+                  placeholder={t("pageCountAuto")}
                 />
+                <span className="library-field-hint">{t("pageCountHint")}</span>
               </label>
             ) : null}
           </div>
@@ -318,7 +489,7 @@ export function OwnerBookUploadPanel({ syncReady, editorial = false }: Props) {
                   checked={readingDelivery === "upload"}
                   onChange={() => {
                     setReadingDelivery("upload");
-                    setDriveUrl("");
+                    if (!editingSlug) setDriveUrl("");
                   }}
                 />
                 {t("readingSourceUpload")}
@@ -355,19 +526,9 @@ export function OwnerBookUploadPanel({ syncReady, editorial = false }: Props) {
               <p className="dash-muted">{t("driveHelp")}</p>
             </>
           ) : (
-            <label
-              className="owner-upload-drop"
-              style={{
-                display: "block",
-                padding: "1.25rem",
-                border: "2px dashed var(--brand-soft, #ccc)",
-                borderRadius: "12px",
-                textAlign: "center",
-                cursor: busy ? "wait" : "pointer",
-              }}
-            >
-              <strong>{t("dropLabel")}</strong>
-              <p className="dash-muted" style={{ margin: "0.5rem 0 0" }}>
+            <label className="owner-upload-drop">
+              <strong>{editingSlug ? t("replaceFile") : t("dropLabel")}</strong>
+              <p className="dash-muted">
                 {selectedFile
                   ? selectedFile.name
                   : isReading
@@ -397,8 +558,7 @@ export function OwnerBookUploadPanel({ syncReady, editorial = false }: Props) {
                   placeholder="https://docs.google.com/spreadsheets/d/..."
                 />
               </label>
-
-              <details className="dash-muted" style={{ marginTop: "0.75rem" }}>
+              <details className="dash-muted">
                 <summary>{t("excelHelpTitle")}</summary>
                 <p>{t("excelHelp")}</p>
               </details>
@@ -410,10 +570,11 @@ export function OwnerBookUploadPanel({ syncReady, editorial = false }: Props) {
           )}
 
           <button type="button" disabled={busy} onClick={() => void submit()}>
-            {busy ? t("busy") : t("submitBook")}
+            {busy ? t("busy") : editingSlug ? t("saveChanges") : t("submitBook")}
           </button>
         </div>
         {error ? <p className="dash-banner dash-banner--warn">{error}</p> : null}
+        {notice ? <p className="dash-banner dash-banner--ok">{notice}</p> : null}
       </ArabyaPanel>
 
       <ArabyaPanel legacyDash title={t("jobsTitle")}>
