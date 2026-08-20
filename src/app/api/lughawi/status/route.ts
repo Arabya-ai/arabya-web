@@ -32,6 +32,6 @@ export async function GET() {
     projectPoolCount: summary.total,
     projectPoolByProvider: summary.byProvider,
     projectPoolHasLocal: summary.hasLocal,
-    note: "Core proofread runs offline. AI Auto uses user keys then multi-key project pool then local Ollama.",
+    note: "Offline rules always run. Auto (project/user keys) enriches proofread when available; rewrite/translate/tashkeel use the same pool.",
   });
 }
