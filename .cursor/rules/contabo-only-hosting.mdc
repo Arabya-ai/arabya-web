@@ -1,0 +1,23 @@
+---
+description: Production is Contabo only — never Vercel
+alwaysApply: true
+---
+
+# Contabo only (hard rule)
+
+Production for Arabya is **Contabo VPS only** (PM2 + Nginx). Domains: `arabya.org` / `arabyaai.com`.
+
+## Forbidden
+- Do **not** deploy, configure, troubleshoot, or ask the owner to act on **Vercel** (or Netlify).
+- Do **not** treat a red Vercel GitHub check as a blocker or as something the owner must fix.
+- Do **not** tell the owner “ignore Vercel then deploy” as a recurring lecture — silently ignore Vercel and drive Contabo.
+
+## Required
+- Ship path: merge to `main` → Contabo deploy (`scripts/contabo-deploy.sh` or GitHub Action **Deploy Contabo**).
+- Databases and runtime stores: create/ensure via `scripts/contabo-ensure-dbs.sh` (SQLite under `/var/lib/arabya`, Lughawi pool files). Do this as part of deploy; do not leave “owner must init DB” unless a secret only they can create is missing.
+- After meaningful changes: confirm `https://www.arabya.org` (touched route) on Contabo, not a Vercel URL.
+- Local verify (`npm run dev`) is fine before Contabo; it does not replace Contabo publish when shipping.
+
+## Owner communication
+- Speak Contabo / PuTTY / PM2 only.
+- Never ask them to open the Vercel dashboard.
