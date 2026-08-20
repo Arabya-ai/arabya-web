@@ -1765,6 +1765,8 @@
     "copied": "تم النسخ",
     "noEditsFlash": "النص سليم حسب المحرك الحالي — لا اقتراحات جديدة.",
     "engineTrace": "{count} اقتراح · {ms} مللي ثانية — مراحل المحرك",
+    "traceEdits": "اقتراح",
+    "traceMs": "مللي ثانية",
     "editType": {
       "spelling": "إملاء",
       "grammar": "نحو",

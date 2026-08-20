@@ -1765,6 +1765,8 @@
     "copied": "Copied",
     "noEditsFlash": "Looks clean for the current engine — no new suggestions.",
     "engineTrace": "{count} suggestion(s) · {ms} ms — engine stages",
+    "traceEdits": "edits",
+    "traceMs": "ms",
     "editType": {
       "spelling": "Spelling",
       "grammar": "Grammar",

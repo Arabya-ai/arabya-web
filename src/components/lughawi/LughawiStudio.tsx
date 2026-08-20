@@ -1,5 +1,6 @@
 "use client";
 
+import { ENGINE_STAGES } from "@/lib/lughawi/engine/core";
 import type { EditType, LughawiEdit, ProofreadResponse, TashkeelLevel } from "@/lib/lughawi/types";
 import { applySingleEdit } from "@/lib/lughawi/pipeline-client";
 import { useTranslations } from "next-intl";
@@ -484,15 +485,19 @@ export function LughawiStudio() {
                   </button>
                   {showTrace ? (
                     <ul>
-                      {result.meta.stages.map((s) => (
-                        <li key={`${s.id}-${s.ms}`}>
-                          <code>{s.id}</code>
-                          <span>
-                            {s.editCount} · {s.ms}ms
-                            {s.note ? ` · ${s.note}` : ""}
-                          </span>
-                        </li>
-                      ))}
+                      {result.meta.stages.map((s) => {
+                        const label =
+                          ENGINE_STAGES.find((st) => st.id === s.id)?.labelAr ??
+                          s.id;
+                        return (
+                          <li key={`${s.id}-${s.ms}`}>
+                            <span>{label}</span>
+                            <span>
+                              {s.editCount} {t("traceEdits")} · {s.ms} {t("traceMs")}
+                            </span>
+                          </li>
+                        );
+                      })}
                     </ul>
                   ) : null}
                 </div>
