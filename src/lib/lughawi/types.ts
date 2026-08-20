@@ -55,6 +55,7 @@ export interface ProofreadMeta {
   quotaCharged: number;
   provider?: string;
   warning?: string;
+  offline?: boolean;
 }
 
 export interface ProofreadResponse {

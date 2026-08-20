@@ -71,6 +71,7 @@ export function proofreadLocal(
       engine: "lughawi-local",
       usedAi: false,
       quotaCharged: 0,
+      offline: true,
     },
   };
 }

@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "pairs": [
+    {
+      "from": "المدرسه",
+      "to": "المدرسة",
+      "ruleId": "ta-marbuta",
+      "accepts": 3,
+      "rejects": 0,
+      "active": true,
+      "updatedAt": "2026-08-20T00:00:00.000Z"
+    },
+    {
+      "from": "الى",
+      "to": "إلى",
+      "ruleId": "ila-preposition",
+      "accepts": 3,
+      "rejects": 0,
+      "active": true,
+      "updatedAt": "2026-08-20T00:00:00.000Z"
+    },
+    {
+      "from": "اذا",
+      "to": "إذا",
+      "ruleId": "hamza-ana",
+      "accepts": 2,
+      "rejects": 0,
+      "active": true,
+      "updatedAt": "2026-08-20T00:00:00.000Z"
+    },
+    {
+      "from": "ان",
+      "to": "أن",
+      "ruleId": "hamza-ana",
+      "accepts": 2,
+      "rejects": 1,
+      "active": true,
+      "updatedAt": "2026-08-20T00:00:00.000Z"
+    },
+    {
+      "from": "لان",
+      "to": "لأن",
+      "ruleId": "hamza-ana",
+      "accepts": 2,
+      "rejects": 0,
+      "active": true,
+      "updatedAt": "2026-08-20T00:00:00.000Z"
+    },
+    {
+      "from": "انا",
+      "to": "أنا",
+      "ruleId": "hamza-ana",
+      "accepts": 1,
+      "rejects": 0,
+      "active": true,
+      "updatedAt": "2026-08-20T13:21:49.657Z"
+    }
+  ]
+}

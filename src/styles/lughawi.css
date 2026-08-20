@@ -203,10 +203,40 @@
   padding: 1rem 1.15rem;
 }
 
-.lughawi-edits h2 {
-  margin: 0 0 0.75rem;
-  font-size: 1.15rem;
+.lughawi-mode-pill {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: var(--brand-soft);
   color: var(--brand-deep);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid color-mix(in srgb, var(--brand) 25%, var(--line));
+}
+
+.lughawi-flash {
+  color: var(--brand-deep);
+  background: var(--brand-soft);
+  border-radius: 10px;
+  padding: 0.45rem 0.65rem;
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.lughawi-edits-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.lughawi-edits-head h2 {
+  margin: 0;
 }
 
 .lughawi-edits ul {

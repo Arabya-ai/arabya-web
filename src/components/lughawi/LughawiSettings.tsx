@@ -153,6 +153,14 @@ export function LughawiSettings() {
           </li>
         ))}
       </ul>
+      <div>
+        <h3 style={{ margin: "0.5rem 0 0.25rem", fontSize: "1rem" }}>
+          {t("keysHelpTitle")}
+        </h3>
+        <p className="lughawi-muted" style={{ margin: 0 }}>
+          {t("keysHelpBody")}
+        </p>
+      </div>
     </div>
   );
 }

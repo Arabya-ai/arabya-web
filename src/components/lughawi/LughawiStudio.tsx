@@ -1,6 +1,7 @@
 "use client";
 
 import type { LughawiEdit, ProofreadResponse, TashkeelLevel } from "@/lib/lughawi/types";
+import { applySingleEdit } from "@/lib/lughawi/pipeline-client";
 import { useTranslations } from "next-intl";
 import { useMemo, useState, useTransition, type ReactNode } from "react";
 import { LughawiSettings } from "@/components/lughawi/LughawiSettings";
@@ -12,6 +13,7 @@ export function LughawiStudio() {
   const [text, setText] = useState("");
   const [result, setResult] = useState<ProofreadResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [flash, setFlash] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [action, setAction] = useState<Action>("proofread");
   const [tashkeelLevel, setTashkeelLevel] = useState<TashkeelLevel>("full");
@@ -19,14 +21,15 @@ export function LughawiStudio() {
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
 
-  const edits = result?.edits ?? [];
+  const edits = result?.edits.filter((e) => e.status === "proposed") ?? [];
 
   const highlighted = useMemo(() => {
-    if (!result?.original) return null;
-    const src = result.original;
+    if (!result) return null;
+    const src = result.result;
     const sorted = [...edits]
-      .filter((e) => e.status !== "rejected" && e.end > e.start)
+      .filter((e) => e.end > e.start)
       .sort((a, b) => a.start - b.start);
+    if (sorted.length === 0) return src;
     const nodes: ReactNode[] = [];
     let cursor = 0;
     sorted.forEach((edit, i) => {
@@ -64,6 +67,7 @@ export function LughawiStudio() {
   function run(next: Action) {
     setAction(next);
     setError(null);
+    setFlash(null);
     startTransition(async () => {
       try {
         const endpoint =
@@ -96,35 +100,100 @@ export function LughawiStudio() {
           setError(json.error || t("errorGeneric"));
           return;
         }
-        setResult(json);
+        // For proofread: highlight on the *unfixed* original so marks align.
+        // Keep result.result as fully applied preview; edits refer to original.
+        if (next === "proofread" && json.edits?.length) {
+          setResult({
+            ...json,
+            result: json.original,
+            edits: json.edits.map((e) => ({ ...e, status: "proposed" })),
+          });
+        } else {
+          setResult(json);
+        }
       } catch {
         setError(t("errorGeneric"));
       }
     });
   }
 
-  function setEditStatus(id: string, status: LughawiEdit["status"]) {
-    if (!result) return;
-    const nextEdits = result.edits.map((e) =>
-      e.id === id ? { ...e, status } : e,
-    );
-    const accepted = nextEdits.filter((e) => e.status !== "rejected");
-    let out = result.original;
-    const sorted = [...accepted].sort((a, b) => b.start - a.start);
-    for (const e of sorted) {
-      if (e.end <= e.start) continue;
-      out = out.slice(0, e.start) + e.suggestion + out.slice(e.end);
+  async function sendFeedback(edit: LughawiEdit, decision: "accepted" | "rejected") {
+    try {
+      await fetch("/api/lughawi/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from: edit.original,
+          to: edit.suggestion,
+          decision,
+          ruleId: edit.ruleId,
+        }),
+      });
+    } catch {
+      // Learning is best-effort; UI still applies locally.
     }
-    setResult({ ...result, edits: nextEdits, result: out });
+  }
+
+  function decide(id: string, decision: "accepted" | "rejected") {
+    if (!result) return;
+    const edit = result.edits.find((e) => e.id === id);
+    if (!edit) return;
+
+    void sendFeedback(edit, decision);
+
+    if (decision === "rejected") {
+      const nextEdits = result.edits.map((e) =>
+        e.id === id ? { ...e, status: "rejected" as const } : e,
+      );
+      setResult({ ...result, edits: nextEdits });
+      setFlash(t("rejectedFlash", { word: edit.original }));
+      return;
+    }
+
+    // Accept: apply onto current working text (result.result which starts as original).
+    const applied = applySingleEdit(result.result, result.edits, id, "accepted");
+    setText(applied.text);
+    setResult({
+      ...result,
+      original: applied.text,
+      result: applied.text,
+      edits: applied.edits,
+    });
+    setFlash(t("acceptedFlash", { from: edit.original, to: edit.suggestion }));
+  }
+
+  function acceptAll() {
+    if (!result) return;
+    const pendingEdits = result.edits.filter((e) => e.status === "proposed");
+    let workingText = result.result;
+    let workingEdits = [...result.edits];
+    for (const edit of pendingEdits) {
+      void sendFeedback(edit, "accepted");
+      const applied = applySingleEdit(workingText, workingEdits, edit.id, "accepted");
+      workingText = applied.text;
+      workingEdits = applied.edits;
+    }
+    setText(workingText);
+    setResult({
+      ...result,
+      original: workingText,
+      result: workingText,
+      edits: [],
+    });
+    setFlash(t("acceptedAllFlash"));
   }
 
   function copyResult() {
-    const value = result?.result ?? "";
+    const value = result?.result ?? text;
     void navigator.clipboard.writeText(value);
   }
 
   return (
     <section className="lughawi-studio" aria-label={t("studioLabel")}>
+      <p className="lughawi-mode-pill" role="status">
+        {t("offlineMode")}
+      </p>
+
       <div className="lughawi-toolbar">
         <button
           type="button"
@@ -233,18 +302,17 @@ export function LughawiStudio() {
         <div className="lughawi-panel">
           <div className="lughawi-panel-label">
             {t("outputLabel")}
-            <button type="button" className="lughawi-copy" onClick={copyResult} disabled={!result}>
+            <button type="button" className="lughawi-copy" onClick={copyResult} disabled={!result && !text}>
               {t("copy")}
             </button>
           </div>
           {pending ? <p className="lughawi-status">{t("processing")}</p> : null}
           {error ? <p className="lughawi-error">{error}</p> : null}
+          {flash ? <p className="lughawi-flash" role="status">{flash}</p> : null}
           {result ? (
             <>
               <div className="lughawi-result" dir="rtl">
-                {highlighted && edits.some((e) => e.end > e.start)
-                  ? highlighted
-                  : result.result}
+                {highlighted}
               </div>
               {result.meta.warning ? (
                 <p className="lughawi-warn">{result.meta.warning}</p>
@@ -270,10 +338,15 @@ export function LughawiStudio() {
 
       {edits.length > 0 ? (
         <div className="lughawi-edits">
-          <h2>{t("editsTitle")}</h2>
+          <div className="lughawi-edits-head">
+            <h2>{t("editsTitle")}</h2>
+            <button type="button" onClick={acceptAll}>
+              {t("acceptAll")}
+            </button>
+          </div>
           <ul>
             {edits.map((edit) => (
-              <li key={edit.id} className={edit.status === "rejected" ? "is-rejected" : undefined}>
+              <li key={edit.id}>
                 <div>
                   <code>{edit.original}</code>
                   <span aria-hidden="true"> ← </span>
@@ -281,10 +354,10 @@ export function LughawiStudio() {
                   <p>{edit.explanation}</p>
                 </div>
                 <div className="lughawi-edit-actions">
-                  <button type="button" onClick={() => setEditStatus(edit.id, "accepted")}>
+                  <button type="button" onClick={() => decide(edit.id, "accepted")}>
                     {t("accept")}
                   </button>
-                  <button type="button" onClick={() => setEditStatus(edit.id, "rejected")}>
+                  <button type="button" onClick={() => decide(edit.id, "rejected")}>
                     {t("reject")}
                   </button>
                 </div>
