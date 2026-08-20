@@ -1,13 +1,11 @@
 #!/usr/bin/env node
 /**
- * Build per-collection isnad overlays for Arabya hadith items.
+ * OPTIONAL offline isnad overlay builder.
  *
- * Sources (fit-checked for Arabya):
- * 1) Structured narrators parsed from Arabic matn already in data/hadith
- *    (transmission verbs — method aligned with open R3GENESI5/Itqan parser ideas;
- *    we do NOT vendor their multi-GB corpora).
- * 2) English “Narrated X:” lead-in from fawazahmed0/hadith-api eng-* editions
- *    (same project as our Arabic matn — adds an explicit narratorEn field).
+ * Default product path is LIVE: parse Arabic matn in-process and fetch
+ * English “Narrated …” from fawazahmed0 CDN (see src/lib/hadith-isnad.ts).
+ * Use this script only if you explicitly want cached JSON under
+ * data/hadith/isnad/ (avoid committing multi‑MB dumps).
  *
  * Deferred (too large / gated for git): emadjumaah/hadith-kg (~1.6GB),
  * JehadOumer Ifta JSON (Kaggle), full Itqan rijal dumps.

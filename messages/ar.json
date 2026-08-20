@@ -1393,7 +1393,17 @@
     "hadithLink": "الأحاديث",
     "indexLink": "الفهرس",
     "binbazCatalog": "كتالوج كتب ابن باز (بيانات مفتوحة)",
-    "binbazCatalogLead": "عناوين وروابط من rn0x/binbaz_database — دون استيراد فتاوى كاملة متعددة الميجابايت."
+    "binbazCatalogLead": "عناوين وروابط من rn0x/binbaz_database — دون استيراد فتاوى كاملة متعددة الميجابايت.",
+    "remoteSiyarTitle": "موسوعة السيرة والتاريخ (من المصدر مباشرة)",
+    "remoteSiyarLead": "تصفّح آلاف الأحداث من مستودع rn0x على GitHub عبر واجهة عربية — الملف الكامل (~12MB) لا يُخزَّن في مشروع عربية.",
+    "remoteSource": "المصدر الحي: {source}",
+    "remoteSearchLabel": "بحث في الموسوعة",
+    "remoteSearchPlaceholder": "كلمة من العنوان أو النص…",
+    "remoteSearch": "بحث",
+    "remoteLoading": "جارٍ الجلب من المصدر…",
+    "remoteError": "تعذّر الوصول للمصدر الآن — أعد المحاولة لاحقاً.",
+    "remotePagerAria": "تصفح صفحات الموسوعة البعيدة",
+    "remotePageOf": "صفحة {page} من {total} · {count} حدثاً"
   },
   "IbadahEvents": {
     "title": "مناسبات هجرية قريبة",

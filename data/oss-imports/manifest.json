@@ -1,12 +1,11 @@
 {
   "updatedAt": "2026-08-20",
-  "note": "Full data imports from open JSON/APIs/CSV fit-checked for Arabya. Quran mushaf text was NOT replaced. Large gated corpora (hadith-kg, Ifta Kaggle, Diwan full) stay deferred.",
-  "imported": [
+  "note": "Prefer live remote display for oversized corpora. Quran mushaf text was NOT replaced. Imports kept bounded and verified via npm run verify-oss-imports.",
+  "importedLocal": [
     {
-      "project": "fawazahmed0/hadith-api",
+      "project": "fawazahmed0/hadith-api (ara editions)",
       "path": "data/hadith/collections/*",
-      "hadithsApprox": 36104,
-      "also": "eng editions → narratorEn in isnad overlays"
+      "hadithsApprox": 36104
     },
     {
       "project": "mhashim6/Open-Hadith-Data",
@@ -14,37 +13,26 @@
       "hadithsApprox": 29730
     },
     {
-      "project": "arabya isnad overlay (matn parse + eng Narrated)",
-      "path": "data/hadith/isnad/*.json",
-      "note": "Structured narrators[] / narratorEn keyed by number"
+      "project": "rn0x adhkar/hisn + Names of Allah",
+      "path": "data/adhkar + data/asma"
     },
     {
-      "project": "rn0x/Adhkar-json + hisn_almuslim_json",
-      "path": "data/adhkar + /adhkar/hisn UI"
+      "project": "ARBML/Ashaar + PD poets + binbaz catalog meta",
+      "path": "data/heritage"
+    }
+  ],
+  "liveRemoteNoGitDump": [
+    {
+      "project": "fawazahmed0 eng/ara per-hadith CDN",
+      "via": "/api/hadith/remote-enrich + live isnad narratorEn"
     },
     {
-      "project": "rn0x/Names_Of_Allah_Json",
-      "path": "data/asma/names-of-allah-rn0x.json"
-    },
-    {
-      "project": "ARBML/Ashaar ashaar_arudi.csv",
-      "path": "data/heritage/works/ashaar-arudi.json"
-    },
-    {
-      "project": "rn0x/Historical_Encyclopedia (sample 60)",
-      "path": "data/heritage/works/siyar-sample.json"
-    },
-    {
-      "project": "rn0x/binbaz_database books_ar (catalog only)",
-      "path": "data/heritage/catalogs/binbaz-books.json"
-    },
-    {
-      "project": "heritage editorial public-domain poetry",
-      "path": "data/heritage/works/*"
+      "project": "rn0x/Historical_Encyclopedia history.json (~12MB)",
+      "via": "/api/remote/siyar + RemoteSiyarBrowser"
     }
   ],
   "deferred": [
-    "emadjumaah/hadith-kg (~1.6GB SQLite)",
+    "emadjumaah/hadith-kg (~1.6GB SQLite — needs separate host)",
     "JehadOumer Ifta chain_of_narrators (Kaggle)",
     "HF classical_arabic_poetry (gated)",
     "NoorBayan/Diwan full (~500k poems)"
@@ -52,6 +40,6 @@
   "totals": {
     "hadithCollections": 12,
     "hadithsApprox": 65834,
-    "heritageWorks": 11
+    "heritageWorksLocal": 11
   }
 }

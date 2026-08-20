@@ -13,9 +13,9 @@
 | `grade` | اختياري (صحيح / حسن…) مع `source` |
 | `words[]` | واجهة: توكنات على المتن + Word IDs `HW:{collection}:{number}:{PPP}` |
 | طبقات | صرف · نحو · دلالة · بلاغة · معجم · ترجمة (Claims عند الاختلاف) — UI جاهز؛ بيانات الصرف تُملأ تدريجيًا |
-| `isnad` | اختياري: `narrators[]` + `narratorEn` من overlay في `data/hadith/isnad/` |
+| `isnad` | حي: `narrators[]` من المتن + `narratorEn` من CDN (بدون dump إسناد في Git) |
 
-ملفات: `data/hadith/index.json` · `data/hadith/collections/*.json` · `data/hadith/isnad/*.json` · `src/lib/hadith.ts` · `src/lib/hadith-isnad.ts` · `/api/hadith/search`.
+ملفات: `data/hadith/index.json` · `data/hadith/collections/*.json` · `src/lib/hadith.ts` · `src/lib/hadith-isnad.ts` · `/api/hadith/search` · `/api/hadith/remote-enrich` · `/api/remote/siyar`.
 
 ## Heritage / Poetry
 

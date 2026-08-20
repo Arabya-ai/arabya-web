@@ -1,47 +1,72 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-
-const dataRoot = path.join(process.cwd(), "data", "hadith");
+import {
+  extractNarratorEnFromText,
+  extractNarratorsFromArabic,
+  HADITH_ENG_EDITION,
+  hadithCdnEditionUrl,
+} from "@/lib/hadith-isnad-parse";
 
 export type HadithIsnadEntry = {
   narrators: string[];
   narratorEn?: string;
-  chainHint?: string;
   source: string;
 };
 
-type OverlayFile = {
-  collection: string;
-  source?: string;
-  method?: string;
-  items?: Record<string, HadithIsnadEntry>;
-};
+const engCache = new Map<string, string | null>();
 
-const overlayCache = new Map<string, OverlayFile | null>();
-
-async function readOverlay(slug: string): Promise<OverlayFile | null> {
-  const safe = slug.replace(/[^a-z0-9-]/gi, "");
-  if (!safe) return null;
-  if (overlayCache.has(safe)) return overlayCache.get(safe) ?? null;
+async function fetchNarratorEnRemote(
+  collection: string,
+  number: number,
+): Promise<string | undefined> {
+  const edition = HADITH_ENG_EDITION[collection];
+  if (!edition) return undefined;
+  const key = `${edition}:${number}`;
+  if (engCache.has(key)) {
+    return engCache.get(key) ?? undefined;
+  }
+  const url = hadithCdnEditionUrl(edition, number);
   try {
-    const raw = await readFile(
-      path.join(dataRoot, "isnad", `${safe}.json`),
-      "utf8",
-    );
-    const parsed = JSON.parse(raw) as OverlayFile;
-    overlayCache.set(safe, parsed);
-    return parsed;
+    const res = await fetch(url, {
+      headers: {
+        Accept: "application/json",
+        "User-Agent": "arabya-web-isnad-live",
+      },
+      next: { revalidate: 86400 },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!res.ok) {
+      engCache.set(key, null);
+      return undefined;
+    }
+    const data = (await res.json()) as {
+      hadiths?: { text?: string }[];
+    };
+    const text = data.hadiths?.[0]?.text ?? "";
+    const narratorEn = extractNarratorEnFromText(text);
+    engCache.set(key, narratorEn ?? null);
+    return narratorEn;
   } catch {
-    overlayCache.set(safe, null);
-    return null;
+    engCache.set(key, null);
+    return undefined;
   }
 }
 
+/**
+ * Build isnād fields live from the local Arabic matn + optional English
+ * lead-in fetched from fawazahmed0 CDN (not vendored into Git).
+ */
 export async function getHadithIsnad(
   collection: string,
   number: number,
+  arabic: string,
 ): Promise<HadithIsnadEntry | null> {
-  const overlay = await readOverlay(collection);
-  if (!overlay?.items) return null;
-  return overlay.items[String(number)] ?? null;
+  const narrators = extractNarratorsFromArabic(arabic || "");
+  const narratorEn = await fetchNarratorEnRemote(collection, number);
+  if (!narrators.length && !narratorEn) return null;
+  return {
+    narrators,
+    narratorEn,
+    source: narrators.length
+      ? "live-matn-parse+cdn-eng"
+      : "cdn-eng",
+  };
 }

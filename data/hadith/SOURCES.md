@@ -1,25 +1,24 @@
 # مصادر بيانات الحديث
 
-| مشروع (قائمة الـ320 / ملاءمة عربية) | الاستخدام |
+| مشروع | الاستخدام في عربية |
 |---|---|
-| [fawazahmed0/hadith-api](https://github.com/fawazahmed0/hadith-api) | متون عربية كاملة + طبعة إنجليزية لحقل الراوي (`Narrated…`) |
-| [mhashim6/Open-Hadith-Data](https://github.com/mhashim6/Open-Hadith-Data) | مسند أحمد + سنن الدارمي (CSV) |
-| استخراج سند محلي (`scripts/build-hadith-isnad-overlay.mjs`) | حقول `narrators[]` / `narratorEn` فوق `H:collection:number` |
-| [R3GENESI5/Itqan](https://github.com/R3GENESI5/Itqan) | مرجع منهجية أفعال التحديث — **لا** نستنسخ قواعدهم كاملة |
+| [fawazahmed0/hadith-api](https://github.com/fawazahmed0/hadith-api) | متون عربية **مستوردة** تحت `data/hadith/collections` + إثراء حي من CDN (راوي إنجليزي / درجات) |
+| [mhashim6/Open-Hadith-Data](https://github.com/mhashim6/Open-Hadith-Data) | مسند أحمد + الدارمي (CSV → JSON محلي) |
+| استخراج سند حي | `src/lib/hadith-isnad-parse.ts` من المتن المحلي + `cdn.jsdelivr` للطبعة الإنجليزية — **بدون** ملفات إسناد متعددة الميجابايت في Git |
 
-## مؤجّل (حجم / بوابة)
+## بيانات كبيرة — تُعرض من المصدر (لا تُحمَّل للمستودع)
 
-| مصدر | السبب |
+| مصدر | الأسلوب |
 |---|---|
-| emadjumaah/hadith-kg | SQLite ~1.6GB — خارج حدود Git |
-| JehadOumer Ifta (`chain_of_narrators`) | بيانات Kaggle كبيرة — تحتاج موافقة مالك + مسار استيراد منفصل |
-
-أعد الاستيراد:
+| fawazahmed0 eng/ara per-hadith JSON | `/api/hadith/remote-enrich` + جلب راوي أثناء عرض الصفحة |
+| emadjumaah/hadith-kg (~1.6GB) | مؤجّل — لا SQLite في Git؛ يحتاج استضافة منفصلة إن رغبت لاحقاً |
+| JehadOumer Ifta | مؤجّل (Kaggle) |
 
 ```bash
 npm run import-hadith-oss
 npm run import-open-hadith-data
+npm run verify-oss-imports
+npm run verify-oss-imports:live   # يختبر CDN + GitHub
+# اختياري فقط لتخزين مؤقت محلي:
 npm run build-hadith-isnad
 ```
-
-آخر تحديث: 2026-08-20

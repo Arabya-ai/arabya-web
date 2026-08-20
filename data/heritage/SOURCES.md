@@ -1,20 +1,20 @@
 # مصادر التراث والشعر
 
-| مصدر | ما استوردناه | ملاءمة عربية |
-|---|---|---|
-| [ARBML/Ashaar](https://github.com/ARBML/Ashaar) | `ashaar-arudi` — شواهد عروضية مشكولة | طبقة بلاغة/عروض |
-| [rn0x/Historical_Encyclopedia](https://github.com/rn0x/Historical_Encyclopedia) | عيّنة 60 حدثًا → `siyar-sample` | نثر تراثي / سيرة |
-| [rn0x/binbaz_database](https://github.com/rn0x/binbaz_database) | كتالوج عناوين فقط (`catalogs/binbaz-books.json`) | مكتبة/تراث — بدون فتاوى كاملة |
-| ملك عام تحريري | زهير، لبيد، عنترة، البحتري + مختارات سابقة | شعر كلاسيكي |
+| مصدر | الأسلوب |
+|---|---|
+| [ARBML/Ashaar](https://github.com/ARBML/Ashaar) | عيّنة عروض مستوردة (`ashaar-arudi`) |
+| شعراء ملك عام | مختارات تحريرية في `works/` |
+| [rn0x/binbaz_database](https://github.com/rn0x/binbaz_database) | كتالوج عناوين فقط |
+| [rn0x/Historical_Encyclopedia](https://github.com/rn0x/Historical_Encyclopedia) | **عرض حي** عبر `/api/remote/siyar` — الملف الكامل ~12MB لا يُخزَّن في Git (عيّنة تعليمية صغيرة `siyar-sample` اختيارية) |
 
-## مؤجّل
+## مؤجّل / بعيد
 
 | مصدر | السبب |
 |---|---|
-| HF `classical_arabic_poetry` | مستودع مقيّد (gated) |
-| Diwan (~500k قصيدة) | حجم هائل — عيّنات فقط لاحقًا |
-| ملف history.json كامل (~12MB) | اكتفينا بعيّنة داخل الأعمال |
+| Diwan الكامل | مئات آلاف القصائد |
+| HF classical_arabic_poetry | gated |
 
 ```bash
 npm run import-heritage-expansion
+npm run verify-oss-imports
 ```

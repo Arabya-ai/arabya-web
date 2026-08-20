@@ -1393,7 +1393,17 @@
     "hadithLink": "Hadith",
     "indexLink": "Index",
     "binbazCatalog": "Ibn Bāz books catalog (open metadata)",
-    "binbazCatalogLead": "Titles and links from rn0x/binbaz_database — full multi‑MB fatwa dumps stay deferred."
+    "binbazCatalogLead": "Titles and links from rn0x/binbaz_database — full multi‑MB fatwa dumps stay deferred.",
+    "remoteSiyarTitle": "Sīrah & history encyclopedia (live from source)",
+    "remoteSiyarLead": "Browse thousands of events from rn0x’s GitHub repo through Arabya UI — the full ~12MB dump is not stored in this repository.",
+    "remoteSource": "Live source: {source}",
+    "remoteSearchLabel": "Search encyclopedia",
+    "remoteSearchPlaceholder": "Word from title or text…",
+    "remoteSearch": "Search",
+    "remoteLoading": "Fetching from upstream…",
+    "remoteError": "Could not reach the upstream source — try again later.",
+    "remotePagerAria": "Remote encyclopedia pages",
+    "remotePageOf": "Page {page} of {total} · {count} events"
   },
   "IbadahEvents": {
     "title": "Upcoming Hijri observances",

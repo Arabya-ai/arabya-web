@@ -36,7 +36,11 @@ export default async function HadithItemPage({ params }: Props) {
   const { collection, item } = hit;
   const title = locale === "en" ? collection.titleEn : collection.titleAr;
   const chapter = locale === "en" ? item.chapterEn : item.chapterAr;
-  const isnad = await getHadithIsnad(collection.slug, item.number);
+  const isnad = await getHadithIsnad(
+    collection.slug,
+    item.number,
+    item.arabic,
+  );
 
   return (
     <div className="shell page-block hadith-page">

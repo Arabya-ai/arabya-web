@@ -5,6 +5,7 @@ import { resolveLocale } from "@/i18n/locale-params";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { listHeritageWorks } from "@/lib/heritage";
+import { RemoteSiyarBrowser } from "@/components/RemoteSiyarBrowser";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -91,6 +92,8 @@ export default async function HeritageHubPage({ params }: Props) {
           </ul>
         </section>
       ) : null}
+
+      <RemoteSiyarBrowser />
 
       <p>
         <Link href="/library" className="nav-pill">
