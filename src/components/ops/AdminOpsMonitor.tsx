@@ -33,6 +33,13 @@ type Snapshot = {
     projectPoolByProvider: Record<string, number>;
     hasLocalOllama: boolean;
     learning: { pairs?: number; active?: number; suppressed?: number };
+    sidecar?: {
+      ok: boolean;
+      version?: string;
+      tools?: Record<string, string>;
+      ms: number;
+      detail?: string;
+    };
   };
   aiUsage: {
     month: string;
