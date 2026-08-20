@@ -133,6 +133,14 @@ export const RULE_NOTES: Record<string, RuleNote> = {
     bodyAr: "«هناك يوجد» تكرار؛ يكفي غالبًا «يوجد» أو «هناك».",
     bodyEn: "«هناك يوجد» is redundant; prefer «يوجد» or «هناك».",
   },
+  "num-agreement": {
+    ruleId: "num-agreement",
+    titleAr: "العدد والمعدود",
+    titleEn: "Number–noun agreement",
+    bodyAr: "من 3 إلى 10 يخالف العدد المعدود في التذكير والتأنيث في الفصحى الشائعة.",
+    bodyEn: "For 3–10, MSA number gender usually disagrees with the counted noun.",
+    exampleAr: "ثلاثة كتب · ثلاث مدارس",
+  },
 };
 
 export function explainRule(

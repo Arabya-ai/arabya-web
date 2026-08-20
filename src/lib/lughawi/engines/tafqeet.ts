@@ -95,13 +95,84 @@ export function numberToArabicWords(n: number): string {
   return parts.join(" و");
 }
 
-/** Replace digit sequences in text with tafqeet suggestions applied. */
+const FEM_NOUNS = new Set([
+  "مدرسة",
+  "سيارة",
+  "امرأة",
+  "بنت",
+  "فكرة",
+  "لغة",
+  "مسألة",
+  "مشكلة",
+  "صفحة",
+  "رسالة",
+  "خدمة",
+  "كلمة",
+  "جملة",
+  "فقرة",
+  "مكتبة",
+  "جامعة",
+]);
+
+const MASC_NOUNS = new Set([
+  "كتاب",
+  "قلم",
+  "رجل",
+  "ولد",
+  "يوم",
+  "درس",
+  "مشروع",
+  "برنامج",
+  "موقع",
+  "نص",
+  "خطأ",
+  "تقرير",
+  "طالب",
+]);
+
+/** Soften masculine 3–10 forms when the counted noun is feminine. */
+function agreeNumberWords(n: number, words: string, noun: string): string {
+  if (n < 3 || n > 10) return words;
+  if (!FEM_NOUNS.has(noun)) return words;
+  return words
+    .replace(/^ثلاثة$/, "ثلاث")
+    .replace(/^أربعة$/, "أربع")
+    .replace(/^خمسة$/, "خمس")
+    .replace(/^ستة$/, "ست")
+    .replace(/^سبعة$/, "سبع")
+    .replace(/^ثمانية$/, "ثمان")
+    .replace(/^تسعة$/, "تسع")
+    .replace(/^عشرة$/, "عشر");
+}
+
+/**
+ * Replace digit sequences with tafqeet.
+ * When `N + noun` is detected, apply limited gender agreement for 3–10.
+ */
 export function applyTafqeet(text: string): {
   result: string;
   replacements: { from: string; to: string }[];
 } {
   const replacements: { from: string; to: string }[] = [];
-  const result = text.replace(/\d+/g, (digits) => {
+
+  let result = text.replace(
+    /(\d+)\s+([\u0600-\u06FF]+)/g,
+    (full, digits: string, noun: string) => {
+      const n = Number(digits);
+      if (!Number.isFinite(n) || n < 0) return full;
+      const base = numberToArabicWords(n);
+      if (!base) return full;
+      const words =
+        FEM_NOUNS.has(noun) || MASC_NOUNS.has(noun)
+          ? agreeNumberWords(n, base, noun)
+          : base;
+      const to = `${words} ${noun}`;
+      replacements.push({ from: full, to });
+      return to;
+    },
+  );
+
+  result = result.replace(/\d+/g, (digits) => {
     const n = Number(digits);
     if (!Number.isFinite(n)) return digits;
     const words = numberToArabicWords(n);
@@ -109,5 +180,6 @@ export function applyTafqeet(text: string): {
     replacements.push({ from: digits, to: words });
     return words;
   });
+
   return { result, replacements };
 }

@@ -58,6 +58,11 @@ export interface EngineStageTrace {
   note?: string;
 }
 
+export interface EloquenceMeta {
+  score: number;
+  summaryAr: string;
+}
+
 export interface ProofreadMeta {
   engine: string;
   usedAi: boolean;
@@ -70,7 +75,11 @@ export interface ProofreadMeta {
   /** Per-stage inference trace (rules / future GEC / AI). */
   stages?: EngineStageTrace[];
   totalMs?: number;
+  /** Surface-form quality score (0–100). */
+  eloquence?: EloquenceMeta;
 }
+
+export type ProofMode = "full" | "spelling";
 
 export interface ProofreadResponse {
   original: string;
@@ -89,6 +98,8 @@ export interface ProofreadOptions {
   useAi?: boolean;
   /** Drop suggestions below this confidence (default 0.5 in engine). */
   minConfidence?: number;
+  /** Sahehly-style: spelling-only vs full grammar+style. */
+  proofMode?: ProofMode;
 }
 
 export const AI_PROVIDERS: {

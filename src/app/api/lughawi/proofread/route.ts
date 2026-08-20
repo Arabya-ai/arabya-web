@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { lughawiMaxGuestChars } from "@/lib/lughawi/config";
 import { proofreadLocal } from "@/lib/lughawi/pipeline";
+import type { ProofMode } from "@/lib/lughawi/types";
 import { enforceRateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
   const limited = enforceRateLimit(req, { prefix: "lughawi-proofread", limit: 40 });
   if (limited) return limited;
 
-  let body: { text?: string; locale?: string; mode?: string };
+  let body: { text?: string; locale?: string; mode?: string; proofMode?: string };
   try {
     body = (await req.json()) as typeof body;
   } catch {
@@ -16,6 +17,8 @@ export async function POST(req: Request) {
 
   const text = typeof body.text === "string" ? body.text : "";
   const locale = body.locale === "en" ? "en" : "ar";
+  const proofMode: ProofMode =
+    body.proofMode === "spelling" ? "spelling" : "full";
   const max = lughawiMaxGuestChars();
 
   if (!text.trim()) {
@@ -36,6 +39,10 @@ export async function POST(req: Request) {
     );
   }
 
-  const result = proofreadLocal(text, { locale, mode: "proofread" });
+  const result = proofreadLocal(text, {
+    locale,
+    mode: "proofread",
+    proofMode,
+  });
   return NextResponse.json(result);
 }

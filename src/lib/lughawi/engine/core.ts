@@ -6,6 +6,8 @@
  * Client UI must import labels from `./stages-meta` only.
  */
 
+import { filterDontCorrect } from "@/lib/lughawi/dont-correct";
+import { scoreEloquence } from "@/lib/lughawi/eloquence";
 import {
   findProtectedQuranSpans,
   isInsideProtected,
@@ -100,9 +102,19 @@ export function runProofreadEngine(
   });
 
   const stageEdits: LughawiEdit[][] = [];
+  const spellingOnly = options.proofMode === "spelling";
 
   for (const stage of ENGINE_STAGES) {
     if (!stage.run) continue;
+    if (spellingOnly && (stage.id === "grammar" || stage.id === "style")) {
+      traces.push({
+        id: stage.id,
+        editCount: 0,
+        ms: 0,
+        note: "skipped (spelling-only)",
+      });
+      continue;
+    }
     const start = Date.now();
     const raw = stage.run(original, locale);
     const filtered = filterProtected(raw, protectedSpans);
@@ -115,7 +127,7 @@ export function runProofreadEngine(
   }
 
   const mergeStart = Date.now();
-  const merged = mergeEdits(stageEdits);
+  const merged = filterDontCorrect(mergeEdits(stageEdits));
   traces.push({
     id: "merge",
     editCount: merged.length,
@@ -131,6 +143,7 @@ export function runProofreadEngine(
   });
 
   const result = applyEdits(original, edits);
+  const eloquence = scoreEloquence(original, edits.length);
 
   return {
     original,
@@ -145,6 +158,10 @@ export function runProofreadEngine(
       version: LUGHAWI_ENGINE_VERSION,
       stages: traces,
       totalMs: Date.now() - t0,
+      eloquence: {
+        score: eloquence.score,
+        summaryAr: eloquence.summaryAr,
+      },
     },
   };
 }

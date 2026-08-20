@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "updatedAt": "2026-08-20",
+  "noteAr": "كلمات وعبارات مؤسسية لا يُقترح تصحيحها (أسماء علامات، مصطلحات ثابتة، أسماء أعلام).",
+  "entries": [
+    { "text": "عربية", "reason": "اسم المنصة" },
+    { "text": "لغوي", "reason": "اسم المنتج" },
+    { "text": "arabya", "reason": "اسم المنصة لاتيني" },
+    { "text": "lughawi", "reason": "اسم المنتج لاتيني" },
+    { "text": "Contabo", "reason": "اسم مزود الاستضافة" },
+    { "text": "Ollama", "reason": "اسم أداة" },
+    { "text": "Gemini", "reason": "اسم نموذج" },
+    { "text": "OpenRouter", "reason": "اسم مزود" }
+  ]
+}
