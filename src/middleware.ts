@@ -1,3 +1,4 @@
+import { collapseDuplicatePathSlashes } from "@/lib/path-normalize";
 import createMiddleware from "next-intl/middleware";
 import {
   NextResponse,
@@ -34,6 +35,21 @@ function canonicalHostRedirect(request: NextRequest): NextResponse | null {
   url.protocol = "https:";
   url.hostname = wwwTarget;
   url.port = "";
+  return NextResponse.redirect(url, 308);
+}
+
+/**
+ * Collapse duplicate path slashes.
+ * Duplicate slashes make the History API treat the path as a protocol-relative
+ * URL (`https://lughawi/`), which crashes the client (SecurityError / replaceState).
+ */
+function duplicateSlashRedirect(request: NextRequest): NextResponse | null {
+  const { pathname } = request.nextUrl;
+  if (!pathname.includes("//")) return null;
+  const nextPath = collapseDuplicatePathSlashes(pathname);
+  if (nextPath === pathname) return null;
+  const url = request.nextUrl.clone();
+  url.pathname = nextPath;
   return NextResponse.redirect(url, 308);
 }
 
@@ -98,6 +114,9 @@ function runPublicMiddleware(request: NextRequest): NextResponse {
 export default function middleware(request: NextRequest) {
   const hostRedirect = canonicalHostRedirect(request);
   if (hostRedirect) return hostRedirect;
+
+  const slashRedirect = duplicateSlashRedirect(request);
+  if (slashRedirect) return slashRedirect;
 
   const { pathname } = request.nextUrl;
 
