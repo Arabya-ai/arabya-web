@@ -948,8 +948,15 @@ export function LughawiStudio() {
                           ) : null}
                         </div>
                       ) : null}
+                      {result.meta.usedAi ? (
+                        <p className="lughawi-flash" role="status">
+                          {t("autoOk")}
+                        </p>
+                      ) : null}
                       {result.meta.warning ? (
-                        <p className="lughawi-warn">{result.meta.warning}</p>
+                        <p className="lughawi-warn" role="status">
+                          {result.meta.warning}
+                        </p>
                       ) : null}
                       {result.protectedSpans.length > 0 ? (
                         <ul className="lughawi-protected">

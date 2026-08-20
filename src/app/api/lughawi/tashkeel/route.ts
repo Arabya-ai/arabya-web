@@ -1,5 +1,5 @@
 import { auth } from "@/auth";
-import { runAiAuto } from "@/lib/lughawi/ai-gateway";
+import { humanizeAiError, runAiAuto } from "@/lib/lughawi/ai-gateway";
 import { countArabicWords } from "@/lib/lughawi/config";
 import { applyLocalTashkeel } from "@/lib/lughawi/engines/tashkeel-engine";
 import { resolveLughawiAiCandidates } from "@/lib/lughawi/resolve-ai";
@@ -165,7 +165,9 @@ export async function POST(req: Request) {
         usedAi: false,
         quotaCharged: 0,
         offline: true,
-        warning: e instanceof Error ? e.message : "AI tashkeel failed",
+        warning: humanizeAiError(
+          e instanceof Error ? e.message : "AI tashkeel failed",
+        ),
       },
     } satisfies ProofreadResponse);
   }

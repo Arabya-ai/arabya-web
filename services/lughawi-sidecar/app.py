@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 
 HOST = "127.0.0.1"
 PORT = 8091
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 
 # Optional heavy deps — never required to boot.
 _HAS_CAMEL = False

@@ -75,6 +75,10 @@ export const BUILTIN_SPELLING: { from: string; to: string; ruleId: string; confi
   { from: "امجد", to: "أمجد", ruleId: "name-hamza", confidence: 0.8 },
   { from: "اديب", to: "أديب", ruleId: "name-hamza", confidence: 0.75 },
   { from: "اسعد", to: "أسعد", ruleId: "name-hamza", confidence: 0.75 },
+  { from: "اسماء", to: "أسماء", ruleId: "name-hamza", confidence: 0.85 },
+  { from: "ايمان", to: "إيمان", ruleId: "name-hamza", confidence: 0.85 },
+  { from: "ايهاب", to: "إيهاب", ruleId: "name-hamza", confidence: 0.8 },
+  { from: "اياد", to: "إياد", ruleId: "name-hamza", confidence: 0.8 },
   { from: "الان", to: "الآن", ruleId: "hamza-ana" },
   { from: "اولا", to: "أولًا", ruleId: "hamza-ana", confidence: 0.75 },
   { from: "ثانيا", to: "ثانيًا", ruleId: "hamza-ana", confidence: 0.75 },
@@ -318,7 +322,7 @@ export function collectSpellingEdits(
 
   // على → علي when it is clearly a person name after meeting/address verbs.
   const nameAliRe =
-    /(?<![\u0600-\u06FFa-zA-Z0-9])(قابل|قابلت|زرت|زار|رأيت|رأى|لقيت|لَقيت|كلمت|كلّمت|سميت|سمّيت|اسمه|يدعى|يُدعى|مع)\s+على(?![\u0600-\u06FFa-zA-Z0-9])/g;
+    /(?<![\u0600-\u06FFa-zA-Z0-9])(قابل|قابلت|قابله|زرت|زار|رأيت|رأى|لقيت|لَقيت|كلمت|كلّمت|ناديت|نادى|سميت|سمّيت|اسمه|يدعى|يُدعى|مع|إلى|الى)\s+على(?![\u0600-\u06FFa-zA-Z0-9])/g;
   let nm: RegExpExecArray | null;
   while ((nm = nameAliRe.exec(text)) !== null) {
     const full = nm[0]!;

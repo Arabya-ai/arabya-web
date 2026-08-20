@@ -119,7 +119,13 @@ export async function enrichProofreadWithAi(
     maxTokens: 800,
   });
 
-  const pairs = parseAiPairs(raw);
+  const pairs = parseAiPairs(raw).filter((p) => {
+    // Never let AI undo a local high-confidence fix (e.g. علي ← على name rule).
+    const undoesLocal = local.edits.some(
+      (e) => e.suggestion === p.from && e.original === p.to,
+    );
+    return !undoesLocal;
+  });
   if (!pairs.length) {
     return {
       ...local,

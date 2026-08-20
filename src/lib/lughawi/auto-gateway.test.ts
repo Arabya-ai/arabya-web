@@ -1,4 +1,4 @@
-import { buildAutoCandidates } from "@/lib/lughawi/ai-gateway";
+import { buildAutoCandidates, humanizeAiError } from "@/lib/lughawi/ai-gateway";
 import { describe, expect, it } from "vitest";
 
 describe("lughawi Auto candidates", () => {
@@ -27,5 +27,15 @@ describe("lughawi Auto candidates", () => {
       ],
     });
     expect(list[0]!.provider).toBe("groq");
+  });
+});
+
+describe("humanizeAiError", () => {
+  it("maps retired Gemini 404 to Arabic without raw JSON", () => {
+    const msg = humanizeAiError(
+      'Google AI error 404: {"error":{"message":"This model models/gemini-2.0-flash is no longer available"}}',
+    );
+    expect(msg).toMatch(/Google|Gemini|3\.5/);
+    expect(msg).not.toMatch(/\{"error"/);
   });
 });
