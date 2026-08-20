@@ -5,19 +5,21 @@ alwaysApply: true
 
 # Contabo only (hard rule)
 
-Production for Arabya is **Contabo VPS only** (PM2 + Nginx).
+Production for Arabya is **Contabo VPS only** (PM2 + Nginx). Domains: `arabya.org` / `arabyaai.com`.
 
 ## Forbidden
-- Do not deploy, configure, or ask the owner to act on Vercel.
-- Do not treat a red Vercel GitHub check as a blocker.
+- Do **not** deploy, configure, troubleshoot, or ask the owner to act on **Vercel** (or Netlify / Render as hosts).
+- Do **not** treat a red Vercel GitHub check as a product failure or as proof that Contabo work is wrong.
+- Do **not** lecture the owner about “ignoring Vercel” every turn — fix Contabo/CI, and once point them to `docs/platform/disconnect-vercel-github-ar.md` if the red check still appears.
+- Do **not** set homepage / docs / ADR text that claims Vercel is production.
 
 ## Required
-- Ship path: merge to `main` → Contabo deploy.
-- After every merge the owner completes: **immediately** send Contabo PuTTY deploy command + Ctrl+F5 URL — never wait for them to ask.
-- Command:
+- Ship path: merge to `main` → Contabo deploy (`scripts/contabo-deploy.sh` or GitHub Action **Deploy Contabo**).
+- Databases and runtime stores: create/ensure via `scripts/contabo-ensure-dbs.sh` (SQLite under `/var/lib/arabya`).
+- After meaningful changes: confirm `https://www.arabya.org` (touched route) on Contabo.
+- Local verify (`npm run dev`) is fine before Contabo; it does not replace Contabo publish when shipping.
+- GitHub workflows that matter: **CI** + **Deploy Contabo** only.
 
-```bash
-cd /var/www/arabya-web && git fetch origin main && git checkout main && git pull --ff-only origin main && bash scripts/contabo-deploy.sh
-```
-
-- Databases: `scripts/contabo-ensure-dbs.sh` (via contabo-deploy.sh).
+## Owner communication
+- Speak Contabo / PuTTY / PM2 / `arabya.org` only.
+- Never ask them to open the Vercel dashboard except the one-time disconnect guide above.
