@@ -2,6 +2,15 @@
   "version": 1,
   "pairs": [
     {
+      "from": "انا",
+      "to": "أنا",
+      "ruleId": "hamza-ana",
+      "accepts": 5,
+      "rejects": 0,
+      "active": true,
+      "updatedAt": "2026-08-20T14:51:19.836Z"
+    },
+    {
       "from": "المدرسه",
       "to": "المدرسة",
       "ruleId": "ta-marbuta",
@@ -54,15 +63,6 @@
       "rejects": 0,
       "active": true,
       "updatedAt": "2026-08-20T13:23:24.591Z"
-    },
-    {
-      "from": "انا",
-      "to": "أنا",
-      "ruleId": "hamza-ana",
-      "accepts": 1,
-      "rejects": 0,
-      "active": true,
-      "updatedAt": "2026-08-20T13:21:49.657Z"
     },
     {
       "from": "رساله",

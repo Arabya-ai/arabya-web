@@ -47,16 +47,16 @@ export const ENGINE_STAGES: EngineStage[] = [
     labelEn: "Quran guard",
   },
   {
-    id: "spelling",
-    labelAr: "إملاء ومعجم",
-    labelEn: "Spelling & lexicon",
-    run: collectSpellingEdits,
-  },
-  {
     id: "grammar",
     labelAr: "نحو واتفاق",
     labelEn: "Grammar & agreement",
     run: collectGrammarEdits,
+  },
+  {
+    id: "spelling",
+    labelAr: "إملاء ومعجم",
+    labelEn: "Spelling & lexicon",
+    run: collectSpellingEdits,
   },
   {
     id: "style",
@@ -96,15 +96,14 @@ export function rankEdits(
 ): LughawiEdit[] {
   return [...edits]
     .filter((e) => e.confidence >= minConfidence)
+    .map((e) => ({
+      ...e,
+      confidence: Math.round(e.confidence * 1000) / 1000,
+    }))
     .sort(
       (a, b) =>
         b.confidence - a.confidence || a.start - b.start || b.end - a.end,
     )
-    .map((e, i) => ({
-      ...e,
-      // Stable display order later re-sorted by start for highlighting
-      id: e.id || `rk-${i + 1}`,
-    }))
     .sort((a, b) => a.start - b.start || b.end - a.end);
 }
 
