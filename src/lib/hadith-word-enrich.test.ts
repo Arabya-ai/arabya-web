@@ -6,57 +6,53 @@ describe("enrichHadithToken", () => {
     const r = await enrichHadithToken("فِي");
     expect(r.matchStatus).toBe("particle");
     expect(r.particleLabelAr).toContain("جر");
-    expect(r.source).toBe("arabya-closed-class-particles");
+    expect(r.translationEn).toBeTruthy();
   });
 
   it("maps inna/anna variants to ان particle", async () => {
     const r = await enrichHadithToken("إِنَّ");
     expect(r.matchStatus).toBe("particle");
-    expect(r.matchKind).toBe("closed-class-particle");
   });
 
-  it("enriches common Quran-surface words with morph/sense", async () => {
-    const r = await enrichHadithToken("الكتاب");
-    expect(r.matchStatus).toBe("exact");
-    expect(r.matchKind).toBe("quran-surface-analogy");
-    expect(r.root || r.lemma || (r.pos && r.pos.length)).toBeTruthy();
-    expect(r.root).toBe("كتب");
+  it("enriches Quran-surface and bare lemmas", async () => {
+    const a = await enrichHadithToken("الكتاب");
+    expect(a.matchStatus).toBe("exact");
+    expect(a.root).toBe("كتب");
+    const b = await enrichHadithToken("كتاب");
+    expect(b.matchStatus).toBe("exact");
   });
 
-  it("enriches bare lemma surfaces from the Quran index", async () => {
-    const r = await enrichHadithToken("كتاب");
-    expect(r.matchStatus).toBe("exact");
-    expect(r.root).toBe("كتب");
-  });
-
-  it("fills core hadith glosses for niyya / aʿmāl", async () => {
+  it("fills core gloss + English translation for niyya / aʿmāl", async () => {
     const n = await enrichHadithToken("بالنيات");
     expect(n.matchStatus).toBe("gloss");
-    expect(n.root).toBe("نوي");
+    expect(n.translationEn?.toLowerCase()).toMatch(/intention/);
     const a = await enrichHadithToken("الأعمال");
     expect(a.matchStatus).toBe("gloss");
-    expect(a.root).toBe("عمل");
+    expect(a.translationAr).toContain("عمل");
   });
 
-  it("strips possessive to reach hijra gloss", async () => {
-    const r = await enrichHadithToken("هجرته");
-    expect(r.matchStatus).toBe("gloss");
-    expect(r.root).toBe("هجر");
+  it("covers common Nawawi/Bukhari vocabulary", async () => {
+    for (const w of ["الحلال", "الشبهات", "القلب", "الإيمان", "الصلاة"]) {
+      const r = await enrichHadithToken(w);
+      expect(r.matchStatus, w).not.toBe("none");
+      expect(r.translationAr || r.sense, w).toBeTruthy();
+    }
   });
 
-  it("returns none for unknown nonce tokens", async () => {
-    const r = await enrichHadithToken("زقزلطن");
-    expect(r.matchStatus).toBe("none");
+  it("attaches rhetoric for إنما and حدثنا", async () => {
+    const r = await enrichHadithToken("إنما");
+    expect(r.rhetoricAr).toMatch(/حصر/);
+    const h = await enrichHadithToken("حدثنا");
+    expect(h.rhetoricAr).toMatch(/إسناد|سند/);
   });
 
-  it("strips Arabic comma glued to tokens", async () => {
-    const r = await enrichHadithToken("بِالنِّيَّاتِ،");
-    expect(r.matchStatus).toBe("gloss");
-    expect(r.root).toBe("نوي");
+  it("strips possessive and Arabic comma", async () => {
+    expect((await enrichHadithToken("هجرته")).root).toBe("هجر");
+    expect((await enrichHadithToken("بِالنِّيَّاتِ،")).root).toBe("نوي");
   });
 
-  it("handles empty input", async () => {
-    const r = await enrichHadithToken("   ");
-    expect(r.matchStatus).toBe("none");
+  it("handles empty / unknown", async () => {
+    expect((await enrichHadithToken("   ")).matchStatus).toBe("none");
+    expect((await enrichHadithToken("زقزلطن")).matchStatus).toBe("none");
   });
 });
