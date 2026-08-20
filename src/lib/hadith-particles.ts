@@ -77,6 +77,36 @@ export const HADITH_PARTICLES: Record<string, ParticleEntry> = {
     labelEn: "Honorific formula",
     kind: "particle",
   },
+  صلي: {
+    labelAr: "صيغة صلاة على النبي",
+    labelEn: "Ṣalāh formula upon the Prophet",
+    kind: "particle",
+  },
+  وسلم: {
+    labelAr: "صيغة تسليم تابعة للصلاة على النبي",
+    labelEn: "Salām formula with ṣalāh on the Prophet",
+    kind: "particle",
+  },
+  الا: {
+    labelAr: "أداة استثناء / تنبيه (بحسب السياق)",
+    labelEn: "Exceptive / attention particle",
+    kind: "particle",
+  },
+  هذا: {
+    labelAr: "اسم إشارة",
+    labelEn: "Demonstrative",
+    kind: "particle",
+  },
+  هذه: {
+    labelAr: "اسم إشارة للمؤنث",
+    labelEn: "Demonstrative (feminine)",
+    kind: "particle",
+  },
+  فقال: {
+    labelAr: "فعل قول معطوف (شائع في المتون)",
+    labelEn: "Speech verb with fa-",
+    kind: "particle",
+  },
   الله: {
     labelAr: "علم — لفظ الجلالة",
     labelEn: "Proper noun — Allah",

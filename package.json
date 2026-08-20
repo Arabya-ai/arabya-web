@@ -50,7 +50,8 @@
     "attach-lexicon-by-root": "node scripts/attach-lexicon-by-root.mjs",
     "init-user-db": "node scripts/init-local-user-db.mjs",
     "verify-oss-imports": "node scripts/verify-oss-imports.mjs",
-    "verify-oss-imports:live": "node scripts/verify-oss-imports.mjs --live"
+    "verify-oss-imports:live": "node scripts/verify-oss-imports.mjs --live",
+    "measure-hadith-coverage": "npx tsx scripts/measure-hadith-coverage.mts"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.20",

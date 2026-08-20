@@ -39,11 +39,17 @@ describe("enrichHadithToken", () => {
     }
   });
 
-  it("attaches rhetoric for إنما and حدثنا", async () => {
-    const r = await enrichHadithToken("إنما");
-    expect(r.rhetoricAr).toMatch(/حصر/);
-    const h = await enrichHadithToken("حدثنا");
-    expect(h.rhetoricAr).toMatch(/إسناد|سند/);
+  it("labels high-frequency isnād names and formulas", async () => {
+    expect((await enrichHadithToken("بن")).matchStatus).toBe("name");
+    expect((await enrichHadithToken("وحدثنا")).matchStatus).toBe("particle");
+    expect((await enrichHadithToken("هريره")).matchStatus).toBe("name");
+    expect((await enrichHadithToken("عائشه")).matchStatus).toBe("name");
+  });
+
+  it("attaches rhetoric for إنما / حدثنا / بالنيات", async () => {
+    expect((await enrichHadithToken("إنما")).rhetoricAr).toMatch(/حصر/);
+    expect((await enrichHadithToken("حدثنا")).rhetoricAr).toMatch(/إسناد|سند/);
+    expect((await enrichHadithToken("بالنيات")).rhetoricAr).toMatch(/نية|قصد/);
   });
 
   it("strips possessive and Arabic comma", async () => {
