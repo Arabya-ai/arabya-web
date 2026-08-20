@@ -1,0 +1,54 @@
+{
+  "updatedAt": "2026-08-20",
+  "note": "مرجع تعليمي لأحكام التجويد الشائعة — ألوان رمزية للهوية فقط؛ مصحف التجويد الملون الكامل يبقى بانتظار بيانات مرخّصة.",
+  "rules": [
+    {
+      "id": "ghunnah",
+      "nameAr": "الغنّة",
+      "nameEn": "Ghunnah",
+      "swatch": "#0d7377",
+      "summaryAr": "غُنّة بمقدار حركتين في النون والميم المشدّدتين وما يلحق بهما من أحكام.",
+      "summaryEn": "Nasalization for two counts on shaddah nūn/mīm and related rulings."
+    },
+    {
+      "id": "idgham",
+      "nameAr": "الإدغام",
+      "nameEn": "Idghām",
+      "swatch": "#2a9d8f",
+      "summaryAr": "إدخال حرف ساكن في متحرك بحيث يصيران حرفًا واحدًا مشددًا.",
+      "summaryEn": "Merging a sukūn letter into the following letter as one stressed sound."
+    },
+    {
+      "id": "ikhfa",
+      "nameAr": "الإخفاء",
+      "nameEn": "Ikhfāʾ",
+      "swatch": "#457b9d",
+      "summaryAr": "إخفاء النون الساكنة أو التنوين عند حروف الإخفاء مع غنّة.",
+      "summaryEn": "Concealing nūn sākinah/tanwīn before ikhfāʾ letters with ghunnah."
+    },
+    {
+      "id": "iqlab",
+      "nameAr": "الإقلاب",
+      "nameEn": "Iqlāb",
+      "swatch": "#e9c46a",
+      "summaryAr": "قلب النون الساكنة أو التنوين ميمًا عند الباء مع غنّة.",
+      "summaryEn": "Turning nūn sākinah/tanwīn into mīm before bāʾ with ghunnah."
+    },
+    {
+      "id": "qalqalah",
+      "nameAr": "القلقلة",
+      "nameEn": "Qalqalah",
+      "swatch": "#c45c26",
+      "summaryAr": "اضطراب في المخرج عند سكون أحرف قطب جد.",
+      "summaryEn": "Bounce on sukūn of qāf, ṭāʾ, bāʾ, jīm, dāl."
+    },
+    {
+      "id": "madd",
+      "nameAr": "المدود",
+      "nameEn": "Madd",
+      "swatch": "#6d4c41",
+      "summaryAr": "إطالة الصوت بحروف المدّ حسب نوع المدّ ومقداره.",
+      "summaryEn": "Lengthening vowels according to the type and measure of madd."
+    }
+  ]
+}

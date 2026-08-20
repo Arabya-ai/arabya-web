@@ -35,6 +35,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/lughawi`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/lughawi/features`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/lughawi/mistakes`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/hadith`, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${base}/heritage`, changeFrequency: "weekly", priority: 0.65 },
+    { url: `${base}/qiraat`, changeFrequency: "monthly", priority: 0.5 },
   ];
 
   const mushafPages: MetadataRoute.Sitemap = Array.from(

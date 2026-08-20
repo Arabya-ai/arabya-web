@@ -1,0 +1,31 @@
+{
+  "slug": "mutanabbi-samples",
+  "titleAr": "مختارات من المتنبي",
+  "titleEn": "Selections from al-Mutanabbi",
+  "kind": "poetry",
+  "source": "arabya-editorial",
+  "license": "public-domain-text-educational",
+  "passages": [
+    {
+      "id": "TW:mutanabbi-samples:1",
+      "titleAr": "على قدر أهل العزم",
+      "titleEn": "On the measure of resolve",
+      "textAr": "عَلَى قَدْرِ أَهْلِ العَزْمِ تَأْتِي العَزَائِمُ · وَتَأْتِي عَلَى قَدْرِ الكِرَامِ المَكَارِمُ",
+      "meter": "الطويل"
+    },
+    {
+      "id": "TW:mutanabbi-samples:2",
+      "titleAr": "إذا غامرت",
+      "titleEn": "If you venture",
+      "textAr": "إِذَا غَامَرْتَ فِي شَرَفٍ مَرُومِ · فَلا تَقْنَعْ بِمَا دُونَ النُّجُومِ",
+      "meter": "الوافر"
+    },
+    {
+      "id": "TW:mutanabbi-samples:3",
+      "titleAr": "الخيل والليل",
+      "titleEn": "Horses and night",
+      "textAr": "الخَيْلُ وَاللَّيْلُ وَالبَيْدَاءُ تَعْرِفُنِي · وَالسَّيْفُ وَالرُّمْحُ وَالقِرْطَاسُ وَالقَلَمُ",
+      "meter": "البسيط"
+    }
+  ]
+}

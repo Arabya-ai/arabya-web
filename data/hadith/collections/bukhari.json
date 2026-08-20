@@ -1,0 +1,73 @@
+{
+  "slug": "bukhari",
+  "titleAr": "صحيح البخاري",
+  "titleEn": "Sahih al-Bukhari",
+  "source": "arabya-sample",
+  "license": "structure-open; matn common educational Arabic",
+  "items": [
+    {
+      "id": "H:bukhari:1",
+      "number": 1,
+      "arabic": "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى",
+      "grade": "صحيح",
+      "chapterAr": "بدء الوحي",
+      "chapterEn": "Beginning of Revelation"
+    },
+    {
+      "id": "H:bukhari:2",
+      "number": 2,
+      "arabic": "الْحَلاَلُ بَيِّنٌ وَالْحَرَامُ بَيِّنٌ، وَبَيْنَهُمَا مُشَبَّهَاتٌ لاَ يَعْلَمُهَا كَثِيرٌ مِنَ النَّاسِ",
+      "grade": "صحيح",
+      "chapterAr": "الإيمان",
+      "chapterEn": "Faith"
+    },
+    {
+      "id": "H:bukhari:3",
+      "number": 3,
+      "arabic": "مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ",
+      "grade": "صحيح",
+      "chapterAr": "الأدب",
+      "chapterEn": "Manners"
+    },
+    {
+      "id": "H:bukhari:4",
+      "number": 4,
+      "arabic": "الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ مِنْ لِسَانِهِ وَيَدِهِ",
+      "grade": "صحيح",
+      "chapterAr": "الإيمان",
+      "chapterEn": "Faith"
+    },
+    {
+      "id": "H:bukhari:5",
+      "number": 5,
+      "arabic": "لاَ يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ",
+      "grade": "صحيح",
+      "chapterAr": "الإيمان",
+      "chapterEn": "Faith"
+    },
+    {
+      "id": "H:bukhari:6",
+      "number": 6,
+      "arabic": "الدِّينُ النَّصِيحَةُ",
+      "grade": "صحيح",
+      "chapterAr": "الإيمان",
+      "chapterEn": "Faith"
+    },
+    {
+      "id": "H:bukhari:7",
+      "number": 7,
+      "arabic": "مَنْ حَسُنَ إِسْلاَمُ الْمَرْءِ تَرْكُهُ مَا لاَ يَعْنِيهِ",
+      "grade": "صحيح",
+      "chapterAr": "الرقاق",
+      "chapterEn": "Softening the Heart"
+    },
+    {
+      "id": "H:bukhari:8",
+      "number": 8,
+      "arabic": "لاَ تَغْضَبْ",
+      "grade": "صحيح",
+      "chapterAr": "الأدب",
+      "chapterEn": "Manners"
+    }
+  ]
+}

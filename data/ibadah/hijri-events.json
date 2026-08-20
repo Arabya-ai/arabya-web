@@ -1,0 +1,70 @@
+{
+  "updatedAt": "2026-08-20",
+  "note": "أحداث هجرية ثابتة الشهر/اليوم — تُعرض بجانب المواقيت دون كسر حساب الصلاة.",
+  "events": [
+    {
+      "id": "ramadan-1",
+      "month": 9,
+      "day": 1,
+      "titleAr": "أول رمضان",
+      "titleEn": "Start of Ramadan",
+      "kind": "ramadan"
+    },
+    {
+      "id": "laylat-qadr-estimate",
+      "month": 9,
+      "day": 27,
+      "titleAr": "ليلة القدر (أشهر التقديرات)",
+      "titleEn": "Laylat al-Qadr (common estimate)",
+      "kind": "ramadan"
+    },
+    {
+      "id": "eid-fitr",
+      "month": 10,
+      "day": 1,
+      "titleAr": "عيد الفطر",
+      "titleEn": "Eid al-Fitr",
+      "kind": "eid"
+    },
+    {
+      "id": "arafah",
+      "month": 12,
+      "day": 9,
+      "titleAr": "يوم عرفة",
+      "titleEn": "Day of ʿArafah",
+      "kind": "hajj"
+    },
+    {
+      "id": "eid-adha",
+      "month": 12,
+      "day": 10,
+      "titleAr": "عيد الأضحى",
+      "titleEn": "Eid al-Adha",
+      "kind": "eid"
+    },
+    {
+      "id": "ashura",
+      "month": 1,
+      "day": 10,
+      "titleAr": "يوم عاشوراء",
+      "titleEn": "Ashura",
+      "kind": "other"
+    },
+    {
+      "id": "mawlid",
+      "month": 3,
+      "day": 12,
+      "titleAr": "ذكرى المولد (تاريخ شائع)",
+      "titleEn": "Mawlid (common date)",
+      "kind": "other"
+    },
+    {
+      "id": "isra-miraj",
+      "month": 7,
+      "day": 27,
+      "titleAr": "الإسراء والمعراج (تاريخ شائع)",
+      "titleEn": "Israʾ & Miʿrāj (common date)",
+      "kind": "other"
+    }
+  ]
+}

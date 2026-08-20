@@ -1,0 +1,33 @@
+{
+  "updatedAt": "2026-08-20",
+  "sourceNote": "عيّنات تراثية وتعليمية — عروض/شعر وقطع أدبية قصيرة بهيكل Word IDs لاحقًا.",
+  "works": [
+    {
+      "slug": "qafiyah-intro",
+      "titleAr": "مدخل إلى العروض والقافية",
+      "titleEn": "Intro to prosody & rhyme",
+      "kind": "prosody",
+      "descriptionAr": "شروح قصيرة لمصطلحات العروض مفيدة لطبقة البلاغة/الشعر.",
+      "descriptionEn": "Short prosody terms useful for rhetoric/poetry layers.",
+      "passageCount": 4
+    },
+    {
+      "slug": "mutanabbi-samples",
+      "titleAr": "مختارات من المتنبي",
+      "titleEn": "Selections from al-Mutanabbi",
+      "kind": "poetry",
+      "descriptionAr": "أبيات تعليمية منسوبة — للتجربة الواجهة قبل الاستيراد الكامل.",
+      "descriptionEn": "Educational couplets for UI before full imports.",
+      "passageCount": 3
+    },
+    {
+      "slug": "nahw-aphorisms",
+      "titleAr": "حكم نحوية قصيرة",
+      "titleEn": "Short grammar aphorisms",
+      "kind": "prose",
+      "descriptionAr": "جمل تراثية قصيرة تربط النحو بالمكتبة التعليمية.",
+      "descriptionEn": "Short heritage lines linking grammar to the library hub.",
+      "passageCount": 3
+    }
+  ]
+}

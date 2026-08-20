@@ -262,6 +262,8 @@ export type SearchAyahsOptions = {
   /** Max hits to return (after offset). Use a large value for «all results». */
   limit?: number;
   offset?: number;
+  /** Optional 1–114 surah filter (Alfanous-style facet). */
+  surahId?: number;
 };
 
 export type SearchAyahsResult = {
@@ -281,6 +283,13 @@ export async function searchAyahs(
     typeof options === "number" ? { limit: options } : options;
   const limit = Math.max(0, opts.limit ?? 40);
   const offset = Math.max(0, opts.offset ?? 0);
+  const surahId =
+    typeof opts.surahId === "number" &&
+    Number.isInteger(opts.surahId) &&
+    opts.surahId >= 1 &&
+    opts.surahId <= 114
+      ? opts.surahId
+      : undefined;
 
   const q = query.trim();
   if (q.length < 2) return { hits: [], total: 0 };
@@ -313,6 +322,7 @@ export async function searchAyahs(
 
   for (const row of searchNormCache) {
     const v = row.hit;
+    if (surahId !== undefined && v.surahId !== surahId) continue;
     if (v.key === q || v.key === digits || String(v.surahId) === q) {
       keyHits.push(v);
       continue;

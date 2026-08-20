@@ -1,0 +1,30 @@
+{
+  "updatedAt": "2026-08-20",
+  "sourceNote": "عيّنة Git-first للهيكلة؛ المتون عربية شائعة للتعلّم. التوسعة من مصادر مفتوحة مرخّصة عند توجيه المالك (مثل hadith-api).",
+  "collections": [
+    {
+      "slug": "bukhari",
+      "titleAr": "صحيح البخاري",
+      "titleEn": "Sahih al-Bukhari",
+      "descriptionAr": "عيّنة مختصرة من صحيح البخاري — الهيكل جاهز للتوسعة.",
+      "descriptionEn": "Small curated sample from Sahih al-Bukhari — expandable.",
+      "itemCount": 8
+    },
+    {
+      "slug": "muslim",
+      "titleAr": "صحيح مسلم",
+      "titleEn": "Sahih Muslim",
+      "descriptionAr": "عيّنة مختصرة من صحيح مسلم.",
+      "descriptionEn": "Small curated sample from Sahih Muslim.",
+      "itemCount": 6
+    },
+    {
+      "slug": "nawawi40",
+      "titleAr": "الأربعون النووية",
+      "titleEn": "Nawawi Forty",
+      "descriptionAr": "مختارات من الأربعين النووية — مناسبة للبدء.",
+      "descriptionEn": "Selections from al-Nawawi’s Forty Hadith.",
+      "itemCount": 5
+    }
+  ]
+}

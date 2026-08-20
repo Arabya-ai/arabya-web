@@ -62,6 +62,8 @@
     "create": "Create",
     "studio": "Studio",
     "library": "Library",
+    "hadith": "Hadith",
+    "heritage": "Heritage",
     "pricing": "Plans",
     "lughawi": "Lughawi"
   },
@@ -100,7 +102,9 @@
       "makkah": "Meccan",
       "madinah": "Medinan"
     },
-    "juz": "Juz {n}"
+    "juz": "Juz {n}",
+    "surahFilterAll": "All surahs",
+    "surahFilterAria": "Filter ayah results by surah"
   },
   "Prayer": {
     "title": "Prayer times & qibla",
@@ -1289,7 +1293,9 @@
       "qalun": "Awaiting licensed files from the owner.",
       "shubah": "Awaiting licensed files from the owner.",
       "tajweed-color": "Color tajwīd display after visual data is licensed."
-    }
+    },
+    "tajweedLegendTitle": "Tajweed rules reference",
+    "tajweedLegendLead": "A short educational guide with symbolic colors — the full color-coded mushaf unlocks after visual data is licensed."
   },
   "Books": {
     "metaTitle": "Iʿrāb books",
@@ -1340,21 +1346,45 @@
   },
   "Hadith": {
     "metaTitle": "Hadith · Arabya",
-    "metaDescription": "Later phase — word-by-word analysis of hadith texts",
+    "metaDescription": "Curated hadith collections with Arabic search — word-level analysis expands over time",
+    "kicker": "Structured matn",
     "title": "Hadith",
-    "lead": "The next phase after the six Quran analysis layers are solid: the same word engine, Word IDs, and Claims on hadith texts.",
-    "doc": "Documentation: <code>docs/spec/entities-hadith-heritage.md</code>",
-    "indexLink": "Index"
+    "lead": "Collections and Arabic texts ready to grow. The same Word IDs and Claims engine deepens on hadith in parallel with the Quran.",
+    "collectionsTitle": "Collections",
+    "itemCount": "{count} hadiths",
+    "searchLabel": "Search texts",
+    "searchPlaceholder": "Search a word from the matn…",
+    "searching": "Searching…",
+    "searchEmpty": "No results in the current sample.",
+    "provenance": "Educational Git-first sample. Expanding from licensed open sources happens when you direct it.",
+    "heritageLink": "Heritage & poetry",
+    "indexLink": "Index",
+    "backCollection": "Back to collection",
+    "wordLayersSoon": "Morphology, syntax, and semantics layers for these words will generalize from the Quran engine."
   },
   "Heritage": {
     "metaTitle": "Heritage & poetry · Arabya",
-    "metaDescription": "Distant phase — word-by-word heritage analysis from al-Shāmila Library",
+    "metaDescription": "Heritage passages and prosody — the same word-by-word layers, gradually",
+    "kicker": "Poetry · prosody · prose",
     "title": "Poetry & heritage",
-    "lead": "After Quran and hadith: import from al-Shāmila Library and other sources and analyze every word with the same layers (morphology · syntax · semantics · rhetoric · lexicon · translation).",
-    "soon": "Data acquisition via files or import/scraping when needed — with source attribution.",
-    "libraryLink": "Educational library (ready PDF books)",
+    "lead": "A short catalog (prosody, poetry selections, grammar aphorisms) in Arabya’s identity — linked to the educational library.",
+    "kind": {
+      "prosody": "Prosody",
+      "poetry": "Poetry",
+      "prose": "Prose"
+    },
+    "passageCount": "{count} passages",
+    "meter": "Meter: {meter}",
+    "wordLayersSoon": "TW:… Word IDs and analysis layers are added gradually without breaking the mushaf.",
+    "backHub": "Back to heritage catalog",
+    "libraryLink": "Educational library (PDF books)",
     "hadithLink": "Hadith",
     "indexLink": "Index"
+  },
+  "IbadahEvents": {
+    "title": "Upcoming Hijri observances",
+    "lead": "Fixed month/day reminders beside prayer times — does not change prayer calculation.",
+    "today": "Approx. Hijri today: {date}"
   },
   "Favorites": {
     "metaTitle": "Favorites archive",

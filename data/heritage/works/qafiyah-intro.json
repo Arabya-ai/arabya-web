@@ -1,0 +1,38 @@
+{
+  "slug": "qafiyah-intro",
+  "titleAr": "مدخل إلى العروض والقافية",
+  "titleEn": "Intro to prosody & rhyme",
+  "kind": "prosody",
+  "source": "arabya-editorial",
+  "license": "CC0-structure",
+  "passages": [
+    {
+      "id": "TW:qafiyah-intro:1",
+      "titleAr": "البحر",
+      "titleEn": "Meter (baḥr)",
+      "textAr": "البحر في العروض: وزن شعري يتكرر وفق تفعيلات معلومة، مثل الطويل والبسيط والكامل.",
+      "meter": null
+    },
+    {
+      "id": "TW:qafiyah-intro:2",
+      "titleAr": "التفعيلة",
+      "titleEn": "Foot (tafʿīlah)",
+      "textAr": "التفعيلة وحدة إيقاعية صغرى يُبنى منها البحر، نحو فَعُولُنْ ومَفَاعِيلُنْ.",
+      "meter": null
+    },
+    {
+      "id": "TW:qafiyah-intro:3",
+      "titleAr": "القافية",
+      "titleEn": "Rhyme (qāfiyah)",
+      "textAr": "القافية آخر ما يُلتزم في البيت من حروف وحركات، وعليها يقوم الإيقاع الختامي.",
+      "meter": null
+    },
+    {
+      "id": "TW:qafiyah-intro:4",
+      "titleAr": "الرويّ",
+      "titleEn": "Rawiyy",
+      "textAr": "الرويّ الحرف الذي تُبنى عليه القصيدة ويتكرر في أواخر الأبيات.",
+      "meter": null
+    }
+  ]
+}
