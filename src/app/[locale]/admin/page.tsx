@@ -56,6 +56,9 @@ export default async function AdminPage({ params }: Props) {
             <li>{t("actionApproveRequests")}</li>
             <li>{t("actionReviewAudit")}</li>
             <li>
+              <Link href="/admin/ops">{t("opsTitle")}</Link>
+            </li>
+            <li>
               <Link href="/account/edit/library">{t("actionLibraryImport")}</Link>
             </li>
           </ul>

@@ -1,0 +1,96 @@
+/* Super-admin ops monitor — Arabya teal, no purple SaaS look */
+
+.ops-monitor__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ops-cards {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+}
+
+.ops-cards article {
+  padding: 1rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--brand) 18%, var(--line));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 94%, var(--brand-soft));
+}
+
+.ops-cards h3 {
+  margin: 0 0 0.5rem;
+  color: var(--brand-deep);
+  font-size: 1.05rem;
+}
+
+.ops-alerts ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.ops-alert {
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+
+.ops-alert--critical {
+  background: color-mix(in srgb, #b91c1c 10%, var(--surface));
+  border-color: color-mix(in srgb, #b91c1c 35%, var(--line));
+}
+
+.ops-alert--warn {
+  background: color-mix(in srgb, #b45309 10%, var(--surface));
+  border-color: color-mix(in srgb, #b45309 35%, var(--line));
+}
+
+.ops-alert--info {
+  background: color-mix(in srgb, var(--brand) 8%, var(--surface));
+}
+
+.ops-table-wrap {
+  overflow-x: auto;
+  margin-top: 0.75rem;
+}
+
+.ops-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.ops-table th,
+.ops-table td {
+  text-align: start;
+  padding: 0.65rem 0.55rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.ops-table th {
+  color: var(--brand-deep);
+  font-weight: 600;
+}
+
+.ops-usage-list {
+  margin: 0.4rem 0 0;
+  padding-inline-start: 1.1rem;
+  font-size: 0.88rem;
+}
+
+.ops-monitor .dash-btn {
+  border: 1px solid color-mix(in srgb, var(--brand) 35%, var(--line));
+  background: var(--brand);
+  color: white;
+  border-radius: 10px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  font: inherit;
+}
