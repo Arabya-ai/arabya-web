@@ -7,6 +7,7 @@
  */
 const base = (process.env.BASE_URL || "http://localhost:3000").replace(/\/$/, "");
 
+/** @type {{ path: string, expect: number, jsonIncludes?: Record<string, unknown> }[]} */
 const checks = [
   { path: "/", expect: 200 },
   { path: "/mushaf/1", expect: 200 },
@@ -29,8 +30,16 @@ const checks = [
     expect: 200,
   },
   { path: "/api/prayer-times?city=makkah", expect: 200 },
-  { path: "/api/qibla?latitude=21.3891&longitude=39.8579", expect: 200 },
-  { path: "/api/qibla?lat=21.3891&lon=39.8579", expect: 200 },
+  {
+    path: "/api/qibla?latitude=21.3891&longitude=39.8579",
+    expect: 200,
+    jsonIncludes: { approxCity: "makkah" },
+  },
+  {
+    path: "/api/qibla?lat=21.3891&lon=39.8579",
+    expect: 200,
+    jsonIncludes: { approxCity: "makkah" },
+  },
   { path: "/api/study?q=%D8%A7%D9%84%D9%84%D9%87", expect: 200 },
   { path: "/api/tafsir/muyassar/1?from=1&to=2", expect: 200 },
   { path: "/api/search?q=%D8%A7%D9%84%D8%AD%D9%85%D8%AF", expect: 200 },
@@ -47,12 +56,24 @@ async function main() {
         headers: { Accept: "text/html,application/json" },
         signal: AbortSignal.timeout(25000),
       });
-      const ok = res.status === c.expect;
+      let ok = res.status === c.expect;
+      let detail = "";
+      if (ok && c.jsonIncludes) {
+        const body = await res.json();
+        for (const [k, v] of Object.entries(c.jsonIncludes)) {
+          if (body?.[k] !== v) {
+            ok = false;
+            detail = ` expected ${k}=${JSON.stringify(v)} got ${JSON.stringify(body?.[k])}`;
+          }
+        }
+      }
       if (!ok) failed += 1;
-      console.log(`${ok ? "OK" : "FAIL"} ${res.status} ${c.path}`);
+      console.log(`${ok ? "OK" : "FAIL"} ${res.status} ${c.path}${detail}`);
     } catch (err) {
       failed += 1;
-      console.log(`FAIL ERR ${c.path} — ${err instanceof Error ? err.message : err}`);
+      console.log(
+        `FAIL ERR ${c.path} — ${err instanceof Error ? err.message : err}`,
+      );
     }
   }
   if (failed) {
