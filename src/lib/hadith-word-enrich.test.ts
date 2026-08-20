@@ -29,6 +29,21 @@ describe("enrichHadithToken", () => {
     expect(r.root).toBe("كتب");
   });
 
+  it("fills core hadith glosses for niyya / aʿmāl", async () => {
+    const n = await enrichHadithToken("بالنيات");
+    expect(n.matchStatus).toBe("gloss");
+    expect(n.root).toBe("نوي");
+    const a = await enrichHadithToken("الأعمال");
+    expect(a.matchStatus).toBe("gloss");
+    expect(a.root).toBe("عمل");
+  });
+
+  it("strips possessive to reach hijra gloss", async () => {
+    const r = await enrichHadithToken("هجرته");
+    expect(r.matchStatus).toBe("gloss");
+    expect(r.root).toBe("هجر");
+  });
+
   it("returns none for unknown nonce tokens", async () => {
     const r = await enrichHadithToken("زقزلطن");
     expect(r.matchStatus).toBe("none");
