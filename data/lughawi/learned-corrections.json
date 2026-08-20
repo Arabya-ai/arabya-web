@@ -47,6 +47,15 @@
       "updatedAt": "2026-08-20T00:00:00.000Z"
     },
     {
+      "from": "اريد",
+      "to": "أريد",
+      "ruleId": "hamza-ana",
+      "accepts": 1,
+      "rejects": 0,
+      "active": true,
+      "updatedAt": "2026-08-20T13:23:24.591Z"
+    },
+    {
       "from": "انا",
       "to": "أنا",
       "ruleId": "hamza-ana",
@@ -54,6 +63,15 @@
       "rejects": 0,
       "active": true,
       "updatedAt": "2026-08-20T13:21:49.657Z"
+    },
+    {
+      "from": "رساله",
+      "to": "رسالة",
+      "ruleId": "ta-marbuta",
+      "accepts": 0,
+      "rejects": 1,
+      "active": false,
+      "updatedAt": "2026-08-20T13:23:57.714Z"
     }
   ]
 }
