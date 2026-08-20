@@ -4,6 +4,21 @@
   "noteAr": "سجل المشاريع والأدوات الخارجية المدمجة أو المخططة داخل عربية/لغوي. يُحدَّث يدويًا عند كل دمج، ولوحة السوبر أدمن تقرأه يوميًا.",
   "integrations": [
     {
+      "id": "lughawi-sidecar",
+      "nameAr": "Sidecar لغوي (Python)",
+      "nameEn": "Lughawi NLP sidecar",
+      "role": "sidecar_gateway",
+      "license": "Project",
+      "repo": "internal:services/lughawi-sidecar",
+      "docs": "services/lughawi-sidecar/README.md",
+      "features": ["صحة", "صرف تقديري", "تشكيل (CATT لاحقًا)", "GEC stub"],
+      "status": "wired",
+      "lughawiStage": "sidecar",
+      "watch": true,
+      "checkUrl": "http://127.0.0.1:8091/health",
+      "notesAr": "يعمل على Contabo عبر PM2 (lughawi-sidecar). بدون حزم ثقيلة يعرض endpoints تقديرية صادقة."
+    },
+    {
       "id": "camel-tools",
       "nameAr": "CAMeL Tools",
       "nameEn": "CAMeL Tools",
@@ -155,7 +170,7 @@
       "status": "wired",
       "lughawiStage": "core",
       "watch": false,
-      "notesAr": "المحرك الأوفلاين الحالي lughawi-engine@1.2.0."
+      "notesAr": "المحرك الأوفلاين الحالي lughawi-engine@1.3.0."
     }
   ],
   "competitors": [
@@ -170,8 +185,8 @@
       "id": "sahehly",
       "nameAr": "صحح لي",
       "url": "https://sahehly.com",
-      "parityDoc": null,
-      "notesAr": "لقطات الشاشة قادمة لاحقًا من المالك."
+      "parityDoc": "specs/001-lughawi-proofreader/SAHEHLY-PARITY-AR.md",
+      "notesAr": "وحدات صحّح الآن / مساعد قرآني / OCR موثّقة؛ الحصة عندنا بالكلمات لا الأحرف."
     }
   ]
 }

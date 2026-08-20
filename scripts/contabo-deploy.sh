@@ -55,6 +55,11 @@ if [[ -f scripts/contabo-mpt-deploy.sh ]]; then
   bash scripts/contabo-mpt-deploy.sh || echo "WARN: MPT deploy step failed — /studio/ai may show engine offline."
 fi
 
+echo "==> Lughawi Python sidecar (optional localhost NLP)"
+if [[ -f scripts/contabo-lughawi-sidecar.sh ]]; then
+  bash scripts/contabo-lughawi-sidecar.sh || echo "WARN: sidecar start skipped — local rules still work."
+fi
+
 echo "==> Restart PM2 arabya-web (after env keys are written)"
 if pm2 describe arabya-web >/dev/null 2>&1; then
   pm2 restart arabya-web --update-env

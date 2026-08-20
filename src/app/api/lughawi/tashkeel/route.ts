@@ -4,6 +4,7 @@ import { countArabicWords } from "@/lib/lughawi/config";
 import { applyLocalTashkeel } from "@/lib/lughawi/engines/tashkeel-engine";
 import { resolveLughawiAiCandidates } from "@/lib/lughawi/resolve-ai";
 import { getQuota, tryChargeQuota } from "@/lib/lughawi/quota-store";
+import { sidecarTashkeel } from "@/lib/lughawi/sidecar-client";
 import type { ProofreadResponse, TashkeelLevel } from "@/lib/lughawi/types";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
@@ -32,6 +33,23 @@ export async function POST(req: Request) {
     : "full";
   if (!text.trim()) {
     return NextResponse.json({ error: "أدخل نصًا" }, { status: 400 });
+  }
+
+  // Prefer Contabo sidecar (CATT) when it actually changes the text.
+  const side = await sidecarTashkeel(text, level);
+  if (side && side.text !== text && !side.engine.includes("passthrough")) {
+    return NextResponse.json({
+      original: text,
+      result: side.text,
+      edits: [],
+      protectedSpans: [],
+      meta: {
+        engine: side.engine,
+        usedAi: false,
+        quotaCharged: 0,
+        offline: true,
+      },
+    } satisfies ProofreadResponse);
   }
 
   const local = applyLocalTashkeel(text, level);
