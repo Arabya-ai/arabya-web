@@ -49,6 +49,13 @@ export interface ProtectedSpan {
   href?: string;
 }
 
+export interface EngineStageTrace {
+  id: string;
+  editCount: number;
+  ms: number;
+  note?: string;
+}
+
 export interface ProofreadMeta {
   engine: string;
   usedAi: boolean;
@@ -56,6 +63,11 @@ export interface ProofreadMeta {
   provider?: string;
   warning?: string;
   offline?: boolean;
+  /** Semver of the local engine core. */
+  version?: string;
+  /** Per-stage inference trace (rules / future GEC / AI). */
+  stages?: EngineStageTrace[];
+  totalMs?: number;
 }
 
 export interface ProofreadResponse {
@@ -73,6 +85,8 @@ export interface ProofreadOptions {
   rewriteStyle?: RewriteStyle;
   targetLang?: string;
   useAi?: boolean;
+  /** Drop suggestions below this confidence (default 0.5 in engine). */
+  minConfidence?: number;
 }
 
 export const AI_PROVIDERS: {
