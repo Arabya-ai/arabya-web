@@ -1367,7 +1367,6 @@
     "wordLayersSoon": "Morphology, syntax, and semantics layers for these words will generalize from the Quran engine.",
     "wordStudyLead": "Tap a word in the matn to open its study layers (HW:… Word IDs). Morphology and semantics fill from matching Quran surface forms when available.",
     "tokensAria": "Matn words for analysis",
-    "wordLayersAwaiting": "All six layers are wired in the UI — morph/syntax payloads for this word fill in later without breaking the mushaf.",
     "wordLayersAnalogyNote": "Layers filled by analogy to Quran morph/lexicon for the same written form when a match exists.",
     "syntaxAnalogyNote": "Hadith-context iʿrāb is not claimed yet — we show Quran-analogy morph/semantics without inventing matn-specific parsing.",
     "semanticsAwaiting": "No matching study gloss for this word yet (no Quran/particle match).",
