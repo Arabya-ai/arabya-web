@@ -49,22 +49,28 @@ const DEFAULT_MODELS: Record<AiProviderId, string> = {
   groq: "llama-3.3-70b-versatile",
   openrouter: "openai/gpt-4o-mini",
   anthropic: "claude-3-5-haiku-latest",
-  /** gemini-2.0-flash was retired → 404; prefer 2.5 Flash. */
-  google: "gemini-2.5-flash",
+  /**
+   * Prefer current Gemini 3.x Flash (2.0 retired; 2.5 sunsets soon).
+   * Override with LUGHAWI_GOOGLE_MODEL or per-slot model in /admin/ops.
+   */
+  google: "gemini-3.5-flash",
   ollama: "llama3.2",
 };
 
+/** Tried in order on 404 / model-not-found (newest → older Flash). */
 const GOOGLE_MODEL_FALLBACKS = [
+  "gemini-3.7-flash",
+  "gemini-3.6-flash",
+  "gemini-3.5-flash",
+  "gemini-3.5-flash-lite",
   "gemini-2.5-flash",
-  "gemini-2.5-flash-lite",
-  "gemini-1.5-flash",
 ] as const;
 
 /** Short Arabic message for UI — never dump raw provider JSON. */
 export function humanizeAiError(msg: string): string {
   const m = msg || "";
   if (/404|no longer ava|not found|is not found/i.test(m)) {
-    return "نموذج Google غير متاح أو قديم — حدّثنا الافتراضي إلى Gemini 2.5. أعد المحاولة.";
+    return "نموذج Google غير متاح أو قديم — نستخدم Gemini 3.5+ مع بدائل تلقائية. أعد المحاولة.";
   }
   if (/401|403|API[_ ]?key|invalid|permission/i.test(m)) {
     return "مفتاح Google مرفوض أو منتهٍ — راجع تبويب المفاتيح في /admin/ops.";

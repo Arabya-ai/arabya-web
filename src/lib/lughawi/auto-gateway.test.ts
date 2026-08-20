@@ -35,7 +35,7 @@ describe("humanizeAiError", () => {
     const msg = humanizeAiError(
       'Google AI error 404: {"error":{"message":"This model models/gemini-2.0-flash is no longer available"}}',
     );
-    expect(msg).toMatch(/Google|Gemini|2\.5/);
+    expect(msg).toMatch(/Google|Gemini|3\.5/);
     expect(msg).not.toMatch(/\{"error"/);
   });
 });
