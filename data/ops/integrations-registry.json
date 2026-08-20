@@ -11,12 +11,42 @@
       "license": "Project",
       "repo": "internal:services/lughawi-sidecar",
       "docs": "services/lughawi-sidecar/README.md",
-      "features": ["صحة", "صرف تقديري", "تشكيل (CATT لاحقًا)", "GEC stub"],
+      "features": ["صحة", "صرف CAMeL", "قواعد Stanza/PyArabic", "GEC اختياري", "تشكيل CATT"],
       "status": "wired",
       "lughawiStage": "sidecar",
       "watch": true,
       "checkUrl": "http://127.0.0.1:8091/health",
-      "notesAr": "يعمل على Contabo عبر PM2 (lughawi-sidecar). بدون حزم ثقيلة يعرض endpoints تقديرية صادقة."
+      "notesAr": "أساس NLP على Contabo عبر PM2. ثبّت الحزم بـ scripts/contabo-lughawi-sidecar-deps.sh ثم أعد تشغيل الـ sidecar."
+    },
+    {
+      "id": "stanza-arabic",
+      "nameAr": "Stanford Stanza (عربي)",
+      "nameEn": "Stanford Stanza Arabic",
+      "role": "rule_nlp",
+      "license": "Apache-2.0",
+      "repo": "https://github.com/stanfordnlp/stanza",
+      "docs": "https://stanfordnlp.github.io/stanza/",
+      "features": ["تقطيع", "POS", "lemma", "دعم العربية"],
+      "status": "wired_sidecar",
+      "lughawiStage": "rule_nlp",
+      "watch": true,
+      "checkUrl": "http://127.0.0.1:8091/health",
+      "notesAr": "بديل AraNLP المعتمد هنا. يُثبَّت مع sidecar؛ أول تشغيل ينزّل نماذج العربية."
+    },
+    {
+      "id": "pyarabic",
+      "nameAr": "PyArabic",
+      "nameEn": "PyArabic",
+      "role": "rule_nlp",
+      "license": "GPL-3.0",
+      "repo": "https://github.com/linuxscout/pyarabic",
+      "docs": "https://pyarabic.readthedocs.io/",
+      "features": ["تطبيع", "إزالة تشكيل", "مساعدات حروف عربية"],
+      "status": "wired_sidecar",
+      "lughawiStage": "rule_nlp",
+      "watch": true,
+      "checkUrl": null,
+      "notesAr": "طبقة قواعد خفيفة داخل sidecar قبل Stanza/GEC."
     },
     {
       "id": "camel-tools",
@@ -27,11 +57,11 @@
       "repo": "https://github.com/CAMeL-Lab/camel_tools",
       "docs": "https://camel-tools.readthedocs.io/",
       "features": ["صرف", "تحليل صرفي", "تقطيع", "NER", "مشاعر", "لهجات"],
-      "status": "planned_sidecar",
+      "status": "wired_sidecar",
       "lughawiStage": "morphology",
       "watch": true,
-      "checkUrl": null,
-      "notesAr": "أساس الصرف العربي. يُشغَّل كـ sidecar بايثون على Contabo — لا يُحقن في حزمة Next.js."
+      "checkUrl": "http://127.0.0.1:8091/health",
+      "notesAr": "أساس الصرف العربي عبر sidecar. يُحمَّل MLE عند التثبيت على Contabo."
     },
     {
       "id": "camel-arabic-gec",
@@ -42,14 +72,29 @@
       "repo": "https://github.com/CAMeL-Lab/arabic-gec",
       "docs": "https://huggingface.co/collections/CAMeL-Lab/arabic-ged-and-gec-6541e5996be058da06556994",
       "features": ["كشف أخطاء نحوية", "تصحيح GEC", "نماذج AraBART / CAMeLBERT"],
-      "status": "planned_sidecar",
+      "status": "optional_sidecar",
       "lughawiStage": "gec",
       "watch": true,
       "hfModels": [
         "CAMeL-Lab/arabart-qalb14-gec-ged-13",
         "CAMeL-Lab/camelbert-msa-qalb14-ged-13"
       ],
-      "notesAr": "نماذج Hugging Face للتصحيح النحوي. تتطلب GPU أو CPU قوي على Contabo."
+      "notesAr": "اختياري: LUGHAWI_INSTALL_GEC=1 عند التثبيت. يحتاج ~8GB RAM فاضي على Contabo."
+    },
+    {
+      "id": "ollama-llama31-8b",
+      "nameAr": "Ollama Llama 3.1 8B (محلي)",
+      "nameEn": "Ollama Llama 3.1 8B local",
+      "role": "local_llm",
+      "license": "Meta Llama",
+      "repo": "https://ollama.com/library/llama3.1",
+      "docs": "scripts/contabo-ollama-setup.sh",
+      "features": ["تدقيق سياقي", "إعادة صياغة", "ملاذ عند نفاد المفاتيح السحابية"],
+      "status": "optional_local",
+      "lughawiStage": "llm",
+      "watch": true,
+      "checkUrl": "http://127.0.0.1:11434/api/tags",
+      "notesAr": "الافتراضي المحلي للغوي. بديل: mistral:7b. يحتاج ~10GB RAM. ليس fine-tune عربيًا مخصصًا بعد — البرومبت موجّه للتدقيق لا التأليف."
     },
     {
       "id": "camel-text-editing",

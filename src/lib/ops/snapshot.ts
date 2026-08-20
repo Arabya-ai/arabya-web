@@ -128,7 +128,10 @@ export async function buildOpsSnapshot(): Promise<OpsSnapshot> {
         (entry.id !== "ollama-local" || Boolean(process.env.LUGHAWI_OLLAMA_BASE_URL));
       if (shouldProbe && entry.checkUrl) {
         health = await probeUrl(entry.checkUrl);
-        if (!health.ok && entry.status === "wired") {
+        if (
+          !health.ok &&
+          (entry.status === "wired" || entry.status === "wired_sidecar")
+        ) {
           alerts.push({
             id: `health-${entry.id}`,
             level: "critical",

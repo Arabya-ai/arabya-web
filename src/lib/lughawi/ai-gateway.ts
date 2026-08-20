@@ -54,7 +54,8 @@ const DEFAULT_MODELS: Record<AiProviderId, string> = {
    * Override only via LUGHAWI_GOOGLE_MODEL or per-slot model in /admin/ops.
    */
   google: "gemini-3.7-flash",
-  ollama: "llama3.2",
+  /** Local Llama-3.1-class on Contabo (8B). Override via LUGHAWI_OLLAMA_MODEL. */
+  ollama: "llama3.1:8b",
 };
 
 /**

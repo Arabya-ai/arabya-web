@@ -4,7 +4,9 @@
 #   bash /var/www/arabya-web/scripts/contabo-ollama-setup.sh
 set -euo pipefail
 
-MODEL="${LUGHAWI_OLLAMA_MODEL:-llama3.2}"
+# Default: Llama 3.1 8B — suitable for Arabic contextual proofread/rewrite on Contabo
+# when ≥10GB RAM is free. Alternatives: mistral:7b, aya:8b
+MODEL="${LUGHAWI_OLLAMA_MODEL:-llama3.1:8b}"
 
 if ! command -v ollama >/dev/null 2>&1; then
   echo "==> Installing Ollama"
