@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { pageRemoteSiyar } from "@/lib/remote-siyar";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,6 +10,9 @@ export const dynamic = "force-dynamic";
  * Arabya does not vendor the ~12MB dump.
  */
 export async function GET(req: Request) {
+  const limited = enforceRateLimit(req, { prefix: "remote-siyar", limit: 40 });
+  if (limited) return limited;
+
   const url = new URL(req.url);
   const page = Number(url.searchParams.get("page") || "1");
   const pageSize = Number(url.searchParams.get("pageSize") || "20");

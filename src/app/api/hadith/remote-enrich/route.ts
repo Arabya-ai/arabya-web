@@ -3,6 +3,7 @@ import {
   HADITH_ENG_EDITION,
   hadithCdnEditionUrl,
 } from "@/lib/hadith-isnad-parse";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,6 +13,12 @@ export const dynamic = "force-dynamic";
  * without importing full English editions into Git.
  */
 export async function GET(req: Request) {
+  const limited = enforceRateLimit(req, {
+    prefix: "hadith-remote-enrich",
+    limit: 40,
+  });
+  if (limited) return limited;
+
   const url = new URL(req.url);
   const collection = String(url.searchParams.get("collection") || "")
     .toLowerCase()

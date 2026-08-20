@@ -195,7 +195,7 @@
 
 | ID | العنوان | الحالة | مصدر |
 |---|---|---|---|
-| `hadith-placeholder` | حديث placeholder | live | arabya-live |
+| `hadith-placeholder` | حديث (محور حي) | live | arabya-live |
 | `hadith-bukhari-index` | حديث bukhari:index | planned | catalog-expand |
 | `hadith-bukhari-read` | حديث bukhari:read | planned | catalog-expand |
 | `hadith-bukhari-search` | حديث bukhari:search | planned | catalog-expand |
@@ -443,7 +443,7 @@
 
 | ID | العنوان | الحالة | مصدر |
 |---|---|---|---|
-| `heritage-placeholder` | تراث placeholder | live | arabya-live |
+| `heritage-placeholder` | تراث (محور حي) | live | arabya-live |
 | `heritage-work-01` | عمل تراثي #1 | planned | catalog-expand |
 | `heritage-work-02` | عمل تراثي #2 | planned | catalog-expand |
 | `heritage-work-03` | عمل تراثي #3 | planned | catalog-expand |

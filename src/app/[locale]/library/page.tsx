@@ -90,6 +90,8 @@ export default async function LibraryIndexPage({ params, searchParams }: Props) 
         <p className="library-back-link">
           <Link href="/resources">{t("backResources")}</Link>
           {" · "}
+          <Link href="/books">{t("booksCatalogLink")}</Link>
+          {" · "}
           <Link href="/account/import">{t("uploadCta")}</Link>
         </p>
       </div>

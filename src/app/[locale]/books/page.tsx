@@ -15,7 +15,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-function statusKey(status: string | undefined): "statusReady" | "statusReview" | "statusAwaiting" {
+function statusKey(
+  status: string | undefined,
+): "statusReady" | "statusReview" | "statusAwaiting" {
   if (status === "ready") return "statusReady";
   if (status === "review") return "statusReview";
   return "statusAwaiting";
@@ -30,6 +32,11 @@ export default async function BooksIndexPage({ params }: Props) {
     <div className="shell page-block">
       <h1>{t("title")}</h1>
       <p>{t("intro")}</p>
+      <p className="layer-hint">
+        {t.rich("libraryHint", {
+          library: (c) => <Link href="/library">{c}</Link>,
+        })}
+      </p>
 
       {books.length ? (
         <ul className="books-catalog">
@@ -46,11 +53,9 @@ export default async function BooksIndexPage({ params }: Props) {
                   <p className="books-catalog-desc">{b.description}</p>
                 ) : null}
               </div>
-              {b.status === "ready" ? (
-                <Link href={`/books/${b.id}`}>{t("open")}</Link>
-              ) : (
-                <span className="books-catalog-muted">{t("notAvailable")}</span>
-              )}
+              <Link href={`/books/${b.id}`}>
+                {b.status === "ready" ? t("open") : t("viewStatus")}
+              </Link>
             </li>
           ))}
         </ul>
