@@ -377,18 +377,32 @@ export function AdminKeysManager() {
             <p className="dash-muted">لا استخدام مسجّل بعد هذا الشهر.</p>
           ) : (
             <ul className="ops-usage-list">
-              {usage.map((u) => (
-                <li key={`${u.provider}-${u.keyTail}`}>
-                  <span dir="ltr">
-                    {u.provider}…{u.keyTail}
-                  </span>
-                  {u.label ? ` (${u.label})` : ""} — متبقّي {u.remainingPct}% ·{" "}
-                  {u.requestsMonth} طلب
-                  {u.alert && u.alert !== "ok" ? ` · تنبيه: ${u.alert}` : ""}
-                </li>
-              ))}
+              {usage.map((u) => {
+                const alertClass =
+                  u.alert && u.alert !== "ok"
+                    ? u.remainingPct < 15
+                      ? "ops-usage-list__item--critical"
+                      : "ops-usage-list__item--warn"
+                    : "";
+                return (
+                  <li key={`${u.provider}-${u.keyTail}`} className={alertClass || undefined}>
+                    <span dir="ltr">
+                      {u.provider}…{u.keyTail}
+                    </span>
+                    {u.label ? ` (${u.label})` : ""} — متبقّي{" "}
+                    <strong>{u.remainingPct}%</strong> · {u.requestsMonth} طلب
+                    {u.alert && u.alert !== "ok" ? (
+                      <span className="ops-usage-alert"> · تنبيه: {u.alert}</span>
+                    ) : null}
+                  </li>
+                );
+              })}
             </ul>
           )}
+          <p className="dash-muted" style={{ marginTop: "0.75rem" }}>
+            الحصة المجانية للمستخدم: <strong>1500 كلمة / شهر</strong> على مفاتيح
+            المشروع، ثم يطلب مفتاحه الخاص.
+          </p>
           <h2 style={{ marginTop: "1.25rem" }}>أعلى المستخدمين استهلاكًا (كلمات مجانية)</h2>
           {topUsers.length === 0 ? (
             <p className="dash-muted">لا بيانات مستخدمين بعد.</p>

@@ -14,14 +14,19 @@ RUNTIME_DIR="${APP_DIR}/.data"
 cd "$APP_DIR"
 
 echo "==> Contabo data dirs"
-mkdir -p "$(dirname "$DB_PATH")" "$IMPORT_DIR" "$IMPORT_DIR/irab-claims" "$LIBRARY_DIR" "$RUNTIME_DIR"
+mkdir -p "$(dirname "$DB_PATH")" "$IMPORT_DIR" "$IMPORT_DIR/irab-claims" "$LIBRARY_DIR" "$RUNTIME_DIR" /var/lib/arabya
 
 echo "==> SQLite user DB (accounts / bookmarks / progress)"
 ARABYA_USER_DB_PATH="$DB_PATH" npm run init-user-db
 
-echo "==> Lughawi runtime files (learning / quota / credentials placeholders)"
+echo "==> Lughawi runtime files (learning / quota / credentials / admin pool)"
 # Learning store creates the JSON on first write; ensure parent exists.
 touch "$RUNTIME_DIR/.keep"
+# Encrypted admin AI pool (UI-managed) — file created on first key save.
+if [[ ! -f /var/lib/arabya/lughawi-admin-pool.json ]]; then
+  echo '{"version":1,"slots":[]}' > /var/lib/arabya/lughawi-admin-pool.json
+  chmod 640 /var/lib/arabya/lughawi-admin-pool.json 2>/dev/null || true
+fi
 # Optional empty seeds — stores create real files lazily.
 : > "$RUNTIME_DIR/lughawi-learning.json.tmp" && rm -f "$RUNTIME_DIR/lughawi-learning.json.tmp"
 

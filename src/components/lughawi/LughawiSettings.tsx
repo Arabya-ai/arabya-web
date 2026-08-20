@@ -10,6 +10,10 @@ interface Quota {
   limitChars: number;
   usedChars: number;
   remainingChars: number;
+  limitWords?: number;
+  usedWords?: number;
+  remainingWords?: number;
+  unit?: "words";
 }
 
 interface ProviderRow {
@@ -132,8 +136,8 @@ export function LughawiSettings() {
       {quota ? (
         <p className="lughawi-quota">
           {t("quotaLine", {
-            remaining: quota.remainingChars,
-            limit: quota.limitChars,
+            remaining: quota.remainingWords ?? quota.remainingChars,
+            limit: quota.limitWords ?? quota.limitChars,
             period: quota.period,
           })}
         </p>

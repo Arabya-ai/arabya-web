@@ -3,6 +3,7 @@
 import { lughawiProjectAiPoolSummary } from "@/lib/lughawi/config";
 import { LUGHAWI_ENGINE_VERSION } from "@/lib/lughawi/engine/stages-meta";
 import { learningStats } from "@/lib/lughawi/learning-store";
+import { probeSidecarHealth } from "@/lib/lughawi/sidecar-client";
 import {
   loadIntegrationsRegistry,
   probeUrl,
@@ -31,6 +32,13 @@ export interface OpsSnapshot {
     projectPoolByProvider: Record<string, number>;
     hasLocalOllama: boolean;
     learning: ReturnType<typeof learningStats>;
+    sidecar?: {
+      ok: boolean;
+      version?: string;
+      tools?: Record<string, string>;
+      ms: number;
+      detail?: string;
+    };
   };
   aiUsage: ReturnType<typeof usageSummary>;
   integrations: Array<
@@ -47,6 +55,7 @@ export async function buildOpsSnapshot(): Promise<OpsSnapshot> {
   const registry = loadIntegrationsRegistry();
   const pool = lughawiProjectAiPoolSummary();
   const aiUsage = usageSummary();
+  const sidecar = await probeSidecarHealth();
 
   for (const a of aiUsage.alerts) {
     alerts.push({
@@ -64,7 +73,7 @@ export async function buildOpsSnapshot(): Promise<OpsSnapshot> {
       level: "warn",
       area: "ai-pool",
       messageAr:
-        "مجمّع مفاتيح المشروع فارغ — Auto يعتمد على مفاتيح المستخدم أو التدقيق الأوفلاين فقط.",
+        "مجمّع مفاتيح المشروع فارغ — أضف مفاتيح من تبويب «المفاتيح» أعلاه (بدون تعديل ملفات).",
       at: now,
     });
   }
@@ -76,6 +85,17 @@ export async function buildOpsSnapshot(): Promise<OpsSnapshot> {
       area: "local-ai",
       messageAr:
         "لم يُضبط Ollama المحلي بعد (LUGHAWI_OLLAMA_BASE_URL). أضفه لتقليل التكلفة عند نفاد المفاتيح.",
+      at: now,
+    });
+  }
+
+  if (!sidecar.ok) {
+    alerts.push({
+      id: "sidecar-down",
+      level: "info",
+      area: "sidecar",
+      messageAr:
+        "Sidecar لغوي غير متصل (127.0.0.1:8091). التدقيق المحلي يعمل؛ الصرف/التشكيل العصبي لاحقًا بعد تشغيله.",
       at: now,
     });
   }
@@ -94,19 +114,29 @@ export async function buildOpsSnapshot(): Promise<OpsSnapshot> {
   const integrations: OpsSnapshot["integrations"] = [];
   for (const entry of registry.integrations) {
     let health: { ok: boolean; ms: number; detail?: string } | undefined;
-    const shouldProbe =
-      Boolean(entry.checkUrl) &&
-      (entry.id !== "ollama-local" || Boolean(process.env.LUGHAWI_OLLAMA_BASE_URL));
-    if (shouldProbe && entry.checkUrl) {
-      health = await probeUrl(entry.checkUrl);
-      if (!health.ok && entry.status === "wired") {
-        alerts.push({
-          id: `health-${entry.id}`,
-          level: "critical",
-          area: "integrations",
-          messageAr: `${entry.nameAr} لا يستجيب: ${health.detail ?? "فشل"}`,
-          at: now,
-        });
+    if (entry.id === "lughawi-sidecar") {
+      health = {
+        ok: sidecar.ok,
+        ms: sidecar.ms,
+        detail: sidecar.ok
+          ? `v${sidecar.version ?? "?"} · ${JSON.stringify(sidecar.tools ?? {})}`
+          : sidecar.detail,
+      };
+    } else {
+      const shouldProbe =
+        Boolean(entry.checkUrl) &&
+        (entry.id !== "ollama-local" || Boolean(process.env.LUGHAWI_OLLAMA_BASE_URL));
+      if (shouldProbe && entry.checkUrl) {
+        health = await probeUrl(entry.checkUrl);
+        if (!health.ok && entry.status === "wired") {
+          alerts.push({
+            id: `health-${entry.id}`,
+            level: "critical",
+            area: "integrations",
+            messageAr: `${entry.nameAr} لا يستجيب: ${health.detail ?? "فشل"}`,
+            at: now,
+          });
+        }
       }
     }
     integrations.push({ ...entry, health });
@@ -118,7 +148,7 @@ export async function buildOpsSnapshot(): Promise<OpsSnapshot> {
       id: "sidecar-backlog",
       level: "info",
       area: "integrations",
-      messageAr: `${planned.length} أداة مفتوحة مخططة للـ sidecar (CAMeL / CATT / BAYAN / ARETA…). اطلب التحديث عند الجاهزية.`,
+      messageAr: `${planned.length} أداة مفتوحة مخططة للـ sidecar (CAMeL / CATT / BAYAN / ARETA…).`,
       at: now,
     });
   }
@@ -135,6 +165,13 @@ export async function buildOpsSnapshot(): Promise<OpsSnapshot> {
       projectPoolByProvider: pool.byProvider,
       hasLocalOllama: pool.hasLocal,
       learning: learningStats(),
+      sidecar: {
+        ok: sidecar.ok,
+        version: sidecar.version,
+        tools: sidecar.tools,
+        ms: sidecar.ms,
+        detail: sidecar.detail,
+      },
     },
     aiUsage,
     integrations,

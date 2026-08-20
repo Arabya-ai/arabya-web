@@ -145,9 +145,51 @@ export function collectGrammarEdits(
     add(edits, m.index, m.index + 4, "قالو", "قالوا", "alef-farq", locale, 0.9);
   }
 
-  // هو الذي تفعل → هو الذي يفعل (very light gender on relative + verb) — skip, too risky
+  // Number–noun gender (high-precision closed lists)
+  // ثلاث كتاب → ثلاثة كتب / ثلاث كتب OK for feminine counted nouns in 3–10
+  const numFemWrong =
+    /(?<![\u0600-\u06FFa-zA-Z0-9])(ثلاث|أربع|خمس|ست|سبع|ثمان|تسع|عشر)\s+(كتاب|قلم|رجل|ولد|يوم|درس|مشروع|برنامج|موقع|نص|خطأ|تقرير)(?![\u0600-\u06FFa-zA-Z0-9])/g;
+  const femToMasc: Record<string, string> = {
+    ثلاث: "ثلاثة",
+    أربع: "أربعة",
+    خمس: "خمسة",
+    ست: "ستة",
+    سبع: "سبعة",
+    ثمان: "ثمانية",
+    تسع: "تسعة",
+    عشر: "عشرة",
+  };
+  while ((m = numFemWrong.exec(text)) !== null) {
+    const num = m[1]!;
+    const to = femToMasc[num];
+    if (!to) continue;
+    add(edits, m.index, m.index + num.length, num, to, "num-agreement", locale, 0.78);
+  }
 
-  // عدد + feminine noun wrong: ثلاثة كتب → ثلاثة كتب OK; ثلاث كتاب → ثلاثة كتب hard
+  const numMascWrong =
+    /(?<![\u0600-\u06FFa-zA-Z0-9])(ثلاثة|أربعة|خمسة|ستة|سبعة|ثمانية|تسعة|عشرة)\s+(مدرسة|سيارة|مرأة|بنت|فكرة|لغة|مسألة|مشكلة|صفحة|رسالة|خدمة|كلمة|جملة|فقرة)(?![\u0600-\u06FFa-zA-Z0-9])/g;
+  const mascToFem: Record<string, string> = {
+    ثلاثة: "ثلاث",
+    أربعة: "أربع",
+    خمسة: "خمس",
+    ستة: "ست",
+    سبعة: "سبع",
+    ثمانية: "ثمان",
+    تسعة: "تسع",
+    عشرة: "عشر",
+  };
+  while ((m = numMascWrong.exec(text)) !== null) {
+    const num = m[1]!;
+    const to = mascToFem[num];
+    if (!to) continue;
+    add(edits, m.index, m.index + num.length, num, to, "num-agreement", locale, 0.78);
+  }
+
+  // هناك يوجد → هناك (redundant)
+  const hunak = /هناك\s+يوجد/g;
+  while ((m = hunak.exec(text)) !== null) {
+    add(edits, m.index, m.index + m[0]!.length, m[0]!, "هناك", "style-redundant", locale, 0.7);
+  }
 
   return edits.sort((a, b) => a.start - b.start);
 }
