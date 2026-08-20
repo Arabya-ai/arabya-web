@@ -1,0 +1,16 @@
+---
+description: Always prefer the newest stable AI model for Lughawi Auto
+alwaysApply: true
+---
+
+# Lughawi AI models — newest first
+
+## Hard preference
+- For Google (and any Auto provider defaults): **always prefer the newest stable production model**.
+- Do not pin older generations (e.g. Gemini 2.x) when a newer Flash GA exists (3.5 / 3.6 / 3.7+).
+- Keep a **newest → older** fallback list for 404 / retired models.
+- Update `DEFAULT_MODELS.google` and `GOOGLE_MODELS_NEWEST_FIRST` in `src/lib/lughawi/ai-gateway.ts` whenever Google ships a newer Flash GA.
+- Owner override remains: `/admin/ops` slot `model` or env `LUGHAWI_GOOGLE_MODEL`.
+
+## After shipping model bumps
+Always give Contabo deploy PuTTY command immediately after merge — do not wait for the owner to ask.

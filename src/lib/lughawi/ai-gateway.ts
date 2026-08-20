@@ -50,15 +50,18 @@ const DEFAULT_MODELS: Record<AiProviderId, string> = {
   openrouter: "openai/gpt-4o-mini",
   anthropic: "claude-3-5-haiku-latest",
   /**
-   * Prefer current Gemini 3.x Flash (2.0 retired; 2.5 sunsets soon).
-   * Override with LUGHAWI_GOOGLE_MODEL or per-slot model in /admin/ops.
+   * Always prefer the newest stable Gemini Flash.
+   * Override only via LUGHAWI_GOOGLE_MODEL or per-slot model in /admin/ops.
    */
-  google: "gemini-3.5-flash",
+  google: "gemini-3.7-flash",
   ollama: "llama3.2",
 };
 
-/** Tried in order on 404 / model-not-found (newest → older Flash). */
-const GOOGLE_MODEL_FALLBACKS = [
+/**
+ * Newest → older. Used as default + automatic 404 fallbacks.
+ * When Google ships a newer Flash GA, put it first here and as `DEFAULT_MODELS.google`.
+ */
+const GOOGLE_MODELS_NEWEST_FIRST = [
   "gemini-3.7-flash",
   "gemini-3.6-flash",
   "gemini-3.5-flash",
@@ -66,11 +69,14 @@ const GOOGLE_MODEL_FALLBACKS = [
   "gemini-2.5-flash",
 ] as const;
 
+/** @deprecated alias — use GOOGLE_MODELS_NEWEST_FIRST */
+const GOOGLE_MODEL_FALLBACKS = GOOGLE_MODELS_NEWEST_FIRST;
+
 /** Short Arabic message for UI — never dump raw provider JSON. */
 export function humanizeAiError(msg: string): string {
   const m = msg || "";
   if (/404|no longer ava|not found|is not found/i.test(m)) {
-    return "نموذج Google غير متاح أو قديم — نستخدم Gemini 3.5+ مع بدائل تلقائية. أعد المحاولة.";
+    return "نموذج Google غير متاح أو قديم — نستخدم أحدث Gemini المتاح تلقائياً. أعد المحاولة.";
   }
   if (/401|403|API[_ ]?key|invalid|permission/i.test(m)) {
     return "مفتاح Google مرفوض أو منتهٍ — راجع تبويب المفاتيح في /admin/ops.";
@@ -258,11 +264,11 @@ export async function runAiChat(params: AiChatParams): Promise<AiChatResult> {
       model,
     );
   } else if (provider === "google") {
+    // Explicit slot/env override first, then newest→older Flash list.
     const preferred = [
       params.model?.trim(),
       process.env.LUGHAWI_GOOGLE_MODEL?.trim(),
-      DEFAULT_MODELS.google,
-      ...GOOGLE_MODEL_FALLBACKS,
+      ...GOOGLE_MODELS_NEWEST_FIRST,
     ].filter((x): x is string => Boolean(x));
     const tried = new Set<string>();
     let lastErr: Error | null = null;
