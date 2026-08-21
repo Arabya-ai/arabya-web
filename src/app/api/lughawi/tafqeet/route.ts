@@ -1,10 +1,18 @@
+import { auth } from "@/auth";
 import { applyTafqeet } from "@/lib/lughawi/engines/tafqeet";
-import { enforceRateLimit } from "@/lib/rate-limit";
+import { sessionSkipsLughawiRateLimit } from "@/lib/lughawi/rate-limit-policy";
+import { enforceRateLimit, LUGHAWI_TOOL_LIMIT } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const limited = enforceRateLimit(req, { prefix: "lughawi-tafqeet", limit: 40 });
-  if (limited) return limited;
+  const session = await auth();
+  if (!sessionSkipsLughawiRateLimit(session)) {
+    const limited = enforceRateLimit(req, {
+      prefix: "lughawi-tafqeet",
+      limit: LUGHAWI_TOOL_LIMIT,
+    });
+    if (limited) return limited;
+  }
 
   let body: { text?: string };
   try {

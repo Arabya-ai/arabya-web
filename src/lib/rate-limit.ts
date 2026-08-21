@@ -17,11 +17,15 @@ const MAX_BUCKETS = 50_000;
 const SWEEP_EVERY_MS = 60_000;
 
 /** Every /api request — enforced in middleware before route handlers. */
-export const API_BASELINE_LIMIT = 120;
+export const API_BASELINE_LIMIT = 2_000;
 /** OAuth sign-in / session endpoints per IP. */
-export const AUTH_RATE_LIMIT = 30;
+export const AUTH_RATE_LIMIT = 60;
 /** Bulk Quran search (`?all=1`) per IP — caps scraping throughput. */
-export const SEARCH_BULK_LIMIT = 10;
+export const SEARCH_BULK_LIMIT = 30;
+
+/** Lughawi public tools — generous so guests never hit false 429 under normal use. */
+export const LUGHAWI_PROOFREAD_LIMIT = 1_000;
+export const LUGHAWI_TOOL_LIMIT = 800;
 
 const hits = new Map<string, number[]>();
 let lastSweep = 0;

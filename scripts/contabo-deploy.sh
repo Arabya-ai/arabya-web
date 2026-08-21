@@ -6,6 +6,17 @@ set -euo pipefail
 
 APP_DIR="${APP_DIR:-/var/www/arabya-web}"
 BRANCH="${BRANCH:-main}"
+DEPLOY_LOCK="${DEPLOY_LOCK:-/var/lock/arabya-contabo-deploy.lock}"
+
+# Prevent two Deploy Contabo / manual deploys from racing (ENOENT / 503).
+mkdir -p "$(dirname "$DEPLOY_LOCK")"
+exec 9>"$DEPLOY_LOCK"
+if ! flock -n 9; then
+  echo "ERROR: another Contabo deploy holds $DEPLOY_LOCK — aborting to protect the live site."
+  echo "Wait for the other deploy to finish, or: fuser -v $DEPLOY_LOCK"
+  exit 1
+fi
+echo "==> Deploy lock acquired ($DEPLOY_LOCK)"
 
 cd "$APP_DIR"
 

@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { arabyaNlpConjugate } from "@/lib/lughawi/arabya-nlp-client";
+import { sessionSkipsLughawiRateLimit } from "@/lib/lughawi/rate-limit-policy";
 import { sidecarMorph } from "@/lib/lughawi/sidecar-client";
-import { enforceRateLimit } from "@/lib/rate-limit";
+import { enforceRateLimit, LUGHAWI_TOOL_LIMIT } from "@/lib/rate-limit";
 
 /**
  * Morphology / conjugation peek.
@@ -9,8 +11,14 @@ import { enforceRateLimit } from "@/lib/rate-limit";
  * Does not touch mushaf word-study dock.
  */
 export async function POST(req: Request) {
-  const limited = enforceRateLimit(req, { prefix: "lughawi-morph", limit: 40 });
-  if (limited) return limited;
+  const session = await auth();
+  if (!sessionSkipsLughawiRateLimit(session)) {
+    const limited = enforceRateLimit(req, {
+      prefix: "lughawi-morph",
+      limit: LUGHAWI_TOOL_LIMIT,
+    });
+    if (limited) return limited;
+  }
 
   let body: { text?: string; verb?: string; futureType?: string };
   try {
