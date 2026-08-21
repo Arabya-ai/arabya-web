@@ -26,6 +26,7 @@ describe("adhkar loaders", () => {
     const duas = await getDuas();
     expect(duas.length).toBeGreaterThanOrEqual(200);
     expect(duas[0].textAr.length).toBeGreaterThan(8);
+    expect(duas.every((d) => Boolean(d.categoryAr?.trim()))).toBe(true);
     const phrases = await getTasbeehPhrases();
     expect(phrases.some((p) => p.id === "subhanallah")).toBe(true);
     const sleep = await getAdhkarCategory("sleep");
