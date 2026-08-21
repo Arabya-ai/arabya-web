@@ -13,12 +13,12 @@ export const PRAYER_METHOD_OPTIONS: Array<{
   labelEn: string;
 }> = [
   { id: 5, labelAr: "مصر (هيئة المساحة)", labelEn: "Egyptian General Authority" },
-  { id: 2, labelAr: "ISNA (أمريكا)", labelEn: "ISNA" },
-  { id: 3, labelAr: "مكة (أم القرى)", labelEn: "Makkah (Umm al-Qura)" },
-  { id: 4, labelAr: "كارachi", labelEn: "Karachi" },
-  { id: 1, labelAr: "جامعة العلوم الإسلامية، كarachi", labelEn: "University of Islamic Sciences" },
-  { id: 7, labelAr: "Tehran", labelEn: "Tehran" },
-  { id: 8, labelAr: "Gulf", labelEn: "Gulf Region" },
+  { id: 2, labelAr: "ISNA (أمريكا الشمالية)", labelEn: "ISNA" },
+  { id: 3, labelAr: "رابطة العالم الإسلامي", labelEn: "Muslim World League" },
+  { id: 4, labelAr: "أم القرى (مكة)", labelEn: "Umm al-Qura (Makkah)" },
+  { id: 1, labelAr: "جامعة العلوم الإسلامية، كراتشي", labelEn: "University of Islamic Sciences, Karachi" },
+  { id: 7, labelAr: "طهران", labelEn: "Tehran" },
+  { id: 8, labelAr: "الخليج (تقريب أم القرى)", labelEn: "Gulf (Umm al-Qura approx.)" },
 ];
 
 const DEFAULT: PrayerUserPrefs = { method: 5, school: 0 };

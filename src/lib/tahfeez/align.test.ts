@@ -46,6 +46,16 @@ describe("alignRecitation", () => {
     expect(results[1].status).toBe("skipped");
   });
 
+  it("keeps original word indexes when a token normalizes empty", () => {
+    const words = ["بِسْمِ", "!!!", "ٱللَّهِ"];
+    const { results, cursor } = alignRecitation(words, "بسم الله");
+    expect(results).toHaveLength(3);
+    expect(results[0].status).toBe("correct");
+    expect(results[1].status).toBe("pending");
+    expect(results[2].status).toBe("correct");
+    expect(cursor).toBe(2);
+  });
+
   it("resumes from cursor", () => {
     const { cursor } = alignRecitation(fatiha, "بسم الله", { cursor: 0 });
     expect(cursor).toBe(2);

@@ -10,6 +10,7 @@ import { PreferencesMenu } from "@/components/PreferencesMenu";
 import { useDismissibleOpen } from "@/hooks/useDismissibleOpen";
 import { Link, usePathname } from "@/i18n/navigation";
 import { isStudioEditorViewportPath } from "@/ayat-studio/lib/studio-shell-mode";
+import { ServicesMegaPanel } from "@/components/services/ServicesGrid";
 
 /** Site chrome for all pages including Arabya Studio (header + footer). */
 export function AppShell({
@@ -39,19 +40,53 @@ export function AppShell({
 function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
   const t = useTranslations("Nav");
   const rootRef = useRef<HTMLDivElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { open, setOpen, toggle } = useDismissibleOpen(rootRef);
+  const [finePointer, setFinePointer] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
+    function sync() {
+      setFinePointer(mq.matches);
+    }
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  function clearCloseTimer() {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  }
+
+  function openMenu() {
+    clearCloseTimer();
+    setOpen(true);
+  }
+
+  function scheduleClose() {
+    clearCloseTimer();
+    closeTimer.current = setTimeout(() => setOpen(false), 180);
+  }
 
   function go() {
     return () => {
+      clearCloseTimer();
       setOpen(false);
       onNavigate?.();
     };
   }
 
+  useEffect(() => () => clearCloseTimer(), []);
+
   return (
     <div
-      className={`nav-dropdown ${open ? "is-open" : ""}`}
+      className={`nav-dropdown nav-dropdown--services ${open ? "is-open" : ""}`}
       ref={rootRef}
+      onMouseEnter={finePointer ? openMenu : undefined}
+      onMouseLeave={finePointer ? scheduleClose : undefined}
     >
       <button
         type="button"
@@ -60,60 +95,18 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
         aria-haspopup="menu"
         onClick={(e) => {
           e.stopPropagation();
+          clearCloseTimer();
           toggle();
         }}
       >
         {t("services")}
       </button>
-      <div className="nav-dropdown-menu" role="menu" hidden={!open}>
-        <Link href="/juz" role="menuitem" onClick={go()}>
-          {t("juz")}
-        </Link>
-        <Link href="/roots" role="menuitem" onClick={go()}>
-          {t("roots")}
-        </Link>
-        <Link href="/qiraat" role="menuitem" onClick={go()}>
-          {t("qiraat")}
-        </Link>
-        <Link href="/asma" role="menuitem" onClick={go()}>
-          {t("asma")}
-        </Link>
-        <Link href="/reciters" role="menuitem" onClick={go()}>
-          {t("reciters")}
-        </Link>
-        <Link href="/adhkar" role="menuitem" onClick={go()}>
-          {t("adhkar")}
-        </Link>
-        <Link href="/qibla" role="menuitem" onClick={go()}>
-          {t("qibla")}
-        </Link>
-        <Link href="/tahfeez" role="menuitem" onClick={go()}>
-          {t("tahfeez")}
-        </Link>
-        <Link href="/study" role="menuitem" onClick={go()}>
-          {t("study")}
-        </Link>
-        <Link href="/studio" role="menuitem" onClick={go()}>
-          {t("studio")}
-        </Link>
-        <Link href="/library" role="menuitem" onClick={go()}>
-          {t("library")}
-        </Link>
-        <Link href="/books" role="menuitem" onClick={go()}>
-          {t("books")}
-        </Link>
-        <Link href="/hadith" role="menuitem" onClick={go()}>
-          {t("hadith")}
-        </Link>
-        <Link href="/heritage" role="menuitem" onClick={go()}>
-          {t("heritage")}
-        </Link>
-        <Link href="/resources" role="menuitem" onClick={go()}>
-          {t("resources")}
-        </Link>
-        <Link href="/lughawi" role="menuitem" onClick={go()}>
-          {t("lughawi")}
-        </Link>
+      <div
+        className="nav-dropdown-menu nav-mega-wrap"
+        role="presentation"
+        hidden={!open}
+      >
+        <ServicesMegaPanel onNavigate={go()} />
       </div>
     </div>
   );
@@ -238,6 +231,7 @@ export function SiteFooter({ credit }: { credit: string }) {
           <div className="arabya-footer-nav-row">
             <nav className="arabya-footer-menu" aria-label={t("footerNav")}>
               <Link href="/">{t("home")}</Link>
+              <Link href="/services">{t("services")}</Link>
               <Link href="/mushaf/1">{t("mushaf")}</Link>
               <Link href="/juz">{t("juz")}</Link>
               <Link href="/roots">{t("roots")}</Link>
@@ -247,12 +241,14 @@ export function SiteFooter({ credit }: { credit: string }) {
               <Link href="/study">{t("study")}</Link>
               <Link href="/adhkar">{t("adhkar")}</Link>
               <Link href="/qibla">{t("qibla")}</Link>
+              <Link href="/tahfeez">{t("tahfeez")}</Link>
               <Link href="/studio">{t("studio")}</Link>
               <Link href="/library">{t("library")}</Link>
               <Link href="/books">{t("books")}</Link>
               <Link href="/hadith">{t("hadith")}</Link>
               <Link href="/heritage">{t("heritage")}</Link>
               <Link href="/resources">{t("resources")}</Link>
+              <Link href="/lughawi">{t("lughawi")}</Link>
               <Link href="/about">{t("about")}</Link>
               <Link href="/privacy">{t("privacy")}</Link>
               <Link href="/terms">{t("terms")}</Link>

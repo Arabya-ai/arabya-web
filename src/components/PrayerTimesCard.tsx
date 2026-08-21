@@ -26,6 +26,8 @@ type Timings = PrayerTimings;
 
 type PrayerPayload = {
   timezone?: string | null;
+  source?: string;
+  offline?: boolean;
   place?: { city?: string | null; country?: string | null; displayName?: string | null };
   gregorian: {
     ar: string | null;
@@ -320,6 +322,13 @@ export function PrayerTimesCard() {
       {data?.place?.displayName ? (
         <p className="prayer-status prayer-status--hint" role="status">
           {data.place.displayName}
+        </p>
+      ) : null}
+      {data && !loading ? (
+        <p className="prayer-status prayer-status--hint" role="status">
+          {data.source === "adhan-js" || data.offline
+            ? t("localSource")
+            : t("remoteSource")}
         </p>
       ) : null}
 

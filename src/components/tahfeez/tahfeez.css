@@ -181,7 +181,7 @@
   min-height: 7.5rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem 0.55rem;
+  gap: 0.55rem 0.65rem;
   justify-content: center;
   align-content: center;
   font-size: clamp(1.35rem, 3.2vw, 1.85rem);
@@ -190,25 +190,66 @@
   font-family: var(--font-quran, inherit);
 }
 
-.tahfeez-ayah[data-hidden="true"] .tahfeez-word {
+.tahfeez-ayah[data-hidden="true"] .tahfeez-word__text {
   filter: blur(7px);
   user-select: none;
 }
 
 .tahfeez-word {
-  padding: 0.1rem 0.2rem;
-  border-radius: 0.35rem;
-  transition: background-color 160ms ease, color 160ms ease;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.55rem;
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--surface) 88%, var(--brand-soft));
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.tahfeez-word__text {
+  display: inline-block;
+}
+
+.tahfeez-word__mark {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.2rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .tahfeez-word[data-status="correct"] {
-  background: color-mix(in srgb, var(--tz-good) 22%, transparent);
-  color: color-mix(in srgb, var(--tz-good) 70%, var(--tz-ink));
+  background: var(--status-good-soft);
+  border-color: color-mix(in srgb, var(--tz-good) 55%, var(--tz-line));
+  color: color-mix(in srgb, var(--tz-good) 82%, var(--tz-ink));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--tz-good) 18%, transparent);
+}
+
+.tahfeez-word[data-status="correct"] .tahfeez-word__mark {
+  background: var(--tz-good);
+  color: #fff;
 }
 
 .tahfeez-word[data-status="wrong"] {
-  background: color-mix(in srgb, var(--tz-bad) 18%, transparent);
-  color: color-mix(in srgb, var(--tz-bad) 65%, var(--tz-ink));
+  background: var(--status-bad-soft);
+  border-color: color-mix(in srgb, var(--tz-bad) 55%, var(--tz-line));
+  color: color-mix(in srgb, var(--tz-bad) 78%, var(--tz-ink));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--tz-bad) 18%, transparent);
+}
+
+.tahfeez-word[data-status="wrong"] .tahfeez-word__mark {
+  background: var(--tz-bad);
+  color: #fff;
 }
 
 .tahfeez-word[data-status="pending"] {
@@ -217,6 +258,56 @@
 
 .tahfeez-word[data-status="skipped"],
 .tahfeez-word[data-status="hesitation"] {
+  color: var(--tz-muted);
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--tz-muted) 35%, var(--tz-line));
+}
+
+.tahfeez-word[data-current="true"] {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--tz-teal) 55%, var(--tz-line));
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--tz-teal) 22%, transparent),
+    0 8px 18px color-mix(in srgb, var(--tz-teal) 12%, transparent);
+}
+
+.tahfeez-ayah[data-recording="true"] .tahfeez-word[data-current="true"][data-status="pending"] {
+  background: color-mix(in srgb, var(--brand-soft) 70%, var(--surface));
+}
+
+.tahfeez-live-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.75rem;
+  justify-content: center;
+  margin: 0.15rem 0 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.tahfeez-live-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--tz-line);
+  background: var(--tz-panel);
+}
+
+.tahfeez-live-legend span[data-tone="correct"] {
+  color: var(--tz-good);
+  border-color: color-mix(in srgb, var(--tz-good) 35%, var(--tz-line));
+  background: var(--status-good-soft);
+}
+
+.tahfeez-live-legend span[data-tone="wrong"] {
+  color: var(--tz-bad);
+  border-color: color-mix(in srgb, var(--tz-bad) 35%, var(--tz-line));
+  background: var(--status-bad-soft);
+}
+
+.tahfeez-live-legend span[data-tone="pending"] {
   color: var(--tz-muted);
 }
 
@@ -321,9 +412,38 @@
   display: flex;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.35rem 0;
+  align-items: center;
+  padding: 0.45rem 0.35rem;
   border-bottom: 1px solid color-mix(in srgb, var(--tz-line) 70%, transparent);
   font-size: 0.9rem;
+  border-radius: 0.45rem;
+}
+
+.tahfeez-word-list li[data-current="true"] {
+  background: color-mix(in srgb, var(--brand-soft) 55%, transparent);
+}
+
+.tahfeez-word-list__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--line) 35%, var(--surface));
+  color: var(--tz-muted);
+}
+
+.tahfeez-word-list li[data-status="correct"] .tahfeez-word-list__badge {
+  background: var(--status-good-soft);
+  color: var(--tz-good);
+}
+
+.tahfeez-word-list li[data-status="wrong"] .tahfeez-word-list__badge {
+  background: var(--status-bad-soft);
+  color: var(--tz-bad);
 }
 
 .tahfeez-word-list li[data-status="correct"] span:last-child {
