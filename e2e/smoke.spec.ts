@@ -1,13 +1,5 @@
 import { expect, test } from "@playwright/test";
-
-async function gotoOk(page: import("@playwright/test").Page, path: string) {
-  let res = await page.goto(path, { waitUntil: "domcontentloaded" });
-  if (!res || !res.ok()) {
-    res = await page.goto(path, { waitUntil: "load" });
-  }
-  expect(res?.ok(), `GET ${path} → ${res?.status()}`).toBeTruthy();
-  return res;
-}
+import { gotoOk, visibleFirst } from "./helpers";
 
 test.describe("smoke", () => {
   test.describe.configure({ mode: "serial" });
@@ -47,12 +39,13 @@ test.describe("smoke", () => {
 
   test("mushaf page 1 loads Madinah frame and word text", async ({ page }) => {
     await gotoOk(page, "/mushaf/1");
-    await expect(page.locator(".mushaf-page")).toBeVisible({ timeout: 30_000 });
+    const mushaf = visibleFirst(page, ".mushaf-page");
+    await expect(mushaf).toBeVisible({ timeout: 30_000 });
     // LCP: mushaf title h1 in banner top row (UI font, stable paint).
-    await expect(page.locator(".mushaf-madinah-label")).toBeVisible({
+    await expect(visibleFirst(page, ".mushaf-madinah-label")).toBeVisible({
       timeout: 30_000,
     });
-    await expect(page.locator(".mushaf-text")).toBeVisible();
+    await expect(visibleFirst(page, ".mushaf-text")).toBeVisible();
     await expect(page.locator(".mushaf-word").first()).toBeVisible({
       timeout: 15_000,
     });
@@ -63,9 +56,10 @@ test.describe("smoke", () => {
   }) => {
     await gotoOk(page, "/en/mushaf/1");
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
-    await expect(page.locator(".mushaf-page")).toBeVisible({ timeout: 30_000 });
-    await expect(page.locator(".mushaf-page")).toHaveAttribute("dir", "rtl");
-    await expect(page.locator(".mushaf-page")).toHaveAttribute("lang", "ar");
+    const mushaf = visibleFirst(page, ".mushaf-page");
+    await expect(mushaf).toBeVisible({ timeout: 30_000 });
+    await expect(mushaf).toHaveAttribute("dir", "rtl");
+    await expect(mushaf).toHaveAttribute("lang", "ar");
     await expect(page.locator(".mushaf-word").first()).toBeVisible();
   });
 
@@ -83,7 +77,10 @@ test.describe("smoke", () => {
 
   test("home search returns ayah results", async ({ page }) => {
     await gotoOk(page, "/en");
-    const search = page.locator(".index-search-simple input[type='search']");
+    const search = visibleFirst(
+      page,
+      ".home-index .index-search-simple input[type='search']",
+    );
     await expect(search).toBeVisible();
     await search.fill("الحمد");
     await expect(page.locator("#ayah-search-h")).toBeVisible({
