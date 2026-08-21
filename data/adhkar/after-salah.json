@@ -90,6 +90,87 @@
       "textAr": "اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْماً نافِعاً، وَرِزْقاً طَيِّباً، وَعَمَلاً مُتَقَبَّلاً)) بَعْدَ السّلامِ مِنْ صَلاَةِ الفَجْرِ.",
       "repeat": 1,
       "source": "حصن المسلم"
+    },
+    {
+      "id": "after-salah-15",
+      "textAr": "أَسْـتَغْفِرُ الله، أَسْـتَغْفِرُ الله، أَسْـتَغْفِرُ الله.اللّهُـمَّ أَنْـتَ السَّلامُ ، وَمِـنْكَ السَّلام ، تَبارَكْتَ يا ذا الجَـلالِ وَالإِكْـرام .",
+      "repeat": 1,
+      "source": "azkar-api",
+      "fadlAr": "أضيف من مقارنة مصادر مفتوحة (azkar-api).",
+      "fadlEn": "Added via open-source azkar comparison (azkar-api).",
+      "importedFrom": "nawafalqari/azkar-api"
+    },
+    {
+      "id": "after-salah-16",
+      "textAr": "لا إلهَ إلاّ اللّهُ وحدَهُ لا شريكَ لهُ، لهُ المُـلْكُ ولهُ الحَمْد، وهوَ على كلّ شَيءٍ قَدير، اللّهُـمَّ لا مانِعَ لِما أَعْطَـيْت، وَلا مُعْطِـيَ لِما مَنَـعْت، وَلا يَنْفَـعُ ذا الجَـدِّ مِنْـكَ الجَـد.",
+      "repeat": 1,
+      "source": "azkar-api",
+      "fadlAr": "أضيف من مقارنة مصادر مفتوحة (azkar-api).",
+      "fadlEn": "Added via open-source azkar comparison (azkar-api).",
+      "importedFrom": "nawafalqari/azkar-api"
+    },
+    {
+      "id": "after-salah-17",
+      "textAr": "لا إلهَ إلاّ اللّه, وحدَهُ لا شريكَ لهُ، لهُ الملكُ ولهُ الحَمد، وهوَ على كلّ شيءٍ قدير، لا حَـوْلَ وَلا قـوَّةَ إِلاّ بِاللهِ، لا إلهَ إلاّ اللّـه، وَلا نَعْـبُـدُ إِلاّ إيّـاه, لَهُ النِّعْـمَةُ وَلَهُ الفَضْل وَلَهُ الثَّـناءُ الحَـسَن، لا إلهَ إلاّ اللّهُ مخْلِصـينَ لَـهُ الدِّينَ وَلَوْ كَـرِهَ الكـافِرون.",
+      "repeat": 1,
+      "source": "azkar-api",
+      "fadlAr": "أضيف من مقارنة مصادر مفتوحة (azkar-api).",
+      "fadlEn": "Added via open-source azkar comparison (azkar-api).",
+      "importedFrom": "nawafalqari/azkar-api"
+    },
+    {
+      "id": "after-salah-18",
+      "textAr": "سُـبْحانَ اللهِ، والحَمْـدُ لله ، واللهُ أكْـبَر.",
+      "repeat": 33,
+      "source": "azkar-api",
+      "fadlAr": "أضيف من مقارنة مصادر مفتوحة (azkar-api).",
+      "fadlEn": "Added via open-source azkar comparison (azkar-api).",
+      "importedFrom": "nawafalqari/azkar-api"
+    },
+    {
+      "id": "after-salah-19",
+      "textAr": "لا إلهَ إلاّ اللّهُ وَحْـدَهُ لا شريكَ لهُ، لهُ الملكُ ولهُ الحَمْد، وهُوَ على كُلّ شَيءٍ قَـدير.",
+      "repeat": 1,
+      "source": "azkar-api",
+      "fadlAr": "أضيف من مقارنة مصادر مفتوحة (azkar-api).",
+      "fadlEn": "Added via open-source azkar comparison (azkar-api).",
+      "importedFrom": "nawafalqari/azkar-api"
+    },
+    {
+      "id": "after-salah-20",
+      "textAr": "لا إلهَ إلاّ اللّهُ وحْـدَهُ لا شريكَ لهُ، لهُ المُلكُ ولهُ الحَمْد، يُحيـي وَيُمـيتُ وهُوَ على كُلّ شيءٍ قدير.",
+      "repeat": 10,
+      "source": "azkar-api",
+      "fadlAr": "عَشْر مَرّات بَعْدَ المَغْرِب وَالصّـبْح.",
+      "fadlEn": "عَشْر مَرّات بَعْدَ المَغْرِب وَالصّـبْح.",
+      "importedFrom": "nawafalqari/azkar-api"
+    },
+    {
+      "id": "after-salah-21",
+      "textAr": "اللّهُـمَّ إِنِّـي أَسْأَلُـكَ عِلْمـاً نافِعـاً وَرِزْقـاً طَيِّـباً ، وَعَمَـلاً مُتَقَـبَّلاً.",
+      "repeat": 1,
+      "source": "azkar-api",
+      "fadlAr": "بَعْد السّلامِ من صَلاةِ الفَجْر.",
+      "fadlEn": "بَعْد السّلامِ من صَلاةِ الفَجْر.",
+      "importedFrom": "nawafalqari/azkar-api"
+    },
+    {
+      "id": "after-salah-22",
+      "textAr": "اللَّهُمَّ أَجِرْنِي مِنْ النَّار.",
+      "repeat": 7,
+      "source": "azkar-api",
+      "fadlAr": "بعد صلاة الصبح والمغرب.",
+      "fadlEn": "بعد صلاة الصبح والمغرب.",
+      "importedFrom": "nawafalqari/azkar-api"
+    },
+    {
+      "id": "after-salah-23",
+      "textAr": "اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ.",
+      "repeat": 1,
+      "source": "azkar-api",
+      "fadlAr": "أضيف من مقارنة مصادر مفتوحة (azkar-api).",
+      "fadlEn": "Added via open-source azkar comparison (azkar-api).",
+      "importedFrom": "nawafalqari/azkar-api"
     }
   ]
 }

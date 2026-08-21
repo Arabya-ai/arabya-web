@@ -153,7 +153,9 @@
       "madinah": "Madinah",
       "jeddah": "Jeddah",
       "amman": "Amman"
-    }
+    },
+    "localSource": "Local times (adhan)",
+    "remoteSource": "Network times"
   },
   "Habit": {
     "title": "Reading habit",
@@ -1579,7 +1581,11 @@
     "qiblaLead": "Bearing from north toward the Kaaba, using the selected city or the nearest city to your location.",
     "qiblaError": "Could not load the qibla direction right now.",
     "qiblaNorth": "N",
-    "qiblaFromNorth": "from north"
+    "qiblaFromNorth": "from north",
+    "enableLiveCompass": "Enable device compass",
+    "compassUnsupported": "This device has no orientation sensors — showing bearing from north only.",
+    "liveCompassHint": "Turn the device until the needle points up ({turn}° off).",
+    "localCalcNote": "Bearing computed locally on the server (no upstream network)."
   },
   "Ayah": {
     "metaFallback": "Ayah iʿrāb",

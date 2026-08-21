@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toArabicNumerals } from "@/lib/format";
 import { usePortalLocation } from "@/hooks/usePortalLocation";
@@ -13,9 +13,17 @@ import { portalLocationSearchParams } from "@/lib/portal-location";
 type QiblaPayload = {
   direction: number;
   directionLabel: string;
+  source?: string;
+  offline?: boolean;
   approxCity?: PortalCityId;
   place?: { city?: string | null; country?: string | null; displayName?: string | null };
 };
+
+type OrientationPermission = "unknown" | "granted" | "denied" | "unsupported";
+
+function normalizeHeading(deg: number): number {
+  return ((deg % 360) + 360) % 360;
+}
 
 export function QiblaCompass() {
   const t = useTranslations("Qibla");
@@ -24,6 +32,8 @@ export function QiblaCompass() {
   const [qibla, setQibla] = useState<QiblaPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [heading, setHeading] = useState<number | null>(null);
+  const [orientPerm, setOrientPerm] = useState<OrientationPermission>("unknown");
 
   const loc = usePortalLocation({
     formatGeoMatched: (id) =>
@@ -70,11 +80,73 @@ export function QiblaCompass() {
     }
   }, [loc.coordsInvalid, tPrayer]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hasAbsolute = "ondeviceorientationabsolute" in window;
+    const hasRelative = "ondeviceorientation" in window;
+    if (!hasAbsolute && !hasRelative) {
+      setOrientPerm("unsupported");
+      return;
+    }
+    setOrientPerm("unknown");
+  }, []);
+
+  const attachOrientation = useCallback(() => {
+    function onAbsolute(ev: DeviceOrientationEvent) {
+      const anyEv = ev as DeviceOrientationEvent & { absolute?: boolean };
+      if (typeof anyEv.alpha !== "number") return;
+      // alpha: degrees from north (browser-dependent); prefer absolute when flagged
+      setHeading(normalizeHeading(360 - anyEv.alpha));
+    }
+    function onRelative(ev: DeviceOrientationEvent) {
+      if (typeof ev.alpha !== "number") return;
+      setHeading(normalizeHeading(360 - ev.alpha));
+    }
+
+    window.addEventListener("deviceorientationabsolute", onAbsolute);
+    window.addEventListener("deviceorientation", onRelative);
+    return () => {
+      window.removeEventListener("deviceorientationabsolute", onAbsolute);
+      window.removeEventListener("deviceorientation", onRelative);
+    };
+  }, []);
+
+  const enableCompass = useCallback(async () => {
+    const Doe = DeviceOrientationEvent as unknown as {
+      requestPermission?: () => Promise<"granted" | "denied">;
+    };
+    try {
+      if (typeof Doe.requestPermission === "function") {
+        const state = await Doe.requestPermission();
+        if (state !== "granted") {
+          setOrientPerm("denied");
+          return;
+        }
+      }
+      setOrientPerm("granted");
+    } catch {
+      setOrientPerm("denied");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (orientPerm !== "granted") return;
+    return attachOrientation();
+  }, [attachOrientation, orientPerm]);
+
   const degreesLabel = qibla
     ? locale === "ar"
       ? toArabicNumerals(Math.round(qibla.direction))
       : String(Math.round(qibla.direction))
     : null;
+
+  const needleRotation = useMemo(() => {
+    if (!qibla) return 0;
+    if (heading == null) return qibla.direction;
+    return normalizeHeading(qibla.direction - heading);
+  }, [heading, qibla]);
+
+  const dialRotation = heading == null ? 0 : -heading;
 
   return (
     <section className="qibla-panel" aria-label={t("title")}>
@@ -172,7 +244,11 @@ export function QiblaCompass() {
 
       {qibla && !loading ? (
         <div className="qibla-compass-wrap">
-          <div className="qibla-compass" aria-hidden>
+          <div
+            className="qibla-compass"
+            aria-hidden
+            style={{ transform: `rotate(${dialRotation}deg)` }}
+          >
             <span className="qibla-compass-n">{t("qiblaNorth")}</span>
             <span
               className="qibla-needle"
@@ -182,6 +258,27 @@ export function QiblaCompass() {
           <p className="qibla-degrees">
             <span dir="ltr">{degreesLabel}°</span> {t("qiblaFromNorth")}
           </p>
+          {heading != null ? (
+            <p className="prayer-status prayer-status--hint" role="status">
+              {t("liveCompassHint", {
+                turn: locale === "ar"
+                  ? toArabicNumerals(Math.round(needleRotation))
+                  : String(Math.round(needleRotation)),
+              })}
+            </p>
+          ) : null}
+          {orientPerm === "unsupported" ? (
+            <p className="prayer-status prayer-status--hint">{t("compassUnsupported")}</p>
+          ) : orientPerm !== "granted" ? (
+            <button type="button" className="prayer-geo-btn" onClick={() => void enableCompass()}>
+              {t("enableLiveCompass")}
+            </button>
+          ) : null}
+          {qibla.offline || qibla.source === "adhan-js" ? (
+            <p className="prayer-status prayer-status--hint" role="status">
+              {t("localCalcNote")}
+            </p>
+          ) : null}
         </div>
       ) : null}
     </section>

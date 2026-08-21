@@ -81,6 +81,7 @@
     "@resvg/resvg-js": "^2.6.2",
     "@sentry/nextjs": "^9.47.1",
     "@tanstack/react-query": "^5.101.4",
+    "adhan": "^4.4.4",
     "better-sqlite3": "^13.0.3",
     "cheerio": "^1.2.0",
     "class-variance-authority": "^0.7.1",
