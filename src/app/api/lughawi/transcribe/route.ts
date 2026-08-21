@@ -1,15 +1,26 @@
+import { auth } from "@/auth";
 import { sidecarTranscribe } from "@/lib/lughawi/sidecar-client";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 /**
- * Speech/video → text via Contabo sidecar → Hugging Face Whisper.
+ * Speech/video → text via Contabo sidecar (local Whisper / optional HF).
+ * Requires a signed-in session — prevents anonymous CPU/RAM DoS on Contabo.
  * Body JSON: { audioBase64: string, filename?: string }
  */
 export async function POST(req: Request) {
+  const session = await auth();
+  const email = session?.user?.email?.trim();
+  if (!email || session?.error === "Banned") {
+    return NextResponse.json(
+      { error: "يلزم تسجيل الدخول لتحويل الصوت إلى نص" },
+      { status: 401 },
+    );
+  }
+
   const limited = enforceRateLimit(req, {
     prefix: "lughawi-transcribe",
-    limit: 10,
+    limit: 6,
   });
   if (limited) return limited;
 
@@ -33,10 +44,10 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
-  // ~25MB binary ≈ 34MB base64
-  if (audioBase64.length > 34_000_000) {
+  // ~8MB binary ≈ 11MB base64 — keep Contabo Whisper load bounded
+  if (audioBase64.length > 11_000_000) {
     return NextResponse.json(
-      { error: "الملف كبير جدًا (الحد ≈ 25 ميغابايت)" },
+      { error: "الملف كبير جدًا (الحد ≈ 8 ميغابايت)" },
       { status: 400 },
     );
   }

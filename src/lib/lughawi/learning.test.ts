@@ -62,11 +62,13 @@ describe("applySingleEdit", () => {
 });
 
 describe("learning activation", () => {
-  it("activates on strong accept ratio", () => {
-    expect(computeActive(3, 0)).toBe(true);
-    expect(computeActive(1, 0)).toBe(true);
-    expect(computeActive(2, 3)).toBe(false);
+  it("activates only after enough accepts and a strong ratio", () => {
+    expect(computeActive(1, 0)).toBe(false);
+    expect(computeActive(4, 0)).toBe(false);
+    expect(computeActive(5, 0)).toBe(true);
     expect(computeActive(5, 1)).toBe(true);
+    expect(computeActive(5, 2)).toBe(false);
+    expect(computeActive(2, 3)).toBe(false);
   });
 });
 

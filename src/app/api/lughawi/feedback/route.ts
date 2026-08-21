@@ -1,10 +1,22 @@
+import { auth } from "@/auth";
 import { recordFeedback } from "@/lib/lughawi/learning-store";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
-/** Crowd learn: accept/reject a proposed correction. Works for guests too. */
+/** Crowd learn: accept/reject — signed-in only (prevents anonymous poisoning). */
 export async function POST(req: Request) {
-  const limited = enforceRateLimit(req, { prefix: "lughawi-feedback", limit: 80 });
+  const session = await auth();
+  if (!session?.user?.email || session.error === "Banned") {
+    return NextResponse.json(
+      { error: "يلزم تسجيل الدخول لقبول أو رفض اقتراح" },
+      { status: 401 },
+    );
+  }
+
+  const limited = enforceRateLimit(req, {
+    prefix: "lughawi-feedback",
+    limit: 40,
+  });
   if (limited) return limited;
 
   let body: {
@@ -24,7 +36,10 @@ export async function POST(req: Request) {
       ? body.decision
       : null;
   if (!decision || !body.from?.trim() || !body.to?.trim()) {
-    return NextResponse.json({ error: "from, to, decision required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "from, to, decision required" },
+      { status: 400 },
+    );
   }
 
   try {
@@ -45,9 +60,7 @@ export async function POST(req: Request) {
       },
     });
   } catch (e) {
-    return NextResponse.json(
-      { error: e instanceof Error ? e.message : "feedback failed" },
-      { status: 400 },
-    );
+    const msg = e instanceof Error ? e.message : "feedback failed";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

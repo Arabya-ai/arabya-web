@@ -1079,10 +1079,10 @@
       },
       "next": {
         "title": "What we are working on",
-        "intro": "We deepen Quran word layers and expand live services with honest coverage.",
+        "intro": "We deepen Quran word layers and expand hubs with honest coverage — no false “complete” claims.",
         "n0": "Richer semantics and rhetoric layers when attributed sources are available.",
         "n1": "Classic iʿrāb books and dictionaries after written licensing from rights holders.",
-        "n2": "Expanding word analysis on <hadithLink>Hadith</hadithLink> and the <heritageLink>Heritage</heritageLink> catalog (hubs are live now; layers fill gradually without invented iʿrāb)."
+        "n2": "Expanding word analysis on <hadithLink>Hadith</hadithLink> and the <heritageLink>Heritage</heritageLink> catalog (hubs exist; word layers fill gradually without invented iʿrāb)."
       },
       "contact": {
         "title": "Contact",
@@ -1333,9 +1333,9 @@
     "metaTitle": "Resources · Arabya",
     "metaDescription": "Arabya services guide: mushaf, hadith, heritage, adhkar, qibla, libraries, and APIs",
     "title": "Resources & services",
-    "lead": "A hub for live Arabya services and the APIs the site uses.",
-    "servicesTitle": "Site services",
-    "servicesLead": "Direct links to hubs ready to use:",
+    "lead": "A hub for ready Arabya surfaces, expanding hubs, and the APIs the site uses.",
+    "servicesTitle": "Site hubs",
+    "servicesLead": "Direct links — mushaf, adhkar, and qibla are ready; hadith, heritage, and iʿrāb books expand gradually:",
     "svcMushaf": "Mushaf",
     "svcHadith": "Hadith",
     "svcHeritage": "Heritage",
