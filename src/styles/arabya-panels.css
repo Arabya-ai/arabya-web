@@ -64,8 +64,7 @@
 
 
 /* Studio (shadcn HSL) — same primitive, local token mapping */
-.ayat-studio .arabya-panel,
-.mpt-studio-root .arabya-panel {
+.ayat-studio .arabya-panel {
   border-radius: calc(var(--radius) * 1.05);
   border: 1px solid hsl(var(--border));
   background: hsl(var(--card) / 0.92);
@@ -73,18 +72,15 @@
   box-shadow: 0 1px 0 color-mix(in srgb, var(--studio-surface) 55%, transparent) inset;
 }
 
-.ayat-studio .arabya-panel--accent,
-.mpt-studio-root .arabya-panel--accent {
+.ayat-studio .arabya-panel--accent {
   border-color: color-mix(in srgb, var(--studio-brand) 24%, hsl(var(--border)));
   background: color-mix(in srgb, var(--studio-brand-soft) 42%, hsl(var(--card)));
 }
 
-.ayat-studio .arabya-panel__title,
-.mpt-studio-root .arabya-panel__title {
+.ayat-studio .arabya-panel__title {
   color: hsl(var(--card-foreground));
 }
 
-.ayat-studio .arabya-panel__muted,
-.mpt-studio-root .arabya-panel__muted {
+.ayat-studio .arabya-panel__muted {
   color: hsl(var(--muted-foreground));
 }

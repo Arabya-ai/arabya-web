@@ -1,5 +1,5 @@
 "use client";
-import { Home, FolderOpen, Plus, History, Settings, UserRound, Sparkles } from "lucide-react";
+import { Home, FolderOpen, Plus, History, Settings, UserRound } from "lucide-react";
 import Image from "next/image";
 import { NavLink } from "@/ayat-studio/components/NavLink";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -21,7 +21,6 @@ const items = [
   { title: "الرئيسية", url: "/dashboard", icon: Home },
   { title: "مشاريعي", url: "/projects", icon: FolderOpen },
   { title: "مشروع جديد", url: "/projects/new", icon: Plus },
-  { title: "فيديو ذكي", url: "/ai", icon: Sparkles },
   { title: "سجل التصدير", url: "/exports", icon: History },
   { title: "الإعدادات", url: "/settings", icon: Settings },
 ];

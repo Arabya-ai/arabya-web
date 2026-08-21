@@ -48,7 +48,7 @@ echo "==> Install & build"
 # Stop ALL Contabo Node apps before wiping node_modules — concurrent reads cause TAR_ENTRY_ERROR ENOENT.
 if command -v pm2 >/dev/null 2>&1; then
   echo "==> Stopping PM2 apps during install (web + siblings)"
-  pm2 stop arabya-web arabya-nlp arabya-mpt-api lughawi-sidecar 2>/dev/null || true
+  pm2 stop arabya-web arabya-nlp lughawi-sidecar 2>/dev/null || true
 fi
 
 # shellcheck source=scripts/contabo-deploy-lib.sh
@@ -96,7 +96,7 @@ if [[ "$npm_ci_ok" -ne 1 ]]; then
   echo "ERROR: npm ci could not produce a complete Next.js install."
   echo "On the server run:"
   echo "  df -h /"
-  echo "  pm2 stop arabya-web arabya-nlp arabya-mpt-api lughawi-sidecar 2>/dev/null || true"
+  echo "  pm2 stop arabya-web arabya-nlp lughawi-sidecar 2>/dev/null || true"
   echo "  rm -rf node_modules ~/.npm/_cacache"
   echo "  npm cache clean --force && npm ci"
   if [[ -d .next.prev-good ]]; then
@@ -234,15 +234,6 @@ else
   fi
 fi
 
-echo "==> MoneyPrinterTurbo engine (optional — off by default to spare Contabo CPU/RAM)"
-if [[ "${CONTABO_ENABLE_MPT:-0}" == "1" || "${CONTABO_ENABLE_MPT:-}" == "true" ]]; then
-  if [[ -f scripts/contabo-mpt-deploy.sh ]]; then
-    bash scripts/contabo-mpt-deploy.sh || echo "WARN: MPT deploy step failed — /studio/ai may show engine offline."
-  fi
-else
-  echo "==> Skipping MPT (set CONTABO_ENABLE_MPT=1 to enable). Stopping arabya-mpt-api if present."
-  pm2 stop arabya-mpt-api 2>/dev/null || true
-fi
 
 echo "==> Lughawi Python sidecar (optional localhost NLP)"
 # Ensure Next can reach sidecar (production bug: sidecar online but unreachable from app)

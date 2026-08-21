@@ -35,7 +35,6 @@
 | `/admin` · `/admin/ops` | Super-admin CRM + system monitor (keys, Contabo health, Sentry errors tab) |
 | Contabo `arabya-nlp` `:8092` | Self-hosted FastAPI NLP platform (`services/arabya-nlp`: hybrid proofread, Whisper STT, DevOps agent, `/dashboard`) |
 | `/studio` | Ayah video studio (browser WebCodecs) |
-| `/studio/ai` | Independent AI short-video UI; Python engine in `services/money-printer-turbo` |
 | `/api/tafsir/...`, `/api/translation/...`, `/api/search`, `/api/study` | Local JSON APIs |
 
 Study UI: `MushafPageStudio` + `StudyModeTabs` (keyboard-accessible RTL tabs) + `WordStudyDock` (morph/syntax/semantics/…). Do **not** show per-layer “المصدر: …” attribution chips in the dock (removed by product decision); keep footer/about GPL credit where legally needed.

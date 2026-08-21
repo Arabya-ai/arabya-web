@@ -4,7 +4,7 @@ import { localizedHref } from "@/i18n/locale-params";
 describe("localizedHref", () => {
   it("keeps Arabic paths unprefixed", () => {
     expect(localizedHref("/login", "ar")).toBe("/login");
-    expect(localizedHref("/studio/ai", "ar")).toBe("/studio/ai");
+    expect(localizedHref("/studio", "ar")).toBe("/studio");
   });
 
   it("prefixes English paths with /en", () => {

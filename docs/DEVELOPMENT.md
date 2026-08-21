@@ -12,7 +12,7 @@
 4. **موبايل Capacitor** — غلاف فوق الموقع بعد استقرار اللغات.
 5. **مؤجّل حاليًا** — دفع الاشتراكات، `arabya.ai`، تطبيقات أصلية، بوتات كمنتج أساسي. الحديث والتراث **مفتوحان** للتنفيذ المتوازي (Git-first).
 
-فحص دمج إنشاء الآيات: `docs/plans/ayat-creator-pro-integration.md` — محرر خفيف `/create` + واجهة Lovable تحت `/studio`. فيديو ذكي مستقل: `/studio/ai` و`docs/plans/money-printer-turbo-integration.md`. دليل: `docs/platform/create-studio-owner-guide-ar.md`. بوابة الدفع التالية: **PayPal**.
+فحص دمج إنشاء الآيات: `docs/plans/ayat-creator-pro-integration.md` — محرر خفيف `/create` + واجهة Lovable تحت `/studio`. دليل: `docs/platform/create-studio-owner-guide-ar.md`. بوابة الدفع التالية: **PayPal**.
 
 ## مؤجّل حتى اكتمال الأساس
 

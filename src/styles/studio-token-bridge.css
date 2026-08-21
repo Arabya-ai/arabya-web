@@ -1,11 +1,10 @@
 /**
- * Bridges Arabya core tokens into studio surfaces (Ayat + MPT).
+ * Bridges Arabya core tokens into ayat-studio surfaces.
  * Keeps shadcn HSL triplets while aligning hex/semantic aliases with :root.
  */
 
 .ayat-studio,
-.ayat-studio-portal,
-.mpt-studio-root {
+.ayat-studio-portal {
   --studio-bg: var(--bg);
   --studio-ink: var(--ink);
   --studio-surface: var(--surface);
@@ -19,34 +18,9 @@
   --studio-status-bad: var(--status-bad);
 }
 
-.mpt-studio-root .mpt-studio {
-  color: var(--studio-ink);
-}
-
-.mpt-studio-root .mpt-banner[data-state="online"] {
-  background: color-mix(in srgb, var(--studio-brand-soft) 55%, var(--studio-surface));
-}
-
-.mpt-studio-root .mpt-banner[data-state="offline"],
-.mpt-studio-root .mpt-banner[data-state="unconfigured"] {
-  background: color-mix(in srgb, var(--status-bad-soft) 70%, var(--studio-surface));
-}
-
-.mpt-studio-root .mpt-banner[data-state="login"] {
-  background: color-mix(in srgb, var(--studio-brand-soft) 45%, var(--studio-surface));
-}
-
 #ayat-studio-root.ayat-studio {
   background: var(--studio-bg);
   color: var(--studio-ink);
-}
-
-.mpt-studio-root .mpt-studio fieldset,
-.mpt-studio-root .mpt-studio .mpt-panel {
-  border: 1px solid var(--panel-border);
-  border-radius: var(--panel-radius);
-  padding: 1rem 1.1rem 1.15rem;
-  background: color-mix(in srgb, var(--studio-surface) 94%, var(--studio-brand-soft));
 }
 
 .studio-landing-preview-wrap {
@@ -77,4 +51,3 @@
 .studio-landing-quote-shadow {
   text-shadow: 0 0 30px color-mix(in srgb, var(--accent) 30%, transparent);
 }
-
