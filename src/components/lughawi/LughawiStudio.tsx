@@ -220,7 +220,7 @@ export function LughawiStudio() {
       setPending(true);
       void (async () => {
         const ctrl = new AbortController();
-        const timer = window.setTimeout(() => ctrl.abort(), 55_000);
+        const timer = window.setTimeout(() => ctrl.abort(), 90_000);
         try {
           const endpoint =
             next === "proofread"
@@ -657,7 +657,7 @@ export function LughawiStudio() {
                               const ctrl = new AbortController();
                               const timer = window.setTimeout(
                                 () => ctrl.abort(),
-                                55_000,
+                                90_000,
                               );
                               try {
                                 const res = await fetch(

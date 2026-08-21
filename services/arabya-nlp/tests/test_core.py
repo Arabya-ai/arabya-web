@@ -81,6 +81,54 @@ def test_rule_stage_builtin_pairs() -> None:
     assert out.edits
 
 
+def test_rule_stage_inna_sound_masculine() -> None:
+    from app.pipeline.rule_stage import run_rule_stage
+
+    sentence = "إن المعلمون يرفعون شأن الأمة لاكن الطلاب لم يهتموا بالدرس"
+    out = run_rule_stage(sentence, preserve_diacritics=True)
+    assert "المعلمين" in out.text
+    assert "لكن" in out.text
+    originals = {e.original for e in out.edits}
+    suggestions = {e.suggestion for e in out.edits}
+    assert "المعلمون" in originals
+    assert "المعلمين" in suggestions
+    assert "لاكن" in originals
+    assert "لكن" in suggestions
+
+
+def test_remap_edits_to_original_recovers_zero_spans() -> None:
+    from app.pipeline.proofreader import remap_edits_to_original
+
+    original = "إن المعلمون يرفعون شأن الأمة لاكن الطلاب"
+    raw = [
+        {
+            "id": "llm-1",
+            "start": 0,
+            "end": 0,
+            "type": "grammar",
+            "original": "المعلمون",
+            "suggestion": "المعلمين",
+            "rule_id": "ollama-grammar",
+            "stage": "llm",
+        },
+        {
+            "id": "builtin-1",
+            "start": 0,
+            "end": 0,
+            "type": "spelling",
+            "original": "لاكن",
+            "suggestion": "لكن",
+            "rule_id": "rb-1",
+            "stage": "rule",
+        },
+    ]
+    located = remap_edits_to_original(original, raw)
+    assert len(located) == 2
+    by_orig = {e["original"]: e for e in located}
+    assert original[by_orig["المعلمون"]["start"] : by_orig["المعلمون"]["end"]] == "المعلمون"
+    assert original[by_orig["لاكن"]["start"] : by_orig["لاكن"]["end"]] == "لاكن"
+
+
 @pytest.mark.asyncio
 async def test_proofread_skip_llm() -> None:
     from app.pipeline.proofreader import proofread_text
