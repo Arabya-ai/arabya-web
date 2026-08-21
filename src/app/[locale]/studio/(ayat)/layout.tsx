@@ -1,9 +1,15 @@
 import type { CSSProperties, ReactNode } from "react";
+import type { Metadata } from "next";
 import "@/ayat-studio/theme.css";
 import { Toaster } from "@/ayat-studio/components/ui/toaster";
 import { TooltipProvider } from "@/ayat-studio/components/ui/tooltip";
 import { StudioProviders } from "@/ayat-studio/components/StudioProviders";
 import { StudioHeaderHeightSync } from "@/components/StudioHeaderHeightSync";
+
+/** Studio is auth-gated — keep out of search indexes (audit M-05). */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
+};
 
 /**
  * Studio route CSS only — theme is not imported on mushaf/home.

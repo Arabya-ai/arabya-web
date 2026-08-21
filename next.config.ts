@@ -35,7 +35,9 @@ hoistWebpackErrorConstructor();
 
 /**
  * CSP allows self + Google fonts + Quran audio CDNs + Cloudflare Insights.
- * Theme bootstrap uses a tiny inline script → 'unsafe-inline' for script/style.
+ * Theme boot is `/theme-boot.js` (no inline script) so script-src omits
+ * 'unsafe-inline'. style-src still needs 'unsafe-inline' for Next/Tailwind
+ * until a nonce/hash pipeline is wired per-response.
  */
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -43,7 +45,7 @@ const contentSecurityPolicy = [
   "frame-ancestors 'self'",
   "object-src 'none'",
   "form-action 'self' https://accounts.google.com",
-  "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://browser.sentry-cdn.com https://js.sentry-cdn.com",
+  "script-src 'self' https://static.cloudflareinsights.com https://browser.sentry-cdn.com https://js.sentry-cdn.com",
   "worker-src 'self' blob:",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",

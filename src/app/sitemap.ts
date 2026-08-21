@@ -7,17 +7,34 @@ import { listHeritageWorks } from "@/lib/heritage";
 
 const base = "https://www.arabya.org";
 
+/** Cache sitemap for 6h — avoids reloading catalogs on every crawler hit (audit H-02/C-02). */
+export const revalidate = 21600;
+
+async function safe<T>(label: string, fn: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    console.error(`[sitemap] ${label} failed:`, err);
+    return fallback;
+  }
+}
+
 /** Full sitemap: home, tools, mushaf, library, hadith collections, heritage */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [index, surahs, libraryWorks, hadithCollections, heritageWorks] =
     await Promise.all([
-      getMushafIndex(),
-      getSurahs(),
-      getLibraryCatalog(),
-      listHadithCollections(),
-      listHeritageWorks(),
+      safe("mushaf-index", () => getMushafIndex(), {
+        totalPages: 604,
+        pages: {},
+        surahFirstPage: {},
+        surahPages: {},
+      }),
+      safe("surahs", () => getSurahs(), []),
+      safe("library", () => getLibraryCatalog(), []),
+      safe("hadith", () => listHadithCollections(), []),
+      safe("heritage", () => listHeritageWorks(), []),
     ]);
-  const total = index.totalPages || 604;
+  const total = Math.min(Math.max(index.totalPages || 604, 1), 604);
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: base, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
@@ -40,13 +57,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/adhkar/tasbeeh`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/qibla`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/tahfeez`, changeFrequency: "monthly", priority: 0.55 },
-    { url: `${base}/studio`, changeFrequency: "monthly", priority: 0.55 },
+    // /studio is auth-gated — keep out of sitemap (robots already disallows)
     { url: `${base}/lughawi`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/lughawi/features`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/lughawi/mistakes`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/hadith`, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/heritage`, changeFrequency: "weekly", priority: 0.65 },
     { url: `${base}/qiraat`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/en`, changeFrequency: "weekly", priority: 0.9 },
   ];
 
   const mushafPages: MetadataRoute.Sitemap = Array.from(

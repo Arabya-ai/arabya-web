@@ -70,9 +70,6 @@ const GOOGLE_MODELS_NEWEST_FIRST = [
   "gemini-2.5-flash",
 ] as const;
 
-/** @deprecated alias — use GOOGLE_MODELS_NEWEST_FIRST */
-const GOOGLE_MODEL_FALLBACKS = GOOGLE_MODELS_NEWEST_FIRST;
-
 /** Short Arabic message for UI — never dump raw provider JSON. */
 export function humanizeAiError(msg: string): string {
   const m = msg || "";
