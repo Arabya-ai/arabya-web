@@ -107,16 +107,23 @@ export async function getAdhkarCategory(
 }
 
 export async function getDuas(): Promise<DuaItem[]> {
+  const normalize = (item: DuaItem): DuaItem | null => {
+    if (!item?.id || !item?.textAr || item.active === false) return null;
+    const categoryAr = (item.categoryAr || "").trim() || "متفرقات";
+    const categoryEn =
+      (item.categoryEn || "").trim() ||
+      (categoryAr === "متفرقات" ? "General" : categoryAr);
+    return { ...item, categoryAr, categoryEn };
+  };
+
   const override = readAdhkarContentOverride();
   if (Array.isArray(override?.duas) && override.duas.length > 0) {
-    return override.duas.filter(
-      (item) => item.id && item.textAr && item.active !== false,
-    );
+    return override.duas.map(normalize).filter((x): x is DuaItem => Boolean(x));
   }
   const parsed = await readJson<{ items?: DuaItem[] }>("duas.json");
-  const base = (parsed?.items ?? []).filter(
-    (item) => item.id && item.textAr && item.active !== false,
-  );
+  const base = (parsed?.items ?? [])
+    .map(normalize)
+    .filter((x): x is DuaItem => Boolean(x));
   const hisn = await getHisnAlMuslimItems();
   if (!hisn.length) return base;
   const seen = new Set(base.map((d) => d.textAr.slice(0, 100)));
@@ -125,7 +132,8 @@ export async function getDuas(): Promise<DuaItem[]> {
     const key = item.textAr.slice(0, 100);
     if (seen.has(key)) continue;
     seen.add(key);
-    merged.push(item);
+    const normalized = normalize(item);
+    if (normalized) merged.push(normalized);
   }
   return merged;
 }

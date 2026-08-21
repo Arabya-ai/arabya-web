@@ -13,6 +13,8 @@ concurrency:
 
 jobs:
   deploy:
+    # Auto-deploy only after green CI on main. Manual "Run workflow" always allowed
+    # so Contabo can be published when CI is red for unrelated reasons.
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' &&
