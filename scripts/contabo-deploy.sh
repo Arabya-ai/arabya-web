@@ -50,6 +50,8 @@ echo "==> Install & build"
 if command -v pm2 >/dev/null 2>&1; then
   echo "==> Stopping PM2 apps during install (web + siblings)"
   pm2 stop arabya-web arabya-nlp lughawi-sidecar 2>/dev/null || true
+  # Let file handles release before wiping (ENOTEMPTY on Contabo disks)
+  sleep 2
 fi
 
 # shellcheck source=scripts/contabo-deploy-lib.sh
@@ -70,25 +72,23 @@ if [[ -d .next ]]; then
   echo "==> Saved previous .next → .next.prev-good (restore if build fails)"
 fi
 
-# Contabo sometimes fails plain `rm -rf node_modules` ("Directory not empty") when
-# files are busy / NFS-ish. Rename + force chmod then remove; never abort mid-wipe.
+# Contabo often fails plain `rm -rf node_modules` (ENOTEMPTY). Move OUT of the app
+# tree to /tmp first so npm never sees a half-deleted tree.
 wipe_node_modules() {
   local target="${1:-node_modules}"
   [[ -e "$target" ]] || return 0
-  local trash="${target}.wiping.$$"
-  mv "$target" "$trash" 2>/dev/null || {
-    chmod -R u+w "$target" 2>/dev/null || true
-    rm -rf "$target" 2>/dev/null || true
-    [[ -e "$target" ]] || return 0
-    trash="${target}.wiping.$$"
-    mv "$target" "$trash" || return 1
-  }
-  chmod -R u+w "$trash" 2>/dev/null || true
-  rm -rf "$trash" 2>/dev/null || true
-  # If residual trash remains, leave it for later cleanup — deploy can continue
-  if [[ -e "$trash" ]]; then
-    echo "WARN: could not fully delete $trash — continuing with fresh install path"
+  local trash="/tmp/arabya-nm-wipe-$$-$(date +%s)"
+  chmod -R u+w "$target" 2>/dev/null || true
+  if mv "$target" "$trash" 2>/dev/null; then
     ( rm -rf "$trash" >/dev/null 2>&1 & ) || true
+    return 0
+  fi
+  # Fallback: in-place wipe
+  rm -rf "$target" 2>/dev/null || true
+  if [[ -e "$target" ]]; then
+    echo "WARN: residual $target remains — renaming aside"
+    mv "$target" "${target}.dead.$$" 2>/dev/null || return 1
+    ( rm -rf "${target}.dead.$$" >/dev/null 2>&1 & ) || true
   fi
   return 0
 }
@@ -98,7 +98,7 @@ if ! wipe_node_modules node_modules; then
   if [[ -d .next.prev-good ]]; then
     mv .next.prev-good .next
     echo "==> Restored .next.prev-good — attempting emergency PM2 start"
-    contabo_safe_restart_web || pm2 start arabya-web || true
+    contabo_safe_restart_web || true
   fi
   exit 1
 fi
@@ -106,30 +106,44 @@ fi
 npm cache clean --force >/dev/null 2>&1 || true
 
 npm_ci_ok=0
-for attempt in 1 2; do
-  echo "==> npm ci (attempt $attempt)"
-  if npm ci --no-audit --no-fund; then
-    # Contabo often prints tar ENOENT on next/dist yet exits 0 — verify next immediately.
-    if [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
-       [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
-      npm_ci_ok=1
-      break
-    fi
-    echo "WARN: npm ci exited 0 but Next extract is incomplete (tar ENOENT on next/dist is common)."
+# Node 24 npm is stricter about optional platform entries in package-lock → prefer install.
+if [[ "$NODE_MAJOR" == "24" ]]; then
+  echo "==> Node 24 detected — using npm install (skips npm ci lock strictness)"
+  if npm install --no-audit --no-fund && \
+     [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
+     [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
+    npm_ci_ok=1
+    echo "==> npm install OK"
   else
-    echo "WARN: npm ci failed (attempt $attempt)"
+    echo "WARN: npm install incomplete on Node 24 — will retry after wipe"
+    wipe_node_modules node_modules || true
   fi
-  echo "==> Cleaning corrupted node_modules + npm cache before retry"
-  wipe_node_modules node_modules || true
-  npm cache clean --force >/dev/null 2>&1 || true
-  rm -rf "${NPM_CONFIG_CACHE:-$HOME/.npm}/_cacache" 2>/dev/null || true
-  sleep 2
-done
+fi
 
-# Node 24 npm is stricter about optional platform entries in the lockfile.
+if [[ "$npm_ci_ok" -ne 1 ]]; then
+  for attempt in 1 2; do
+    echo "==> npm ci (attempt $attempt)"
+    if npm ci --no-audit --no-fund; then
+      if [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
+         [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
+        npm_ci_ok=1
+        break
+      fi
+      echo "WARN: npm ci exited 0 but Next extract is incomplete (tar ENOENT on next/dist is common)."
+    else
+      echo "WARN: npm ci failed (attempt $attempt)"
+    fi
+    echo "==> Cleaning corrupted node_modules + npm cache before retry"
+    wipe_node_modules node_modules || true
+    npm cache clean --force >/dev/null 2>&1 || true
+    rm -rf "${NPM_CONFIG_CACHE:-$HOME/.npm}/_cacache" 2>/dev/null || true
+    sleep 2
+  done
+fi
+
 # Fall back to npm install so Contabo can recover instead of leaving the site stopped.
 if [[ "$npm_ci_ok" -ne 1 ]]; then
-  echo "==> npm ci still failing — falling back to npm install (lock sync / optional platforms)"
+  echo "==> falling back to npm install (lock sync / optional platforms / ENOTEMPTY)"
   wipe_node_modules node_modules || true
   npm cache clean --force >/dev/null 2>&1 || true
   if npm install --no-audit --no-fund && \
@@ -144,17 +158,15 @@ fi
 
 if [[ "$npm_ci_ok" -ne 1 ]]; then
   echo "ERROR: could not produce a complete Next.js install (npm ci + npm install fallback)."
-  echo "On the server run:"
-  echo "  df -h /"
+  echo "On the server run the recovery block in docs or:"
   echo "  pm2 stop arabya-web arabya-nlp lughawi-sidecar 2>/dev/null || true"
-  echo "  chmod -R u+w node_modules 2>/dev/null; rm -rf node_modules ~/.npm/_cacache"
-  echo "  npm cache clean --force && npm install --no-audit --no-fund"
-  echo "  bash scripts/contabo-deploy.sh"
+  echo "  mv node_modules /tmp/arabya-nm-dead-\$\$ 2>/dev/null; rm -rf /tmp/arabya-nm-dead-\$\$ &"
+  echo "  npm cache clean --force && npm install --no-audit --no-fund && npm run build"
+  echo "  pm2 start deploy/contabo/ecosystem.config.cjs"
   if [[ -d .next.prev-good ]]; then
     mv .next.prev-good .next
     echo "==> Restored .next.prev-good (site stays STOPPED until node_modules is healthy)"
   fi
-  # Never pm2 restart on a broken node_modules — that causes crash-loop 503.
   pm2 stop arabya-web 2>/dev/null || true
   exit 1
 fi
