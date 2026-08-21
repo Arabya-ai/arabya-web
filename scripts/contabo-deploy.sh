@@ -11,7 +11,6 @@ cd "$APP_DIR"
 
 echo "==> Fetch $BRANCH"
 git fetch origin "$BRANCH"
-git checkout "$BRANCH"
 
 # Learning may have dirtied tracked seed file on older builds — backup + reset so pull can proceed.
 LEARNED="data/lughawi/learned-corrections.json"
@@ -22,12 +21,14 @@ if [[ -f "$LEARNED" ]] && ! git diff --quiet -- "$LEARNED" 2>/dev/null; then
   git checkout -- "$LEARNED"
 fi
 
-# Any other unexpected local edits: stash (keep deploy unblocked)
-if ! git diff --quiet || ! git diff --cached --quiet; then
-  echo "==> Stashing other local working-tree changes before pull"
+# Stash BEFORE checkout — Contabo often has dirty package-lock.json from failed/partial npm runs.
+# (checkout would abort: "local changes would be overwritten")
+if ! git diff --quiet || ! git diff --cached --quiet || [[ -n "$(git ls-files --others --exclude-standard)" ]]; then
+  echo "==> Stashing local working-tree changes before checkout/pull"
   git stash push -u -m "contabo-deploy-auto-$(date +%F-%H%M%S)" || true
 fi
 
+git checkout "$BRANCH"
 git pull --ff-only origin "$BRANCH"
 
 echo "==> Node version check (Contabo: Node 22 or 24)"
@@ -68,7 +69,39 @@ if [[ -d .next ]]; then
   mv .next .next.prev-good
   echo "==> Saved previous .next → .next.prev-good (restore if build fails)"
 fi
-rm -rf node_modules
+
+# Contabo sometimes fails plain `rm -rf node_modules` ("Directory not empty") when
+# files are busy / NFS-ish. Rename + force chmod then remove; never abort mid-wipe.
+wipe_node_modules() {
+  local target="${1:-node_modules}"
+  [[ -e "$target" ]] || return 0
+  local trash="${target}.wiping.$$"
+  mv "$target" "$trash" 2>/dev/null || {
+    chmod -R u+w "$target" 2>/dev/null || true
+    rm -rf "$target" 2>/dev/null || true
+    [[ -e "$target" ]] || return 0
+    trash="${target}.wiping.$$"
+    mv "$target" "$trash" || return 1
+  }
+  chmod -R u+w "$trash" 2>/dev/null || true
+  rm -rf "$trash" 2>/dev/null || true
+  # If residual trash remains, leave it for later cleanup — deploy can continue
+  if [[ -e "$trash" ]]; then
+    echo "WARN: could not fully delete $trash — continuing with fresh install path"
+    ( rm -rf "$trash" >/dev/null 2>&1 & ) || true
+  fi
+  return 0
+}
+
+if ! wipe_node_modules node_modules; then
+  echo "ERROR: could not clear node_modules after PM2 stop."
+  if [[ -d .next.prev-good ]]; then
+    mv .next.prev-good .next
+    echo "==> Restored .next.prev-good — attempting emergency PM2 start"
+    contabo_safe_restart_web || pm2 start arabya-web || true
+  fi
+  exit 1
+fi
 # Stale npm cache / partial extracts → tar TAR_ENTRY_ERROR ENOENT on Contabo
 npm cache clean --force >/dev/null 2>&1 || true
 
@@ -87,18 +120,36 @@ for attempt in 1 2; do
     echo "WARN: npm ci failed (attempt $attempt)"
   fi
   echo "==> Cleaning corrupted node_modules + npm cache before retry"
-  rm -rf node_modules
+  wipe_node_modules node_modules || true
   npm cache clean --force >/dev/null 2>&1 || true
   rm -rf "${NPM_CONFIG_CACHE:-$HOME/.npm}/_cacache" 2>/dev/null || true
   sleep 2
 done
+
+# Node 24 npm is stricter about optional platform entries in the lockfile.
+# Fall back to npm install so Contabo can recover instead of leaving the site stopped.
 if [[ "$npm_ci_ok" -ne 1 ]]; then
-  echo "ERROR: npm ci could not produce a complete Next.js install."
+  echo "==> npm ci still failing — falling back to npm install (lock sync / optional platforms)"
+  wipe_node_modules node_modules || true
+  npm cache clean --force >/dev/null 2>&1 || true
+  if npm install --no-audit --no-fund && \
+     [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
+     [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
+    npm_ci_ok=1
+    echo "==> npm install fallback OK"
+  else
+    echo "WARN: npm install fallback also failed or Next extract incomplete"
+  fi
+fi
+
+if [[ "$npm_ci_ok" -ne 1 ]]; then
+  echo "ERROR: could not produce a complete Next.js install (npm ci + npm install fallback)."
   echo "On the server run:"
   echo "  df -h /"
   echo "  pm2 stop arabya-web arabya-nlp lughawi-sidecar 2>/dev/null || true"
-  echo "  rm -rf node_modules ~/.npm/_cacache"
-  echo "  npm cache clean --force && npm ci"
+  echo "  chmod -R u+w node_modules 2>/dev/null; rm -rf node_modules ~/.npm/_cacache"
+  echo "  npm cache clean --force && npm install --no-audit --no-fund"
+  echo "  bash scripts/contabo-deploy.sh"
   if [[ -d .next.prev-good ]]; then
     mv .next.prev-good .next
     echo "==> Restored .next.prev-good (site stays STOPPED until node_modules is healthy)"
