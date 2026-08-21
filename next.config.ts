@@ -68,11 +68,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  // Contabo `next build` must not fail on flaky ESLint flat-config resolves.
-  // Keep `npm run lint` in CI for quality; production deploy prioritizes a green build.
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // Next 16 removed `eslint` from next.config — keep lint via `npm run lint` only.
+  // Contabo production deploy must not depend on config keys Next rejects.
   serverExternalPackages: ["@resvg/resvg-js", "better-sqlite3"],
   experimental: {
     // Next 15.5.x Contabo/self-host: minify-webpack-plugin can throw
@@ -114,8 +111,6 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   authToken: process.env.SENTRY_AUTH_TOKEN,
   silent: true,
   widenClientFileUpload: false,
-  disableLogger: true,
-  automaticVercelMonitors: false,
   sourcemaps: {
     disable: !process.env.SENTRY_AUTH_TOKEN,
   },
