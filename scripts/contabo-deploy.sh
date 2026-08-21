@@ -24,11 +24,18 @@ fi
 
 # Any other unexpected local edits: stash (keep deploy unblocked)
 if ! git diff --quiet || ! git diff --cached --quiet; then
-  echo "==> Stashing other local working-tree changes before pull"
+  echo "==> Stashing other local working-tree changes before sync"
   git stash push -u -m "contabo-deploy-auto-$(date +%F-%H%M%S)" || true
 fi
 
-git pull --ff-only origin "$BRANCH"
+# Contabo is a deploy mirror — hard-reset to origin/main.
+# Avoids: "fatal: Cannot fast-forward to multiple branches." from git pull --ff-only
+# when the server has a stale/multi-ref FETCH_HEAD or odd pull.* config.
+echo "==> Sync to origin/${BRANCH} (reset --hard)"
+git reset --hard "origin/${BRANCH}"
+git clean -fd -e .env -e .env.local -e node_modules -e .next -e .next.prev-good -e services/arabya-nlp/.venv -e services/lughawi-sidecar/.venv
+git rev-parse --short HEAD
+git log -1 --oneline
 
 echo "==> Node version check (Contabo: Node 22 or 24)"
 NODE_MAJOR="$(node -p "process.versions.node.split('.')[0]")"
