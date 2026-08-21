@@ -211,8 +211,18 @@ fi
 echo "==> Arabya NLP FastAPI platform (proofread / STT / DevOps / dashboard)"
 grep -q '^ARABYA_NLP_DATABASE_URL=' "$APP_DIR/.env" 2>/dev/null || \
   echo 'ARABYA_NLP_DATABASE_URL=sqlite:////var/lib/arabya/arabya-nlp.sqlite' >> "$APP_DIR/.env"
-if [[ -f scripts/contabo-arabya-nlp.sh ]]; then
-  bash scripts/contabo-arabya-nlp.sh || echo "WARN: arabya-nlp start skipped — install deps via contabo-arabya-nlp-deps.sh"
+# CRITICAL safety: keep DevOps auto-execute disabled unless an operator sets it intentionally later
+if grep -q '^ARABYA_NLP_DEVOPS_AUTO_EXECUTE=' "$APP_DIR/.env" 2>/dev/null; then
+  sed -i 's/^ARABYA_NLP_DEVOPS_AUTO_EXECUTE=.*/ARABYA_NLP_DEVOPS_AUTO_EXECUTE=0/' "$APP_DIR/.env"
+else
+  echo 'ARABYA_NLP_DEVOPS_AUTO_EXECUTE=0' >> "$APP_DIR/.env"
+fi
+if [[ -x "$APP_DIR/services/arabya-nlp/.venv/bin/python" && -f scripts/contabo-arabya-nlp.sh ]]; then
+  bash scripts/contabo-arabya-nlp.sh || echo "WARN: arabya-nlp PM2 restart skipped"
+elif [[ -f scripts/contabo-arabya-nlp-activate.sh ]]; then
+  echo "WARN: arabya-nlp venv missing — run once: bash scripts/contabo-arabya-nlp-activate.sh"
+else
+  echo "WARN: arabya-nlp scripts missing"
 fi
 
 echo "==> Restart PM2 arabya-web (after env keys are written)"
