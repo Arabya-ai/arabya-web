@@ -11,7 +11,6 @@ cd "$APP_DIR"
 
 echo "==> Fetch $BRANCH"
 git fetch origin "$BRANCH"
-git checkout "$BRANCH"
 
 # Learning may have dirtied tracked seed file on older builds — backup + reset so pull can proceed.
 LEARNED="data/lughawi/learned-corrections.json"
@@ -22,12 +21,14 @@ if [[ -f "$LEARNED" ]] && ! git diff --quiet -- "$LEARNED" 2>/dev/null; then
   git checkout -- "$LEARNED"
 fi
 
-# Any other unexpected local edits: stash (keep deploy unblocked)
-if ! git diff --quiet || ! git diff --cached --quiet; then
-  echo "==> Stashing other local working-tree changes before pull"
+# Stash BEFORE checkout — Contabo often has dirty package-lock.json from failed/partial npm runs.
+# (checkout would abort: "local changes would be overwritten")
+if ! git diff --quiet || ! git diff --cached --quiet || [[ -n "$(git ls-files --others --exclude-standard)" ]]; then
+  echo "==> Stashing local working-tree changes before checkout/pull"
   git stash push -u -m "contabo-deploy-auto-$(date +%F-%H%M%S)" || true
 fi
 
+git checkout "$BRANCH"
 git pull --ff-only origin "$BRANCH"
 
 echo "==> Node version check (Contabo: Node 22 or 24)"
@@ -92,13 +93,31 @@ for attempt in 1 2; do
   rm -rf "${NPM_CONFIG_CACHE:-$HOME/.npm}/_cacache" 2>/dev/null || true
   sleep 2
 done
+
+# Node 24 npm is stricter about optional platform entries in the lockfile.
+# Fall back to npm install so Contabo can recover instead of leaving the site stopped.
 if [[ "$npm_ci_ok" -ne 1 ]]; then
-  echo "ERROR: npm ci could not produce a complete Next.js install."
+  echo "==> npm ci still failing — falling back to npm install (lock sync / optional platforms)"
+  rm -rf node_modules
+  npm cache clean --force >/dev/null 2>&1 || true
+  if npm install --no-audit --no-fund && \
+     [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
+     [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
+    npm_ci_ok=1
+    echo "==> npm install fallback OK"
+  else
+    echo "WARN: npm install fallback also failed or Next extract incomplete"
+  fi
+fi
+
+if [[ "$npm_ci_ok" -ne 1 ]]; then
+  echo "ERROR: could not produce a complete Next.js install (npm ci + npm install fallback)."
   echo "On the server run:"
   echo "  df -h /"
   echo "  pm2 stop arabya-web arabya-nlp lughawi-sidecar 2>/dev/null || true"
   echo "  rm -rf node_modules ~/.npm/_cacache"
-  echo "  npm cache clean --force && npm ci"
+  echo "  npm cache clean --force && npm install --no-audit --no-fund"
+  echo "  bash scripts/contabo-deploy.sh"
   if [[ -d .next.prev-good ]]; then
     mv .next.prev-good .next
     echo "==> Restored .next.prev-good (site stays STOPPED until node_modules is healthy)"
