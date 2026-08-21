@@ -1,5 +1,9 @@
-// Real video export with audio using WebCodecs + mp4-muxer (true MP4 output)
-import { Muxer, ArrayBufferTarget } from "mp4-muxer";
+// Real video export with audio using WebCodecs + Mediabunny (MP4 / WebM)
+import {
+  createMediabunnyMuxSession,
+  mimeForContainer,
+  type MuxContainer,
+} from "@/lib/media-export/mediabunny-mux";
 import {
   STUDIO_PROGRESS_GOLD,
   STUDIO_TAFSIR_TEXT,
@@ -198,26 +202,14 @@ export async function exportProjectToVideo({
         e instanceof Error ? e : new Error(String(e || "encode_failed"));
     };
 
-    const webmMuxer = useWebm ? await import("webm-muxer") : null;
-    const muxer = useWebm
-      ? new webmMuxer!.Muxer({
-          target: new webmMuxer!.ArrayBufferTarget(),
-          video: { codec: "V_VP9", width, height, frameRate: fps },
-          audio: {
-            codec: "A_OPUS",
-            sampleRate: audioSampleRate,
-            numberOfChannels: 2,
-          },
-        })
-      : new Muxer({
-          target: new ArrayBufferTarget(),
-          video: { codec: "avc", width, height, frameRate: fps },
-          audio: { codec: "aac", numberOfChannels: 2, sampleRate: audioSampleRate },
-          fastStart: "in-memory",
-        });
+    const container: MuxContainer = useWebm ? "webm" : "mp4";
+    const mux = await createMediabunnyMuxSession({
+      container,
+      frameRate: fps,
+    });
 
     const videoEncoder = new VideoEncoder({
-      output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+      output: (chunk, meta) => mux.addVideoChunk(chunk, meta),
       error: failEncode,
     });
 
@@ -274,7 +266,7 @@ export async function exportProjectToVideo({
     videoEncoder.configure(videoConfig);
 
     const audioEncoder = new AudioEncoder({
-      output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
+      output: (chunk, meta) => mux.addAudioChunk(chunk, meta),
       error: failEncode,
     });
     audioEncoder.configure(
@@ -462,10 +454,9 @@ export async function exportProjectToVideo({
     if (encoderError) throw encoderError;
 
     onProgress?.(95, "إنهاء الملف...");
-    muxer.finalize();
-    const target = muxer.target as { buffer: ArrayBuffer };
-    const outBlob = new Blob([target.buffer], {
-      type: useWebm ? "video/webm" : "video/mp4",
+    const buffer = await mux.finalize();
+    const outBlob = new Blob([buffer], {
+      type: mimeForContainer(container),
     });
 
     await audioCtx.close().catch(() => {});
