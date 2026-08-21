@@ -94,9 +94,11 @@ app.include_router(router)
 def main() -> None:
     import uvicorn
 
+    # Explicit bind: 0.0.0.0 (not 127.0.0.1) so Contabo/Next can reach :8092
+    # when UFW + ServerAvatar inbound rules allow TCP 8092.
     uvicorn.run(
         "main:app",
-        host=settings.host,
+        host=settings.host or "0.0.0.0",
         port=settings.port,
         reload=False,
         log_level=settings.log_level.lower(),

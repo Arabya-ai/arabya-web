@@ -37,6 +37,22 @@ def test_reject_supabase_url() -> None:
         )
 
 
+def test_default_bind_host_is_all_interfaces(monkeypatch: pytest.MonkeyPatch) -> None:
+    from config import Settings
+
+    # Contabo Next.js / ServerAvatar path requires 0.0.0.0 (not 127.0.0.1 only)
+    monkeypatch.delenv("ARABYA_NLP_HOST", raising=False)
+    monkeypatch.delenv("ARABYA_NLP_PORT", raising=False)
+    s = Settings(
+        _env_file=None,
+        database_url="sqlite:////tmp/arabya-nlp-host-test.sqlite",
+        server_log_path="/tmp/arabya-nlp/host-test.log",
+        tmp_dir="/tmp/arabya-nlp",
+    )
+    assert s.host == "0.0.0.0"
+    assert s.port == 8092
+
+
 def test_command_sandbox_rejects_unknown() -> None:
     from app.security.command_sandbox import execute_whitelisted, resolve_action_key
 
