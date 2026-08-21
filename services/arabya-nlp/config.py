@@ -69,8 +69,9 @@ class Settings(BaseSettings):
 
     # --- Rate limiting (external guests only; loopback/Next is exempt) ---
     rate_limit_enabled: bool = True
-    # Was 5/hour — too low once Lughawi proxies many POSTs through Contabo Next.
-    rate_limit_requests: int = Field(default=120, alias="ARABYA_NLP_RATE_LIMIT_REQUESTS")
+    # Generous guest ceiling — loopback Contabo→NLP is never limited.
+    # Was 5 then 120/hour; keep huge so public traffic never false-429s.
+    rate_limit_requests: int = Field(default=100_000, alias="ARABYA_NLP_RATE_LIMIT_REQUESTS")
     rate_limit_window_seconds: int = Field(
         default=3600,
         alias="ARABYA_NLP_RATE_LIMIT_WINDOW",

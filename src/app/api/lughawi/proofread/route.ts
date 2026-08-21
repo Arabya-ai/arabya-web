@@ -11,8 +11,9 @@ import { applyEdits, mergeEdits } from "@/lib/lughawi/pipeline-merge";
 import { proofreadLocal } from "@/lib/lughawi/pipeline";
 import { resolveLughawiAiCandidates } from "@/lib/lughawi/resolve-ai";
 import { getQuota, tryChargeQuota } from "@/lib/lughawi/quota-store";
+import { sessionSkipsLughawiRateLimit } from "@/lib/lughawi/rate-limit-policy";
 import type { ProofMode, ProofreadResponse } from "@/lib/lughawi/types";
-import { enforceRateLimit } from "@/lib/rate-limit";
+import { enforceRateLimit, LUGHAWI_PROOFREAD_LIMIT } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 /**
@@ -32,8 +33,14 @@ function contaboOllamaAlreadyUsed(result: ProofreadResponse): boolean {
 }
 
 export async function POST(req: Request) {
-  const limited = enforceRateLimit(req, { prefix: "lughawi-proofread", limit: 40 });
-  if (limited) return limited;
+  const session = await auth();
+  if (!sessionSkipsLughawiRateLimit(session)) {
+    const limited = enforceRateLimit(req, {
+      prefix: "lughawi-proofread",
+      limit: LUGHAWI_PROOFREAD_LIMIT,
+    });
+    if (limited) return limited;
+  }
 
   let body: {
     text?: string;
@@ -135,7 +142,6 @@ export async function POST(req: Request) {
     return NextResponse.json(result);
   }
 
-  const session = await auth();
   const email = session?.user?.email?.trim().toLowerCase();
   const banned = session?.error === "Banned";
 

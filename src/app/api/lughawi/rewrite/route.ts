@@ -3,8 +3,9 @@ import { humanizeAiError, runAiAuto } from "@/lib/lughawi/ai-gateway";
 import { countArabicWords } from "@/lib/lughawi/config";
 import { resolveLughawiAiCandidates } from "@/lib/lughawi/resolve-ai";
 import { getQuota, tryChargeQuota } from "@/lib/lughawi/quota-store";
+import { sessionSkipsLughawiRateLimit } from "@/lib/lughawi/rate-limit-policy";
 import type { ProofreadResponse, RewriteStyle } from "@/lib/lughawi/types";
-import { enforceRateLimit } from "@/lib/rate-limit";
+import { enforceRateLimit, LUGHAWI_TOOL_LIMIT } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 const STYLE_PROMPT: Record<RewriteStyle, string> = {
@@ -14,10 +15,15 @@ const STYLE_PROMPT: Record<RewriteStyle, string> = {
 };
 
 export async function POST(req: Request) {
-  const limited = enforceRateLimit(req, { prefix: "lughawi-rewrite", limit: 20 });
-  if (limited) return limited;
-
   const session = await auth();
+  if (!sessionSkipsLughawiRateLimit(session)) {
+    const limited = enforceRateLimit(req, {
+      prefix: "lughawi-rewrite",
+      limit: LUGHAWI_TOOL_LIMIT,
+    });
+    if (limited) return limited;
+  }
+
   const email = session?.user?.email?.trim().toLowerCase();
   if (!email || session?.error === "Banned") {
     return NextResponse.json({ error: "يلزم تسجيل الدخول", code: "auth" }, { status: 401 });

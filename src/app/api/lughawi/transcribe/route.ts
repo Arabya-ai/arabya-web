@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
+import { sessionSkipsLughawiRateLimit } from "@/lib/lughawi/rate-limit-policy";
 import { sidecarTranscribe } from "@/lib/lughawi/sidecar-client";
-import { enforceRateLimit } from "@/lib/rate-limit";
+import { enforceRateLimit, LUGHAWI_TOOL_LIMIT } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 /**
@@ -18,11 +19,13 @@ export async function POST(req: Request) {
     );
   }
 
-  const limited = enforceRateLimit(req, {
-    prefix: "lughawi-transcribe",
-    limit: 6,
-  });
-  if (limited) return limited;
+  if (!sessionSkipsLughawiRateLimit(session)) {
+    const limited = enforceRateLimit(req, {
+      prefix: "lughawi-transcribe",
+      limit: Math.min(60, LUGHAWI_TOOL_LIMIT),
+    });
+    if (limited) return limited;
+  }
 
   let body: { audioBase64?: string; filename?: string };
   try {

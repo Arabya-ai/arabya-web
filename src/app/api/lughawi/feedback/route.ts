@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { recordFeedback } from "@/lib/lughawi/learning-store";
-import { enforceRateLimit } from "@/lib/rate-limit";
+import { sessionSkipsLughawiRateLimit } from "@/lib/lughawi/rate-limit-policy";
+import { enforceRateLimit, LUGHAWI_TOOL_LIMIT } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 /** Crowd learn: accept/reject — signed-in only (prevents anonymous poisoning). */
@@ -13,11 +14,13 @@ export async function POST(req: Request) {
     );
   }
 
-  const limited = enforceRateLimit(req, {
-    prefix: "lughawi-feedback",
-    limit: 40,
-  });
-  if (limited) return limited;
+  if (!sessionSkipsLughawiRateLimit(session)) {
+    const limited = enforceRateLimit(req, {
+      prefix: "lughawi-feedback",
+      limit: LUGHAWI_TOOL_LIMIT,
+    });
+    if (limited) return limited;
+  }
 
   let body: {
     from?: string;
