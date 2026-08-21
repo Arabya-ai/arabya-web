@@ -25,6 +25,14 @@ describe("ops usage meter", () => {
   });
 });
 
+describe("clear sticky AI failures", () => {
+  it("exports clear helpers", async () => {
+    const mod = await import("@/lib/ops/usage-meter");
+    expect(typeof mod.clearAiUsageByLast4).toBe("function");
+    expect(typeof mod.pruneFailureAlertsForActiveLast4).toBe("function");
+  });
+});
+
 describe("integrations registry", () => {
   it("loads camel tools and catt entries", () => {
     const reg = loadIntegrationsRegistry();
