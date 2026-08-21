@@ -253,17 +253,28 @@ if [[ -f scripts/contabo-lughawi-sidecar.sh ]]; then
   bash scripts/contabo-lughawi-sidecar.sh || echo "WARN: sidecar start skipped — local rules still work."
 fi
 
-echo "==> Arabya NLP FastAPI platform (optional — off by default)"
+echo "==> Arabya NLP FastAPI platform (:8092) — Next.js proxies via ARABYA_NLP_URL"
 grep -q '^ARABYA_NLP_DATABASE_URL=' "$APP_DIR/.env" 2>/dev/null || \
   echo 'ARABYA_NLP_DATABASE_URL=sqlite:////var/lib/arabya/arabya-nlp.sqlite' >> "$APP_DIR/.env"
+grep -q '^ARABYA_NLP_URL=' "$APP_DIR/.env" 2>/dev/null || \
+  echo 'ARABYA_NLP_URL=http://127.0.0.1:8092' >> "$APP_DIR/.env"
+grep -q '^ARABYA_NLP_PROOFREAD=' "$APP_DIR/.env" 2>/dev/null || \
+  echo 'ARABYA_NLP_PROOFREAD=1' >> "$APP_DIR/.env"
 # CRITICAL safety: keep DevOps auto-execute disabled unless an operator sets it intentionally later
 if grep -q '^ARABYA_NLP_DEVOPS_AUTO_EXECUTE=' "$APP_DIR/.env" 2>/dev/null; then
   sed -i 's/^ARABYA_NLP_DEVOPS_AUTO_EXECUTE=.*/ARABYA_NLP_DEVOPS_AUTO_EXECUTE=0/' "$APP_DIR/.env"
 else
   echo 'ARABYA_NLP_DEVOPS_AUTO_EXECUTE=0' >> "$APP_DIR/.env"
 fi
-if [[ "${CONTABO_ENABLE_NLP:-0}" == "1" || "${CONTABO_ENABLE_NLP:-}" == "true" ]]; then
-  if [[ -x "$APP_DIR/services/arabya-nlp/.venv/bin/python" && -f scripts/contabo-arabya-nlp.sh ]]; then
+# Prefer enabling when venv is present (owner already activated Option A).
+NLP_VENV_OK=0
+if [[ -x "$APP_DIR/services/arabya-nlp/.venv/bin/python" && -f "$APP_DIR/services/arabya-nlp/main.py" ]]; then
+  NLP_VENV_OK=1
+fi
+if [[ "${CONTABO_ENABLE_NLP:-}" == "0" || "${CONTABO_ENABLE_NLP:-}" == "false" ]]; then
+  echo "==> CONTABO_ENABLE_NLP=0 — leaving arabya-nlp as-is (not force-stopped)."
+elif [[ "${CONTABO_ENABLE_NLP:-1}" == "1" || "${CONTABO_ENABLE_NLP:-}" == "true" || "$NLP_VENV_OK" == "1" ]]; then
+  if [[ "$NLP_VENV_OK" == "1" && -f scripts/contabo-arabya-nlp.sh ]]; then
     bash scripts/contabo-arabya-nlp.sh || echo "WARN: arabya-nlp PM2 restart skipped"
   elif [[ -f scripts/contabo-arabya-nlp-activate.sh ]]; then
     echo "WARN: arabya-nlp venv missing — run once: bash scripts/contabo-arabya-nlp-activate.sh"
@@ -271,8 +282,7 @@ if [[ "${CONTABO_ENABLE_NLP:-0}" == "1" || "${CONTABO_ENABLE_NLP:-}" == "true" ]
     echo "WARN: arabya-nlp scripts missing"
   fi
 else
-  echo "==> Skipping arabya-nlp (set CONTABO_ENABLE_NLP=1 to enable). Stopping if present."
-  pm2 stop arabya-nlp 2>/dev/null || true
+  echo "==> Skipping arabya-nlp start (no venv). Local/sidecar proofread still works."
 fi
 
 echo "==> Restart PM2 arabya-web (only if tree can run next start)"
