@@ -36,6 +36,10 @@ describe("integrations registry", () => {
     expect(ids).toContain("bayan");
     expect(ids).toContain("stanza-arabic");
     expect(ids).toContain("pyarabic");
+    expect(ids).toContain("ghalatawi");
+    expect(ids).toContain("fareh");
+    expect(ids).toContain("alnnahwi-gemma3-gec");
+    expect(ids).toContain("whisper-arabic-stt");
     expect(ids).toContain("ollama-llama31-8b");
   });
 });

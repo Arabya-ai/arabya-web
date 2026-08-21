@@ -14,6 +14,22 @@ def probe() -> dict[str, Any]:
     except Exception:
         pass
 
+    has_ghalatawi = False
+    try:
+        from ghalatawi.autocorrector import AutoCorrector  # noqa: F401
+
+        has_ghalatawi = True
+    except Exception:
+        pass
+
+    has_fareh = False
+    try:
+        from engines.fareh_rules import available as fareh_available
+
+        has_fareh = fareh_available()
+    except Exception:
+        pass
+
     has_camel = False
     try:
         import camel_tools  # noqa: F401
@@ -51,10 +67,21 @@ def probe() -> dict[str, Any]:
     except Exception:
         pass
 
+    import os
+
+    has_hf_token = bool(
+        os.environ.get("LUGHAWI_HF_TOKEN", "").strip()
+        or os.environ.get("HF_TOKEN", "").strip()
+        or os.environ.get("HUGGING_FACE_HUB_TOKEN", "").strip()
+    )
+
     return {
         "pyarabic": has_pyarabic,
+        "ghalatawi": has_ghalatawi,
+        "fareh": has_fareh,
         "camel": has_camel,
         "stanza": has_stanza,
         "catt": has_catt,
         "transformers": has_transformers,
+        "hfToken": has_hf_token,
     }

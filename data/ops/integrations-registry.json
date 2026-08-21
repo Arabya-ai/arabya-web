@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-20",
+  "updatedAt": "2026-08-21",
   "noteAr": "سجل المشاريع والأدوات الخارجية المدمجة أو المخططة داخل عربية/لغوي. يُحدَّث يدويًا عند كل دمج، ولوحة السوبر أدمن تقرأه يوميًا.",
   "integrations": [
     {
@@ -11,12 +11,12 @@
       "license": "Project",
       "repo": "internal:services/lughawi-sidecar",
       "docs": "services/lughawi-sidecar/README.md",
-      "features": ["صحة", "صرف CAMeL", "قواعد Stanza/PyArabic", "GEC اختياري", "تشكيل CATT"],
+      "features": ["صحة", "غلطاوي", "فارح", "Stanza", "CAMeL", "Alnnahwi HF", "Whisper STT"],
       "status": "wired",
       "lughawiStage": "sidecar",
       "watch": true,
       "checkUrl": "http://127.0.0.1:8091/health",
-      "notesAr": "أساس NLP على Contabo عبر PM2. ثبّت الحزم بـ scripts/contabo-lughawi-sidecar-deps.sh ثم أعد تشغيل الـ sidecar."
+      "notesAr": "v0.4 — ثبّت deps ثم اضبط LUGHAWI_SIDECAR_URL و LUGHAWI_HF_TOKEN (موصى به)."
     },
     {
       "id": "stanza-arabic",
@@ -47,6 +47,81 @@
       "watch": true,
       "checkUrl": null,
       "notesAr": "طبقة قواعد خفيفة داخل sidecar قبل Stanza/GEC."
+    },
+    {
+      "id": "ghalatawi",
+      "nameAr": "غلطاوي (Ghalatawi)",
+      "nameEn": "Ghalatawi Arabic Autocorrect",
+      "role": "rule_nlp",
+      "license": "GPL-3.0",
+      "repo": "https://github.com/linuxscout/ghalatawi",
+      "docs": "https://ghalatawi.readthedocs.io/",
+      "features": ["تصحيح تلقائي", "همزات", "تاء مربوطة", "ترقيم", "أخطاء شائعة"],
+      "status": "wired_sidecar",
+      "lughawiStage": "rule_nlp",
+      "watch": true,
+      "checkUrl": "http://127.0.0.1:8091/health",
+      "notesAr": "pip install ghalatawi داخل venv الـ sidecar. يعتمد على PyArabic."
+    },
+    {
+      "id": "fareh",
+      "nameAr": "فارح (Fareh)",
+      "nameEn": "Fareh Arabic rules DB",
+      "role": "rule_nlp",
+      "license": "GPL",
+      "repo": "https://github.com/linuxscout/fareh",
+      "docs": "https://github.com/linuxscout/fareh",
+      "features": ["قواعد نحوية/أسلوبية", "جدول استبدال", "LanguageTool Arabic"],
+      "status": "wired_sidecar",
+      "lughawiStage": "rule_nlp",
+      "watch": true,
+      "checkUrl": null,
+      "notesAr": "قاعدة بيانات قواعد — ملف replaces.txt مضمّن في services/lughawi-sidecar/data/fareh-replaces.txt"
+    },
+    {
+      "id": "alnnahwi-gemma3-gec",
+      "nameAr": "Alnnahwi Gemma-3-1B Arabic GEC",
+      "nameEn": "Alnnahwi Gemma 3 1B Arabic GEC",
+      "role": "gec",
+      "license": "Gemma",
+      "repo": "https://huggingface.co/alnnahwi/gemma-3-1b-arabic-gec-v1",
+      "docs": "https://huggingface.co/alnnahwi/gemma-3-1b-arabic-gec-v1",
+      "features": ["GEC عربي متخصص", "مطابقة العدد", "همزات", "ترقيم"],
+      "status": "optional_sidecar",
+      "lughawiStage": "gec",
+      "watch": true,
+      "hfModels": ["alnnahwi/gemma-3-1b-arabic-gec-v1"],
+      "notesAr": "يُفضَّل عبر Hugging Face Inference (LUGHAWI_HF_TOKEN) لتقليل RAM Contabo. محلي فقط مع LUGHAWI_GEC_LOCAL=1."
+    },
+    {
+      "id": "whisper-arabic-stt",
+      "nameAr": "Whisper STT (عربي)",
+      "nameEn": "Whisper speech-to-text",
+      "role": "stt",
+      "license": "MIT (OpenAI Whisper)",
+      "repo": "https://huggingface.co/openai/whisper-large-v3",
+      "docs": "services/lughawi-sidecar/engines/stt_whisper.py",
+      "features": ["صوت→نص", "فيديو→نص", "دعم العربية"],
+      "status": "optional_sidecar",
+      "lughawiStage": "stt",
+      "watch": true,
+      "hfModels": ["openai/whisper-large-v3", "MightyStudent/whisper-large-v3-arabic"],
+      "notesAr": "عبر HF Inference افتراضيًا. الواجهة: وحدة OCR في /lughawi → /api/lughawi/transcribe"
+    },
+    {
+      "id": "research-arabic-curriculum-tech",
+      "nameAr": "مراجعة منهجية: التقنية في منهج العربية",
+      "nameEn": "Arabic curriculum + technology systematic review",
+      "role": "research_ref",
+      "license": "Publication",
+      "repo": "https://www.researchgate.net/publication/395790816_Integrating_technology_into_the_Arabic_language_curriculum_A_systematic_review_of_trends_strategies_and_cultural_dimensions",
+      "docs": "data/lughawi/refs/arabic-tech-curriculum-and-stack.md",
+      "features": ["اتجاهات", "استراتيجيات", "أبعاد ثقافية"],
+      "status": "research_only",
+      "lughawiStage": "pedagogy",
+      "watch": false,
+      "checkUrl": null,
+      "notesAr": "مرجع تربوي لتوجيه المنتج — ليس حزمة تشغيل."
     },
     {
       "id": "camel-tools",
@@ -173,20 +248,6 @@
       "lughawiStage": "tashkeel",
       "watch": true,
       "notesAr": "مرشّح أول للتشكيل المحلي المجاني على Contabo."
-    },
-    {
-      "id": "pyarabic",
-      "nameAr": "PyArabic",
-      "nameEn": "PyArabic",
-      "role": "normalize",
-      "license": "GPL-3.0",
-      "repo": "https://github.com/linuxscout/pyarabic",
-      "docs": "https://github.com/linuxscout/pyarabic",
-      "features": ["تطبيع", "إزالة تشكيل", "أرقام عربية"],
-      "status": "planned_sidecar",
-      "lughawiStage": "normalize",
-      "watch": false,
-      "notesAr": "مساعد خفيف للتطبيع داخل الـ sidecar."
     },
     {
       "id": "ollama-local",

@@ -120,6 +120,7 @@ export function LughawiStudio() {
   const [quranHits, setQuranHits] = useState<
     ReturnType<typeof searchKnownAyahs>
   >([]);
+  const [sttPending, setSttPending] = useState(false);
 
   const allEdits = result?.edits.filter((e) => e.status === "proposed") ?? [];
   const edits = allEdits.filter((e) => {
@@ -581,8 +582,118 @@ export function LughawiStudio() {
               </ul>
             </div>
           ) : module === "ocr" ? (
-            <div className="lughawi-module-placeholder">
-              <p>{t("ocrHelp")}</p>
+            <div className="lughawi-workspace">
+              <p className="lughawi-muted">{t("ocrHelp")}</p>
+              <div className="lughawi-toolbar">
+                <label className="lughawi-secondary">
+                  <input
+                    type="file"
+                    accept="audio/*,video/*,.mp3,.wav,.m4a,.ogg,.webm,.mp4"
+                    disabled={sttPending || pending}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = "";
+                      if (!file) return;
+                      setError(null);
+                      setSttPending(true);
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        const dataUrl = String(reader.result || "");
+                        const b64 = dataUrl.includes(",")
+                          ? dataUrl.split(",")[1] || ""
+                          : dataUrl;
+                        void fetch("/api/lughawi/transcribe", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            audioBase64: b64,
+                            filename: file.name,
+                          }),
+                        })
+                          .then(async (r) => {
+                            const j = (await r.json()) as {
+                              text?: string;
+                              error?: string;
+                              engine?: string;
+                            };
+                            if (!r.ok) {
+                              throw new Error(j.error || t("ocrSttFailed"));
+                            }
+                            const extracted = (j.text || "").trim();
+                            if (!extracted) {
+                              throw new Error(t("ocrSttEmpty"));
+                            }
+                            setText(extracted);
+                            setModule("editor");
+                            setFlash(
+                              t("ocrSttOk", {
+                                engine: j.engine || "whisper",
+                              }),
+                            );
+                            setAction("proofread");
+                            setError(null);
+                            startTransition(async () => {
+                              try {
+                                const res = await fetch(
+                                  "/api/lughawi/proofread",
+                                  {
+                                    method: "POST",
+                                    headers: {
+                                      "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify({
+                                      text: extracted,
+                                      locale: "ar",
+                                      proofMode,
+                                    }),
+                                  },
+                                );
+                                const json =
+                                  (await res.json()) as ProofreadResponse & {
+                                    error?: string;
+                                  };
+                                if (!res.ok) {
+                                  setError(json.error || t("errorGeneric"));
+                                  return;
+                                }
+                                if (json.edits?.length) {
+                                  setResult({
+                                    ...json,
+                                    result: json.original,
+                                    edits: json.edits.map((e) => ({
+                                      ...e,
+                                      status: "proposed" as const,
+                                    })),
+                                  });
+                                } else {
+                                  setResult(json);
+                                  setFlash(t("noEditsFlash"));
+                                }
+                              } catch {
+                                setError(t("errorGeneric"));
+                              }
+                            });
+                          })
+                          .catch((err: unknown) => {
+                            setError(
+                              err instanceof Error
+                                ? err.message
+                                : t("ocrSttFailed"),
+                            );
+                          })
+                          .finally(() => setSttPending(false));
+                      };
+                      reader.onerror = () => {
+                        setSttPending(false);
+                        setError(t("ocrSttFailed"));
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                  {sttPending ? t("ocrSttWorking") : t("ocrPickMedia")}
+                </label>
+              </div>
+              <p className="lughawi-muted">{t("ocrImageSoon")}</p>
             </div>
           ) : module === "tafqeetPanel" ? (
             <div className="lughawi-workspace">

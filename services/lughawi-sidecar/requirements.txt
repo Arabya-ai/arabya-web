@@ -1,17 +1,14 @@
-# Core — always install on Contabo for Lughawi NLP foundation
+# Core rule-based NLP (always on Contabo)
 pyarabic>=0.6.15
+ghalatawi>=0.3
 
-# Morphology (CAMeL Lab) — CPU OK
+# Morphology (CAMeL Lab) — CPU OK; run camel_data full after install
 camel-tools>=1.5.2
 
-# Stanford Stanza Arabic pipeline — CPU OK; first run downloads models
+# Stanford Stanza Arabic pipeline
 stanza>=1.8.2
 
-# Optional neural tashkeel (install when ready)
-# catt-tashkeel
-
-# Optional HF Arabic GEC (AraBART) — heavy; needs RAM (≥8GB free recommended)
-# transformers>=4.40.0
-# torch --index-url https://download.pytorch.org/whl/cpu
-# sentencepiece
-# protobuf
+# Optional neural stacks — prefer Hugging Face Inference API instead of local load:
+#   LUGHAWI_HF_TOKEN=hf_...   → Alnnahwi GEC + Whisper remote (saves Contabo RAM)
+# Local only when explicitly needed:
+#   LUGHAWI_GEC_LOCAL=1 pip install torch transformers sentencepiece

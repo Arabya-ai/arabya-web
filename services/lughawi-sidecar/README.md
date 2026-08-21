@@ -1,59 +1,54 @@
 # Lughawi NLP Sidecar (Contabo)
 
-Python NLP runs **outside** the Next.js bundle on Contabo and talks to لغوي over
-HTTP localhost. This is the **foundation** stack for Arabic proofreading.
+Python NLP runs **outside** Next.js on Contabo (`127.0.0.1:8091`).
 
-## Foundation layers
+## Why Hugging Face (not “upload our whole project”)?
 
-| Layer | Tech | Role |
-|-------|------|------|
-| Rule-based NLP | **PyArabic** + **Stanford Stanza** + builtin MSA pairs | Fast spelling / punctuation / high-precision fixes |
-| Morphology | **CAMeL Tools** | POS / lemma / morph analysis |
-| Neural GEC (optional) | **AraBART** (`CAMeL-Lab/arabart-qalb14-gec-ged-13`) | Contextual grammar when RAM allows |
-| Local LLM (optional) | **Ollama `llama3.1:8b`** (or Mistral 7B) | Rewrite + hard contextual fixes via Auto pool |
-| Cloud Auto | Gemini Flash (newest) … | Enrichment when keys exist |
+We do **not** host Arabya’s app on Hugging Face. We **call existing HF models via Inference API** when `LUGHAWI_HF_TOKEN` is set:
 
-AraNLP is not used (less maintained); Stanza covers the Stanford rule-NLP role.
+| Task | Model | Where it runs |
+|------|--------|----------------|
+| Arabic GEC | `alnnahwi/gemma-3-1b-arabic-gec-v1` | HF remote (preferred) |
+| Speech→text | `openai/whisper-large-v3` | HF remote (preferred) |
+| Rule NLP | PyArabic, Ghalatawi, Fareh, Stanza, CAMeL | Contabo sidecar (light CPU) |
+| Local LLM fallback | Ollama `llama3.1:8b` | Contabo (optional, heavy RAM) |
 
-## Install on Contabo
+This is intentional: light rules stay local; heavy neural work prefers HF to save Contabo RAM/CPU.
+
+## Install
 
 ```bash
 cd /var/www/arabya-web
-git pull --ff-only origin main
 bash scripts/contabo-lughawi-sidecar-deps.sh
-# Optional neural GEC (heavy):
-#   LUGHAWI_INSTALL_GEC=1 bash scripts/contabo-lughawi-sidecar-deps.sh
-bash scripts/contabo-lughawi-sidecar.sh
+# Add free token from https://huggingface.co/settings/tokens
+# echo 'LUGHAWI_HF_TOKEN=hf_...' >> .env
+pm2 restart lughawi-sidecar arabya-web --update-env
+curl -s http://127.0.0.1:8091/health | python3 -m json.tool
+```
 
-# Local Llama 3.1 8B (needs ~10GB free RAM):
-LUGHAWI_OLLAMA_MODEL=llama3.1:8b bash scripts/contabo-ollama-setup.sh
+Ensure `.env` also has:
 
-# .env
-echo 'LUGHAWI_SIDECAR_URL=http://127.0.0.1:8091' >> .env
-# if Ollama installed:
-# LUGHAWI_OLLAMA_BASE_URL=http://127.0.0.1:11434/v1
-# LUGHAWI_OLLAMA_MODEL=llama3.1:8b
-
-pm2 restart arabya-web --update-env
+```bash
+LUGHAWI_SIDECAR_URL=http://127.0.0.1:8091
 ```
 
 ## Endpoints
 
 | Method | Path | Role |
 |--------|------|------|
-| GET | `/health` | Liveness + capability map for `/admin/ops` |
-| POST | `/morph` | CAMeL when installed; else heuristic |
-| POST | `/rules-nlp` | PyArabic + Stanza + builtin pairs |
-| POST | `/gec` | rules-nlp + optional AraBART |
-| POST | `/tashkeel` | CATT when installed; else passthrough |
+| GET | `/health` | Capability map |
+| POST | `/morph` | CAMeL morph |
+| POST | `/rules-nlp` | Fareh + Ghalatawi + Stanza + builtin |
+| POST | `/gec` | rules-nlp + Alnnahwi (HF) |
+| POST | `/tashkeel` | CATT or passthrough |
+| POST | `/transcribe` | Whisper via HF (`audioBase64`) |
 
-## Proofread path (Next.js)
+## Proofread path
 
-1. Offline TypeScript rules (`proofreadLocal`)
-2. Sidecar `/gec` (`enrichProofreadWithSidecar`)
-3. Auto LLM pool — Gemini / Groq / **Ollama Llama-3.1-8B** (`enrichProofreadWithAi`)
+1. TypeScript rules  
+2. Sidecar `/gec` (Fareh/Ghalatawi/Stanza + Alnnahwi)  
+3. Auto LLM pool (Gemini / Groq / Ollama)
 
-## Status
+## Refs
 
-v0.3.0 wires the foundation APIs. Contabo must run `contabo-lughawi-sidecar-deps.sh`
-once so Stanza/CAMeL packages and models land on disk.
+See `data/lughawi/refs/arabic-tech-curriculum-and-stack.md`.

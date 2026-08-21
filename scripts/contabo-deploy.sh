@@ -81,6 +81,10 @@ if [[ -f scripts/contabo-mpt-deploy.sh ]]; then
 fi
 
 echo "==> Lughawi Python sidecar (optional localhost NLP)"
+# Ensure Next can reach sidecar (production bug: sidecar online but unreachable from app)
+touch "$APP_DIR/.env"
+grep -q '^LUGHAWI_SIDECAR_URL=' "$APP_DIR/.env" 2>/dev/null || \
+  echo 'LUGHAWI_SIDECAR_URL=http://127.0.0.1:8091' >> "$APP_DIR/.env"
 if [[ -f scripts/contabo-lughawi-sidecar.sh ]]; then
   bash scripts/contabo-lughawi-sidecar.sh || echo "WARN: sidecar start skipped — local rules still work."
 fi
