@@ -2,13 +2,20 @@
 
 ## كيف يصل الزائر إلى التدقيق؟ (مهم)
 
-المتصفح **لا** يتصل بـ `:8092` مباشرة.
+المتصفح **لا** يتصل بـ `:8092` مباشرة — ولا يحتاج مسار Nginx عامًا إلى FastAPI.
 
 ```
 الزائر → https://www.arabya.org/lughawi
        → POST /api/lughawi/proofread   (Next.js على :3000 عبر LiteSpeed)
        → http://127.0.0.1:8092/v1/proofread   (FastAPI داخل السيرفر فقط)
 ```
+
+### لا تفعل هذا (يكسر النظام)
+- **لا** تضع `ARABYA_NLP_URL=https://arabya.org` أو `https://www.arabya.org`  
+  Next سيحاول طلب `/v1/proofread` من نفسه (حلقة أو 404) بدل FastAPI المحلي.
+- **لا** تفتح مسار Nginx/OLS عامًا إلى `:8092` للجمهور (يعرّض واجهة DevOps).  
+  الباب العام الصحيح هو `/api/lughawi/proofread` فقط.
+- المتصفح **لا** يرى `127.0.0.1` أبدًا؛ الاتصال المحلي يحدث داخل سيرفر Contabo بين Next وFastAPI.
 
 بعد تشغيل FastAPI، اربط Next بالمحرك:
 
@@ -22,6 +29,9 @@ bash scripts/contabo-wire-arabya-nlp-proxy.sh
 - `ARABYA_NLP_PROOFREAD=1`
 
 ثم يعيد تشغيل `arabya-web` ويختبر المسار العام.
+
+اختياري — لإعادة انتظار Ollama المحلي داخل مسار الواجهة (أبطأ، قد يسبب مهلة):
+- `ARABYA_NLP_INTERACTIVE_LLM=1`
 
 ## حالة السيرفر (فحص SSH فعلي)
 

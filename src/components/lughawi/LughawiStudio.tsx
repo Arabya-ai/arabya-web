@@ -39,7 +39,6 @@ import {
   useId,
   useMemo,
   useState,
-  useTransition,
   type KeyboardEvent,
   type ReactNode,
 } from "react";
@@ -102,7 +101,8 @@ export function LughawiStudio() {
   const [result, setResult] = useState<ProofreadResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  /** Explicit busy flag — do not use async startTransition (pending drops early). */
+  const [pending, setPending] = useState(false);
   const [action, setAction] = useState<Action>("proofread");
   const [tashkeelLevel, setTashkeelLevel] = useState<TashkeelLevel>("full");
   const [targetLang, setTargetLang] = useState("en");
@@ -212,11 +212,15 @@ export function LughawiStudio() {
 
   const run = useCallback(
     (next: Action) => {
+      if (pending) return;
       setAction(next);
       setError(null);
       setFlash(null);
       setCopied(false);
-      startTransition(async () => {
+      setPending(true);
+      void (async () => {
+        const ctrl = new AbortController();
+        const timer = window.setTimeout(() => ctrl.abort(), 55_000);
         try {
           const endpoint =
             next === "proofread"
@@ -242,11 +246,17 @@ export function LughawiStudio() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
+            signal: ctrl.signal,
           });
-          const json = (await res.json()) as ProofreadResponse & {
-            error?: string;
-            code?: string;
-          };
+          let json: ProofreadResponse & { error?: string; code?: string };
+          try {
+            json = (await res.json()) as typeof json;
+          } catch {
+            setError(
+              res.ok ? t("errorGeneric") : t("errorProxy", { status: res.status }),
+            );
+            return;
+          }
           if (!res.ok) {
             setError(json.error || t("errorGeneric"));
             return;
@@ -263,12 +273,19 @@ export function LughawiStudio() {
           if (next === "proofread" && (!json.edits || json.edits.length === 0)) {
             setFlash(t("noEditsFlash"));
           }
-        } catch {
-          setError(t("errorGeneric"));
+        } catch (e) {
+          if (e instanceof DOMException && e.name === "AbortError") {
+            setError(t("errorTimeout"));
+          } else {
+            setError(t("errorGeneric"));
+          }
+        } finally {
+          window.clearTimeout(timer);
+          setPending(false);
         }
-      });
+      })();
     },
-    [t, text, targetLang, tashkeelLevel, proofMode],
+    [t, text, targetLang, tashkeelLevel, proofMode, pending],
   );
 
   async function sendFeedback(edit: LughawiEdit, decision: "accepted" | "rejected") {
@@ -635,7 +652,13 @@ export function LughawiStudio() {
                             );
                             setAction("proofread");
                             setError(null);
-                            startTransition(async () => {
+                            setPending(true);
+                            void (async () => {
+                              const ctrl = new AbortController();
+                              const timer = window.setTimeout(
+                                () => ctrl.abort(),
+                                55_000,
+                              );
                               try {
                                 const res = await fetch(
                                   "/api/lughawi/proofread",
@@ -649,12 +672,22 @@ export function LughawiStudio() {
                                       locale: "ar",
                                       proofMode,
                                     }),
+                                    signal: ctrl.signal,
                                   },
                                 );
-                                const json =
-                                  (await res.json()) as ProofreadResponse & {
-                                    error?: string;
-                                  };
+                                let json: ProofreadResponse & {
+                                  error?: string;
+                                };
+                                try {
+                                  json = (await res.json()) as typeof json;
+                                } catch {
+                                  setError(
+                                    res.ok
+                                      ? t("errorGeneric")
+                                      : t("errorProxy", { status: res.status }),
+                                  );
+                                  return;
+                                }
                                 if (!res.ok) {
                                   setError(json.error || t("errorGeneric"));
                                   return;
@@ -672,10 +705,20 @@ export function LughawiStudio() {
                                   setResult(json);
                                   setFlash(t("noEditsFlash"));
                                 }
-                              } catch {
-                                setError(t("errorGeneric"));
+                              } catch (err: unknown) {
+                                if (
+                                  err instanceof DOMException &&
+                                  err.name === "AbortError"
+                                ) {
+                                  setError(t("errorTimeout"));
+                                } else {
+                                  setError(t("errorGeneric"));
+                                }
+                              } finally {
+                                window.clearTimeout(timer);
+                                setPending(false);
                               }
-                            });
+                            })();
                           })
                           .catch((err: unknown) => {
                             setError(

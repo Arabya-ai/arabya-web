@@ -1763,6 +1763,8 @@
       "other": "Other"
     },
     "errorGeneric": "Could not complete the request. Try again.",
+    "errorTimeout": "The request timed out before proofreading finished. Try again or shorten the text.",
+    "errorProxy": "The server returned an error ({status}). Try again in a moment.",
     "protectedQuran": "Quranic span protected from auto-correction.",
     "openAyah": "Open ayah",
     "quotaLine": "Free quota for {period}: {remaining} of {limit} words left (Arabya project keys).",
