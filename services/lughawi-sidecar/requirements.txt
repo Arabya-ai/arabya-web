@@ -1,14 +1,14 @@
-# Core rule-based NLP (always on Contabo)
+# Contabo-complete foundation (always)
 pyarabic>=0.6.15
 ghalatawi>=0.3
-
-# Morphology (CAMeL Lab) — CPU OK; run camel_data full after install
 camel-tools>=1.5.2
-
-# Stanford Stanza Arabic pipeline
 stanza>=1.8.2
 
-# Optional neural stacks — prefer Hugging Face Inference API instead of local load:
-#   LUGHAWI_HF_TOKEN=hf_...   → Alnnahwi GEC + Whisper remote (saves Contabo RAM)
-# Local only when explicitly needed:
-#   LUGHAWI_GEC_LOCAL=1 pip install torch transformers sentencepiece
+# Local neural (Contabo fallback — installed by default via deps script)
+# torch CPU + transformers for Alnnahwi; faster-whisper for STT
+torch
+transformers>=4.40.0
+sentencepiece
+protobuf
+accelerate
+faster-whisper>=1.0.0

@@ -73,3 +73,4 @@ services/money-printer-turbo/resource/fonts/*.ttc
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+__pycache__/

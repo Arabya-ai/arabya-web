@@ -56,7 +56,7 @@ export async function POST(req: Request) {
       {
         error:
           result.error ||
-          "فشل التحويل. أضف LUGHAWI_HF_TOKEN (مجاني من Hugging Face) ثم أعد تشغيل الخدمات.",
+          "فشل التحويل. ثبّت Whisper المحلي عبر contabo-lughawi-sidecar-deps.sh (أو أضف LUGHAWI_HF_TOKEN كتسريع).",
         engine: result.engine,
       },
       { status: 502 },

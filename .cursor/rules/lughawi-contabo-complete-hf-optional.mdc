@@ -1,0 +1,12 @@
+---
+description: Lughawi Contabo-complete vs optional Hugging Face acceleration
+alwaysApply: true
+---
+
+# Lughawi hosting / model priority
+
+1. **Contabo is the complete foundation** — rule NLP + local neural (Alnnahwi GEC, faster-whisper STT, Ollama) must work with **no** Hugging Face token.
+2. **HF token is optional acceleration** — when `LUGHAWI_HF_TOKEN` is set and `LUGHAWI_PREFER_HF=1`, try HF first to spare Contabo RAM/CPU.
+3. **Always auto-fallback to Contabo** on HF quota, model disable, network error, or missing token — never leave the product stuck on remote-only.
+4. Do not design features that hard-require HF Inference. Local install via `scripts/contabo-lughawi-sidecar-deps.sh` is the default path.
+5. Production = Contabo only (PM2). Ignore Vercel.

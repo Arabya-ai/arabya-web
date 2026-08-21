@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from typing import Any
 
 
@@ -67,13 +68,25 @@ def probe() -> dict[str, Any]:
     except Exception:
         pass
 
-    import os
+    has_faster_whisper = False
+    try:
+        import faster_whisper  # noqa: F401
+
+        has_faster_whisper = True
+    except Exception:
+        pass
 
     has_hf_token = bool(
         os.environ.get("LUGHAWI_HF_TOKEN", "").strip()
         or os.environ.get("HF_TOKEN", "").strip()
         or os.environ.get("HUGGING_FACE_HUB_TOKEN", "").strip()
     )
+    prefer_hf = os.environ.get("LUGHAWI_PREFER_HF", "1").strip().lower() not in {
+        "0",
+        "false",
+        "no",
+        "off",
+    }
 
     return {
         "pyarabic": has_pyarabic,
@@ -83,5 +96,8 @@ def probe() -> dict[str, Any]:
         "stanza": has_stanza,
         "catt": has_catt,
         "transformers": has_transformers,
+        "fasterWhisper": has_faster_whisper,
         "hfToken": has_hf_token,
+        "preferHf": prefer_hf and has_hf_token,
+        "contaboComplete": True,
     }

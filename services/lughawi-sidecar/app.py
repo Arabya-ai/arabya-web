@@ -1,10 +1,9 @@
 """
 Lughawi NLP sidecar — localhost only (default 127.0.0.1:8091).
 
-Stack:
-  Rule NLP: PyArabic + Ghalatawi + Fareh + Stanza + CAMeL
-  Neural GEC: Alnnahwi via Hugging Face API (preferred) or local
-  STT: Whisper via Hugging Face Inference (preferred)
+Policy:
+  Contabo = complete foundation (never stops if HF token dies).
+  Hugging Face = optional acceleration when token works (spare RAM/CPU).
 """
 
 from __future__ import annotations
@@ -27,7 +26,7 @@ from engines.tashkeel import tashkeel as run_tashkeel  # noqa: E402
 
 HOST = "127.0.0.1"
 PORT = 8091
-VERSION = "0.4.0"
+VERSION = "0.4.1"
 
 
 def _json_bytes(obj: Any) -> bytes:
@@ -42,12 +41,23 @@ def health_payload() -> dict[str, Any]:
         if caps.get(key):
             rules.append(key)
     rules.append("builtin")
-    if caps.get("hfToken"):
-        gec = "alnnahwi-hf-remote"
+
+    if caps.get("preferHf"):
+        gec = "hf-then-contabo-local"
     elif caps.get("transformers"):
-        gec = "transformers-local"
+        gec = "contabo-local"
     else:
         gec = "rules-nlp"
+
+    if caps.get("preferHf") and caps.get("fasterWhisper"):
+        stt = "hf-then-contabo-local"
+    elif caps.get("fasterWhisper"):
+        stt = "contabo-local-whisper"
+    elif caps.get("hfToken"):
+        stt = "hf-only-until-local-installed"
+    else:
+        stt = "needs-local-or-hf"
+
     return {
         "ok": True,
         "service": "lughawi-sidecar",
@@ -58,7 +68,17 @@ def health_payload() -> dict[str, Any]:
             "rules_nlp": "+".join(rules),
             "tashkeel": "catt" if caps["catt"] else "passthrough",
             "gec": gec,
-            "stt": "hf-whisper" if caps.get("hfToken") else "needs-hf-token",
+            "stt": stt,
+        },
+        "policy": {
+            "contaboFirstComplete": True,
+            "hfOptionalAcceleration": True,
+            "autoFallbackLocal": True,
+            "noteAr": (
+                "الأساس الكامل على Contabo (قواعد + نماذج محلية). "
+                "إن وُجد LUGHAWI_HF_TOKEN يُجرَّب HF أولًا لتوفير الموارد، "
+                "ومع أي فشل/نفاد رصيد يُرجع تلقائيًا للمحلي فلا يتوقف العمل."
+            ),
         },
         "foundation": {
             "ruleBasedNlp": True,
@@ -67,12 +87,11 @@ def health_payload() -> dict[str, Any]:
             "pyarabic": caps["pyarabic"],
             "ghalatawi": caps["ghalatawi"],
             "fareh": caps["fareh"],
-            "neuralGec": bool(caps.get("hfToken") or caps["transformers"]),
-            "preferHuggingFaceRemote": True,
+            "neuralGec": bool(caps.get("transformers") or caps.get("hfToken")),
+            "localStt": bool(caps.get("fasterWhisper")),
+            "preferHuggingFaceRemote": bool(caps.get("preferHf")),
             "noteAr": (
-                "الأساس: غلطاوي+فارح+PyArabic+Stanza+CAMeL. "
-                "GEC/Whisper يُفضَّل عبر Hugging Face API لتقليل حمل Contabo "
-                "(LUGHAWI_HF_TOKEN). Ollama محلي اختياري."
+                "Contabo كامل أولًا. HF اختياري لتوفير الموارد مع رجوع محلي تلقائي."
             ),
         },
     }
