@@ -187,7 +187,7 @@ export function AdminOpsMonitor() {
           <p dir="ltr">NODE_ENV={data.site.nodeEnv}</p>
         </article>
         <article>
-          <h3>Arabya NLP</h3>
+          <h3>لغوي</h3>
           <p>
             {data.arabyaNlp?.ok
               ? `متصل (${data.arabyaNlp.ms}ms)`

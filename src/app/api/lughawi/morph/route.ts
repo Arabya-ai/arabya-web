@@ -61,7 +61,7 @@ export async function POST(req: Request) {
         });
         return NextResponse.json({
           ok: true,
-          engine: conj.engine || "arabya-nlp-qutrub",
+            engine: conj.engine || "lughawi-qutrub",
           verb: conj.verb,
           future_type: conj.future_type,
           table: conj.table,
@@ -80,7 +80,7 @@ export async function POST(req: Request) {
         ok: false,
         error: "sidecar_offline",
         messageAr:
-          "خدمة الصرف غير متصلة. التدقيق المحلي يعمل؛ شغّل arabya-nlp/sidecar على Contabo لاحقًا.",
+          "خدمة الصرف غير متصلة. التدقيق المحلي يعمل؛ أعد تشغيل محرك لغوي لاحقًا.",
       },
       { status: 503 },
     );

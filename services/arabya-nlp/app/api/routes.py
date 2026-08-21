@@ -59,7 +59,7 @@ async def root() -> dict:
 
 @router.get("/v1/engines", response_model=EnginesResponse)
 async def engines() -> EnginesResponse:
-    """Public inventory of installed Contabo NLP engines (no secrets)."""
+    """Public inventory of installed Lughawi engines (no secrets)."""
     return EnginesResponse(ok=True, engines=engines_snapshot())
 
 
@@ -203,7 +203,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Arabya NLP — لوحة Contabo</title>
+  <title>لغوي — لوحة المراقبة</title>
   <style>
     :root {
       --brand: #0d9488;
@@ -275,8 +275,8 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 </head>
 <body>
   <header>
-    <h1>عربية NLP</h1>
-    <p>لوحة مراقبة Contabo الذاتية — صحة الخادم، وكيل DevOps، وإحصاءات لغوية.</p>
+    <h1>لغوي</h1>
+    <p>لوحة مراقبة محرك لغوي — صحة الخادم، وكيل DevOps، وإحصاءات التدقيق.</p>
   </header>
   <main>
     <div class="row" id="health-row"></div>

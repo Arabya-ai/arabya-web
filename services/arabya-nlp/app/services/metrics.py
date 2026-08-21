@@ -69,9 +69,8 @@ def collect_health() -> HealthResponse:
                 "online": "same + Ollama in parallel",
             },
             "noteAr": (
-                "الأولوية: PyArabic + قواعد. Ollama اختياري بالتوازي. "
-                "mishkal (تشكيل) و qutrub (تصريف) اختياريان خلف API. "
-                "المنصة على Contabo فقط — لا Vercel."
+                "محرك لغوي: PyArabic + قواعد أولاً. Ollama اختياري بالتوازي. "
+                "mishkal (تشكيل) و qutrub (تصريف) اختياريان خلف API."
             ),
         },
     )

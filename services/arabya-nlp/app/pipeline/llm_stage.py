@@ -159,7 +159,7 @@ async def run_llm_stage(
                 "original": original,
                 "suggestion": suggestion,
                 "rule_id": "ollama-grammar",
-                "explanation": str(item.get("explanation") or "تصحيح من llama المحلي على Contabo"),
+                "explanation": str(item.get("explanation") or "تصحيح من محرك لغوي المحلي"),
                 "stage": "llm",
             }
         )

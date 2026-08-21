@@ -111,6 +111,6 @@ describe("enrichProofreadWithArabyaNlp", () => {
     const pairs = out.edits.map((e) => `${e.original}→${e.suggestion}`);
     expect(pairs).toContain("المعلمون→المعلمين");
     expect(pairs).toContain("لاكن→لكن");
-    expect(out.meta.provider).toBe("arabya-nlp");
+    expect(out.meta.provider).toBe("lughawi");
   });
 });

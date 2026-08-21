@@ -6,7 +6,7 @@
     {
       "id": "lughawi-sidecar",
       "nameAr": "Sidecar لغوي (Python)",
-      "nameEn": "Lughawi NLP sidecar",
+      "nameEn": "Lughawi sidecar",
       "role": "sidecar_gateway",
       "license": "Project",
       "repo": "internal:services/lughawi-sidecar",

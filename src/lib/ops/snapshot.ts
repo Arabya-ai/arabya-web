@@ -145,7 +145,7 @@ export async function buildOpsSnapshot(): Promise<OpsSnapshot> {
       id: "arabya-nlp-down",
       level: "warn",
       area: "arabya-nlp",
-      messageAr: `منصة arabya-nlp (:8092) لا تستجيب: ${nlpHealth.detail ?? "فشل"}`,
+      messageAr: `محرك لغوي (:8092) لا يستجيب: ${nlpHealth.detail ?? "فشل"}`,
       at: now,
     });
   }

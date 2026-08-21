@@ -20,9 +20,9 @@ if str(ROOT) not in sys.path:
 
 API = os.environ.get("ARABYA_NLP_DASHBOARD_API", "http://127.0.0.1:8092")
 
-st.set_page_config(page_title="Arabya NLP Contabo", layout="wide", page_icon="ع")
-st.title("عربية NLP — Contabo")
-st.caption("مراقبة مباشرة للخادم المحلي فقط (لا خدمات سحابية).")
+st.set_page_config(page_title="لغوي", layout="wide", page_icon="ع")
+st.title("لغوي")
+st.caption("مراقبة مباشرة لمحرك لغوي المحلي فقط.")
 
 
 @st.cache_data(ttl=10)

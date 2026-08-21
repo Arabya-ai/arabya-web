@@ -31,7 +31,7 @@ from config import Settings, get_settings
 
 logger = logging.getLogger("arabya_nlp.devops_agent")
 
-DEVOPS_SYSTEM = """أنت مهندس DevOps خبير لخادم Contabo يعمل عليه Arabya NLP (FastAPI + Ollama).
+DEVOPS_SYSTEM = """أنت مهندس DevOps خبير لخادم Contabo يعمل عليه محرك لغوي (FastAPI + Ollama).
 حلّل سجلات الأخطاء وقدّم تشخيصًا موجزًا بالعربية.
 يجب أن يكون الحقل action_key واحدًا فقط من قائمة الإجراءات الآمنة المسموحة.
 لا تخترع أوامر shell حرة. أعد JSON فقط:

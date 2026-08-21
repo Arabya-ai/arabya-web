@@ -80,7 +80,7 @@ export async function enrichProofreadWithArabyaNlp(
             id: "arabya-nlp",
             editCount: 0,
             ms,
-            note: "arabya-nlp unreachable — kept local/sidecar",
+            note: "lughawi engine unreachable — kept local/sidecar",
           },
         ],
       },
@@ -117,7 +117,7 @@ export async function enrichProofreadWithArabyaNlp(
       explanation:
         typeof raw.explanation === "string" && raw.explanation
           ? raw.explanation
-          : "تصحيح من منصة arabya-nlp على Contabo",
+          : "تصحيح من محرك لغوي",
       confidence: raw.stage === "llm" ? 0.75 : 0.9,
       source: mapSource(raw.stage),
       status: "proposed",
@@ -169,7 +169,7 @@ export async function enrichProofreadWithArabyaNlp(
       original: local.original,
       suggestion: payload.corrected,
       ruleId: "arabya-nlp-full",
-      explanation: "نص مصحّح من arabya-nlp (قواعد + Ollama محلي)",
+      explanation: "نص مصحّح عبر لغوي (قواعد + نموذج محلي)",
       confidence: 0.8,
       source: payload.stage2_engine?.includes("ollama") ? "ai" : "rules",
       status: "proposed",
@@ -187,7 +187,7 @@ export async function enrichProofreadWithArabyaNlp(
             id: "arabya-nlp",
             editCount: 0,
             ms,
-            note: `arabya-nlp:${payload.stage1_engine ?? "ok"}+${payload.stage2_engine ?? "ok"} (no new edits)`,
+            note: `lughawi:${payload.stage1_engine ?? "ok"}+${payload.stage2_engine ?? "ok"} (no new edits)`,
           },
         ],
       },
@@ -210,14 +210,14 @@ export async function enrichProofreadWithArabyaNlp(
       ...local.meta,
       offline: local.meta.offline && !usedLlm,
       usedAi: local.meta.usedAi || usedLlm,
-      provider: usedLlm ? "arabya-nlp" : local.meta.provider,
+      provider: usedLlm ? "lughawi" : local.meta.provider,
       stages: [
         ...(local.meta.stages ?? []),
         {
           id: "arabya-nlp",
           editCount: mapped.length,
           ms,
-          note: `arabya-nlp:${payload.stage1_engine ?? "?"}+${payload.stage2_engine ?? "?"}${payload.parallel ? ":parallel" : ""}${payload.mode ? `:${payload.mode}` : ""}`,
+          note: `lughawi:${payload.stage1_engine ?? "?"}+${payload.stage2_engine ?? "?"}${payload.parallel ? ":parallel" : ""}${payload.mode ? `:${payload.mode}` : ""}`,
         },
       ],
     },
