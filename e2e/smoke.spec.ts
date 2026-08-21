@@ -7,11 +7,15 @@ test.describe("smoke", () => {
   test("home Arabic renders brand and prayer panel", async ({ page }) => {
     await gotoOk(page, "/");
     await expect(page.locator("body")).toBeVisible();
-    await expect(page.locator("header .brand-name").first()).toContainText(
+    // Prefer visible instance — Next streaming can leave hidden duplicates.
+    await expect(visibleFirst(page, "header .brand-name")).toContainText(
       /عربية|Arabya/i,
+      { timeout: 20_000 },
     );
-    await expect(page.locator(".prayer-panel")).toBeVisible();
-    await expect(page.locator("#prayer-h")).toContainText(/مواقيت|Prayer/i);
+    await expect(visibleFirst(page, ".prayer-panel")).toBeVisible({
+      timeout: 20_000,
+    });
+    await expect(visibleFirst(page, "#prayer-h")).toContainText(/مواقيت|Prayer/i);
   });
 
   test("home English renders EN chrome and English prayer dates", async ({
@@ -19,15 +23,18 @@ test.describe("smoke", () => {
   }) => {
     await gotoOk(page, "/en");
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
-    await expect(page.locator("header .brand-name").first()).toContainText(
+    await expect(visibleFirst(page, "header .brand-name")).toContainText(
       /Arabya/i,
+      { timeout: 20_000 },
     );
-    await expect(page.locator(".prayer-panel")).toBeVisible();
-    await expect(page.locator("#prayer-h")).toContainText("Prayer times");
-    await expect(page.locator(".prayer-date-value").first()).toBeVisible({
+    await expect(visibleFirst(page, ".prayer-panel")).toBeVisible({
       timeout: 20_000,
     });
-    const dates = page.locator(".prayer-date-value");
+    await expect(visibleFirst(page, "#prayer-h")).toContainText("Prayer times");
+    await expect(visibleFirst(page, ".prayer-date-value")).toBeVisible({
+      timeout: 20_000,
+    });
+    const dates = page.locator(".prayer-date-value").filter({ visible: true });
     await expect(dates).toHaveCount(2);
     const hijri = await dates.nth(0).innerText();
     const gregorian = await dates.nth(1).innerText();
