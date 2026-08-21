@@ -15,6 +15,7 @@ import { ArabyaPanel } from "@/components/ui/ArabyaPanel";
 import { TahfeezHistoryActions } from "@/components/dashboard/TahfeezHistoryActions";
 import { retentionDaysLabel } from "@/lib/history-retention";
 import { emptyTahfeezPortfolio } from "@/lib/tahfeez/types";
+import { tahfeezHref } from "@/lib/tahfeez/paths";
 
 export const dynamic = "force-dynamic";
 
@@ -56,7 +57,7 @@ export default async function AccountTahfeezPage({ params }: Props) {
       <div className="dash-stack">
         <ArabyaPanel as="div" accent legacyDash>
           <p>
-            <Link href="/tahfeez">{t("openSession")}</Link>
+            <Link href={tahfeezHref({ surah: 1 })}>{t("openSession")}</Link>
           </p>
         </ArabyaPanel>
         <ArabyaPanel
@@ -104,14 +105,22 @@ export default async function AccountTahfeezPage({ params }: Props) {
             <ul className="mt-3 space-y-2 text-sm">
               {weakSessions.slice(0, 10).map((s) => (
                 <li key={s.id}>
-                  {s.surahName} · {s.ayahStart}–{s.ayahEnd} · {s.accuracy}%
+                  <Link
+                    href={tahfeezHref({
+                      surah: s.surahId,
+                      from: s.ayahStart,
+                      to: s.ayahEnd,
+                    })}
+                  >
+                    {s.surahName} · {s.ayahStart}–{s.ayahEnd} · {s.accuracy}%
+                  </Link>
                 </li>
               ))}
             </ul>
             <p className="dash-muted text-sm">
-              <Link href="/tahfeez">
-                {locale === "en" ? "Repeat weak segments" : "أعد التسميع"}
-              </Link>
+              {locale === "en"
+                ? "Open a weak segment to resume."
+                : "افتح مقطعًا ضعيفًا لإعادة التسميع."}
             </p>
           </ArabyaPanel>
         ) : null}
@@ -128,8 +137,18 @@ export default async function AccountTahfeezPage({ params }: Props) {
             ) : (
               portfolio.sessions.slice(0, 30).map((s) => (
                 <li key={s.id}>
-                  {s.surahName} · {s.ayahStart}
-                  {s.ayahEnd !== s.ayahStart ? `–${s.ayahEnd}` : ""} · {s.accuracy}% ·{" "}
+                  <Link
+                    href={tahfeezHref({
+                      surah: s.surahId,
+                      from: s.ayahStart,
+                      to: s.ayahEnd,
+                    })}
+                  >
+                    {s.surahName} · {s.ayahStart}
+                    {s.ayahEnd !== s.ayahStart ? `–${s.ayahEnd}` : ""} ·{" "}
+                    {s.accuracy}%
+                  </Link>
+                  {" · "}
                   {new Date(s.completedAt).toLocaleString(locale)}
                 </li>
               ))
