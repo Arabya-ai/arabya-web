@@ -11,6 +11,18 @@ cd "$APP_DIR"
 
 echo "==> Fetch $BRANCH"
 git fetch origin "$BRANCH"
+
+# Stash BEFORE checkout — dirty package-lock.json otherwise aborts checkout
+# and leaves arabya-web stopped (503) after a failed Deploy Contabo run.
+if ! git diff --quiet || ! git diff --cached --quiet || [[ -n "$(git ls-files --others --exclude-standard 2>/dev/null | head -1)" ]]; then
+  echo "==> Local working-tree changes detected — stashing before checkout"
+  git stash push -u -m "contabo-deploy-auto-$(date +%F-%H%M%S)" || true
+fi
+if ! git diff --quiet -- package-lock.json 2>/dev/null || ! git diff --cached --quiet -- package-lock.json 2>/dev/null; then
+  echo "==> Resetting dirty package-lock.json so checkout can proceed"
+  git checkout -- package-lock.json 2>/dev/null || true
+fi
+
 git checkout "$BRANCH"
 
 # Learning may have dirtied tracked seed file on older builds — backup + reset so pull can proceed.
@@ -22,13 +34,14 @@ if [[ -f "$LEARNED" ]] && ! git diff --quiet -- "$LEARNED" 2>/dev/null; then
   git checkout -- "$LEARNED"
 fi
 
-# Any other unexpected local edits: stash (keep deploy unblocked)
+# Any other unexpected local edits after checkout: stash (keep deploy unblocked)
 if ! git diff --quiet || ! git diff --cached --quiet; then
   echo "==> Stashing other local working-tree changes before pull"
   git stash push -u -m "contabo-deploy-auto-$(date +%F-%H%M%S)" || true
 fi
 
-git pull --ff-only origin "$BRANCH"
+# Hard-sync to remote tip so package.json / package-lock.json cannot drift
+git reset --hard "origin/$BRANCH"
 
 echo "==> Node version check (Contabo: Node 22 or 24)"
 NODE_MAJOR="$(node -p "process.versions.node.split('.')[0]")"
@@ -92,11 +105,27 @@ for attempt in 1 2; do
   rm -rf "${NPM_CONFIG_CACHE:-$HOME/.npm}/_cacache" 2>/dev/null || true
   sleep 2
 done
+
+# Lockfile drift fallback — never leave the site stopped if install can recover.
 if [[ "$npm_ci_ok" -ne 1 ]]; then
-  echo "ERROR: npm ci could not produce a complete Next.js install."
+  echo "==> npm ci failed — falling back to npm install (then freeze with a fresh lock on disk only)"
+  rm -rf node_modules
+  if npm install --no-audit --no-fund; then
+    if [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
+       [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
+      npm_ci_ok=1
+      # Do not commit lockfile from Contabo; discard local lock drift after install
+      git checkout -- package-lock.json 2>/dev/null || true
+    fi
+  fi
+fi
+
+if [[ "$npm_ci_ok" -ne 1 ]]; then
+  echo "ERROR: npm install could not produce a complete Next.js install."
   echo "On the server run:"
   echo "  df -h /"
   echo "  pm2 stop arabya-web arabya-nlp lughawi-sidecar 2>/dev/null || true"
+  echo "  git fetch origin main && git reset --hard origin/main"
   echo "  rm -rf node_modules ~/.npm/_cacache"
   echo "  npm cache clean --force && npm ci"
   if [[ -d .next.prev-good ]]; then
