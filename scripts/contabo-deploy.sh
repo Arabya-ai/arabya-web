@@ -62,24 +62,80 @@ rm -rf node_modules .next
 # Stale npm cache / partial extracts → tar TAR_ENTRY_ERROR ENOENT on Contabo
 npm cache clean --force >/dev/null 2>&1 || true
 
+# Capture log: npm ci can exit 0 while printing TAR_ENTRY_ERROR and leaving holes.
 npm_ci_ok=0
+NPM_CI_LOG="$(mktemp)"
 for attempt in 1 2; do
   echo "==> npm ci (attempt $attempt)"
-  if npm ci --no-audit --no-fund; then
+  set +e
+  npm ci --no-audit --no-fund 2>&1 | tee "$NPM_CI_LOG"
+  npm_ec=${PIPESTATUS[0]}
+  set -e
+  tar_warn=0
+  if grep -qE 'TAR_ENTRY_ERROR|npm warn tar' "$NPM_CI_LOG"; then
+    tar_warn=1
+    echo "WARN: npm reported tar extract errors (attempt $attempt)"
+  fi
+  if [[ "$npm_ec" -eq 0 && "$tar_warn" -eq 0 ]]; then
     npm_ci_ok=1
     break
   fi
-  echo "WARN: npm ci failed (attempt $attempt) — cleaning and retrying"
+  echo "WARN: npm ci incomplete (exit=$npm_ec tar_warn=$tar_warn) — cleaning and retrying"
   rm -rf node_modules .next
   npm cache clean --force >/dev/null 2>&1 || true
+  rm -rf "${HOME}/.npm/_cacache" 2>/dev/null || true
   sleep 2
 done
+rm -f "$NPM_CI_LOG"
 if [[ "$npm_ci_ok" -ne 1 ]]; then
   echo "ERROR: npm ci failed twice. On the server run:"
   echo "  df -h"
   echo "  rm -rf node_modules .next ~/.npm/_cacache"
   echo "  npm cache clean --force && npm ci"
   exit 1
+fi
+
+# Even without tar warnings, Contabo has seen missing use-intl/.../core.js after "success".
+verify_critical_modules() {
+  local missing=0
+  local paths=(
+    "node_modules/next/package.json"
+    "node_modules/next/dist/compiled/babel/code-frame.js"
+    "node_modules/next-intl/package.json"
+    "node_modules/use-intl/package.json"
+    "node_modules/use-intl/dist/esm/production/core.js"
+    "node_modules/react/package.json"
+    "node_modules/react-dom/package.json"
+    "node_modules/sharp/package.json"
+  )
+  for p in "${paths[@]}"; do
+    if [[ ! -e "$p" ]]; then
+      echo "MISSING after install: $p"
+      missing=1
+    fi
+  done
+  return "$missing"
+}
+
+if ! verify_critical_modules; then
+  echo "==> Incomplete node_modules after npm ci — forcing repair install"
+  rm -rf node_modules/use-intl node_modules/next-intl node_modules/next
+  npm install next@"$(node -p "require('./package.json').dependencies.next")" \
+    next-intl@"$(node -p "require('./package.json').dependencies['next-intl']")" \
+    --no-save --include=optional --no-audit --no-fund
+  if ! verify_critical_modules; then
+    echo "==> Still incomplete — full clean reinstall (npm install)"
+    rm -rf node_modules .next
+    npm cache clean --force >/dev/null 2>&1 || true
+    rm -rf "${HOME}/.npm/_cacache" 2>/dev/null || true
+    npm install --no-audit --no-fund
+  fi
+  if ! verify_critical_modules; then
+    echo "ERROR: critical packages still missing after repair."
+    echo "On Contabo: rm -rf node_modules .next ~/.npm/_cacache && npm cache clean --force && npm install"
+    exit 1
+  fi
+  echo "==> Critical modules OK after repair"
 fi
 
 if [[ ! -f node_modules/sharp/package.json ]] || ! node -e "require('sharp')" >/dev/null 2>&1; then
