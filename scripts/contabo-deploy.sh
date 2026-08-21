@@ -72,18 +72,28 @@ npm_ci_ok=0
 for attempt in 1 2; do
   echo "==> npm ci (attempt $attempt)"
   if npm ci --no-audit --no-fund; then
-    npm_ci_ok=1
-    break
+    # Contabo often prints tar ENOENT on next/dist yet exits 0 — verify next immediately.
+    if [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
+       [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
+      npm_ci_ok=1
+      break
+    fi
+    echo "WARN: npm ci exited 0 but Next extract is incomplete (tar ENOENT on next/dist is common)."
+  else
+    echo "WARN: npm ci failed (attempt $attempt)"
   fi
-  echo "WARN: npm ci failed (attempt $attempt) — cleaning and retrying"
+  echo "==> Cleaning corrupted node_modules + npm cache before retry"
   rm -rf node_modules
   npm cache clean --force >/dev/null 2>&1 || true
+  rm -rf "${NPM_CONFIG_CACHE:-$HOME/.npm}/_cacache" 2>/dev/null || true
   sleep 2
 done
 if [[ "$npm_ci_ok" -ne 1 ]]; then
-  echo "ERROR: npm ci failed twice. On the server run:"
-  echo "  df -h"
-  echo "  rm -rf node_modules .next ~/.npm/_cacache"
+  echo "ERROR: npm ci could not produce a complete Next.js install."
+  echo "On the server run:"
+  echo "  df -h /"
+  echo "  pm2 stop arabya-web arabya-nlp arabya-mpt-api 2>/dev/null || true"
+  echo "  rm -rf node_modules ~/.npm/_cacache"
   echo "  npm cache clean --force && npm ci"
   if [[ -d .next.prev-good ]]; then
     mv .next.prev-good .next
@@ -92,6 +102,7 @@ if [[ "$npm_ci_ok" -ne 1 ]]; then
   fi
   exit 1
 fi
+echo "==> Next.js package extract OK"
 
 # Incomplete extracts: use-intl / next-intl missing production ESM (ENOENT core.js)
 verify_intl() {
@@ -126,16 +137,32 @@ fi
 # Detect incomplete Next install (common Contabo failure modes)
 if [[ ! -f node_modules/next/dist/lib/verify-typescript-setup.js ]] || \
    [[ ! -f node_modules/next/dist/compiled/babel/code-frame.js ]]; then
-  echo "==> Next.js install looks incomplete — reinstalling next"
-  npm install next@"$(node -p "require('./package.json').dependencies.next")" --no-save --include=optional
+  echo "==> Next.js install looks incomplete — reinstalling next cleanly"
+  NEXT_VER="$(node -p "require('./package.json').dependencies.next.replace(/^[\\^~]/,'')")"
+  rm -rf node_modules/next
+  npm install "next@${NEXT_VER}" --no-save --include=optional || \
+    npm install "next@$(node -p "require('./package.json').dependencies.next")" --no-save --include=optional || true
 fi
 if [[ ! -f node_modules/next/dist/compiled/babel/code-frame.js ]]; then
   echo "ERROR: next/dist/compiled/babel/code-frame still missing after reinstall."
-  echo "Try: rm -rf node_modules package-lock.json && npm install && npm run build"
+  echo "Do NOT delete package-lock.json. Repair with:"
+  echo "  rm -rf node_modules ~/.npm/_cacache && npm cache clean --force && npm ci"
+  if [[ -d .next.prev-good ]]; then
+    rm -rf .next
+    mv .next.prev-good .next
+    echo "==> Restored .next.prev-good — bringing previous site back online"
+    pm2 restart arabya-web --update-env || true
+  fi
   exit 1
 fi
 if [[ ! -f node_modules/sharp/package.json ]]; then
   echo "ERROR: sharp still missing after rebuild. Check npm version / allowScripts on Contabo."
+  if [[ -d .next.prev-good ]]; then
+    rm -rf .next
+    mv .next.prev-good .next
+    echo "==> Restored .next.prev-good"
+    pm2 restart arabya-web --update-env || true
+  fi
   exit 1
 fi
 
@@ -146,8 +173,9 @@ if ! node -e "
   if (typeof w.webpack?.WebpackError !== 'function') process.exit(2);
 " >/dev/null 2>&1; then
   echo "==> Compiled webpack broken — reinstalling next cleanly"
-  npm uninstall next >/dev/null 2>&1 || true
-  npm install next@"$(node -p "require('./package.json').dependencies.next")" --no-save --include=optional
+  NEXT_VER="$(node -p "require('./package.json').dependencies.next.replace(/^[\\^~]/,'')")"
+  rm -rf node_modules/next
+  npm install "next@${NEXT_VER}" --no-save --include=optional
   if ! node -e "
     const w = require('next/dist/compiled/webpack/webpack');
     if (typeof w.init === 'function') w.init();
@@ -155,6 +183,12 @@ if ! node -e "
   "; then
     echo "ERROR: next/dist/compiled/webpack still broken after reinstall."
     echo "Confirm Node is 22.x, then: rm -rf node_modules .next && npm ci && npm run build"
+    if [[ -d .next.prev-good ]]; then
+      rm -rf .next
+      mv .next.prev-good .next
+      echo "==> Restored .next.prev-good"
+      pm2 restart arabya-web --update-env || true
+    fi
     exit 1
   fi
 fi
@@ -163,6 +197,7 @@ fi
 
 echo "==> Building (webpack, Node $(node -v))"
 export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}"
+# Contabo stays on Next 15.5.x for now (no --webpack flag). Next 16 Turbopack default is not used.
 if ! NEXT_TELEMETRY_DISABLED=1 npm run build; then
   echo "ERROR: next build failed."
   if [[ -d .next.prev-good ]]; then
@@ -171,7 +206,7 @@ if ! NEXT_TELEMETRY_DISABLED=1 npm run build; then
     echo "==> Restored .next.prev-good — restarting previous working build"
     pm2 restart arabya-web --update-env || true
   fi
-  echo "Common Contabo cause: incomplete use-intl extract. Retry:"
+  echo "Common Contabo cause: incomplete npm extract. Retry:"
   echo "  rm -rf node_modules ~/.npm/_cacache && npm cache clean --force"
   echo "  bash scripts/contabo-deploy.sh"
   exit 1
