@@ -39,10 +39,13 @@ bash "$APP_DIR/scripts/contabo-arabya-nlp-deps.sh"
 
 echo "==> Step 2/4 — Ollama model llama3.1:8b"
 if command -v ollama >/dev/null 2>&1; then
-  # Start daemon if needed (ignore failure if already running / systemd-managed)
   (ollama serve >/dev/null 2>&1 &) || true
   sleep 2
-  ollama pull llama3.1:8b
+  if ollama list 2>/dev/null | grep -q 'llama3.1:8b'; then
+    echo "OK — llama3.1:8b already present"
+  else
+    ollama pull llama3.1:8b
+  fi
   ollama list || true
 else
   echo "WARN: ollama binary missing — run: bash scripts/contabo-ollama-setup.sh"
