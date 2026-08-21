@@ -72,12 +72,6 @@ export default async function CreateHubPage({ params }: Props) {
             <span>{t("hubLead")}</span>
           </Link>
         </li>
-        <li>
-          <Link href="/studio/ai" className="create-hub-card">
-            <strong>{t("aiTitle")}</strong>
-            <span>{t("aiLead")}</span>
-          </Link>
-        </li>
       </ul>
     </div>
   );

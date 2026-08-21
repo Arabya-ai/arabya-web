@@ -6,7 +6,7 @@ Last updated: 2026-08-20
 - Public Quran core: `/`, `/mushaf/[page]`, `/surah/[id]`, `/surah/[id]/read`, `/ayah/[surah]/[verse]`
 - Study/search/navigation: `/study`, `/juz`, `/roots`, `/root/[root]`
 - Devotional tools: `/adhkar`, `/adhkar/[slug]`, `/adhkar/duas`, `/adhkar/tasbeeh`, `/qibla`, `/asma`, `/asma/[n]`
-- Studio: `/studio`, `/studio/(shell)/*`, `/studio/ai`, `/studio/ai/*`
+- Studio: `/studio`, `/studio/(shell)/*` (ayah editor; AI MPT path removed)
 - Create legacy redirects: `/create`, `/create/image`, `/create/video`
 - Auth/account: `/login`, `/account/*`, `/favorites`
 - Admin: `/admin`, `/admin/users`, `/admin/requests`, `/admin/audit`, `/admin/settings`, `/admin/tahfeez`

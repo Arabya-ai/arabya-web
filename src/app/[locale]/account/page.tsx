@@ -69,11 +69,6 @@ export default async function AccountPage({ params }: Props) {
               <span>{t("studioLead")}</span>
               <em>{t("openTool")}</em>
             </Link>
-            <Link href="/studio/ai" className="account-hub-card">
-              <strong>{t("studioAi")}</strong>
-              <span>{t("studioAiLead")}</span>
-              <em>{t("openTool")}</em>
-            </Link>
             <Link href="/account/adhkar" className="account-hub-card">
               <strong>{t("adhkarTitle")}</strong>
               <span>{t("adhkarLead")}</span>

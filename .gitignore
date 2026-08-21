@@ -40,7 +40,6 @@ yarn-error.log*
 !.env.example
 
 # MPT stock-API keys written at runtime by Next (never commit)
-services/money-printer-turbo/.runtime-stock-keys.env
 
 # local acquisition staging (Internet Archive / owner drops)
 /incoming/
@@ -59,13 +58,6 @@ data/user-data.sqlite-shm
 /.data/
 
 # MoneyPrinterTurbo engine runtime (keep source; ignore secrets/output/media)
-services/money-printer-turbo/storage/
-services/money-printer-turbo/.venv/
-services/money-printer-turbo/venv/
-services/money-printer-turbo/config.toml
-services/money-printer-turbo/models/
-services/money-printer-turbo/resource/songs/*.mp3
-services/money-printer-turbo/resource/fonts/*.ttc
 
 # Arabya NLP FastAPI (Contabo) — keep source; ignore local venv
 services/arabya-nlp/.venv/

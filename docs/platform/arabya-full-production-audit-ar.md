@@ -18,7 +18,8 @@
 | loading.tsx | **أُضيف** لمسارات `[locale]` |
 | تسويق حديث/تراث | **لُيّن** في الرسائل |
 | بلاغة | نص أوضح «قيد البناء» |
-| نشر يشغّل NLP/MPT دائماً | **أُصلح** — يتطلب `CONTABO_ENABLE_NLP=1` / `CONTABO_ENABLE_MPT=1` |
+| نشر يشغّل NLP دائماً | **أُصلح** — يتطلب `CONTABO_ENABLE_NLP=1` |
+| `/studio/ai` MoneyPrinter | **أُزيل بالكامل** من الكود والنشر |
 | crash-loop deploy | أُصلح سابقاً (#147) |
 
 ## موارد Contabo (مهم بعد النشر)
@@ -26,12 +27,18 @@
 
 الآن على السيرفر:
 ```bash
-pm2 stop arabya-nlp arabya-mpt-api
+pm2 stop arabya-nlp
 pm2 save
 pm2 status
 ```
 
 أبقِ: `arabya-web` + اختياري `lughawi-sidecar`.
+
+إن بقي `arabya-mpt-api` من نشر قديم:
+```bash
+pm2 delete arabya-mpt-api
+pm2 save
+```
 
 ## حكم الجاهزية للجمهور (صادق)
 | السطح | جاهز؟ |
@@ -41,7 +48,6 @@ pm2 status
 | لغوي AI | للمسجّلين مع مفاتيح/حصة |
 | أذكار / قبلة | نعم |
 | استوديو التصدير في المتصفح | نعم (بدون MPT) |
-| `/studio/ai` (MPT) | اختياري ثقيل — متوقف افتراضياً |
 | حديث/تراث كتحليل كلمة كامل | لا — واجهات فقط |
 | طبقة البلاغة القرآنية | لا بيانات بعد |
 
@@ -52,7 +58,7 @@ pm2 status
 cd /var/www/arabya-web
 git fetch origin main && git pull --ff-only origin main
 bash scripts/contabo-deploy.sh
-pm2 stop arabya-nlp arabya-mpt-api
+pm2 stop arabya-nlp
 pm2 save
 ```
 تأكد أن `.env` فيه `AUTH_SECRET` (مطلوب الآن لتشفير مفاتيح لغوي في الإنتاج).

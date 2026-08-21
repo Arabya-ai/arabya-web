@@ -236,8 +236,8 @@
     "title_ar": "فيديو ذكي",
     "group": "studio",
     "source": "arabya-live",
-    "note": "موجودة",
-    "status": "live"
+    "note": "Removed from product; ayah /studio remains",
+    "status": "removed"
   },
   {
     "id": "account-hub",

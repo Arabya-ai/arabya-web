@@ -12,7 +12,7 @@ describe("unifiedDashNav", () => {
     expect(accountHrefs).toContain("/account/adhkar");
     expect(accountHrefs).toContain("/account/tahfeez");
     expect(accountHrefs).toContain("/studio/dashboard");
-    expect(accountHrefs).toContain("/studio/ai");
+    expect(accountHrefs).not.toContain("/studio/ai");
     expect(nav.every((item) => item.group !== "groupStudio")).toBe(true);
     expect(nav.some((item) => item.href === "/admin/tahfeez")).toBe(false);
   });

@@ -518,7 +518,7 @@
 | ID | العنوان | الحالة | مصدر |
 |---|---|---|---|
 | `studio-ayat` | استوديو آيات | live | arabya-live |
-| `studio-ai` | فيديو ذكي | live | arabya-live |
+| `studio-ai` | فيديو ذكي | removed | — |
 
 ## tahfeez (1)
 

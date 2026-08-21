@@ -71,5 +71,5 @@ Muxing runs in the visitor’s browser; Contabo only needs a clean `npm ci` with
 
 ## 7. Out of scope
 
-- Server-side MPT / Money Printer Turbo Python encoding (separate stack)
+- Server-side Money Printer Turbo encoding (**removed from product**; ayah studio uses Mediabunny in-browser)
 - Full browser E2E encode of a long ayah video (requires Chrome WebCodecs UI)

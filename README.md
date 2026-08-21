@@ -65,7 +65,7 @@ npm run dev
 - `/resources` · `/qiraat` — موارد وإذاعة / القراءات (حفص حاليًا)
 - `/hadith` · `/heritage` — محاور لاحقة (placeholders)
 - `/studio` — استوديو الآيات (تلاوة + تصدير في المتصفح)
-- `/studio/ai` — فيديو ذكي من موضوع (MoneyPrinterTurbo كخدمة شقيقة؛ يحتاج محرك Python)
+- `/studio` — استوديو آيات (تصدير في المتصفح)
 - `/about` · `/privacy`
 
 ## واجهة الدراسة
