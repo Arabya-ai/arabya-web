@@ -217,7 +217,7 @@ export async function enrichProofreadWithArabyaNlp(
           id: "arabya-nlp",
           editCount: mapped.length,
           ms,
-          note: `arabya-nlp:${payload.stage1_engine ?? "?"}+${payload.stage2_engine ?? "?"}`,
+          note: `arabya-nlp:${payload.stage1_engine ?? "?"}+${payload.stage2_engine ?? "?"}${payload.parallel ? ":parallel" : ""}${payload.mode ? `:${payload.mode}` : ""}`,
         },
       ],
     },

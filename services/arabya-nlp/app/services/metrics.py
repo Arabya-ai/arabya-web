@@ -7,6 +7,7 @@ from typing import Any
 import psutil
 
 from app.agent.devops_agent import agent_singleton
+from app.pipeline.optional_engines import engines_snapshot
 from app.services.ollama_client import OllamaClient
 from app.schemas import HealthComponent, HealthResponse
 from config import get_settings
@@ -19,20 +20,35 @@ def collect_health() -> HealthResponse:
     disk = float(psutil.disk_usage("/").percent)
     ollama_up = OllamaClient(settings).is_up_sync()
     agent_status = agent_singleton.status
+    engines = engines_snapshot()
+
+    def eng(name: str) -> HealthComponent:
+        on = bool(engines.get(name))
+        return HealthComponent(
+            name=name,
+            status="green" if on else "yellow",
+            detail="installed" if on else "optional — not installed (offline rules still work)",
+        )
 
     components = [
         HealthComponent(name="web_server", status="green", detail="FastAPI process alive"),
+        eng("pyarabic"),
+        eng("ghalatawi"),
+        eng("mishkal"),
+        eng("qutrub"),
         HealthComponent(
             name="ollama",
-            status="green" if ollama_up else "red",
-            detail="localhost:11434" if ollama_up else "unreachable",
+            # Yellow (not red): Ollama is optional — offline PyArabic+rules must stay healthy.
+            status="green" if ollama_up else "yellow",
+            detail="localhost:11434" if ollama_up else "optional — unreachable (rules-only OK)",
         ),
         HealthComponent(
             name="devops_agent",
-            status=agent_status if agent_status in {"green", "red", "yellow"} else "red",
+            status=agent_status if agent_status in {"green", "red", "yellow"} else "yellow",
             detail=agent_singleton.last_error or ("running" if agent_singleton.running else "stopped"),
         ),
     ]
+    # Core service is OK unless FastAPI itself is broken (never red solely for optional engines).
     ok = all(c.status != "red" for c in components)
     return HealthResponse(
         ok=ok,
@@ -47,9 +63,15 @@ def collect_health() -> HealthResponse:
             "noCloudDatabases": True,
             "rateLimitGuestPerHour": settings.rate_limit_requests,
             "devopsAutoExecute": settings.devops_auto_execute,
+            "engines": engines,
+            "proofreadMode": {
+                "offline": "PyArabic + rules (+ Ghalatawi)",
+                "online": "same + Ollama in parallel",
+            },
             "noteAr": (
-                "المنصة بالكامل على Contabo: FastAPI + Ollama + Whisper + SQLite. "
-                "لا اعتماد على Vercel أو Supabase."
+                "الأولوية: PyArabic + قواعد. Ollama اختياري بالتوازي. "
+                "mishkal (تشكيل) و qutrub (تصريف) اختياريان خلف API. "
+                "المنصة على Contabo فقط — لا Vercel."
             ),
         },
     )

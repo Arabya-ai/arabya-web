@@ -137,6 +137,100 @@ async def test_proofread_skip_llm() -> None:
     assert res.ok
     assert "إلى" in res.corrected
     assert res.stage2_engine == "llm-skipped"
+    assert res.mode == "offline"
+    assert res.parallel is False
+
+
+@pytest.mark.asyncio
+async def test_proofread_parallel_merges_rule_priority(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Rules + mocked Ollama run together; overlapping spans prefer rules."""
+    from app.pipeline import proofreader as pr
+    from app.pipeline.llm_stage import LlmStageResult
+
+    async def fake_llm(text: str, **kwargs):  # noqa: ANN003
+        return LlmStageResult(
+            text=text.replace("لاكن", "لكن").replace("المعلمون", "المعلمين"),
+            edits=[
+                {
+                    "id": "llm-1",
+                    "start": 0,
+                    "end": 0,
+                    "type": "grammar",
+                    "original": "المعلمون",
+                    "suggestion": "المعلمين",
+                    "rule_id": "ollama-grammar",
+                    "explanation": "mock",
+                    "stage": "llm",
+                },
+                {
+                    "id": "llm-2",
+                    "start": 0,
+                    "end": 0,
+                    "type": "spelling",
+                    "original": "لاكن",
+                    "suggestion": "لكن",
+                    "rule_id": "ollama-grammar",
+                    "explanation": "mock",
+                    "stage": "llm",
+                },
+            ],
+            engine="ollama:mock",
+            raw_ok=True,
+        )
+
+    monkeypatch.setattr(pr, "run_llm_stage", fake_llm)
+    from types import SimpleNamespace
+
+    settings = SimpleNamespace(
+        preserve_diacritics_default=True,
+        llm_proofread_enabled=True,
+    )
+
+    text = "إن المعلمون يرفعون شأن الأمة لاكن الطلاب"
+    res = await pr.proofread_text(text, skip_llm=False, settings=settings)  # type: ignore[arg-type]
+    assert res.ok
+    assert res.parallel is True
+    assert res.mode == "hybrid-parallel"
+    assert "المعلمين" in res.corrected
+    assert "لكن" in res.corrected
+    originals = {e.original for e in res.edits}
+    assert "المعلمون" in originals
+    assert "لاكن" in originals
+
+
+def test_optional_engines_snapshot() -> None:
+    from app.pipeline.optional_engines import engines_snapshot
+
+    snap = engines_snapshot()
+    assert snap["offlineOkWithoutOllama"] is True
+    assert "pyarabic" in snap
+    assert "mishkal" in snap
+    assert "qutrub" in snap
+
+
+def test_mishkal_tashkeel_graceful_or_real() -> None:
+    from app.pipeline.optional_engines import mishkal_available, run_mishkal_tashkeel
+
+    out = run_mishkal_tashkeel("تطلع الشمس")
+    if mishkal_available():
+        assert out.ok
+        assert out.available
+        assert out.text != out.original or "َ" in out.text or "ُ" in out.text or "ِ" in out.text
+    else:
+        assert out.available is False
+        assert out.ok is False
+
+
+def test_qutrub_conjugate_graceful_or_real() -> None:
+    from app.pipeline.optional_engines import qutrub_available, run_qutrub_conjugate
+
+    out = run_qutrub_conjugate("كتب", future_type="فتحة")
+    if qutrub_available():
+        assert out.ok
+        assert out.available
+        assert "الماضي المعلوم" in out.table
+    else:
+        assert out.available is False
 
 
 def test_rate_limit_blocks_sixth_request() -> None:
@@ -181,3 +275,29 @@ def test_fastapi_health_and_proofread() -> None:
         dash = client.get("/dashboard")
         assert dash.status_code == 200
         assert "عربية NLP" in dash.text
+
+        engines = client.get("/v1/engines")
+        assert engines.status_code == 200
+        eng = engines.json()["engines"]
+        assert eng["offlineOkWithoutOllama"] is True
+
+        tash = client.post(
+            "/v1/tashkeel",
+            json={"text": "تطلع الشمس"},
+            headers={"Authorization": "Bearer test-token-secret"},
+        )
+        assert tash.status_code == 200
+        assert "available" in tash.json()
+
+        conj = client.post(
+            "/v1/conjugate",
+            json={"verb": "كتب"},
+            headers={"Authorization": "Bearer test-token-secret"},
+        )
+        assert conj.status_code == 200
+        assert "available" in conj.json()
+
+        # Offline health stays ok even without Ollama (yellow, not red).
+        assert body["ok"] is True
+        ollama = next(c for c in body["components"] if c["name"] == "ollama")
+        assert ollama["status"] in {"green", "yellow"}

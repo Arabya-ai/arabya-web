@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { humanizeAiError, runAiAuto } from "@/lib/lughawi/ai-gateway";
+import { arabyaNlpTashkeel } from "@/lib/lughawi/arabya-nlp-client";
 import { countArabicWords } from "@/lib/lughawi/config";
 import { applyLocalTashkeel } from "@/lib/lughawi/engines/tashkeel-engine";
 import { resolveLughawiAiCandidates } from "@/lib/lughawi/resolve-ai";
@@ -33,6 +34,30 @@ export async function POST(req: Request) {
     : "full";
   if (!text.trim()) {
     return NextResponse.json({ error: "أدخل نصًا" }, { status: 400 });
+  }
+
+  // Prefer Contabo arabya-nlp Mishkal when available (full MSA diacritization).
+  if (level === "full" || level === "partial") {
+    try {
+      const nlp = await arabyaNlpTashkeel(text, { timeoutMs: 18_000 });
+      if (nlp?.ok && nlp.available && nlp.text && nlp.text !== text) {
+        return NextResponse.json({
+          original: text,
+          result: nlp.text,
+          edits: [],
+          protectedSpans: [],
+          meta: {
+            engine: nlp.engine || "arabya-nlp-mishkal",
+            usedAi: false,
+            quotaCharged: 0,
+            offline: true,
+            warning: nlp.warnings?.length ? nlp.warnings.join(" · ") : undefined,
+          },
+        } satisfies ProofreadResponse);
+      }
+    } catch {
+      // Optional — fall through to sidecar / local lexicon.
+    }
   }
 
   // Prefer Contabo sidecar (CATT) when it actually changes the text.
