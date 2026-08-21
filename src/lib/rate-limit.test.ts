@@ -24,6 +24,14 @@ describe("clientIpFromHeaders", () => {
     expect(clientIpFromHeaders(h)).toBe("1.2.3.4");
   });
 
+  it("prefers X-Real-IP over X-Forwarded-For (Contabo LiteSpeed)", () => {
+    const h = new Headers({
+      "x-real-ip": "10.0.0.8",
+      "x-forwarded-for": "9.9.9.9, 8.8.8.8",
+    });
+    expect(clientIpFromHeaders(h)).toBe("10.0.0.8");
+  });
+
   it("falls back to first X-Forwarded-For hop", () => {
     const h = new Headers({ "x-forwarded-for": "9.9.9.9, 8.8.8.8" });
     expect(clientIpFromHeaders(h)).toBe("9.9.9.9");

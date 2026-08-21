@@ -33,17 +33,19 @@ function sweep(now: number) {
   }
 }
 
-/** Trusted client IP behind Cloudflare, then first X-Forwarded-For hop. */
+/** Trusted client IP: Cloudflare first, then LiteSpeed X-Real-IP (not spoofable XFF). */
 export function clientIpFromHeaders(headers: Headers): string {
   const cf = headers.get("cf-connecting-ip")?.trim();
   if (cf) return cf;
+  // Contabo LiteSpeed typically sets X-Real-IP from the true peer.
+  const real = headers.get("x-real-ip")?.trim();
+  if (real) return real;
+  // Only as last resort — first XFF hop is client-controllable without a trusted proxy overwrite.
   const xff = headers.get("x-forwarded-for");
   if (xff) {
     const first = xff.split(",")[0]?.trim();
     if (first) return first;
   }
-  const real = headers.get("x-real-ip")?.trim();
-  if (real) return real;
   return "unknown";
 }
 
