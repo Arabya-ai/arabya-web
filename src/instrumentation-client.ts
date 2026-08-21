@@ -1,5 +1,6 @@
 /**
  * Client-side Sentry — Contabo production (optional).
+ * Next.js + Sentry pick up this file (replaces deprecated sentry.client.config.ts).
  * No-op when NEXT_PUBLIC_SENTRY_DSN is unset.
  */
 import * as Sentry from "@sentry/nextjs";
