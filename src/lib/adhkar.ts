@@ -106,31 +106,24 @@ export async function getAdhkarCategory(
   return { ...meta, items };
 }
 
-function normalizeDuaItem(item: Partial<DuaItem> & { textAr?: string }): DuaItem | null {
-  if (!item.id || !item.textAr || item.active === false) return null;
-  const categoryAr = (item.categoryAr || "").trim() || "عام";
-  const categoryEn = (item.categoryEn || "").trim() || "General";
-  return {
-    id: item.id,
-    categoryAr,
-    categoryEn,
-    textAr: item.textAr,
-    source: item.source,
-    active: item.active,
-  };
-}
-
 export async function getDuas(): Promise<DuaItem[]> {
+  const normalize = (item: DuaItem): DuaItem | null => {
+    if (!item?.id || !item?.textAr || item.active === false) return null;
+    const categoryAr = (item.categoryAr || "").trim() || "متفرقات";
+    const categoryEn =
+      (item.categoryEn || "").trim() ||
+      (categoryAr === "متفرقات" ? "General" : categoryAr);
+    return { ...item, categoryAr, categoryEn };
+  };
+
   const override = readAdhkarContentOverride();
   if (Array.isArray(override?.duas) && override.duas.length > 0) {
-    return override.duas
-      .map((item) => normalizeDuaItem(item))
-      .filter((item): item is DuaItem => item !== null);
+    return override.duas.map(normalize).filter((x): x is DuaItem => Boolean(x));
   }
   const parsed = await readJson<{ items?: DuaItem[] }>("duas.json");
   const base = (parsed?.items ?? [])
-    .map((item) => normalizeDuaItem(item))
-    .filter((item): item is DuaItem => item !== null);
+    .map(normalize)
+    .filter((x): x is DuaItem => Boolean(x));
   const hisn = await getHisnAlMuslimItems();
   if (!hisn.length) return base;
   const seen = new Set(base.map((d) => d.textAr.slice(0, 100)));
@@ -139,7 +132,7 @@ export async function getDuas(): Promise<DuaItem[]> {
     const key = item.textAr.slice(0, 100);
     if (seen.has(key)) continue;
     seen.add(key);
-    const normalized = normalizeDuaItem(item);
+    const normalized = normalize(item);
     if (normalized) merged.push(normalized);
   }
   return merged;
