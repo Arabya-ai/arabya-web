@@ -40,6 +40,11 @@ BUILTIN_PAIRS: list[tuple[str, str, str, str]] = [
     ("انة ", "أنه ", "spelling", "أنه"),
 ]
 
+# إنّ وأخواتها + جمع مذكر سالم مرفوع (…ون) → منصوب بالياء (…ين)
+_INNA_SOUND_MASC = re.compile(
+    r"(?:^|[\s،,.])(إن|أن|كأن|لكن|ليت|لعل)\s+(ال[\u0621-\u064A]{2,24})ون(?=[\s.,،؛؟!]|$)"
+)
+
 
 @dataclass
 class RuleEdit:
@@ -164,6 +169,39 @@ def _apply_builtin_pairs(text: str) -> tuple[str, list[RuleEdit]]:
     return out, edits
 
 
+def _apply_inna_sound_masc(text: str) -> tuple[str, list[RuleEdit]]:
+    """إن المعلمون → إن المعلمين (اسم إنّ منصوب بالياء)."""
+    edits: list[RuleEdit] = []
+    out = text
+    seq = 0
+    # Work on a stable scan of the original slice positions in `out` as we rewrite.
+    search_from = 0
+    while True:
+        m = _INNA_SOUND_MASC.search(out, search_from)
+        if not m:
+            break
+        noun = f"{m.group(2)}ون"
+        suggestion = f"{m.group(2)}ين"
+        start = m.start(0) + m.group(0).rfind(noun)
+        end = start + len(noun)
+        seq += 1
+        edits.append(
+            RuleEdit(
+                id=f"inna-{seq}",
+                start=start,
+                end=end,
+                type="grammar",
+                original=noun,
+                suggestion=suggestion,
+                rule_id="inna-nasb",
+                explanation="اسم إنّ منصوب؛ الجمع المذكر السالم بالياء (المعلمين)",
+            )
+        )
+        out = out[:start] + suggestion + out[end:]
+        search_from = start + len(suggestion)
+    return out, edits
+
+
 def run_rule_stage(text: str, *, preserve_diacritics: bool = True) -> RuleStageResult:
     warnings: list[str] = []
     engines: list[str] = []
@@ -181,7 +219,11 @@ def run_rule_stage(text: str, *, preserve_diacritics: bool = True) -> RuleStageR
     corrected, builtin_edits = _apply_builtin_pairs(corrected)
     engines.append("builtin")
 
-    all_edits = ghalatawi_edits + builtin_edits
+    corrected, inna_edits = _apply_inna_sound_masc(corrected)
+    if inna_edits:
+        engines.append("inna-nasb")
+
+    all_edits = ghalatawi_edits + builtin_edits + inna_edits
     return RuleStageResult(
         text=corrected,
         edits=all_edits,

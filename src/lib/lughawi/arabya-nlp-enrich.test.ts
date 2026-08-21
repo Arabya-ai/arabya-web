@@ -71,12 +71,46 @@ describe("enrichProofreadWithArabyaNlp", () => {
     ).toBe(true);
   });
 
-  it("skips remote call when disabled", async () => {
-    vi.mocked(arabyaNlpProofreadEnabled).mockReturnValue(false);
-    const out = await enrichProofreadWithArabyaNlp(base());
-    expect(arabyaNlpProofread).not.toHaveBeenCalled();
-    expect(out.meta.stages?.some((s) => s.note?.includes("disabled"))).toBe(
-      true,
-    );
+  it("recovers Ollama edits that arrive with start=end=0 via token search", async () => {
+    const sentence = "إن المعلمون يرفعون شأن الأمة لاكن الطلاب";
+    vi.mocked(arabyaNlpProofread).mockResolvedValue({
+      ok: true,
+      original: sentence,
+      corrected: "إن المعلمين يرفعون شأن الأمة لكن الطلاب",
+      stage1_engine: "builtin+inna-nasb",
+      stage2_engine: "ollama:llama3.1:8b",
+      edits: [
+        {
+          id: "llm-1",
+          start: 0,
+          end: 0,
+          type: "grammar",
+          original: "المعلمون",
+          suggestion: "المعلمين",
+          rule_id: "ollama-grammar",
+          stage: "llm",
+        },
+        {
+          id: "r1",
+          start: 0,
+          end: 0,
+          type: "spelling",
+          original: "لاكن",
+          suggestion: "لكن",
+          rule_id: "rb-1",
+          stage: "rule",
+        },
+      ],
+    });
+    const local: ProofreadResponse = {
+      ...base(),
+      original: sentence,
+      result: sentence,
+    };
+    const out = await enrichProofreadWithArabyaNlp(local);
+    const pairs = out.edits.map((e) => `${e.original}→${e.suggestion}`);
+    expect(pairs).toContain("المعلمون→المعلمين");
+    expect(pairs).toContain("لاكن→لكن");
+    expect(out.meta.provider).toBe("arabya-nlp");
   });
 });

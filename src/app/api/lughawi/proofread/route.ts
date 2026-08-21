@@ -14,6 +14,9 @@ import type { ProofMode } from "@/lib/lughawi/types";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
+/** Contabo Ollama (llama3.1:8b) may need up to ~1m on cold CPU. */
+export const maxDuration = 90;
+
 export async function POST(req: Request) {
   const limited = enforceRateLimit(req, { prefix: "lughawi-proofread", limit: 40 });
   if (limited) return limited;
@@ -74,11 +77,12 @@ export async function POST(req: Request) {
   // Layer 2b: Contabo arabya-nlp FastAPI (:8092) — server-side only proxy.
   // Browser → /api/lughawi/proofread → http://127.0.0.1:8092/v1/proofread
   // Do NOT expose :8092 on public Nginx/OLS; Next is the public front door.
+  // Keep ARABYA_NLP_URL=http://127.0.0.1:8092 (never https://arabya.org).
   try {
     result = await enrichProofreadWithArabyaNlp(result, {
-      // Guests / useAi=false: rules-only on FastAPI (skip Ollama) for snappy UX.
+      // Interactive Auto: Contabo rules + local llama3.1:8b when useAi.
       skipLlm: !wantAi,
-      timeoutMs: wantAi ? 45_000 : 8_000,
+      timeoutMs: wantAi ? 55_000 : 8_000,
     });
   } catch {
     // arabya-nlp optional — keep local + sidecar.
