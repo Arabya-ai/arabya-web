@@ -304,7 +304,10 @@ def test_client_ip_prefers_loopback_peer_over_xff() -> None:
 
     req = MagicMock()
     req.client.host = "127.0.0.1"
-    req.headers = {"x-forwarded-for": "198.51.100.7"}
+    req.headers = {
+        "x-forwarded-for": "198.51.100.7",
+        "x-real-ip": "198.51.100.8",
+    }
     assert peer_host(req) == "127.0.0.1"
     assert client_ip(req) == "127.0.0.1"
 
@@ -312,6 +315,11 @@ def test_client_ip_prefers_loopback_peer_over_xff() -> None:
     remote.client.host = "10.0.0.5"
     remote.headers = {"x-forwarded-for": "198.51.100.7"}
     assert client_ip(remote) == "198.51.100.7"
+
+    real_only = MagicMock()
+    real_only.client.host = "10.0.0.5"
+    real_only.headers = {"x-real-ip": "198.51.100.9"}
+    assert client_ip(real_only) == "198.51.100.9"
 
 
 @pytest.mark.asyncio

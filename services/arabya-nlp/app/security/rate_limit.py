@@ -56,8 +56,11 @@ def peer_host(request: Request) -> str:
 
 def client_ip(request: Request) -> str:
     """
-    Best-effort client IP for logs / audit.
-    For rate limits, prefer peer_host when peer is loopback (see enforce_rate_limit).
+    Best-effort real client IP for logs / guest rate limits on external peers.
+
+    Order: loopback peer → X-Forwarded-For (first hop) → X-Real-IP → TCP peer.
+    When the TCP peer is loopback (Contabo Next → NLP), never trust forwarded
+    headers — see enforce_rate_limit.
     """
     peer = peer_host(request)
     if is_loopback(peer):
@@ -65,6 +68,9 @@ def client_ip(request: Request) -> str:
     forwarded = request.headers.get("x-forwarded-for")
     if forwarded:
         return forwarded.split(",")[0].strip()
+    real_ip = (request.headers.get("x-real-ip") or "").strip()
+    if real_ip:
+        return real_ip
     return peer
 
 
