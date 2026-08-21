@@ -11,6 +11,7 @@ cd "$APP_DIR"
 
 echo "==> Fetch $BRANCH"
 git fetch origin "$BRANCH"
+git checkout "$BRANCH"
 
 # Learning may have dirtied tracked seed file on older builds — backup + reset so pull can proceed.
 LEARNED="data/lughawi/learned-corrections.json"
@@ -21,14 +22,12 @@ if [[ -f "$LEARNED" ]] && ! git diff --quiet -- "$LEARNED" 2>/dev/null; then
   git checkout -- "$LEARNED"
 fi
 
-# Stash BEFORE checkout — Contabo often has dirty package-lock.json from failed/partial npm runs.
-# (checkout would abort: "local changes would be overwritten")
-if ! git diff --quiet || ! git diff --cached --quiet || [[ -n "$(git ls-files --others --exclude-standard)" ]]; then
-  echo "==> Stashing local working-tree changes before checkout/pull"
+# Any other unexpected local edits: stash (keep deploy unblocked)
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "==> Stashing other local working-tree changes before pull"
   git stash push -u -m "contabo-deploy-auto-$(date +%F-%H%M%S)" || true
 fi
 
-git checkout "$BRANCH"
 git pull --ff-only origin "$BRANCH"
 
 echo "==> Node version check (Contabo: Node 22 or 24)"
