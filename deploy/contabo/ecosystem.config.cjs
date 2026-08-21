@@ -16,7 +16,13 @@ module.exports = {
         NODE_ENV: "production",
         PORT: "3000",
       },
-      max_memory_restart: "900M",
+      // Contabo VPS: allow headroom for Quran JSON + study routes
+      max_memory_restart: "1500M",
+      // Prevent infinite crash-loops that present as public 503
+      min_uptime: "10s",
+      max_restarts: 15,
+      exp_backoff_restart_delay: 2000,
+      kill_timeout: 8000,
       time: true,
     },
   ],

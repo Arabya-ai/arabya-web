@@ -78,7 +78,8 @@ export async function POST(req: Request) {
   const email = session?.user?.email?.trim().toLowerCase();
   const banned = session?.error === "Banned";
 
-  let candidates = buildAutoCandidates({ userCandidates: [] });
+  // Guests: local rules + sidecar only — never burn project/admin AI keys without a session.
+  let candidates: ReturnType<typeof buildAutoCandidates> = [];
   let chargeProject = false;
 
   if (email && !banned) {

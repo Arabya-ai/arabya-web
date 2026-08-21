@@ -45,11 +45,15 @@ if [[ "$NODE_MAJOR" == "24" ]]; then
 fi
 
 echo "==> Install & build"
-# Stop app before wiping node_modules — concurrent reads cause TAR_ENTRY_ERROR ENOENT.
-if command -v pm2 >/dev/null 2>&1 && pm2 describe arabya-web >/dev/null 2>&1; then
-  echo "==> Stopping PM2 arabya-web during install"
-  pm2 stop arabya-web || true
+# Stop ALL Contabo Node apps before wiping node_modules — concurrent reads cause TAR_ENTRY_ERROR ENOENT.
+if command -v pm2 >/dev/null 2>&1; then
+  echo "==> Stopping PM2 apps during install (web + siblings)"
+  pm2 stop arabya-web arabya-nlp arabya-mpt-api lughawi-sidecar 2>/dev/null || true
 fi
+
+# shellcheck source=scripts/contabo-deploy-lib.sh
+# shellcheck disable=SC1091
+source "$APP_DIR/scripts/contabo-deploy-lib.sh"
 
 # Disk headroom (npm extract fails cryptically when nearly full)
 AVAIL_KB="$(df -Pk "$APP_DIR" | awk 'NR==2 {print $4}')"
@@ -92,14 +96,15 @@ if [[ "$npm_ci_ok" -ne 1 ]]; then
   echo "ERROR: npm ci could not produce a complete Next.js install."
   echo "On the server run:"
   echo "  df -h /"
-  echo "  pm2 stop arabya-web arabya-nlp arabya-mpt-api 2>/dev/null || true"
+  echo "  pm2 stop arabya-web arabya-nlp arabya-mpt-api lughawi-sidecar 2>/dev/null || true"
   echo "  rm -rf node_modules ~/.npm/_cacache"
   echo "  npm cache clean --force && npm ci"
   if [[ -d .next.prev-good ]]; then
     mv .next.prev-good .next
-    echo "==> Restored .next.prev-good"
-    pm2 restart arabya-web --update-env || true
+    echo "==> Restored .next.prev-good (site stays STOPPED until node_modules is healthy)"
   fi
+  # Never pm2 restart on a broken node_modules — that causes crash-loop 503.
+  pm2 stop arabya-web 2>/dev/null || true
   exit 1
 fi
 echo "==> Next.js package extract OK"
@@ -124,7 +129,7 @@ if ! verify_intl; then
   if [[ -d .next.prev-good ]]; then
     mv .next.prev-good .next
     echo "==> Restored previous .next so the site can stay up"
-    pm2 restart arabya-web --update-env || true
+    contabo_safe_restart_web || true
   fi
   exit 1
 fi
@@ -151,7 +156,7 @@ if [[ ! -f node_modules/next/dist/compiled/babel/code-frame.js ]]; then
     rm -rf .next
     mv .next.prev-good .next
     echo "==> Restored .next.prev-good — bringing previous site back online"
-    pm2 restart arabya-web --update-env || true
+    contabo_safe_restart_web || true
   fi
   exit 1
 fi
@@ -161,7 +166,7 @@ if [[ ! -f node_modules/sharp/package.json ]]; then
     rm -rf .next
     mv .next.prev-good .next
     echo "==> Restored .next.prev-good"
-    pm2 restart arabya-web --update-env || true
+    contabo_safe_restart_web || true
   fi
   exit 1
 fi
@@ -187,8 +192,8 @@ if ! node -e "
       rm -rf .next
       mv .next.prev-good .next
       echo "==> Restored .next.prev-good"
-      pm2 restart arabya-web --update-env || true
     fi
+    contabo_safe_restart_web || true
     exit 1
   fi
 fi
@@ -204,14 +209,14 @@ if ! NEXT_TELEMETRY_DISABLED=1 npm run build; then
     rm -rf .next
     mv .next.prev-good .next
     echo "==> Restored .next.prev-good — restarting previous working build"
-    pm2 restart arabya-web --update-env || true
+    contabo_safe_restart_web || true
   fi
   echo "Common Contabo cause: incomplete npm extract. Retry:"
   echo "  rm -rf node_modules ~/.npm/_cacache && npm cache clean --force"
   echo "  bash scripts/contabo-deploy.sh"
   exit 1
 fi
-rm -rf .next.prev-good
+# Keep .next.prev-good until health check proves the new process is up.
 
 echo "==> Ensure Contabo databases & runtime stores"
 if [[ -f scripts/contabo-ensure-dbs.sh ]]; then
@@ -260,11 +265,15 @@ else
   echo "WARN: arabya-nlp scripts missing"
 fi
 
-echo "==> Restart PM2 arabya-web (after env keys are written)"
-if pm2 describe arabya-web >/dev/null 2>&1; then
-  pm2 restart arabya-web --update-env
-else
-  NODE_ENV=production PORT=3000 pm2 start node_modules/next/dist/bin/next --name arabya-web -- start -p 3000
+echo "==> Restart PM2 arabya-web (only if tree can run next start)"
+if ! contabo_safe_restart_web; then
+  echo "ERROR: deploy aborted — arabya-web left stopped to avoid crash-loop 503."
+  exit 1
+fi
+
+# Optional: restart sidecar after web is healthy (stopped during install)
+if [[ -f scripts/contabo-lughawi-sidecar.sh ]]; then
+  bash scripts/contabo-lughawi-sidecar.sh || true
 fi
 
 pm2 save
@@ -279,11 +288,19 @@ for i in $(seq 1 45); do
   sleep 2
 done
 if [[ "$health_ok" -ne 1 ]]; then
-  echo "WARN: localhost:3000 not ready within 90s — site may still be starting."
-  echo "      Check: pm2 logs arabya-web --lines 30"
+  echo "ERROR: localhost:3000 not ready within 90s."
+  echo "      Check: pm2 logs arabya-web --lines 40"
+  if [[ -d .next.prev-good ]]; then
+    echo "==> Rolling back to .next.prev-good"
+    pm2 stop arabya-web || true
+    rm -rf .next
+    mv .next.prev-good .next
+    contabo_safe_restart_web || true
+  fi
   pm2 status || true
-else
-  curl -sI -H "Host: www.arabya.org" http://127.0.0.1:3000 | head -5 || true
-  curl -sI -H "Host: www.arabyaai.com" http://127.0.0.1:3000 | head -5 || true
+  exit 1
 fi
-echo "Deploy done. Ensure Nginx serves www.arabya.org and www.arabyaai.com — see deploy/contabo/nginx-dual-domain.conf"
+rm -rf .next.prev-good
+curl -sI -H "Host: www.arabya.org" http://127.0.0.1:3000 | head -5 || true
+curl -sI -H "Host: www.arabyaai.com" http://127.0.0.1:3000 | head -5 || true
+echo "Deploy done. Ensure LiteSpeed serves www.arabya.org — see deploy/contabo/nginx-dual-domain.conf (reference)"
