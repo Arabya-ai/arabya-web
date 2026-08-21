@@ -67,9 +67,10 @@ class Settings(BaseSettings):
     ffmpeg_binary: str = Field(default="ffmpeg", alias="ARABYA_NLP_FFMPEG")
     max_upload_bytes: int = Field(default=25_000_000, alias="ARABYA_NLP_MAX_UPLOAD_BYTES")
 
-    # --- Rate limiting (unauthenticated public visitors) ---
+    # --- Rate limiting (external guests only; loopback/Next is exempt) ---
     rate_limit_enabled: bool = True
-    rate_limit_requests: int = Field(default=5, alias="ARABYA_NLP_RATE_LIMIT_REQUESTS")
+    # Was 5/hour — too low once Lughawi proxies many POSTs through Contabo Next.
+    rate_limit_requests: int = Field(default=120, alias="ARABYA_NLP_RATE_LIMIT_REQUESTS")
     rate_limit_window_seconds: int = Field(
         default=3600,
         alias="ARABYA_NLP_RATE_LIMIT_WINDOW",
