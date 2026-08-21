@@ -1,28 +1,46 @@
-# Contabo: موقع 503 أثناء النشر / next ناقص
+# Contabo: 503 + `tar TAR_ENTRY_ERROR` على `next/dist`
 
-## الأعراض
-- `arabya-web` في PM2 = `stopped`
-- السجل: `code-frame still missing` أو تحذير `eslint` في `next.config`
-- الموقع يعيد 503 من Cloudflare/LiteSpeed
+## ماذا تعني سجلاتك؟
+```text
+npm warn tar TAR_ENTRY_ERROR ENOENT: …/node_modules/next/dist
+==> use-intl/next-intl incomplete after npm ci — reinstalling
+```
+يعني `npm ci` أنهى بـ exit 0 لكن استخراج حزمة `next` (وأحياناً غيرها) **ناقص**. بعدها يبقى `arabya-web` متوقفاً → الموقع 503.
 
-## السبب الشائع
-1. ترقية Next 16 أزالت مفتاح `eslint` من الإعداد.
-2. `npm ci` على Contabo أحياناً يستخرج `next` ناقصاً.
-3. سكربت النشر القديم كان يتوقف **بدون** إعادة تشغيل النسخة السابقة.
+تحذير `@sentry/cli` / `allow-scripts` **ليس** سبب التوقف؛ يمكن تجاهله الآن.
 
-## الإصلاح السريع (على السيرفر)
+## مطلوب منك الآن (بالترتيب)
+
+### أ) أعد الموقع فوراً (قبل أي نشر)
 ```bash
 cd /var/www/arabya-web
-# إن وُجدت نسخة بناء سابقة — أعد الموقع فوراً:
-if [ -d .next.prev-good ]; then rm -rf .next; mv .next.prev-good .next; fi
+pm2 stop arabya-nlp arabya-mpt-api 2>/dev/null || true
+if [ -d .next.prev-good ]; then
+  rm -rf .next
+  mv .next.prev-good .next
+fi
 pm2 restart arabya-web --update-env
-# ثم انشر الإصلاح من main:
-git fetch origin main && git pull --ff-only origin main
+curl -sI -H "Host: www.arabya.org" http://127.0.0.1:3000 | head -5
+```
+
+### ب) بعد دمج PR الإصلاح — نشر نظيف
+```bash
+cd /var/www/arabya-web
+pm2 stop arabya-web arabya-nlp arabya-mpt-api 2>/dev/null || true
+df -h /
+git fetch origin main && git checkout main && git pull --ff-only origin main
 rm -rf node_modules ~/.npm/_cacache
 npm cache clean --force
 bash scripts/contabo-deploy.sh
-# لتوفير موارد أثناء الاستعادة (اختياري):
-pm2 stop arabya-nlp arabya-mpt-api 2>/dev/null || true
+pm2 status
 ```
 
 **لا تحذف `package-lock.json`.**
+
+### ج) إن بقيت أخطاء tar
+```bash
+df -h /
+du -sh /var/www/arabya-web /root/.npm /tmp 2>/dev/null
+# إن كان القرص ممتلئاً: نظّف سجلات PM2 القديمة ثم أعد الخطوة ب
+pm2 flush || true
+```

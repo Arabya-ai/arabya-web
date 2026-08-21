@@ -72,18 +72,28 @@ npm_ci_ok=0
 for attempt in 1 2; do
   echo "==> npm ci (attempt $attempt)"
   if npm ci --no-audit --no-fund; then
-    npm_ci_ok=1
-    break
+    # Contabo often prints tar ENOENT on next/dist yet exits 0 — verify next immediately.
+    if [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
+       [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
+      npm_ci_ok=1
+      break
+    fi
+    echo "WARN: npm ci exited 0 but Next extract is incomplete (tar ENOENT on next/dist is common)."
+  else
+    echo "WARN: npm ci failed (attempt $attempt)"
   fi
-  echo "WARN: npm ci failed (attempt $attempt) — cleaning and retrying"
+  echo "==> Cleaning corrupted node_modules + npm cache before retry"
   rm -rf node_modules
   npm cache clean --force >/dev/null 2>&1 || true
+  rm -rf "${NPM_CONFIG_CACHE:-$HOME/.npm}/_cacache" 2>/dev/null || true
   sleep 2
 done
 if [[ "$npm_ci_ok" -ne 1 ]]; then
-  echo "ERROR: npm ci failed twice. On the server run:"
-  echo "  df -h"
-  echo "  rm -rf node_modules .next ~/.npm/_cacache"
+  echo "ERROR: npm ci could not produce a complete Next.js install."
+  echo "On the server run:"
+  echo "  df -h /"
+  echo "  pm2 stop arabya-web arabya-nlp arabya-mpt-api 2>/dev/null || true"
+  echo "  rm -rf node_modules ~/.npm/_cacache"
   echo "  npm cache clean --force && npm ci"
   if [[ -d .next.prev-good ]]; then
     mv .next.prev-good .next
@@ -92,6 +102,7 @@ if [[ "$npm_ci_ok" -ne 1 ]]; then
   fi
   exit 1
 fi
+echo "==> Next.js package extract OK"
 
 # Incomplete extracts: use-intl / next-intl missing production ESM (ENOENT core.js)
 verify_intl() {
