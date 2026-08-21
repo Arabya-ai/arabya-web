@@ -42,6 +42,11 @@ export default async function ResourcesPage({ params }: Props) {
     <div className="shell page-block">
       <h1>{t("title")}</h1>
       <p className="layer-hint">{t("lead")}</p>
+      <p>
+        <Link href="/services" className="nav-pill">
+          {t("toServicesHub")}
+        </Link>
+      </p>
 
       <section className="resource-block">
         <h2>{t("servicesTitle")}</h2>
@@ -64,21 +69,6 @@ export default async function ResourcesPage({ params }: Props) {
             create: (c) => <Link href="/create">{c}</Link>,
             studio: (c) => <Link href="/studio">{c}</Link>,
           })}
-        </p>
-      </section>
-
-      <section className="resource-block">
-        <h2>{t("radioTitle")}</h2>
-        <p>{t("radioLead")}</p>
-        <p>
-          <a
-            href="https://stream.radiojar.com/8s5u5tpdtwzuv"
-            target="_blank"
-            rel="noreferrer"
-            className="nav-pill"
-          >
-            {t("radioPlay")}
-          </a>
         </p>
       </section>
 

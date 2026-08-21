@@ -1330,9 +1330,9 @@
     "metaTitle": "Resources · Arabya",
     "metaDescription": "Arabya services guide: mushaf, hadith, heritage, adhkar, qibla, libraries, and APIs",
     "title": "Resources & services",
-    "lead": "A hub for ready Arabya surfaces, expanding hubs, and the APIs the site uses.",
-    "servicesTitle": "Site hubs",
-    "servicesLead": "Direct links — mushaf, adhkar, and qibla are ready; hadith, heritage, and iʿrāb books expand gradually:",
+    "lead": "A hub for sources and APIs, with quick links. The full services catalog lives on the Services page.",
+    "servicesTitle": "Quick hubs",
+    "servicesLead": "For the full card hub with descriptions, open Services. Quick links:",
     "svcMushaf": "Mushaf",
     "svcHadith": "Hadith",
     "svcHeritage": "Heritage",
@@ -1347,9 +1347,6 @@
     "svcRoots": "Roots",
     "createTitle": "Create ayah media",
     "createLead": "Make ayah images and recitation videos from the <create>Create hub</create> or full <studio>Studio</studio> (sign-in required; video is Plus).",
-    "radioTitle": "Quran radio",
-    "radioLead": "Live stream from Cairo Quran Radio (external link — we do not host audio):",
-    "radioPlay": "Play stream",
     "libraryTitle": "Educational library",
     "libraryLead": "Educational PDF books (grammar, morphology…) to read on the site.",
     "libraryOpen": "Open library",
@@ -1369,7 +1366,8 @@
     "qiraatTitle": "Riwāyāt & tajwīd",
     "qiraatLead": "Readings catalog and color tajweed legend on the <qiraat>qiraʾat page</qiraat>. Hafs is what the Madinah mushaf uses today.",
     "qiraatSoon": "Multi-riwayah layers and color-coded tajwid mushaf are in progress and will appear when licensed data is ready.",
-    "backIndex": "Back to index"
+    "backIndex": "Back to index",
+    "toServicesHub": "Full services hub"
   },
   "Hadith": {
     "metaTitle": "Hadith · Arabya",
@@ -1832,5 +1830,91 @@
     "ocrImageSoon": "Image and PDF OCR will be enabled in a later step.",
     "charLimitLabel": "Characters",
     "maxLabel": "Maximum"
+  },
+  "ServicesHub": {
+    "metaTitle": "Services · Arabya",
+    "metaDescription": "Arabya services hub: mushaf, adhkar, qibla, hadith, heritage, tahfeez, Lughawi, and studio.",
+    "title": "Arabya services",
+    "lead": "All Arabya tools in one place — reading and study, devotion, knowledge, and creation — in one calm brand.",
+    "navAria": "Services page navigation",
+    "backHome": "Home",
+    "toResources": "Resources & APIs",
+    "megaAria": "Services menu",
+    "megaLead": "Pick a service to go there, or open the full hub.",
+    "viewAll": "All services",
+    "cat_read": "Read & study",
+    "cat_ibadah": "Devotion & tools",
+    "cat_knowledge": "Knowledge & sources",
+    "cat_create": "Create & language",
+    "items": {
+      "mushaf": {
+        "title": "Mushaf",
+        "desc": "Madinah mushaf with word study: morphology, syntax, and sense."
+      },
+      "juz": {
+        "title": "Juz",
+        "desc": "Index of the thirty juzʾ with quick reading links."
+      },
+      "roots": {
+        "title": "Roots",
+        "desc": "Qurʾanic root concordance and occurrence map."
+      },
+      "study": {
+        "title": "Quick study",
+        "desc": "Search and study an ayah or word in context."
+      },
+      "qiraat": {
+        "title": "Qiraʾat",
+        "desc": "Readings guide and tajweed legend."
+      },
+      "adhkar": {
+        "title": "Adhkar",
+        "desc": "Morning/evening remembrances and Hisn with counters."
+      },
+      "qibla": {
+        "title": "Qibla",
+        "desc": "Qibla direction and prayer times for your location."
+      },
+      "asma": {
+        "title": "Beautiful Names",
+        "desc": "The Beautiful Names of Allah in a calm study layout."
+      },
+      "tahfeez": {
+        "title": "Smart recitation",
+        "desc": "Recite ayahs aloud and track correct vs incorrect words."
+      },
+      "reciters": {
+        "title": "Reciters",
+        "desc": "Choose reciters and mushaf audio playback."
+      },
+      "hadith": {
+        "title": "Hadith",
+        "desc": "Hadith collections with search and word layers."
+      },
+      "heritage": {
+        "title": "Heritage",
+        "desc": "Heritage and poetry passages with gradual analysis."
+      },
+      "library": {
+        "title": "Library",
+        "desc": "Educational PDF books readable on the site."
+      },
+      "books": {
+        "title": "Iʿrāb books",
+        "desc": "Catalog of Qurʾan iʿrāb books (licensed imports later)."
+      },
+      "resources": {
+        "title": "Resources",
+        "desc": "Links, APIs, and sources used across Arabya."
+      },
+      "studio": {
+        "title": "Studio",
+        "desc": "Create ayah images and videos in Arabya branding."
+      },
+      "lughawi": {
+        "title": "Lughawi",
+        "desc": "Arabic proofreader: correction and tashkeel on Contabo."
+      }
+    }
   }
 }
