@@ -155,6 +155,34 @@ function Glyph({ icon }: { icon: ArabyaServiceIcon }) {
           <path d="M18 34l6 8 6-8H18z" fill="currentColor" opacity="0.75" />
         </svg>
       );
+    case "tajweed":
+      return (
+        <svg viewBox="0 0 48 48" width="28" height="28" aria-hidden>
+          <circle cx="14" cy="24" r="6" fill="currentColor" />
+          <circle cx="24" cy="24" r="6" fill="currentColor" opacity="0.75" />
+          <circle cx="34" cy="24" r="6" fill="currentColor" opacity="0.5" />
+        </svg>
+      );
+    case "search":
+      return (
+        <svg viewBox="0 0 48 48" width="28" height="28" aria-hidden>
+          <circle cx="22" cy="22" r="10" fill="none" stroke="currentColor" strokeWidth="3.5" />
+          <path d="M30 30l10 10" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" />
+        </svg>
+      );
+    case "nlp":
+      return (
+        <svg viewBox="0 0 48 48" width="28" height="28" aria-hidden>
+          <rect x="10" y="12" width="28" height="24" rx="4" fill="currentColor" />
+          <path
+            d="M16 22h16M16 28h10"
+            stroke="#fff"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            opacity="0.9"
+          />
+        </svg>
+      );
     default:
       return null;
   }

@@ -435,3 +435,191 @@
     border-color: color-mix(in srgb, var(--brand) 28%, var(--line));
   }
 }
+
+/* —— Independent phase-2 services: tajweed / search / nlp —— */
+.tajweed-svc__rule {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  width: 100%;
+  text-align: start;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.tajweed-svc__rule:hover,
+.tajweed-svc__rule.is-active {
+  border-color: color-mix(in srgb, var(--brand) 28%, var(--line));
+  background: color-mix(in srgb, var(--brand-soft) 55%, transparent);
+}
+
+.tajweed-svc__rule-sum {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+.tajweed-svc__hint {
+  margin-top: 0.75rem;
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
+}
+
+.tajweed-svc__sample-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.tajweed-svc__sample {
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--brand) 14%, var(--line));
+  background: color-mix(in srgb, var(--surface) 88%, var(--brand-soft));
+}
+
+.tajweed-svc__ref {
+  margin: 0 0 0.5rem;
+  font-size: 0.92rem;
+  opacity: 0.8;
+}
+
+.tajweed-svc__ayah {
+  margin: 0;
+  font-size: clamp(1.35rem, 2.4vw, 1.75rem);
+  line-height: 2.05;
+  font-family: var(--font-uthmani, inherit);
+}
+
+.tajweed-svc__seg {
+  border-bottom: 2px solid transparent;
+  transition: opacity 0.15s ease;
+}
+
+.tajweed-svc__seg.is-dim {
+  opacity: 0.28;
+}
+
+.adv-search__filters {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr);
+  margin-bottom: 1.25rem;
+}
+
+.adv-search__filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.92rem;
+}
+
+.adv-search__filters input,
+.adv-search__filters select,
+.nlp-svc__input textarea {
+  border: 1px solid color-mix(in srgb, var(--brand) 16%, var(--line));
+  border-radius: 12px;
+  padding: 0.65rem 0.8rem;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+
+.adv-search__hits {
+  list-style: none;
+  margin: 0.75rem 0 1rem;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.adv-search__hit {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.adv-search__hit:hover {
+  border-color: color-mix(in srgb, var(--brand) 32%, var(--line));
+  background: color-mix(in srgb, var(--brand-soft) 40%, transparent);
+}
+
+.adv-search__key {
+  font-size: 0.88rem;
+  color: var(--brand-deep);
+}
+
+.adv-search__text {
+  line-height: 1.85;
+}
+
+.adv-search__root a {
+  color: var(--brand-deep);
+}
+
+.nlp-svc__panel,
+.nlp-svc__links {
+  margin-top: 1.25rem;
+}
+
+.nlp-svc__input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0.85rem 0;
+}
+
+.nlp-svc__out {
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  border: 1px dashed color-mix(in srgb, var(--brand) 22%, var(--line));
+  background: color-mix(in srgb, var(--brand-soft) 35%, transparent);
+}
+
+.nlp-svc__out h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+}
+
+.nlp-svc__cards {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.nlp-svc__card {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1rem;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--brand) 14%, var(--line));
+  text-decoration: none;
+  color: inherit;
+  background: color-mix(in srgb, var(--surface) 90%, var(--brand-soft));
+}
+
+.nlp-svc__card:hover {
+  border-color: color-mix(in srgb, var(--brand) 30%, var(--line));
+}
+
+@media (max-width: 720px) {
+  .adv-search__filters,
+  .nlp-svc__cards {
+    grid-template-columns: 1fr;
+  }
+}

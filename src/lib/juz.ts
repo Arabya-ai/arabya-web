@@ -115,3 +115,15 @@ export const JUZ_FIRST_PAGE: Record<number, number> = {
   29: 562,
   30: 582,
 };
+
+/** Madinah mushaf page (1–604) → juz (1–30). */
+export function pageToJuz(page: number): number {
+  const p = Math.floor(Number(page));
+  if (!Number.isFinite(p) || p < 1) return 1;
+  let juz = 1;
+  for (let j = 1; j <= 30; j++) {
+    if (p >= JUZ_FIRST_PAGE[j]) juz = j;
+    else break;
+  }
+  return juz;
+}

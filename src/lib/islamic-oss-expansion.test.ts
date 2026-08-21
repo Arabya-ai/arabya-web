@@ -62,4 +62,10 @@ describe("search surah facet", () => {
     expect(filtered.total).toBeLessThanOrEqual(all.total);
     expect(filtered.hits.every((h) => h.surahId === 1)).toBe(true);
   });
+
+  it("limits ayah hits to one juz", async () => {
+    const filtered = await searchAyahs("الله", { limit: 40, juzId: 30 });
+    expect(filtered.total).toBeGreaterThan(0);
+    expect(filtered.hits.every((h) => h.page >= 582)).toBe(true);
+  });
 });

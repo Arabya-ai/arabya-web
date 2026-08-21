@@ -1938,7 +1938,78 @@
       "lughawi": {
         "title": "Lughawi",
         "desc": "Arabic proofreader: correction and tashkeel on Contabo."
+      },
+      "search": {
+        "title": "Qurʾan search",
+        "desc": "Advanced ayah search with surah, juz, and root facets."
+      },
+      "tajweed": {
+        "title": "Tajweed",
+        "desc": "Educational tajweed legend — independent from word-by-word study."
+      },
+      "nlp": {
+        "title": "Language tools",
+        "desc": "Arabic normalization plus Contabo Lughawi and roots hub."
       }
     }
+  },
+  "TajweedService": {
+    "metaTitle": "Tajweed · Arabya",
+    "metaDescription": "Independent educational tajweed service with colored rules and sample ayahs.",
+    "title": "Tajweed",
+    "lead": "An independent service for learning tajweed rules with calm colors. Not a layer on the word-by-word mushaf study dock.",
+    "navAria": "Tajweed page navigation",
+    "backServices": "Services",
+    "toQiraat": "Qiraʾat",
+    "legendTitle": "Rules legend",
+    "legendLead": "Select a rule to highlight matching spans in the samples. Colors are brand-symbolic.",
+    "filterHint": "Matching spans stay clearer while others are dimmed.",
+    "samplesTitle": "Educational samples",
+    "samplesLead": "Short visual drills — a full colored mushaf awaits licensed data."
+  },
+  "AdvancedSearch": {
+    "metaTitle": "Qurʾan search · Arabya",
+    "metaDescription": "Advanced Qurʾan text search with surah and juz filters and root hints.",
+    "title": "Qurʾan search",
+    "lead": "Search ayah text with optional surah or juz filters, plus a root hint when the query matches.",
+    "navAria": "Search page navigation",
+    "backServices": "Services",
+    "backHome": "Index",
+    "queryLabel": "Query",
+    "placeholder": "Word, ayah fragment, or key like 2:255…",
+    "ariaLabel": "Search Qurʾan ayahs",
+    "surahFilter": "Surah",
+    "surahAll": "All surahs",
+    "juzFilter": "Juz",
+    "juzAll": "All juzʾ",
+    "searching": "Searching…",
+    "rootLabel": "Root {root} · {count} places",
+    "noResults": "No matching results.",
+    "resultsCount": "{shown} of {total} results",
+    "showAll": "All results ({total})",
+    "showPreview": "Show first {limit} only"
+  },
+  "NlpService": {
+    "metaTitle": "Language tools · Arabya",
+    "metaDescription": "Arabic text tools on Contabo: normalize, Lughawi, roots, and search.",
+    "title": "Language tools",
+    "lead": "An independent hub for Arabic text processing — local normalize in the browser, full proofreading via Contabo Lughawi.",
+    "navAria": "Language tools navigation",
+    "backServices": "Services",
+    "toLughawi": "Open Lughawi",
+    "localTitle": "Local Arabic normalize",
+    "localLead": "Strip tashkeel and unify hamza/alef — useful before search or comparison.",
+    "inputLabel": "Text",
+    "normalizedLabel": "Normalized",
+    "hubTitle": "Related services",
+    "hubLead": "This page does not replace Lughawi; it gathers language entry points.",
+    "lughawiTitle": "Lughawi — proofreader",
+    "lughawiDesc": "Correction and tashkeel via the Contabo local engine.",
+    "featuresTitle": "Lughawi features",
+    "featuresDesc": "How rules and learning layers drive corrections.",
+    "rootsTitle": "Roots",
+    "rootsDesc": "Qurʾanic root concordance and occurrences.",
+    "searchTitle": "Qurʾan search",
+    "searchDesc": "Advanced search with surah and juz filters."
   }
 }
