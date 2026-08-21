@@ -49,29 +49,40 @@ except Exception as e:
     print("WARN stanza download:", e)
 PY
 
-echo "==> Prefetch CAMeL morphology DB + MLE"
+echo "==> Prefetch CAMeL morphology DB + MLE (use 'light' — includes both)"
 python - <<'PY'
 import subprocess
-for args in (
+
+# IMPORTANT: do NOT stop after morphology-db alone — MLE needs camel_data -i light
+# (or the disambig package). Order: light first, then explicit packages as backup.
+cmds = [
+    ["camel_data", "-i", "light"],
     ["camel_data", "-i", "morphology-db-msa-r13"],
+    ["camel_data", "-i", "disambig-mle-calima-msa-r13"],
     ["camel_data", "-i", "disambig-mle-msa"],
-    ["camel_data", "light"],
-):
+]
+ok_any = False
+for args in cmds:
     try:
         subprocess.check_call(args)
         print("OK", " ".join(args))
-        break
+        ok_any = True
+        # Keep going so MLE package is present even if light partially existed
+        if args[-1] == "light":
+            break
     except Exception as e:
-        print("try failed", args, "→", type(e).__name__)
-else:
+        print("try failed", args, "→", type(e).__name__, e)
+
+if not ok_any:
     print("WARN: camel_data incomplete")
 
 try:
     from camel_tools.disambig.mle import MLEDisambiguator
     MLEDisambiguator.pretrained()
-    print("OK camel MLE")
+    print("OK camel MLE pretrained")
 except Exception as e:
     print("WARN camel MLE:", type(e).__name__, e)
+    # Last resort: analyzer-only morph still works in sidecar
 PY
 
 if [[ "${LUGHAWI_SKIP_LOCAL_NEURAL:-0}" != "1" ]]; then
