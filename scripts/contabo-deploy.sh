@@ -45,10 +45,42 @@ if [[ "$NODE_MAJOR" == "24" ]]; then
 fi
 
 echo "==> Install & build"
-# Fresh tree avoids half-broken node_modules after interrupted installs
-# (missing next/dist/compiled/babel/code-frame breaks Turbopack/webpack).
+# Stop app before wiping node_modules — concurrent reads cause TAR_ENTRY_ERROR ENOENT.
+if command -v pm2 >/dev/null 2>&1 && pm2 describe arabya-web >/dev/null 2>&1; then
+  echo "==> Stopping PM2 arabya-web during install"
+  pm2 stop arabya-web || true
+fi
+
+# Disk headroom (npm extract fails cryptically when nearly full)
+AVAIL_KB="$(df -Pk "$APP_DIR" | awk 'NR==2 {print $4}')"
+if [[ -n "${AVAIL_KB:-}" && "$AVAIL_KB" -lt 1500000 ]]; then
+  echo "WARN: low disk space (~${AVAIL_KB}KB free). Aim for ≥1.5GB free before npm ci."
+fi
+
+echo "==> Cleaning previous install artifacts"
 rm -rf node_modules .next
-npm ci
+# Stale npm cache / partial extracts → tar TAR_ENTRY_ERROR ENOENT on Contabo
+npm cache clean --force >/dev/null 2>&1 || true
+
+npm_ci_ok=0
+for attempt in 1 2; do
+  echo "==> npm ci (attempt $attempt)"
+  if npm ci --no-audit --no-fund; then
+    npm_ci_ok=1
+    break
+  fi
+  echo "WARN: npm ci failed (attempt $attempt) — cleaning and retrying"
+  rm -rf node_modules .next
+  npm cache clean --force >/dev/null 2>&1 || true
+  sleep 2
+done
+if [[ "$npm_ci_ok" -ne 1 ]]; then
+  echo "ERROR: npm ci failed twice. On the server run:"
+  echo "  df -h"
+  echo "  rm -rf node_modules .next ~/.npm/_cacache"
+  echo "  npm cache clean --force && npm ci"
+  exit 1
+fi
 
 if [[ ! -f node_modules/sharp/package.json ]] || ! node -e "require('sharp')" >/dev/null 2>&1; then
   echo "==> Native modules incomplete — rebuilding sharp/sqlite/swc"

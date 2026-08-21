@@ -64,3 +64,4 @@ cd /var/www/arabya-web && bash scripts/contabo-deploy.sh
 - Bootstrap أول مرة: `scripts/contabo-bootstrap.sh`
 - قطع إشارة Vercel الحمراء على GitHub (مرة واحدةحدة): `docs/platform/disconnect-vercel-github-ar.md`
 - إن ظهر `WebpackError is not a constructor` عند البناء: `docs/platform/contabo-webpackerror-fix-ar.md`
+- إن ظهر `tar TAR_ENTRY_ERROR ENOENT` أثناء npm: `docs/platform/contabo-npm-tar-enoent-ar.md`
