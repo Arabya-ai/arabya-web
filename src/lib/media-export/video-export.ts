@@ -1,8 +1,12 @@
 /**
  * Client-side MP4 export (adapted from ayat-creator-pro / آيات ستوديو).
  * Uses Arabya reciters + QPC ayah text passed in — no alquran.cloud.
+ * Muxing: Mediabunny (replaces deprecated mp4-muxer).
  */
-import { Muxer, ArrayBufferTarget } from "mp4-muxer";
+import {
+  createMediabunnyMuxSession,
+  mimeForContainer,
+} from "@/lib/media-export/mediabunny-mux";
 import { getReciter, reciterDisplayName } from "@/lib/audio";
 import {
   ARABYA_MARK_PUBLIC_PATH,
@@ -347,19 +351,13 @@ export async function exportProjectToVideo(opts: {
   const totalFrames = Math.ceil(totalDuration * fps);
   const freqPerFrame = await computeFreqPerFrame(audioBuffer, totalFrames, fps);
 
-  const muxer = new Muxer({
-    target: new ArrayBufferTarget(),
-    video: { codec: "avc", width, height, frameRate: fps },
-    audio: {
-      codec: "aac",
-      numberOfChannels: 2,
-      sampleRate: audioBuffer.sampleRate,
-    },
-    fastStart: "in-memory",
+  const mux = await createMediabunnyMuxSession({
+    container: "mp4",
+    frameRate: fps,
   });
 
   const videoEncoder = new VideoEncoder({
-    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+    output: (chunk, meta) => mux.addVideoChunk(chunk, meta),
     error: (e) => console.error(e),
   });
   videoEncoder.configure({
@@ -372,7 +370,7 @@ export async function exportProjectToVideo(opts: {
   });
 
   const audioEncoder = new AudioEncoder({
-    output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
+    output: (chunk, meta) => mux.addAudioChunk(chunk, meta),
     error: (e) => console.error(e),
   });
   audioEncoder.configure({
@@ -475,9 +473,10 @@ export async function exportProjectToVideo(opts: {
   await videoEncoder.flush();
   videoEncoder.close();
   await audioPromise;
-  muxer.finalize();
-  const target = muxer.target as ArrayBufferTarget;
+  const buffer = await mux.finalize();
   await audioCtx.close();
   onProgress?.(100, "done");
-  return new Blob([new Uint8Array(target.buffer)], { type: "video/mp4" });
+  return new Blob([new Uint8Array(buffer)], {
+    type: mimeForContainer("mp4"),
+  });
 }
