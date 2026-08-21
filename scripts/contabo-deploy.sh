@@ -50,8 +50,9 @@ echo "==> Install & build"
 if command -v pm2 >/dev/null 2>&1; then
   echo "==> Stopping PM2 apps during install (web + siblings)"
   pm2 stop arabya-web arabya-nlp lughawi-sidecar 2>/dev/null || true
-  # Let file handles release before wiping (ENOTEMPTY on Contabo disks)
-  sleep 2
+  # Contabo ENOTEMPTY: give handles time to release (2s was too short in owner logs)
+  sleep 5
+  sync || true
 fi
 
 # shellcheck source=scripts/contabo-deploy-lib.sh
@@ -77,7 +78,7 @@ fi
 wipe_node_modules() {
   local target="${1:-node_modules}"
   [[ -e "$target" ]] || return 0
-  local trash="/tmp/arabya-nm-wipe-$$-$(date +%s)"
+  local trash="/tmp/arabya-nm-wipe-$$-$(date +%s)-$RANDOM"
   chmod -R u+w "$target" 2>/dev/null || true
   if mv "$target" "$trash" 2>/dev/null; then
     ( rm -rf "$trash" >/dev/null 2>&1 & ) || true
@@ -93,45 +94,103 @@ wipe_node_modules() {
   return 0
 }
 
-if ! wipe_node_modules node_modules; then
-  echo "ERROR: could not clear node_modules after PM2 stop."
-  if [[ -d .next.prev-good ]]; then
-    mv .next.prev-good .next
-    echo "==> Restored .next.prev-good — attempting emergency PM2 start"
-    contabo_safe_restart_web || true
+# Preserve last *healthy* node_modules so a failed npm never leaves the site 503.
+save_prev_good_node_modules() {
+  rm -rf node_modules.prev-good
+  if [[ -d node_modules ]] && \
+     [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
+     [[ -f node_modules/next/dist/bin/next ]]; then
+    echo "==> Saving healthy node_modules → node_modules.prev-good (emergency restore)"
+    mv node_modules node_modules.prev-good
+    return 0
   fi
-  exit 1
-fi
+  wipe_node_modules node_modules || true
+}
+
+restore_site_after_install_failure() {
+  echo "==> EMERGENCY: restoring previous site so Contabo is not left on 503"
+  wipe_node_modules node_modules || true
+  if [[ -d node_modules.prev-good ]]; then
+    mv node_modules.prev-good node_modules
+    echo "==> Restored node_modules.prev-good"
+  fi
+  if [[ -d .next.prev-good ]]; then
+    rm -rf .next
+    mv .next.prev-good .next
+    echo "==> Restored .next.prev-good"
+  fi
+  # Bring web (+ siblings) back even if this deploy failed
+  contabo_safe_restart_web || true
+  if [[ -f scripts/contabo-arabya-nlp.sh ]]; then
+    bash scripts/contabo-arabya-nlp.sh || true
+  fi
+  if [[ -f scripts/contabo-lughawi-sidecar.sh ]]; then
+    bash scripts/contabo-lughawi-sidecar.sh || true
+  fi
+  pm2 save || true
+}
+
+# Install into /tmp then swap — avoids Contabo ENOTEMPTY during in-tree npm cleanup.
+npm_install_atomic() {
+  local mode="${1:-install}" # install | ci
+  local work="/tmp/arabya-npm-build-$$-$(date +%s)"
+  mkdir -p "$work"
+  cp -a package.json package-lock.json "$work/"
+  # Keep npm overrides/resolutions path stable if present
+  [[ -f .npmrc ]] && cp -a .npmrc "$work/" || true
+
+  echo "==> Atomic npm ${mode} in $work (then swap into app tree)"
+  (
+    cd "$work"
+    npm cache clean --force >/dev/null 2>&1 || true
+    if [[ "$mode" == "ci" ]]; then
+      npm ci --no-audit --no-fund
+    else
+      npm install --no-audit --no-fund
+    fi
+  ) || {
+    rm -rf "$work"
+    return 1
+  }
+
+  if [[ ! -f "$work/node_modules/next/dist/compiled/babel/code-frame.js" ]] || \
+     [[ ! -f "$work/node_modules/next/dist/lib/verify-typescript-setup.js" ]]; then
+    echo "WARN: atomic npm ${mode} produced incomplete Next extract"
+    rm -rf "$work"
+    return 1
+  fi
+
+  wipe_node_modules node_modules || true
+  # Ensure destination empty
+  [[ -e node_modules ]] && wipe_node_modules node_modules
+  mv "$work/node_modules" "$APP_DIR/node_modules"
+  rm -rf "$work"
+  echo "==> Atomic npm ${mode} swapped into place"
+  return 0
+}
+
+save_prev_good_node_modules
 # Stale npm cache / partial extracts → tar TAR_ENTRY_ERROR ENOENT on Contabo
 npm cache clean --force >/dev/null 2>&1 || true
 
 npm_ci_ok=0
 # Node 24 npm is stricter about optional platform entries in package-lock → prefer install.
 if [[ "$NODE_MAJOR" == "24" ]]; then
-  echo "==> Node 24 detected — using npm install (skips npm ci lock strictness)"
-  if npm install --no-audit --no-fund && \
-     [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
-     [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
+  echo "==> Node 24 detected — atomic npm install (skips npm ci lock strictness)"
+  if npm_install_atomic install; then
     npm_ci_ok=1
     echo "==> npm install OK"
   else
-    echo "WARN: npm install incomplete on Node 24 — will retry after wipe"
-    wipe_node_modules node_modules || true
+    echo "WARN: atomic npm install incomplete on Node 24 — will try npm ci then install again"
   fi
 fi
 
 # Prefer a single npm ci attempt — Contabo lock/optional mismatches fail fast.
-# A second ci attempt (seen in owner screenshots) only prolongs 503 downtime.
 if [[ "$npm_ci_ok" -ne 1 ]]; then
-  echo "==> npm ci (attempt 1)"
-  if npm ci --no-audit --no-fund; then
-    if [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
-       [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
-      npm_ci_ok=1
-      echo "==> npm ci OK"
-    else
-      echo "WARN: npm ci exited 0 but Next extract is incomplete (tar ENOENT on next/dist is common)."
-    fi
+  echo "==> npm ci (attempt 1, atomic)"
+  if npm_install_atomic ci; then
+    npm_ci_ok=1
+    echo "==> npm ci OK"
   else
     echo "WARN: npm ci failed — skipping second ci (go straight to npm install)"
   fi
@@ -139,14 +198,9 @@ fi
 
 # Fall back to npm install so Contabo can recover instead of leaving the site stopped.
 if [[ "$npm_ci_ok" -ne 1 ]]; then
-  echo "==> Cleaning before npm install fallback (lock sync / optional platforms / ENOTEMPTY)"
-  wipe_node_modules node_modules || true
-  npm cache clean --force >/dev/null 2>&1 || true
+  echo "==> Atomic npm install fallback (lock sync / optional platforms / ENOTEMPTY)"
   rm -rf "${NPM_CONFIG_CACHE:-$HOME/.npm}/_cacache" 2>/dev/null || true
-  echo "==> npm install (fallback — Contabo recovery path)"
-  if npm install --no-audit --no-fund && \
-     [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
-     [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
+  if npm_install_atomic install; then
     npm_ci_ok=1
     echo "==> npm install fallback OK"
   else
@@ -156,17 +210,21 @@ fi
 
 if [[ "$npm_ci_ok" -ne 1 ]]; then
   echo "ERROR: could not produce a complete Next.js install (npm ci + npm install fallback)."
-  echo "On the server run the recovery block in docs or:"
+  echo "On the server run the recovery block:"
+  echo "  cd /var/www/arabya-web"
   echo "  pm2 stop arabya-web arabya-nlp lughawi-sidecar 2>/dev/null || true"
+  echo "  sleep 5"
   echo "  mv node_modules /tmp/arabya-nm-dead-\$\$ 2>/dev/null; rm -rf /tmp/arabya-nm-dead-\$\$ &"
   echo "  npm cache clean --force && npm install --no-audit --no-fund && npm run build"
   echo "  pm2 start deploy/contabo/ecosystem.config.cjs"
-  if [[ -d .next.prev-good ]]; then
-    mv .next.prev-good .next
-    echo "==> Restored .next.prev-good (site stays STOPPED until node_modules is healthy)"
-  fi
-  pm2 stop arabya-web 2>/dev/null || true
+  restore_site_after_install_failure
   exit 1
+fi
+# Drop prev-good modules in background after successful install (free disk)
+if [[ -d node_modules.prev-good ]]; then
+  trash_pg="/tmp/arabya-nm-prev-good-$$"
+  mv node_modules.prev-good "$trash_pg" 2>/dev/null || true
+  ( rm -rf "$trash_pg" >/dev/null 2>&1 & ) || true
 fi
 echo "==> Next.js package extract OK"
 
