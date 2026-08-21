@@ -35,8 +35,12 @@ grep -q '^ARABYA_NLP_DATABASE_URL=' "$ENV_FILE" 2>/dev/null || \
   echo 'ARABYA_NLP_DATABASE_URL=sqlite:////var/lib/arabya/arabya-nlp.sqlite' >> "$ENV_FILE"
 grep -q '^ARABYA_NLP_OLLAMA_BASE_URL=' "$ENV_FILE" 2>/dev/null || \
   echo 'ARABYA_NLP_OLLAMA_BASE_URL=http://127.0.0.1:11434' >> "$ENV_FILE"
-grep -q '^ARABYA_NLP_HOST=' "$ENV_FILE" 2>/dev/null || \
-  echo 'ARABYA_NLP_HOST=127.0.0.1' >> "$ENV_FILE"
+# Force network bind (upgrade from older 127.0.0.1 installs)
+if grep -q '^ARABYA_NLP_HOST=' "$ENV_FILE" 2>/dev/null; then
+  sed -i 's/^ARABYA_NLP_HOST=.*/ARABYA_NLP_HOST=0.0.0.0/' "$ENV_FILE"
+else
+  echo 'ARABYA_NLP_HOST=0.0.0.0' >> "$ENV_FILE"
+fi
 grep -q '^ARABYA_NLP_PORT=' "$ENV_FILE" 2>/dev/null || \
   echo 'ARABYA_NLP_PORT=8092' >> "$ENV_FILE"
 grep -q '^ARABYA_NLP_DEVOPS_AUTO_EXECUTE=' "$ENV_FILE" 2>/dev/null || \
