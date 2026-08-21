@@ -24,7 +24,11 @@ export async function GET() {
     ok: true,
     summary: adminPoolSummary(),
     slots: listAdminPoolPublic(),
-    usage: usageSummary(),
+    usage: usageSummary({
+      activeLast4: listAdminPoolPublic()
+        .filter((s) => s.enabled)
+        .map((s) => ({ provider: s.provider, keyLast4: s.keyLast4 })),
+    }),
     topUsers: quotaLeaderboard(40),
   });
 }
@@ -36,7 +40,7 @@ export async function POST(req: Request) {
   if (limited) return limited;
 
   let body: {
-    mode?: "single" | "bulk";
+    mode?: "single" | "bulk" | "clear-failures";
     provider?: string;
     apiKey?: string;
     label?: string;
@@ -44,6 +48,7 @@ export async function POST(req: Request) {
     baseUrl?: string;
     text?: string;
     defaultProvider?: string;
+    keyLast4?: string;
   };
   try {
     body = (await req.json()) as typeof body;
@@ -52,6 +57,28 @@ export async function POST(req: Request) {
   }
 
   try {
+    if (body.mode === "clear-failures") {
+      const { clearAiUsageByLast4, pruneFailureAlertsForActiveLast4 } =
+        await import("@/lib/ops/usage-meter");
+      const active = listAdminPoolPublic()
+        .filter((s) => s.enabled)
+        .map((s) => ({ provider: s.provider, keyLast4: s.keyLast4 }));
+      let cleared = 0;
+      if (body.provider && body.keyLast4) {
+        cleared = clearAiUsageByLast4(body.provider, body.keyLast4);
+      } else {
+        pruneFailureAlertsForActiveLast4(active);
+        cleared = 1;
+      }
+      return NextResponse.json({
+        ok: true,
+        cleared,
+        slots: listAdminPoolPublic(),
+        summary: adminPoolSummary(),
+        usage: usageSummary({ activeLast4: active }),
+      });
+    }
+
     if (body.mode === "bulk" || (body.text && body.text.trim())) {
       const result = bulkAddAdminPoolKeys({
         text: body.text ?? "",

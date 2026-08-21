@@ -155,6 +155,57 @@ export function recordAiFailure(opts: {
   save(file);
 }
 
+/** Clear failure counters after key rotation / delete (stops sticky red alerts). */
+export function clearAiUsageForApiKey(provider: string, apiKey: string): boolean {
+  const file = load();
+  const id = slotId(provider, apiKey);
+  const row = file.slots.find((s) => `${s.provider}:${s.keyTail}` === id);
+  if (!row) return false;
+  row.failuresMonth = 0;
+  row.lastError = undefined;
+  row.lastFailureAt = undefined;
+  save(file);
+  return true;
+}
+
+/** Match by provider + last-4 (admin UI public id) when full key unknown. */
+export function clearAiUsageByLast4(provider: string, keyLast4: string): number {
+  const file = load();
+  const needle = keyLast4.trim().toLowerCase();
+  if (needle.length < 4) return 0;
+  let n = 0;
+  for (const row of file.slots) {
+    if (row.provider !== provider) continue;
+    if (!row.keyTail.toLowerCase().endsWith(needle)) continue;
+    row.failuresMonth = 0;
+    row.lastError = undefined;
+    row.lastFailureAt = undefined;
+    n += 1;
+  }
+  if (n > 0) save(file);
+  return n;
+}
+
+/** Drop failure alerts for keys no longer in the active pool (by last-4). */
+export function pruneFailureAlertsForActiveLast4(
+  active: Array<{ provider: string; keyLast4: string }>,
+): void {
+  const file = load();
+  const alive = new Set(
+    active.map((a) => `${a.provider}:${a.keyLast4.toLowerCase()}`),
+  );
+  let changed = false;
+  for (const row of file.slots) {
+    if (row.failuresMonth < 5) continue;
+    const key = `${row.provider}:${row.keyTail.slice(-4).toLowerCase()}`;
+    if (alive.has(key)) continue;
+    row.failuresMonth = 0;
+    row.lastError = undefined;
+    changed = true;
+  }
+  if (changed) save(file);
+}
+
 export function remainingRatio(slot: SlotUsage): number {
   if (slot.budgetTokens <= 0) return 1;
   return Math.max(0, 1 - slot.tokensMonth / slot.budgetTokens);
@@ -174,7 +225,10 @@ export function slotHealthScore(opts: {
   return Math.max(0.01, remaining - failPenalty);
 }
 
-export function usageSummary(): {
+export function usageSummary(opts?: {
+  /** Only raise "failing" alerts for these last-4 keys (enabled pool). */
+  activeLast4?: Array<{ provider: string; keyLast4: string }>;
+}): {
   month: string;
   slots: Array<{
     provider: string;
@@ -193,13 +247,24 @@ export function usageSummary(): {
   alerts: Array<{ level: "warn" | "critical"; messageAr: string }>;
 } {
   const file = load();
+  const alive =
+    opts?.activeLast4 && opts.activeLast4.length > 0
+      ? new Set(
+          opts.activeLast4.map(
+            (a) => `${a.provider}:${a.keyLast4.toLowerCase()}`,
+          ),
+        )
+      : null;
+
   const alerts: Array<{ level: "warn" | "critical"; messageAr: string }> = [];
   const slots = file.slots.map((s) => {
     const remainingPct = Math.round(remainingRatio(s) * 100);
     let alert: "ok" | "low" | "exhausted" | "failing" = "ok";
-    if (s.failuresMonth >= 5) alert = "failing";
-    else if (remainingPct <= 0) alert = "exhausted";
-    else if (remainingPct <= 15) alert = "low";
+    const stillActive =
+      !alive || alive.has(`${s.provider}:${s.keyTail.slice(-4).toLowerCase()}`);
+    if (s.failuresMonth >= 5 && stillActive) alert = "failing";
+    else if (remainingPct <= 0 && stillActive) alert = "exhausted";
+    else if (remainingPct <= 15 && stillActive) alert = "low";
 
     if (alert === "exhausted") {
       alerts.push({
@@ -214,7 +279,7 @@ export function usageSummary(): {
     } else if (alert === "failing") {
       alerts.push({
         level: "critical",
-        messageAr: `فشل متكرر على ${s.provider} …${s.keyTail}: ${s.lastError ?? ""}`,
+        messageAr: `فشل متكرر على ${s.provider} …${s.keyTail}: ${s.lastError ?? "بدون تفاصيل — راجع سجل الاستخدام"}`,
       });
     }
 

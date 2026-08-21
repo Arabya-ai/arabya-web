@@ -10,6 +10,7 @@ import {
   type IntegrationEntry,
 } from "@/lib/ops/integrations";
 import { usageSummary } from "@/lib/ops/usage-meter";
+import { listAdminPoolPublic } from "@/lib/lughawi/admin-pool-store";
 import { isCloudSyncConfigured } from "@/lib/cloud-sync";
 import { getSentryStatus, type SentryStatus } from "@/lib/sentry/status";
 
@@ -62,7 +63,10 @@ export async function buildOpsSnapshot(): Promise<OpsSnapshot> {
   const alerts: OpsAlert[] = [];
   const registry = loadIntegrationsRegistry();
   const pool = lughawiProjectAiPoolSummary();
-  const aiUsage = usageSummary();
+  const activeLast4 = listAdminPoolPublic()
+    .filter((s) => s.enabled)
+    .map((s) => ({ provider: s.provider, keyLast4: s.keyLast4 }));
+  const aiUsage = usageSummary({ activeLast4 });
   const sidecar = await probeSidecarHealth();
 
   for (const a of aiUsage.alerts) {

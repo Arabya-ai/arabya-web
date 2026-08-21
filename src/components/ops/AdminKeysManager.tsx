@@ -21,6 +21,8 @@ type UsageSlot = {
   tokensMonth: number;
   requestsMonth: number;
   remainingPct: number;
+  failuresMonth?: number;
+  lastError?: string;
   alert?: string;
 };
 
@@ -173,6 +175,28 @@ export function AdminKeysManager() {
         setSlots(json.slots ?? []);
         setSummary(json.summary ?? null);
       }
+    });
+  }
+
+  function clearFailureHistory() {
+    startTransition(async () => {
+      setError(null);
+      const res = await fetch("/api/admin/lughawi-keys", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: "clear-failures" }),
+      });
+      const json = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        usage?: { slots: UsageSlot[] };
+      };
+      if (!res.ok || json.ok === false) {
+        setError(json.error || "تعذّر مسح سجل الفشل");
+        return;
+      }
+      setUsage(json.usage?.slots ?? []);
+      setFlash("تم مسح تنبيهات الفشل القديمة لمفاتيح غير النشطة.");
     });
   }
 
@@ -373,6 +397,19 @@ export function AdminKeysManager() {
       {tab === "usage" ? (
         <section className="ops-keys__card">
           <h2>استهلاك مفاتيح المشروع</h2>
+          <p className="dash-muted">
+            التنبيه الأحمر قد يبقى من مفتاح قديم محذوف في ملف الإحصاءات. استخدم
+            الزر أدناه لمسح سجل الفشل العالق، أو راجع{" "}
+            <code dir="ltr">lastError</code> في القائمة.
+          </p>
+          <button
+            type="button"
+            className="dash-btn"
+            disabled={pending}
+            onClick={() => clearFailureHistory()}
+          >
+            مسح تنبيهات الفشل العالقة
+          </button>
           {usage.length === 0 ? (
             <p className="dash-muted">لا استخدام مسجّل بعد هذا الشهر.</p>
           ) : (
@@ -380,7 +417,7 @@ export function AdminKeysManager() {
               {usage.map((u) => {
                 const alertClass =
                   u.alert && u.alert !== "ok"
-                    ? u.remainingPct < 15
+                    ? u.remainingPct < 15 || u.alert === "failing"
                       ? "ops-usage-list__item--critical"
                       : "ops-usage-list__item--warn"
                     : "";
@@ -391,8 +428,19 @@ export function AdminKeysManager() {
                     </span>
                     {u.label ? ` (${u.label})` : ""} — متبقّي{" "}
                     <strong>{u.remainingPct}%</strong> · {u.requestsMonth} طلب
+                    {typeof u.failuresMonth === "number" && u.failuresMonth > 0
+                      ? ` · فشل: ${u.failuresMonth}`
+                      : ""}
                     {u.alert && u.alert !== "ok" ? (
                       <span className="ops-usage-alert"> · تنبيه: {u.alert}</span>
+                    ) : null}
+                    {u.lastError ? (
+                      <>
+                        <br />
+                        <span className="dash-muted" dir="ltr">
+                          lastError: {u.lastError}
+                        </span>
+                      </>
                     ) : null}
                   </li>
                 );

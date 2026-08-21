@@ -9,6 +9,10 @@ import {
   last4,
 } from "@/lib/lughawi/ai-gateway";
 import type { AiProviderId } from "@/lib/lughawi/types";
+import {
+  clearAiUsageByLast4,
+  clearAiUsageForApiKey,
+} from "@/lib/ops/usage-meter";
 import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
@@ -293,9 +297,15 @@ export function updateAdminPoolKey(
 
 export function deleteAdminPoolKey(id: string): boolean {
   const file = load();
-  const before = file.slots.length;
+  const slot = file.slots.find((s) => s.id === id);
+  if (!slot) return false;
+  try {
+    const plain = decryptSecret(slot.keyCiphertext);
+    clearAiUsageForApiKey(slot.provider, plain);
+  } catch {
+    clearAiUsageByLast4(slot.provider, slot.keyLast4);
+  }
   file.slots = file.slots.filter((s) => s.id !== id);
-  if (file.slots.length === before) return false;
   save(file);
   return true;
 }
