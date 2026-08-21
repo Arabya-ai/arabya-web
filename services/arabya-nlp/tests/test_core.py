@@ -245,6 +245,33 @@ def test_rate_limit_blocks_sixth_request() -> None:
     assert retry >= 1
 
 
+def test_loopback_is_trusted() -> None:
+    from app.security.rate_limit import is_loopback
+
+    assert is_loopback("127.0.0.1")
+    assert is_loopback("::1")
+    assert is_loopback("localhost")
+    assert is_loopback("::ffff:127.0.0.1")
+    assert not is_loopback("1.2.3.4")
+
+
+@pytest.mark.asyncio
+async def test_enforce_rate_limit_skips_loopback() -> None:
+    from unittest.mock import MagicMock
+
+    from app.security.rate_limit import enforce_rate_limit, limiter
+
+    # Exhaust guest bucket for a fake IP first — loopback must still pass.
+    for _ in range(200):
+        limiter.check("guest:9.9.9.9", 1, 3600)
+
+    req = MagicMock()
+    req.url.path = "/v1/proofread"
+    req.headers = {}
+    req.client.host = "127.0.0.1"
+    await enforce_rate_limit(req)  # must not raise
+
+
 def test_fastapi_health_and_proofread() -> None:
     from fastapi.testclient import TestClient
 
