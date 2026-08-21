@@ -211,7 +211,15 @@ fi
 echo "==> Arabya NLP FastAPI platform (proofread / STT / DevOps / dashboard)"
 grep -q '^ARABYA_NLP_DATABASE_URL=' "$APP_DIR/.env" 2>/dev/null || \
   echo 'ARABYA_NLP_DATABASE_URL=sqlite:////var/lib/arabya/arabya-nlp.sqlite' >> "$APP_DIR/.env"
-if [[ -f scripts/contabo-arabya-nlp.sh ]]; then
+# CRITICAL safety: never enable agent shell execution during routine deploys
+if grep -q '^ARABYA_NLP_DEVOPS_AUTO_EXECUTE=' "$APP_DIR/.env" 2>/dev/null; then
+  sed -i 's/^ARABYA_NLP_DEVOPS_AUTO_EXECUTE=.*/ARABYA_NLP_DEVOPS_AUTO_EXECUTE=0/' "$APP_DIR/.env"
+else
+  echo 'ARABYA_NLP_DEVOPS_AUTO_EXECUTE=0' >> "$APP_DIR/.env"
+fi
+if [[ -f scripts/contabo-arabya-nlp-activate.sh ]]; then
+  bash scripts/contabo-arabya-nlp-activate.sh || echo "WARN: arabya-nlp activate skipped — run scripts/contabo-arabya-nlp-deps.sh manually"
+elif [[ -f scripts/contabo-arabya-nlp.sh ]]; then
   bash scripts/contabo-arabya-nlp.sh || echo "WARN: arabya-nlp start skipped — install deps via contabo-arabya-nlp-deps.sh"
 fi
 

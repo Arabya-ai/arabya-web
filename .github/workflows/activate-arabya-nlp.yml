@@ -1,0 +1,88 @@
+name: Activate Arabya NLP (Contabo)
+
+# Option A operational activation only — no Next.js rebuild.
+# Triggers when activation scripts land on main, or via workflow_dispatch.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/contabo-arabya-nlp-activate.sh"
+      - "scripts/contabo-arabya-nlp-deps.sh"
+      - "scripts/contabo-arabya-nlp.sh"
+      - "services/arabya-nlp/**"
+      - ".github/workflows/activate-arabya-nlp.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: activate-arabya-nlp
+  cancel-in-progress: false
+
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    environment: Production
+    timeout-minutes: 180
+    steps:
+      - name: Validate SSH secrets
+        env:
+          SSH_HOST: ${{ secrets.CONTABO_HOST }}
+          SSH_USER: ${{ secrets.CONTABO_SSH_USER }}
+          SSH_KEY: ${{ secrets.CONTABO_SSH_KEY }}
+          SSH_KEY_B64: ${{ secrets.CONTABO_SSH_KEY_B64 }}
+        run: |
+          set -euo pipefail
+          if [ -z "$SSH_HOST" ] || [ -z "$SSH_USER" ]; then
+            echo "::error::Missing CONTABO_HOST or CONTABO_SSH_USER in Production secrets."
+            exit 1
+          fi
+          if [ -z "${SSH_KEY_B64:-}" ] && [ -z "${SSH_KEY:-}" ]; then
+            echo "::error::Set CONTABO_SSH_KEY or CONTABO_SSH_KEY_B64."
+            exit 1
+          fi
+
+      - name: Option A — deps, ollama pull, PM2, health
+        env:
+          SSH_HOST: ${{ secrets.CONTABO_HOST }}
+          SSH_USER: ${{ secrets.CONTABO_SSH_USER }}
+          SSH_KEY: ${{ secrets.CONTABO_SSH_KEY }}
+          SSH_KEY_B64: ${{ secrets.CONTABO_SSH_KEY_B64 }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          if [ -n "${SSH_KEY_B64:-}" ]; then
+            printf '%s' "$SSH_KEY_B64" | tr -d '\n' | base64 -d > ~/.ssh/contabo_key
+          else
+            printf '%s\n' "$SSH_KEY" > ~/.ssh/contabo_key
+          fi
+          chmod 600 ~/.ssh/contabo_key
+          ssh-keygen -lf ~/.ssh/contabo_key >/dev/null
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+          # Keepalive prevents Broken pipe during long pip/ollama pulls
+          SSH_OPTS=(
+            -i ~/.ssh/contabo_key
+            -o BatchMode=yes
+            -o StrictHostKeyChecking=accept-new
+            -o ServerAliveInterval=30
+            -o ServerAliveCountMax=120
+            -o TCPKeepAlive=yes
+          )
+
+          ssh "${SSH_OPTS[@]}" "$SSH_USER@$SSH_HOST" bash -s <<'REMOTE'
+          set -euo pipefail
+          cd /var/www/arabya-web
+          git fetch origin main
+          git checkout main
+          git pull --ff-only origin main
+          # CRITICAL: never enable auto-execute during Option A
+          touch .env
+          if grep -q '^ARABYA_NLP_DEVOPS_AUTO_EXECUTE=' .env; then
+            sed -i 's/^ARABYA_NLP_DEVOPS_AUTO_EXECUTE=.*/ARABYA_NLP_DEVOPS_AUTO_EXECUTE=0/' .env
+          else
+            echo 'ARABYA_NLP_DEVOPS_AUTO_EXECUTE=0' >> .env
+          fi
+          bash scripts/contabo-arabya-nlp-activate.sh
+          REMOTE
+
+          rm -f ~/.ssh/contabo_key
