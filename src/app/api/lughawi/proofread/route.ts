@@ -87,17 +87,24 @@ export async function POST(req: Request) {
     proofMode,
   });
 
-  // Layers 2 + 2b in PARALLEL:
-  //   :8091 sidecar — rules + Alnnahwi GEC when useAi
-  //   :8092 arabya-nlp — PyArabic/rules ∥ Ollama when useAi
+  // Contabo RAM: local Ollama 8B + neural GEC thrash swap and time out the UI.
+  // Opt-in only via env. Rules (TS + arabya-nlp PyArabic) stay always-on and fast.
+  const allowLocalOllama = process.env.LUGHAWI_LOCAL_OLLAMA === "1";
+  const allowNeuralGec = process.env.LUGHAWI_NEURAL_GEC === "1";
+  const runLocalLlm = Boolean(wantAi && allowLocalOllama);
+  const runNeural = Boolean(wantAi && allowNeuralGec);
+
+  // Layers 2 + 2b in PARALLEL (light by default):
+  //   :8091 sidecar — rules (+ Alnnahwi only if LUGHAWI_NEURAL_GEC=1)
+  //   :8092 arabya-nlp — PyArabic/rules (+ Ollama only if LUGHAWI_LOCAL_OLLAMA=1)
   const [fromSidecar, fromNlp] = await Promise.all([
     enrichProofreadWithSidecar(local, {
-      neural: wantAi,
-      timeoutMs: wantAi ? 45_000 : 4_000,
+      neural: runNeural,
+      timeoutMs: runNeural ? 45_000 : 4_000,
     }).catch(() => local),
     enrichProofreadWithArabyaNlp(local, {
-      skipLlm: !wantAi,
-      timeoutMs: wantAi ? 75_000 : 8_000,
+      skipLlm: !runLocalLlm,
+      timeoutMs: runLocalLlm ? 25_000 : 8_000,
     }).catch(() => local),
   ]);
 

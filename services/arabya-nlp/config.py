@@ -99,7 +99,9 @@ class Settings(BaseSettings):
 
     # --- Proofreader ---
     preserve_diacritics_default: bool = True
-    llm_proofread_enabled: bool = Field(default=True, alias="ARABYA_NLP_LLM_PROOFREAD")
+    # Local Ollama (llama 8B) is optional — OFF by default on Contabo RAM budgets.
+    # Rules (PyArabic/ghalatawi) stay always-on. Set ARABYA_NLP_LLM_PROOFREAD=1 to enable.
+    llm_proofread_enabled: bool = Field(default=False, alias="ARABYA_NLP_LLM_PROOFREAD")
 
     @field_validator("database_url")
     @classmethod
