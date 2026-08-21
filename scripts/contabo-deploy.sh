@@ -312,6 +312,18 @@ grep -q '^ARABYA_NLP_URL=' "$APP_DIR/.env" 2>/dev/null || \
   echo 'ARABYA_NLP_URL=http://127.0.0.1:8092' >> "$APP_DIR/.env"
 grep -q '^ARABYA_NLP_PROOFREAD=' "$APP_DIR/.env" 2>/dev/null || \
   echo 'ARABYA_NLP_PROOFREAD=1' >> "$APP_DIR/.env"
+# Next.js on Contabo talks to NLP via 127.0.0.1 — raise guest cap + leave loopback uncapped in code.
+if grep -q '^ARABYA_NLP_RATE_LIMIT_REQUESTS=' "$APP_DIR/.env" 2>/dev/null; then
+  # Bump legacy 5/hour installs that broke Lughawi after a few proofreads
+  cur="$(grep '^ARABYA_NLP_RATE_LIMIT_REQUESTS=' "$APP_DIR/.env" | head -1 | cut -d= -f2-)"
+  if [[ "${cur}" =~ ^[0-9]+$ ]] && [[ "${cur}" -lt 60 ]]; then
+    sed -i 's/^ARABYA_NLP_RATE_LIMIT_REQUESTS=.*/ARABYA_NLP_RATE_LIMIT_REQUESTS=120/' "$APP_DIR/.env"
+  fi
+else
+  echo 'ARABYA_NLP_RATE_LIMIT_REQUESTS=120' >> "$APP_DIR/.env"
+fi
+grep -q '^ARABYA_NLP_RATE_LIMIT_WINDOW=' "$APP_DIR/.env" 2>/dev/null || \
+  echo 'ARABYA_NLP_RATE_LIMIT_WINDOW=3600' >> "$APP_DIR/.env"
 # CRITICAL safety: keep DevOps auto-execute disabled unless an operator sets it intentionally later
 if grep -q '^ARABYA_NLP_DEVOPS_AUTO_EXECUTE=' "$APP_DIR/.env" 2>/dev/null; then
   sed -i 's/^ARABYA_NLP_DEVOPS_AUTO_EXECUTE=.*/ARABYA_NLP_DEVOPS_AUTO_EXECUTE=0/' "$APP_DIR/.env"
