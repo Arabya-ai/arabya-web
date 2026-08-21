@@ -85,6 +85,7 @@
     "cheerio": "^1.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "exceljs": "^4.4.0",
     "lucide-react": "^1.27.0",
     "mammoth": "^1.12.1",
     "mediabunny": "^1.55.1",
@@ -96,8 +97,7 @@
     "react-dom": "19.1.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.6.0",
-    "tailwindcss-animate": "^1.0.7",
-    "xlsx": "^0.18.5"
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -119,7 +119,8 @@
     "vitest": "^4.1.10"
   },
   "overrides": {
-    "postcss": "8.5.20"
+    "postcss": "8.5.20",
+    "sharp": "^0.35.3"
   },
   "allowScripts": {
     "sharp": true,

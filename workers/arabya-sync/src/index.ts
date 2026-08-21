@@ -160,10 +160,7 @@ function parseAdminEmails(raw: string | undefined): string[] {
 }
 
 function isProtectedAdmin(email: string, env: Env): boolean {
-  if (isSuperAdmin(email)) return true;
-  return parseAdminEmails(env.ARABYA_ADMIN_EMAILS).includes(
-    email.trim().toLowerCase(),
-  );
+  return isSuperAdmin(email, env);
 }
 
 function newId(prefix: string): string {
@@ -176,9 +173,10 @@ function normalizeRole(role: unknown): UserRole {
   return "member";
 }
 
-function isSuperAdmin(email: string): boolean {
-  const e = email.trim().toLowerCase();
-  return e === "egywebdev@gmail.com" || e === "arabyaaicom@gmail.com";
+function isSuperAdmin(email: string, env: Env): boolean {
+  return parseAdminEmails(env.ARABYA_ADMIN_EMAILS).includes(
+    email.trim().toLowerCase(),
+  );
 }
 
 function makeUid(): string {
@@ -1085,17 +1083,17 @@ const workerHandler = {
       const targetId = userIdFromEmail(String(body.userId || body.email || ""));
       const toRole = normalizeRole(body.role);
       if (!targetId) return badRequest("user_required");
-      if (!isSuperAdmin(actorEmail)) {
+      if (!isSuperAdmin(actorEmail, env)) {
         return forbidden("super_admin_required");
       }
       // admin rank is super-admin emails only — no promotion of others
-      if (toRole === "admin" && !isSuperAdmin(targetId)) {
+      if (toRole === "admin" && !isSuperAdmin(targetId, env)) {
         return forbidden("admin_reserved_for_super_admin");
       }
       if (isProtectedAdmin(targetId, env) && toRole !== "admin") {
         return forbidden("cannot_change_protected_admin");
       }
-      if (isSuperAdmin(targetId) && toRole !== "admin") {
+      if (isSuperAdmin(targetId, env) && toRole !== "admin") {
         return forbidden("cannot_demote_super_admin");
       }
       // Prevent self-demotion away from admin
@@ -1148,7 +1146,7 @@ const workerHandler = {
     if (url.pathname === "/v1/admin/ban-user") {
       const targetId = userIdFromEmail(String(body.userId || body.email || ""));
       if (!targetId) return badRequest("user_required");
-      if (isProtectedAdmin(targetId, env) || isSuperAdmin(targetId)) {
+      if (isProtectedAdmin(targetId, env) || isSuperAdmin(targetId, env)) {
         return forbidden("cannot_ban_protected_admin");
       }
       if (targetId === actorEmail) return forbidden("cannot_ban_self");
@@ -1172,7 +1170,7 @@ const workerHandler = {
     }
 
     if (url.pathname === "/v1/admin/portfolio") {
-      if (!isSuperAdmin(actorEmail)) {
+      if (!isSuperAdmin(actorEmail, env)) {
         return forbidden("super_admin_required");
       }
       const targetId = userIdFromEmail(String(body.userId || body.email || ""));

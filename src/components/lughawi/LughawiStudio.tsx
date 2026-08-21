@@ -122,7 +122,10 @@ export function LughawiStudio() {
   >([]);
   const [sttPending, setSttPending] = useState(false);
 
-  const allEdits = result?.edits.filter((e) => e.status === "proposed") ?? [];
+  const allEdits = useMemo(
+    () => result?.edits.filter((e) => e.status === "proposed") ?? [],
+    [result?.edits],
+  );
   const edits = allEdits.filter((e) => {
     if (typeFilter[e.type] === false) return false;
     if (proofMode === "spelling") return e.type === "spelling";

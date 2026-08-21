@@ -279,7 +279,7 @@ fi
 
 pm2 save
 
-echo "==> Health check (both domains via Host header)"
+echo "==> Health check (localhost + SEO endpoints)"
 health_ok=0
 for i in $(seq 1 45); do
   if curl -sf -o /dev/null -H "Host: www.arabya.org" http://127.0.0.1:3000/; then
@@ -301,7 +301,35 @@ if [[ "$health_ok" -ne 1 ]]; then
   pm2 status || true
   exit 1
 fi
+
+# Extended smoke (audit C-02): robots, sitemap, mushaf must not 5xx after deploy
+smoke_fail=0
+for path in "/" "/robots.txt" "/sitemap.xml" "/mushaf/1" "/about"; do
+  code="$(curl -s -o /dev/null -w '%{http_code}' -H "Host: www.arabya.org" "http://127.0.0.1:3000${path}" || echo 000)"
+  echo "  smoke ${path} → ${code}"
+  if [[ "$code" != 200 && "$code" != 301 && "$code" != 302 && "$code" != 308 ]]; then
+    smoke_fail=1
+  fi
+done
+if [[ "$smoke_fail" -eq 1 ]]; then
+  echo "ERROR: post-deploy smoke failed (non-2xx/3xx on public routes)."
+  if [[ -d .next.prev-good ]]; then
+    echo "==> Rolling back to .next.prev-good"
+    pm2 stop arabya-web || true
+    rm -rf .next
+    mv .next.prev-good .next
+    contabo_safe_restart_web || true
+  fi
+  exit 1
+fi
+
+# Record published commit for incident matching (audit C-01)
+if command -v git >/dev/null 2>&1; then
+  echo "==> Published commit: $(git rev-parse HEAD) ($(git rev-parse --short HEAD))"
+fi
+
 rm -rf .next.prev-good
 curl -sI -H "Host: www.arabya.org" http://127.0.0.1:3000 | head -5 || true
 curl -sI -H "Host: www.arabyaai.com" http://127.0.0.1:3000 | head -5 || true
 echo "Deploy done. Ensure LiteSpeed serves www.arabya.org — see deploy/contabo/nginx-dual-domain.conf (reference)"
+echo "NOTE: app lives at /var/www/arabya-web (PM2). ServerAvatar public_html is NOT the Next.js app."

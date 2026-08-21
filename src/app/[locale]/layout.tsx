@@ -99,16 +99,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "Meta" });
   const isEn = locale === "en";
 
+  const canonical = isEn
+    ? "https://www.arabya.org/en"
+    : "https://www.arabya.org";
+
   return {
     title: {
       default: t("defaultTitle"),
       template: t("titleTemplate"),
     },
     description: t("description"),
+    alternates: {
+      canonical,
+      languages: {
+        ar: "https://www.arabya.org",
+        en: "https://www.arabya.org/en",
+        "x-default": "https://www.arabya.org",
+      },
+    },
     openGraph: {
       title: t("defaultTitle"),
       description: t("ogDescription"),
-      url: isEn ? "https://www.arabya.org/en" : "https://www.arabya.org",
+      url: canonical,
       siteName: t("siteName"),
       locale: isEn ? "en_US" : "ar_AR",
       type: "website",
@@ -143,12 +155,9 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <head>
-        {/* Theme boot: key must match STORAGE_KEYS.theme */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('arabya-theme');var d=t==='dark';document.documentElement.dataset.theme=d?'dark':'light';document.documentElement.style.colorScheme=d?'dark':'light';var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',d?'#071110':'#0f766e');}catch(e){document.documentElement.dataset.theme='light';document.documentElement.style.colorScheme='light';}})();`,
-          }}
-        />
+        {/* Theme boot: external file so CSP can omit script-src 'unsafe-inline' */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts -- must run before paint to avoid theme flash */}
+        <script src="/theme-boot.js" />
       </head>
       <body
         className={`${cairo.variable} ${plexArabic.variable} ${jakarta.variable} ${naskh.variable} ${amiri.variable} ${tajawal.variable} ${reemKufi.variable} antialiased`}
