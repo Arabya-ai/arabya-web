@@ -30,6 +30,17 @@ upsert "ARABYA_NLP_PORT" "8092"
 echo "==> Env wired:"
 grep -E '^(ARABYA_NLP_URL|ARABYA_NLP_PROOFREAD|ARABYA_NLP_HOST|ARABYA_NLP_PORT)=' "$ENV_FILE"
 
+echo "==> Ensure arabya-nlp is running on :8092"
+if ! curl -sS --max-time 3 "${NLP_URL}/health" >/dev/null 2>&1; then
+  if [[ -f "$APP_DIR/scripts/contabo-arabya-nlp.sh" ]]; then
+    bash "$APP_DIR/scripts/contabo-arabya-nlp.sh" || true
+    sleep 3
+  else
+    echo "ERROR: scripts/contabo-arabya-nlp.sh missing"
+    exit 1
+  fi
+fi
+
 echo "==> Health (must be JSON, not HTML)"
 curl -sS --max-time 10 "${NLP_URL}/health" | python3 -m json.tool | head -30
 
