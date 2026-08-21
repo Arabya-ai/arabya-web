@@ -58,6 +58,25 @@ export function collectGrammarEdits(
     );
   }
 
+  // إنّ وأخواتها + جمع مذكر سالم مرفوع (…ون) → منصوب/مجرور (…ين) بدون حاجة للضبط
+  // مثال: إن المعلمون → إن المعلمين
+  const innaSoundMasc =
+    /(?:^|[\s،,.])(إن|أن|كأن|لكن|ليت|لعل)\s+(ال[\u0621-\u064A]{2,24})ون(?=[\s.,،؛؟!]|$)/g;
+  while ((m = innaSoundMasc.exec(text)) !== null) {
+    const noun = `${m[2]!}ون`;
+    const start = m.index + m[0]!.lastIndexOf(noun);
+    add(
+      edits,
+      start,
+      start + noun.length,
+      noun,
+      `${m[2]!}ين`,
+      "inna-nasb",
+      locale,
+      0.9,
+    );
+  }
+
   // Demonstrative agreement (masculine nouns)
   const demMasc =
     /هذه\s+(الكتاب|القلم|الرجل|الولد|اليوم|الأمر|البيت|الباب|الدرس|الموضوع|المشروع|البرنامج|الموقع|النص|الخطأ)/g;

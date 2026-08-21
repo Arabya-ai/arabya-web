@@ -23,10 +23,68 @@ from config import Settings, get_settings
 logger = logging.getLogger("arabya_nlp.proofreader")
 
 _WORD_RE = re.compile(r"[\u0600-\u06FFa-zA-Z0-9]+")
+_LETTER_RE = re.compile(r"[\u0600-\u06FFa-zA-Z0-9]")
 
 
 def count_words(text: str) -> int:
     return len(_WORD_RE.findall(text or ""))
+
+
+def remap_edits_to_original(
+    original: str,
+    edits: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """
+    Re-locate every edit on the *user-facing original* string.
+
+    Stage-1 rewrites (لاكن→لكن) shift later indices; Ollama historically
+    returned start=end=0. Next.js drops edits whose span does not match
+    `original.slice(start, end) === original_token`.
+    """
+    claimed: set[tuple[int, int]] = set()
+    located: list[dict[str, Any]] = []
+    for edit in edits:
+        token = str(edit.get("original") or "")
+        suggestion = str(edit.get("suggestion") or "")
+        if not token or not suggestion or token == suggestion:
+            continue
+        start = edit.get("start")
+        end = edit.get("end")
+        if (
+            isinstance(start, int)
+            and isinstance(end, int)
+            and end > start
+            and original[start:end] == token
+            and (start, end) not in claimed
+        ):
+            claimed.add((start, end))
+            located.append({**edit, "start": start, "end": end})
+            continue
+
+        pos = 0
+        found: tuple[int, int] | None = None
+        while True:
+            idx = original.find(token, pos)
+            if idx < 0:
+                break
+            end_i = idx + len(token)
+            before = original[idx - 1] if idx > 0 else ""
+            after = original[end_i] if end_i < len(original) else ""
+            whole = (not before or not _LETTER_RE.match(before)) and (
+                not after or not _LETTER_RE.match(after)
+            )
+            key = (idx, end_i)
+            if key not in claimed and whole:
+                found = key
+                break
+            if found is None and key not in claimed:
+                found = key
+            pos = idx + 1
+        if found is None:
+            continue
+        claimed.add(found)
+        located.append({**edit, "start": found[0], "end": found[1]})
+    return located
 
 
 def _record_error_stats(db: Session | None, edits: list[dict[str, Any]]) -> None:
@@ -94,7 +152,11 @@ async def proofread_text(
     stage1 = run_rule_stage(original, preserve_diacritics=preserve)
     stage2 = await run_llm_stage(stage1.text, skip=skip_llm, settings=settings)
 
-    edits: list[dict[str, Any]] = [e.as_dict() for e in stage1.edits] + list(stage2.edits)
+    raw_edits: list[dict[str, Any]] = [e.as_dict() for e in stage1.edits] + list(
+        stage2.edits
+    )
+    # Span indices must match the user original for the Next.js highlighter.
+    edits = remap_edits_to_original(original, raw_edits)
     warnings = list(stage1.warnings) + list(stage2.warnings)
     word_count = count_words(original)
 

@@ -6,6 +6,7 @@
 import {
   arabyaNlpProofread,
   arabyaNlpProofreadEnabled,
+  type ArabyaNlpEdit,
 } from "@/lib/lughawi/arabya-nlp-client";
 import { applyEdits, mergeEdits } from "@/lib/lughawi/pipeline-merge";
 import type { LughawiEdit, ProofreadResponse } from "@/lib/lughawi/types";
@@ -88,23 +89,29 @@ export async function enrichProofreadWithArabyaNlp(
 
   const mapped: LughawiEdit[] = [];
   let seq = 0;
-  for (const raw of payload.edits) {
-    const start = typeof raw.start === "number" ? raw.start : -1;
-    const end = typeof raw.end === "number" ? raw.end : -1;
-    const original = typeof raw.original === "string" ? raw.original : "";
-    const suggestion =
-      typeof raw.suggestion === "string" ? raw.suggestion : "";
-    if (start < 0 || end <= start || !original || !suggestion) continue;
-    if (original === suggestion) continue;
-    if (overlapsProtected(start, end, local.protectedSpans)) continue;
-    if (local.original.slice(start, end) !== original) continue;
+  const claimed = new Set<string>();
+
+  function claimSpan(
+    start: number,
+    end: number,
+    originalTok: string,
+    suggestion: string,
+    raw: ArabyaNlpEdit,
+  ): void {
+    const key = `${start}:${end}`;
+    if (claimed.has(key)) return;
+    if (end <= start || !originalTok || !suggestion) return;
+    if (originalTok === suggestion) return;
+    if (local.original.slice(start, end) !== originalTok) return;
+    if (overlapsProtected(start, end, local.protectedSpans)) return;
+    claimed.add(key);
     seq += 1;
     mapped.push({
       id: typeof raw.id === "string" && raw.id ? raw.id : `nlp-${seq}`,
       start,
       end,
       type: mapType(raw.type),
-      original,
+      original: originalTok,
       suggestion,
       ruleId: typeof raw.rule_id === "string" ? raw.rule_id : undefined,
       explanation:
@@ -115,6 +122,36 @@ export async function enrichProofreadWithArabyaNlp(
       source: mapSource(raw.stage),
       status: "proposed",
     });
+  }
+
+  for (const raw of payload.edits) {
+    const originalTok = typeof raw.original === "string" ? raw.original : "";
+    const suggestion =
+      typeof raw.suggestion === "string" ? raw.suggestion : "";
+    if (!originalTok || !suggestion || originalTok === suggestion) continue;
+
+    const start = typeof raw.start === "number" ? raw.start : -1;
+    const end = typeof raw.end === "number" ? raw.end : -1;
+    if (start >= 0 && end > start && local.original.slice(start, end) === originalTok) {
+      claimSpan(start, end, originalTok, suggestion, raw);
+      continue;
+    }
+
+    // Fallback: locate token in the user original (Ollama historically sent 0:0).
+    let from = 0;
+    while (from < local.original.length) {
+      const idx = local.original.indexOf(originalTok, from);
+      if (idx < 0) break;
+      const endIdx = idx + originalTok.length;
+      const before = idx === 0 ? "" : local.original[idx - 1]!;
+      const after =
+        endIdx >= local.original.length ? "" : local.original[endIdx]!;
+      const isLetter = (c: string) => /[\u0600-\u06FFa-zA-Z0-9]/.test(c);
+      from = endIdx;
+      if (isLetter(before) || isLetter(after)) continue;
+      claimSpan(idx, endIdx, originalTok, suggestion, raw);
+      break;
+    }
   }
 
   // If FastAPI returned a corrected string but no span edits, expose a full-doc edit.
