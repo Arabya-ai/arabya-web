@@ -30,15 +30,18 @@ fi
 
 git pull --ff-only origin "$BRANCH"
 
-echo "==> Node version check (Contabo requires Node 22)"
+echo "==> Node version check (Contabo: Node 22 or 24)"
 NODE_MAJOR="$(node -p "process.versions.node.split('.')[0]")"
-if [[ "$NODE_MAJOR" != "22" ]]; then
-  echo "ERROR: Contabo builds require Node.js 22 (found $(node -v))."
-  echo "Fix once:"
+if [[ "$NODE_MAJOR" != "22" && "$NODE_MAJOR" != "24" ]]; then
+  echo "ERROR: Contabo builds require Node.js 22 or 24 (found $(node -v))."
+  echo "Fix once (recommended Node 22):"
   echo "  curl -fsSL https://deb.nodesource.com/setup_22.x | bash -"
   echo "  apt-get install -y nodejs"
-  echo "  node -v   # expect v22.x"
+  echo "  node -v"
   exit 1
+fi
+if [[ "$NODE_MAJOR" == "24" ]]; then
+  echo "WARN: Node 24 detected — Contabo build uses webpack hoist + serverMinification=false."
 fi
 
 echo "==> Install & build"

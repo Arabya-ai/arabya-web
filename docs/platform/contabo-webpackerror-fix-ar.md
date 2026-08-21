@@ -20,16 +20,14 @@ TypeError: __webpack.WebpackError is not a constructor
 
 ## مطلوب منك الآن على السيرفر (PuTTY)
 
+السيرفر عندك يعمل بـ **Node 24** — مدعوم الآن بعد إصلاح Webpack. لا حاجة لتثبيت Node 22 إلا إن رغبت.
+
 ```bash
 node -v
-# يجب أن ترى v22.x — إن رأيت v24 أو غير ذلك:
-curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
-apt-get install -y nodejs
-node -v
+# يقبل v22.x أو v24.x
 
 cd /var/www/arabya-web
 git fetch origin main
-git checkout main
 git pull --ff-only origin main
 bash scripts/contabo-deploy.sh
 ```
