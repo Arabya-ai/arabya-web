@@ -8,12 +8,22 @@ from sqlalchemy.orm import Session
 
 from app.agent.devops_agent import agent_singleton, run_agent_once_async
 from app.database import get_db
+from app.pipeline.optional_engines import (
+    engines_snapshot,
+    run_mishkal_tashkeel,
+    run_qutrub_conjugate,
+)
 from app.pipeline.proofreader import proofread_text
 from app.schemas import (
     AnalyticsSummary,
+    ConjugateRequest,
+    ConjugateResponse,
+    EnginesResponse,
     HealthResponse,
     ProofreadRequest,
     ProofreadResponse,
+    TashkeelRequest,
+    TashkeelResponse,
     TranscribeResponse,
 )
 from app.security.command_sandbox import list_safe_actions
@@ -37,12 +47,20 @@ async def root() -> dict:
         "health": "/health",
         "dashboard": "/dashboard",
         "layers": [
-            "proofread (Layer 1)",
+            "proofread (Layer 1 — PyArabic+rules; Ollama optional parallel)",
+            "tashkeel (mishkal optional)",
+            "conjugate (libqutrub optional)",
             "transcribe (Layer 2)",
             "devops-agent (Layer 3)",
             "dashboard (Layer 4)",
         ],
     }
+
+
+@router.get("/v1/engines", response_model=EnginesResponse)
+async def engines() -> EnginesResponse:
+    """Public inventory of installed Contabo NLP engines (no secrets)."""
+    return EnginesResponse(ok=True, engines=engines_snapshot())
 
 
 @router.post("/v1/proofread", response_model=ProofreadResponse)
@@ -58,6 +76,49 @@ async def proofread(
         skip_llm=body.skip_llm,
         db=db,
         client_ip=client_ip(request),
+    )
+
+
+@router.post("/v1/tashkeel", response_model=TashkeelResponse)
+async def tashkeel(
+    body: TashkeelRequest,
+    request: Request,
+    _: None = Depends(enforce_rate_limit),
+) -> TashkeelResponse:
+    """Optional Mishkal diacritization — 200 with available=false if not installed."""
+    _ = request
+    result = run_mishkal_tashkeel(body.text)
+    return TashkeelResponse(
+        ok=result.ok,
+        original=result.original,
+        text=result.text,
+        engine=result.engine,
+        available=result.available,
+        warnings=result.warnings,
+    )
+
+
+@router.post("/v1/conjugate", response_model=ConjugateResponse)
+async def conjugate(
+    body: ConjugateRequest,
+    request: Request,
+    _: None = Depends(enforce_rate_limit),
+) -> ConjugateResponse:
+    """Optional Qutrub verb conjugation — never errors solely for missing package."""
+    _ = request
+    result = run_qutrub_conjugate(
+        body.verb,
+        future_type=body.future_type,
+        transitive=body.transitive,
+    )
+    return ConjugateResponse(
+        ok=result.ok,
+        verb=result.verb,
+        future_type=result.future_type,
+        table=result.table,
+        engine=result.engine,
+        available=result.available,
+        warnings=result.warnings,
     )
 
 

@@ -47,8 +47,13 @@ export async function GET() {
       enabled: arabyaNlpProofreadEnabled(),
       url: arabyaNlpBaseUrl(),
       proofreadPath: "/v1/proofread",
+      tashkeelPath: "/v1/tashkeel",
+      conjugatePath: "/v1/conjugate",
+      enginesPath: "/v1/engines",
       publicProxy: "/api/lughawi/proofread",
       health: nlp,
+      priorityAr:
+        "أوفلاين: PyArabic + قواعد (+ تشكيل محلي/mishkal). أونلاين: نفس الشيء + Ollama بالتوازي.",
     },
     sidecar: {
       health: sidecar,

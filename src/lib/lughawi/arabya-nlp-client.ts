@@ -8,6 +8,7 @@ export interface ArabyaNlpHealth {
   ms: number;
   detail?: string;
   service?: string;
+  engines?: Record<string, unknown>;
 }
 
 export interface ArabyaNlpEdit {
@@ -30,7 +31,28 @@ export interface ArabyaNlpProofreadPayload {
   word_count?: number;
   stage1_engine?: string;
   stage2_engine?: string;
+  mode?: string;
+  parallel?: boolean;
   edits: ArabyaNlpEdit[];
+  warnings?: string[];
+}
+
+export interface ArabyaNlpTashkeelPayload {
+  ok: boolean;
+  original: string;
+  text: string;
+  engine: string;
+  available: boolean;
+  warnings?: string[];
+}
+
+export interface ArabyaNlpConjugatePayload {
+  ok: boolean;
+  verb: string;
+  future_type: string;
+  table: Record<string, Record<string, string> | string>;
+  engine: string;
+  available: boolean;
   warnings?: string[];
 }
 
@@ -39,6 +61,17 @@ function baseUrl(): string {
     process.env.ARABYA_NLP_URL?.trim().replace(/\/$/, "") ||
     "http://127.0.0.1:8092"
   );
+}
+
+function authHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  const token = process.env.ARABYA_NLP_API_TOKEN?.trim();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  return headers;
 }
 
 /** When unset/true, /api/lughawi/proofread calls arabya-nlp after local rules. */
@@ -67,11 +100,16 @@ export async function probeArabyaNlpHealth(
     if (!res.ok) {
       return { ok: false, ms, detail: `HTTP ${res.status}` };
     }
-    const json = (await res.json()) as { ok?: boolean; service?: string };
+    const json = (await res.json()) as {
+      ok?: boolean;
+      service?: string;
+      policy?: { engines?: Record<string, unknown> };
+    };
     return {
       ok: Boolean(json.ok),
       ms,
       service: typeof json.service === "string" ? json.service : undefined,
+      engines: json.policy?.engines,
     };
   } catch (e) {
     return {
@@ -85,7 +123,7 @@ export async function probeArabyaNlpHealth(
 }
 
 /**
- * POST /v1/proofread — hybrid Contabo stack (rules + local Ollama).
+ * POST /v1/proofread — hybrid Contabo stack (rules + optional local Ollama in parallel).
  * Returns null on timeout/network/error (caller keeps local/sidecar result).
  */
 export async function arabyaNlpProofread(
@@ -96,17 +134,9 @@ export async function arabyaNlpProofread(
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-    const token = process.env.ARABYA_NLP_API_TOKEN?.trim();
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-
     const res = await fetch(`${baseUrl()}/v1/proofread`, {
       method: "POST",
-      headers,
+      headers: authHeaders(),
       body: JSON.stringify({
         text,
         preserve_diacritics: opts?.preserveDiacritics ?? true,
@@ -122,6 +152,67 @@ export async function arabyaNlpProofread(
       ...json,
       ok: json.ok !== false,
       edits: Array.isArray(json.edits) ? json.edits : [],
+    };
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** POST /v1/tashkeel — optional Mishkal. null = unreachable; available=false = package missing. */
+export async function arabyaNlpTashkeel(
+  text: string,
+  opts?: { timeoutMs?: number },
+): Promise<ArabyaNlpTashkeelPayload | null> {
+  const timeoutMs = opts?.timeoutMs ?? 20_000;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${baseUrl()}/v1/tashkeel`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ text }),
+      signal: ctrl.signal,
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as ArabyaNlpTashkeelPayload;
+    if (!json || typeof json.text !== "string") return null;
+    return json;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** POST /v1/conjugate — optional libqutrub. */
+export async function arabyaNlpConjugate(
+  verb: string,
+  opts?: { futureType?: string; transitive?: boolean; timeoutMs?: number },
+): Promise<ArabyaNlpConjugatePayload | null> {
+  const timeoutMs = opts?.timeoutMs ?? 12_000;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${baseUrl()}/v1/conjugate`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({
+        verb,
+        future_type: opts?.futureType ?? "فتحة",
+        transitive: opts?.transitive ?? true,
+      }),
+      signal: ctrl.signal,
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as ArabyaNlpConjugatePayload;
+    if (!json || typeof json.verb !== "string") return null;
+    return {
+      ...json,
+      table: json.table && typeof json.table === "object" ? json.table : {},
     };
   } catch {
     return null;

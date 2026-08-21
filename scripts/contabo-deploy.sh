@@ -120,32 +120,30 @@ if [[ "$NODE_MAJOR" == "24" ]]; then
   fi
 fi
 
+# Prefer a single npm ci attempt — Contabo lock/optional mismatches fail fast.
+# A second ci attempt (seen in owner screenshots) only prolongs 503 downtime.
 if [[ "$npm_ci_ok" -ne 1 ]]; then
-  for attempt in 1 2; do
-    echo "==> npm ci (attempt $attempt)"
-    if npm ci --no-audit --no-fund; then
-      if [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
-         [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
-        npm_ci_ok=1
-        break
-      fi
-      echo "WARN: npm ci exited 0 but Next extract is incomplete (tar ENOENT on next/dist is common)."
+  echo "==> npm ci (attempt 1)"
+  if npm ci --no-audit --no-fund; then
+    if [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
+       [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
+      npm_ci_ok=1
+      echo "==> npm ci OK"
     else
-      echo "WARN: npm ci failed (attempt $attempt)"
+      echo "WARN: npm ci exited 0 but Next extract is incomplete (tar ENOENT on next/dist is common)."
     fi
-    echo "==> Cleaning corrupted node_modules + npm cache before retry"
-    wipe_node_modules node_modules || true
-    npm cache clean --force >/dev/null 2>&1 || true
-    rm -rf "${NPM_CONFIG_CACHE:-$HOME/.npm}/_cacache" 2>/dev/null || true
-    sleep 2
-  done
+  else
+    echo "WARN: npm ci failed — skipping second ci (go straight to npm install)"
+  fi
 fi
 
 # Fall back to npm install so Contabo can recover instead of leaving the site stopped.
 if [[ "$npm_ci_ok" -ne 1 ]]; then
-  echo "==> falling back to npm install (lock sync / optional platforms / ENOTEMPTY)"
+  echo "==> Cleaning before npm install fallback (lock sync / optional platforms / ENOTEMPTY)"
   wipe_node_modules node_modules || true
   npm cache clean --force >/dev/null 2>&1 || true
+  rm -rf "${NPM_CONFIG_CACHE:-$HOME/.npm}/_cacache" 2>/dev/null || true
+  echo "==> npm install (fallback — Contabo recovery path)"
   if npm install --no-audit --no-fund && \
      [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
      [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
@@ -325,18 +323,33 @@ NLP_VENV_OK=0
 if [[ -x "$APP_DIR/services/arabya-nlp/.venv/bin/python" && -f "$APP_DIR/services/arabya-nlp/main.py" ]]; then
   NLP_VENV_OK=1
 fi
+# Auto-bootstrap NLP deps once when missing (PyArabic + optional mishkal/qutrub).
+# Set CONTABO_NLP_DEPS=0 to skip; CONTABO_NLP_DEPS=force to reinstall every deploy.
 if [[ "${CONTABO_ENABLE_NLP:-}" == "0" || "${CONTABO_ENABLE_NLP:-}" == "false" ]]; then
   echo "==> CONTABO_ENABLE_NLP=0 — leaving arabya-nlp as-is (not force-stopped)."
+elif [[ -f scripts/contabo-arabya-nlp-deps.sh ]] && {
+  [[ "${CONTABO_NLP_DEPS:-}" == "force" ]] || \
+  [[ "${CONTABO_NLP_DEPS:-1}" != "0" && "$NLP_VENV_OK" != "1" ]]
+}; then
+  echo "==> Installing / repairing arabya-nlp venv (PyArabic + optional mishkal/qutrub)"
+  bash scripts/contabo-arabya-nlp-deps.sh || echo "WARN: arabya-nlp-deps failed — web still deploys"
+  if [[ -x "$APP_DIR/services/arabya-nlp/.venv/bin/python" ]]; then
+    NLP_VENV_OK=1
+  fi
 elif [[ "${CONTABO_ENABLE_NLP:-1}" == "1" || "${CONTABO_ENABLE_NLP:-}" == "true" || "$NLP_VENV_OK" == "1" ]]; then
   if [[ "$NLP_VENV_OK" == "1" && -f scripts/contabo-arabya-nlp.sh ]]; then
     bash scripts/contabo-arabya-nlp.sh || echo "WARN: arabya-nlp PM2 restart skipped"
   elif [[ -f scripts/contabo-arabya-nlp-activate.sh ]]; then
-    echo "WARN: arabya-nlp venv missing — run once: bash scripts/contabo-arabya-nlp-activate.sh"
+    echo "WARN: arabya-nlp venv missing — run once: bash scripts/contabo-arabya-nlp-deps.sh"
   else
     echo "WARN: arabya-nlp scripts missing"
   fi
 else
   echo "==> Skipping arabya-nlp start (no venv). Local/sidecar proofread still works."
+fi
+# Ensure PM2 process is up when venv exists (deps script already starts it; restart is idempotent).
+if [[ "$NLP_VENV_OK" == "1" && -f scripts/contabo-arabya-nlp.sh && "${CONTABO_ENABLE_NLP:-1}" != "0" ]]; then
+  bash scripts/contabo-arabya-nlp.sh || true
 fi
 
 echo "==> Restart PM2 arabya-web (only if tree can run next start)"

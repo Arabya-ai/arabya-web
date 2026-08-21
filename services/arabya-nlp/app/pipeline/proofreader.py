@@ -1,13 +1,17 @@
 """
 Layer 1 — Hybrid Arabic NLP proofreader pipeline.
 
-Every input string passes sequentially through:
-  Stage 1: PyArabic + Ghalatawi rule cleanup
-  Stage 2: Local Ollama contextual grammar / style
+Priority:
+  • Always: PyArabic + builtin/Ghalatawi rules (offline-capable)
+  • Optional parallel: local Ollama contextual grammar when reachable
+  • Never fail the request solely because Ollama is down
+
+Online Contabo path runs rules and Ollama concurrently (asyncio.gather).
 """
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
 from typing import Any
@@ -15,8 +19,8 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from app.models import GrammarErrorStat, ProofreadJob, utcnow
-from app.pipeline.llm_stage import run_llm_stage
-from app.pipeline.rule_stage import run_rule_stage
+from app.pipeline.llm_stage import LlmStageResult, run_llm_stage
+from app.pipeline.rule_stage import RuleStageResult, run_rule_stage
 from app.schemas import ProofreadResponse, TextEdit
 from config import Settings, get_settings
 
@@ -87,6 +91,52 @@ def remap_edits_to_original(
     return located
 
 
+def merge_edit_lists(
+    rule_edits: list[dict[str, Any]],
+    llm_edits: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Rules win on overlapping spans; LLM fills non-conflicting gaps."""
+    claimed: list[tuple[int, int]] = []
+    merged: list[dict[str, Any]] = []
+
+    def overlaps(a: int, b: int) -> bool:
+        return any(a < ce and b > cs for cs, ce in claimed)
+
+    for edit in rule_edits:
+        start = int(edit["start"])
+        end = int(edit["end"])
+        if overlaps(start, end):
+            continue
+        claimed.append((start, end))
+        merged.append(edit)
+
+    for edit in llm_edits:
+        start = int(edit["start"])
+        end = int(edit["end"])
+        if overlaps(start, end):
+            continue
+        claimed.append((start, end))
+        merged.append(edit)
+
+    merged.sort(key=lambda e: (int(e["start"]), int(e["end"])))
+    return merged
+
+
+def apply_edits(original: str, edits: list[dict[str, Any]]) -> str:
+    """Apply non-overlapping span edits right-to-left onto the original."""
+    ordered = sorted(edits, key=lambda e: int(e["start"]), reverse=True)
+    out = original
+    for edit in ordered:
+        start = int(edit["start"])
+        end = int(edit["end"])
+        suggestion = str(edit.get("suggestion") or "")
+        token = str(edit.get("original") or "")
+        if end <= start or out[start:end] != token:
+            continue
+        out = out[:start] + suggestion + out[end:]
+    return out
+
+
 def _record_error_stats(db: Session | None, edits: list[dict[str, Any]]) -> None:
     if db is None:
         return
@@ -121,6 +171,14 @@ def _record_error_stats(db: Session | None, edits: list[dict[str, Any]]) -> None
             )
 
 
+async def _run_rules_async(
+    text: str, *, preserve_diacritics: bool
+) -> RuleStageResult:
+    return await asyncio.to_thread(
+        run_rule_stage, text, preserve_diacritics=preserve_diacritics
+    )
+
+
 async def proofread_text(
     text: str,
     *,
@@ -146,18 +204,52 @@ async def proofread_text(
             word_count=0,
             stage1_engine="",
             stage2_engine="",
+            mode="offline",
+            parallel=False,
             warnings=["empty text"],
         )
 
-    stage1 = run_rule_stage(original, preserve_diacritics=preserve)
-    stage2 = await run_llm_stage(stage1.text, skip=skip_llm, settings=settings)
+    # Offline / skip path: rules only (PyArabic + pairs) — never waits on Ollama.
+    if skip_llm or not settings.llm_proofread_enabled:
+        stage1 = await _run_rules_async(original, preserve_diacritics=preserve)
+        stage2 = LlmStageResult(text=stage1.text, engine="llm-skipped", raw_ok=True)
+        parallel = False
+        mode = "offline"
+    else:
+        # Online hybrid: rules + Ollama on the *original* text in parallel.
+        stage1, stage2 = await asyncio.gather(
+            _run_rules_async(original, preserve_diacritics=preserve),
+            run_llm_stage(original, skip=False, settings=settings),
+        )
+        parallel = True
+        mode = (
+            "hybrid-parallel"
+            if stage2.raw_ok and not str(stage2.engine).startswith("ollama-unavailable")
+            else "rules-only-fallback"
+        )
 
-    raw_edits: list[dict[str, Any]] = [e.as_dict() for e in stage1.edits] + list(
-        stage2.edits
-    )
-    # Span indices must match the user original for the Next.js highlighter.
-    edits = remap_edits_to_original(original, raw_edits)
+    rule_dicts = [e.as_dict() for e in stage1.edits]
+    llm_dicts = list(stage2.edits)
+    rule_located = remap_edits_to_original(original, rule_dicts)
+    llm_located = remap_edits_to_original(original, llm_dicts)
+    edits = merge_edit_lists(rule_located, llm_located)
     warnings = list(stage1.warnings) + list(stage2.warnings)
+
+    # Prefer applying merged span edits; fall back to sequential texts.
+    if edits:
+        corrected = apply_edits(original, edits)
+        cleaned = apply_edits(original, rule_located) if rule_located else stage1.text
+    else:
+        cleaned = stage1.text
+        # If Ollama failed, keep rules; if both idle, keep original.
+        if stage2.raw_ok and stage2.text and stage2.engine not in {
+            "llm-skipped",
+            "ollama-unavailable",
+        }:
+            corrected = stage2.text if stage2.text != original else stage1.text
+        else:
+            corrected = stage1.text
+
     word_count = count_words(original)
 
     if db is not None:
@@ -166,8 +258,8 @@ async def proofread_text(
         job = ProofreadJob(
             client_ip=client_ip,
             input_text=original,
-            cleaned_text=stage1.text,
-            corrected_text=stage2.text,
+            cleaned_text=cleaned,
+            corrected_text=corrected,
             word_count=word_count,
             stage1_engine=stage1.engine,
             stage2_engine=stage2.engine,
@@ -185,11 +277,13 @@ async def proofread_text(
     return ProofreadResponse(
         ok=True,
         original=original,
-        cleaned=stage1.text,
-        corrected=stage2.text,
+        cleaned=cleaned,
+        corrected=corrected,
         word_count=word_count,
         stage1_engine=stage1.engine,
         stage2_engine=stage2.engine,
+        mode=mode,
+        parallel=parallel,
         edits=[TextEdit(**e) for e in edits],
         warnings=warnings,
     )
