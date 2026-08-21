@@ -80,7 +80,7 @@ rm -rf node_modules
 npm cache clean --force >/dev/null 2>&1 || true
 
 npm_ci_ok=0
-for attempt in 1 2; do
+for attempt in 1 2 3; do
   echo "==> npm ci (attempt $attempt)"
   if npm ci --no-audit --no-fund; then
     # Contabo often prints tar ENOENT on next/dist yet exits 0 — verify next immediately.
@@ -90,6 +90,14 @@ for attempt in 1 2; do
       break
     fi
     echo "WARN: npm ci exited 0 but Next extract is incomplete (tar ENOENT on next/dist is common)."
+    NEXT_VER="$(node -p "require('./package.json').dependencies.next.replace(/^[\\^~]/,'')")"
+    echo "==> Salvage: reinstall next@${NEXT_VER} alone"
+    rm -rf node_modules/next
+    if npm install "next@${NEXT_VER}" --no-save --include=optional && \
+       [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]]; then
+      npm_ci_ok=1
+      break
+    fi
   else
     echo "WARN: npm ci failed (attempt $attempt)"
   fi
@@ -97,15 +105,19 @@ for attempt in 1 2; do
   rm -rf node_modules
   npm cache clean --force >/dev/null 2>&1 || true
   rm -rf "${NPM_CONFIG_CACHE:-$HOME/.npm}/_cacache" 2>/dev/null || true
+  pm2 flush >/dev/null 2>&1 || true
   sleep 2
 done
 if [[ "$npm_ci_ok" -ne 1 ]]; then
   echo "ERROR: npm ci could not produce a complete Next.js install."
-  echo "On the server run:"
-  echo "  df -h /"
-  echo "  pm2 stop arabya-web arabya-nlp lughawi-sidecar 2>/dev/null || true"
-  echo "  rm -rf node_modules ~/.npm/_cacache"
-  echo "  npm cache clean --force && npm ci"
+  echo "Disk free on /: $(df -h / | awk 'NR==2{print $4}')"
+  echo "See docs/platform/contabo-503-next-incomplete-ar.md"
+  echo "Manual salvage:"
+  echo "  pm2 stop all"
+  echo "  rm -rf node_modules ~/.npm/_cacache && npm cache clean --force"
+  echo "  npm ci --no-audit --no-fund"
+  echo "  NEXT_VER=\$(node -p \"require('./package.json').dependencies.next.replace(/^[\\\\^~]/,'')\")"
+  echo "  rm -rf node_modules/next && npm install next@\$NEXT_VER --no-save --include=optional"
   if [[ -d .next.prev-good ]]; then
     mv .next.prev-good .next
     echo "==> Restored .next.prev-good (site stays STOPPED until node_modules is healthy)"
