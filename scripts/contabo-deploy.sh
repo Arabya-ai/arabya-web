@@ -30,6 +30,17 @@ fi
 
 git pull --ff-only origin "$BRANCH"
 
+echo "==> Node version check (Contabo requires Node 22)"
+NODE_MAJOR="$(node -p "process.versions.node.split('.')[0]")"
+if [[ "$NODE_MAJOR" != "22" ]]; then
+  echo "ERROR: Contabo builds require Node.js 22 (found $(node -v))."
+  echo "Fix once:"
+  echo "  curl -fsSL https://deb.nodesource.com/setup_22.x | bash -"
+  echo "  apt-get install -y nodejs"
+  echo "  node -v   # expect v22.x"
+  exit 1
+fi
+
 echo "==> Install & build"
 # Fresh tree avoids half-broken node_modules after interrupted installs
 # (missing next/dist/compiled/babel/code-frame breaks Turbopack/webpack).
@@ -57,7 +68,31 @@ if [[ ! -f node_modules/sharp/package.json ]]; then
   exit 1
 fi
 
-npm run build
+# Guard: webpack must load (real WebpackError lives on .webpack after init)
+if ! node -e "
+  const w = require('next/dist/compiled/webpack/webpack');
+  if (typeof w.init === 'function') w.init();
+  if (typeof w.webpack?.WebpackError !== 'function') process.exit(2);
+" >/dev/null 2>&1; then
+  echo "==> Compiled webpack broken — reinstalling next cleanly"
+  npm uninstall next >/dev/null 2>&1 || true
+  npm install next@"$(node -p "require('./package.json').dependencies.next")" --no-save --include=optional
+  if ! node -e "
+    const w = require('next/dist/compiled/webpack/webpack');
+    if (typeof w.init === 'function') w.init();
+    if (typeof w.webpack?.WebpackError !== 'function') process.exit(2);
+  "; then
+    echo "ERROR: next/dist/compiled/webpack still broken after reinstall."
+    echo "Confirm Node is 22.x, then: rm -rf node_modules .next && npm ci && npm run build"
+    exit 1
+  fi
+fi
+
+# Hoist WebpackError is handled in next.config.ts (same Node process as the build).
+
+echo "==> Building (webpack, Node $(node -v))"
+export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}"
+NEXT_TELEMETRY_DISABLED=1 npm run build
 
 echo "==> Ensure Contabo databases & runtime stores"
 if [[ -f scripts/contabo-ensure-dbs.sh ]]; then

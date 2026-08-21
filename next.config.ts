@@ -4,6 +4,35 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 /**
+ * Next 15.5 ships `next/dist/compiled/webpack/webpack` where `WebpackError`
+ * lives on `.webpack` after `init()`, but minify-webpack-plugin reads
+ * `_webpack.WebpackError` on the module exports. When minification fails,
+ * Contabo builds collapse into:
+ *   TypeError: __webpack.WebpackError is not a constructor
+ * Hoist the constructor once so the real minify error (if any) can surface.
+ */
+function hoistWebpackErrorConstructor(): void {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const w = require("next/dist/compiled/webpack/webpack") as {
+      init?: () => void;
+      WebpackError?: unknown;
+      webpack?: { WebpackError?: unknown };
+    };
+    if (typeof w.init === "function") w.init();
+    if (
+      typeof w.WebpackError !== "function" &&
+      typeof w.webpack?.WebpackError === "function"
+    ) {
+      w.WebpackError = w.webpack.WebpackError;
+    }
+  } catch {
+    /* ignore — build will fail loudly later if webpack is truly broken */
+  }
+}
+hoistWebpackErrorConstructor();
+
+/**
  * CSP allows self + Google fonts + Quran audio CDNs + Cloudflare Insights.
  * Theme bootstrap uses a tiny inline script → 'unsafe-inline' for script/style.
  */
@@ -45,6 +74,11 @@ const nextConfig: NextConfig = {
   },
   serverExternalPackages: ["@resvg/resvg-js", "better-sqlite3"],
   experimental: {
+    // Next 15.5.x Contabo/self-host: minify-webpack-plugin can throw
+    //   TypeError: __webpack.WebpackError is not a constructor
+    // when wrapping an underlying minify failure (often Node 24 / OOM).
+    // Disable server minify; client still minifies via SWC.
+    serverMinification: false,
     // Tree-shake heavy barrels so home/mushaf ship less unused JS.
     optimizePackageImports: [
       "lucide-react",
@@ -56,6 +90,11 @@ const nextConfig: NextConfig = {
       "@radix-ui/react-popover",
       "@radix-ui/react-tooltip",
     ],
+  },
+  webpack: (config) => {
+    // Re-run hoist inside the webpack compile process (separate from config eval).
+    hoistWebpackErrorConstructor();
+    return config;
   },
   async headers() {
     return [
