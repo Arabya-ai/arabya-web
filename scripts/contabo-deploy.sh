@@ -65,50 +65,30 @@ fi
 echo "==> Cleaning previous install artifacts"
 # Keep a copy of the last good build so a failed build can restore the site
 if [[ -d .next ]]; then
-  rm -rf .next.prev-good
+  contabo_wipe_path .next.prev-good || true
   mv .next .next.prev-good
   echo "==> Saved previous .next → .next.prev-good (restore if build fails)"
 fi
 
-# Contabo sometimes fails plain `rm -rf node_modules` ("Directory not empty") when
-# files are busy / NFS-ish. Rename + force chmod then remove; never abort mid-wipe.
-wipe_node_modules() {
-  local target="${1:-node_modules}"
-  [[ -e "$target" ]] || return 0
-  local trash="${target}.wiping.$$"
-  mv "$target" "$trash" 2>/dev/null || {
-    chmod -R u+w "$target" 2>/dev/null || true
-    rm -rf "$target" 2>/dev/null || true
-    [[ -e "$target" ]] || return 0
-    trash="${target}.wiping.$$"
-    mv "$target" "$trash" || return 1
-  }
-  chmod -R u+w "$trash" 2>/dev/null || true
-  rm -rf "$trash" 2>/dev/null || true
-  # If residual trash remains, leave it for later cleanup — deploy can continue
-  if [[ -e "$trash" ]]; then
-    echo "WARN: could not fully delete $trash — continuing with fresh install path"
-    ( rm -rf "$trash" >/dev/null 2>&1 & ) || true
-  fi
-  return 0
-}
-
-if ! wipe_node_modules node_modules; then
+# Keep last healthy node_modules for rollback — otherwise a failed npm leaves public 503.
+contabo_stash_good_node_modules || true
+if [[ -e node_modules ]]; then
   echo "ERROR: could not clear node_modules after PM2 stop."
-  if [[ -d .next.prev-good ]]; then
-    mv .next.prev-good .next
-    echo "==> Restored .next.prev-good — attempting emergency PM2 start"
-    contabo_safe_restart_web || pm2 start arabya-web || true
-  fi
+  contabo_rollback_install "could not clear node_modules"
   exit 1
 fi
-# Stale npm cache / partial extracts → tar TAR_ENTRY_ERROR ENOENT on Contabo
+
+# Stale npm cache / partial extracts → tar TAR_ENTRY_ERROR / ENOTEMPTY on Contabo
 npm cache clean --force >/dev/null 2>&1 || true
+rm -rf "${NPM_CONFIG_CACHE:-$HOME/.npm}/_cacache" 2>/dev/null || true
+npm config set maxsockets 2 >/dev/null 2>&1 || true
+
+NPM_INSTALL_FLAGS=(--no-audit --no-fund --dangerously-allow-all-scripts)
 
 npm_ci_ok=0
 for attempt in 1 2; do
   echo "==> npm ci (attempt $attempt)"
-  if npm ci --no-audit --no-fund; then
+  if npm ci "${NPM_INSTALL_FLAGS[@]}"; then
     # Contabo often prints tar ENOENT on next/dist yet exits 0 — verify next immediately.
     if [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
        [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
@@ -120,7 +100,7 @@ for attempt in 1 2; do
     echo "WARN: npm ci failed (attempt $attempt)"
   fi
   echo "==> Cleaning corrupted node_modules + npm cache before retry"
-  wipe_node_modules node_modules || true
+  contabo_wipe_node_modules || true
   npm cache clean --force >/dev/null 2>&1 || true
   rm -rf "${NPM_CONFIG_CACHE:-$HOME/.npm}/_cacache" 2>/dev/null || true
   sleep 2
@@ -130,9 +110,9 @@ done
 # Fall back to npm install so Contabo can recover instead of leaving the site stopped.
 if [[ "$npm_ci_ok" -ne 1 ]]; then
   echo "==> npm ci still failing — falling back to npm install (lock sync / optional platforms)"
-  wipe_node_modules node_modules || true
+  contabo_wipe_node_modules || true
   npm cache clean --force >/dev/null 2>&1 || true
-  if npm install --no-audit --no-fund && \
+  if npm install "${NPM_INSTALL_FLAGS[@]}" && \
      [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
      [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
     npm_ci_ok=1
@@ -144,21 +124,12 @@ fi
 
 if [[ "$npm_ci_ok" -ne 1 ]]; then
   echo "ERROR: could not produce a complete Next.js install (npm ci + npm install fallback)."
-  echo "On the server run:"
-  echo "  df -h /"
-  echo "  pm2 stop arabya-web arabya-nlp lughawi-sidecar 2>/dev/null || true"
-  echo "  chmod -R u+w node_modules 2>/dev/null; rm -rf node_modules ~/.npm/_cacache"
-  echo "  npm cache clean --force && npm install --no-audit --no-fund"
-  echo "  bash scripts/contabo-deploy.sh"
-  if [[ -d .next.prev-good ]]; then
-    mv .next.prev-good .next
-    echo "==> Restored .next.prev-good (site stays STOPPED until node_modules is healthy)"
-  fi
-  # Never pm2 restart on a broken node_modules — that causes crash-loop 503.
-  pm2 stop arabya-web 2>/dev/null || true
+  echo "On the server run: bash scripts/contabo-recover-web.sh"
+  contabo_rollback_install "npm ci + npm install both failed"
   exit 1
 fi
 echo "==> Next.js package extract OK"
+# Keep node_modules.prev-good until smoke health succeeds (see end of script).
 
 # Incomplete extracts: use-intl / next-intl missing production ESM (ENOENT core.js)
 verify_intl() {
@@ -175,13 +146,8 @@ if ! verify_intl; then
 fi
 if ! verify_intl; then
   echo "ERROR: node_modules/use-intl/dist/esm/production/core.js still missing."
-  echo "Usually corrupted npm extract on Contabo. Run:"
-  echo "  rm -rf node_modules ~/.npm/_cacache && npm cache clean --force && npm ci"
-  if [[ -d .next.prev-good ]]; then
-    mv .next.prev-good .next
-    echo "==> Restored previous .next so the site can stay up"
-    contabo_safe_restart_web || true
-  fi
+  echo "Repair: bash scripts/contabo-recover-web.sh"
+  contabo_rollback_install "use-intl incomplete"
   exit 1
 fi
 echo "==> use-intl production ESM OK"
@@ -201,24 +167,13 @@ if [[ ! -f node_modules/next/dist/lib/verify-typescript-setup.js ]] || \
 fi
 if [[ ! -f node_modules/next/dist/compiled/babel/code-frame.js ]]; then
   echo "ERROR: next/dist/compiled/babel/code-frame still missing after reinstall."
-  echo "Do NOT delete package-lock.json. Repair with:"
-  echo "  rm -rf node_modules ~/.npm/_cacache && npm cache clean --force && npm ci"
-  if [[ -d .next.prev-good ]]; then
-    rm -rf .next
-    mv .next.prev-good .next
-    echo "==> Restored .next.prev-good — bringing previous site back online"
-    contabo_safe_restart_web || true
-  fi
+  echo "Repair: bash scripts/contabo-recover-web.sh"
+  contabo_rollback_install "incomplete next extract"
   exit 1
 fi
 if [[ ! -f node_modules/sharp/package.json ]]; then
   echo "ERROR: sharp still missing after rebuild. Check npm version / allowScripts on Contabo."
-  if [[ -d .next.prev-good ]]; then
-    rm -rf .next
-    mv .next.prev-good .next
-    echo "==> Restored .next.prev-good"
-    contabo_safe_restart_web || true
-  fi
+  contabo_rollback_install "sharp missing"
   exit 1
 fi
 
@@ -238,13 +193,8 @@ if ! node -e "
     if (typeof w.webpack?.WebpackError !== 'function') process.exit(2);
   "; then
     echo "ERROR: next/dist/compiled/webpack still broken after reinstall."
-    echo "Confirm Node is 22.x, then: rm -rf node_modules .next && npm ci && npm run build"
-    if [[ -d .next.prev-good ]]; then
-      rm -rf .next
-      mv .next.prev-good .next
-      echo "==> Restored .next.prev-good"
-    fi
-    contabo_safe_restart_web || true
+    echo "Confirm Node is 22.x, then: bash scripts/contabo-recover-web.sh"
+    contabo_rollback_install "broken webpack extract"
     exit 1
   fi
 fi
@@ -256,15 +206,8 @@ export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}"
 # Contabo stays on Next 15.5.x for now (no --webpack flag). Next 16 Turbopack default is not used.
 if ! NEXT_TELEMETRY_DISABLED=1 npm run build; then
   echo "ERROR: next build failed."
-  if [[ -d .next.prev-good ]]; then
-    rm -rf .next
-    mv .next.prev-good .next
-    echo "==> Restored .next.prev-good — restarting previous working build"
-    contabo_safe_restart_web || true
-  fi
-  echo "Common Contabo cause: incomplete npm extract. Retry:"
-  echo "  rm -rf node_modules ~/.npm/_cacache && npm cache clean --force"
-  echo "  bash scripts/contabo-deploy.sh"
+  echo "Common Contabo cause: incomplete npm extract. Retry: bash scripts/contabo-recover-web.sh"
+  contabo_rollback_install "next build failed"
   exit 1
 fi
 # Keep .next.prev-good until health check proves the new process is up.
@@ -352,13 +295,7 @@ done
 if [[ "$health_ok" -ne 1 ]]; then
   echo "ERROR: localhost:3000 not ready within 90s."
   echo "      Check: pm2 logs arabya-web --lines 40"
-  if [[ -d .next.prev-good ]]; then
-    echo "==> Rolling back to .next.prev-good"
-    pm2 stop arabya-web || true
-    rm -rf .next
-    mv .next.prev-good .next
-    contabo_safe_restart_web || true
-  fi
+  contabo_rollback_install "localhost health timeout"
   pm2 status || true
   exit 1
 fi
@@ -374,13 +311,7 @@ for path in "/" "/robots.txt" "/sitemap.xml" "/mushaf/1" "/about"; do
 done
 if [[ "$smoke_fail" -eq 1 ]]; then
   echo "ERROR: post-deploy smoke failed (non-2xx/3xx on public routes)."
-  if [[ -d .next.prev-good ]]; then
-    echo "==> Rolling back to .next.prev-good"
-    pm2 stop arabya-web || true
-    rm -rf .next
-    mv .next.prev-good .next
-    contabo_safe_restart_web || true
-  fi
+  contabo_rollback_install "post-deploy smoke failed"
   exit 1
 fi
 
@@ -389,7 +320,8 @@ if command -v git >/dev/null 2>&1; then
   echo "==> Published commit: $(git rev-parse HEAD) ($(git rev-parse --short HEAD))"
 fi
 
-rm -rf .next.prev-good
+contabo_wipe_path .next.prev-good || true
+contabo_wipe_path node_modules.prev-good || true
 curl -sI -H "Host: www.arabya.org" http://127.0.0.1:3000 | head -5 || true
 curl -sI -H "Host: www.arabyaai.com" http://127.0.0.1:3000 | head -5 || true
 echo "Deploy done. Ensure LiteSpeed serves www.arabya.org — see deploy/contabo/nginx-dual-domain.conf (reference)"
