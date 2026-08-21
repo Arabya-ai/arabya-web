@@ -58,7 +58,13 @@ if [[ -n "${AVAIL_KB:-}" && "$AVAIL_KB" -lt 1500000 ]]; then
 fi
 
 echo "==> Cleaning previous install artifacts"
-rm -rf node_modules .next
+# Keep a copy of the last good build so a failed build can restore the site
+if [[ -d .next ]]; then
+  rm -rf .next.prev-good
+  mv .next .next.prev-good
+  echo "==> Saved previous .next → .next.prev-good (restore if build fails)"
+fi
+rm -rf node_modules
 # Stale npm cache / partial extracts → tar TAR_ENTRY_ERROR ENOENT on Contabo
 npm cache clean --force >/dev/null 2>&1 || true
 
@@ -70,7 +76,7 @@ for attempt in 1 2; do
     break
   fi
   echo "WARN: npm ci failed (attempt $attempt) — cleaning and retrying"
-  rm -rf node_modules .next
+  rm -rf node_modules
   npm cache clean --force >/dev/null 2>&1 || true
   sleep 2
 done
@@ -79,9 +85,39 @@ if [[ "$npm_ci_ok" -ne 1 ]]; then
   echo "  df -h"
   echo "  rm -rf node_modules .next ~/.npm/_cacache"
   echo "  npm cache clean --force && npm ci"
+  if [[ -d .next.prev-good ]]; then
+    mv .next.prev-good .next
+    echo "==> Restored .next.prev-good"
+    pm2 restart arabya-web --update-env || true
+  fi
   exit 1
 fi
 
+# Incomplete extracts: use-intl / next-intl missing production ESM (ENOENT core.js)
+verify_intl() {
+  [[ -f node_modules/use-intl/dist/esm/production/core.js ]] && \
+  [[ -f node_modules/use-intl/dist/esm/production/index.js ]] && \
+  [[ -d node_modules/next-intl ]]
+}
+if ! verify_intl; then
+  echo "==> use-intl/next-intl incomplete after npm ci — reinstalling"
+  USE_INTL_VER="$(node -p "try{require('./package-lock.json').packages['node_modules/use-intl'].version}catch(e){'4.13.4'}")"
+  NEXT_INTL_VER="$(node -p "require('./package.json').dependencies['next-intl'].replace(/^[\\^~]/,'')")"
+  npm install "use-intl@${USE_INTL_VER}" "next-intl@${NEXT_INTL_VER}" --no-save --include=optional || \
+    npm install use-intl@4.13.4 next-intl@4.13.4 --no-save --include=optional || true
+fi
+if ! verify_intl; then
+  echo "ERROR: node_modules/use-intl/dist/esm/production/core.js still missing."
+  echo "Usually corrupted npm extract on Contabo. Run:"
+  echo "  rm -rf node_modules ~/.npm/_cacache && npm cache clean --force && npm ci"
+  if [[ -d .next.prev-good ]]; then
+    mv .next.prev-good .next
+    echo "==> Restored previous .next so the site can stay up"
+    pm2 restart arabya-web --update-env || true
+  fi
+  exit 1
+fi
+echo "==> use-intl production ESM OK"
 if [[ ! -f node_modules/sharp/package.json ]] || ! node -e "require('sharp')" >/dev/null 2>&1; then
   echo "==> Native modules incomplete — rebuilding sharp/sqlite/swc"
   npm rebuild sharp better-sqlite3 @swc/core unrs-resolver @parcel/watcher || true
@@ -127,7 +163,20 @@ fi
 
 echo "==> Building (webpack, Node $(node -v))"
 export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}"
-NEXT_TELEMETRY_DISABLED=1 npm run build
+if ! NEXT_TELEMETRY_DISABLED=1 npm run build; then
+  echo "ERROR: next build failed."
+  if [[ -d .next.prev-good ]]; then
+    rm -rf .next
+    mv .next.prev-good .next
+    echo "==> Restored .next.prev-good — restarting previous working build"
+    pm2 restart arabya-web --update-env || true
+  fi
+  echo "Common Contabo cause: incomplete use-intl extract. Retry:"
+  echo "  rm -rf node_modules ~/.npm/_cacache && npm cache clean --force"
+  echo "  bash scripts/contabo-deploy.sh"
+  exit 1
+fi
+rm -rf .next.prev-good
 
 echo "==> Ensure Contabo databases & runtime stores"
 if [[ -f scripts/contabo-ensure-dbs.sh ]]; then
