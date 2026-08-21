@@ -80,7 +80,6 @@ export async function GET(req: Request) {
     }
   }
 
-  const directionRounded = Math.round(direction);
   const directionLabel = formatDirectionLabel(direction, locale);
 
   return NextResponse.json(
