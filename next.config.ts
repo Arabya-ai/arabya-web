@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
@@ -42,14 +43,14 @@ const contentSecurityPolicy = [
   "frame-ancestors 'self'",
   "object-src 'none'",
   "form-action 'self' https://accounts.google.com",
-  "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
+  "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com https://browser.sentry-cdn.com https://js.sentry-cdn.com",
   "worker-src 'self' blob:",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
   "img-src 'self' data: blob: https:",
   // blob: Studio preview/export; https: Pexels/Vimeo CDN fallbacks for <video>
   "media-src 'self' blob: data: https:",
-  "connect-src 'self' https://cloudflareinsights.com https://api.quran.com https://accounts.google.com https://images.pexels.com https://videos.pexels.com https://player.vimeo.com https://cdn.pixabay.com https://pixabay.com https://i.vimeocdn.com",
+  "connect-src 'self' https://cloudflareinsights.com https://*.ingest.sentry.io https://*.sentry.io https://api.quran.com https://accounts.google.com https://images.pexels.com https://videos.pexels.com https://player.vimeo.com https://cdn.pixabay.com https://pixabay.com https://i.vimeocdn.com",
   "frame-src 'self' https://drive.google.com https://docs.google.com blob:",
   "upgrade-insecure-requests",
 ].join("; ");
@@ -106,4 +107,17 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+export default withSentryConfig(withNextIntl(nextConfig), {
+  // Contabo: never require Vercel monitors; source maps upload only with token
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: true,
+  widenClientFileUpload: false,
+  disableLogger: true,
+  automaticVercelMonitors: false,
+  sourcemaps: {
+    disable: !process.env.SENTRY_AUTH_TOKEN,
+  },
+  telemetry: false,
+});

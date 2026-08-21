@@ -41,6 +41,19 @@ type Snapshot = {
       detail?: string;
     };
   };
+  arabyaNlp?: {
+    ok: boolean;
+    ms: number;
+    detail?: string;
+    url: string;
+  };
+  sentry?: {
+    configured: boolean;
+    sdkEnabled: boolean;
+    dsnHost: string | null;
+    issuesFetchable: boolean;
+    messageAr: string;
+  };
   aiUsage: {
     month: string;
     slots: Array<{
@@ -172,6 +185,31 @@ export function AdminOpsMonitor() {
             {data.site.userSyncEnabled ? "مفعّلة" : "متوقفة"}
           </p>
           <p dir="ltr">NODE_ENV={data.site.nodeEnv}</p>
+        </article>
+        <article>
+          <h3>Arabya NLP</h3>
+          <p>
+            {data.arabyaNlp?.ok
+              ? `متصل (${data.arabyaNlp.ms}ms)`
+              : `غير متصل${data.arabyaNlp?.detail ? `: ${data.arabyaNlp.detail}` : ""}`}
+          </p>
+          <p className="dash-muted" dir="ltr">
+            {data.arabyaNlp?.url ?? "http://127.0.0.1:8092/health"}
+          </p>
+        </article>
+        <article>
+          <h3>Sentry</h3>
+          <p>
+            {data.sentry?.configured
+              ? data.sentry.sdkEnabled
+                ? "مفعّل"
+                : "DSN موجود — SDK متوقف في التطوير"
+              : "غير مضبوط"}
+          </p>
+          <p className="dash-muted">{data.sentry?.messageAr ?? "—"}</p>
+          <p className="dash-muted" dir="ltr">
+            {data.sentry?.dsnHost ?? "—"}
+          </p>
         </article>
         <article>
           <h3>استخدام الذكاء ({data.aiUsage.month})</h3>

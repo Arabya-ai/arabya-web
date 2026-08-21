@@ -32,6 +32,7 @@
 | `/hadith`, `/hadith/[collection]`, `/api/hadith/search` | Hadith hub (Git JSON under `data/hadith`) — parallel with Quran |
 | `/heritage`, `/heritage/[slug]` | Heritage & poetry passages (Git JSON under `data/heritage`) — parallel with Quran |
 | `/lughawi` | Arabic MSA proofreader (لغوي) |
+| `/admin` · `/admin/ops` | Super-admin CRM + system monitor (keys, Contabo health, Sentry errors tab) |
 | Contabo `arabya-nlp` `:8092` | Self-hosted FastAPI NLP platform (`services/arabya-nlp`: hybrid proofread, Whisper STT, DevOps agent, `/dashboard`) |
 | `/studio` | Ayah video studio (browser WebCodecs) |
 | `/studio/ai` | Independent AI short-video UI; Python engine in `services/money-printer-turbo` |
