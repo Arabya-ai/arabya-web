@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   canCreatePremiumImage,
   canCreateVideo,
@@ -9,6 +9,16 @@ import {
   studioExportNeedsWatermark,
 } from "@/lib/plans";
 
+beforeEach(() => {
+  process.env.ARABYA_ADMIN_EMAILS = "super@example.com";
+  process.env.ARABYA_PLUS_EMAILS = "plus-owner@example.com";
+});
+
+afterEach(() => {
+  delete process.env.ARABYA_ADMIN_EMAILS;
+  delete process.env.ARABYA_PLUS_EMAILS;
+});
+
 describe("resolveUserPlan", () => {
   it("maps roles to free / pro / plus", () => {
     expect(resolveUserPlan({ email: "a@b.com", role: "member" })).toBe("free");
@@ -17,9 +27,12 @@ describe("resolveUserPlan", () => {
     expect(resolveUserPlan({ email: "a@b.com", role: "admin" })).toBe("plus");
   });
 
-  it("grants plus to owner emails", () => {
+  it("grants plus to env owner / super-admin emails", () => {
     expect(
-      resolveUserPlan({ email: "egywebdev@gmail.com", role: "member" }),
+      resolveUserPlan({ email: "plus-owner@example.com", role: "member" }),
+    ).toBe("plus");
+    expect(
+      resolveUserPlan({ email: "super@example.com", role: "member" }),
     ).toBe("plus");
   });
 });

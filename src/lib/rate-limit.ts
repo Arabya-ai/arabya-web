@@ -4,6 +4,10 @@
  * Suitable while arabya-web runs as one Node/PM2 process. If you move to
  * multiple instances, replace the Map store with Redis/Upstash using the same
  * `enforceRateLimit` / `enforceRateLimitKey` surface so call sites stay unchanged.
+ *
+ * Proxy IP headers (`cf-connecting-ip`, `x-real-ip`, `x-forwarded-for`) are
+ * trusted only when `ARABYA_TRUST_PROXY` is not `0`/`false`. Origin :3000 must
+ * stay closed to the public internet (LiteSpeed/Cloudflare only).
  */
 
 import { NextResponse } from "next/server";
@@ -33,18 +37,42 @@ function sweep(now: number) {
   }
 }
 
-/** Trusted client IP: Cloudflare first, then LiteSpeed X-Real-IP (not spoofable XFF). */
+function trustProxyHeaders(): boolean {
+  const v = (process.env.ARABYA_TRUST_PROXY || "").trim().toLowerCase();
+  if (v === "0" || v === "false" || v === "no") return false;
+  return true;
+}
+
+/** Reject obvious non-IP garbage before using a header as a rate-limit key. */
+export function looksLikeIp(value: string): boolean {
+  const v = value.trim();
+  if (!v || v.length > 64 || /[\s<>"'\\]/.test(v)) return false;
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(v)) return true;
+  // Loose IPv6 / IPv4-mapped check
+  if (v.includes(":") && /^[0-9a-fA-F:.]+$/.test(v)) return true;
+  return false;
+}
+
+/**
+ * Trusted client IP behind Cloudflare / LiteSpeed.
+ * Order: CF-Connecting-IP → X-Real-IP → first X-Forwarded-For hop.
+ * When proxy trust is disabled, returns `unknown` (shared bucket — fail-closed).
+ */
 export function clientIpFromHeaders(headers: Headers): string {
+  if (!trustProxyHeaders()) return "unknown";
+
   const cf = headers.get("cf-connecting-ip")?.trim();
-  if (cf) return cf;
+  if (cf && looksLikeIp(cf)) return cf;
+
   // Contabo LiteSpeed typically sets X-Real-IP from the true peer.
   const real = headers.get("x-real-ip")?.trim();
-  if (real) return real;
-  // Only as last resort — first XFF hop is client-controllable without a trusted proxy overwrite.
+  if (real && looksLikeIp(real)) return real;
+
+  // Last resort — first XFF hop is client-controllable without a trusted overwrite.
   const xff = headers.get("x-forwarded-for");
   if (xff) {
     const first = xff.split(",")[0]?.trim();
-    if (first) return first;
+    if (first && looksLikeIp(first)) return first;
   }
   return "unknown";
 }
