@@ -11,6 +11,21 @@ cd "$APP_DIR"
 
 echo "==> Fetch $BRANCH"
 git fetch origin "$BRANCH"
+
+# Stash/reset BEFORE checkout — dirty package-lock.json (or any tracked file)
+# otherwise aborts `git checkout` and fails GitHub Deploy Contabo + manual deploy.
+if ! git diff --quiet || ! git diff --cached --quiet || [[ -n "$(git ls-files --others --exclude-standard 2>/dev/null | head -1)" ]]; then
+  echo "==> Local working-tree changes detected — stashing before checkout"
+  git stash push -u -m "contabo-deploy-auto-$(date +%F-%H%M%S)" || true
+fi
+
+# If stash left package-lock dirty (rare), discard it — npm ci regenerates from lock on BRANCH.
+if ! git diff --quiet -- package-lock.json 2>/dev/null || ! git diff --cached --quiet -- package-lock.json 2>/dev/null; then
+  echo "==> Resetting dirty package-lock.json so checkout can proceed (npm ci will reinstall)"
+  git checkout -- package-lock.json 2>/dev/null || true
+  git reset HEAD -- package-lock.json 2>/dev/null || true
+fi
+
 git checkout "$BRANCH"
 
 # Learning may have dirtied tracked seed file on older builds — backup + reset so pull can proceed.
@@ -22,7 +37,7 @@ if [[ -f "$LEARNED" ]] && ! git diff --quiet -- "$LEARNED" 2>/dev/null; then
   git checkout -- "$LEARNED"
 fi
 
-# Any other unexpected local edits: stash (keep deploy unblocked)
+# Any other unexpected local edits after checkout: stash again (keep deploy unblocked)
 if ! git diff --quiet || ! git diff --cached --quiet; then
   echo "==> Stashing other local working-tree changes before pull"
   git stash push -u -m "contabo-deploy-auto-$(date +%F-%H%M%S)" || true
