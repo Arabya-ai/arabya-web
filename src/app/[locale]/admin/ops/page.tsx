@@ -7,8 +7,7 @@ import {
 
 import { auth } from "@/auth";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { AdminKeysManager } from "@/components/ops/AdminKeysManager";
-import { AdminOpsMonitor } from "@/components/ops/AdminOpsMonitor";
+import { AdminOpsTabs } from "@/components/ops/AdminOpsTabs";
 import { canAccessAdmin } from "@/lib/roles";
 
 export const dynamic = "force-dynamic";
@@ -42,10 +41,7 @@ export default async function AdminOpsPage({ params }: Props) {
       backHref="/admin"
       backLabel={t("backToStats")}
     >
-      <div className="dash-stack">
-        <AdminKeysManager />
-        <AdminOpsMonitor />
-      </div>
+      <AdminOpsTabs />
     </DashboardShell>
   );
 }

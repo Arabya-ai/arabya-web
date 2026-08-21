@@ -11,6 +11,7 @@ import {
 } from "@/lib/ops/integrations";
 import { usageSummary } from "@/lib/ops/usage-meter";
 import { isCloudSyncConfigured } from "@/lib/cloud-sync";
+import { getSentryStatus, type SentryStatus } from "@/lib/sentry/status";
 
 export interface OpsAlert {
   id: string;
@@ -40,6 +41,13 @@ export interface OpsSnapshot {
       detail?: string;
     };
   };
+  arabyaNlp?: {
+    ok: boolean;
+    ms: number;
+    detail?: string;
+    url: string;
+  };
+  sentry: SentryStatus;
   aiUsage: ReturnType<typeof usageSummary>;
   integrations: Array<
     IntegrationEntry & {
@@ -111,6 +119,33 @@ export async function buildOpsSnapshot(): Promise<OpsSnapshot> {
     });
   }
 
+  const sentry = getSentryStatus();
+  if (!sentry.configured) {
+    alerts.push({
+      id: "sentry-missing",
+      level: "info",
+      area: "sentry",
+      messageAr:
+        "Sentry غير مضبوط — من تبويب «الأخطاء (Sentry)» أضف DSN على Contabo لتتبع الأعطال.",
+      at: now,
+    });
+  }
+
+  const nlpBase = (
+    process.env.ARABYA_NLP_HEALTH_URL?.trim() ||
+    "http://127.0.0.1:8092/health"
+  ).replace(/\/$/, "");
+  const nlpHealth = await probeUrl(nlpBase);
+  if (!nlpHealth.ok) {
+    alerts.push({
+      id: "arabya-nlp-down",
+      level: "warn",
+      area: "arabya-nlp",
+      messageAr: `منصة arabya-nlp (:8092) لا تستجيب: ${nlpHealth.detail ?? "فشل"}`,
+      at: now,
+    });
+  }
+
   const integrations: OpsSnapshot["integrations"] = [];
   for (const entry of registry.integrations) {
     let health: { ok: boolean; ms: number; detail?: string } | undefined;
@@ -176,6 +211,13 @@ export async function buildOpsSnapshot(): Promise<OpsSnapshot> {
         detail: sidecar.detail,
       },
     },
+    arabyaNlp: {
+      ok: nlpHealth.ok,
+      ms: nlpHealth.ms,
+      detail: nlpHealth.detail,
+      url: nlpBase,
+    },
+    sentry,
     aiUsage,
     integrations,
     alerts,
