@@ -1,6 +1,5 @@
 import {
   normalizeArabicToken,
-  tokenizeExpected,
   tokenizeHypothesis,
 } from "./normalize";
 import type { TahfeezWordResult, TahfeezWordStatus } from "./types";
@@ -8,6 +7,9 @@ import type { TahfeezWordResult, TahfeezWordStatus } from "./types";
 /**
  * Sequential constrained alignment: advance expected pointer when the next
  * hypothesized token matches; mark wrong on mismatch; skip remaining as pending.
+ *
+ * Statuses are always indexed against the original `expectedWords` array
+ * (empty normalized tokens stay `pending` and do not consume hypothesis).
  */
 export function alignRecitation(
   expectedWords: string[],
@@ -19,47 +21,57 @@ export function alignRecitation(
   accuracy: number;
   matchedThisPass: number;
 } {
-  const expected = tokenizeExpected(expectedWords);
+  const expectedTokens = expectedWords.map((w) => normalizeArabicToken(w));
+  const activeIndexes = expectedTokens
+    .map((token, index) => (token ? index : -1))
+    .filter((i) => i >= 0);
   const hypo = tokenizeHypothesis(hypothesisText);
-  const cursor0 = Math.max(0, Math.min(opts?.cursor ?? 0, expected.length));
 
-  const status: TahfeezWordStatus[] = expected.map((_, i) =>
-    i < cursor0 ? "correct" : "pending",
+  const status: TahfeezWordStatus[] = expectedWords.map(() => "pending");
+
+  const activePos0 = Math.max(
+    0,
+    Math.min(opts?.cursor ?? 0, activeIndexes.length),
   );
+  for (let i = 0; i < activePos0; i++) {
+    status[activeIndexes[i]] = "correct";
+  }
 
-  let cursor = cursor0;
+  let activePos = activePos0;
   let matchedThisPass = 0;
   let hypoIdx = 0;
 
-  while (hypoIdx < hypo.length && cursor < expected.length) {
-    const want = expected[cursor];
+  while (hypoIdx < hypo.length && activePos < activeIndexes.length) {
+    const wordIndex = activeIndexes[activePos];
+    const want = expectedTokens[wordIndex];
     const got = hypo[hypoIdx];
+
     if (got === want) {
-      status[cursor] = "correct";
-      cursor += 1;
+      status[wordIndex] = "correct";
+      activePos += 1;
       matchedThisPass += 1;
       hypoIdx += 1;
       continue;
     }
+
     // Lookahead: skip one expected if next matches (user skipped a word)
-    if (
-      cursor + 1 < expected.length &&
-      hypo[hypoIdx] === expected[cursor + 1]
-    ) {
-      status[cursor] = "skipped";
-      cursor += 1;
-      continue;
+    if (activePos + 1 < activeIndexes.length) {
+      const nextIndex = activeIndexes[activePos + 1];
+      if (hypo[hypoIdx] === expectedTokens[nextIndex]) {
+        status[wordIndex] = "skipped";
+        activePos += 1;
+        continue;
+      }
     }
+
     // Lookahead: ignore filler hypo token if next hypo matches current expected
-    if (
-      hypoIdx + 1 < hypo.length &&
-      hypo[hypoIdx + 1] === want
-    ) {
+    if (hypoIdx + 1 < hypo.length && hypo[hypoIdx + 1] === want) {
       hypoIdx += 1;
       continue;
     }
-    status[cursor] = "wrong";
-    cursor += 1;
+
+    status[wordIndex] = "wrong";
+    activePos += 1;
     hypoIdx += 1;
   }
 
@@ -74,7 +86,12 @@ export function alignRecitation(
   const accuracy =
     decided.length === 0 ? 0 : Math.round((correct / decided.length) * 100);
 
-  return { results, cursor, accuracy, matchedThisPass };
+  return {
+    results,
+    cursor: activePos,
+    accuracy,
+    matchedThisPass,
+  };
 }
 
 export function wordsEqual(a: string, b: string): boolean {

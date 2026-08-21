@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { mushafAyahAudioUrl } from "@/lib/audio";
 import { alignRecitation } from "@/lib/tahfeez/align";
+import { normalizeArabicToken } from "@/lib/tahfeez/normalize";
 import {
   TAHFEEZ_MAX_AYAHS,
   tahfeezHref,
@@ -58,6 +59,14 @@ function statusIcon(status: TahfeezWordStatus): string {
   if (status === "wrong") return "✕";
   if (status === "skipped" || status === "hesitation") return "•";
   return "○";
+}
+
+function statusLabel(status: TahfeezWordStatus, ar: boolean): string {
+  if (status === "correct") return ar ? "صواب" : "Correct";
+  if (status === "wrong") return ar ? "خطأ" : "Wrong";
+  if (status === "skipped") return ar ? "تخطي" : "Skipped";
+  if (status === "hesitation") return ar ? "تردّد" : "Hesitation";
+  return ar ? "بانتظار" : "Pending";
 }
 
 function resetAyahAttemptState(
@@ -189,7 +198,32 @@ export function TahfeezApp({
       },
       { setWordResults, setCursor, setSessionAccuracy },
     );
-  }, [expectedWords]);
+
+    // Local/dev visual QA: ?demo=align paints sample correct/wrong without mic.
+    if (
+      process.env.NODE_ENV === "development" &&
+      typeof window !== "undefined"
+    ) {
+      const demo = new URLSearchParams(window.location.search).get("demo");
+      if (demo === "align" && expectedWords.length > 0) {
+        const sample = expectedWords
+          .slice(0, Math.min(4, expectedWords.length))
+          .map((w, i) => (i === 1 ? "كلمةخاطئة" : w))
+          .join(" ");
+        const local = alignRecitation(expectedWords, sample);
+        setWordResults(local.results);
+        resultsRef.current = local.results;
+        setCursor(local.cursor);
+        cursorRef.current = local.cursor;
+        setSessionAccuracy(local.accuracy);
+        setListeningHint(
+          ar
+            ? "وضع تجريبي محلي: عرض تلوين الصواب/الخطأ"
+            : "Local demo: sample correct/wrong coloring",
+        );
+      }
+    }
+  }, [expectedWords, ar]);
 
   useEffect(() => {
     void fetch("/api/tahfeez/portfolio")
@@ -351,13 +385,17 @@ export function TahfeezApp({
     }
   }, [persistSession, stopAudio, stopRecording]);
 
-  const applyHypothesisRef = useRef<(chunk: string) => void>(() => {});
+  const applyHypothesisRef = useRef<
+    (chunk: string, opts?: { permanent?: boolean }) => void
+  >(() => {});
   const restartRecognitionRef = useRef<(() => void) | null>(null);
 
   const maybeCompleteAyah = useCallback(
     (alignedCursor: number) => {
-      const total = expectedRef.current.length;
-      if (!isAyahRecitationComplete(alignedCursor, total)) return;
+      const totalActive = expectedRef.current.filter((w) =>
+        Boolean(normalizeArabicToken(w)),
+      ).length;
+      if (!isAyahRecitationComplete(alignedCursor, totalActive)) return;
       if (ayahCompletedRef.current || advancingRef.current) return;
       if (!recordingRef.current) return;
 
@@ -385,7 +423,7 @@ export function TahfeezApp({
   );
 
   const applyHypothesis = useCallback(
-    async (hypothesisChunk: string) => {
+    async (hypothesisChunk: string, opts?: { permanent?: boolean }) => {
       if (
         !hypothesisChunk.trim() ||
         advancingRef.current ||
@@ -394,9 +432,14 @@ export function TahfeezApp({
         return;
       }
 
+      const permanent = opts?.permanent !== false;
       const gen = alignGenRef.current;
-      hypoAllRef.current = `${hypoAllRef.current} ${hypothesisChunk}`.trim();
-      const hypothesis = hypoAllRef.current;
+      const hypothesis = permanent
+        ? `${hypoAllRef.current} ${hypothesisChunk}`.trim()
+        : `${hypoAllRef.current} ${hypothesisChunk}`.trim();
+      if (permanent) {
+        hypoAllRef.current = hypothesis;
+      }
       const expected = expectedRef.current;
 
       const local = alignRecitation(expected, hypothesis);
@@ -407,6 +450,8 @@ export function TahfeezApp({
       setCursor(local.cursor);
       cursorRef.current = local.cursor;
       setSessionAccuracy(local.accuracy);
+
+      if (!permanent) return;
 
       maybeCompleteAyah(local.cursor);
       if (isStaleAlignGeneration(gen, alignGenRef.current)) return;
@@ -443,19 +488,23 @@ export function TahfeezApp({
     [maybeCompleteAyah],
   );
 
-  applyHypothesisRef.current = (chunk) => {
-    void applyHypothesis(chunk);
+  applyHypothesisRef.current = (chunk, opts) => {
+    void applyHypothesis(chunk, opts);
   };
 
   const bindRecognitionHandlers = useCallback(
     (rec: SpeechRec) => {
       rec.onresult = (ev) => {
-        const { finalText, displayHint } = extractSpeechSegments(
+        const { finalText, interimText, displayHint } = extractSpeechSegments(
           ev.results,
           ev.resultIndex ?? 0,
         );
         if (displayHint) setListeningHint(displayHint);
-        if (finalText) applyHypothesisRef.current(finalText);
+        if (finalText) {
+          applyHypothesisRef.current(finalText, { permanent: true });
+        } else if (interimText.trim()) {
+          applyHypothesisRef.current(interimText, { permanent: false });
+        }
       };
       rec.onerror = (ev) => {
         if (ev.error === "not-allowed") {
@@ -604,6 +653,17 @@ export function TahfeezApp({
 
   const stats = portfolio.stats;
   const currentMeta = surahCatalog.find((s) => s.id === initialSurahId);
+  const activeWordIndexes = useMemo(
+    () =>
+      expectedWords
+        .map((w, index) => (normalizeArabicToken(w) ? index : -1))
+        .filter((i) => i >= 0),
+    [expectedWords],
+  );
+  const currentWordIndex = activeWordIndexes[cursor] ?? -1;
+  const decidedCount = wordResults.filter((w) => w.status !== "pending").length;
+  const correctCount = wordResults.filter((w) => w.status === "correct").length;
+  const wrongCount = wordResults.filter((w) => w.status === "wrong").length;
 
   return (
     <main className="shell page-block tahfeez-shell" dir={ar ? "rtl" : "ltr"}>
@@ -738,16 +798,37 @@ export function TahfeezApp({
         <div
           className="tahfeez-ayah"
           data-hidden={hideText ? "true" : "false"}
+          data-recording={recording ? "true" : "false"}
         >
           {wordResults.map((w) => (
             <span
               key={`${w.index}-${w.text}`}
               className="tahfeez-word"
               data-status={w.status}
+              data-current={w.index === currentWordIndex ? "true" : "false"}
+              title={statusLabel(w.status, ar)}
             >
-              {w.text}
+              <span className="tahfeez-word__text">{w.text}</span>
+              {w.status === "correct" || w.status === "wrong" ? (
+                <span className="tahfeez-word__mark" aria-hidden>
+                  {statusIcon(w.status)}
+                </span>
+              ) : null}
             </span>
           ))}
+        </div>
+
+        <div className="tahfeez-live-legend" aria-hidden={!recording}>
+          <span data-tone="correct">
+            ✓ {ar ? "صواب" : "OK"} {correctCount}
+          </span>
+          <span data-tone="wrong">
+            ✕ {ar ? "خطأ" : "Wrong"} {wrongCount}
+          </span>
+          <span data-tone="pending">
+            ○ {ar ? "متبقّي" : "Left"}{" "}
+            {Math.max(0, activeWordIndexes.length - decidedCount)}
+          </span>
         </div>
 
         <div className="tahfeez-controls">
@@ -794,8 +875,8 @@ export function TahfeezApp({
         <p className="tahfeez-status">
           {recording
             ? ar
-              ? `${listeningHint || "جاري التسجيل"} · ${elapsed}ث · ${cursor}/${expectedWords.length} · دقة ${sessionAccuracy}%`
-              : `${listeningHint || "Recording"} · ${elapsed}s · ${cursor}/${expectedWords.length} · ${sessionAccuracy}%`
+              ? `${listeningHint || "جاري التسجيل"} · ${elapsed}ث · ${cursor}/${activeWordIndexes.length} · دقة ${sessionAccuracy}%`
+              : `${listeningHint || "Recording"} · ${elapsed}s · ${cursor}/${activeWordIndexes.length} · ${sessionAccuracy}%`
             : listeningHint ||
               (ar
                 ? "اضغط «ابدأ التسميع» — ينتقل تلقائيًا للآية التالية ضمن النطاق"
@@ -834,9 +915,18 @@ export function TahfeezApp({
         </h2>
         <ul className="tahfeez-word-list">
           {wordResults.map((w) => (
-            <li key={w.index} data-status={w.status}>
-              <span>{w.text}</span>
-              <span aria-label={w.status}>{statusIcon(w.status)}</span>
+            <li
+              key={w.index}
+              data-status={w.status}
+              data-current={w.index === currentWordIndex ? "true" : "false"}
+            >
+              <span className="tahfeez-word-list__text">{w.text}</span>
+              <span
+                className="tahfeez-word-list__badge"
+                aria-label={statusLabel(w.status, ar)}
+              >
+                {statusIcon(w.status)} {statusLabel(w.status, ar)}
+              </span>
             </li>
           ))}
         </ul>

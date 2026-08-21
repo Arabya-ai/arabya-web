@@ -42,6 +42,17 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { open, setOpen, toggle } = useDismissibleOpen(rootRef);
+  const [finePointer, setFinePointer] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
+    function sync() {
+      setFinePointer(mq.matches);
+    }
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   function clearCloseTimer() {
     if (closeTimer.current) {
@@ -57,7 +68,7 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
 
   function scheduleClose() {
     clearCloseTimer();
-    closeTimer.current = setTimeout(() => setOpen(false), 160);
+    closeTimer.current = setTimeout(() => setOpen(false), 180);
   }
 
   function go() {
@@ -74,9 +85,8 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
     <div
       className={`nav-dropdown nav-dropdown--services ${open ? "is-open" : ""}`}
       ref={rootRef}
-      onMouseEnter={openMenu}
-      onMouseLeave={scheduleClose}
-      onFocusCapture={openMenu}
+      onMouseEnter={finePointer ? openMenu : undefined}
+      onMouseLeave={finePointer ? scheduleClose : undefined}
     >
       <button
         type="button"
