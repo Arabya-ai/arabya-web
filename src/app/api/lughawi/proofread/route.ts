@@ -7,15 +7,29 @@ import { enrichProofreadWithAi } from "@/lib/lughawi/ai-proofread";
 import { enrichProofreadWithArabyaNlp } from "@/lib/lughawi/arabya-nlp-enrich";
 import { enrichProofreadWithSidecar } from "@/lib/lughawi/sidecar-enrich";
 import { lughawiMaxGuestChars, countArabicWords } from "@/lib/lughawi/config";
+import { applyEdits, mergeEdits } from "@/lib/lughawi/pipeline-merge";
 import { proofreadLocal } from "@/lib/lughawi/pipeline";
 import { resolveLughawiAiCandidates } from "@/lib/lughawi/resolve-ai";
 import { getQuota, tryChargeQuota } from "@/lib/lughawi/quota-store";
-import type { ProofMode } from "@/lib/lughawi/types";
+import type { ProofMode, ProofreadResponse } from "@/lib/lughawi/types";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
-/** Contabo Ollama (llama3.1:8b) may need up to ~1m on cold CPU. */
-export const maxDuration = 90;
+/**
+ * Contabo hybrid: Alnnahwi (sidecar) ∥ Ollama (arabya-nlp) in parallel.
+ * Wall-clock ≈ max(sidecar, nlp), not the sum.
+ */
+export const maxDuration = 120;
+
+function stageNote(result: ProofreadResponse, id: string): string {
+  const s = result.meta.stages?.find((x) => x.id === id);
+  return typeof s?.note === "string" ? s.note : "";
+}
+
+function contaboOllamaAlreadyUsed(result: ProofreadResponse): boolean {
+  const nlp = stageNote(result, "arabya-nlp");
+  return /ollama/i.test(nlp) && !/llm-skipped|unreachable|skip/i.test(nlp);
+}
 
 export async function POST(req: Request) {
   const limited = enforceRateLimit(req, { prefix: "lughawi-proofread", limit: 40 });
@@ -59,34 +73,63 @@ export async function POST(req: Request) {
     );
   }
 
-  // Layer 1: offline TypeScript rules
-  let result = proofreadLocal(text, {
+  // Layer 1: offline TypeScript rules (instant Contabo foundation)
+  const local = proofreadLocal(text, {
     locale,
     mode: "proofread",
     proofMode,
   });
 
-  // Layer 2: Contabo sidecar rule-NLP (fast path; neural GEC only if explicitly requested later).
-  // Keep timeout short so interactive UI never hangs on Alnnahwi/Stanza CPU load.
-  try {
-    result = await enrichProofreadWithSidecar(result);
-  } catch {
-    // Sidecar is optional — keep local rules.
-  }
-
-  // Layer 2b: Contabo arabya-nlp FastAPI (:8092) — server-side only proxy.
-  // Browser → /api/lughawi/proofread → http://127.0.0.1:8092/v1/proofread
-  // Do NOT expose :8092 on public Nginx/OLS; Next is the public front door.
-  // Keep ARABYA_NLP_URL=http://127.0.0.1:8092 (never https://arabya.org).
-  try {
-    result = await enrichProofreadWithArabyaNlp(result, {
-      // Interactive Auto: Contabo rules + local llama3.1:8b when useAi.
+  // Layers 2 + 2b in PARALLEL:
+  //   :8091 sidecar — rules + Alnnahwi GEC when useAi
+  //   :8092 arabya-nlp — PyArabic/rules ∥ Ollama when useAi
+  const [fromSidecar, fromNlp] = await Promise.all([
+    enrichProofreadWithSidecar(local, {
+      neural: wantAi,
+      timeoutMs: wantAi ? 45_000 : 4_000,
+    }).catch(() => local),
+    enrichProofreadWithArabyaNlp(local, {
       skipLlm: !wantAi,
-      timeoutMs: wantAi ? 55_000 : 8_000,
-    });
-  } catch {
-    // arabya-nlp optional — keep local + sidecar.
-  }
+      timeoutMs: wantAi ? 75_000 : 8_000,
+    }).catch(() => local),
+  ]);
+
+  const sidecarStage = (fromSidecar.meta.stages ?? []).find(
+    (s) => s.id === "sidecar-nlp",
+  );
+  const nlpStage = (fromNlp.meta.stages ?? []).find((s) => s.id === "arabya-nlp");
+  const baseStages = (local.meta.stages ?? []).filter(
+    (s) => s.id !== "sidecar-nlp" && s.id !== "arabya-nlp",
+  );
+
+  const mergedEdits = mergeEdits([local.edits, fromSidecar.edits, fromNlp.edits]);
+  let result: ProofreadResponse = {
+    original: text,
+    result: applyEdits(text, mergedEdits),
+    edits: mergedEdits,
+    protectedSpans: local.protectedSpans,
+    meta: {
+      engine: local.meta.engine,
+      usedAi: Boolean(fromSidecar.meta.usedAi || fromNlp.meta.usedAi),
+      offline: Boolean(fromSidecar.meta.offline && fromNlp.meta.offline),
+      quotaCharged: 0,
+      provider: fromNlp.meta.provider ?? fromSidecar.meta.provider,
+      warning: fromNlp.meta.warning ?? fromSidecar.meta.warning,
+      stages: [
+        ...baseStages,
+        ...(sidecarStage ? [sidecarStage] : []),
+        ...(nlpStage ? [nlpStage] : []),
+        {
+          id: "parallel-contabo",
+          editCount: mergedEdits.length,
+          ms: Math.max(sidecarStage?.ms ?? 0, nlpStage?.ms ?? 0),
+          note: wantAi
+            ? "sidecar(Alnnahwi∥rules) ∥ arabya-nlp(rules∥Ollama)"
+            : "sidecar(rules) ∥ arabya-nlp(rules-only)",
+        },
+      ],
+    },
+  };
 
   if (!wantAi) {
     return NextResponse.json(result);
@@ -96,7 +139,7 @@ export async function POST(req: Request) {
   const email = session?.user?.email?.trim().toLowerCase();
   const banned = session?.error === "Banned";
 
-  // Guests: local rules + sidecar only — never burn project/admin AI keys without a session.
+  // Guests: Contabo parallel stack only — never burn project/admin cloud keys.
   let candidates: ReturnType<typeof buildAutoCandidates> = [];
   let chargeProject = false;
 
@@ -109,6 +152,14 @@ export async function POST(req: Request) {
     chargeProject = resolved.chargeProject;
   }
 
+  if (!candidates.length) {
+    return NextResponse.json(result);
+  }
+
+  // Avoid double Ollama when Contabo arabya-nlp already ran llama.
+  if (contaboOllamaAlreadyUsed(result)) {
+    candidates = candidates.filter((c) => c.provider !== "ollama");
+  }
   if (!candidates.length) {
     return NextResponse.json(result);
   }
@@ -128,7 +179,7 @@ export async function POST(req: Request) {
     }
   }
 
-  // Layer 3: cloud / local LLM enrichment (Gemini Auto pool, Ollama Llama-3.1-8B, …)
+  // Layer 3 (signed-in only): optional cloud Gemini/OpenAI polish after Contabo.
   try {
     result = await enrichProofreadWithAi(result, candidates);
     if (chargeProject && email && result.meta.usedAi) {

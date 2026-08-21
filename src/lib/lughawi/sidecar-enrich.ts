@@ -15,13 +15,27 @@ function overlapsProtected(
   return spans.some((s) => start < s.end && end > s.start);
 }
 
+export type SidecarEnrichOpts = {
+  /** Run Alnnahwi / AraBART neural GEC after rules (CPU-heavy on Contabo). */
+  neural?: boolean;
+  /** Override timeout (ms). Defaults: neural 45000 / rules-only 4000. */
+  timeoutMs?: number;
+};
+
 export async function enrichProofreadWithSidecar(
   local: ProofreadResponse,
+  opts?: SidecarEnrichOpts,
 ): Promise<ProofreadResponse> {
-  // Prefer snappy interactive UX: local rules already cover many MSA fixes;
-  // never wait on Contabo neural GEC (Alnnahwi) during default proofread.
-  const timeoutMs = local.edits.length > 0 ? 2_000 : 4_000;
-  const payload = await sidecarGec(local.original, timeoutMs, { neural: false });
+  const wantNeural = Boolean(opts?.neural);
+  const timeoutMs =
+    opts?.timeoutMs ??
+    (wantNeural ? 45_000 : local.edits.length > 0 ? 2_000 : 4_000);
+  const t0 = Date.now();
+  const payload = await sidecarGec(local.original, timeoutMs, {
+    neural: wantNeural,
+  });
+  const ms = Date.now() - t0;
+
   if (!payload || !payload.edits.length) {
     return {
       ...local,
@@ -32,7 +46,7 @@ export async function enrichProofreadWithSidecar(
           {
             id: "sidecar-nlp",
             editCount: 0,
-            ms: 0,
+            ms,
             note: payload?.engine
               ? `sidecar:${payload.engine} (no new edits)`
               : "sidecar unreachable — rules-only",
@@ -62,6 +76,9 @@ export async function enrichProofreadWithSidecar(
     ).includes(raw.type as LughawiEdit["type"])
       ? (raw.type as LughawiEdit["type"])
       : "other";
+    const isNeural =
+      typeof raw.ruleId === "string" &&
+      (raw.ruleId.includes("alnnahwi") || raw.ruleId.includes("arabart") || raw.ruleId.includes("gec"));
     mapped.push({
       id: `sidecar-${seq}`,
       start,
@@ -73,10 +90,12 @@ export async function enrichProofreadWithSidecar(
       explanation:
         typeof raw.explanation === "string" && raw.explanation
           ? raw.explanation
-          : "تصحيح من محرك NLP المحلي (Stanza/قواعد)",
+          : isNeural
+            ? "تصحيح من محرك النحوي العصبي (Alnnahwi) على Contabo"
+            : "تصحيح من محرك NLP المحلي (قواعد/Stanza)",
       confidence:
-        typeof raw.confidence === "number" ? raw.confidence : 0.8,
-      source: "gec",
+        typeof raw.confidence === "number" ? raw.confidence : isNeural ? 0.72 : 0.85,
+      source: isNeural || wantNeural ? "gec" : "gec",
       status: "proposed",
     });
   }
@@ -91,7 +110,7 @@ export async function enrichProofreadWithSidecar(
           {
             id: "sidecar-nlp",
             editCount: 0,
-            ms: 0,
+            ms,
             note: `sidecar:${payload.engine}`,
           },
         ],
@@ -101,20 +120,27 @@ export async function enrichProofreadWithSidecar(
 
   const merged = mergeEdits([local.edits, mapped]);
   const result = applyEdits(local.original, merged);
+  const usedNeural =
+    wantNeural &&
+    (payload.engine.includes("alnnahwi") ||
+      payload.engine.includes("arabart") ||
+      mapped.some((e) => (e.ruleId || "").includes("alnnahwi")));
+
   return {
     ...local,
     result,
     edits: merged,
     meta: {
       ...local.meta,
-      offline: local.meta.offline && !payload.engine.includes("arabart"),
+      offline: local.meta.offline && !usedNeural,
+      usedAi: local.meta.usedAi || usedNeural,
       stages: [
         ...(local.meta.stages ?? []),
         {
           id: "sidecar-nlp",
           editCount: mapped.length,
-          ms: 0,
-          note: `sidecar:${payload.engine}`,
+          ms,
+          note: `sidecar:${payload.engine}${wantNeural ? ":neural" : ":rules"}`,
         },
       ],
     },
