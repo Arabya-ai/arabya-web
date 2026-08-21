@@ -20,9 +20,7 @@ Last updated: 2026-08-19
 
 ## Low
 
-4) **UX pattern split across Ayat Studio vs MPT Studio**
-- Similar workflows have different visual language and interaction rhythm.
-- Risk: user cognitive overhead and maintenance duplication.
+4) **UX pattern split across Ayat Studio vs MPT Studio** — resolved: MPT `/studio/ai` removed; only ayat studio remains.
 
 ## Design normalization plan (short)
 1. Create one canonical token map for all app surfaces.
