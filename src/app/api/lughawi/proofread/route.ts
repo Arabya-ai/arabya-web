@@ -4,6 +4,7 @@ import {
   humanizeAiError,
 } from "@/lib/lughawi/ai-gateway";
 import { enrichProofreadWithAi } from "@/lib/lughawi/ai-proofread";
+import { enrichProofreadWithArabyaNlp } from "@/lib/lughawi/arabya-nlp-enrich";
 import { enrichProofreadWithSidecar } from "@/lib/lughawi/sidecar-enrich";
 import { lughawiMaxGuestChars, countArabicWords } from "@/lib/lughawi/config";
 import { proofreadLocal } from "@/lib/lughawi/pipeline";
@@ -68,6 +69,19 @@ export async function POST(req: Request) {
     result = await enrichProofreadWithSidecar(result);
   } catch {
     // Sidecar is optional — keep local rules.
+  }
+
+  // Layer 2b: Contabo arabya-nlp FastAPI (:8092) — server-side only proxy.
+  // Browser → /api/lughawi/proofread → http://127.0.0.1:8092/v1/proofread
+  // Do NOT expose :8092 on public Nginx/OLS; Next is the public front door.
+  try {
+    result = await enrichProofreadWithArabyaNlp(result, {
+      // Guests / useAi=false: rules-only on FastAPI (skip Ollama) for snappy UX.
+      skipLlm: !wantAi,
+      timeoutMs: wantAi ? 45_000 : 8_000,
+    });
+  } catch {
+    // arabya-nlp optional — keep local + sidecar.
   }
 
   if (!wantAi) {
