@@ -3,7 +3,6 @@ import { getTranslations } from "next-intl/server";
 import { auth, signOut } from "@/auth";
 import { AccountHistoryPanel } from "@/components/AccountHistoryPanel";
 import { AccountLanguagePanel } from "@/components/AccountLanguagePanel";
-import { AccountPersonalData } from "@/components/AccountPersonalData";
 import { CloudSyncPanel } from "@/components/CloudSyncPanel";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { RoleRequestPanel } from "@/components/dashboard/RoleRequestPanel";
@@ -58,16 +57,11 @@ export default async function AccountPage({ params }: Props) {
     >
       <div className="dash-stack">
         <ArabyaPanel accent legacyDash title={t("shortcuts")}>
-          <div className="account-hub">
-            <Link href="/tahfeez" className="account-hub-card">
+          <div className="account-hub account-hub--primary">
+            <Link href="/account/tahfeez" className="account-hub-card">
               <strong>{t("tahfeez")}</strong>
               <span>{t("tahfeezLead")}</span>
               <em>{t("openRecitation")}</em>
-            </Link>
-            <Link href="/studio/dashboard" className="account-hub-card">
-              <strong>{t("studio")}</strong>
-              <span>{t("studioLead")}</span>
-              <em>{t("openTool")}</em>
             </Link>
             <Link href="/account/adhkar" className="account-hub-card">
               <strong>{t("adhkarTitle")}</strong>
@@ -79,28 +73,11 @@ export default async function AccountPage({ params }: Props) {
               <span>{t("studyLead")}</span>
               <em>{t("openTool")}</em>
             </Link>
-            <Link href="/account/import" className="account-hub-card">
-              <strong>{t("importBook")}</strong>
-              <span>{t("importBookLead")}</span>
-              <em>{t("openTool")}</em>
-            </Link>
-            <Link href="/favorites" className="account-hub-card">
-              <strong>{t("favorites")}</strong>
-              <span>{t("favoritesLead")}</span>
-              <em>{t("openTool")}</em>
-            </Link>
             <Link href="/account/stats" className="account-hub-card">
               <strong>{t("statsPageTitle")}</strong>
               <span>{t("statsLead")}</span>
-              <em>{t("openTool")}</em>
+              <em>{t("openStats")}</em>
             </Link>
-            {canAccessAdmin(role) ? (
-              <Link href="/admin/users" className="account-hub-card">
-                <strong>{t("admin")}</strong>
-                <span>{t("crmLead")}</span>
-                <em>{t("openCrm")}</em>
-              </Link>
-            ) : null}
             {canAccessEditorialTools(role) ? (
               <Link href="/account/edit" className="account-hub-card">
                 <strong>{t("editHub")}</strong>
@@ -108,7 +85,22 @@ export default async function AccountPage({ params }: Props) {
                 <em>{t("openTool")}</em>
               </Link>
             ) : null}
+            {canAccessAdmin(role) ? (
+              <Link href="/admin/users" className="account-hub-card">
+                <strong>{t("admin")}</strong>
+                <span>{t("crmLead")}</span>
+                <em>{t("openCrm")}</em>
+              </Link>
+            ) : null}
           </div>
+          <p className="account-hub-more dash-muted">
+            {t("moreInSidebar")}{" "}
+            <Link href="/studio/dashboard">{t("studio")}</Link>
+            {" · "}
+            <Link href="/account/import">{t("importBook")}</Link>
+            {" · "}
+            <Link href="/favorites">{t("favorites")}</Link>
+          </p>
         </ArabyaPanel>
 
         <ArabyaPanel legacyDash title={t("personalTitle")}>
@@ -124,9 +116,13 @@ export default async function AccountPage({ params }: Props) {
             {" · "}
             <Link href="/pricing">{t("viewPricing")}</Link>
           </p>
-          <div className="account-grid account-grid--personal">
-            <AccountPersonalData />
-          </div>
+          <p className="account-personal-summary">
+            <Link href="/account/stats" className="account-hub-card account-hub-card--inline">
+              <strong>{t("statsPageTitle")}</strong>
+              <span>{t("personalSummaryLead")}</span>
+              <em>{t("openStats")}</em>
+            </Link>
+          </p>
         </ArabyaPanel>
 
         <AccountLanguagePanel />

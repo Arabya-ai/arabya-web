@@ -71,39 +71,45 @@ export function AccountHistoryPanel({ syncReady }: Props) {
       <ul className="dash-list" style={{ marginTop: "0.75rem" }}>
         <li>{t("studyCount", { count: studyCountDisplay })}</li>
       </ul>
-      <div className="dash-row-actions" style={{ marginTop: "1rem", flexWrap: "wrap" }}>
-        <button
-          type="button"
-          className="danger"
-          disabled={!!busy}
-          onClick={() => {
-            if (syncReady) void clearRemote("study");
-            else clearStudyLocal();
-          }}
-        >
-          {busy === "study" ? t("busy") : t("clearStudy")}
-        </button>
-        {syncReady ? (
-          <>
-            <button
-              type="button"
-              className="danger"
-              disabled={!!busy}
-              onClick={() => void clearRemote("tahfeez")}
-            >
-              {busy === "tahfeez" ? t("busy") : t("clearTahfeez")}
-            </button>
-            <button
-              type="button"
-              className="danger"
-              disabled={!!busy}
-              onClick={() => void clearRemote("all")}
-            >
-              {busy === "all" ? t("busy") : t("clearAll")}
-            </button>
-          </>
-        ) : null}
-      </div>
+      {studyCountDisplay === 0 && !syncReady ? (
+        <p className="dash-muted" style={{ marginTop: "0.75rem" }}>
+          {t("emptyLocal")}
+        </p>
+      ) : (
+        <div className="dash-row-actions" style={{ marginTop: "1rem", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            className="danger"
+            disabled={!!busy || studyCountDisplay === 0}
+            onClick={() => {
+              if (syncReady) void clearRemote("study");
+              else clearStudyLocal();
+            }}
+          >
+            {busy === "study" ? t("busy") : t("clearStudy")}
+          </button>
+          {syncReady ? (
+            <>
+              <button
+                type="button"
+                className="danger"
+                disabled={!!busy}
+                onClick={() => void clearRemote("tahfeez")}
+              >
+                {busy === "tahfeez" ? t("busy") : t("clearTahfeez")}
+              </button>
+              <button
+                type="button"
+                className="danger"
+                disabled={!!busy}
+                onClick={() => void clearRemote("all")}
+              >
+                {busy === "all" ? t("busy") : t("clearAll")}
+              </button>
+            </>
+          ) : null}
+        </div>
+      )}
       {msg ? <p className="dash-banner dash-banner--ok">{msg}</p> : null}
       {err ? <p className="dash-banner dash-banner--warn">{err}</p> : null}
     </ArabyaPanel>

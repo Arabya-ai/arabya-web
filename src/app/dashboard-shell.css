@@ -1491,6 +1491,36 @@ html[data-theme="dark"] .dash-header-badge {
   margin-top: 0.85rem;
 }
 
+.account-hub--primary {
+  grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr));
+}
+
+.account-hub-more {
+  margin: 1rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.account-hub-more a {
+  color: var(--brand-deep);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.account-hub-more a:hover,
+.account-hub-more a:focus-visible {
+  text-decoration: underline;
+}
+
+.account-personal-summary {
+  margin: 1rem 0 0;
+}
+
+.account-hub-card--inline {
+  min-height: 0;
+  width: 100%;
+}
+
 .account-hub-card {
   display: flex;
   flex-direction: column;

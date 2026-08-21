@@ -43,14 +43,17 @@ export function DashboardShell({
   const tRoles = useTranslations("Roles");
   const pathname = usePathname();
   const nav = unifiedDashNav(role);
-  const [navOpen, setNavOpen] = useState(true);
+  // Compact (mobile): start collapsed so content is first; desktop stays open.
+  const [navOpen, setNavOpen] = useState(false);
   const [isCompact, setIsCompact] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 960px)");
     const sync = () => {
-      setIsCompact(mq.matches);
-      if (!mq.matches) setNavOpen(true);
+      const compact = mq.matches;
+      setIsCompact(compact);
+      if (!compact) setNavOpen(true);
+      else setNavOpen(false);
     };
     sync();
     mq.addEventListener("change", sync);
