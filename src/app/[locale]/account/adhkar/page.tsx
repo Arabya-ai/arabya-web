@@ -40,6 +40,8 @@ export default async function AccountAdhkarPage({ params }: Props) {
       userName={user.name || t("defaultName")}
       userEmail={user.email}
       userImage={user.image}
+      backHref="/account"
+      backLabel={t("backToAccount")}
     >
       <AccountAdhkarPanel
         locale={locale}

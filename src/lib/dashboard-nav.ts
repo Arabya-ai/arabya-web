@@ -39,6 +39,12 @@ export function unifiedDashNav(role: UserRole): DashNavItem[] {
     },
     { href: "/account/study", label: "study", icon: "book", group: "groupAccount" },
     {
+      href: "/account/import",
+      label: "importBook",
+      icon: "book",
+      group: "groupAccount",
+    },
+    {
       href: "/favorites",
       label: "favorites",
       icon: "favorites",
