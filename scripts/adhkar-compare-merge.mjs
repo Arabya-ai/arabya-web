@@ -81,6 +81,13 @@ for (const [remoteCat, slug] of Object.entries(MAP)) {
       fadlEn: row.description || "Added via open-source azkar comparison (azkar-api).",
       importedFrom: "nawafalqari/azkar-api",
     };
+    // duas.json uses DuaItem shape (category required for /adhkar/duas build)
+    if (slug === "duas") {
+      item.categoryAr =
+        remoteCat === "أدعية الأنبياء" ? "أنبياء" : "قرآني";
+      item.categoryEn =
+        remoteCat === "أدعية الأنبياء" ? "Prophets" : "Quranic";
+    }
     items.push(item);
     added += 1;
     addedTotal += 1;

@@ -13,14 +13,16 @@ export function DuasExplorer({ duas }: { duas: DuaItem[] }) {
   const categories = useMemo(() => {
     const map = new Map<string, { ar: string; en: string }>();
     for (const dua of duas) {
-      if (!map.has(dua.categoryAr)) {
-        map.set(dua.categoryAr, {
-          ar: dua.categoryAr,
-          en: dua.categoryEn || dua.categoryAr,
-        });
-      }
+      const ar = (dua.categoryAr || "").trim();
+      if (!ar || map.has(ar)) continue;
+      map.set(ar, {
+        ar,
+        en: (dua.categoryEn || "").trim() || ar,
+      });
     }
-    return [...map.values()].sort((a, b) => a.ar.localeCompare(b.ar, "ar"));
+    return [...map.values()].sort((a, b) =>
+      a.ar.localeCompare(b.ar, "ar"),
+    );
   }, [duas]);
 
   const filtered = useMemo(() => {
