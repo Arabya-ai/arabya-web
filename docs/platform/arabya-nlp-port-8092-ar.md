@@ -1,5 +1,28 @@
 # فتح منفذ 8092 لـ Arabya NLP (Contabo + ServerAvatar)
 
+## كيف يصل الزائر إلى التدقيق؟ (مهم)
+
+المتصفح **لا** يتصل بـ `:8092` مباشرة.
+
+```
+الزائر → https://www.arabya.org/lughawi
+       → POST /api/lughawi/proofread   (Next.js على :3000 عبر LiteSpeed)
+       → http://127.0.0.1:8092/v1/proofread   (FastAPI داخل السيرفر فقط)
+```
+
+بعد تشغيل FastAPI، اربط Next بالمحرك:
+
+```bash
+cd /var/www/arabya-web
+bash scripts/contabo-wire-arabya-nlp-proxy.sh
+```
+
+هذا يضبط في `.env`:
+- `ARABYA_NLP_URL=http://127.0.0.1:8092`
+- `ARABYA_NLP_PROOFREAD=1`
+
+ثم يعيد تشغيل `arabya-web` ويختبر المسار العام.
+
 ## حالة السيرفر (فحص SSH فعلي)
 
 | فحص | النتيجة |
