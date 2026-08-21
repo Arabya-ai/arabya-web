@@ -112,7 +112,13 @@ jobs:
           if [ -n "${GROQ_API_KEY:-}" ]; then
             REMOTE_ENV="${REMOTE_ENV} export GROQ_API_KEY=$(printf %q "$GROQ_API_KEY");"
           fi
-          ssh -i ~/.ssh/contabo_key -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
+          # Keepalive: Contabo next build can exceed idle SSH timeout (Broken pipe)
+          ssh -i ~/.ssh/contabo_key \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=accept-new \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=120 \
+            -o TCPKeepAlive=yes \
             "$SSH_USER@$SSH_HOST" \
             "${REMOTE_ENV} cd /var/www/arabya-web && bash scripts/contabo-deploy.sh"
           rm -f ~/.ssh/contabo_key

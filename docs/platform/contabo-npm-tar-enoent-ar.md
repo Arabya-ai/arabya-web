@@ -7,7 +7,7 @@ npm warn tar TAR_ENTRY_ERROR ENOENT: no such file or directory …
 ```
 يعني استخراج الحزم فشل جزئيًا (كاش تالف، أو `node_modules` يُمسَح أثناء تشغيل التطبيق، أو مساحة قرص منخفضة).
 
-تحذيرات `deprecated mp4-muxer` / `webm-muxer` **ليست** سبب الفشل — تجاهلها.
+تحذيرات npm القديمة عن `mp4-muxer` / `webm-muxer` لم تعد تنطبق — المشروع يستخدم `mediabunny` للتصدير.
 
 ## مطلوب منك الآن على السيرفر
 
