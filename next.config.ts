@@ -34,10 +34,11 @@ function hoistWebpackErrorConstructor(): void {
 hoistWebpackErrorConstructor();
 
 /**
- * CSP allows self + Google fonts + Quran audio CDNs + Cloudflare Insights.
- * Theme boot is `/theme-boot.js` (no inline script) so script-src omits
- * 'unsafe-inline'. style-src still needs 'unsafe-inline' for Next/Tailwind
- * until a nonce/hash pipeline is wired per-response.
+ * CSP allows self + Google fonts + Quran audio CDNs + Cloudflare Insights + Sentry.
+ * Contabo/Cloudflare inject small inline bootstraps; Next App Router also needs
+ * inline script allowance for hydration — without 'unsafe-inline' the UI paints
+ * blank white while HTML/JS/CSS still return HTTP 200.
+ * Prefer nonces later; for now restore unsafe-inline so /lughawi (and all pages) render.
  */
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -45,7 +46,7 @@ const contentSecurityPolicy = [
   "frame-ancestors 'self'",
   "object-src 'none'",
   "form-action 'self' https://accounts.google.com",
-  "script-src 'self' https://static.cloudflareinsights.com https://browser.sentry-cdn.com https://js.sentry-cdn.com",
+  "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com https://browser.sentry-cdn.com https://js.sentry-cdn.com",
   "worker-src 'self' blob:",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
