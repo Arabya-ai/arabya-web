@@ -9,29 +9,24 @@ contabo_tree_ready() {
     [[ -f .next/BUILD_ID ]]
 }
 
-# Contabo often fails plain `rm -rf` with ENOTEMPTY. Rename out of the way, then
-# delete synchronously (never background — races with the next npm install).
+# Contabo often fails plain `rm -rf` with ENOTEMPTY. Move OUT of the app tree
+# to /tmp first so the next npm install never sees a half-deleted tree.
 contabo_wipe_path() {
   local target="${1:?path required}"
   [[ -e "$target" ]] || return 0
-  local trash="${target}.wiping.$$.$RANDOM"
-  if ! mv "$target" "$trash" 2>/dev/null; then
-    chmod -R u+w "$target" 2>/dev/null || true
-    rm -rf "$target" 2>/dev/null || true
-    [[ -e "$target" ]] || return 0
-    trash="${target}.wiping.$$.$RANDOM"
-    mv "$target" "$trash" || return 1
+  chmod -R u+w "$target" 2>/dev/null || true
+  local trash="/tmp/arabya-wipe-$$-$(date +%s)-$RANDOM"
+  if mv "$target" "$trash" 2>/dev/null; then
+    # Path is clear for npm immediately; delete trash in background.
+    ( rm -rf "$trash" >/dev/null 2>&1 ) &
+    return 0
   fi
-  chmod -R u+w "$trash" 2>/dev/null || true
-  rm -rf "$trash" 2>/dev/null || true
-  if [[ -e "$trash" ]]; then
-    find "$trash" -mindepth 1 -delete 2>/dev/null || true
-    rm -rf "$trash" 2>/dev/null || true
-  fi
-  # Last resort: leave trash aside but ensure original path is gone
-  if [[ -e "$trash" ]]; then
-    echo "WARN: residual $trash left for later cleanup (path $target is clear for install)"
-    ( sleep 30; rm -rf "$trash" >/dev/null 2>&1 ) &
+  # Fallback: in-place wipe then rename residual
+  rm -rf "$target" 2>/dev/null || true
+  if [[ -e "$target" ]]; then
+    local dead="${target}.dead.$$"
+    mv "$target" "$dead" 2>/dev/null || return 1
+    ( rm -rf "$dead" >/dev/null 2>&1 ) &
   fi
   [[ ! -e "$target" ]]
 }

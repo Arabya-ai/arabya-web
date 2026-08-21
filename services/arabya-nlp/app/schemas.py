@@ -34,8 +34,44 @@ class ProofreadResponse(BaseModel):
     word_count: int
     stage1_engine: str
     stage2_engine: str
+    mode: str = "offline"
+    parallel: bool = False
     edits: list[TextEdit] = []
     warnings: list[str] = []
+
+
+class TashkeelRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=50_000)
+
+
+class TashkeelResponse(BaseModel):
+    ok: bool = True
+    original: str
+    text: str
+    engine: str = ""
+    available: bool = False
+    warnings: list[str] = []
+
+
+class ConjugateRequest(BaseModel):
+    verb: str = Field(..., min_length=1, max_length=64)
+    future_type: str | None = Field(default="فتحة")
+    transitive: bool = True
+
+
+class ConjugateResponse(BaseModel):
+    ok: bool = True
+    verb: str
+    future_type: str
+    table: dict[str, Any] = Field(default_factory=dict)
+    engine: str = ""
+    available: bool = False
+    warnings: list[str] = []
+
+
+class EnginesResponse(BaseModel):
+    ok: bool = True
+    engines: dict[str, Any] = Field(default_factory=dict)
 
 
 class TranscribeResponse(BaseModel):

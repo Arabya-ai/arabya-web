@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Install Contabo-local deps for Arabya NLP FastAPI (venv + PyArabic/Ghalatawi/faster-whisper).
+# Install Contabo-local deps for Arabya NLP FastAPI.
+# Required: PyArabic + Ghalatawi (+ FastAPI stack from requirements.txt)
+# Optional (never fail the script): mishkal (tashkeel), libqutrub (conjugation)
+#
 # Usage (on Contabo as root or deploy user):
 #   cd /var/www/arabya-web && bash scripts/contabo-arabya-nlp-deps.sh
 set -euo pipefail
@@ -24,6 +27,33 @@ source "$VENV/bin/activate"
 pip install --upgrade pip wheel
 pip install -r "$NLP_DIR/requirements.txt"
 
+# Optional Arabic engines — missing packages must NOT break Contabo deploy / PM2.
+echo "==> Optional: mishkal (تشكيل) + libqutrub (تصريف)"
+if pip install --no-cache-dir "mishkal>=0.4" "libqutrub>=1.2" ; then
+  echo "OK — mishkal + libqutrub installed"
+else
+  echo "WARN: optional mishkal/libqutrub install failed — proofread rules still work; /v1/tashkeel and /v1/conjugate return available=false"
+fi
+
+# Prove imports (soft)
+python - <<'PY' || true
+import sys
+ok = True
+for name, mod in [
+    ("pyarabic", "pyarabic"),
+    ("ghalatawi", "ghalatawi"),
+    ("mishkal", "mishkal.tashkeel"),
+    ("libqutrub", "libqutrub.conjugator"),
+]:
+    try:
+        __import__(mod)
+        print(f"  ✓ {name}")
+    except Exception as e:
+        ok = False
+        print(f"  ✗ {name}: {e}")
+sys.exit(0)
+PY
+
 # Ensure ffmpeg exists (STT layer)
 if ! command -v ffmpeg >/dev/null 2>&1; then
   echo "WARN: ffmpeg not found — install with: apt-get install -y ffmpeg"
@@ -45,6 +75,10 @@ grep -q '^ARABYA_NLP_PORT=' "$ENV_FILE" 2>/dev/null || \
   echo 'ARABYA_NLP_PORT=8092' >> "$ENV_FILE"
 grep -q '^ARABYA_NLP_DEVOPS_AUTO_EXECUTE=' "$ENV_FILE" 2>/dev/null || \
   echo 'ARABYA_NLP_DEVOPS_AUTO_EXECUTE=0' >> "$ENV_FILE"
+grep -q '^ARABYA_NLP_URL=' "$ENV_FILE" 2>/dev/null || \
+  echo 'ARABYA_NLP_URL=http://127.0.0.1:8092' >> "$ENV_FILE"
+grep -q '^ARABYA_NLP_PROOFREAD=' "$ENV_FILE" 2>/dev/null || \
+  echo 'ARABYA_NLP_PROOFREAD=1' >> "$ENV_FILE"
 
 export ARABYA_NLP_PYTHON="$VENV/bin/python"
 echo "OK — venv at $VENV"
