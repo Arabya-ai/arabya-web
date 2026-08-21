@@ -159,13 +159,28 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         if path == "/gec":
+            # Interactive proofread: rules-only by default (Contabo Alnnahwi is slow on CPU).
+            # Pass {"neural": true} to run local/HF GEC after rules.
+            want_neural = body.get("neural") is True
+            if isinstance(body.get("neural"), str):
+                want_neural = body.get("neural", "").strip().lower() in {
+                    "1",
+                    "true",
+                    "yes",
+                    "on",
+                }
             base = rules_nlp_edits(text)
-            neural = gec_neural(text)
             edits = list(base.get("edits") or [])
-            # Prefer span-local rule edits; append neural whole-span only if useful
-            for e in neural.get("edits") or []:
-                edits.append(e)
-            engines = [base.get("engine"), neural.get("engine")]
+            engines = [base.get("engine")]
+            warning = None
+            if want_neural:
+                neural = gec_neural(text)
+                for e in neural.get("edits") or []:
+                    edits.append(e)
+                engines.append(neural.get("engine"))
+                warning = neural.get("warning")
+            else:
+                engines.append("neural-skipped-for-speed")
             self._send(
                 200,
                 {
@@ -173,7 +188,7 @@ class Handler(BaseHTTPRequestHandler):
                     "text": text,
                     "edits": edits,
                     "engine": "+".join(str(x) for x in engines if x),
-                    "warning": neural.get("warning"),
+                    "warning": warning,
                     "tokens": base.get("tokens") or [],
                 },
             )

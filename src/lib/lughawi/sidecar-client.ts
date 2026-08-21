@@ -135,10 +135,13 @@ export interface SidecarGecEdit {
   status?: string;
 }
 
-/** Rule-based NLP + optional neural GEC from Contabo sidecar. */
+/** Rule-based NLP + optional neural GEC from Contabo sidecar.
+ * Default: rules only (fast). Pass neural=true to run Alnnahwi (slow on CPU).
+ */
 export async function sidecarGec(
   text: string,
-  timeoutMs = 12_000,
+  timeoutMs = 4_000,
+  opts?: { neural?: boolean },
 ): Promise<{ edits: SidecarGecEdit[]; engine: string; warning?: string } | null> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -146,7 +149,7 @@ export async function sidecarGec(
     const res = await fetch(`${baseUrl()}/gec`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, neural: Boolean(opts?.neural) }),
       signal: ctrl.signal,
     });
     if (!res.ok) return null;
