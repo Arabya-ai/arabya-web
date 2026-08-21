@@ -1,9 +1,15 @@
 import {
+  arabyaNlpBaseUrl,
+  arabyaNlpProofreadEnabled,
+  probeArabyaNlpHealth,
+} from "@/lib/lughawi/arabya-nlp-client";
+import {
   ENGINE_STAGE_META,
   LUGHAWI_ENGINE_VERSION,
 } from "@/lib/lughawi/engine/stages-meta";
 import { learningStats } from "@/lib/lughawi/learning-store";
 import { lughawiProjectAiPoolSummary } from "@/lib/lughawi/config";
+import { probeSidecarHealth } from "@/lib/lughawi/sidecar-client";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -17,6 +23,11 @@ export async function GET() {
   } catch {
     /* ignore */
   }
+
+  const [nlp, sidecar] = await Promise.all([
+    probeArabyaNlpHealth(1200),
+    probeSidecarHealth(800),
+  ]);
 
   return NextResponse.json({
     offline: true,
@@ -32,6 +43,16 @@ export async function GET() {
     projectPoolCount: summary.total,
     projectPoolByProvider: summary.byProvider,
     projectPoolHasLocal: summary.hasLocal,
-    note: "Offline rules always run. Auto (project/user keys) enriches proofread when available; rewrite/translate/tashkeel use the same pool.",
+    arabyaNlp: {
+      enabled: arabyaNlpProofreadEnabled(),
+      url: arabyaNlpBaseUrl(),
+      proofreadPath: "/v1/proofread",
+      publicProxy: "/api/lughawi/proofread",
+      health: nlp,
+    },
+    sidecar: {
+      health: sidecar,
+    },
+    note: "UI calls /api/lughawi/proofread only. Next.js proxies Contabo arabya-nlp at ARABYA_NLP_URL (default http://127.0.0.1:8092). Port 8092 stays private.",
   });
 }

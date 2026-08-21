@@ -244,17 +244,28 @@ if [[ -f scripts/contabo-lughawi-sidecar.sh ]]; then
   bash scripts/contabo-lughawi-sidecar.sh || echo "WARN: sidecar start skipped — local rules still work."
 fi
 
-echo "==> Arabya NLP FastAPI platform (optional — off by default)"
+echo "==> Arabya NLP FastAPI platform (:8092) — Next.js proxies via ARABYA_NLP_URL"
 grep -q '^ARABYA_NLP_DATABASE_URL=' "$APP_DIR/.env" 2>/dev/null || \
   echo 'ARABYA_NLP_DATABASE_URL=sqlite:////var/lib/arabya/arabya-nlp.sqlite' >> "$APP_DIR/.env"
+grep -q '^ARABYA_NLP_URL=' "$APP_DIR/.env" 2>/dev/null || \
+  echo 'ARABYA_NLP_URL=http://127.0.0.1:8092' >> "$APP_DIR/.env"
+grep -q '^ARABYA_NLP_PROOFREAD=' "$APP_DIR/.env" 2>/dev/null || \
+  echo 'ARABYA_NLP_PROOFREAD=1' >> "$APP_DIR/.env"
 # CRITICAL safety: keep DevOps auto-execute disabled unless an operator sets it intentionally later
 if grep -q '^ARABYA_NLP_DEVOPS_AUTO_EXECUTE=' "$APP_DIR/.env" 2>/dev/null; then
   sed -i 's/^ARABYA_NLP_DEVOPS_AUTO_EXECUTE=.*/ARABYA_NLP_DEVOPS_AUTO_EXECUTE=0/' "$APP_DIR/.env"
 else
   echo 'ARABYA_NLP_DEVOPS_AUTO_EXECUTE=0' >> "$APP_DIR/.env"
 fi
-if [[ "${CONTABO_ENABLE_NLP:-0}" == "1" || "${CONTABO_ENABLE_NLP:-}" == "true" ]]; then
-  if [[ -x "$APP_DIR/services/arabya-nlp/.venv/bin/python" && -f scripts/contabo-arabya-nlp.sh ]]; then
+# Prefer enabling when venv is present (owner already activated Option A).
+NLP_VENV_OK=0
+if [[ -x "$APP_DIR/services/arabya-nlp/.venv/bin/python" && -f "$APP_DIR/services/arabya-nlp/main.py" ]]; then
+  NLP_VENV_OK=1
+fi
+if [[ "${CONTABO_ENABLE_NLP:-}" == "0" || "${CONTABO_ENABLE_NLP:-}" == "false" ]]; then
+  echo "==> CONTABO_ENABLE_NLP=0 — leaving arabya-nlp as-is (not force-stopped)."
+elif [[ "${CONTABO_ENABLE_NLP:-1}" == "1" || "${CONTABO_ENABLE_NLP:-}" == "true" || "$NLP_VENV_OK" == "1" ]]; then
+  if [[ "$NLP_VENV_OK" == "1" && -f scripts/contabo-arabya-nlp.sh ]]; then
     bash scripts/contabo-arabya-nlp.sh || echo "WARN: arabya-nlp PM2 restart skipped"
   elif [[ -f scripts/contabo-arabya-nlp-activate.sh ]]; then
     echo "WARN: arabya-nlp venv missing — run once: bash scripts/contabo-arabya-nlp-activate.sh"
@@ -262,8 +273,7 @@ if [[ "${CONTABO_ENABLE_NLP:-0}" == "1" || "${CONTABO_ENABLE_NLP:-}" == "true" ]
     echo "WARN: arabya-nlp scripts missing"
   fi
 else
-  echo "==> Skipping arabya-nlp (set CONTABO_ENABLE_NLP=1 to enable). Stopping if present."
-  pm2 stop arabya-nlp 2>/dev/null || true
+  echo "==> Skipping arabya-nlp start (no venv). Local/sidecar proofread still works."
 fi
 
 echo "==> Restart PM2 arabya-web (only if tree can run next start)"
@@ -279,7 +289,7 @@ fi
 
 pm2 save
 
-echo "==> Health check (both domains via Host header)"
+echo "==> Health check (localhost + SEO endpoints)"
 health_ok=0
 for i in $(seq 1 45); do
   if curl -sf -o /dev/null -H "Host: www.arabya.org" http://127.0.0.1:3000/; then
@@ -301,7 +311,35 @@ if [[ "$health_ok" -ne 1 ]]; then
   pm2 status || true
   exit 1
 fi
+
+# Extended smoke (audit C-02): robots, sitemap, mushaf must not 5xx after deploy
+smoke_fail=0
+for path in "/" "/robots.txt" "/sitemap.xml" "/mushaf/1" "/about"; do
+  code="$(curl -s -o /dev/null -w '%{http_code}' -H "Host: www.arabya.org" "http://127.0.0.1:3000${path}" || echo 000)"
+  echo "  smoke ${path} → ${code}"
+  if [[ "$code" != 200 && "$code" != 301 && "$code" != 302 && "$code" != 308 ]]; then
+    smoke_fail=1
+  fi
+done
+if [[ "$smoke_fail" -eq 1 ]]; then
+  echo "ERROR: post-deploy smoke failed (non-2xx/3xx on public routes)."
+  if [[ -d .next.prev-good ]]; then
+    echo "==> Rolling back to .next.prev-good"
+    pm2 stop arabya-web || true
+    rm -rf .next
+    mv .next.prev-good .next
+    contabo_safe_restart_web || true
+  fi
+  exit 1
+fi
+
+# Record published commit for incident matching (audit C-01)
+if command -v git >/dev/null 2>&1; then
+  echo "==> Published commit: $(git rev-parse HEAD) ($(git rev-parse --short HEAD))"
+fi
+
 rm -rf .next.prev-good
 curl -sI -H "Host: www.arabya.org" http://127.0.0.1:3000 | head -5 || true
 curl -sI -H "Host: www.arabyaai.com" http://127.0.0.1:3000 | head -5 || true
 echo "Deploy done. Ensure LiteSpeed serves www.arabya.org — see deploy/contabo/nginx-dual-domain.conf (reference)"
+echo "NOTE: app lives at /var/www/arabya-web (PM2). ServerAvatar public_html is NOT the Next.js app."

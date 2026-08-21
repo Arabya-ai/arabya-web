@@ -47,7 +47,10 @@ export async function parseUploadToPayload(input: {
   }
 
   if (kind === "xlsx") {
-    return { payload: parseSpreadsheetBuffer(input.buffer, meta), kind };
+    if (input.filename.toLowerCase().endsWith(".xls") && !input.filename.toLowerCase().endsWith(".xlsx")) {
+      throw new Error("xls_not_supported_use_xlsx_or_csv");
+    }
+    return { payload: await parseSpreadsheetBuffer(input.buffer, meta), kind };
   }
 
   if (kind === "docx") {

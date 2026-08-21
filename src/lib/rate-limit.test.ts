@@ -13,6 +13,7 @@ import {
 afterEach(() => {
   resetRateLimitForTests();
   vi.useRealTimers();
+  delete process.env.ARABYA_TRUST_PROXY;
 });
 
 describe("clientIpFromHeaders", () => {
@@ -39,6 +40,20 @@ describe("clientIpFromHeaders", () => {
 
   it("returns unknown when empty", () => {
     expect(clientIpFromHeaders(new Headers())).toBe("unknown");
+  });
+
+  it("ignores proxy headers when ARABYA_TRUST_PROXY=0", () => {
+    process.env.ARABYA_TRUST_PROXY = "0";
+    const h = new Headers({
+      "cf-connecting-ip": "1.2.3.4",
+      "x-real-ip": "10.0.0.8",
+    });
+    expect(clientIpFromHeaders(h)).toBe("unknown");
+  });
+
+  it("rejects non-IP garbage in headers", () => {
+    const h = new Headers({ "cf-connecting-ip": '1.2.3.4<script>' });
+    expect(clientIpFromHeaders(h)).toBe("unknown");
   });
 });
 

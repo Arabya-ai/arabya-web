@@ -10,11 +10,11 @@ export type UserPlan = "free" | "pro" | "plus";
 
 export type AppLocale = "ar" | "en";
 
-/** Owner accounts always on Plus until PayPal billing is live. */
-export const OWNER_PLUS_EMAILS = [
-  "egywebdev@gmail.com",
-  "arabyaaicom@gmail.com",
-] as const;
+/**
+ * @deprecated Always empty — use `ARABYA_PLUS_EMAILS` / super-admin env.
+ * Hardcoded owner emails removed from source (audit H-05).
+ */
+export const OWNER_PLUS_EMAILS: readonly string[] = [];
 
 const PLAN_LABELS: Record<AppLocale, Record<UserPlan, string>> = {
   ar: { free: "مجاني", pro: "برو", plus: "بلس" },
@@ -28,11 +28,13 @@ export function parsePlusEmails(raw: string | undefined): string[] {
     .filter(Boolean);
 }
 
+/** Plus allowlist from env (`ARABYA_PLUS_EMAILS`) plus super-admins. */
 export function isOwnerPlusEmail(email: string | null | undefined): boolean {
   if (!email) return false;
-  return (OWNER_PLUS_EMAILS as readonly string[]).includes(
-    email.trim().toLowerCase(),
-  );
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) return false;
+  if (isSuperAdminEmail(normalized)) return true;
+  return parsePlusEmails(process.env.ARABYA_PLUS_EMAILS).includes(normalized);
 }
 
 export function normalizeUserPlan(value: unknown): UserPlan {

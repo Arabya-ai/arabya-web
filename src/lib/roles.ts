@@ -3,15 +3,6 @@ export type UserRole = "member" | "creator" | "editor" | "admin";
 /** Legacy DB value still accepted on read. */
 export type LegacyUserRole = UserRole | "user";
 
-/**
- * سوبر أدمن فقط — الرتبة `admin` محصورة بهؤلاء.
- * لا ترقية ذاتية ولا تعيين من غيرهم.
- */
-export const SUPER_ADMIN_EMAILS = [
-  "egywebdev@gmail.com",
-  "arabyaaicom@gmail.com",
-] as const;
-
 export function parseAdminEmails(raw: string | undefined): string[] {
   return (raw || "")
     .split(/[,;\s]+/)
@@ -19,11 +10,26 @@ export function parseAdminEmails(raw: string | undefined): string[] {
     .filter(Boolean);
 }
 
+/**
+ * Super-admin allowlist from Contabo `.env` only (`ARABYA_ADMIN_EMAILS`).
+ * Production is fail-closed: empty env → no email is treated as super-admin.
+ * Hardcoded identities were removed from source (audit H-05).
+ */
+export function getSuperAdminEmails(): string[] {
+  return parseAdminEmails(process.env.ARABYA_ADMIN_EMAILS);
+}
+
+/**
+ * @deprecated Always empty — use `getSuperAdminEmails()` / `ARABYA_ADMIN_EMAILS`.
+ * Kept so older imports do not crash; do not put real emails here.
+ */
+export const SUPER_ADMIN_EMAILS: readonly string[] = [];
+
 export function isSuperAdminEmail(email: string | null | undefined): boolean {
   if (!email) return false;
-  return (SUPER_ADMIN_EMAILS as readonly string[]).includes(
-    email.trim().toLowerCase(),
-  );
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) return false;
+  return getSuperAdminEmails().includes(normalized);
 }
 
 /** @deprecated Prefer isSuperAdminEmail — admin rank is super-admin only. */

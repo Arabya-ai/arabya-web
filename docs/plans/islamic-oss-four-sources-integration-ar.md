@@ -155,8 +155,9 @@
 
 | فجوة | الأولوية | مصدر الإلهام | سطح مقترح |
 |---|---|---|---|
-| حساب مواقيت **محلي** (أوفلاين / بدون Aladhan) | عالية | Adhan / adhan-js | `src/lib` + `/api/prayer-times` بوضع fallback |
-| بوصلة قبلة بـ **DeviceOrientation** (حيث يدعم المتصفح) | متوسطة | al-azan UX | `/qibla` |
+| حساب مواقيت **محلي** (أوفلاين / بدون Aladhan) | عالية | Adhan / adhan-js | **منجَز 2026-08-21** — `src/lib/prayer-local.ts` + fallback في `/api/prayer-times` |
+| بوصلة قبلة بـ **DeviceOrientation** (حيث يدعم المتصفح) | متوسطة | al-azan UX | **منجَز** — زر تفعيل على `/qibla` |
+| مقارنة محتوى أذكار | متوسطة | azkar-api | **منجَز** — `scripts/adhkar-compare-merge.mjs` |
 | تذكير أذكار لطيف (ويب / لاحقًا PWA) | متوسطة | Azkar-App | `/adhkar` + تفضيلات حساب |
 | تجويد ملون مرخّص | عالية للمنتج | quran-tajweed / quran-svg | طبقة مصحف اختيارية |
 | بحث قرآن أقوى (أفكار Alfanous) | متوسطة | Alfanous | `/api/search` |
