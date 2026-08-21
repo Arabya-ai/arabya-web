@@ -91,8 +91,8 @@ export async function enrichProofreadWithSidecar(
         typeof raw.explanation === "string" && raw.explanation
           ? raw.explanation
           : isNeural
-            ? "تصحيح من محرك النحوي العصبي (Alnnahwi) على Contabo"
-            : "تصحيح من محرك NLP المحلي (قواعد/Stanza)",
+            ? "تصحيح من محرك النحوي (لغوي)"
+            : "تصحيح من محرك لغوي المحلي",
       confidence:
         typeof raw.confidence === "number" ? raw.confidence : isNeural ? 0.72 : 0.85,
       source: isNeural || wantNeural ? "gec" : "gec",

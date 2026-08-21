@@ -113,7 +113,7 @@ def run_mishkal_tashkeel(text: str) -> TashkeelResult:
             engine="mishkal-missing",
             available=False,
             warnings=[
-                "حزمة mishkal غير مثبتة — ثبّتها اختياريًا عبر contabo-arabya-nlp-deps.sh"
+                "حزمة mishkal غير مثبتة — التشكيل عبر لغوي يبقى متاحاً بالمسار الافتراضي"
             ],
         )
 
@@ -181,7 +181,7 @@ def run_qutrub_conjugate(
             engine="qutrub-missing",
             available=False,
             warnings=[
-                "حزمة libqutrub غير مثبتة — ثبّتها اختياريًا عبر contabo-arabya-nlp-deps.sh"
+                "حزمة libqutrub غير مثبتة — التصريف عبر لغوي يبقى متاحاً بالمسار الافتراضي"
             ],
         )
 

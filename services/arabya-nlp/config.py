@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     )
 
     # --- Service ---
-    app_name: str = "Arabya NLP Platform"
+    app_name: str = "Lughawi"
     app_version: str = "1.0.0"
     environment: Literal["development", "production", "test"] = "production"
     # Bind all interfaces so Next.js / reverse proxies can reach :8092.

@@ -47,7 +47,7 @@ export async function POST(req: Request) {
           edits: [],
           protectedSpans: [],
           meta: {
-            engine: nlp.engine || "arabya-nlp-mishkal",
+            engine: nlp.engine || "lughawi-mishkal",
             usedAi: false,
             quotaCharged: 0,
             offline: true,

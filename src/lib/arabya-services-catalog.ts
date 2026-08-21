@@ -28,8 +28,7 @@ export type ArabyaServiceIcon =
   | "resources"
   | "lughawi"
   | "tajweed"
-  | "search"
-  | "nlp";
+  | "search";
 
 export type ArabyaServiceId = ArabyaServiceIcon;
 
@@ -61,7 +60,6 @@ export const ARABYA_SERVICES: readonly ArabyaServiceEntry[] = [
   { id: "resources", href: "/resources", icon: "resources", category: "knowledge" },
   { id: "studio", href: "/studio", icon: "studio", category: "create" },
   { id: "lughawi", href: "/lughawi", icon: "lughawi", category: "create" },
-  { id: "nlp", href: "/nlp", icon: "nlp", category: "create" },
 ] as const;
 
 export const ARABYA_SERVICE_CATEGORIES: readonly ArabyaServiceCategory[] = [

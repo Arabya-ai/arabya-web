@@ -56,6 +56,18 @@ export const ENGINE_STAGE_META: EngineStageMeta[] = [
   },
 ];
 
+/** Runtime engine stages (not in ENGINE_STAGE_META) — always branded as لغوي. */
+const RUNTIME_STAGE_LABELS_AR: Record<string, string> = {
+  "arabya-nlp": "محرك لغوي",
+  "sidecar-nlp": "النحوي (لغوي)",
+  lughawi: "محرك لغوي",
+  "lughawi-neural": "النحوي (لغوي)",
+};
+
 export function stageLabelAr(id: string): string {
-  return ENGINE_STAGE_META.find((s) => s.id === id)?.labelAr ?? id;
+  return (
+    ENGINE_STAGE_META.find((s) => s.id === id)?.labelAr ??
+    RUNTIME_STAGE_LABELS_AR[id] ??
+    id
+  );
 }

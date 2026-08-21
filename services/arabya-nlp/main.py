@@ -1,5 +1,5 @@
 """
-Arabya NLP Platform — Contabo self-hosted FastAPI entrypoint.
+Arabya Lughawi engine — Contabo self-hosted FastAPI entrypoint.
 
 Layers:
   1) Hybrid proofreader (PyArabic/Ghalatawi → local Ollama)

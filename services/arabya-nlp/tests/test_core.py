@@ -375,7 +375,7 @@ def test_fastapi_health_and_proofread() -> None:
 
         dash = client.get("/dashboard")
         assert dash.status_code == 200
-        assert "عربية NLP" in dash.text
+        assert "لغوي" in dash.text
 
         engines = client.get("/v1/engines")
         assert engines.status_code == 200

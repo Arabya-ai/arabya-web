@@ -58,6 +58,6 @@ export async function GET() {
     sidecar: {
       health: sidecar,
     },
-    note: "واجهة لغوي تستدعي /api/lughawi/proofread فقط. Contabo يعمل بالتوازي: قواعد TypeScript + sidecar النحوي (Alnnahwi) على :8091 + arabya-nlp (PyArabic∥Ollama) على :8092. مفاتيح Gemini/السحابة اختيارية بعد تسجيل الدخول فقط.",
+    note: "واجهة لغوي تستدعي /api/lughawi/proofread فقط. المحركات الخلفية تحت اسم لغوي: قواعد TypeScript + النحوي على :8091 + محرك لغوي (PyArabic∥Ollama) على :8092. مفاتيح Gemini/السحابة اختيارية بعد تسجيل الدخول فقط.",
   });
 }
