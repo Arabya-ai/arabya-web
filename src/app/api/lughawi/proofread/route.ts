@@ -137,8 +137,8 @@ export async function POST(req: Request) {
           id: "parallel-contabo",
           editCount: mergedEdits.length,
           ms: Math.max(sidecarStage?.ms ?? 0, nlpStage?.ms ?? 0),
-          note: wantAi
-            ? "sidecar(Alnnahwi∥rules) ∥ arabya-nlp(rules∥Ollama)"
+          note: runLocalLlm || runNeural
+            ? `sidecar(${runNeural ? "neural∥" : ""}rules) ∥ arabya-nlp(rules${runLocalLlm ? "∥Ollama" : "-only"})`
             : "sidecar(rules) ∥ arabya-nlp(rules-only)",
         },
       ],
