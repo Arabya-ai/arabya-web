@@ -69,7 +69,39 @@ if [[ -d .next ]]; then
   mv .next .next.prev-good
   echo "==> Saved previous .next → .next.prev-good (restore if build fails)"
 fi
-rm -rf node_modules
+
+# Contabo sometimes fails plain `rm -rf node_modules` ("Directory not empty") when
+# files are busy / NFS-ish. Rename + force chmod then remove; never abort mid-wipe.
+wipe_node_modules() {
+  local target="${1:-node_modules}"
+  [[ -e "$target" ]] || return 0
+  local trash="${target}.wiping.$$"
+  mv "$target" "$trash" 2>/dev/null || {
+    chmod -R u+w "$target" 2>/dev/null || true
+    rm -rf "$target" 2>/dev/null || true
+    [[ -e "$target" ]] || return 0
+    trash="${target}.wiping.$$"
+    mv "$target" "$trash" || return 1
+  }
+  chmod -R u+w "$trash" 2>/dev/null || true
+  rm -rf "$trash" 2>/dev/null || true
+  # If residual trash remains, leave it for later cleanup — deploy can continue
+  if [[ -e "$trash" ]]; then
+    echo "WARN: could not fully delete $trash — continuing with fresh install path"
+    ( rm -rf "$trash" >/dev/null 2>&1 & ) || true
+  fi
+  return 0
+}
+
+if ! wipe_node_modules node_modules; then
+  echo "ERROR: could not clear node_modules after PM2 stop."
+  if [[ -d .next.prev-good ]]; then
+    mv .next.prev-good .next
+    echo "==> Restored .next.prev-good — attempting emergency PM2 start"
+    contabo_safe_restart_web || pm2 start arabya-web || true
+  fi
+  exit 1
+fi
 # Stale npm cache / partial extracts → tar TAR_ENTRY_ERROR ENOENT on Contabo
 npm cache clean --force >/dev/null 2>&1 || true
 
@@ -88,7 +120,7 @@ for attempt in 1 2; do
     echo "WARN: npm ci failed (attempt $attempt)"
   fi
   echo "==> Cleaning corrupted node_modules + npm cache before retry"
-  rm -rf node_modules
+  wipe_node_modules node_modules || true
   npm cache clean --force >/dev/null 2>&1 || true
   rm -rf "${NPM_CONFIG_CACHE:-$HOME/.npm}/_cacache" 2>/dev/null || true
   sleep 2
@@ -98,7 +130,7 @@ done
 # Fall back to npm install so Contabo can recover instead of leaving the site stopped.
 if [[ "$npm_ci_ok" -ne 1 ]]; then
   echo "==> npm ci still failing — falling back to npm install (lock sync / optional platforms)"
-  rm -rf node_modules
+  wipe_node_modules node_modules || true
   npm cache clean --force >/dev/null 2>&1 || true
   if npm install --no-audit --no-fund && \
      [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
@@ -115,7 +147,7 @@ if [[ "$npm_ci_ok" -ne 1 ]]; then
   echo "On the server run:"
   echo "  df -h /"
   echo "  pm2 stop arabya-web arabya-nlp lughawi-sidecar 2>/dev/null || true"
-  echo "  rm -rf node_modules ~/.npm/_cacache"
+  echo "  chmod -R u+w node_modules 2>/dev/null; rm -rf node_modules ~/.npm/_cacache"
   echo "  npm cache clean --force && npm install --no-audit --no-fund"
   echo "  bash scripts/contabo-deploy.sh"
   if [[ -d .next.prev-good ]]; then
