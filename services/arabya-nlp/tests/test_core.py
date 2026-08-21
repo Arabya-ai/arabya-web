@@ -272,6 +272,23 @@ async def test_enforce_rate_limit_skips_loopback() -> None:
     await enforce_rate_limit(req)  # must not raise
 
 
+@pytest.mark.asyncio
+async def test_enforce_rate_limit_ignores_xff_on_loopback_peer() -> None:
+    """Next may forward browser XFF; TCP peer 127.0.0.1 must still be trusted."""
+    from unittest.mock import MagicMock
+
+    from app.security.rate_limit import enforce_rate_limit, limiter
+
+    for _ in range(50):
+        limiter.check("guest:203.0.113.9", 1, 3600)
+
+    req = MagicMock()
+    req.url.path = "/v1/tashkeel"
+    req.headers = {"x-forwarded-for": "203.0.113.9"}
+    req.client.host = "127.0.0.1"
+    await enforce_rate_limit(req)  # must not raise despite XFF
+
+
 def test_fastapi_health_and_proofread() -> None:
     from fastapi.testclient import TestClient
 

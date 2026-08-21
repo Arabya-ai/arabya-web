@@ -3,6 +3,10 @@
 Trusted Contabo path: Next.js on the same VPS calls http://127.0.0.1:8092.
 Loopback MUST never be guest-limited — otherwise Lughawi dies after a few requests
 (default was 5/hour and made /v1/proofread look “unreachable”).
+
+Important: ignore X-Forwarded-For when the TCP peer is loopback. Next.js may
+forward the browser's XFF header on server-side fetch; trusting it would
+rate-limit Contabo→NLP by visitor IP and return 429 while /health stays green.
 """
 
 from __future__ import annotations
@@ -43,13 +47,25 @@ class SlidingWindowRateLimiter:
 limiter = SlidingWindowRateLimiter()
 
 
+def peer_host(request: Request) -> str:
+    """TCP peer only — never X-Forwarded-For."""
+    if request.client and request.client.host:
+        return request.client.host
+    return "unknown"
+
+
 def client_ip(request: Request) -> str:
+    """
+    Best-effort client IP for logs / audit.
+    For rate limits, prefer peer_host when peer is loopback (see enforce_rate_limit).
+    """
+    peer = peer_host(request)
+    if is_loopback(peer):
+        return peer
     forwarded = request.headers.get("x-forwarded-for")
     if forwarded:
         return forwarded.split(",")[0].strip()
-    if request.client:
-        return request.client.host
-    return "unknown"
+    return peer
 
 
 def is_loopback(ip: str) -> bool:
@@ -86,8 +102,13 @@ async def enforce_rate_limit(request: Request) -> None:
     if path.startswith("/dashboard"):
         return
 
+    # Contabo Next.js → arabya-nlp is always a loopback TCP peer.
+    # Do NOT rate-limit by X-Forwarded-For in that case (causes false 429s).
+    peer = peer_host(request)
+    if is_loopback(peer):
+        return
+
     ip = client_ip(request)
-    # Next.js (arabya-web) on Contabo always talks to arabya-nlp via loopback.
     if is_loopback(ip):
         return
 
