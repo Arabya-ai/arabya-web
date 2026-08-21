@@ -44,11 +44,16 @@ export function lughawiProjectApiKey(): string | undefined {
 }
 
 export function lughawiCredentialsSecret(): string {
-  return (
+  const secret =
     process.env.LUGHAWI_CREDENTIALS_SECRET?.trim() ||
-    process.env.AUTH_SECRET?.trim() ||
-    "arabya-lughawi-dev-only-change-me"
-  );
+    process.env.AUTH_SECRET?.trim();
+  if (secret) return secret;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "LUGHAWI_CREDENTIALS_SECRET or AUTH_SECRET must be set in production (no default encrypt key).",
+    );
+  }
+  return "arabya-lughawi-dev-only-change-me";
 }
 
 const PROVIDERS: AiProviderId[] = [

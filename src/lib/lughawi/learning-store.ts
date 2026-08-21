@@ -24,8 +24,9 @@ export interface LearningFile {
   pairs: LearnedPair[];
 }
 
-const MIN_SAMPLES = 2;
-const ACCEPT_RATIO = 0.66;
+/** Need enough crowd votes before a pair auto-applies offline (anti-poison). */
+const MIN_SAMPLES = 5;
+const ACCEPT_RATIO = 0.8;
 
 function seedPath(): string {
   return join(process.cwd(), "data", "lughawi", "learned-corrections.json");
@@ -80,8 +81,8 @@ function mergeFiles(seed: LearningFile, runtime: LearningFile): LearningFile {
 
 export function computeActive(accepts: number, rejects: number): boolean {
   const n = accepts + rejects;
-  if (n < MIN_SAMPLES) return accepts >= 1 && rejects === 0;
-  return accepts / n >= ACCEPT_RATIO && accepts >= rejects;
+  if (n < MIN_SAMPLES) return false;
+  return accepts / n >= ACCEPT_RATIO && accepts > rejects;
 }
 
 /** Merged view: Git seed + runtime learning. */

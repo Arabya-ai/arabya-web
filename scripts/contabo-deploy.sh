@@ -234,9 +234,14 @@ else
   fi
 fi
 
-echo "==> MoneyPrinterTurbo engine"
-if [[ -f scripts/contabo-mpt-deploy.sh ]]; then
-  bash scripts/contabo-mpt-deploy.sh || echo "WARN: MPT deploy step failed — /studio/ai may show engine offline."
+echo "==> MoneyPrinterTurbo engine (optional — off by default to spare Contabo CPU/RAM)"
+if [[ "${CONTABO_ENABLE_MPT:-0}" == "1" || "${CONTABO_ENABLE_MPT:-}" == "true" ]]; then
+  if [[ -f scripts/contabo-mpt-deploy.sh ]]; then
+    bash scripts/contabo-mpt-deploy.sh || echo "WARN: MPT deploy step failed — /studio/ai may show engine offline."
+  fi
+else
+  echo "==> Skipping MPT (set CONTABO_ENABLE_MPT=1 to enable). Stopping arabya-mpt-api if present."
+  pm2 stop arabya-mpt-api 2>/dev/null || true
 fi
 
 echo "==> Lughawi Python sidecar (optional localhost NLP)"
@@ -248,7 +253,7 @@ if [[ -f scripts/contabo-lughawi-sidecar.sh ]]; then
   bash scripts/contabo-lughawi-sidecar.sh || echo "WARN: sidecar start skipped — local rules still work."
 fi
 
-echo "==> Arabya NLP FastAPI platform (proofread / STT / DevOps / dashboard)"
+echo "==> Arabya NLP FastAPI platform (optional — off by default)"
 grep -q '^ARABYA_NLP_DATABASE_URL=' "$APP_DIR/.env" 2>/dev/null || \
   echo 'ARABYA_NLP_DATABASE_URL=sqlite:////var/lib/arabya/arabya-nlp.sqlite' >> "$APP_DIR/.env"
 # CRITICAL safety: keep DevOps auto-execute disabled unless an operator sets it intentionally later
@@ -257,12 +262,17 @@ if grep -q '^ARABYA_NLP_DEVOPS_AUTO_EXECUTE=' "$APP_DIR/.env" 2>/dev/null; then
 else
   echo 'ARABYA_NLP_DEVOPS_AUTO_EXECUTE=0' >> "$APP_DIR/.env"
 fi
-if [[ -x "$APP_DIR/services/arabya-nlp/.venv/bin/python" && -f scripts/contabo-arabya-nlp.sh ]]; then
-  bash scripts/contabo-arabya-nlp.sh || echo "WARN: arabya-nlp PM2 restart skipped"
-elif [[ -f scripts/contabo-arabya-nlp-activate.sh ]]; then
-  echo "WARN: arabya-nlp venv missing — run once: bash scripts/contabo-arabya-nlp-activate.sh"
+if [[ "${CONTABO_ENABLE_NLP:-0}" == "1" || "${CONTABO_ENABLE_NLP:-}" == "true" ]]; then
+  if [[ -x "$APP_DIR/services/arabya-nlp/.venv/bin/python" && -f scripts/contabo-arabya-nlp.sh ]]; then
+    bash scripts/contabo-arabya-nlp.sh || echo "WARN: arabya-nlp PM2 restart skipped"
+  elif [[ -f scripts/contabo-arabya-nlp-activate.sh ]]; then
+    echo "WARN: arabya-nlp venv missing — run once: bash scripts/contabo-arabya-nlp-activate.sh"
+  else
+    echo "WARN: arabya-nlp scripts missing"
+  fi
 else
-  echo "WARN: arabya-nlp scripts missing"
+  echo "==> Skipping arabya-nlp (set CONTABO_ENABLE_NLP=1 to enable). Stopping if present."
+  pm2 stop arabya-nlp 2>/dev/null || true
 fi
 
 echo "==> Restart PM2 arabya-web (only if tree can run next start)"

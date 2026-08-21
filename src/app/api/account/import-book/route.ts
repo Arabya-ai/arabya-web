@@ -18,7 +18,7 @@ import {
   listBookImportJobsForUser,
 } from "@/lib/local-user-db/book-import-jobs";
 import { enforceRateLimitKey } from "@/lib/rate-limit";
-import { requireSession } from "@/lib/require-role";
+import { requireEditorial, requireSession } from "@/lib/require-role";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -80,7 +80,8 @@ function parseReadingMeta(form: FormData | Record<string, unknown>): ReadingBook
 }
 
 export async function POST(req: Request) {
-  const gate = await requireSession();
+  // Uploads/parsing are CPU+disk heavy — editors/admins only (not every member).
+  const gate = await requireEditorial();
   if ("error" in gate) return gate.error;
   if (!isCloudSyncConfigured() || !isLocalUserSyncEnabled()) {
     return apiError("not_configured", 503);
