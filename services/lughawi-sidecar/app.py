@@ -1,12 +1,10 @@
 """
 Lughawi NLP sidecar — localhost only (default 127.0.0.1:8091).
 
-Foundation stack (install via scripts/contabo-lughawi-sidecar-deps.sh):
-  - PyArabic + Stanford Stanza + CAMeL Tools  → rule-based / morph NLP
-  - Optional HF AraBART GEC                   → contextual grammar
-  - Optional CATT                             → neural tashkeel
-
-Without heavy packages the service still boots with honest fallbacks.
+Stack:
+  Rule NLP: PyArabic + Ghalatawi + Fareh + Stanza + CAMeL
+  Neural GEC: Alnnahwi via Hugging Face API (preferred) or local
+  STT: Whisper via Hugging Face Inference (preferred)
 """
 
 from __future__ import annotations
@@ -18,18 +16,18 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-# Allow `python app.py` from this directory
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from engines.capabilities import probe  # noqa: E402
 from engines.gec import gec_neural  # noqa: E402
 from engines.morph import analyze_morph  # noqa: E402
 from engines.rules_nlp import rules_nlp_edits  # noqa: E402
+from engines.stt_whisper import transcribe_audio  # noqa: E402
 from engines.tashkeel import tashkeel as run_tashkeel  # noqa: E402
 
 HOST = "127.0.0.1"
 PORT = 8091
-VERSION = "0.3.0"
+VERSION = "0.4.0"
 
 
 def _json_bytes(obj: Any) -> bytes:
@@ -40,12 +38,16 @@ def health_payload() -> dict[str, Any]:
     caps = probe()
     morph = "camel" if caps["camel"] else "heuristic"
     rules = []
-    if caps["pyarabic"]:
-        rules.append("pyarabic")
-    if caps["stanza"]:
-        rules.append("stanza")
+    for key in ("pyarabic", "ghalatawi", "fareh", "stanza"):
+        if caps.get(key):
+            rules.append(key)
     rules.append("builtin")
-    gec = "arabart" if caps["transformers"] else "rules-nlp"
+    if caps.get("hfToken"):
+        gec = "alnnahwi-hf-remote"
+    elif caps.get("transformers"):
+        gec = "transformers-local"
+    else:
+        gec = "rules-nlp"
     return {
         "ok": True,
         "service": "lughawi-sidecar",
@@ -56,23 +58,28 @@ def health_payload() -> dict[str, Any]:
             "rules_nlp": "+".join(rules),
             "tashkeel": "catt" if caps["catt"] else "passthrough",
             "gec": gec,
+            "stt": "hf-whisper" if caps.get("hfToken") else "needs-hf-token",
         },
         "foundation": {
             "ruleBasedNlp": True,
             "stanza": caps["stanza"],
             "camel": caps["camel"],
             "pyarabic": caps["pyarabic"],
-            "neuralGec": caps["transformers"],
+            "ghalatawi": caps["ghalatawi"],
+            "fareh": caps["fareh"],
+            "neuralGec": bool(caps.get("hfToken") or caps["transformers"]),
+            "preferHuggingFaceRemote": True,
             "noteAr": (
-                "الأساس: قواعد NLP (Stanza/PyArabic/CAMeL) + GEC اختياري. "
-                "النماذج اللغوية المحلية عبر Ollama على Contabo منفصلة."
+                "الأساس: غلطاوي+فارح+PyArabic+Stanza+CAMeL. "
+                "GEC/Whisper يُفضَّل عبر Hugging Face API لتقليل حمل Contabo "
+                "(LUGHAWI_HF_TOKEN). Ollama محلي اختياري."
             ),
         },
     }
 
 
 class Handler(BaseHTTPRequestHandler):
-    def log_message(self, fmt: str, *args: Any) -> None:  # quieter PM2 logs
+    def log_message(self, fmt: str, *args: Any) -> None:
         sys.stderr.write("%s - %s\n" % (self.address_string(), fmt % args))
 
     def _send(self, code: int, obj: Any) -> None:
@@ -87,7 +94,7 @@ class Handler(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length") or "0")
         if length <= 0:
             return {}
-        if length > 2_000_000:
+        if length > 30_000_000:
             raise ValueError("payload too large")
         raw = self.rfile.read(length)
         return json.loads(raw.decode("utf-8"))
@@ -105,6 +112,12 @@ class Handler(BaseHTTPRequestHandler):
             body = self._read_json()
         except Exception as e:
             self._send(400, {"ok": False, "error": str(e)})
+            return
+
+        if path == "/transcribe":
+            audio_b64 = body.get("audioBase64") if isinstance(body.get("audioBase64"), str) else None
+            filename = body.get("filename") if isinstance(body.get("filename"), str) else "audio.webm"
+            self._send(200, transcribe_audio(audio_b64=audio_b64, filename=filename))
             return
 
         text = body.get("text") if isinstance(body.get("text"), str) else ""
@@ -127,12 +140,10 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         if path == "/gec":
-            # Foundation: always run rule-based NLP; neural GEC merges on top when loaded.
             base = rules_nlp_edits(text)
             neural = gec_neural(text)
             edits = list(base.get("edits") or [])
-            # Prefer span-local rule edits; only append neural if it produced something
-            # and rules found nothing spanning the whole text.
+            # Prefer span-local rule edits; append neural whole-span only if useful
             for e in neural.get("edits") or []:
                 edits.append(e)
             engines = [base.get("engine"), neural.get("engine")]

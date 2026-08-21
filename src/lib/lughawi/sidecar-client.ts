@@ -168,3 +168,38 @@ export async function sidecarGec(
     clearTimeout(timer);
   }
 }
+
+/** Whisper STT via sidecar → Hugging Face Inference (when token configured). */
+export async function sidecarTranscribe(
+  audioBase64: string,
+  filename: string,
+  timeoutMs = 120_000,
+): Promise<{ ok: boolean; text: string; engine: string; error?: string } | null> {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${baseUrl()}/transcribe`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ audioBase64, filename }),
+      signal: ctrl.signal,
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as {
+      ok?: boolean;
+      text?: string;
+      engine?: string;
+      error?: string;
+    };
+    return {
+      ok: Boolean(json.ok),
+      text: typeof json.text === "string" ? json.text : "",
+      engine: json.engine ?? "whisper",
+      error: typeof json.error === "string" ? json.error : undefined,
+    };
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}

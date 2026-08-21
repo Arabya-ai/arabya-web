@@ -1921,7 +1921,13 @@
     "quranAssistHelp": "Type a word or phrase to find matching ayahs, then copy into your text safely.",
     "quranSearch": "Search",
     "quranSearchPlaceholder": "Word or ayah fragment…",
-    "ocrHelp": "Upload an image or PDF to extract text for Lughawi — coming soon.",
+    "ocrHelp": "Upload audio or video — Whisper extracts speech, then Lughawi proofreads it. Image/PDF OCR comes next.",
+    "ocrPickMedia": "Choose audio / video file",
+    "ocrSttWorking": "Transcribing audio…",
+    "ocrSttOk": "Extracted via {engine} — proofreading",
+    "ocrSttFailed": "Transcription failed. Ensure Hugging Face token is set on the server.",
+    "ocrSttEmpty": "No speech text was extracted.",
+    "ocrImageSoon": "Image and PDF OCR will be enabled in a later step.",
     "charLimitLabel": "Characters",
     "maxLabel": "Maximum"
   }

@@ -173,6 +173,44 @@ def rules_nlp_edits(text: str) -> dict[str, Any]:
                 }
             )
 
+    # 1b) Fareh common-error table (LanguageTool Arabic rules DB)
+    try:
+        from engines.fareh_rules import fareh_edits
+
+        fareh = fareh_edits(text)
+        if fareh.get("edits"):
+            engines.append("fareh")
+        for e in fareh.get("edits") or []:
+            span = (int(e["start"]), int(e["end"]))
+            if span in claimed:
+                continue
+            claimed.add(span)
+            seq += 1
+            e = dict(e)
+            e["id"] = f"rb-fareh-{seq}"
+            edits.append(e)
+    except Exception:
+        pass
+
+    # 1c) Ghalatawi autocorrect (token-level when possible)
+    try:
+        from engines.ghalatawi_engine import ghalatawi_edits
+
+        gh = ghalatawi_edits(text)
+        if gh.get("engine") == "ghalatawi":
+            engines.append("ghalatawi")
+        for e in gh.get("edits") or []:
+            span = (int(e["start"]), int(e["end"]))
+            if span in claimed:
+                continue
+            claimed.add(span)
+            seq += 1
+            e = dict(e)
+            e["id"] = f"rb-gh-{seq}"
+            edits.append(e)
+    except Exception:
+        pass
+
     # 2) Punctuation spacing (Arabic)
     for m in re.finditer(r"\s+([،؛؟!.,])", text):
         start, end = m.start(), m.end()
@@ -233,5 +271,5 @@ def rules_nlp_edits(text: str) -> dict[str, Any]:
         "edits": edits,
         "tokens": st_tokens[:200],
         "engine": f"rules-nlp:{engine}",
-        "note": "Rule-based NLP (PyArabic/Stanza/builtin) — ليس نموذج توليد",
+        "note": "Rule-based NLP (PyArabic/Stanza/Fareh/Ghalatawi/builtin)",
     }
