@@ -208,6 +208,13 @@ if [[ -f scripts/contabo-lughawi-sidecar.sh ]]; then
   bash scripts/contabo-lughawi-sidecar.sh || echo "WARN: sidecar start skipped — local rules still work."
 fi
 
+echo "==> Arabya NLP FastAPI platform (proofread / STT / DevOps / dashboard)"
+grep -q '^ARABYA_NLP_DATABASE_URL=' "$APP_DIR/.env" 2>/dev/null || \
+  echo 'ARABYA_NLP_DATABASE_URL=sqlite:////var/lib/arabya/arabya-nlp.sqlite' >> "$APP_DIR/.env"
+if [[ -f scripts/contabo-arabya-nlp.sh ]]; then
+  bash scripts/contabo-arabya-nlp.sh || echo "WARN: arabya-nlp start skipped — install deps via contabo-arabya-nlp-deps.sh"
+fi
+
 echo "==> Restart PM2 arabya-web (after env keys are written)"
 if pm2 describe arabya-web >/dev/null 2>&1; then
   pm2 restart arabya-web --update-env

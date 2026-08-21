@@ -67,6 +67,12 @@ services/money-printer-turbo/models/
 services/money-printer-turbo/resource/songs/*.mp3
 services/money-printer-turbo/resource/fonts/*.ttc
 
+# Arabya NLP FastAPI (Contabo) — keep source; ignore local venv
+services/arabya-nlp/.venv/
+services/arabya-nlp/venv/
+services/arabya-nlp/*.sqlite
+services/arabya-nlp/*.log
+
 # vercel
 .vercel
 

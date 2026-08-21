@@ -30,6 +30,13 @@ fi
 # Optional empty seeds — stores create real files lazily.
 : > "$RUNTIME_DIR/lughawi-learning.json.tmp" && rm -f "$RUNTIME_DIR/lughawi-learning.json.tmp"
 
+echo "==> Arabya NLP SQLite (FastAPI analytics / agent audit)"
+NLP_DB="${ARABYA_NLP_SQLITE_PATH:-/var/lib/arabya/arabya-nlp.sqlite}"
+mkdir -p "$(dirname "$NLP_DB")" /tmp/arabya-nlp /var/log/arabya
+# File is created on first FastAPI boot; ensure parent + log dir exist.
+touch "$NLP_DB" 2>/dev/null || true
+chmod 640 "$NLP_DB" 2>/dev/null || true
+
 echo "==> Permissions"
 chmod 750 /var/lib/arabya 2>/dev/null || true
 chmod 640 "$DB_PATH" 2>/dev/null || true
@@ -37,4 +44,5 @@ chmod 750 "$RUNTIME_DIR" 2>/dev/null || true
 
 echo "OK — user DB: $DB_PATH"
 echo "OK — runtime: $RUNTIME_DIR"
+echo "OK — arabya-nlp DB path: $NLP_DB"
 echo "Reminder: set ARABYA_USER_SYNC_ENABLED=1 and ARABYA_USER_DB_PATH=$DB_PATH in .env then: pm2 restart arabya-web --update-env"
