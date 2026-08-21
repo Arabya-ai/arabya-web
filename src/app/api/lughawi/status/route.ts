@@ -58,6 +58,6 @@ export async function GET() {
     sidecar: {
       health: sidecar,
     },
-    note: "UI calls /api/lughawi/proofread only. Next.js proxies Contabo arabya-nlp at ARABYA_NLP_URL (default http://127.0.0.1:8092). Port 8092 stays private.",
+    note: "واجهة لغوي تستدعي /api/lughawi/proofread فقط. Contabo يعمل بالتوازي: قواعد TypeScript + sidecar النحوي (Alnnahwi) على :8091 + arabya-nlp (PyArabic∥Ollama) على :8092. مفاتيح Gemini/السحابة اختيارية بعد تسجيل الدخول فقط.",
   });
 }
