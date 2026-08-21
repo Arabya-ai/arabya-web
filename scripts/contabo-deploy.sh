@@ -74,6 +74,43 @@ if [[ -n "${AVAIL_KB:-}" && "$AVAIL_KB" -lt 1500000 ]]; then
   echo "WARN: low disk space (~${AVAIL_KB}KB free). Aim for ≥1.5GB free before npm ci."
 fi
 
+# Force-remove node_modules even if a concurrent npm left the tree half-written
+# (Contabo saw: rm: cannot remove 'node_modules/...': Directory not empty → exit 1 → 503).
+contabo_rm_node_modules() {
+  local target="${1:-node_modules}"
+  [[ -e "$target" ]] || return 0
+  echo "==> Removing $target"
+  # Stop stray npm/node installers that keep rewriting the tree during rm
+  if command -v pgrep >/dev/null 2>&1; then
+    while read -r pid; do
+      [[ -n "${pid:-}" ]] || continue
+      # Only kill installers whose cwd is this app dir when detectable
+      if [[ -r "/proc/$pid/cwd" ]] && [[ "$(readlink -f "/proc/$pid/cwd" 2>/dev/null || true)" == "$APP_DIR" ]]; then
+        echo "==> Stopping conflicting pid $pid in $APP_DIR"
+        kill "$pid" 2>/dev/null || true
+      fi
+    done < <(pgrep -f "npm (ci|install)|node .*npm" 2>/dev/null || true)
+    sleep 1
+  fi
+  local i
+  for i in 1 2 3 4 5; do
+    if rm -rf "$target" 2>/tmp/contabo-rm-node_modules.err; then
+      [[ ! -e "$target" ]] && return 0
+    fi
+    echo "WARN: rm -rf $target incomplete (attempt $i); retrying..."
+    cat /tmp/contabo-rm-node_modules.err 2>/dev/null | head -5 || true
+    sleep 2
+  done
+  # Last resort: rename away then delete async so deploy can continue installing
+  if [[ -e "$target" ]]; then
+    local trash="${target}.trash-$(date +%s)"
+    echo "WARN: renaming stubborn $target → $trash"
+    mv "$target" "$trash" || return 1
+    (rm -rf "$trash" >/dev/null 2>&1 || true) &
+  fi
+  return 0
+}
+
 echo "==> Cleaning previous install artifacts"
 # Keep a copy of the last good build so a failed build can restore the site
 if [[ -d .next ]]; then
@@ -81,14 +118,14 @@ if [[ -d .next ]]; then
   mv .next .next.prev-good
   echo "==> Saved previous .next → .next.prev-good (restore if build fails)"
 fi
-rm -rf node_modules
+contabo_rm_node_modules node_modules
 # Stale npm cache / partial extracts → tar TAR_ENTRY_ERROR ENOENT on Contabo
 npm cache clean --force >/dev/null 2>&1 || true
 
 npm_ci_ok=0
 for attempt in 1 2; do
   echo "==> npm ci (attempt $attempt)"
-  if npm ci --no-audit --no-fund; then
+  if npm ci --no-audit --no-fund --dangerously-allow-all-scripts; then
     # Contabo often prints tar ENOENT on next/dist yet exits 0 — verify next immediately.
     if [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
        [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
@@ -100,7 +137,7 @@ for attempt in 1 2; do
     echo "WARN: npm ci failed (attempt $attempt)"
   fi
   echo "==> Cleaning corrupted node_modules + npm cache before retry"
-  rm -rf node_modules
+  contabo_rm_node_modules node_modules
   npm cache clean --force >/dev/null 2>&1 || true
   rm -rf "${NPM_CONFIG_CACHE:-$HOME/.npm}/_cacache" 2>/dev/null || true
   sleep 2
@@ -108,13 +145,12 @@ done
 
 # Lockfile drift fallback — never leave the site stopped if install can recover.
 if [[ "$npm_ci_ok" -ne 1 ]]; then
-  echo "==> npm ci failed — falling back to npm install (then freeze with a fresh lock on disk only)"
-  rm -rf node_modules
-  if npm install --no-audit --no-fund; then
+  echo "==> npm ci failed — falling back to npm install"
+  contabo_rm_node_modules node_modules
+  if npm install --no-audit --no-fund --dangerously-allow-all-scripts; then
     if [[ -f node_modules/next/dist/compiled/babel/code-frame.js ]] && \
        [[ -f node_modules/next/dist/lib/verify-typescript-setup.js ]]; then
       npm_ci_ok=1
-      # Do not commit lockfile from Contabo; discard local lock drift after install
       git checkout -- package-lock.json 2>/dev/null || true
     fi
   fi
@@ -127,7 +163,7 @@ if [[ "$npm_ci_ok" -ne 1 ]]; then
   echo "  pm2 stop arabya-web arabya-nlp lughawi-sidecar 2>/dev/null || true"
   echo "  git fetch origin main && git reset --hard origin/main"
   echo "  rm -rf node_modules ~/.npm/_cacache"
-  echo "  npm cache clean --force && npm ci"
+  echo "  npm cache clean --force && npm ci --dangerously-allow-all-scripts"
   if [[ -d .next.prev-good ]]; then
     mv .next.prev-good .next
     echo "==> Restored .next.prev-good (site stays STOPPED until node_modules is healthy)"
