@@ -288,6 +288,55 @@ async def test_enforce_rate_limit_ignores_xff_on_loopback_peer() -> None:
     req.client.host = "127.0.0.1"
     await enforce_rate_limit(req)  # must not raise despite XFF
 
+    # IPv6 loopback + XFF (same Contabo→NLP path via ::1)
+    req6 = MagicMock()
+    req6.url.path = "/v1/conjugate"
+    req6.headers = {"x-forwarded-for": "203.0.113.9, 10.0.0.1"}
+    req6.client.host = "::1"
+    await enforce_rate_limit(req6)
+
+
+def test_client_ip_prefers_loopback_peer_over_xff() -> None:
+    """Audit helper must not treat forwarded browser IP as client when peer is loopback."""
+    from unittest.mock import MagicMock
+
+    from app.security.rate_limit import client_ip, peer_host
+
+    req = MagicMock()
+    req.client.host = "127.0.0.1"
+    req.headers = {"x-forwarded-for": "198.51.100.7"}
+    assert peer_host(req) == "127.0.0.1"
+    assert client_ip(req) == "127.0.0.1"
+
+    remote = MagicMock()
+    remote.client.host = "10.0.0.5"
+    remote.headers = {"x-forwarded-for": "198.51.100.7"}
+    assert client_ip(remote) == "198.51.100.7"
+
+
+@pytest.mark.asyncio
+async def test_enforce_rate_limit_applies_to_remote_peer_xff() -> None:
+    """Non-loopback peers still rate-limit by XFF (public edge path)."""
+    from unittest.mock import MagicMock
+
+    import pytest
+    from fastapi import HTTPException
+
+    from app.security.rate_limit import enforce_rate_limit, limiter
+
+    # Match test env: ARABYA_NLP_RATE_LIMIT_REQUESTS=5
+    for _ in range(5):
+        ok, _ = limiter.check("guest:198.51.100.42", 5, 3600)
+        assert ok
+
+    req = MagicMock()
+    req.url.path = "/v1/proofread"
+    req.headers = {"x-forwarded-for": "198.51.100.42"}
+    req.client.host = "10.0.0.8"  # not loopback — XFF must apply
+    with pytest.raises(HTTPException) as ei:
+        await enforce_rate_limit(req)
+    assert ei.value.status_code == 429
+
 
 def test_fastapi_health_and_proofread() -> None:
     from fastapi.testclient import TestClient
