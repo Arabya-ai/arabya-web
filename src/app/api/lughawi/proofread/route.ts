@@ -62,7 +62,8 @@ export async function POST(req: Request) {
     proofMode,
   });
 
-  // Layer 2: Contabo sidecar rule-NLP (Stanza/PyArabic/CAMeL) + optional neural GEC
+  // Layer 2: Contabo sidecar rule-NLP (fast path; neural GEC only if explicitly requested later).
+  // Keep timeout short so interactive UI never hangs on Alnnahwi/Stanza CPU load.
   try {
     result = await enrichProofreadWithSidecar(result);
   } catch {

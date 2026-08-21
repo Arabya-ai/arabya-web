@@ -26,6 +26,18 @@ describe("lughawi spelling", () => {
     const res = proofreadLocal(text, { locale: "ar" });
     expect(res.result).toBe("أحمد قابل علي في المدرسة");
   });
+
+  it("fixes بقرة / تقرأ / كتابًا in a short nonsense sentence", () => {
+    const text = "بقره تقرا كتاب";
+    const res = proofreadLocal(text, { locale: "ar" });
+    const map = Object.fromEntries(
+      res.edits.map((e) => [e.original, e.suggestion]),
+    );
+    expect(map["بقره"]).toBe("بقرة");
+    expect(map["تقرا"]).toBe("تقرأ");
+    expect(map["كتاب"]).toBe("كتابًا");
+    expect(res.result).toBe("بقرة تقرأ كتابًا");
+  });
 });
 
 describe("lughawi pipeline", () => {

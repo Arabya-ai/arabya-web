@@ -127,11 +127,23 @@ export function collectGrammarEdits(
       end,
       `${verb}ون`,
       `${verb}وا`,
-      "lan-nasb",
+      "lam-jussive",
       locale,
       0.7,
     );
   }
+
+  // Object of «قرأ / يقرأ / تقرأ / نقرأ / أقرأ»: كتاب → كتابًا (accusative tanween)
+  const qaraKitab =
+    /(?:^|[\s،,])((?:أ|ا)?قرأ|يقرأ|تقرأ|نقرأ|تقرا|يقرا|نقرا|اقرا)\s+(كتاب)(?=[\s.,،؛؟!]|$)/g;
+  while ((m = qaraKitab.exec(text)) !== null) {
+    const noun = m[2]!;
+    const start = m.index + m[0]!.lastIndexOf(noun);
+    add(edits, start, start + noun.length, noun, "كتابًا", "accusative-object", locale, 0.86);
+  }
+
+  // قابَلَ على → علي (name) when followed by typical name context is in spelling;
+  // number agreement heuristics below.
 
   // كانو → كانوا (common typo; alef-farq also catches but word-level is clearer)
   const kanu = /(?<![\u0600-\u06FFa-zA-Z0-9])كانو(?!ا)(?![\u0600-\u06FFa-zA-Z0-9])/g;

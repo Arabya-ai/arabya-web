@@ -18,7 +18,10 @@ function overlapsProtected(
 export async function enrichProofreadWithSidecar(
   local: ProofreadResponse,
 ): Promise<ProofreadResponse> {
-  const payload = await sidecarGec(local.original);
+  // Prefer snappy interactive UX: local rules already cover many MSA fixes;
+  // never wait on Contabo neural GEC (Alnnahwi) during default proofread.
+  const timeoutMs = local.edits.length > 0 ? 2_000 : 4_000;
+  const payload = await sidecarGec(local.original, timeoutMs, { neural: false });
   if (!payload || !payload.edits.length) {
     return {
       ...local,
