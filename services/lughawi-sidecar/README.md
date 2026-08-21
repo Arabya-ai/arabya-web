@@ -1,54 +1,47 @@
 # Lughawi NLP Sidecar (Contabo)
 
-Python NLP runs **outside** Next.js on Contabo (`127.0.0.1:8091`).
+## سياسة التشغيل (مهمة)
 
-## Why Hugging Face (not “upload our whole project”)?
+1. **Contabo أساس كامل** — القواعد + نماذج محلية (Alnnahwi / Whisper) مثبتة على السيرفر حتى لا يتوقف العمل إن انتهى توكن HF أو تُعطّل نماذج بعيدة.
+2. **Hugging Face تسريع اختياري** — إن وُجد `LUGHAWI_HF_TOKEN` يُجرَّب أولًا لتوفير RAM/CPU.
+3. **رجوع تلقائي** — أي فشل HF → Contabo المحلي فورًا.
 
-We do **not** host Arabya’s app on Hugging Face. We **call existing HF models via Inference API** when `LUGHAWI_HF_TOKEN` is set:
+```text
+طلب تدقيق/صوت
+   ├─ إن وُجد توكن HF و LUGHAWI_PREFER_HF=1 → جرّب HF
+   │     └─ نجح؟ استخدمه
+   └─ وإلا / فشل → Contabo المحلي (دائمًا)
+```
 
-| Task | Model | Where it runs |
-|------|--------|----------------|
-| Arabic GEC | `alnnahwi/gemma-3-1b-arabic-gec-v1` | HF remote (preferred) |
-| Speech→text | `openai/whisper-large-v3` | HF remote (preferred) |
-| Rule NLP | PyArabic, Ghalatawi, Fareh, Stanza, CAMeL | Contabo sidecar (light CPU) |
-| Local LLM fallback | Ollama `llama3.1:8b` | Contabo (optional, heavy RAM) |
-
-This is intentional: light rules stay local; heavy neural work prefers HF to save Contabo RAM/CPU.
-
-## Install
+## Install (كامل على Contabo)
 
 ```bash
 cd /var/www/arabya-web
 bash scripts/contabo-lughawi-sidecar-deps.sh
-# Add free token from https://huggingface.co/settings/tokens
+# اختياري لتوفير الموارد فقط:
 # echo 'LUGHAWI_HF_TOKEN=hf_...' >> .env
 pm2 restart lughawi-sidecar arabya-web --update-env
 curl -s http://127.0.0.1:8091/health | python3 -m json.tool
 ```
 
-Ensure `.env` also has:
+Env defaults written by the deps script:
 
-```bash
-LUGHAWI_SIDECAR_URL=http://127.0.0.1:8091
-```
+| Variable | Default | Meaning |
+|----------|---------|---------|
+| `LUGHAWI_SIDECAR_URL` | `http://127.0.0.1:8091` | Next → sidecar |
+| `LUGHAWI_GEC_LOCAL` | `1` | Alnnahwi على Contabo |
+| `LUGHAWI_STT_LOCAL` | `1` | faster-whisper على Contabo |
+| `LUGHAWI_PREFER_HF` | `1` | جرّب HF أولًا إن وُجد توكن |
+| `LUGHAWI_HF_TOKEN` | (optional) | تسريع فقط |
+| `LUGHAWI_WHISPER_LOCAL_SIZE` | `medium` | حجم Whisper المحلي |
 
 ## Endpoints
 
 | Method | Path | Role |
 |--------|------|------|
-| GET | `/health` | Capability map |
-| POST | `/morph` | CAMeL morph |
-| POST | `/rules-nlp` | Fareh + Ghalatawi + Stanza + builtin |
-| POST | `/gec` | rules-nlp + Alnnahwi (HF) |
+| GET | `/health` | capabilities + policy |
+| POST | `/morph` | CAMeL |
+| POST | `/rules-nlp` | Fareh + Ghalatawi + Stanza |
+| POST | `/gec` | rules + Alnnahwi (HF→local) |
+| POST | `/transcribe` | Whisper (HF→local) |
 | POST | `/tashkeel` | CATT or passthrough |
-| POST | `/transcribe` | Whisper via HF (`audioBase64`) |
-
-## Proofread path
-
-1. TypeScript rules  
-2. Sidecar `/gec` (Fareh/Ghalatawi/Stanza + Alnnahwi)  
-3. Auto LLM pool (Gemini / Groq / Ollama)
-
-## Refs
-
-See `data/lughawi/refs/arabic-tech-curriculum-and-stack.md`.

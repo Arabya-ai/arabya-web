@@ -91,7 +91,7 @@
       "lughawiStage": "gec",
       "watch": true,
       "hfModels": ["alnnahwi/gemma-3-1b-arabic-gec-v1"],
-      "notesAr": "يُفضَّل عبر Hugging Face Inference (LUGHAWI_HF_TOKEN) لتقليل RAM Contabo. محلي فقط مع LUGHAWI_GEC_LOCAL=1."
+      "notesAr": "أساس Contabo محلي (LUGHAWI_GEC_LOCAL=1). HF اختياري لتوفير الموارد مع رجوع تلقائي."
     },
     {
       "id": "whisper-arabic-stt",
@@ -101,12 +101,12 @@
       "license": "MIT (OpenAI Whisper)",
       "repo": "https://huggingface.co/openai/whisper-large-v3",
       "docs": "services/lughawi-sidecar/engines/stt_whisper.py",
-      "features": ["صوت→نص", "فيديو→نص", "دعم العربية"],
-      "status": "optional_sidecar",
+      "features": ["صوت→نص", "فيديو→نص", "دعم العربية", "faster-whisper محلي"],
+      "status": "wired_sidecar",
       "lughawiStage": "stt",
       "watch": true,
       "hfModels": ["openai/whisper-large-v3", "MightyStudent/whisper-large-v3-arabic"],
-      "notesAr": "عبر HF Inference افتراضيًا. الواجهة: وحدة OCR في /lughawi → /api/lughawi/transcribe"
+      "notesAr": "محلي عبر faster-whisper (افتراضي medium). HF اختياري لتوفير CPU مع رجوع تلقائي."
     },
     {
       "id": "research-arabic-curriculum-tech",

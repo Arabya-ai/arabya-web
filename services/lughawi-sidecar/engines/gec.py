@@ -1,10 +1,15 @@
 """
-Arabic GEC engines — prefer Hugging Face Inference API to spare Contabo RAM.
+Arabic GEC — Contabo-complete with optional HF acceleration.
+
+Policy (owner):
+1) Contabo local must always work (never depend on HF token remaining).
+2) If LUGHAWI_HF_TOKEN works → try HF first to spare Contabo RAM/CPU.
+3) On HF failure / quota / model disabled → automatic local Contabo fallback.
 
 Order:
-1) HF Inference remote: alnnahwi/gemma-3-1b-arabic-gec-v1 (when LUGHAWI_HF_TOKEN set)
-2) Local transformers Alnnahwi (heavy — only if LUGHAWI_GEC_LOCAL=1)
-3) Legacy AraBART local if already loaded
+1) HF remote Alnnahwi (only when token + LUGHAWI_PREFER_HF≠0)
+2) Local Alnnahwi (transformers) when weights present
+3) Local AraBART if present
 """
 
 from __future__ import annotations
@@ -35,6 +40,20 @@ def _hf_token() -> str:
     )
 
 
+def _prefer_hf() -> bool:
+    """Use HF first when token exists, unless explicitly disabled."""
+    flag = os.environ.get("LUGHAWI_PREFER_HF", "1").strip().lower()
+    if flag in {"0", "false", "no", "off"}:
+        return False
+    return bool(_hf_token())
+
+
+def _allow_local_neural() -> bool:
+    """Local neural is ON by default (Contabo-complete). Set LUGHAWI_GEC_LOCAL=0 to skip."""
+    flag = os.environ.get("LUGHAWI_GEC_LOCAL", "1").strip().lower()
+    return flag not in {"0", "false", "no", "off"}
+
+
 def _extract_alnnahwi_response(generated_text: str) -> str:
     marker = "\nmodel\n"
     if marker in generated_text:
@@ -46,12 +65,13 @@ def _extract_alnnahwi_response(generated_text: str) -> str:
 
 
 def gec_hf_remote(text: str) -> dict[str, Any] | None:
-    """Call HF Inference API. Returns None if token missing or request fails soft."""
+    """Call HF Inference API. Returns None if skipped; dict with warning on soft fail."""
+    if not _prefer_hf():
+        return None
     token = _hf_token()
     if not token:
         return None
     sample = text if len(text) <= 800 else text[:800]
-    # Prefer router; fall back to classic inference URL.
     urls = [
         f"https://router.huggingface.co/hf-inference/models/{ALNNAHWI_MODEL}",
         f"https://api-inference.huggingface.co/models/{ALNNAHWI_MODEL}",
@@ -108,7 +128,7 @@ def gec_hf_remote(text: str) -> dict[str, Any] | None:
                         "original": sample,
                         "suggestion": corrected,
                         "ruleId": "alnnahwi-gemma3-1b-gec",
-                        "explanation": "تصحيح نحوي عربي (Alnnahwi Gemma-3-1B عبر Hugging Face)",
+                        "explanation": "تصحيح نحوي عربي (Alnnahwi عبر Hugging Face — توفير موارد Contabo)",
                         "confidence": 0.78,
                         "source": "gec",
                         "status": "proposed",
@@ -131,13 +151,13 @@ def gec_hf_remote(text: str) -> dict[str, Any] | None:
         "text": text,
         "edits": [],
         "engine": "hf-remote-failed",
-        "warning": last_err or "HF Inference unavailable",
+        "warning": last_err or "HF Inference unavailable — will try Contabo local",
     }
 
 
 def _get_alnnahwi_local():  # type: ignore[no-untyped-def]
     global _local_pipe, _local_failed
-    if os.environ.get("LUGHAWI_GEC_LOCAL", "").strip() not in {"1", "true", "yes"}:
+    if not _allow_local_neural():
         return None
     if _local_failed:
         return None
@@ -167,6 +187,8 @@ def _get_alnnahwi_local():  # type: ignore[no-untyped-def]
 
 def _get_arabart():  # type: ignore[no-untyped-def]
     global _arabart_pipe, _arabart_failed
+    if not _allow_local_neural():
+        return None
     if _arabart_failed:
         return None
     if _arabart_pipe is not None:
@@ -188,106 +210,146 @@ def _get_arabart():  # type: ignore[no-untyped-def]
         return None
 
 
-def gec_neural(text: str) -> dict[str, Any]:
-    remote = gec_hf_remote(text)
-    if remote is not None and remote.get("engine", "").startswith("hf-remote:"):
-        return remote
-    if remote is not None and remote.get("edits"):
-        return remote
-
+def _local_alnnahwi(text: str) -> dict[str, Any] | None:
     pipe = _get_alnnahwi_local()
-    if pipe is not None:
-        try:
-            sample = text if len(text) <= 800 else text[:800]
-            messages = [{"role": "user", "content": sample}]
-            prompt = pipe.tokenizer.apply_chat_template(
-                messages, tokenize=False, add_generation_prompt=True
-            )
-            outputs = pipe(
-                prompt,
-                max_new_tokens=min(512, max(64, len(sample) + 32)),
-                do_sample=False,
-            )
-            full = str(outputs[0].get("generated_text") or sample)
-            corrected = _extract_alnnahwi_response(full)
-            edits: list[dict[str, Any]] = []
-            if corrected and corrected != sample:
-                edits.append(
-                    {
-                        "id": "alnnahwi-local-1",
-                        "start": 0,
-                        "end": len(sample),
-                        "type": "grammar",
-                        "original": sample,
-                        "suggestion": corrected,
-                        "ruleId": "alnnahwi-gemma3-1b-gec-local",
-                        "explanation": "تصحيح نحوي عربي (Alnnahwi محلي على Contabo)",
-                        "confidence": 0.76,
-                        "source": "gec",
-                        "status": "proposed",
-                    }
-                )
-            return {
-                "ok": True,
-                "text": corrected if len(text) <= 800 else corrected + text[800:],
-                "edits": edits,
-                "engine": f"local:{ALNNAHWI_MODEL}",
-            }
-        except Exception as e:
-            pass_err = f"{type(e).__name__}"
-        else:
-            pass_err = ""
-    else:
-        pass_err = ""
-
-    arabart = _get_arabart()
-    if arabart is not None:
-        try:
-            sample = text if len(text) <= 800 else text[:800]
-            out = arabart(sample, max_new_tokens=min(512, max(64, len(sample) + 32)))
-            corrected = sample
-            if isinstance(out, list) and out:
-                corrected = str(out[0].get("generated_text") or sample)
-            edits = []
-            if corrected != sample:
-                edits.append(
-                    {
-                        "id": "arabart-1",
-                        "start": 0,
-                        "end": len(sample),
-                        "type": "grammar",
-                        "original": sample,
-                        "suggestion": corrected,
-                        "ruleId": "arabart-gec",
-                        "explanation": "تصحيح نحوي (AraBART)",
-                        "confidence": 0.72,
-                        "source": "gec",
-                        "status": "proposed",
-                    }
-                )
-            return {
-                "ok": True,
-                "text": corrected if len(text) <= 800 else corrected + text[800:],
-                "edits": edits,
-                "engine": f"local:{ARABART_MODEL}",
-            }
-        except Exception as e:
-            pass_err = pass_err or f"{type(e).__name__}"
-
-    warning_parts = []
-    if not _hf_token():
-        warning_parts.append(
-            "أضف LUGHAWI_HF_TOKEN في .env لتشغيل Alnnahwi عبر Hugging Face دون استهلاك RAM السيرفر"
+    if pipe is None:
+        return None
+    try:
+        sample = text if len(text) <= 800 else text[:800]
+        messages = [{"role": "user", "content": sample}]
+        prompt = pipe.tokenizer.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
         )
-    if remote and remote.get("warning"):
-        warning_parts.append(str(remote.get("warning")))
-    if pass_err:
-        warning_parts.append(pass_err)
+        outputs = pipe(
+            prompt,
+            max_new_tokens=min(512, max(64, len(sample) + 32)),
+            do_sample=False,
+        )
+        full = str(outputs[0].get("generated_text") or sample)
+        corrected = _extract_alnnahwi_response(full)
+        edits: list[dict[str, Any]] = []
+        if corrected and corrected != sample:
+            edits.append(
+                {
+                    "id": "alnnahwi-local-1",
+                    "start": 0,
+                    "end": len(sample),
+                    "type": "grammar",
+                    "original": sample,
+                    "suggestion": corrected,
+                    "ruleId": "alnnahwi-gemma3-1b-gec-local",
+                    "explanation": "تصحيح نحوي عربي (Alnnahwi محلي على Contabo — لا يعتمد على توكن)",
+                    "confidence": 0.76,
+                    "source": "gec",
+                    "status": "proposed",
+                }
+            )
+        return {
+            "ok": True,
+            "text": corrected if len(text) <= 800 else corrected + text[800:],
+            "edits": edits,
+            "engine": f"contabo-local:{ALNNAHWI_MODEL}",
+        }
+    except Exception as e:
+        return {
+            "ok": True,
+            "text": text,
+            "edits": [],
+            "engine": "contabo-local-error",
+            "warning": f"{type(e).__name__}",
+        }
+
+
+def _local_arabart(text: str) -> dict[str, Any] | None:
+    arabart = _get_arabart()
+    if arabart is None:
+        return None
+    try:
+        sample = text if len(text) <= 800 else text[:800]
+        out = arabart(sample, max_new_tokens=min(512, max(64, len(sample) + 32)))
+        corrected = sample
+        if isinstance(out, list) and out:
+            corrected = str(out[0].get("generated_text") or sample)
+        edits: list[dict[str, Any]] = []
+        if corrected != sample:
+            edits.append(
+                {
+                    "id": "arabart-1",
+                    "start": 0,
+                    "end": len(sample),
+                    "type": "grammar",
+                    "original": sample,
+                    "suggestion": corrected,
+                    "ruleId": "arabart-gec",
+                    "explanation": "تصحيح نحوي (AraBART محلي Contabo)",
+                    "confidence": 0.72,
+                    "source": "gec",
+                    "status": "proposed",
+                }
+            )
+        return {
+            "ok": True,
+            "text": corrected if len(text) <= 800 else corrected + text[800:],
+            "edits": edits,
+            "engine": f"contabo-local:{ARABART_MODEL}",
+        }
+    except Exception as e:
+        return {
+            "ok": True,
+            "text": text,
+            "edits": [],
+            "engine": "arabart-error",
+            "warning": f"{type(e).__name__}",
+        }
+
+
+def gec_neural(text: str) -> dict[str, Any]:
+    warnings: list[str] = []
+
+    # 1) Optional HF acceleration
+    remote = gec_hf_remote(text)
+    if remote is not None and str(remote.get("engine", "")).startswith("hf-remote:"):
+        return remote
+    if remote is not None and remote.get("warning"):
+        warnings.append(str(remote["warning"]))
+
+    # 2) Contabo local Alnnahwi (foundation — must not depend on token)
+    local = _local_alnnahwi(text)
+    if local is not None and str(local.get("engine", "")).startswith("contabo-local:"):
+        if warnings:
+            local = {**local, "warning": " · ".join(warnings + ([local.get("warning")] if local.get("warning") else []))}
+        return local
+    if local is not None and local.get("warning"):
+        warnings.append(str(local["warning"]))
+
+    # 3) AraBART local fallback
+    arabart = _local_arabart(text)
+    if arabart is not None and str(arabart.get("engine", "")).startswith("contabo-local:"):
+        if warnings:
+            arabart = {
+                **arabart,
+                "warning": " · ".join(
+                    warnings + ([arabart.get("warning")] if arabart.get("warning") else [])
+                ),
+            }
+        return arabart
+
+    if not _allow_local_neural():
+        warnings.append("النموذج المحلي معطّل (LUGHAWI_GEC_LOCAL=0)")
+    else:
+        warnings.append(
+            "ثبّت النماذج المحلية: bash scripts/contabo-lughawi-sidecar-deps.sh "
+            "(يُنزّل Alnnahwi على Contabo)"
+        )
+
     return {
         "ok": True,
         "text": text,
         "edits": [],
         "engine": "gec-unloaded",
-        "warning": " · ".join(warning_parts)
-        or "لا يوجد محرك GEC عصبي جاهز (HF token أو نموذج محلي)",
+        "warning": " · ".join(warnings) or "لا يوجد محرك GEC عصبي جاهز على Contabo",
     }
+
+
+def local_gec_ready() -> bool:
+    return _get_alnnahwi_local() is not None or _get_arabart() is not None

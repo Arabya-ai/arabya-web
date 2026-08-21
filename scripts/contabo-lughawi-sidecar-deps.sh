@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
-# Contabo: install Lughawi NLP deps — PyArabic, Ghalatawi, Stanza, CAMeL (+ Fareh data vendored).
-# Prefer Hugging Face Inference for Alnnahwi GEC + Whisper (set LUGHAWI_HF_TOKEN) to spare RAM.
+# Contabo: install COMPLETE Lughawi NLP stack locally (never depends on HF token).
+# Optional HF token accelerates GEC/Whisper to spare RAM — auto-fallback to local.
 #
 # Usage (root):
 #   cd /var/www/arabya-web && bash scripts/contabo-lughawi-sidecar-deps.sh
 #
-# Optional:
-#   LUGHAWI_INSTALL_GEC=1   → local torch+transformers (heavy; usually avoid — use HF token instead)
-#   LUGHAWI_INSTALL_CATT=1  → CATT tashkeel
+# Skip heavy local neural (not recommended): LUGHAWI_SKIP_LOCAL_NEURAL=1
+# Extra: LUGHAWI_INSTALL_CATT=1
 set -euo pipefail
 
 APP_DIR="${APP_DIR:-/var/www/arabya-web}"
@@ -29,9 +28,13 @@ source "$VENV/bin/activate"
 
 pip install -U pip wheel setuptools >/dev/null 2>&1 || pip install -U pip wheel setuptools
 
-echo "==> Foundation: PyArabic + Ghalatawi + CAMeL + Stanza"
+echo "==> Contabo-complete: rules + local neural packages"
 if [[ -f "$SIDECAR_DIR/requirements.txt" ]]; then
-  pip install -r "$SIDECAR_DIR/requirements.txt"
+  if [[ "${LUGHAWI_SKIP_LOCAL_NEURAL:-0}" == "1" ]]; then
+    pip install "pyarabic>=0.6.15" "ghalatawi>=0.3" "camel-tools>=1.5.2" "stanza>=1.8.2"
+  else
+    pip install -r "$SIDECAR_DIR/requirements.txt"
+  fi
 else
   pip install "pyarabic>=0.6.15" "ghalatawi>=0.3" "camel-tools>=1.5.2" "stanza>=1.8.2"
 fi
@@ -46,10 +49,9 @@ except Exception as e:
     print("WARN stanza download:", e)
 PY
 
-echo "==> Prefetch CAMeL morphology DB + MLE (fixes missing morphology.db)"
+echo "==> Prefetch CAMeL morphology DB + MLE"
 python - <<'PY'
-import subprocess, sys
-# camel_data CLI ships with camel-tools
+import subprocess
 for args in (
     ["camel_data", "-i", "morphology-db-msa-r13"],
     ["camel_data", "-i", "disambig-mle-msa"],
@@ -62,15 +64,48 @@ for args in (
     except Exception as e:
         print("try failed", args, "→", type(e).__name__)
 else:
-    print("WARN: camel_data install incomplete — morph stays heuristic/analyzer")
+    print("WARN: camel_data incomplete")
 
 try:
     from camel_tools.disambig.mle import MLEDisambiguator
     MLEDisambiguator.pretrained()
-    print("OK camel MLE pretrained")
+    print("OK camel MLE")
 except Exception as e:
     print("WARN camel MLE:", type(e).__name__, e)
 PY
+
+if [[ "${LUGHAWI_SKIP_LOCAL_NEURAL:-0}" != "1" ]]; then
+  echo "==> Prefetch Alnnahwi GEC weights on Contabo (foundation — no HF token needed at runtime)"
+  python - <<'PY'
+import os
+mid = os.environ.get("LUGHAWI_GEC_MODEL", "alnnahwi/gemma-3-1b-arabic-gec-v1")
+try:
+    from transformers import AutoTokenizer, AutoModelForCausalLM
+    AutoTokenizer.from_pretrained(mid)
+    AutoModelForCausalLM.from_pretrained(mid)
+    print("OK local GEC", mid)
+except Exception as e:
+    # Gemma may need AutoModelForCausalLM or different class — try generic
+    try:
+        from transformers import AutoModel
+        AutoModel.from_pretrained(mid)
+        print("OK local GEC (AutoModel)", mid)
+    except Exception as e2:
+        print("WARN GEC download:", type(e).__name__, e, "|", type(e2).__name__, e2)
+PY
+
+  echo "==> Prefetch faster-whisper local model (default: medium)"
+  python - <<'PY'
+import os
+size = os.environ.get("LUGHAWI_WHISPER_LOCAL_SIZE", "medium")
+try:
+    from faster_whisper import WhisperModel
+    WhisperModel(size, device="cpu", compute_type="int8")
+    print("OK local whisper", size)
+except Exception as e:
+    print("WARN whisper download:", type(e).__name__, e)
+PY
+fi
 
 if [[ "${LUGHAWI_INSTALL_CATT:-0}" == "1" ]]; then
   echo "==> CATT (tashkeel)"
@@ -78,20 +113,20 @@ if [[ "${LUGHAWI_INSTALL_CATT:-0}" == "1" ]]; then
     echo "WARN: catt not installed"
 fi
 
-if [[ "${LUGHAWI_INSTALL_GEC:-0}" == "1" ]]; then
-  echo "==> LOCAL neural GEC (heavy) — prefer LUGHAWI_HF_TOKEN instead"
-  pip install "torch" "transformers>=4.40.0" "sentencepiece" "protobuf" || \
-    echo "WARN: GEC packages failed"
-fi
-
 deactivate || true
 
-# Ensure Next can reach the sidecar + document HF preference
 touch "$ENV_FILE"
 grep -q '^LUGHAWI_SIDECAR_URL=' "$ENV_FILE" 2>/dev/null || \
   echo 'LUGHAWI_SIDECAR_URL=http://127.0.0.1:8091' >> "$ENV_FILE"
+# Contabo-complete defaults
+grep -q '^LUGHAWI_GEC_LOCAL=' "$ENV_FILE" 2>/dev/null || \
+  echo 'LUGHAWI_GEC_LOCAL=1' >> "$ENV_FILE"
+grep -q '^LUGHAWI_STT_LOCAL=' "$ENV_FILE" 2>/dev/null || \
+  echo 'LUGHAWI_STT_LOCAL=1' >> "$ENV_FILE"
+grep -q '^LUGHAWI_PREFER_HF=' "$ENV_FILE" 2>/dev/null || \
+  echo 'LUGHAWI_PREFER_HF=1' >> "$ENV_FILE"
 if ! grep -q '^LUGHAWI_HF_TOKEN=' "$ENV_FILE" 2>/dev/null; then
-  echo "# LUGHAWI_HF_TOKEN=hf_xxx   # مجاني من huggingface.co/settings/tokens — Alnnahwi GEC + Whisper عن بُعد" >> "$ENV_FILE"
+  echo "# LUGHAWI_HF_TOKEN=hf_xxx  # اختياري: تسريع HF مع رجوع تلقائي لـ Contabo" >> "$ENV_FILE"
 fi
 
 if [[ -x "$VENV/bin/python" ]]; then
@@ -105,6 +140,5 @@ bash "$APP_DIR/scripts/contabo-lughawi-sidecar.sh" || true
 echo "Done. Health: curl -s http://127.0.0.1:8091/health | python3 -m json.tool"
 echo "Then: pm2 restart arabya-web --update-env"
 echo
-echo "موصى به لتقليل حمل السيرفر — أضف توكن Hugging Face في .env:"
-echo "  LUGHAWI_HF_TOKEN=hf_..."
-echo "ثم: pm2 restart lughawi-sidecar arabya-web --update-env"
+echo "السياسة: Contabo كامل دائمًا. HF اختياري لتوفير الموارد (LUGHAWI_HF_TOKEN)."
+echo "عند نفاد التوكن أو تعطيل النموذج — الرجوع المحلي تلقائي ولن يتوقف العمل."
