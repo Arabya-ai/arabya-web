@@ -68,7 +68,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  // Next 16 removed `eslint` from next.config — lint stays in CI via `npm run lint`.
+  // Next 16 removed `eslint` from next.config — keep lint via `npm run lint` only.
+  // Contabo production deploy must not depend on config keys Next rejects.
   serverExternalPackages: ["@resvg/resvg-js", "better-sqlite3"],
   experimental: {
     // Next 15.5.x Contabo/self-host: minify-webpack-plugin can throw
@@ -114,11 +115,4 @@ export default withSentryConfig(withNextIntl(nextConfig), {
     disable: !process.env.SENTRY_AUTH_TOKEN,
   },
   telemetry: false,
-  // Prefer nested webpack options (top-level disableLogger / automaticVercelMonitors are deprecated).
-  webpack: {
-    treeshake: {
-      removeDebugLogging: true,
-    },
-    automaticVercelMonitors: false,
-  },
 });

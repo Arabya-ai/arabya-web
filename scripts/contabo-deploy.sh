@@ -184,10 +184,10 @@ fi
 
 # Hoist WebpackError is handled in next.config.ts (same Node process as the build).
 
-echo "==> Building with webpack (Node $(node -v))"
+echo "==> Building (webpack, Node $(node -v))"
 export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}"
-# Next 16 defaults to Turbopack; Contabo self-host path is validated on webpack.
-if ! NEXT_TELEMETRY_DISABLED=1 npx next build --webpack; then
+# Contabo stays on Next 15.5.x for now (no --webpack flag). Next 16 Turbopack default is not used.
+if ! NEXT_TELEMETRY_DISABLED=1 npm run build; then
   echo "ERROR: next build failed."
   if [[ -d .next.prev-good ]]; then
     rm -rf .next

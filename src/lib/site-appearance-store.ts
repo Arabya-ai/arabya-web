@@ -100,8 +100,7 @@ export async function getFooterCredit(
 }
 
 export function revalidateSiteAppearance(): void {
-  // Next 16 requires a cacheLife profile (SWR). Use immediate expire for admin edits.
-  revalidateTag(APPEARANCE_TAG, { expire: 0 });
+  revalidateTag(APPEARANCE_TAG);
 }
 
 export async function loadAdminSiteAppearance(

@@ -1,6 +1,6 @@
 /**
- * Client-side Sentry (Next 16+ / Turbopack-compatible).
- * Contabo: no-op when NEXT_PUBLIC_SENTRY_DSN is unset.
+ * Client-side Sentry — Contabo production (optional).
+ * No-op when NEXT_PUBLIC_SENTRY_DSN is unset.
  */
 import * as Sentry from "@sentry/nextjs";
 
@@ -13,9 +13,7 @@ if (dsn) {
       process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT?.trim() ||
       process.env.NODE_ENV ||
       "production",
-    tracesSampleRate: Number(
-      process.env.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE || "0.08",
-    ),
+    tracesSampleRate: Number(process.env.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE || "0.08"),
     replaysSessionSampleRate: 0,
     replaysOnErrorSampleRate: 0.1,
     enabled:
