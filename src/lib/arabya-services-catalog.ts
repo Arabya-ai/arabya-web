@@ -26,7 +26,10 @@ export type ArabyaServiceIcon =
   | "hadith"
   | "heritage"
   | "resources"
-  | "lughawi";
+  | "lughawi"
+  | "tajweed"
+  | "search"
+  | "nlp";
 
 export type ArabyaServiceId = ArabyaServiceIcon;
 
@@ -43,6 +46,8 @@ export const ARABYA_SERVICES: readonly ArabyaServiceEntry[] = [
   { id: "juz", href: "/juz", icon: "juz", category: "read" },
   { id: "roots", href: "/roots", icon: "roots", category: "read" },
   { id: "study", href: "/study", icon: "study", category: "read" },
+  { id: "search", href: "/search", icon: "search", category: "read" },
+  { id: "tajweed", href: "/tajweed", icon: "tajweed", category: "read" },
   { id: "qiraat", href: "/qiraat", icon: "qiraat", category: "read" },
   { id: "adhkar", href: "/adhkar", icon: "adhkar", category: "ibadah" },
   { id: "qibla", href: "/qibla", icon: "qibla", category: "ibadah" },
@@ -56,6 +61,7 @@ export const ARABYA_SERVICES: readonly ArabyaServiceEntry[] = [
   { id: "resources", href: "/resources", icon: "resources", category: "knowledge" },
   { id: "studio", href: "/studio", icon: "studio", category: "create" },
   { id: "lughawi", href: "/lughawi", icon: "lughawi", category: "create" },
+  { id: "nlp", href: "/nlp", icon: "nlp", category: "create" },
 ] as const;
 
 export const ARABYA_SERVICE_CATEGORIES: readonly ArabyaServiceCategory[] = [

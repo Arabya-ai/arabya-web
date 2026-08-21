@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { SURAH_START_JUZ, juzLabel } from "@/lib/juz";
+import { SURAH_START_JUZ, juzLabel, pageToJuz } from "@/lib/juz";
+
+describe("pageToJuz", () => {
+  it("maps Madinah pages to juz boundaries", () => {
+    expect(pageToJuz(1)).toBe(1);
+    expect(pageToJuz(21)).toBe(1);
+    expect(pageToJuz(22)).toBe(2);
+    expect(pageToJuz(582)).toBe(30);
+    expect(pageToJuz(604)).toBe(30);
+  });
+});
 
 describe("juzLabel", () => {
   it("returns the known label for a juz number", () => {

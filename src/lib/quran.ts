@@ -1,5 +1,11 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { pageToJuz } from "@/lib/juz";
+import {
+  expandSearchQueryVariants,
+  foldArabicAlefs,
+  normalizeArabicSearch,
+} from "@/lib/arabic-normalize";
 import type {
   IrabSurah,
   RootEntry,
@@ -11,6 +17,12 @@ import type {
   VerseTranslationEdition,
   VerseTranslationSurah,
 } from "./types";
+
+export {
+  expandSearchQueryVariants,
+  foldArabicAlefs,
+  normalizeArabicSearch,
+} from "@/lib/arabic-normalize";
 
 const dataRoot = path.join(process.cwd(), "data");
 
@@ -160,49 +172,6 @@ export type SearchHit = {
   nameAr: string;
 };
 
-/**
- * Strip tashkeel / Quran marks and normalize orthography so plain Arabic
- * queries match Uthmani text (e.g. ابراهيم ↔ إِبۡرَٰهِـۧمَ).
- */
-export function normalizeArabicSearch(input: string): string {
-  return String(input || "")
-    .normalize("NFKD")
-    .replace(/\u0670/g, "ا") // dagger alef → alef
-    .replace(/\u06E5/g, "و") // small waw
-    .replace(/[\u06E6\u06E7]/g, "ي") // small yeh / small high yeh
-    .replace(
-      /[\u064B-\u065F\u06D6-\u06ED\u0640\u06DE-\u06E4\u06E8-\u06ED\u0610-\u061A\u08F0-\u08FF]/g,
-      "",
-    )
-    .replace(/[ٱأإآ]/g, "ا")
-    .replace(/ى/g, "ي")
-    .replace(/ة/g, "ه")
-    .replace(/[^\u0621-\u064A0-9:\s]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-/** Drop alefs for a secondary match (الرحمن ↔ الرحمان). */
-export function foldArabicAlefs(input: string): string {
-  return input.replace(/ا/g, "");
-}
-
-/**
- * Limited, intentional query variants (not fuzzy search).
- * Currently: optional definite article ال — strip or add when the stem is long enough.
- */
-export function expandSearchQueryVariants(qNorm: string): string[] {
-  const q = qNorm.trim();
-  if (q.length < 2) return [];
-  const out = new Set<string>([q]);
-  if (q.startsWith("ال") && q.length >= 5) {
-    out.add(q.slice(2));
-  } else if (!q.startsWith("ال") && q.length >= 3) {
-    out.add(`ال${q}`);
-  }
-  return [...out];
-}
-
 let searchCache: SearchHit[] | null = null;
 let searchNormCache:
   | { hit: SearchHit; norm: string; fold: string }[]
@@ -264,6 +233,8 @@ export type SearchAyahsOptions = {
   offset?: number;
   /** Optional 1–114 surah filter (Alfanous-style facet). */
   surahId?: number;
+  /** Optional 1–30 juz filter (page-based Madinah mapping). */
+  juzId?: number;
 };
 
 export type SearchAyahsResult = {
@@ -289,6 +260,13 @@ export async function searchAyahs(
     opts.surahId >= 1 &&
     opts.surahId <= 114
       ? opts.surahId
+      : undefined;
+  const juzId =
+    typeof opts.juzId === "number" &&
+    Number.isInteger(opts.juzId) &&
+    opts.juzId >= 1 &&
+    opts.juzId <= 30
+      ? opts.juzId
       : undefined;
 
   const q = query.trim();
@@ -323,6 +301,7 @@ export async function searchAyahs(
   for (const row of searchNormCache) {
     const v = row.hit;
     if (surahId !== undefined && v.surahId !== surahId) continue;
+    if (juzId !== undefined && pageToJuz(v.page) !== juzId) continue;
     if (v.key === q || v.key === digits || String(v.surahId) === q) {
       keyHits.push(v);
       continue;

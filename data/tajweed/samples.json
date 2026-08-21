@@ -1,0 +1,55 @@
+{
+  "updatedAt": "2026-08-21",
+  "noteAr": "عيّنات تعليمية مستقلة عن مصحف الدراسة كلمةً بكلمة. الألوان رمزية للهوية؛ مصحف التجويد الملون الكامل ينتظر بيانات مرخّصة.",
+  "noteEn": "Independent educational samples — not the word-by-word mushaf study dock. Colors are brand-symbolic; full colored mushaf awaits licensed data.",
+  "samples": [
+    {
+      "id": "fatiha-1",
+      "refAr": "الفاتحة ١",
+      "refEn": "Al-Fātiḥah 1",
+      "segments": [
+        { "text": "بِسْمِ", "rule": null },
+        { "text": " ", "rule": null },
+        { "text": "اللَّهِ", "rule": "ghunnah" },
+        { "text": " ", "rule": null },
+        { "text": "الرَّحْمَٰنِ", "rule": "madd" },
+        { "text": " ", "rule": null },
+        { "text": "الرَّحِيمِ", "rule": "madd" }
+      ]
+    },
+    {
+      "id": "baqara-2",
+      "refAr": "البقرة ٢",
+      "refEn": "Al-Baqarah 2",
+      "segments": [
+        { "text": "ذَٰلِكَ", "rule": "madd" },
+        { "text": " ", "rule": null },
+        { "text": "الْكِتَابُ", "rule": "qalqalah" },
+        { "text": " ", "rule": null },
+        { "text": "لَا", "rule": "madd" },
+        { "text": " ", "rule": null },
+        { "text": "رَيْبَ", "rule": null },
+        { "text": " ", "rule": null },
+        { "text": "فِيهِ", "rule": null },
+        { "text": " ", "rule": null },
+        { "text": "هُدًى", "rule": "ikhfa" },
+        { "text": " ", "rule": null },
+        { "text": "لِّلْمُتَّقِينَ", "rule": "idgham" }
+      ]
+    },
+    {
+      "id": "ikhlas-1",
+      "refAr": "الإخلاص ١",
+      "refEn": "Al-Ikhlāṣ 1",
+      "segments": [
+        { "text": "قُلْ", "rule": "qalqalah" },
+        { "text": " ", "rule": null },
+        { "text": "هُوَ", "rule": null },
+        { "text": " ", "rule": null },
+        { "text": "اللَّهُ", "rule": "ghunnah" },
+        { "text": " ", "rule": null },
+        { "text": "أَحَدٌ", "rule": "qalqalah" }
+      ]
+    }
+  ]
+}

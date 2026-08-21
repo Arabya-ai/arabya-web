@@ -33,10 +33,22 @@ export async function GET(req: Request) {
     Number.isInteger(rawSurah) && rawSurah >= 1 && rawSurah <= 114
       ? rawSurah
       : undefined;
+  const rawJuz = Number(searchParams.get("juz"));
+  const juzId =
+    Number.isInteger(rawJuz) && rawJuz >= 1 && rawJuz <= 30
+      ? rawJuz
+      : undefined;
 
   if (!q) {
     return NextResponse.json(
-      { query: "", hits: [], total: 0, root: null, surahId: surahId ?? null },
+      {
+        query: "",
+        hits: [],
+        total: 0,
+        root: null,
+        surahId: surahId ?? null,
+        juzId: juzId ?? null,
+      },
       {
         headers: {
           "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
@@ -46,7 +58,7 @@ export async function GET(req: Request) {
   }
 
   const [result, rootEntry] = await Promise.all([
-    searchAyahs(q, { limit, surahId }),
+    searchAyahs(q, { limit, surahId, juzId }),
     findRootByQuery(q),
   ]);
 
@@ -65,6 +77,7 @@ export async function GET(req: Request) {
       total: result.total,
       root,
       surahId: surahId ?? null,
+      juzId: juzId ?? null,
     },
     {
       headers: {
