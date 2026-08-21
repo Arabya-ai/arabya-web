@@ -39,10 +39,13 @@ export function AppShell({
 
 function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
   const t = useTranslations("Nav");
+  const pathname = usePathname();
   const rootRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { open, setOpen, toggle } = useDismissibleOpen(rootRef);
+  const { open, setOpen } = useDismissibleOpen(rootRef);
   const [finePointer, setFinePointer] = useState(false);
+  const onServicesPage =
+    pathname === "/services" || pathname.startsWith("/services/");
 
   useEffect(() => {
     const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -88,19 +91,25 @@ function ServicesMenu({ onNavigate }: { onNavigate?: () => void }) {
       onMouseEnter={finePointer ? openMenu : undefined}
       onMouseLeave={finePointer ? scheduleClose : undefined}
     >
-      <button
-        type="button"
-        className="nav-dropdown-trigger nav-link-btn"
+      {/*
+        Click / tap → /services page (primary action).
+        Desktop hover → mega menu preview (enhancement).
+      */}
+      <Link
+        href="/services"
+        className={`nav-dropdown-trigger nav-link-btn ${onServicesPage ? "is-active" : ""}`}
         aria-expanded={open}
         aria-haspopup="menu"
-        onClick={(e) => {
-          e.stopPropagation();
+        aria-current={onServicesPage ? "page" : undefined}
+        onClick={() => {
           clearCloseTimer();
-          toggle();
+          setOpen(false);
+          onNavigate?.();
         }}
+        onFocus={finePointer ? openMenu : undefined}
       >
         {t("services")}
-      </button>
+      </Link>
       <div
         className="nav-dropdown-menu nav-mega-wrap"
         role="presentation"

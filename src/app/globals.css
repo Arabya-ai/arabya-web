@@ -525,9 +525,12 @@ html[data-theme="dark"] .site-header {
   font-size: 0.92rem;
   cursor: pointer;
   font-family: inherit;
+  text-decoration: none;
 }
 
-.nav-link-btn:hover {
+.nav-link-btn:hover,
+.nav-link-btn.is-active,
+.nav-link-btn[aria-current="page"] {
   background: var(--brand-soft);
   color: var(--brand-deep);
 }
