@@ -4,6 +4,8 @@ import { readJsonFile } from "@/lib/library/json-file";
 import {
   getImportedLibraryRoot,
   gitLibraryDataRoot,
+  isSafeLibrarySlug,
+  resolveContainedLibraryPath,
 } from "@/lib/library/paths";
 import type { LibraryCatalog, LibraryWorkMeta } from "@/lib/library/types";
 
@@ -61,12 +63,18 @@ export async function getLibraryCatalogForEditors(): Promise<LibraryWorkMeta[]> 
 export async function getLibraryWork(
   slug: string,
 ): Promise<LibraryWorkMeta | null> {
+  if (!isSafeLibrarySlug(slug)) return null;
   const work = (await mergedCatalog()).find((w) => w.id === slug);
   if (!work || work.status !== "ready") return null;
 
-  const importedMeta = await readJsonFile<LibraryWorkMeta>(
-    path.join(getImportedLibraryRoot(), slug, "meta.json"),
+  const metaPath = resolveContainedLibraryPath(
+    getImportedLibraryRoot(),
+    slug,
+    "meta.json",
   );
+  const importedMeta = metaPath
+    ? await readJsonFile<LibraryWorkMeta>(metaPath)
+    : null;
   if (importedMeta?.status === "deleted") return null;
   if (importedMeta) return withResolvedCover({ ...work, ...importedMeta });
 
@@ -74,5 +82,9 @@ export async function getLibraryWork(
 }
 
 export function resolveLibraryPdfPath(slug: string): string | null {
-  return path.join(getImportedLibraryRoot(), slug, "book.pdf");
+  return resolveContainedLibraryPath(
+    getImportedLibraryRoot(),
+    slug,
+    "book.pdf",
+  );
 }

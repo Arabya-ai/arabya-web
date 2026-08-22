@@ -18,6 +18,47 @@ export function ensureImportedLibraryRoot(): string {
   return root;
 }
 
+/** Reject `../`, absolute, or otherwise unsafe library slug segments. */
+const SAFE_LIBRARY_SLUG_RE = /^[a-z0-9][a-z0-9-]{0,127}$/i;
+
+export function isSafeLibrarySlug(slug: string): boolean {
+  if (!slug || typeof slug !== "string") return false;
+  if (slug.includes("\0") || slug.includes("/") || slug.includes("\\")) {
+    return false;
+  }
+  if (slug === "." || slug === ".." || slug.includes("..")) return false;
+  return SAFE_LIBRARY_SLUG_RE.test(slug);
+}
+
+/**
+ * Resolve a path under `root` for a library slug + relative parts.
+ * Returns null when the slug is unsafe or the resolved path escapes `root`.
+ */
+export function resolveContainedLibraryPath(
+  root: string,
+  slug: string,
+  ...parts: string[]
+): string | null {
+  if (!isSafeLibrarySlug(slug)) return null;
+  for (const part of parts) {
+    if (
+      !part ||
+      part.includes("\0") ||
+      part.includes("/") ||
+      part.includes("\\") ||
+      part === ".." ||
+      part.includes("..")
+    ) {
+      return null;
+    }
+  }
+  const resolvedRoot = path.resolve(root);
+  const resolved = path.resolve(resolvedRoot, slug, ...parts);
+  const rel = path.relative(resolvedRoot, resolved);
+  if (!rel || rel.startsWith("..") || path.isAbsolute(rel)) return null;
+  return resolved;
+}
+
 export function gitLibraryDataRoot(): string {
   return path.join(process.cwd(), "data", "library");
 }

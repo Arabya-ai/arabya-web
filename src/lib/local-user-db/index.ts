@@ -794,6 +794,9 @@ export function localAdminBanUser(
   banned: boolean,
   reason?: string,
 ) {
+  if (!isSuperAdminEmail(actorEmail)) {
+    throw new Error("super_admin_required");
+  }
   const db = getUserDb();
   const targetId = userIdFromEmail(userId);
   if (isProtectedAdmin(targetId) || isSuperAdminEmail(targetId)) {
@@ -886,9 +889,14 @@ export function localAdminDeleteUser(
   userId: string,
   reason?: string,
 ) {
+  if (!isSuperAdminEmail(actorEmail)) {
+    throw new Error("super_admin_required");
+  }
   const db = getUserDb();
   const targetId = userIdFromEmail(userId);
-  if (isProtectedAdmin(targetId)) throw new Error("cannot_delete_protected_admin");
+  if (isProtectedAdmin(targetId) || isSuperAdminEmail(targetId)) {
+    throw new Error("cannot_delete_protected_admin");
+  }
   if (targetId === userIdFromEmail(actorEmail)) {
     throw new Error("cannot_delete_self");
   }
@@ -928,6 +936,9 @@ export function localAdminReviewRoleRequest(
   decision: "approved" | "rejected",
   reviewNote?: string,
 ) {
+  if (!isSuperAdminEmail(actorEmail)) {
+    throw new Error("super_admin_required");
+  }
   const db = getUserDb();
   const req = db
     .prepare(

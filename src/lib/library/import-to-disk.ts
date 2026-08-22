@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { ensureImportedLibraryRoot } from "@/lib/library/paths";
+import { ensureImportedLibraryRoot, isSafeLibrarySlug } from "@/lib/library/paths";
 import {
   generatePdfCoverThumbnail,
   libraryCoverFileName,
@@ -88,6 +88,9 @@ function buildMetaRecord(
 export async function importReadingBookToDisk(
   input: ReadingBookMetaInput & { pdfBuffer: Buffer },
 ): Promise<{ slug: string; pageCount?: number; coverUrl?: string }> {
+  if (!isSafeLibrarySlug(input.slug)) {
+    throw new Error("invalid_library_slug");
+  }
   const root = ensureImportedLibraryRoot();
   const outDir = path.join(root, input.slug);
   await mkdir(outDir, { recursive: true });
@@ -142,6 +145,9 @@ export async function importReadingBookFromDrive(
     thumbnailUrl: string;
   },
 ): Promise<{ slug: string; coverUrl?: string }> {
+  if (!isSafeLibrarySlug(input.slug)) {
+    throw new Error("invalid_library_slug");
+  }
   const root = ensureImportedLibraryRoot();
   const outDir = path.join(root, input.slug);
   await mkdir(outDir, { recursive: true });

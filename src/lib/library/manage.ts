@@ -1,7 +1,11 @@
 import { rm } from "node:fs/promises";
 import path from "node:path";
 import { getLibraryCatalogForEditors } from "@/lib/library";
-import { ensureImportedLibraryRoot } from "@/lib/library/paths";
+import {
+  ensureImportedLibraryRoot,
+  isSafeLibrarySlug,
+  resolveContainedLibraryPath,
+} from "@/lib/library/paths";
 import type { LibraryWorkMeta } from "@/lib/library/types";
 import { readJsonFile } from "@/lib/library/json-file";
 
@@ -31,11 +35,13 @@ export async function updateLibraryWorkMeta(
   slug: string,
   patch: Partial<LibraryWorkMeta>,
 ): Promise<LibraryWorkMeta | null> {
+  if (!isSafeLibrarySlug(slug)) return null;
   const { writeFile, mkdir } = await import("node:fs/promises");
   const root = ensureImportedLibraryRoot();
-  const dir = path.join(root, slug);
+  const dir = resolveContainedLibraryPath(root, slug);
+  const metaPath = resolveContainedLibraryPath(root, slug, "meta.json");
+  if (!dir || !metaPath) return null;
   await mkdir(dir, { recursive: true });
-  const metaPath = path.join(dir, "meta.json");
   const fromFile = await readJsonFile<LibraryWorkMeta>(metaPath);
   const fromCatalog = (await getLibraryCatalogForEditors()).find((w) => w.id === slug);
   const existing = fromFile ?? fromCatalog ?? { id: slug, title: slug, status: "ready" as const, pdfUrl: "" };
@@ -53,8 +59,12 @@ export async function updateLibraryWorkMeta(
 }
 
 export async function deleteLibraryWork(slug: string): Promise<void> {
+  if (!isSafeLibrarySlug(slug)) {
+    throw new Error("invalid_library_slug");
+  }
   const root = ensureImportedLibraryRoot();
-  const dir = path.join(root, slug);
+  const dir = resolveContainedLibraryPath(root, slug);
+  if (!dir) throw new Error("invalid_library_slug");
   await rm(dir, { recursive: true, force: true });
   const { works } = await readImportedIndex();
   const tombstone: LibraryWorkMeta = {
