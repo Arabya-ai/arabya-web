@@ -59,6 +59,12 @@
 cd /var/www/arabya-web && bash scripts/contabo-deploy.sh
 ```
 
+### طوارئ 503 (الموقع متوقف)
+
+```bash
+cd /var/www/arabya-web && bash scripts/contabo-recover-web.sh
+```
+
 - Google OAuth: `docs/platform/contabo-google-and-updates-ar.md`
 - PM2: `deploy/contabo/ecosystem.config.cjs`
 - Bootstrap أول مرة: `scripts/contabo-bootstrap.sh`
