@@ -15,6 +15,8 @@ class ProofreadRequest(BaseModel):
     # L3 MoA — only when ARABYA_NLP_MOA=1 + HF token; never required for Contabo rules
     use_moa: bool = False
     few_shot_pairs: list[dict[str, str]] = Field(default_factory=list)
+    # Optional per-request HF token from Next admin pool (never logged)
+    hf_token: str | None = Field(default=None, max_length=512)
 
 
 class TextEdit(BaseModel):

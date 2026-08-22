@@ -36,6 +36,7 @@ type Tab = "keys" | "usage" | "howto";
 
 const PROVIDERS = [
   { id: "google", label: "Google (Gemini)" },
+  { id: "huggingface", label: "Hugging Face (MoA لغوي)" },
   { id: "openrouter", label: "OpenRouter" },
   { id: "openai", label: "OpenAI" },
   { id: "anthropic", label: "Anthropic (Claude)" },
@@ -294,7 +295,7 @@ export function AdminKeysManager() {
                   type="password"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="الصق المفتاح هنا"
+                  placeholder="الصق المفتاح هنا (hf_… لـ Hugging Face)"
                   dir="ltr"
                   disabled={pending}
                   autoComplete="off"
@@ -481,7 +482,75 @@ export function AdminKeysManager() {
 
       {tab === "howto" ? (
         <section className="ops-keys__card ops-keys__howto">
-          <h2>Google (الأسهل — ابدأ هنا)</h2>
+          <h2>Hugging Face (تدقيق عميق MoA — لغوي)</h2>
+          <p className="dash-muted">
+            مفتاح واحد من نوع <strong>Read</strong> يكفي لكل نماذج MoA (Jais + Llama +
+            DeepSeek + Qwen). يجب قبول تراخيص النماذج أولاً (الخطوة 1 أدناه).
+          </p>
+          <ol>
+            <li>
+              <strong>قبول التراخيص</strong> — افتح كل رابط وسجّل الدخول بحسابك ثم اضغط{" "}
+              <em>Agree and access repository</em> إن ظهر:
+              <ul>
+                <li>
+                  <a
+                    href="https://huggingface.co/inceptionai/jais-30b-chat-v3"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Jais 30B
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://huggingface.co/meta-llama/Llama-3.3-70B-Instruct"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Llama 3.3 70B
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://huggingface.co/deepseek-ai/DeepSeek-V3"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    DeepSeek-V3
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://huggingface.co/Qwen/Qwen2.5-72B-Instruct"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Qwen 2.5 72B (القاضي)
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li>
+              من القائمة اليسرى: <strong>Settings</strong> →{" "}
+              <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noreferrer">
+                Access Tokens
+              </a>
+            </li>
+            <li>
+              اضغط <strong>Create new token</strong> → الاسم مثل{" "}
+              <code dir="ltr">arabya-moa</code> → النوع <strong>Read</strong> → انسخ
+              المفتاح (يبدأ بـ <code dir="ltr">hf_</code>).
+            </li>
+            <li>
+              ارجع لتبويب «المفاتيح» هنا → اختر المزود{" "}
+              <strong>Hugging Face (MoA لغوي)</strong> → الصق → «حفظ مشفّرًا».
+            </li>
+            <li>
+              أخبر الوكيل «فعّل MoA على Contabo» لتشغيل التدقيق العميق (يتطلب أيضاً{" "}
+              <code dir="ltr">LUGHAWI_MOA=1</code> على السيرفر).
+            </li>
+          </ol>
+          <h2>Google (الأسهل — Auto العادي)</h2>
           <ol>
             <li>
               افتح{" "}

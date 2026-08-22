@@ -46,6 +46,7 @@ export async function enrichProofreadWithArabyaNlp(
   opts?: {
     skipLlm?: boolean;
     useMoa?: boolean;
+    hfToken?: string;
     fewShotPairs?: Array<{ from: string; to: string }>;
     timeoutMs?: number;
   },
@@ -72,6 +73,7 @@ export async function enrichProofreadWithArabyaNlp(
   const payload = await arabyaNlpProofread(local.original, {
     skipLlm: opts?.skipLlm,
     useMoa: opts?.useMoa,
+    hfToken: opts?.hfToken,
     fewShotPairs: opts?.fewShotPairs,
     timeoutMs: opts?.timeoutMs,
   });

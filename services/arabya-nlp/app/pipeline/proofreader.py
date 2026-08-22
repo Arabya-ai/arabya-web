@@ -187,6 +187,7 @@ async def proofread_text(
     skip_llm: bool = False,
     use_moa: bool = False,
     few_shot_pairs: list[dict[str, str]] | None = None,
+    hf_token: str | None = None,
     db: Session | None = None,
     client_ip: str | None = None,
     settings: Settings | None = None,
@@ -239,6 +240,7 @@ async def proofread_text(
             settings=settings,
             few_shot_pairs=few_shot_pairs,
             force=use_moa,
+            hf_token=hf_token,
         )
         if moa.mode not in {"disabled", "no-token", "off", "skipped"} and moa.raw_ok:
             mode = f"{mode}+{moa.mode}" if mode else moa.mode

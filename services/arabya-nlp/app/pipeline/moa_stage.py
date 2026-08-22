@@ -132,6 +132,7 @@ async def _run_proposer(
     text: str,
     few_shot: str,
     timeout_s: float,
+    token: str,
 ) -> dict[str, Any]:
     user = (
         f"{few_shot}"
@@ -144,6 +145,7 @@ async def _run_proposer(
             model=model,
             system=PROPOSER_SYSTEM,
             user=user,
+            token=token,
             timeout_s=timeout_s,
             max_tokens=1024,
         )
@@ -204,6 +206,7 @@ async def _run_judge(
     drafts: list[dict[str, Any]],
     few_shot: str,
     timeout_s: float,
+    token: str,
 ) -> dict[str, Any]:
     parts = [f"{few_shot}النص الأصلي:\n{text}\n"]
     for d in drafts:
@@ -221,6 +224,7 @@ async def _run_judge(
             model=model,
             system=JUDGE_SYSTEM,
             user=user,
+            token=token,
             timeout_s=timeout_s,
             max_tokens=1200,
             temperature=0.15,
@@ -283,6 +287,7 @@ async def run_moa_stage(
     settings: Settings | None = None,
     few_shot_pairs: list[dict[str, str]] | None = None,
     force: bool = False,
+    hf_token: str | None = None,
 ) -> MoaStageResult:
     """
     Run MoA when enabled (or force=True) and HF token present.
@@ -294,7 +299,7 @@ async def run_moa_stage(
     if not force and not settings.moa_enabled:
         return MoaStageResult(text=original, engine="moa-skipped", mode="disabled")
 
-    token = resolve_hf_token()
+    token = (hf_token or "").strip() or resolve_hf_token()
     if not token:
         return MoaStageResult(
             text=original,
@@ -319,6 +324,7 @@ async def run_moa_stage(
                 text=original,
                 few_shot=few_shot,
                 timeout_s=timeout_s,
+                token=token,
             )
             for role, model in proposers
         ]
@@ -347,6 +353,7 @@ async def run_moa_stage(
         drafts=drafts,
         few_shot=few_shot,
         timeout_s=max(timeout_s, 6.0),
+        token=token,
     )
 
     if judge.get("ok"):
