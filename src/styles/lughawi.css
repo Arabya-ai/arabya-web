@@ -519,10 +519,11 @@
 .lughawi-tt-mark--other { border-bottom-color: var(--lughawi-other); }
 
 .lughawi-tt-float {
-  position: absolute;
-  z-index: 20;
-  width: min(22rem, calc(100% - 1rem));
+  position: fixed;
+  z-index: 80;
+  width: min(22rem, calc(100vw - 1.5rem));
   animation: lughawi-tip-in 0.18s ease both;
+  pointer-events: auto;
 }
 
 .lughawi-editor-wrap:focus-within {

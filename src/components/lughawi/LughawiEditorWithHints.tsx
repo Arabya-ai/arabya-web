@@ -8,7 +8,6 @@ import {
 } from "@/lib/lughawi/tiptap/proofread-extension";
 import {
   docToPlainText,
-  plainOffsetToPmPos,
   plainTextToDocJson,
 } from "@/lib/lughawi/tiptap/plain-map";
 import type { EditType, LughawiEdit } from "@/lib/lughawi/types";
@@ -24,6 +23,7 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
+import { createPortal } from "react-dom";
 
 const TYPE_CLASS: Record<EditType, string> = {
   spelling: "spelling",
@@ -172,30 +172,40 @@ export function LughawiEditorWithHints({
     dispatchProofreadDecorations(editor, sortedEdits, activeId);
   }, [editor, sortedEdits, activeId]);
 
-  // Position floating popover under the active mark (Word-like).
+  // Position floating popover from the marked word's DOM box (RTL-safe).
   useEffect(() => {
     if (!editor || !activeEdit || editor.isDestroyed) {
       setPopCoords(null);
       return;
     }
-    try {
-      const from = plainOffsetToPmPos(editor.state.doc, activeEdit.start);
-      const coords = editor.view.coordsAtPos(from);
-      const wrap = wrapRef.current?.getBoundingClientRect();
-      if (!wrap) {
-        setPopCoords({ top: coords.bottom + 6, left: coords.left });
+    const place = () => {
+      const mark = editor.view.dom.querySelector(
+        `[data-lughawi-edit-id="${CSS.escape(activeEdit.id)}"]`,
+      ) as HTMLElement | null;
+      if (!mark) {
+        setPopCoords(null);
         return;
       }
-      setPopCoords({
-        top: coords.bottom - wrap.top + 8,
-        left: Math.min(
-          Math.max(8, coords.left - wrap.left),
-          Math.max(8, wrap.width - 280),
-        ),
-      });
-    } catch {
-      setPopCoords({ top: 48, left: 16 });
-    }
+      const rect = mark.getBoundingClientRect();
+      const width = 320;
+      const left = Math.min(
+        Math.max(12, rect.left),
+        Math.max(12, window.innerWidth - width - 12),
+      );
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const top =
+        spaceBelow < 240
+          ? Math.max(12, rect.top - 8 - 200)
+          : rect.bottom + 10;
+      setPopCoords({ top, left });
+    };
+    place();
+    window.addEventListener("scroll", place, true);
+    window.addEventListener("resize", place);
+    return () => {
+      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("resize", place);
+    };
   }, [editor, activeEdit]);
 
   const acceptEdit = useCallback(
@@ -248,21 +258,33 @@ export function LughawiEditorWithHints({
             <span className="lughawi-editor-busy-bar" />
           </div>
         ) : null}
-
-        {activeEdit && popCoords ? (
-          <div
-            className="lughawi-tt-float"
-            style={{ top: popCoords.top, left: popCoords.left }}
-          >
-            <LughawiSuggestionPopover
-              edit={activeEdit}
-              onAccept={acceptEdit}
-              onReject={rejectEdit}
-              onCustom={customEdit}
-            />
-          </div>
-        ) : null}
       </div>
+
+      {activeEdit && popCoords && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              className="lughawi-tt-float"
+              style={{ top: popCoords.top, left: popCoords.left }}
+            >
+              <LughawiSuggestionPopover
+                edit={activeEdit}
+                onAccept={acceptEdit}
+                onReject={rejectEdit}
+                onCustom={customEdit}
+              />
+            </div>,
+            document.body,
+          )
+        : null}
+
+      {activeEdit && !popCoords ? (
+        <LughawiSuggestionPopover
+          edit={activeEdit}
+          onAccept={acceptEdit}
+          onReject={rejectEdit}
+          onCustom={customEdit}
+        />
+      ) : null}
 
       {sortedEdits.length > 0 && !activeEdit ? (
         <ul className="lughawi-instant-chips" aria-label={t("instantChipsLabel")}>
