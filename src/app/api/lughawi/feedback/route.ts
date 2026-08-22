@@ -4,7 +4,7 @@ import { sessionSkipsLughawiRateLimit } from "@/lib/lughawi/rate-limit-policy";
 import { enforceRateLimit, LUGHAWI_TOOL_LIMIT } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
-/** Crowd learn: accept/reject — signed-in only (prevents anonymous poisoning). */
+/** Crowd learn: accept/reject/custom — signed-in only (prevents anonymous poisoning). */
 export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user?.email || session.error === "Banned") {
@@ -27,6 +27,7 @@ export async function POST(req: Request) {
     to?: string;
     decision?: string;
     ruleId?: string;
+    customTo?: string;
   };
   try {
     body = (await req.json()) as typeof body;
@@ -35,12 +36,20 @@ export async function POST(req: Request) {
   }
 
   const decision =
-    body.decision === "accepted" || body.decision === "rejected"
+    body.decision === "accepted" ||
+    body.decision === "rejected" ||
+    body.decision === "custom"
       ? body.decision
       : null;
   if (!decision || !body.from?.trim() || !body.to?.trim()) {
     return NextResponse.json(
       { error: "from, to, decision required" },
+      { status: 400 },
+    );
+  }
+  if (decision === "custom" && !body.customTo?.trim()) {
+    return NextResponse.json(
+      { error: "customTo required for custom decision" },
       { status: 400 },
     );
   }
@@ -51,6 +60,7 @@ export async function POST(req: Request) {
       to: body.to,
       decision,
       ruleId: body.ruleId,
+      customTo: body.customTo,
     });
     return NextResponse.json({
       ok: true,

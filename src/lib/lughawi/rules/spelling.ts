@@ -5,6 +5,7 @@ import {
 import { BUILTIN_SPELLING } from "@/lib/lughawi/rules/spelling-data";
 import {
   ALEF_FARQ_RE,
+  collectNameAliEdits,
   nextSpellingId,
   spellingWordEdit,
   spellingWordRe,
@@ -132,31 +133,15 @@ export function collectSpellingEdits(
     );
   }
 
-  const nameAliRe =
-    /(?<![\u0600-\u06FFa-zA-Z0-9])(قابل|قابلت|قابله|زرت|زار|رأيت|رأى|لقيت|لَقيت|كلمت|كلّمت|ناديت|نادى|سميت|سمّيت|اسمه|يدعى|يُدعى|مع|إلى|الى)\s+على(?![\u0600-\u06FFa-zA-Z0-9])/g;
-  let nm: RegExpExecArray | null;
-  while ((nm = nameAliRe.exec(text)) !== null) {
-    const full = nm[0]!;
-    const start = nm.index + full.lastIndexOf("على");
-    const end = start + "على".length;
-    const key = `${start}:${end}`;
-    if (claimed.has(key)) continue;
-    if (isPairSuppressed("على", "علي")) continue;
-    claimed.add(key);
-    seq += 1;
-    edits.push(
-      spellingWordEdit(
-        text,
-        start,
-        end,
-        "علي",
-        "name-ali",
-        locale,
-        nextSpellingId("sp", seq),
-        0.88,
-      ),
-    );
-  }
+  const nameAli = collectNameAliEdits(
+    text,
+    locale,
+    claimed,
+    seq,
+    isPairSuppressed,
+  );
+  edits.push(...nameAli.edits);
+  seq = nameAli.nextSeq;
 
   return edits.sort((a, b) => a.start - b.start || b.end - a.end);
 }

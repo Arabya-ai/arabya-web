@@ -13,6 +13,18 @@ describe("lughawi spelling", () => {
     expect(suggestions).toContain("المدرسة");
   });
 
+  it("fixes احمد ساعد على في الكتابة to أحمد ساعد علي في الكتابة", () => {
+    const text = "احمد ساعد على في الكتابة";
+    const res = proofreadLocal(text, { locale: "ar" });
+    const map = Object.fromEntries(
+      res.edits.map((e) => [e.original, e.suggestion]),
+    );
+    expect(map["احمد"]).toBe("أحمد");
+    expect(map["على"]).toBe("علي");
+    expect(map["ساعد"]).toBeUndefined();
+    expect(res.result).toBe("أحمد ساعد علي في الكتابة");
+  });
+
   it("fixes hamza, في, علي name, and ta-marbuta in a short sentence", () => {
     const text = "احمد قابل على فى المدرسه";
     const edits = collectSpellingEdits(text, "ar");

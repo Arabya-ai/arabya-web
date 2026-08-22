@@ -1,8 +1,8 @@
 "use client";
 
+import { LughawiSuggestionPopover } from "@/components/lughawi/LughawiSuggestionPopover";
 import { applySingleEdit } from "@/lib/lughawi/pipeline-client";
 import type { EditType, LughawiEdit } from "@/lib/lughawi/types";
-import { Check, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   useCallback,
@@ -10,6 +10,7 @@ import {
   useState,
   type KeyboardEvent,
   type ReactNode,
+  type SyntheticEvent,
 } from "react";
 
 const TYPE_CLASS: Record<EditType, string> = {
@@ -33,7 +34,17 @@ type Props = {
   hintText: string;
   onKeyDown?: (e: KeyboardEvent<HTMLTextAreaElement>) => void;
   onAcceptInstant?: (edit: LughawiEdit) => void;
+  onRejectInstant?: (edit: LughawiEdit) => void;
+  onCustomInstant?: (edit: LughawiEdit, customTo: string) => void;
 };
+
+function editAtCaret(edits: LughawiEdit[], offset: number): LughawiEdit | null {
+  return (
+    edits.find((e) => offset >= e.start && offset <= e.end) ??
+    edits.find((e) => Math.abs((e.start + e.end) / 2 - offset) <= 1) ??
+    null
+  );
+}
 
 export function LughawiEditorWithHints({
   text,
@@ -46,16 +57,24 @@ export function LughawiEditorWithHints({
   hintText,
   onKeyDown,
   onAcceptInstant,
+  onRejectInstant,
+  onCustomInstant,
 }: Props) {
   const t = useTranslations("Lughawi");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [dismissed, setDismissed] = useState<Set<string>>(() => new Set());
 
   const sortedEdits = useMemo(
     () =>
       [...instantEdits]
-        .filter((e) => e.end > e.start && text.slice(e.start, e.end) === e.original)
+        .filter(
+          (e) =>
+            !dismissed.has(e.id) &&
+            e.end > e.start &&
+            text.slice(e.start, e.end) === e.original,
+        )
         .sort((a, b) => a.start - b.start),
-    [instantEdits, text],
+    [instantEdits, text, dismissed],
   );
 
   const backdrop = useMemo(() => {
@@ -74,8 +93,6 @@ export function LughawiEditorWithHints({
         <mark
           key={edit.id}
           className={`lughawi-instant-mark lughawi-instant-mark--${TYPE_CLASS[edit.type]}${isActive ? " is-active" : ""}`}
-          onMouseEnter={() => setActiveId(edit.id)}
-          onMouseLeave={() => setActiveId((id) => (id === edit.id ? null : id))}
         >
           {text.slice(edit.start, edit.end)}
         </mark>,
@@ -90,6 +107,16 @@ export function LughawiEditorWithHints({
 
   const activeEdit = sortedEdits.find((e) => e.id === activeId) ?? null;
 
+  const syncCaret = useCallback(
+    (e: SyntheticEvent<HTMLTextAreaElement>) => {
+      const el = e.currentTarget;
+      const pos = el.selectionStart ?? 0;
+      const hit = editAtCaret(sortedEdits, pos);
+      setActiveId(hit?.id ?? null);
+    },
+    [sortedEdits],
+  );
+
   const acceptEdit = useCallback(
     (edit: LughawiEdit) => {
       const applied = applySingleEdit(text, sortedEdits, edit.id, "accepted");
@@ -98,6 +125,31 @@ export function LughawiEditorWithHints({
       setActiveId(null);
     },
     [text, sortedEdits, onChange, onAcceptInstant],
+  );
+
+  const rejectEdit = useCallback(
+    (edit: LughawiEdit) => {
+      setDismissed((prev) => new Set(prev).add(edit.id));
+      onRejectInstant?.(edit);
+      setActiveId(null);
+    },
+    [onRejectInstant],
+  );
+
+  const customEdit = useCallback(
+    (edit: LughawiEdit, customTo: string) => {
+      const applied = applySingleEdit(
+        text,
+        sortedEdits,
+        edit.id,
+        "accepted",
+        customTo,
+      );
+      onChange(applied.text);
+      onCustomInstant?.(edit, customTo);
+      setActiveId(null);
+    },
+    [text, sortedEdits, onChange, onCustomInstant],
   );
 
   return (
@@ -111,8 +163,15 @@ export function LughawiEditorWithHints({
         <textarea
           className="lughawi-editor-input"
           value={text}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => {
+            onChange(e.target.value);
+            setActiveId(null);
+            setDismissed(new Set());
+          }}
           onKeyDown={onKeyDown}
+          onClick={syncCaret}
+          onKeyUp={syncCaret}
+          onSelect={syncCaret}
           disabled={disabled || pending}
           placeholder=""
           dir="rtl"
@@ -128,28 +187,12 @@ export function LughawiEditorWithHints({
       </div>
 
       {activeEdit ? (
-        <div
-          className="lughawi-instant-popover"
-          role="dialog"
-          aria-label={t("instantSuggestionTitle")}
-        >
-          <p className="lughawi-instant-popover-rule">{activeEdit.explanation}</p>
-          <p className="lughawi-instant-popover-diff">
-            <span>{activeEdit.original}</span>
-            <span aria-hidden>→</span>
-            <strong>{activeEdit.suggestion}</strong>
-          </p>
-          <div className="lughawi-instant-popover-actions">
-            <button type="button" className="lughawi-primary" onClick={() => acceptEdit(activeEdit)}>
-              <Check className="lughawi-ico" aria-hidden />
-              {t("accept")}
-            </button>
-            <button type="button" onClick={() => setActiveId(null)}>
-              <X className="lughawi-ico" aria-hidden />
-              {t("reject")}
-            </button>
-          </div>
-        </div>
+        <LughawiSuggestionPopover
+          edit={activeEdit}
+          onAccept={acceptEdit}
+          onReject={rejectEdit}
+          onCustom={customEdit}
+        />
       ) : null}
 
       {sortedEdits.length > 0 && !activeEdit ? (
@@ -159,8 +202,6 @@ export function LughawiEditorWithHints({
               <button
                 type="button"
                 className={`lughawi-instant-chip lughawi-instant-chip--${TYPE_CLASS[edit.type]}`}
-                onMouseEnter={() => setActiveId(edit.id)}
-                onFocus={() => setActiveId(edit.id)}
                 onClick={() => setActiveId(edit.id)}
               >
                 {edit.original} → {edit.suggestion}
