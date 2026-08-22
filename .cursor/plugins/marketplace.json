@@ -1,0 +1,212 @@
+{
+  "name": "arabya-agent-ecosystem",
+  "owner": {
+    "name": "Arabya",
+    "email": "plugins@arabya.org"
+  },
+  "metadata": {
+    "description": "Arabya project marketplace — vendored cursor/plugins + agent ecosystem for Contabo production.",
+    "upstream": "https://github.com/cursor/plugins",
+    "vendorRoot": "vendor/agent-ecosystem/cursor-plugins"
+  },
+  "plugins": [
+    {
+      "name": "teaching",
+      "source": "vendor/agent-ecosystem/cursor-plugins/teaching",
+      "description": "Skill mapping, practice plans, and learning retrospectives.",
+      "recommended": false
+    },
+    {
+      "name": "continual-learning",
+      "source": "vendor/agent-ecosystem/cursor-plugins/continual-learning",
+      "description": "Incremental transcript-driven memory updates for AGENTS.md using high-signal bullet points only.",
+      "recommended": true
+    },
+    {
+      "name": "cursor-team-kit",
+      "source": "vendor/agent-ecosystem/cursor-plugins/cursor-team-kit",
+      "description": "Internal team workflows for CI, code review, shipping, local automation, and verification.",
+      "recommended": true
+    },
+    {
+      "name": "thermos",
+      "source": "vendor/agent-ecosystem/cursor-plugins/thermos",
+      "description": "Thermo-nuclear branch review: deep security/correctness audits, harsh code-quality rubrics, parallel subagents, thermos orchestration, and optional merge-ready PR flows.",
+      "recommended": false
+    },
+    {
+      "name": "create-plugin",
+      "source": "vendor/agent-ecosystem/cursor-plugins/create-plugin",
+      "description": "Scaffold and validate new agent plugins.",
+      "recommended": false
+    },
+    {
+      "name": "ralph-loop",
+      "source": "vendor/agent-ecosystem/cursor-plugins/ralph-loop",
+      "description": "Iterative self-referential AI loops using the Ralph Wiggum technique.",
+      "recommended": false
+    },
+    {
+      "name": "agent-compatibility",
+      "source": "vendor/agent-ecosystem/cursor-plugins/agent-compatibility",
+      "description": "CLI-backed repo compatibility scans plus agents that audit startup, validation, and docs against reality.",
+      "recommended": true
+    },
+    {
+      "name": "cli-for-agent",
+      "source": "vendor/agent-ecosystem/cursor-plugins/cli-for-agent",
+      "description": "Patterns for designing CLIs that coding agents can run reliably: flags, help with examples, pipelines, errors, idempotency, dry-run.",
+      "recommended": false
+    },
+    {
+      "name": "pr-review-canvas",
+      "source": "vendor/agent-ecosystem/cursor-plugins/pr-review-canvas",
+      "description": "Render PR diffs as review canvases grouped by importance.",
+      "recommended": false
+    },
+    {
+      "name": "docs-canvas",
+      "source": "vendor/agent-ecosystem/cursor-plugins/docs-canvas",
+      "description": "Render documentation as a navigable canvas.",
+      "recommended": false
+    },
+    {
+      "name": "cursor-sdk",
+      "source": "vendor/agent-ecosystem/cursor-plugins/cursor-sdk",
+      "description": "Build apps, scripts, and automations with the TypeScript SDK.",
+      "recommended": true
+    },
+    {
+      "name": "orchestrate",
+      "source": "vendor/agent-ecosystem/cursor-plugins/orchestrate",
+      "description": "Fan large tasks out across parallel cloud agents with planners, workers, verifiers, and structured handoffs.",
+      "recommended": true
+    },
+    {
+      "name": "pstack",
+      "source": "vendor/agent-ecosystem/cursor-plugins/pstack",
+      "description": "if you want to go fast, go deep first. pstack helps you write less, but higher quality code. rigorous agent workflows you can parallelize with confidence.",
+      "recommended": false
+    },
+    {
+      "name": "gmail",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/gmail",
+      "description": "Search, read, draft, and manage email.",
+      "recommended": false
+    },
+    {
+      "name": "google-drive",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/google-drive",
+      "description": "Search, read, create, and share files.",
+      "recommended": false
+    },
+    {
+      "name": "google-calendar",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/google-calendar",
+      "description": "Search events and schedule meetings.",
+      "recommended": false
+    },
+    {
+      "name": "gong",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/gong",
+      "description": "Pull account summaries, deal insights, and call briefs.",
+      "recommended": false
+    },
+    {
+      "name": "salesforce",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/salesforce",
+      "description": "Query, create, and update records in your org.",
+      "recommended": false
+    },
+    {
+      "name": "playwright",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/playwright",
+      "description": "Navigate, click, screenshot, and test in a real browser.",
+      "recommended": true
+    },
+    {
+      "name": "github",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/github",
+      "description": "Manage repos, issues, pull requests, and Actions.",
+      "recommended": true
+    },
+    {
+      "name": "ashby",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/ashby",
+      "description": "Search candidates, prep interviews, and manage pipeline tasks.",
+      "recommended": false
+    },
+    {
+      "name": "hubspot",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/hubspot",
+      "description": "Search and update contacts, companies, deals, and tickets.",
+      "recommended": false
+    },
+    {
+      "name": "intercom",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/intercom",
+      "description": "Search conversations, contacts, and Help Center articles.",
+      "recommended": false
+    },
+    {
+      "name": "zoom",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/zoom",
+      "description": "Search meetings, pull transcripts, and work with Zoom Docs.",
+      "recommended": false
+    },
+    {
+      "name": "x",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/x",
+      "description": "Search posts, read timelines, pull trends, and manage bookmarks.",
+      "recommended": false
+    },
+    {
+      "name": "clay",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/clay",
+      "description": "Enrich people and companies, run AI research agents.",
+      "recommended": false
+    },
+    {
+      "name": "circleback",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/circleback",
+      "description": "Search meetings, transcripts, action items, and emails.",
+      "recommended": false
+    },
+    {
+      "name": "docusign",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/docusign",
+      "description": "Manage envelopes, templates, workflows, and agreements.",
+      "recommended": false
+    },
+    {
+      "name": "navan",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/navan",
+      "description": "Query expenses, travel bookings, policies, and cards.",
+      "recommended": false
+    },
+    {
+      "name": "profound",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/profound",
+      "description": "Track AI visibility, sentiment, and citations.",
+      "recommended": false
+    },
+    {
+      "name": "juicebox",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/juicebox",
+      "description": "Query recruiting analytics, shortlists, and sourcing agents.",
+      "recommended": false
+    },
+    {
+      "name": "outreach",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/outreach",
+      "description": "Search sequences, prospects, and Kaia meetings.",
+      "recommended": false
+    },
+    {
+      "name": "amplemarket",
+      "source": "vendor/agent-ecosystem/cursor-plugins/third_party/amplemarket",
+      "description": "Search people and companies, enrich leads, run sequences.",
+      "recommended": false
+    }
+  ]
+}

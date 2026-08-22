@@ -6,6 +6,28 @@
       "sourceType": "github",
       "skillPath": "skills/redesign-skill/SKILL.md",
       "computedHash": "b405eee0e0e80fc243f731d9aa368bca307e356db7e6157d27101d369dac6726"
+    },
+    "arabya-agent-ecosystem": {
+      "source": "arabya-web",
+      "sourceType": "local",
+      "skillPath": ".cursor/skills/arabya-agent-ecosystem/SKILL.md",
+      "computedHash": "local-master-routing-skill"
     }
+  },
+  "ecosystem": {
+    "manifest": "vendor/agent-ecosystem/manifest.json",
+    "installScript": "scripts/install-agent-ecosystem.sh",
+    "submodules": [
+      "vendor/agent-ecosystem/deepseek-harness",
+      "vendor/agent-ecosystem/anthropic-skills",
+      "vendor/agent-ecosystem/openai-cookbook",
+      "vendor/agent-ecosystem/claude-cookbooks",
+      "vendor/agent-ecosystem/grok-build",
+      "vendor/agent-ecosystem/openai-agents-python",
+      "vendor/agent-ecosystem/gemini-cookbook",
+      "vendor/agent-ecosystem/google-adk-python",
+      "vendor/agent-ecosystem/cursor-cookbook",
+      "vendor/agent-ecosystem/cursor-plugins"
+    ]
   }
 }

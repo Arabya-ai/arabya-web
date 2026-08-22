@@ -56,3 +56,29 @@ Open `/mushaf/1`, select a word, switch study tabs (الكلمات / الإعر�
 
 ### Irab books
 `/books` and `import-irab-book` are ready for owner-supplied files and for import/scraping pipelines when the owner directs. Catalog entries may stay `awaiting` until content is imported.
+
+### Agent ecosystem (10 upstream repos)
+Ten agent harnesses/cookbooks/SDKs are vendored as git submodules under `vendor/agent-ecosystem/` and wired into Cursor:
+
+| Repo | Path |
+|------|------|
+| DeepSeek Harness | `vendor/agent-ecosystem/deepseek-harness` |
+| Claude Skills | `vendor/agent-ecosystem/anthropic-skills` |
+| OpenAI Cookbook | `vendor/agent-ecosystem/openai-cookbook` |
+| Claude Cookbooks | `vendor/agent-ecosystem/claude-cookbooks` |
+| Grok Build | `vendor/agent-ecosystem/grok-build` |
+| OpenAI Agents SDK | `vendor/agent-ecosystem/openai-agents-python` |
+| Gemini Cookbook | `vendor/agent-ecosystem/gemini-cookbook` |
+| Google ADK | `vendor/agent-ecosystem/google-adk-python` |
+| Cursor Cookbook | `vendor/agent-ecosystem/cursor-cookbook` |
+| Cursor Plugins | `vendor/agent-ecosystem/cursor-plugins` |
+
+**Install / refresh:** `npm run agent-ecosystem:install` (or `bash scripts/install-agent-ecosystem.sh`).
+
+**Master routing skill:** `.cursor/skills/arabya-agent-ecosystem/SKILL.md` (mirrored to `.agents/skills/`).
+
+**Cursor plugins:** after install, run `/plugin marketplace add .cursor/plugins` then install `cursor-team-kit`, `orchestrate`, `playwright`, `github`.
+
+**Python lab (optional):** `services/agent-lab/` for OpenAI Agents + Google ADK prototypes — not production PM2 unless owner approves.
+
+Manifest: `vendor/agent-ecosystem/manifest.json`. Rule: `.cursor/rules/arabya-agent-ecosystem.mdc`.
