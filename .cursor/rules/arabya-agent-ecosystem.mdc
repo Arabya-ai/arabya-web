@@ -1,0 +1,28 @@
+---
+description: Routes Cursor agents to Arabya's vendored agent ecosystem (10 repos). Always consult when building agents, MCP, multi-agent flows, or Lughawi/NLP experiments.
+globs:
+alwaysApply: true
+---
+
+# Arabya agent ecosystem
+
+Ten upstream repos live under `vendor/agent-ecosystem/` (git submodules). Install/sync:
+
+```bash
+bash scripts/install-agent-ecosystem.sh
+```
+
+**Master skill:** `.cursor/skills/arabya-agent-ecosystem/SKILL.md`
+
+**Cursor plugins:** `.cursor/plugins/marketplace.json` → `/plugin marketplace add .cursor/plugins`
+
+## Quick routing
+
+- CI / verify / ship → `cursor-verify-this`, `cursor-fix-ci`, `cursor-review-and-ship`
+- Parallel agents → `cursor-orchestrate`, `cursor-dag-task-runner`
+- Web tests → `anthropic-webapp-testing` + Playwright plugin
+- MCP tools → `anthropic-mcp-builder`
+- **Gemini (prod default)** → `gemini-cookbook-index` + `src/lib/lughawi/ai-gateway.ts`
+- Python agent lab → `services/agent-lab/` (OpenAI Agents + Google ADK)
+
+Production stays **Contabo-only**; cloud API keys are optional acceleration, never hard-required for Quran reading or Lughawi Contabo path.

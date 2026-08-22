@@ -41,6 +41,8 @@
     "import-oss-json-pack": "node scripts/import-oss-json-pack.mjs",
     "build-quality-queue": "node scripts/build-quality-queue.mjs",
     "import-irab-book": "node scripts/import-irab-book.mjs",
+    "agent-ecosystem:install": "bash scripts/install-agent-ecosystem.sh",
+    "agent-ecosystem:sync-skills": "bash scripts/sync-agent-skills.sh",
     "fetch-ia-item": "node scripts/fetch-ia-item.mjs",
     "import-from-incoming": "node scripts/import-from-incoming.mjs",
     "fetch-quran-words": "node scripts/fetch-quran-words.mjs",
