@@ -4,6 +4,7 @@ import { resolveLocale } from "@/i18n/locale-params";
 import { getHisnCategories } from "@/lib/adhkar";
 import { AdhkarLocalNav } from "@/components/AdhkarLocalNav";
 import { HisnExplorer } from "@/components/HisnExplorer";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -19,18 +20,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function HisnPage({ params }: Props) {
   const locale = await resolveLocale(params);
   const t = await getTranslations({ locale, namespace: "Adhkar" });
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
   const categories = await getHisnCategories();
 
   return (
-    <div className="shell page-block adhkar-page">
+    <ArabyaHubPage className="adhkar-page">
       <AdhkarLocalNav locale={locale} current="hisn" />
-
-      <header className="asma-page-head">
-        <h1>{t("tools.hisn")}</h1>
-        <p>{t("tools.hisnDesc")}</p>
-      </header>
-
+      <ArabyaHubHero
+        icon="books"
+        iconLabel={t("tools.hisn")}
+        title={t("tools.hisn")}
+        lead={t("tools.hisnDesc")}
+        nav={[
+          { href: "/adhkar", label: th("items.adhkar.title") },
+          { href: "/", label: th("backHome") },
+        ]}
+      />
       <HisnExplorer categories={categories} />
-    </div>
+    </ArabyaHubPage>
   );
 }

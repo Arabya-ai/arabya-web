@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
 import { getBookCatalog } from "@/lib/books";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -26,17 +27,28 @@ function statusKey(
 export default async function BooksIndexPage({ params }: Props) {
   const locale = await resolveLocale(params);
   const t = await getTranslations({ locale, namespace: "Books" });
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
   const books = await getBookCatalog();
 
   return (
-    <div className="shell page-block">
-      <h1>{t("title")}</h1>
-      <p>{t("intro")}</p>
-      <p className="layer-hint">
-        {t.rich("libraryHint", {
-          library: (c) => <Link href="/library">{c}</Link>,
-        })}
-      </p>
+    <ArabyaHubPage>
+      <ArabyaHubHero
+        icon="books"
+        iconLabel={t("title")}
+        title={t("title")}
+        lead={t("intro")}
+        nav={[
+          { href: "/", label: th("backHome") },
+          { href: "/library", label: th("items.library.title") },
+          { href: "/services", label: th("viewAll") },
+        ]}
+      >
+        <p className="layer-hint" style={{ marginTop: "0.75rem" }}>
+          {t.rich("libraryHint", {
+            library: (c) => <Link href="/library">{c}</Link>,
+          })}
+        </p>
+      </ArabyaHubHero>
 
       {books.length ? (
         <ul className="books-catalog">
@@ -68,6 +80,6 @@ export default async function BooksIndexPage({ params }: Props) {
           {t("backMushaf")}
         </Link>
       </p>
-    </div>
+    </ArabyaHubPage>
   );
 }

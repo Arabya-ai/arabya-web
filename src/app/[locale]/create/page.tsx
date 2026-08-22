@@ -6,6 +6,7 @@ import {
   studioCreateFromAyahHref,
   studioPath,
 } from "@/ayat-studio/lib/studio-paths";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -18,25 +19,24 @@ export async function generateMetadata({
 }
 
 export default async function CreateHubPage({ params }: Props) {
-  await resolveLocale(params);
-  const t = await getTranslations("Create");
-  const tNav = await getTranslations("Nav");
+  const locale = await resolveLocale(params);
+  const t = await getTranslations({ locale, namespace: "Create" });
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
 
   return (
-    <div className="shell page-block">
-      <nav className="surah-nav">
-        <Link href="/" className="nav-pill">
-          {tNav("index")}
-        </Link>
-        <Link href="/pricing" className="nav-pill">
-          {t("pricing")}
-        </Link>
-        <Link href="/studio" className="nav-pill">
-          {tNav("studio")}
-        </Link>
-      </nav>
-      <h1>{t("hubTitle")}</h1>
-      <p className="dash-muted">{t("hubLead")}</p>
+    <ArabyaHubPage>
+      <ArabyaHubHero
+        icon="studio"
+        iconLabel={t("hubTitle")}
+        title={t("hubTitle")}
+        lead={t("hubLead")}
+        nav={[
+          { href: "/", label: th("backHome") },
+          { href: "/pricing", label: t("pricing") },
+          { href: "/studio", label: th("items.studio.title") },
+          { href: "/services", label: th("viewAll") },
+        ]}
+      />
       <ul className="create-hub-list">
         <li>
           <Link
@@ -68,11 +68,11 @@ export default async function CreateHubPage({ params }: Props) {
         </li>
         <li>
           <Link href={studioPath("/projects/new")} className="create-hub-card">
-            <strong>{tNav("studio")}</strong>
+            <strong>{th("items.studio.title")}</strong>
             <span>{t("hubLead")}</span>
           </Link>
         </li>
       </ul>
-    </div>
+    </ArabyaHubPage>
   );
 }

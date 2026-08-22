@@ -76,6 +76,15 @@
     "openMushaf": "Open the mushaf",
     "continueReading": "Continue reading from page {page}"
   },
+  "HomeServices": {
+    "kicker": "Platform services",
+    "title": "Arabya services",
+    "lead": "Quick paths to reading, worship, knowledge, and creation — the same cards as our Services page.",
+    "viewAll": "All services",
+    "featuredAria": "Favorite services",
+    "favoriteBadge": "Favorite",
+    "allHeading": "All services"
+  },
   "Theme": {
     "light": "Light",
     "dark": "Dark",
@@ -254,9 +263,15 @@
     "message": "This page could not load. Please try again.",
     "retry": "Try again",
     "index": "Index",
+    "brandName": "Arabya",
     "notFoundTitle": "Page not found",
-    "notFoundMessage": "Sorry, we could not find that page.",
-    "backToIndex": "Back to the surah index"
+    "notFoundMessage": "This link is wrong or the page moved. Go home or pick a service below.",
+    "backToIndex": "Back to the surah index",
+    "backHome": "Back to home",
+    "browseServices": "All services",
+    "openMushaf": "Open mushaf",
+    "servicesHeading": "Arabya services",
+    "servicesLead": "The same services as our Services page — quick paths without hunting the menus."
   },
   "Auth": {
     "account": "Account",

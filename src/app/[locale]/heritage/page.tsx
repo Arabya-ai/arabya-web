@@ -6,6 +6,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { listHeritageWorks } from "@/lib/heritage";
 import { RemoteSiyarBrowser } from "@/components/RemoteSiyarBrowser";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -41,19 +42,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function HeritageHubPage({ params }: Props) {
   const locale = await resolveLocale(params);
   const t = await getTranslations({ locale, namespace: "Heritage" });
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
   const works = await listHeritageWorks();
   const binbaz = await loadBinbazCatalog();
 
   return (
-    <div className="shell page-block heritage-page">
-      <header className="adhkar-hero">
-        <p className="adhkar-kicker">{t("kicker")}</p>
-        <h1>{t("title")}</h1>
-        <p>{t("lead")}</p>
-        <div className="home-index-ornament" aria-hidden="true">
-          <span className="home-index-ornament-mark" />
-        </div>
-      </header>
+    <ArabyaHubPage className="heritage-page">
+      <ArabyaHubHero
+        icon="heritage"
+        iconLabel={t("title")}
+        kicker={t("kicker")}
+        title={t("title")}
+        lead={t("lead")}
+        nav={[
+          { href: "/", label: th("backHome") },
+          { href: "/hadith", label: th("items.hadith.title") },
+          { href: "/services", label: th("viewAll") },
+        ]}
+      />
 
       <ul className="heritage-work-grid">
         {works.map((w) => (
@@ -105,6 +111,6 @@ export default async function HeritageHubPage({ params }: Props) {
         {" · "}
         <Link href="/">{t("indexLink")}</Link>
       </p>
-    </div>
+    </ArabyaHubPage>
   );
 }

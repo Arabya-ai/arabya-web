@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
 import { toArabicNumerals } from "@/lib/format";
 import { getAsmaNames } from "@/lib/asma";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -19,27 +20,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function AsmaPage({ params }: Props) {
   const locale = await resolveLocale(params);
   const t = await getTranslations({ locale, namespace: "Asma" });
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
   const names = await getAsmaNames();
 
   return (
-    <div className="shell page-block asma-page">
-      <nav className="surah-nav" aria-label={t("navAria")}>
-        <Link href="/" className="nav-pill">
-          {t("backIndex")}
-        </Link>
-      </nav>
-
-      <header className="asma-page-head">
-        <h1>{t("title")}</h1>
-        <p>
-          {t("pageIntro", {
-            count:
-              locale === "en"
-                ? String(names.length || 99)
-                : toArabicNumerals(names.length || 99),
-          })}
-        </p>
-      </header>
+    <ArabyaHubPage className="asma-page">
+      <ArabyaHubHero
+        icon="asma"
+        iconLabel={t("title")}
+        title={t("title")}
+        lead={t("pageIntro", {
+          count:
+            locale === "en"
+              ? String(names.length || 99)
+              : toArabicNumerals(names.length || 99),
+        })}
+        nav={[
+          { href: "/", label: th("backHome") },
+          { href: "/adhkar", label: th("items.adhkar.title") },
+          { href: "/services", label: th("viewAll") },
+        ]}
+      />
 
       {names.length === 0 ? (
         <p className="empty-state">{t("empty")}</p>
@@ -69,6 +70,6 @@ export default async function AsmaPage({ params }: Props) {
           ))}
         </ul>
       )}
-    </div>
+    </ArabyaHubPage>
   );
 }

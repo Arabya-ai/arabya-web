@@ -1,7 +1,5 @@
-import "@/components/services/services-hub.css";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
 import tajweedLegend from "../../../../data/qiraat/tajweed-legend.json";
 import tajweedSamples from "../../../../data/tajweed/samples.json";
@@ -10,6 +8,7 @@ import {
   type TajweedRule,
   type TajweedSample,
 } from "@/components/tajweed/TajweedService";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -28,24 +27,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function TajweedPage({ params }: Props) {
   const locale = await resolveLocale(params);
   const t = await getTranslations({ locale, namespace: "TajweedService" });
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
 
   return (
-    <div className="shell page-block tajweed-svc-page">
-      <nav className="surah-nav" aria-label={t("navAria")}>
-        <Link href="/services" className="nav-pill">
-          {t("backServices")}
-        </Link>
-        <Link href="/qiraat" className="nav-pill">
-          {t("toQiraat")}
-        </Link>
-      </nav>
-
-      <header className="services-hub__hero">
-        <h1>{t("title")}</h1>
-        <p>{t("lead")}</p>
-      </header>
-
+    <ArabyaHubPage className="tajweed-svc-page">
+      <ArabyaHubHero
+        icon="tajweed"
+        iconLabel={t("title")}
+        title={t("title")}
+        lead={t("lead")}
+        nav={[
+          { href: "/services", label: th("viewAll") },
+          { href: "/qiraat", label: th("items.qiraat.title") },
+          { href: "/", label: th("backHome") },
+        ]}
+      />
       <TajweedService rules={rules} samples={samples} />
-    </div>
+    </ArabyaHubPage>
   );
 }

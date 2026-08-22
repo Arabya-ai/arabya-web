@@ -9,6 +9,7 @@ import {
 import { AdhkarCategoryShell } from "@/components/AdhkarCategoryShell";
 import { AdhkarLocalNav } from "@/components/AdhkarLocalNav";
 import { formatCount } from "@/lib/format";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -33,6 +34,7 @@ export default async function AdhkarCategoryPage({ params }: Props) {
   const locale = await resolveLocale(params);
   const { slug } = await params;
   const t = await getTranslations({ locale, namespace: "Adhkar" });
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
   const category = await getAdhkarCategory(slug);
   if (!category) notFound();
 
@@ -43,20 +45,27 @@ export default async function AdhkarCategoryPage({ params }: Props) {
       : category.descriptionAr || category.descriptionEn;
 
   return (
-    <div className="shell page-block adhkar-page">
+    <ArabyaHubPage className="adhkar-page">
       <AdhkarLocalNav locale={locale} current="hub" />
-
-      <header className="asma-page-head">
-        <h1>{title}</h1>
-        {desc ? <p>{desc}</p> : null}
-        <p>
-          {t("countLabel", {
-            count: formatCount(category.items.length, locale),
-          })}
-        </p>
-      </header>
-
+      <ArabyaHubHero
+        icon="adhkar"
+        iconLabel={title}
+        title={title}
+        lead={
+          desc
+            ? `${desc} — ${t("countLabel", {
+                count: formatCount(category.items.length, locale),
+              })}`
+            : t("countLabel", {
+                count: formatCount(category.items.length, locale),
+              })
+        }
+        nav={[
+          { href: "/adhkar", label: th("items.adhkar.title") },
+          { href: "/", label: th("backHome") },
+        ]}
+      />
       <AdhkarCategoryShell slug={slug} items={category.items} />
-    </div>
+    </ArabyaHubPage>
   );
 }

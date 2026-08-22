@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
 import { StudyAssistant } from "@/components/StudyAssistant";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -18,15 +19,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function StudyPage({ params }: Props) {
   const locale = await resolveLocale(params);
   const t = await getTranslations({ locale, namespace: "Study" });
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
 
   return (
-    <div className="shell page-block study-page">
-      <nav className="surah-nav" aria-label={t("navAria")}>
-        <Link href="/" className="nav-pill">
-          {t("backIndex")}
-        </Link>
-      </nav>
+    <ArabyaHubPage className="study-page">
+      <ArabyaHubHero
+        icon="study"
+        iconLabel={t("title")}
+        title={t("title")}
+        lead={t("lead")}
+        nav={[
+          { href: "/", label: th("backHome") },
+          { href: "/search", label: th("items.search.title") },
+          { href: "/services", label: th("viewAll") },
+        ]}
+      />
       <StudyAssistant />
-    </div>
+    </ArabyaHubPage>
   );
 }

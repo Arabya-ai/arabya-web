@@ -5,6 +5,7 @@ import { QiblaCompass } from "@/components/QiblaCompass";
 import { PrayerTimesCard } from "@/components/PrayerTimesCard";
 import { HijriEventsPanel } from "@/components/HijriEventsPanel";
 import { listHijriEvents } from "@/lib/hijri-events";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -20,22 +21,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function QiblaPage({ params }: Props) {
   const locale = await resolveLocale(params);
   const t = await getTranslations({ locale, namespace: "Qibla" });
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
   const events = await listHijriEvents();
 
   return (
-    <div className="shell page-block qibla-page">
-      <header className="adhkar-hero">
-        <p className="adhkar-kicker">{t("kicker")}</p>
-        <h1>{t("title")}</h1>
-        <p>{t("lead")}</p>
-        <div className="home-index-ornament" aria-hidden="true">
-          <span className="home-index-ornament-mark" />
-        </div>
-      </header>
+    <ArabyaHubPage className="qibla-page">
+      <ArabyaHubHero
+        icon="qibla"
+        iconLabel={t("title")}
+        kicker={t("kicker")}
+        title={t("title")}
+        lead={t("lead")}
+        nav={[
+          { href: "/", label: th("backHome") },
+          { href: "/adhkar", label: th("items.adhkar.title") },
+          { href: "/services", label: th("viewAll") },
+        ]}
+      />
 
       <QiblaCompass />
       <PrayerTimesCard />
       <HijriEventsPanel events={events} />
-    </div>
+    </ArabyaHubPage>
   );
 }
