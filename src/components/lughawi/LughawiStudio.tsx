@@ -116,6 +116,8 @@ export function LughawiStudio() {
   const [copied, setCopied] = useState(false);
   const [engineVersion, setEngineVersion] = useState<string | null>(null);
   const [poolCount, setPoolCount] = useState(0);
+  const [learningActive, setLearningActive] = useState(0);
+  const [learningEvents, setLearningEvents] = useState(0);
   const [history, setHistory] = useState<string[]>([]);
   const [module, setModule] = useState<WorkspaceModule>("editor");
   const [typeFilter, setTypeFilter] = useState(ALL_TYPES_ON);
@@ -162,10 +164,18 @@ export function LughawiStudio() {
   useEffect(() => {
     void fetch("/api/lughawi/status")
       .then((r) => r.json())
-      .then((j: { engine?: { version?: string }; projectPoolCount?: number }) => {
-        if (j.engine?.version) setEngineVersion(j.engine.version);
-        setPoolCount(j.projectPoolCount ?? 0);
-      })
+      .then(
+        (j: {
+          engine?: { version?: string };
+          projectPoolCount?: number;
+          learning?: { active?: number; events?: number };
+        }) => {
+          if (j.engine?.version) setEngineVersion(j.engine.version);
+          setPoolCount(j.projectPoolCount ?? 0);
+          setLearningActive(j.learning?.active ?? 0);
+          setLearningEvents(j.learning?.events ?? 0);
+        },
+      )
       .catch(() => undefined);
   }, []);
 
@@ -305,7 +315,7 @@ export function LughawiStudio() {
     customTo?: string,
   ) {
     try {
-      await fetch("/api/lughawi/feedback", {
+      const res = await fetch("/api/lughawi/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -313,9 +323,14 @@ export function LughawiStudio() {
           to: edit.suggestion,
           decision,
           ruleId: edit.ruleId,
+          tier: edit.source === "ai" ? "ai" : "client",
+          source: edit.source,
           ...(decision === "custom" && customTo ? { customTo } : {}),
         }),
       });
+      if (res.ok) {
+        setLearningEvents((n) => n + 1);
+      }
     } catch {
       // Learning is best-effort; UI still applies locally.
     }
@@ -858,6 +873,8 @@ export function LughawiStudio() {
                   deepPending={pending && action === "proofread"}
                   deepStages={result?.meta.stages}
                   usedAi={result?.meta.usedAi}
+                  learningActive={learningActive}
+                  learningEvents={learningEvents}
                 />
 
                 <div

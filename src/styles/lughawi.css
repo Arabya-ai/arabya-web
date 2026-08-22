@@ -447,6 +447,7 @@
 .lughawi-layer-pill--rules { border-color: color-mix(in srgb, var(--brand) 30%, var(--line)); }
 .lughawi-layer-pill--nlp { border-color: color-mix(in srgb, var(--lughawi-grammar) 35%, var(--line)); }
 .lughawi-layer-pill--cloud { border-color: color-mix(in srgb, var(--lughawi-morph) 35%, var(--line)); }
+.lughawi-layer-pill--learn { border-color: color-mix(in srgb, var(--lughawi-style) 40%, var(--line)); }
 
 .lughawi-editor-stack {
   display: flex;

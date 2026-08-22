@@ -32,7 +32,13 @@ type Snapshot = {
     projectPoolCount: number;
     projectPoolByProvider: Record<string, number>;
     hasLocalOllama: boolean;
-    learning: { pairs?: number; active?: number; suppressed?: number };
+    learning: {
+      pairs?: number;
+      active?: number;
+      suppressed?: number;
+      events?: number;
+      backend?: string;
+    };
     sidecar?: {
       ok: boolean;
       version?: string;
@@ -165,6 +171,19 @@ export function AdminOpsMonitor() {
           <p>
             Ollama المحلي:{" "}
             {data.lughawi.hasLocalOllama ? "مفعّل" : "غير مضبوط"}
+            <span className="dash-muted">
+              {" "}
+              (اختياري عبر LUGHAWI_LOCAL_OLLAMA=1)
+            </span>
+          </p>
+          <p>
+            عجلة التعلّم:{" "}
+            {data.lughawi.learning?.pairs ?? 0} زوج ·{" "}
+            {data.lughawi.learning?.active ?? 0} نشط ·{" "}
+            {data.lughawi.learning?.events ?? 0} حدث
+            {data.lughawi.learning?.backend
+              ? ` · ${data.lughawi.learning.backend}`
+              : ""}
           </p>
           <p>
             Sidecar:{" "}

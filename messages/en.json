@@ -1769,6 +1769,7 @@
     "layerRulesReady": "Instant rules ready",
     "layerDeepRunning": "Deep check (server)",
     "layerCloudAi": "Cloud Auto",
+    "layerLearn": "Learn · {active} active · {events} events",
     "instantHint": "Live suggestions while typing — no server wait",
     "instantSuggestionTitle": "Instant suggestion",
     "instantChipsLabel": "Quick suggestions",

@@ -211,6 +211,13 @@ export function remainingRatio(slot: SlotUsage): number {
   return Math.max(0, 1 - slot.tokensMonth / slot.budgetTokens);
 }
 
+/** Transient provider capacity errors should not sticky-red the ops board. */
+export function isTransientAiError(err?: string): boolean {
+  return /503|UNAVAILABLE|high demand|try again later|temporar|overloaded/i.test(
+    err ?? "",
+  );
+}
+
 /** Higher score = prefer this slot first. */
 export function slotHealthScore(opts: {
   provider: string;
@@ -262,14 +269,25 @@ export function usageSummary(opts?: {
     let alert: "ok" | "low" | "exhausted" | "failing" = "ok";
     const stillActive =
       !alive || alive.has(`${s.provider}:${s.keyTail.slice(-4).toLowerCase()}`);
-    if (s.failuresMonth >= 5 && stillActive) alert = "failing";
-    else if (remainingPct <= 0 && stillActive) alert = "exhausted";
+    if (s.failuresMonth >= 5 && stillActive) {
+      // Capacity spikes (503) are common on free Google tiers — escalate slowly.
+      if (isTransientAiError(s.lastError)) {
+        alert = s.failuresMonth >= 20 ? "failing" : "low";
+      } else {
+        alert = "failing";
+      }
+    } else if (remainingPct <= 0 && stillActive) alert = "exhausted";
     else if (remainingPct <= 15 && stillActive) alert = "low";
 
     if (alert === "exhausted") {
       alerts.push({
         level: "critical",
         messageAr: `نفد تقريبًا ميزان التوكن لمفتاح ${s.provider} …${s.keyTail}`,
+      });
+    } else if (alert === "low" && isTransientAiError(s.lastError)) {
+      alerts.push({
+        level: "warn",
+        messageAr: `ضغط مؤقت (503) على ${s.provider} …${s.keyTail} — التدوير يعمل؛ التدقيق المحلي سليم`,
       });
     } else if (alert === "low") {
       alerts.push({

@@ -1,12 +1,22 @@
 /**
- * Crowd learning for لغوي.
+ * Crowd learning for لغوي (L2 flywheel).
  * - Seed (Git): data/lughawi/learned-corrections.json
- * - Runtime tallies (server disk, not overwritten lightly): .data/lughawi-learning.json
+ * - Runtime: SQLite flywheel (pairs + event log) — see flywheel-db.ts
  * Accept raises a pair; reject suppresses it. High accept-ratio pairs auto-apply offline.
  */
 
+import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import {
+  countFlywheelEvents,
+  getFlywheelPair,
+  insertFlywheelEvent,
+  listFlywheelPairs,
+  listRecentAcceptedCorrections,
+  lookupExactLearnedCorrection,
+  upsertFlywheelPair,
+} from "@/lib/lughawi/flywheel-db";
 
 export interface LearnedPair {
   from: string;
@@ -32,20 +42,13 @@ function seedPath(): string {
   return join(process.cwd(), "data", "lughawi", "learned-corrections.json");
 }
 
-function runtimePath(): string {
-  return (
-    process.env.LUGHAWI_LEARNING_PATH?.trim() ||
-    join(process.cwd(), ".data", "lughawi-learning.json")
-  );
-}
-
 function empty(): LearningFile {
   return { version: 1, pairs: [] };
 }
 
-function readJson(path: string): LearningFile {
+function readSeed(): LearningFile {
   try {
-    const raw = readFileSync(path, "utf8");
+    const raw = readFileSync(seedPath(), "utf8");
     const parsed = JSON.parse(raw) as LearningFile;
     if (!Array.isArray(parsed.pairs)) return empty();
     return { version: 1, pairs: parsed.pairs };
@@ -63,13 +66,36 @@ function pairKey(from: string, to: string): string {
   return `${from}\u0000${to}`;
 }
 
-function mergeFiles(seed: LearningFile, runtime: LearningFile): LearningFile {
+function rowToPair(r: {
+  from_text: string;
+  to_text: string;
+  rule_id: string | null;
+  accepts: number;
+  rejects: number;
+  active: number;
+  updated_at: string;
+}): LearnedPair {
+  return {
+    from: r.from_text,
+    to: r.to_text,
+    ruleId: r.rule_id ?? undefined,
+    accepts: r.accepts,
+    rejects: r.rejects,
+    active: Boolean(r.active),
+    updatedAt: r.updated_at,
+  };
+}
+
+function runtimePairs(): LearnedPair[] {
+  return listFlywheelPairs().map(rowToPair);
+}
+
+function mergeFiles(seed: LearningFile, runtime: LearnedPair[]): LearningFile {
   const map = new Map<string, LearnedPair>();
   for (const p of seed.pairs) {
     map.set(pairKey(p.from, p.to), { ...p });
   }
-  for (const p of runtime.pairs) {
-    // Runtime tallies are authoritative for live learning.
+  for (const p of runtime) {
     map.set(pairKey(p.from, p.to), { ...p });
   }
   const pairs = [...map.values()].map((p) => ({
@@ -85,12 +111,17 @@ export function computeActive(accepts: number, rejects: number): boolean {
   return accepts / n >= ACCEPT_RATIO && accepts > rejects;
 }
 
-/** Merged view: Git seed + runtime learning. */
+/** Merged view: Git seed + SQLite runtime. */
 export function loadLearning(): LearningFile {
-  return mergeFiles(readJson(seedPath()), readJson(runtimePath()));
+  return mergeFiles(readSeed(), runtimePairs());
 }
 
-export function getActiveLearnedPairs(): { from: string; to: string; ruleId?: string; confidence: number }[] {
+export function getActiveLearnedPairs(): {
+  from: string;
+  to: string;
+  ruleId?: string;
+  confidence: number;
+}[] {
   return loadLearning()
     .pairs.filter((p) => p.active && p.from !== p.to && p.from.length > 0)
     .map((p) => {
@@ -122,31 +153,33 @@ export function isPairSuppressed(from: string, to: string): boolean {
 }
 
 function bumpPair(
-  runtime: LearningFile,
   from: string,
   to: string,
   decision: "accepted" | "rejected",
   ruleId?: string,
 ): LearnedPair {
-  let row = runtime.pairs.find((p) => p.from === from && p.to === to);
-  if (!row) {
-    row = {
-      from,
-      to,
-      ruleId,
-      accepts: 0,
-      rejects: 0,
-      active: false,
-      updatedAt: new Date().toISOString(),
-    };
-    runtime.pairs.push(row);
-  }
-  if (decision === "accepted") row.accepts += 1;
-  else row.rejects += 1;
-  row.ruleId = ruleId ?? row.ruleId;
-  row.active = computeActive(row.accepts, row.rejects);
-  row.updatedAt = new Date().toISOString();
-  return row;
+  const existing = getFlywheelPair(from, to);
+  let accepts = existing?.accepts ?? 0;
+  let rejects = existing?.rejects ?? 0;
+  if (decision === "accepted") accepts += 1;
+  else rejects += 1;
+  const active = computeActive(accepts, rejects);
+  const row = upsertFlywheelPair({
+    from,
+    to,
+    ruleId: ruleId ?? existing?.rule_id ?? undefined,
+    accepts,
+    rejects,
+    active,
+  });
+  return rowToPair(row);
+}
+
+function hashEmail(email?: string): string | undefined {
+  const e = email?.trim().toLowerCase();
+  if (!e) return undefined;
+  const salt = process.env.LUGHAWI_LEARNING_HASH_SALT?.trim() || "arabya-lughawi";
+  return createHash("sha256").update(`${salt}:${e}`).digest("hex").slice(0, 24);
 }
 
 export function recordFeedback(input: {
@@ -156,6 +189,9 @@ export function recordFeedback(input: {
   ruleId?: string;
   /** When decision is custom: user's own correction (model `to` is rejected). */
   customTo?: string;
+  tier?: string;
+  source?: string;
+  userEmail?: string;
 }): LearnedPair {
   const from = input.from.trim();
   const modelTo = input.to.trim();
@@ -163,7 +199,6 @@ export function recordFeedback(input: {
     throw new Error("invalid feedback pair");
   }
 
-  const runtime = readJson(runtimePath());
   let row: LearnedPair;
 
   if (input.decision === "custom") {
@@ -171,26 +206,32 @@ export function recordFeedback(input: {
     if (!customTo || customTo === from) {
       throw new Error("invalid custom correction");
     }
-    // Reject the engine pair, accept the user's pair for the flywheel.
     if (modelTo !== from && modelTo !== customTo) {
-      bumpPair(runtime, from, modelTo, "rejected", input.ruleId);
+      bumpPair(from, modelTo, "rejected", input.ruleId);
     }
-    row = bumpPair(runtime, from, customTo, "accepted", input.ruleId ?? "user-custom");
+    row = bumpPair(from, customTo, "accepted", input.ruleId ?? "user-custom");
   } else {
     if (from === modelTo) throw new Error("invalid feedback pair");
-    row = bumpPair(runtime, from, modelTo, input.decision, input.ruleId);
+    row = bumpPair(from, modelTo, input.decision, input.ruleId);
   }
 
-  writeJson(runtimePath(), runtime);
+  insertFlywheelEvent({
+    from,
+    to: modelTo,
+    decision: input.decision,
+    customTo: input.customTo,
+    ruleId: input.ruleId,
+    tier: input.tier ?? "client",
+    source: input.source,
+    userEmailHash: hashEmail(input.userEmail),
+  });
+
   syncSeedFromRuntime();
   return row;
 }
 
 /** Write active pairs into data/lughawi/learned-corrections.json for Git history. */
 export function syncSeedFromRuntime(): void {
-  // Contabo/production must not dirty the Git working tree — that blocks deploys.
-  // Runtime learning stays in .data/lughawi-learning.json; promote to Git only when
-  // an operator explicitly sets LUGHAWI_WRITE_GIT_SEED=1 (or in non-production).
   if (
     process.env.NODE_ENV === "production" &&
     process.env.LUGHAWI_WRITE_GIT_SEED !== "1"
@@ -212,6 +253,9 @@ export function learningStats(): {
   pairs: number;
   active: number;
   suppressed: number;
+  events: number;
+  backend: "sqlite";
+  recentAccepted: number;
 } {
   const file = loadLearning();
   const suppressed = file.pairs.filter((p) => {
@@ -222,5 +266,10 @@ export function learningStats(): {
     pairs: file.pairs.length,
     active: file.pairs.filter((p) => p.active).length,
     suppressed,
+    events: countFlywheelEvents(),
+    backend: "sqlite",
+    recentAccepted: listRecentAcceptedCorrections(20).length,
   };
 }
+
+export { listRecentAcceptedCorrections, lookupExactLearnedCorrection };

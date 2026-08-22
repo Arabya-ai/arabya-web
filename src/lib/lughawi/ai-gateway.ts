@@ -82,6 +82,9 @@ export function humanizeAiError(msg: string): string {
   if (/429|quota|rate|resource.?exhausted/i.test(m)) {
     return "حصة Google ممتلئة مؤقتاً — أضف مفتاحاً آخر أو انتظر قليلاً.";
   }
+  if (/503|UNAVAILABLE|high demand|try again later|temporar/i.test(m)) {
+    return "ضغط مؤقت على نموذج Google — نجرّب مفتاحاً أو نموذجاً آخر؛ التدقيق المحلي يعمل.";
+  }
   if (/exhausted all providers/i.test(m)) {
     return "Auto جرّب كل المفاتيح المتاحة ولم ينجح — التدقيق المحلي ما زال يعمل.";
   }
