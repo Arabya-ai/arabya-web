@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { readAdhkarContentOverride } from "@/lib/adhkar-content-store";
+import { localeCompareSafe } from "@/lib/format";
 
 const dataRoot = path.join(process.cwd(), "data", "adhkar");
 
@@ -183,7 +184,7 @@ export async function getHisnCategories(): Promise<HisnCategory[]> {
   }
   return [...map.entries()]
     .map(([categoryAr, catItems]) => ({ categoryAr, items: catItems }))
-    .sort((a, b) => a.categoryAr.localeCompare(b.categoryAr, "ar"));
+    .sort((a, b) => localeCompareSafe(a.categoryAr, b.categoryAr, "ar"));
 }
 
 export async function getTasbeehPhrases(): Promise<TasbeehPhrase[]> {

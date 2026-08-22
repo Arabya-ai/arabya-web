@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { DuaItem } from "@/lib/adhkar";
+import { localeCompareSafe } from "@/lib/format";
 
 export function DuasExplorer({ duas }: { duas: DuaItem[] }) {
   const t = useTranslations("Adhkar");
@@ -21,7 +22,7 @@ export function DuasExplorer({ duas }: { duas: DuaItem[] }) {
       });
     }
     return [...map.values()].sort((a, b) =>
-      a.ar.localeCompare(b.ar, "ar"),
+      localeCompareSafe(a.ar, b.ar, "ar"),
     );
   }, [duas]);
 
