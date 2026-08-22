@@ -7,35 +7,39 @@ Worker `arabya-sync` على Cloudflare مسار مزامنة **قديم/اختي
 
 ## لماذا الإشارة حمراء؟
 
-Workers Builds يفشل غالباً خلال **أقل من ثانية** عندما:
-
 | السبب | التفسير |
 |--------|---------|
 | **Root directory** فارغ أو جذر المستودع | Wrangler يرى مشروع **Next.js** وليس Worker |
-| المسار الصحيح غير مضبوط | يجب أن يكون `workers/arabya-sync` حيث يوجد `wrangler.toml` |
-
-الكود داخل `workers/arabya-sync` يبني محلياً (`npm ci` + `wrangler deploy --dry-run`) — المشكلة إعداد لوحة Cloudflare وليست Contabo.
+| **Build command** = `npm run build` بدون سكربت | خطأ: `Missing script: "build"` — أُصلح بإضافة السكربت في الكود |
+| المسار الصحيح | **Root directory** = `workers/arabya-sync` |
 
 ---
 
-## مطلوب منك الآن (مرة واحدة — ~5 دقائق)
+## مطلوب منك الآن
 
-1. افتح: https://dash.cloudflare.com  
-2. **Workers & Pages** → Worker **`arabya-sync`**  
-3. **Settings** → **Builds** (أو **Build**)  
-4. اضبط:
+### أ) إعداد Cloudflare (إن لم يُضبَط)
+
+1. https://dash.cloudflare.com → **Workers & Pages** → **`arabya-sync`**
+2. **Settings** → **Builds**
+3. اضبط:
 
 | الحقل | القيمة |
 |--------|--------|
 | **Root directory** | `workers/arabya-sync` |
-| **Build command** | اتركه فارغاً *(أو* `npm ci` *إن طلب النظام أمراً)* |
+| **Build command** | `npm run build` *(أو اتركه فارغاً)* |
 | **Deploy command** | `npx wrangler deploy` |
 | **Production branch** | `main` |
 
-5. **Save**  
-6. **Retry** آخر بناء فاشل، أو ادفع commit فارغ — راقب حتى يصير أخضر  
+4. **Save**
 
-7. تأكد أيضاً (مرة سابقة): Secret **`ARABYA_ADMIN_EMAILS`** موجود تحت Variables/Secrets للـ Worker (نفس بريدات Contabo إن استخدمت Worker).
+### ب) بعد دمج إصلاح سكربت `build`
+
+1. انتظر Deploy Contabo / أو ادفع Retry في Cloudflare  
+2. راقب البناء حتى **نجاح** ثم Deploying  
+
+*(حل فوري بدون انتظار كود: امسح Build command واتركه فارغاً → Retry)*
+
+7. تأكد: Secret **`ARABYA_ADMIN_EMAILS`** في Variables/Secrets للـ Worker.
 
 ---
 
