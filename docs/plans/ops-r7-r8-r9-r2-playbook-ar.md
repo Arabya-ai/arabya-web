@@ -71,6 +71,10 @@ pm2 restart arabya-web --update-env
 ### مرجع الكود
 `workers/arabya-sync/wrangler.toml` — تعليق فقط، بدون قيم.
 
+### إشارة GitHub الحمراء «Workers Builds: arabya-sync»
+لا تعني سقوط Contabo. غالباً **Root directory** في لوحة Cloudflare غير مضبوط على `workers/arabya-sync`.  
+خطوات الإصلاح أو التعطيل: [`docs/platform/cloudflare-arabya-sync-builds-ar.md`](../platform/cloudflare-arabya-sync-builds-ar.md)
+
 ### إن فشل التحقق
 - تأكد أن البريد **نفس** بريد Google OAuth (حساب @gmail.com الذي سجّل به)  
 - CRM **لا** يظهر لمن رُقّي إلى «مدير» من الواجهة فقط — يجب أن يكون في `ARABYA_ADMIN_EMAILS`  
