@@ -1,7 +1,7 @@
-import {
-  getActiveLearnedPairs,
-  isPairSuppressed,
-} from "@/lib/lughawi/learning-store";
+/**
+ * Browser-safe spelling rules — builtin pairs only (no learning-store / node:fs).
+ */
+
 import { BUILTIN_SPELLING } from "@/lib/lughawi/rules/spelling-data";
 import {
   ALEF_FARQ_RE,
@@ -12,14 +12,9 @@ import {
 } from "@/lib/lughawi/rules/spelling-helpers";
 import type { LughawiEdit } from "@/lib/lughawi/types";
 
-export { BUILTIN_SPELLING } from "@/lib/lughawi/rules/spelling-data";
-export { collectSpellingEditsOffline } from "@/lib/lughawi/rules/spelling-offline";
-
-type Locale = SpellingLocale;
-
-export function collectSpellingEdits(
+export function collectSpellingEditsOffline(
   text: string,
-  locale: Locale = "ar",
+  locale: SpellingLocale = "ar",
 ): LughawiEdit[] {
   const edits: LughawiEdit[] = [];
   let seq = 0;
@@ -45,23 +40,11 @@ export function collectSpellingEdits(
     return rows;
   });
 
-  const pairs = [
-    ...getActiveLearnedPairs().map((p) => ({
-      from: p.from,
-      to: p.to,
-      ruleId: p.ruleId ?? "learned",
-      confidence: p.confidence,
-      learned: true as const,
-    })),
-    ...expandedBuiltin,
-  ];
-
+  const pairs = [...expandedBuiltin];
   pairs.sort((a, b) => b.from.length - a.from.length);
-
   const claimed = new Set<string>();
 
   for (const rule of pairs) {
-    if (isPairSuppressed(rule.from, rule.to)) continue;
     const re = spellingWordRe(rule.from);
     let m: RegExpExecArray | null;
     while ((m = re.exec(text)) !== null) {
@@ -80,7 +63,7 @@ export function collectSpellingEdits(
           rule.to,
           rule.ruleId,
           locale,
-          nextSpellingId(rule.learned ? "ln" : "sp", seq),
+          nextSpellingId("sp", seq),
           rule.confidence ?? 0.9,
         ),
       );
@@ -97,7 +80,6 @@ export function collectSpellingEdits(
     const end = start + stem.length;
     const key = `${start}:${end}`;
     if (claimed.has(key)) continue;
-    if (isPairSuppressed(stem, `${stem}ا`)) continue;
     claimed.add(key);
     seq += 1;
     edits.push(
@@ -110,50 +92,6 @@ export function collectSpellingEdits(
         locale,
         nextSpellingId("sp", seq),
         0.55,
-      ),
-    );
-  }
-
-  const spaceRe = / {2,}/g;
-  let sm: RegExpExecArray | null;
-  while ((sm = spaceRe.exec(text)) !== null) {
-    seq += 1;
-    edits.push(
-      spellingWordEdit(
-        text,
-        sm.index,
-        sm.index + sm[0]!.length,
-        " ",
-        "double-space",
-        locale,
-        nextSpellingId("sp", seq),
-        0.95,
-      ),
-    );
-  }
-
-  const nameAliRe =
-    /(?<![\u0600-\u06FFa-zA-Z0-9])(قابل|قابلت|قابله|زرت|زار|رأيت|رأى|لقيت|لَقيت|كلمت|كلّمت|ناديت|نادى|سميت|سمّيت|اسمه|يدعى|يُدعى|مع|إلى|الى)\s+على(?![\u0600-\u06FFa-zA-Z0-9])/g;
-  let nm: RegExpExecArray | null;
-  while ((nm = nameAliRe.exec(text)) !== null) {
-    const full = nm[0]!;
-    const start = nm.index + full.lastIndexOf("على");
-    const end = start + "على".length;
-    const key = `${start}:${end}`;
-    if (claimed.has(key)) continue;
-    if (isPairSuppressed("على", "علي")) continue;
-    claimed.add(key);
-    seq += 1;
-    edits.push(
-      spellingWordEdit(
-        text,
-        start,
-        end,
-        "علي",
-        "name-ali",
-        locale,
-        nextSpellingId("sp", seq),
-        0.88,
       ),
     );
   }
