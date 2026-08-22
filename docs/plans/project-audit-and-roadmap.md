@@ -14,6 +14,8 @@
 | ما **الخطوات القادمة** بالترتيب؟ | §6 |
 | تفاصيل **مخطط عربية** (MindFrond)؟ | §7 + `docs/plans/mukhtat-arabya-spec-ar.md` |
 | تدقيق i18n المرحلة 2؟ | `docs/plans/i18n-phase2-audit-ar.md` |
+| **خطة لغوي الذكي (أفكار → لاحقاً)** | `docs/plans/lughawi-model-plan-ar.md` |
+| **R7/R8/R9/R2 خطوات المالك** | `docs/plans/ops-r7-r8-r9-r2-playbook-ar.md` |
 | Contabo / أمان / لغوي؟ | `docs/plans/arabya-contabo-recovery-constitution-ar.md` |
 | اللغات والموبايل؟ | `docs/plans/i18n-and-mobile.md` |
 | ما مؤجّل في المنتج؟ | `docs/DEVELOPMENT.md` |
@@ -118,15 +120,15 @@
 
 | # | البند | لماذا | الإجراء المطلوب |
 |---|--------|--------|-----------------|
-| R1 | **قرار لغوي/Auto** | رسالة صفراء، Ollama في `.env` | قرار مالك: قواعد فقط vs opt-in LLM |
-| R2 | **CSP H-03** | `unsafe-inline` ما زال في script-src | بوابة منفصلة + اختبار Contabo |
+| R1 | **قرار لغوي/Auto** | رسالة صفراء، Ollama في `.env` | 📋 **خطة L0–L6** — `lughawi-model-plan-ar.md` (تنفيذ لاحق) |
+| R2 | **CSP H-03** | `unsafe-inline` ما زال في script-src | 📋 **`ops-r7-r8-r9-r2-playbook-ar.md` §R2** |
 | R3 | **ESLint** | `Link` غير مستخدم في `study/page.tsx` | ✅ أُزيل 22 Aug |
 | R4 | **تغطية i18n** | المرحلة 2 غير مكتملة رسمياً | ✅ تدقيق + خطة موجات — `i18n-phase2-audit-ar.md` |
 | R5 | **صفحات تفاصيل أخرى** | library، mushaf، studio — خارج Hub | قرار: هل نُدخلها Hub؟ (حالياً **لا**) |
 | R6 | **cron قديم** | أُزيل `cp` البسيط — تأكد backup 03:15 | ✅ فحص 22 Aug — OK |
-| R7 | **wrangler admin emails** | أُزيلت من Git (#186) | تأكيد secrets في Cloudflare dashboard |
-| R8 | **SFTP / Rocket Loader** | Pre-Launch | خطوات مالك عند الموافقة |
-| R9 | **Sentry 24h** | مراقبة بشرية | المالك من `/admin/ops` |
+| R7 | **wrangler admin emails** | أُزيلت من Git (#186) | 📋 **`ops-r7-r8-r9-r2-playbook-ar.md` §R7** |
+| R8 | **SFTP / Rocket Loader** | Pre-Launch | 📋 **نفس الدليل §R8** |
+| R9 | **Sentry 24h** | مراقبة بشرية | ARABYA-4 ✅ إصلاح؛ ARABYA-2/3 → R8 Rocket Loader |
 | R10 | **PR #187** | خطة مخطط | ✅ دُمج `f4284be` — Deploy Contabo OK |
 | R11 | **Dependabot #18/#19/#69** | actions bump | ⏸ مؤجّل — اختياري |
 | R12 | **مخطط — مسار URL** | `/mukhtat` | ✅ **مؤكّد من المالك** 22 Aug |
@@ -176,4 +178,77 @@ flowchart LR
   lughawi[R1 لغوي] --> seo[SEO لغوي]
   i18nC -.-> defer5A
 ```
+
+### 🔄 أولوية محدّثة (22 Aug — بعد Sentry + لغوي)
+
+| # | البند | لماذا الآن |
+|---|--------|------------|
+| **1** | **R7** + **R8 Rocket Loader** + deploy **ARABYA-4** | استقرار قبل لغوي |
+| **2** | **L1** محرر فوري (خطة لغوي) | ألمك اليومي |
+| **3** | **2-A** i18n استوديو | parallel |
+| **4** | **L2–L4** MoA + keys UI | بعد L1 |
+| **5** | **5-A مخطط** | مؤجل |
+| **6** | **R2 CSP** | بعد Rocket Loader |
+
+---
+
+## 7) المرحلة 5 — مخطط عربية (معتمد)
+
+**الاسم:** مخطط عربية  
+**المسار المؤكّد:** `/mukhtat` (محرر: `/mukhtat/editor/[id]`)  
+**التفاصيل:** `docs/plans/mukhtat-arabya-spec-ar.md`
+
+### 5-A — صفحة تسويق (P0) — **⏸ مؤجّل (22 Aug)**
+- [ ] Hero + diagram + features + compare + FAQ
+- [ ] ar/en؛ CTA «افتح المحرر»
+- [ ] بطاقة في `/services`
+
+### 5-B — محرر MVP (P0) — بعد 5-A
+- [ ] عقد + حفظ · import/export `.mm` · Outline RTL
+
+---
+
+## 8) ثلاث لغات — لا تخلط (مرجع)
+
+| النوع | مثال |
+|--------|------|
+| لغة الواجهة | ar / en |
+| لغة معنى الكلمة | في لوحة الدراسة |
+| طبعة ترجمة الآية | Saheeh، Diyanet، … |
+
+---
+
+## 9) قائمة تحقق قبل أي نشر كبير
+
+- [ ] `npm run test` + build أخضر
+- [ ] Deploy Contabo + فتح المسار على `arabya.org`
+- [ ] لم نكسر: `/mushaf/1`، `/lughawi`، `/library`، `/studio`
+- [ ] تحديث **هذا الملف** إن تغيّرت الأولويات
+
+---
+
+## 10) مخاطر (ثابتة)
+
+1. ترجمة آلية لنصوص شرعية دون مراجعة  
+2. كسر RTL المصحف عند LTR  
+3. `next build` أثناء `next dev`  
+4. CSP صارم بدون اختبار → صفحة بيضاء  
+5. Ollama ثقيل على CPU 12GB بدون موافقة  
+
+---
+
+## 11) وثائق فرعية
+
+| الملف | الغرض |
+|-------|--------|
+| `docs/plans/lughawi-model-plan-ar.md` | خطة لغوي الذكي (تخطيط) |
+| `docs/plans/ops-r7-r8-r9-r2-playbook-ar.md` | R7/R8/R9/R2 خطوات |
+| `docs/plans/mukhtat-arabya-spec-ar.md` | مواصفات مخطط |
+| `docs/plans/i18n-phase2-audit-ar.md` | تدقيق i18n |
+| `docs/plans/arabya-contabo-recovery-constitution-ar.md` | Contabo · لغوي |
+| `docs/DEVELOPMENT.md` | مؤجّلات |
+
+---
+
+*آخر نشر Contabo مرجعي: merge #188 (`6a91673`). PR #189 على main — راقب CI قبل deploy.*
 

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { formatVerseKey, getMushafPageHref, toArabicNumerals } from "@/lib/format";
+import {
+  formatVerseKey,
+  getMushafPageHref,
+  localeCompareSafe,
+  toArabicNumerals,
+} from "@/lib/format";
 
 describe("toArabicNumerals", () => {
   it("converts western digits to eastern arabic digits", () => {
@@ -38,5 +43,17 @@ describe("getMushafPageHref", () => {
   it("builds the mushaf page href", () => {
     expect(getMushafPageHref(42)).toBe("/mushaf/42");
     expect(getMushafPageHref(1)).toBe("/mushaf/1");
+  });
+});
+
+describe("localeCompareSafe", () => {
+  it("does not throw when operands are missing", () => {
+    expect(localeCompareSafe(undefined, "ب")).toBe(1);
+    expect(localeCompareSafe("أ", undefined)).toBe(-1);
+    expect(localeCompareSafe(undefined, undefined)).toBe(0);
+  });
+
+  it("sorts Arabic strings", () => {
+    expect(localeCompareSafe("ب", "أ", "ar")).toBeGreaterThan(0);
   });
 });

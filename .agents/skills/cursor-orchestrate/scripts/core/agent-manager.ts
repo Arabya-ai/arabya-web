@@ -1358,8 +1358,7 @@ export class AgentManager {
     const rendered = this.slackRenderForTask(task);
     if (!rendered) return;
     const previous = this.slackMirrorQueue.get(task.name) ?? Promise.resolve();
-    let next: Promise<void>;
-    next = previous
+    const next = previous
       .catch(() => {})
       .then(() => this.mirrorTaskToSlack(task, rendered))
       .catch(err => {
