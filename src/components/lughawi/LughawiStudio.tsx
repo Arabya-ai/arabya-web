@@ -5,6 +5,9 @@ import { stripTashkeel } from "@/lib/lughawi/normalize";
 import { findProtectedQuranSpans, searchKnownAyahs } from "@/lib/lughawi/quran-guard";
 import type { EditType, LughawiEdit, ProofreadResponse, TashkeelLevel } from "@/lib/lughawi/types";
 import { applySingleEdit } from "@/lib/lughawi/pipeline-client";
+import { useInstantProofread } from "@/lib/lughawi/use-instant-proofread";
+import { LughawiEditorWithHints } from "@/components/lughawi/LughawiEditorWithHints";
+import { LughawiLayerStrip } from "@/components/lughawi/LughawiLayerStrip";
 import { LughawiSettings } from "@/components/lughawi/LughawiSettings";
 import {
   ArrowLeftRight,
@@ -121,6 +124,15 @@ export function LughawiStudio() {
     ReturnType<typeof searchKnownAyahs>
   >([]);
   const [sttPending, setSttPending] = useState(false);
+
+  const instantEnabled =
+    module === "editor" &&
+    !pending &&
+    (!result || result.original !== text);
+  const { instantEdits, instantScanning } = useInstantProofread(text, {
+    enabled: instantEnabled,
+    proofMode,
+  });
 
   const allEdits = useMemo(
     () => result?.edits.filter((e) => e.status === "proposed") ?? [],
@@ -806,6 +818,15 @@ export function LughawiStudio() {
                   ) : null}
                 </div>
 
+                <LughawiLayerStrip
+                  instantActive={instantEnabled}
+                  instantScanning={instantScanning}
+                  instantCount={instantEdits.length}
+                  deepPending={pending && action === "proofread"}
+                  deepStages={result?.meta.stages}
+                  usedAi={result?.meta.usedAi}
+                />
+
                 <div
                   className="lughawi-subbar"
                   role="group"
@@ -831,7 +852,14 @@ export function LughawiStudio() {
                     onClick={() => run("proofread")}
                     disabled={pending || !text.trim()}
                   >
-                    {t("startCorrect")}
+                    {pending && action === "proofread" ? (
+                      <>
+                        <Loader2 className="lughawi-ico lughawi-ico--spin" aria-hidden />
+                        {t("deepProofreadRunning")}
+                      </>
+                    ) : (
+                      t("startCorrect")
+                    )}
                   </button>
                 </div>
 
@@ -1006,19 +1034,20 @@ export function LughawiStudio() {
                       </button>
                     </span>
                   </span>
-                  <textarea
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    onKeyDown={onTextKeyDown}
-                    rows={12}
+                  <LughawiEditorWithHints
+                    text={text}
+                    onChange={(next) => {
+                      setText(next);
+                      if (result && result.original !== next) setResult(null);
+                    }}
+                    instantEdits={instantEdits}
+                    pending={pending && action === "proofread"}
                     placeholder={t("placeholder")}
-                    dir="rtl"
-                    spellCheck={false}
-                    aria-describedby={`${studioId}-hint`}
+                    hintId={`${studioId}-hint`}
+                    hintText={`${t("instantHint")} · ${t("shortcutHint")}`}
+                    onKeyDown={onTextKeyDown}
+                    onAcceptInstant={(edit) => void sendFeedback(edit, "accepted")}
                   />
-                  <span id={`${studioId}-hint`} className="lughawi-hint">
-                    {t("shortcutHint")}
-                  </span>
                 </label>
 
                 <div className="lughawi-panel lughawi-panel--out">

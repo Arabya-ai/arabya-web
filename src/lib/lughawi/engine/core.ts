@@ -6,6 +6,7 @@
  * Client UI must import labels from `./stages-meta` only.
  */
 
+import { rankEdits } from "@/lib/lughawi/engine/rank-edits";
 import { filterDontCorrect } from "@/lib/lughawi/dont-correct";
 import { scoreEloquence } from "@/lib/lughawi/eloquence";
 import {
@@ -61,23 +62,7 @@ function filterProtected(
   return edits.filter((e) => !isInsideProtected(e.start, e.end, spans));
 }
 
-/** Drop low-confidence noise; keep educational value above floor. */
-export function rankEdits(
-  edits: LughawiEdit[],
-  minConfidence = 0.5,
-): LughawiEdit[] {
-  return [...edits]
-    .filter((e) => e.confidence >= minConfidence)
-    .map((e) => ({
-      ...e,
-      confidence: Math.round(e.confidence * 1000) / 1000,
-    }))
-    .sort(
-      (a, b) =>
-        b.confidence - a.confidence || a.start - b.start || b.end - a.end,
-    )
-    .sort((a, b) => a.start - b.start || b.end - a.end);
-}
+export { rankEdits } from "@/lib/lughawi/engine/rank-edits";
 
 /**
  * Full offline engine pass — deterministic, free, no network.
