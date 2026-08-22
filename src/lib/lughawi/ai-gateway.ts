@@ -39,9 +39,20 @@ export interface AiCandidate {
 }
 
 function isProvider(id: string): id is AiProviderId {
-  return ["openai", "anthropic", "google", "groq", "openrouter", "ollama"].includes(
-    id,
-  );
+  return [
+    "openai",
+    "anthropic",
+    "google",
+    "groq",
+    "openrouter",
+    "huggingface",
+    "ollama",
+  ].includes(id);
+}
+
+/** Providers used only for MoA (HF Inference) — excluded from Auto chat rotation. */
+function isMoaOnlyProvider(id: string): boolean {
+  return id === "huggingface";
 }
 
 const DEFAULT_MODELS: Record<AiProviderId, string> = {
@@ -54,6 +65,8 @@ const DEFAULT_MODELS: Record<AiProviderId, string> = {
    * Override only via LUGHAWI_GOOGLE_MODEL or per-slot model in /admin/ops.
    */
   google: "gemini-3.7-flash",
+  /** MoA judge default — not used by Auto chat; satisfies type coverage. */
+  huggingface: "Qwen/Qwen2.5-72B-Instruct",
   /** Local Llama-3.1-class on Contabo (8B). Override via LUGHAWI_OLLAMA_MODEL. */
   ollama: "llama3.1:8b",
 };
@@ -218,6 +231,11 @@ export async function runAiChat(params: AiChatParams): Promise<AiChatResult> {
   const model = params.model?.trim() || DEFAULT_MODELS[provider];
 
   let text = "";
+  if (isMoaOnlyProvider(provider)) {
+    throw new Error(
+      "Hugging Face keys are for MoA deep proofread only — enable LUGHAWI_MOA=1",
+    );
+  }
   if (provider === "openai") {
     text = await chatOpenAiCompatible(
       "https://api.openai.com/v1",
@@ -401,7 +419,7 @@ export function buildAutoCandidates(opts: {
       a.provider === prefer ? -1 : b.provider === prefer ? 1 : 0,
     );
   }
-  out.push(...user);
+  out.push(...user.filter((c) => !isMoaOnlyProvider(c.provider)));
 
   if (!opts.userOnly) {
     const rotated = rotateSlots(lughawiProjectAiPool());
@@ -412,6 +430,7 @@ export function buildAutoCandidates(opts: {
       return hb - ha;
     });
     for (const slot of byHealth) {
+      if (isMoaOnlyProvider(slot.provider)) continue;
       out.push({
         provider: slot.provider,
         apiKey: slot.apiKey,
