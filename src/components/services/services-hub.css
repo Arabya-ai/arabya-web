@@ -185,11 +185,12 @@
   transform-style: preserve-3d;
   transform: translateY(0) rotateX(0deg) rotateY(0deg);
   transition: transform 280ms ease;
-  animation: none;
+  animation: svc-icon-idle 4.5s ease-in-out infinite;
 }
 
 .svc-card:hover .svc-icon-3d__stage,
-.svc-card:focus-visible .svc-icon-3d__stage {
+.svc-card:focus-visible .svc-icon-3d__stage,
+.arabya-hub-hero:hover .svc-icon-3d__stage {
   animation: svc-icon-float 2.2s ease-in-out infinite;
 }
 
@@ -241,10 +242,35 @@
   }
 }
 
+@keyframes svc-icon-idle {
+  0%,
+  100% {
+    transform: translateY(0) rotateX(4deg) rotateY(-6deg);
+  }
+  50% {
+    transform: translateY(-3px) rotateX(10deg) rotateY(-14deg);
+  }
+}
+
+@keyframes home-feature-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 1px 0 color-mix(in srgb, var(--surface) 50%, transparent) inset,
+      0 0 0 0 color-mix(in srgb, var(--brand) 0%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 1px 0 color-mix(in srgb, var(--surface) 50%, transparent) inset,
+      0 12px 28px color-mix(in srgb, var(--brand) 18%, transparent);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .svc-icon-3d__stage,
   .svc-card:hover .svc-icon-3d__stage,
-  .svc-card:focus-visible .svc-icon-3d__stage {
+  .svc-card:focus-visible .svc-icon-3d__stage,
+  .arabya-hub-hero:hover .svc-icon-3d__stage {
     animation: none !important;
   }
   .svc-card {
@@ -252,6 +278,9 @@
   }
   .svc-card:hover {
     transform: none;
+  }
+  .home-services__feature--pulse {
+    animation: none;
   }
 }
 
@@ -727,9 +756,147 @@
   line-height: 1.65;
 }
 
+/* Shared hub hero (services / juz / adhkar / …) */
+.arabya-hub-hero__nav {
+  margin-bottom: 0.85rem;
+}
+
+.arabya-hub-hero__row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.arabya-hub-hero .svc-icon-3d {
+  width: 3.6rem;
+  height: 3.6rem;
+}
+
+.arabya-hub-hero__copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.arabya-hub-hero__kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--brand-deep);
+  letter-spacing: 0.02em;
+}
+
+.arabya-hub-page .juz-card,
+.arabya-hub-page .books-catalog-item,
+.arabya-hub-page .hadith-collection-card,
+.arabya-hub-page .adhkar-tool-card,
+.arabya-hub-page .adhkar-category-link,
+.arabya-hub-page .create-hub-card,
+.arabya-hub-page .heritage-work-card,
+.arabya-hub-page .asma-grid-link {
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
+  background: color-mix(in srgb, var(--surface) 96%, var(--brand-soft));
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.arabya-hub-page .juz-card:hover,
+.arabya-hub-page .hadith-collection-card:hover,
+.arabya-hub-page .adhkar-tool-card:hover,
+.arabya-hub-page .adhkar-category-link:hover,
+.arabya-hub-page .create-hub-card:hover,
+.arabya-hub-page .heritage-work-card:hover,
+.arabya-hub-page .asma-grid-link:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--brand) 32%, var(--line));
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--brand-deep) 12%, transparent);
+}
+
+.adhkar-tool-card--hub {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
+  align-items: start;
+  padding: 1rem 1rem 1.05rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.adhkar-tool-card--hub .adhkar-tool-title {
+  display: block;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.adhkar-tool-card--hub .adhkar-tool-desc {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.home-services {
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.home-services__hero h2 {
+  margin: 0 0 0.55rem;
+  font-size: clamp(1.45rem, 2.2vw, 1.9rem);
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.home-services__featured {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16.5rem), 1fr));
+  margin: 0 0 1.5rem;
+}
+
+.home-services__feature {
+  position: relative;
+  border-color: color-mix(in srgb, var(--brand) 28%, var(--line));
+  background:
+    radial-gradient(
+      120% 90% at 0% 0%,
+      color-mix(in srgb, var(--brand-soft) 90%, transparent),
+      transparent 55%
+    ),
+    color-mix(in srgb, var(--surface) 94%, var(--brand-soft));
+}
+
+.home-services__feature--pulse {
+  animation: home-feature-glow 3.6s ease-in-out infinite;
+}
+
+.home-services__badge {
+  display: inline-flex;
+  margin-bottom: 0.35rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--brand-deep);
+  background: color-mix(in srgb, var(--brand-soft) 80%, white);
+  border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--line));
+}
+
+.home-services__grid-wrap {
+  margin-top: 0.5rem;
+}
+
 @media (max-width: 720px) {
   .adv-search__filters,
   .nlp-svc__cards {
     grid-template-columns: 1fr;
+  }
+
+  .arabya-hub-hero__row {
+    flex-direction: column;
   }
 }

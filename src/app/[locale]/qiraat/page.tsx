@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
 import qiraatIndex from "../../../../data/qiraat/index.json";
 import tajweedLegend from "../../../../data/qiraat/tajweed-legend.json";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -47,11 +48,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function QiraatPage({ params }: Props) {
   const locale = await resolveLocale(params);
   const t = await getTranslations({ locale, namespace: "Qiraat" });
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
 
   return (
-    <div className="shell page-block">
-      <h1>{t("title")}</h1>
-      <p>{t.rich("intro", { strong: (c) => <strong>{c}</strong> })}</p>
+    <ArabyaHubPage>
+      <ArabyaHubHero
+        icon="qiraat"
+        iconLabel={t("title")}
+        title={t("title")}
+        lead={t.rich("intro", { strong: (c) => <strong>{c}</strong> })}
+        nav={[
+          { href: "/", label: th("backHome") },
+          { href: "/tajweed", label: th("items.tajweed.title") },
+          { href: "/services", label: th("viewAll") },
+        ]}
+      />
+
       <ul className="qiraat-list">
         {readings.map((r) => (
           <li
@@ -115,6 +127,6 @@ export default async function QiraatPage({ params }: Props) {
           })}
         </p>
       ) : null}
-    </div>
+    </ArabyaHubPage>
   );
 }

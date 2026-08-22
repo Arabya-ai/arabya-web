@@ -6,6 +6,8 @@ import { getAdhkarCategories } from "@/lib/adhkar";
 import { formatCount } from "@/lib/format";
 import { AdhkarHubClient } from "@/components/AdhkarHubClient";
 import { AdhkarLocalNav } from "@/components/AdhkarLocalNav";
+import { ServiceIcon3D } from "@/components/services/ServiceIcon3D";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -21,20 +23,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function AdhkarIndexPage({ params }: Props) {
   const locale = await resolveLocale(params);
   const t = await getTranslations({ locale, namespace: "Adhkar" });
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
   const categories = await getAdhkarCategories();
 
   return (
-    <div className="shell page-block adhkar-page">
+    <ArabyaHubPage className="adhkar-page">
       <AdhkarLocalNav locale={locale} current="hub" />
 
-      <header className="adhkar-hero">
-        <p className="adhkar-kicker">{t("kicker")}</p>
-        <h1>{t("title")}</h1>
-        <p>{t("lead")}</p>
-        <div className="home-index-ornament" aria-hidden="true">
-          <span className="home-index-ornament-mark" />
-        </div>
-      </header>
+      <ArabyaHubHero
+        icon="adhkar"
+        iconLabel={t("title")}
+        kicker={t("kicker")}
+        title={t("title")}
+        lead={t("lead")}
+        nav={[
+          { href: "/", label: th("backHome") },
+          { href: "/asma", label: th("items.asma.title") },
+          { href: "/services", label: th("viewAll") },
+        ]}
+      />
 
       <AdhkarHubClient
         locale={locale}
@@ -51,24 +58,39 @@ export default async function AdhkarIndexPage({ params }: Props) {
         <h2 id="adhkar-tools-title">{t("toolsHeading")}</h2>
         <ul className="adhkar-tool-grid">
           <li>
-            <Link href="/adhkar/duas" className="adhkar-tool-card">
-              <span className="adhkar-tool-mark" aria-hidden />
-              <span className="adhkar-tool-title">{t("tools.duas")}</span>
-              <span className="adhkar-tool-desc">{t("tools.duasDesc")}</span>
+            <Link
+              href="/adhkar/duas"
+              className="adhkar-tool-card adhkar-tool-card--hub"
+            >
+              <ServiceIcon3D icon="adhkar" label={t("tools.duas")} />
+              <span>
+                <span className="adhkar-tool-title">{t("tools.duas")}</span>
+                <span className="adhkar-tool-desc">{t("tools.duasDesc")}</span>
+              </span>
             </Link>
           </li>
           <li>
-            <Link href="/adhkar/hisn" className="adhkar-tool-card">
-              <span className="adhkar-tool-mark" aria-hidden />
-              <span className="adhkar-tool-title">{t("tools.hisn")}</span>
-              <span className="adhkar-tool-desc">{t("tools.hisnDesc")}</span>
+            <Link
+              href="/adhkar/hisn"
+              className="adhkar-tool-card adhkar-tool-card--hub"
+            >
+              <ServiceIcon3D icon="books" label={t("tools.hisn")} />
+              <span>
+                <span className="adhkar-tool-title">{t("tools.hisn")}</span>
+                <span className="adhkar-tool-desc">{t("tools.hisnDesc")}</span>
+              </span>
             </Link>
           </li>
           <li>
-            <Link href="/adhkar/tasbeeh" className="adhkar-tool-card">
-              <span className="adhkar-tool-mark" aria-hidden />
-              <span className="adhkar-tool-title">{t("tools.tasbeeh")}</span>
-              <span className="adhkar-tool-desc">{t("tools.tasbeehDesc")}</span>
+            <Link
+              href="/adhkar/tasbeeh"
+              className="adhkar-tool-card adhkar-tool-card--hub"
+            >
+              <ServiceIcon3D icon="asma" label={t("tools.tasbeeh")} />
+              <span>
+                <span className="adhkar-tool-title">{t("tools.tasbeeh")}</span>
+                <span className="adhkar-tool-desc">{t("tools.tasbeehDesc")}</span>
+              </span>
             </Link>
           </li>
         </ul>
@@ -109,6 +131,6 @@ export default async function AdhkarIndexPage({ params }: Props) {
       </section>
 
       <p className="adhkar-credit">{t("credit")}</p>
-    </div>
+    </ArabyaHubPage>
   );
 }

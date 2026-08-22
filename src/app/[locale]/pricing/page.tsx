@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -14,22 +14,23 @@ export async function generateMetadata({
 }
 
 export default async function PricingPage({ params }: Props) {
-  await resolveLocale(params);
-  const t = await getTranslations("Pricing");
-  const tNav = await getTranslations("Nav");
+  const locale = await resolveLocale(params);
+  const t = await getTranslations({ locale, namespace: "Pricing" });
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
 
   return (
-    <div className="shell page-block pricing-page">
-      <nav className="surah-nav">
-        <Link href="/" className="nav-pill">
-          {tNav("index")}
-        </Link>
-        <Link href="/create" className="nav-pill">
-          {t("createHub")}
-        </Link>
-      </nav>
-      <h1>{t("title")}</h1>
-      <p className="dash-muted">{t("lead")}</p>
+    <ArabyaHubPage className="pricing-page">
+      <ArabyaHubHero
+        icon="studio"
+        iconLabel={t("title")}
+        title={t("title")}
+        lead={t("lead")}
+        nav={[
+          { href: "/", label: th("backHome") },
+          { href: "/create", label: t("createHub") },
+          { href: "/services", label: th("viewAll") },
+        ]}
+      />
       <div className="pricing-grid">
         <section className="pricing-card" aria-labelledby="plan-free">
           <h2 id="plan-free">{t("freeTitle")}</h2>
@@ -51,6 +52,6 @@ export default async function PricingPage({ params }: Props) {
       </div>
       <p className="pricing-paypal-note">{t("paypalSoon")}</p>
       <p className="dash-muted">{t("manualUpgrade")}</p>
-    </div>
+    </ArabyaHubPage>
   );
 }
