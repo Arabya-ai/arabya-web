@@ -74,6 +74,8 @@ async def proofread(
         body.text,
         preserve_diacritics=body.preserve_diacritics,
         skip_llm=body.skip_llm,
+        use_moa=body.use_moa,
+        few_shot_pairs=body.few_shot_pairs or None,
         db=db,
         client_ip=client_ip(request),
     )

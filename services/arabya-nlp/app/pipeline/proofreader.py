@@ -20,6 +20,7 @@ from sqlalchemy.orm import Session
 
 from app.models import GrammarErrorStat, ProofreadJob, utcnow
 from app.pipeline.llm_stage import LlmStageResult, run_llm_stage
+from app.pipeline.moa_stage import MoaStageResult, run_moa_stage
 from app.pipeline.rule_stage import RuleStageResult, run_rule_stage
 from app.schemas import ProofreadResponse, TextEdit
 from config import Settings, get_settings
@@ -184,6 +185,8 @@ async def proofread_text(
     *,
     preserve_diacritics: bool | None = None,
     skip_llm: bool = False,
+    use_moa: bool = False,
+    few_shot_pairs: list[dict[str, str]] | None = None,
     db: Session | None = None,
     client_ip: str | None = None,
     settings: Settings | None = None,
@@ -228,12 +231,27 @@ async def proofread_text(
             else "rules-only-fallback"
         )
 
+    # L3 MoA (optional): after rules/Ollama; soft-skip without token / when disabled.
+    moa: MoaStageResult = MoaStageResult(text=original, engine="moa-skipped", mode="off")
+    if use_moa or settings.moa_enabled:
+        moa = await run_moa_stage(
+            original,
+            settings=settings,
+            few_shot_pairs=few_shot_pairs,
+            force=use_moa,
+        )
+        if moa.mode not in {"disabled", "no-token", "off", "skipped"} and moa.raw_ok:
+            mode = f"{mode}+{moa.mode}" if mode else moa.mode
+
     rule_dicts = [e.as_dict() for e in stage1.edits]
     llm_dicts = list(stage2.edits)
+    moa_dicts = list(moa.edits)
     rule_located = remap_edits_to_original(original, rule_dicts)
     llm_located = remap_edits_to_original(original, llm_dicts)
-    edits = merge_edit_lists(rule_located, llm_located)
-    warnings = list(stage1.warnings) + list(stage2.warnings)
+    moa_located = remap_edits_to_original(original, moa_dicts)
+    # Rules win overlaps; MoA fills gaps after local LLM
+    edits = merge_edit_lists(rule_located, merge_edit_lists(llm_located, moa_located))
+    warnings = list(stage1.warnings) + list(stage2.warnings) + list(moa.warnings)
 
     # Prefer applying merged span edits; fall back to sequential texts.
     if edits:
@@ -241,8 +259,13 @@ async def proofread_text(
         cleaned = apply_edits(original, rule_located) if rule_located else stage1.text
     else:
         cleaned = stage1.text
-        # If Ollama failed, keep rules; if both idle, keep original.
-        if stage2.raw_ok and stage2.text and stage2.engine not in {
+        # Prefer MoA corrected text, then Ollama, then rules.
+        if moa.raw_ok and moa.edits and moa.text and moa.engine not in {
+            "moa-skipped",
+            "moa-proposers-empty",
+        }:
+            corrected = moa.text
+        elif stage2.raw_ok and stage2.text and stage2.engine not in {
             "llm-skipped",
             "ollama-unavailable",
         }:
@@ -251,6 +274,9 @@ async def proofread_text(
             corrected = stage1.text
 
     word_count = count_words(original)
+    stage2_label = stage2.engine
+    if moa.engine and moa.engine != "moa-skipped":
+        stage2_label = f"{stage2.engine}+{moa.engine}"
 
     if db is not None:
         import json
@@ -262,7 +288,7 @@ async def proofread_text(
             corrected_text=corrected,
             word_count=word_count,
             stage1_engine=stage1.engine,
-            stage2_engine=stage2.engine,
+            stage2_engine=stage2_label,
             errors_json=json.dumps(edits, ensure_ascii=False),
             preserve_diacritics=preserve,
         )
@@ -281,9 +307,11 @@ async def proofread_text(
         corrected=corrected,
         word_count=word_count,
         stage1_engine=stage1.engine,
-        stage2_engine=stage2.engine,
+        stage2_engine=stage2_label,
         mode=mode,
         parallel=parallel,
         edits=[TextEdit(**e) for e in edits],
         warnings=warnings,
+        moa_engine=moa.engine,
+        moa_mode=moa.mode,
     )

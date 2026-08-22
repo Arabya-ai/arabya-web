@@ -35,6 +35,8 @@ export interface ArabyaNlpProofreadPayload {
   parallel?: boolean;
   edits: ArabyaNlpEdit[];
   warnings?: string[];
+  moa_engine?: string;
+  moa_mode?: string;
 }
 
 export interface ArabyaNlpTashkeelPayload {
@@ -124,11 +126,18 @@ export async function probeArabyaNlpHealth(
 
 /**
  * POST /v1/proofread — hybrid Contabo stack (rules + optional local Ollama in parallel).
+ * Optional L3 MoA when useMoa + Contabo ARABYA_NLP_MOA + HF token.
  * Returns null on timeout/network/error (caller keeps local/sidecar result).
  */
 export async function arabyaNlpProofread(
   text: string,
-  opts?: { preserveDiacritics?: boolean; skipLlm?: boolean; timeoutMs?: number },
+  opts?: {
+    preserveDiacritics?: boolean;
+    skipLlm?: boolean;
+    useMoa?: boolean;
+    fewShotPairs?: Array<{ from: string; to: string }>;
+    timeoutMs?: number;
+  },
 ): Promise<ArabyaNlpProofreadPayload | null> {
   const timeoutMs = opts?.timeoutMs ?? 45_000;
   const ctrl = new AbortController();
@@ -141,6 +150,13 @@ export async function arabyaNlpProofread(
         text,
         preserve_diacritics: opts?.preserveDiacritics ?? true,
         skip_llm: Boolean(opts?.skipLlm),
+        use_moa: Boolean(opts?.useMoa),
+        few_shot_pairs: Array.isArray(opts?.fewShotPairs)
+          ? opts.fewShotPairs.slice(0, 3).map((p) => ({
+              from: p.from,
+              to: p.to,
+            }))
+          : [],
       }),
       signal: ctrl.signal,
       cache: "no-store",

@@ -104,6 +104,26 @@ class Settings(BaseSettings):
     # Rules (PyArabic/ghalatawi) stay always-on. Set ARABYA_NLP_LLM_PROOFREAD=1 to enable.
     llm_proofread_enabled: bool = Field(default=False, alias="ARABYA_NLP_LLM_PROOFREAD")
 
+    # --- L3 MoA (HF cloud proposers + Qwen judge) — OFF by default; Contabo rules always work ---
+    moa_enabled: bool = Field(default=False, alias="ARABYA_NLP_MOA")
+    moa_proposer_timeout_s: float = Field(default=4.0, alias="ARABYA_NLP_MOA_TIMEOUT_S")
+    moa_proposer_jais: str = Field(
+        default="inceptionai/jais-30b-chat-v3",
+        alias="ARABYA_NLP_MOA_JAIS",
+    )
+    moa_proposer_llama: str = Field(
+        default="meta-llama/Llama-3.3-70B-Instruct",
+        alias="ARABYA_NLP_MOA_LLAMA",
+    )
+    moa_proposer_deepseek: str = Field(
+        default="deepseek-ai/DeepSeek-V3",
+        alias="ARABYA_NLP_MOA_DEEPSEEK",
+    )
+    moa_judge_model: str = Field(
+        default="Qwen/Qwen2.5-72B-Instruct",
+        alias="ARABYA_NLP_MOA_JUDGE",
+    )
+
     @field_validator("database_url")
     @classmethod
     def reject_cloud_databases(cls, value: str) -> str:
