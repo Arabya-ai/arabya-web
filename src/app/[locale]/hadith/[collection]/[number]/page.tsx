@@ -6,6 +6,7 @@ import { resolveLocale } from "@/i18n/locale-params";
 import { getHadithItem } from "@/lib/hadith";
 import { getHadithIsnad } from "@/lib/hadith-isnad";
 import { HadithWordStudy } from "@/components/HadithWordStudy";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = {
   params: Promise<{ locale: string; collection: string; number: string }>;
@@ -30,6 +31,7 @@ export default async function HadithItemPage({ params }: Props) {
   const locale = await resolveLocale(params);
   const { collection: slug, number } = await params;
   const t = await getTranslations({ locale, namespace: "Hadith" });
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
   const hit = await getHadithItem(slug, number);
   if (!hit) notFound();
 
@@ -49,22 +51,28 @@ export default async function HadithItemPage({ params }: Props) {
       ? collection.items[idx + 1]
       : null;
 
+  const metaParts = [
+    title,
+    chapter || null,
+    item.grade || null,
+  ].filter(Boolean);
+
   return (
-    <div className="shell page-block hadith-page">
-      <nav className="library-breadcrumbs" aria-label="Breadcrumb">
-        <Link href="/hadith">{t("title")}</Link>
-        <span aria-hidden>/</span>
-        <Link href={`/hadith/${collection.slug}`}>{title}</Link>
-        <span aria-hidden>/</span>
-        <span aria-current="page">#{item.number}</span>
-      </nav>
+    <ArabyaHubPage className="hadith-page">
+      <ArabyaHubHero
+        icon="hadith"
+        iconLabel={title}
+        kicker={title}
+        title={`#${item.number}`}
+        lead={metaParts.length > 1 ? metaParts.slice(1).join(" · ") : item.id}
+        nav={[
+          { href: "/hadith", label: t("title") },
+          { href: `/hadith/${collection.slug}`, label: title },
+          { href: "/", label: th("backHome") },
+        ]}
+      />
 
       <article className="hadith-article">
-        <p className="hadith-article-meta">
-          {title}
-          {chapter ? ` · ${chapter}` : ""}
-          {item.grade ? ` · ${item.grade}` : ""}
-        </p>
         <p className="hadith-article-id">{item.id}</p>
 
         {isnad ? (
@@ -97,7 +105,7 @@ export default async function HadithItemPage({ params }: Props) {
 
       <nav className="hadith-item-pager" aria-label={t("hadithPagerAria")}>
         {prev ? (
-          <Link href={`/hadith/${collection.slug}/${prev.number}`}>
+          <Link href={`/hadith/${collection.slug}/${prev.number}`} className="nav-pill">
             {t("prevHadith")}
           </Link>
         ) : (
@@ -106,7 +114,7 @@ export default async function HadithItemPage({ params }: Props) {
           </span>
         )}
         {next ? (
-          <Link href={`/hadith/${collection.slug}/${next.number}`}>
+          <Link href={`/hadith/${collection.slug}/${next.number}`} className="nav-pill">
             {t("nextHadith")}
           </Link>
         ) : (
@@ -117,8 +125,10 @@ export default async function HadithItemPage({ params }: Props) {
       </nav>
 
       <p>
-        <Link href={`/hadith/${collection.slug}`}>{t("backCollection")}</Link>
+        <Link href={`/hadith/${collection.slug}`} className="nav-pill">
+          {t("backCollection")}
+        </Link>
       </p>
-    </div>
+    </ArabyaHubPage>
   );
 }

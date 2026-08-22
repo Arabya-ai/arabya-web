@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
 import { toArabicNumerals } from "@/lib/format";
 import { getAsmaByNumber } from "@/lib/asma";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = { params: Promise<{ locale: string; n: string }> };
 
@@ -42,7 +43,7 @@ export async function generateStaticParams() {
 export default async function AsmaDetailPage({ params }: Props) {
   const { locale, n } = await params;
   const t = await getTranslations("Asma");
-  const tNav = await getTranslations("Nav");
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
   const num = Number(n);
   if (!Number.isInteger(num) || num < 1 || num > 99) notFound();
   const entry = await getAsmaByNumber(num);
@@ -65,21 +66,26 @@ export default async function AsmaDetailPage({ params }: Props) {
       (entry.detailsEn ? plainEn(entry.detailsEn) : "");
 
   return (
-    <div className="shell page-block asma-detail">
-      <nav className="surah-nav" aria-label={t("navAria")}>
-        <Link href="/asma" className="nav-pill">
-          {t("backAll")}
-        </Link>
-        <Link href="/" className="nav-pill">
-          {tNav("index")}
-        </Link>
-      </nav>
-
-      <header className="asma-detail-head">
-        <p className="asma-detail-num">{numberLabel}</p>
-        <h1>{entry.nameAr}</h1>
-        <p className="asma-detail-trans">{entry.transliteration}</p>
-      </header>
+    <ArabyaHubPage className="asma-detail">
+      <ArabyaHubHero
+        icon="asma"
+        iconLabel={entry.nameAr}
+        kicker={t("title")}
+        title={entry.nameAr}
+        lead={
+          <>
+            <span className="asma-detail-num">{numberLabel}</span>
+            {entry.transliteration ? (
+              <span className="asma-detail-trans"> · {entry.transliteration}</span>
+            ) : null}
+          </>
+        }
+        nav={[
+          { href: "/asma", label: t("backAll") },
+          { href: "/adhkar", label: th("items.adhkar.title") },
+          { href: "/", label: th("backHome") },
+        ]}
+      />
 
       <section className="asma-detail-card" aria-labelledby="asma-meaning">
         <h2 id="asma-meaning">{t("meaningHeading")}</h2>
@@ -149,6 +155,6 @@ export default async function AsmaDetailPage({ params }: Props) {
           <span />
         )}
       </nav>
-    </div>
+    </ArabyaHubPage>
   );
 }

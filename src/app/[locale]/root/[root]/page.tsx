@@ -10,6 +10,7 @@ import { RootOccurrencesList } from "@/components/RootOccurrencesList";
 import { PageShareButton } from "@/components/PageShareButton";
 import { buildSocialMetadata } from "@/lib/og-meta";
 import { shareOgImageUrl } from "@/lib/share";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = { params: Promise<{ locale: string; root: string }> };
 
@@ -37,7 +38,7 @@ export default async function RootPage({ params }: Props) {
   const { locale, root } = await params;
   const decoded = decodeURIComponent(root);
   const t = await getTranslations("Roots");
-  const tNav = await getTranslations("Nav");
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
   const entry = await getRootEntry(decoded);
   if (!entry) notFound();
 
@@ -69,33 +70,31 @@ export default async function RootPage({ params }: Props) {
   const lemmas = summarizeRootLemmas(entry, senseFile?.senses);
 
   return (
-    <div className="shell page-block root-page">
-      <nav className="surah-nav" aria-label={t("detailNavAria")}>
-        <Link href="/roots" className="nav-pill">
-          {t("backRoots")}
-        </Link>
-        <Link href="/" className="nav-pill">
-          {tNav("index")}
-        </Link>
-      </nav>
-
-      <h1>{t("rootTitle", { root: entry.root })}</h1>
-      <p className="root-meta">
-        {t("occurrences", { count: formatCount(entry.count, locale) })}
-      </p>
-      <div className="root-share-row">
-        <PageShareButton
-          title={t("shareTitle", { root: entry.root })}
-          text={t("shareText", {
-            root: entry.root,
-            count: formatCount(entry.count, locale),
-          })}
-          path={`/root/${encodeURIComponent(entry.root)}?share=root`}
-          kind="root"
-          label={t("shareLabel")}
-          hint={t("shareHint")}
-        />
-      </div>
+    <ArabyaHubPage className="root-page">
+      <ArabyaHubHero
+        icon="roots"
+        iconLabel={entry.root}
+        title={t("rootTitle", { root: entry.root })}
+        lead={t("occurrences", { count: formatCount(entry.count, locale) })}
+        nav={[
+          { href: "/roots", label: t("backRoots") },
+          { href: "/mushaf/1", label: th("items.mushaf.title") },
+          { href: "/", label: th("backHome") },
+        ]}
+        actions={
+          <PageShareButton
+            title={t("shareTitle", { root: entry.root })}
+            text={t("shareText", {
+              root: entry.root,
+              count: formatCount(entry.count, locale),
+            })}
+            path={`/root/${encodeURIComponent(entry.root)}?share=root`}
+            kind="root"
+            label={t("shareLabel")}
+            hint={t("shareHint")}
+          />
+        }
+      />
 
       {lemmas.length ? (
         <section className="root-lemmas" aria-labelledby="root-lemmas-h">
@@ -137,6 +136,6 @@ export default async function RootPage({ params }: Props) {
           pageOf={pageOf}
         />
       </section>
-    </div>
+    </ArabyaHubPage>
   );
 }

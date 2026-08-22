@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { getBookMeta } from "@/lib/books";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -17,20 +18,36 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+function statusKey(
+  status: string | undefined,
+): "statusReady" | "statusReview" | "statusAwaiting" {
+  if (status === "ready") return "statusReady";
+  if (status === "review") return "statusReview";
+  return "statusAwaiting";
+}
+
 export default async function BookViewerPage({ params }: Props) {
   const { slug } = await params;
-  const t = await getTranslations("Books");
+  const t = await getTranslations({ locale, namespace: "Books" });
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
   const book = await getBookMeta(slug);
   if (!book) notFound();
 
+  const bookTitle = book.title || book.label;
+
   return (
-    <div className="shell page-block">
-      <nav className="surah-nav">
-        <Link href="/books" className="nav-pill">
-          {t("backCatalog")}
-        </Link>
-      </nav>
-      <h1>{book.title || book.label}</h1>
+    <ArabyaHubPage className="books-detail-page">
+      <ArabyaHubHero
+        icon="books"
+        iconLabel={bookTitle}
+        kicker={t(statusKey(book.status))}
+        title={bookTitle}
+        nav={[
+          { href: "/books", label: t("backCatalog") },
+          { href: "/services", label: th("viewAll") },
+          { href: "/", label: th("backHome") },
+        ]}
+      />
       {book.status !== "ready" ? (
         <div className="book-awaiting">
           <p>
@@ -43,6 +60,6 @@ export default async function BookViewerPage({ params }: Props) {
       ) : (
         <p>{t("readyPlaceholder")}</p>
       )}
-    </div>
+    </ArabyaHubPage>
   );
 }
