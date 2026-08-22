@@ -1342,7 +1342,8 @@ const workerHandler = {
           .run();
 
         if (decision === "approved") {
-          if (isProtectedAdmin(req.userId, env) && toRole !== "admin") {
+          // Role requests never grant admin; block demoting env bootstrap super-admins.
+          if (isProtectedAdmin(req.userId, env)) {
             return forbidden("cannot_change_protected_admin");
           }
           const existing = await env.DB.prepare(
