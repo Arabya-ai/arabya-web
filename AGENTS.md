@@ -7,8 +7,9 @@
 ### Hosting (hard)
 - **Production = Contabo VPS only** (PM2 + Nginx). Domains `arabya.org` / `arabyaai.com`.
 - **Never deploy or ask the owner to use Vercel.** A red Vercel GitHub check is a leftover GitHub App — not Contabo failure. One-time owner steps: `docs/platform/disconnect-vercel-github-ar.md`.
+- **Workers Builds: arabya-sync** (Cloudflare) is optional/legacy sync. Production account sync is Contabo SQLite. Red Workers Builds usually means dashboard **Root directory** is not `workers/arabya-sync` — owner steps: `docs/platform/cloudflare-arabya-sync-builds-ar.md`. Do not treat it as Contabo outage.
 - After merge to `main`: Contabo deploy via Action **Deploy Contabo** or on the server: `cd /var/www/arabya-web && bash scripts/contabo-deploy.sh` (runs `npm ci`, `build`, `contabo-ensure-dbs.sh`, PM2 restart).
-- Meaningful workflows: **CI** + **Deploy Contabo** only (see `.github/workflows/`).
+- Meaningful workflows: **CI** + **Deploy Contabo** only (see `.github/workflows/`). Workers Builds is secondary.
 
 ### Commands
 - `npm install` — dependencies

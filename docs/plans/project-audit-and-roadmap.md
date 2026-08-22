@@ -244,6 +244,7 @@ flowchart LR
 |-------|--------|
 | `docs/plans/lughawi-model-plan-ar.md` | خطة لغوي الذكي (تخطيط) |
 | `docs/plans/ops-r7-r8-r9-r2-playbook-ar.md` | R7/R8/R9/R2 خطوات |
+| `docs/platform/cloudflare-arabya-sync-builds-ar.md` | إصلاح Workers Builds الحمراء (مسار `workers/arabya-sync`) |
 | `docs/plans/mukhtat-arabya-spec-ar.md` | مواصفات مخطط |
 | `docs/plans/i18n-phase2-audit-ar.md` | تدقيق i18n |
 | `docs/plans/arabya-contabo-recovery-constitution-ar.md` | Contabo · لغوي |
