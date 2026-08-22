@@ -9,7 +9,7 @@ main = "src/index.ts"
 compatibility_date = "2026-07-01"
 
 [vars]
-ARABYA_ADMIN_EMAILS = "egywebdev@gmail.com,arabyaaicom@gmail.com"
+# Set ARABYA_ADMIN_EMAILS in Cloudflare dashboard (Secrets / Variables) — not in Git.
 
 [[d1_databases]]
 binding = "DB"

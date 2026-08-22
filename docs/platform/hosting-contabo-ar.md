@@ -65,6 +65,31 @@ cd /var/www/arabya-web && bash scripts/contabo-deploy.sh
 cd /var/www/arabya-web && bash scripts/contabo-recover-web.sh
 ```
 
+### حماية السيرفر (بوابة A — آمنة للتكرار)
+
+```bash
+cd /var/www/arabya-web && bash scripts/contabo-gate-a-harden.sh
+```
+
+- `.env` بصلاحية **600** (لا يقرأه مستأجر آخر على VPS مشترك)
+- منفذ **8092** مغلق للعامة؛ NLP على `127.0.0.1` فقط — لغوي يعمل عبر Next
+
+### نسخ SQLite احتياطي (يومي اختياري)
+
+```bash
+cd /var/www/arabya-web && bash scripts/contabo-backup-sqlite.sh
+```
+
+ملفات مضغوطة في `/var/lib/arabya/backups/` — `user-data` + `arabya-nlp` مع WAL-safe backup.
+
+### إعادة تشغيل المنصة (طوارئ)
+
+```bash
+cd /var/www/arabya-web && bash scripts/restart-platform.sh
+```
+
+يعيد NLP + sidecar + `arabya-web` عبر PM2 — **بدون** `npx next` و**بدون** Ollama.
+
 - Google OAuth: `docs/platform/contabo-google-and-updates-ar.md`
 - PM2: `deploy/contabo/ecosystem.config.cjs`
 - Bootstrap أول مرة: `scripts/contabo-bootstrap.sh`
