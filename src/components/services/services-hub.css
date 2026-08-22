@@ -886,9 +886,37 @@
   border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--line));
 }
 
-.home-services__grid-wrap {
-  margin-top: 0.5rem;
+.info-page .info-hero {
+  margin-bottom: 1.75rem;
+  padding: 1.35rem 1.4rem 1.45rem;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--brand) 16%, var(--line));
+  background:
+    radial-gradient(
+      120% 90% at 100% 0%,
+      color-mix(in srgb, var(--brand-soft) 88%, transparent),
+      transparent 55%
+    ),
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--brand-soft) 55%, var(--surface)),
+      var(--surface) 62%
+    );
 }
+
+.info-page .info-kicker {
+  color: var(--brand-deep);
+  font-weight: 700;
+}
+
+.info-page .info-pillar,
+.info-page .info-feature-block {
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
+  background: color-mix(in srgb, var(--surface) 96%, var(--brand-soft));
+  padding: 1rem 1.05rem;
+}
+
 
 @media (max-width: 720px) {
   .adv-search__filters,

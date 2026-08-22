@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
 import { HadithSearchBox } from "@/components/HadithSearchBox";
 import { listHadithCollections } from "@/lib/hadith";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -19,23 +20,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function HadithHubPage({ params }: Props) {
   const locale = await resolveLocale(params);
   const t = await getTranslations({ locale, namespace: "Hadith" });
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
   const collections = await listHadithCollections();
 
   return (
-    <div className="shell page-block hadith-page">
-      <header className="adhkar-hero">
-        <p className="adhkar-kicker">{t("kicker")}</p>
-        <h1>{t("title")}</h1>
-        <p>{t("lead")}</p>
-        <div className="home-index-ornament" aria-hidden="true">
-          <span className="home-index-ornament-mark" />
-        </div>
-      </header>
+    <ArabyaHubPage className="hadith-page">
+      <ArabyaHubHero
+        icon="hadith"
+        iconLabel={t("title")}
+        kicker={t("kicker")}
+        title={t("title")}
+        lead={t("lead")}
+        nav={[
+          { href: "/", label: th("backHome") },
+          { href: "/services", label: th("viewAll") },
+          { href: "/heritage", label: th("items.heritage.title") },
+        ]}
+      />
 
       <HadithSearchBox />
 
       <section aria-labelledby="hadith-collections-h">
-        <h2 id="hadith-collections-h">{t("collectionsTitle")}</h2>
+        <h2 id="hadith-collections-h" className="svc-group__title">
+          {t("collectionsTitle")}
+        </h2>
         <ul className="hadith-collection-grid">
           {collections.map((c) => (
             <li key={c.slug}>
@@ -48,21 +56,11 @@ export default async function HadithHubPage({ params }: Props) {
                     ? c.descriptionEn
                     : c.descriptionAr}
                 </p>
-                <span>
-                  {t("itemCount", { count: c.itemCount ?? 0 })}
-                </span>
               </Link>
             </li>
           ))}
         </ul>
       </section>
-
-      <p className="layer-hint">{t("provenance")}</p>
-      <p>
-        <Link href="/heritage">{t("heritageLink")}</Link>
-        {" · "}
-        <Link href="/">{t("indexLink")}</Link>
-      </p>
-    </div>
+    </ArabyaHubPage>
   );
 }

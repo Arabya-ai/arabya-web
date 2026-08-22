@@ -76,6 +76,15 @@
     "openMushaf": "Open the mushaf",
     "continueReading": "Continue reading from page {page}"
   },
+  "HomeServices": {
+    "kicker": "Platform services",
+    "title": "Arabya services",
+    "lead": "Quick paths to reading, worship, knowledge, and creation — the same cards as our Services page.",
+    "viewAll": "All services",
+    "featuredAria": "Favorite services",
+    "favoriteBadge": "Favorite",
+    "allHeading": "All services"
+  },
   "Theme": {
     "light": "Light",
     "dark": "Dark",
