@@ -26,6 +26,9 @@
   "exclude": [
     "node_modules",
     "workers",
+    "vendor",
+    ".cursor/skills",
+    ".agents/skills",
     "vitest.config.ts",
     "vitest.setup.ts",
     "src/**/*.test.ts",
