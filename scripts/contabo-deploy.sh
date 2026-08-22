@@ -433,6 +433,27 @@ if [[ "$NLP_VENV_OK" == "1" && -f scripts/contabo-arabya-nlp.sh && "${CONTABO_EN
   bash scripts/contabo-arabya-nlp.sh || true
 fi
 
+echo "==> Super-admin allowlist (CRM gate — Contabo .env)"
+count_admin_emails() {
+  local line="$1"
+  line="${line#ARABYA_ADMIN_EMAILS=}"
+  line="${line#\"}"; line="${line%\"}"
+  line="${line#\'}"; line="${line%\'}"
+  if [[ -z "${line// /}" ]]; then echo 0; return; fi
+  # comma/semicolon/whitespace separated
+  echo "$line" | tr ',;' ' ' | awk '{for(i=1;i<=NF;i++) if($i!="") c++} END{print c+0}'
+}
+for envfile in .env.production.local .env.local .env; do
+  if [[ -f "$APP_DIR/$envfile" ]]; then
+    admins_line="$(grep -E '^ARABYA_ADMIN_EMAILS=' "$APP_DIR/$envfile" 2>/dev/null | tail -1 || true)"
+    if [[ -n "$admins_line" ]]; then
+      n="$(count_admin_emails "$admins_line")"
+      echo "    $envfile: ARABYA_ADMIN_EMAILS → $n email(s)"
+    fi
+  fi
+done
+echo "    CRM /admin requires every super-admin email in Contabo ARABYA_ADMIN_EMAILS (Worker secret alone is not enough)."
+
 echo "==> Restart PM2 arabya-web (only if tree can run next start)"
 if ! contabo_safe_restart_web; then
   echo "ERROR: deploy aborted — arabya-web left stopped to avoid crash-loop 503."

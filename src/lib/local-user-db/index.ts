@@ -24,7 +24,10 @@ import {
   type TahfeezPortfolioStats,
 } from "@/lib/tahfeez/types";
 import {
+  isEnvBootstrapSuperAdmin,
   isSuperAdminEmail,
+  parseAdminEmails,
+  registerSuperAdminUiAllowlist,
   type UserRole,
 } from "@/lib/roles";
 
@@ -36,6 +39,8 @@ const SCHEMA_SQL = fs.readFileSync(
 );
 
 const SITE_APPEARANCE_KEY = "appearance";
+/** CRM-promoted super-admins (JSON string array) — complements ARABYA_ADMIN_EMAILS. */
+const SUPER_ADMIN_EMAILS_KEY = "super_admin_emails";
 const DEFAULT_APPEARANCE: CloudSiteAppearance = {
   footerCreditAr: "© {year} منصة عربية · جميع الحقوق محفوظة لكل مسلم",
   footerCreditEn: "© {year} Arabya · All rights reserved for every Muslim",
@@ -138,6 +143,87 @@ function normalizeRole(role: unknown): UserRole {
 function isProtectedAdmin(email: string): boolean {
   return isSuperAdminEmail(email);
 }
+
+/** Emails promoted to super-admin from CRM (not Contabo .env). */
+export function readUiSuperAdminEmails(): string[] {
+  if (!isLocalUserSyncEnabled()) return [];
+  try {
+    const db = getUserDb();
+    const row = db
+      .prepare(`SELECT value FROM site_settings WHERE key = ?`)
+      .get(SUPER_ADMIN_EMAILS_KEY) as { value: string } | undefined;
+    if (!row?.value?.trim()) return [];
+    try {
+      const parsed = JSON.parse(row.value) as unknown;
+      if (Array.isArray(parsed)) {
+        return [
+          ...new Set(
+            parsed
+              .map((e) => String(e || "").trim().toLowerCase())
+              .filter((e) => e.includes("@")),
+          ),
+        ];
+      }
+    } catch {
+      /* fall through to comma-separated */
+    }
+    return parseAdminEmails(row.value);
+  } catch {
+    return [];
+  }
+}
+
+function writeUiSuperAdminEmails(
+  db: SqliteDb,
+  emails: string[],
+  actorEmail: string,
+) {
+  const unique = [
+    ...new Set(
+      emails
+        .map((e) => e.trim().toLowerCase())
+        .filter((e) => e.includes("@")),
+    ),
+  ];
+  const now = Date.now();
+  db.prepare(
+    `INSERT INTO site_settings (key, value, updated_at, updated_by)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(key) DO UPDATE SET
+       value = excluded.value,
+       updated_at = excluded.updated_at,
+       updated_by = excluded.updated_by`,
+  ).run(
+    SUPER_ADMIN_EMAILS_KEY,
+    JSON.stringify(unique),
+    now,
+    actorEmail.trim().toLowerCase(),
+  );
+}
+
+export function grantUiSuperAdmin(email: string, actorEmail: string): void {
+  const id = userIdFromEmail(email);
+  if (!id.includes("@")) return;
+  const db = getUserDb();
+  const current = readUiSuperAdminEmails();
+  if (current.includes(id)) return;
+  writeUiSuperAdminEmails(db, [...current, id], actorEmail);
+}
+
+export function revokeUiSuperAdmin(email: string, actorEmail: string): void {
+  const id = userIdFromEmail(email);
+  if (isEnvBootstrapSuperAdmin(id)) {
+    throw new Error("cannot_demote_env_super_admin");
+  }
+  const db = getUserDb();
+  writeUiSuperAdminEmails(
+    db,
+    readUiSuperAdminEmails().filter((e) => e !== id),
+    actorEmail,
+  );
+}
+
+registerSuperAdminUiAllowlist(() => readUiSuperAdminEmails());
 
 function upsertUserProfile(
   db: SqliteDb,
@@ -835,14 +921,8 @@ export function localAdminSetRole(
   if (!isSuperAdminEmail(actorEmail)) {
     throw new Error("super_admin_required");
   }
-  if (toRole === "admin" && !isSuperAdminEmail(targetId)) {
-    throw new Error("admin_reserved_for_super_admin");
-  }
-  if (isProtectedAdmin(targetId) && toRole !== "admin") {
-    throw new Error("cannot_change_protected_admin");
-  }
-  if (isSuperAdminEmail(targetId) && toRole !== "admin") {
-    throw new Error("cannot_demote_super_admin");
+  if (isEnvBootstrapSuperAdmin(targetId) && toRole !== "admin") {
+    throw new Error("cannot_demote_env_super_admin");
   }
   if (
     userIdFromEmail(actorEmail) === targetId &&
@@ -858,6 +938,13 @@ export function localAdminSetRole(
 
   const fromRole = normalizeRole(existing.role);
   if (fromRole === toRole) return { role: toRole, fromRole, unchanged: true };
+
+  // Persist CRM allowlist before role write so session merge sees the email.
+  if (toRole === "admin") {
+    grantUiSuperAdmin(targetId, actorEmail);
+  } else if (fromRole === "admin" || isSuperAdminEmail(targetId)) {
+    revokeUiSuperAdmin(targetId, actorEmail);
+  }
 
   const now = Date.now();
   db.prepare(`UPDATE users SET role = ?, updated_at = ? WHERE id = ?`).run(

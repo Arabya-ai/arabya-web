@@ -24,26 +24,58 @@
 ### ماذا تغيّر؟
 أُزيلت عناوين الأدمن من Git في #186. المتغير `ARABYA_ADMIN_EMAILS` يجب أن يكون **Secret** في Cloudflare — ليس في المستودع.
 
-### خطواتك (مرّة واحدة — ~10 دقائق)
+### ⚠️ مكانان — لا يكفي Worker وحده
 
-1. افتح: https://dash.cloudflare.com  
-2. اختر الحساب → **Workers & Pages**  
-3. افتح Worker **`arabya-sync`**  
-4. **Settings** → **Variables and Secrets**  
-5. تحت **Secrets** (ليس Variables العادية):
-   - **Add secret**
-   - الاسم: `ARABYA_ADMIN_EMAILS`
-   - القيمة: قائمة بريدك/فريق الأدمن مفصولة بفاصلة، مثال:  
-     `you@gmail.com,editor@gmail.com`
-6. **Deploy** أو **Save** — تأكد أن النسخة المنشورة تحمل السر  
-7. **تحقق:** من `/admin` سجّل دخول Google — حسابك يظهر كـ admin في CRM
+| المكان | الغرض |
+|--------|--------|
+| **Contabo** `.env.production.local` → `ARABYA_ADMIN_EMAILS` | **إظهار CRM** في الموقع + جلسة الدخول |
+| **Cloudflare Worker** `arabya-sync` secret | مزامنة D1/Worker APIs (إن كانت مفعّلة) |
+
+**خطأ شائع:** إضافة البريد في Cloudflare فقط → CRM **لا يظهر** لبقية الأدمنز.
+
+**بعد أول سوبر أدمن:** رقِّ الباقين من `/admin/users` → «سوبر أدمن» (بدون تعديل `.env`).
+
+### خطواتك (مرّة واحدة — ~15 دقائق)
+
+#### أ) Contabo — **إلزامي لظهور CRM**
+
+1. PuTTY → السيرفر  
+2. `nano /var/www/arabya-web/.env.production.local`  
+3. سطر واحد (فاصلة إنجليزية `,` بين كل بريد — **نفس** بريد Google لكل شخص):
+
+```bash
+ARABYA_ADMIN_EMAILS=you@gmail.com,editor@gmail.com,third@gmail.com
+```
+
+4. انسخ للملف الذي يقرأه PM2:
+
+```bash
+cd /var/www/arabya-web
+cp -f .env.production.local .env.local
+grep -q '^ARABYA_ADMIN_EMAILS=' .env 2>/dev/null || \
+  grep '^ARABYA_ADMIN_EMAILS=' .env.production.local >> .env
+pm2 restart arabya-web --update-env
+```
+
+5. **تحقق:** `/admin/settings` → تبويب الخدمات → «عدد عناوين البريد في ARABYA_ADMIN_EMAILS» ≥ عدد الأدمنز  
+6. كل أدمن: **خروج ثم دخول Google** — يظهر «CRM الأعضاء» في القائمة
+
+#### ب) Cloudflare Worker (إن كنت تستخدم arabya-sync)
+
+1. https://dash.cloudflare.com  
+2. **Workers & Pages** → **`arabya-sync`**  
+3. **Settings** → **Variables and Secrets** → **Secrets**  
+4. الاسم: `ARABYA_ADMIN_EMAILS` — **نفس القائمة** كـ Contabo  
+5. **Save / Deploy**
 
 ### مرجع الكود
 `workers/arabya-sync/wrangler.toml` — تعليق فقط، بدون قيم.
 
 ### إن فشل التحقق
-- تأكد أن البريد **نفس** بريد Google OAuth  
-- راجع Logs للWorker في Cloudflare → **Logs** → Real-time
+- تأكد أن البريد **نفس** بريد Google OAuth (حساب @gmail.com الذي سجّل به)  
+- CRM **لا** يظهر لمن رُقّي إلى «مدير» من الواجهة فقط — يجب أن يكون في `ARABYA_ADMIN_EMAILS`  
+- راجع `/admin/settings` → عدد البريد في القائمة  
+- راجع Logs للWorker في Cloudflare → **Logs** → Real-time (إن استخدمت Worker)
 
 ---
 

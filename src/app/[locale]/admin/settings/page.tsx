@@ -8,6 +8,7 @@ import {
 import { auth } from "@/auth";
 import { AdminAppearancePanel } from "@/components/dashboard/AdminAppearancePanel";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { AdminSuperAdminDiagnostics } from "@/components/dashboard/AdminSuperAdminDiagnostics";
 import { canAccessAdmin } from "@/lib/roles";
 import { getAuthEnvDiagnostics, isGoogleAuthConfigured } from "@/auth";
 import { isCloudSyncConfigured } from "@/lib/cloud-sync";
@@ -73,6 +74,18 @@ export default async function AdminSettingsPage({ params, searchParams }: Props)
               </li>
               <li dir="ltr">AUTH_URL: {authDiag.authUrl}</li>
             </ul>
+            <AdminSuperAdminDiagnostics
+              sessionEmail={session.user.email}
+              labels={{
+                title: t("superAdminDiagTitle"),
+                count: t("superAdminDiagCount"),
+                yoursInList: t("superAdminDiagYoursInList"),
+                yoursMissing: t("superAdminDiagYoursMissing"),
+                notConfigured: t("superAdminDiagNotConfigured"),
+                crmGateNote: t("superAdminDiagCrmGate"),
+                reLoginHint: t("superAdminDiagReLogin"),
+              }}
+            />
             <p className="dash-muted">{t("superAdminNote")}</p>
             <hr className="my-4 border-[var(--line)]" />
             <h3 className="mb-2">الإعدادات الافتراضية لمواقيت الصلاة</h3>

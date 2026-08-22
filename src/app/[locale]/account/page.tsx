@@ -12,7 +12,8 @@ import {
   resolveLocale,
 } from "@/i18n/locale-params";
 import { isCloudSyncConfigured } from "@/lib/cloud-sync";
-import { canAccessAdmin, canAccessEditorialTools } from "@/lib/roles";
+import { AdminCrmAccessHint } from "@/components/dashboard/AdminCrmAccessHint";
+import { canAccessAdmin, canAccessEditorialTools, type UserRole } from "@/lib/roles";
 import { ArabyaPanel } from "@/components/ui/ArabyaPanel";
 import { planLabel } from "@/lib/plans";
 import type { AppLocale } from "@/lib/plans";
@@ -40,7 +41,7 @@ export default async function AccountPage({ params }: Props) {
   if (!user) redirectLocalized("/login", locale);
 
   const t = await getTranslations("Account");
-  const role = user.role ?? "user";
+  const role = (user.role ?? "member") as UserRole;
   const name = user.name || t("defaultName");
   const syncReady = isCloudSyncConfigured();
 
@@ -102,6 +103,17 @@ export default async function AccountPage({ params }: Props) {
             <Link href="/favorites">{t("favorites")}</Link>
           </p>
         </ArabyaPanel>
+
+        <AdminCrmAccessHint
+          role={role}
+          sessionEmail={user.email}
+          labels={{
+            title: t("crmAccessHintTitle"),
+            editorNote: t("crmAccessHintEditor"),
+            envMissing: t("crmAccessHintEnvMissing"),
+            reLoginHint: t("crmAccessHintReLogin"),
+          }}
+        />
 
         <ArabyaPanel legacyDash title={t("personalTitle")}>
           <p className="dash-muted" dir="ltr">
