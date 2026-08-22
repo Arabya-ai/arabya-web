@@ -9,6 +9,7 @@ import {
   canExportUnlimitedStudioAyahs,
   dailyVideoExportLimit,
   getSuperAdminEmails,
+  getSuperAdminEnvDiagnostics,
   isSuperAdminEmail,
   mergeRoleWithEnvAdmin,
   normalizeUserRole,
@@ -36,6 +37,21 @@ describe("parseAdminEmails", () => {
       "b@y.com",
       "c@z.com",
     ]);
+  });
+});
+
+describe("getSuperAdminEnvDiagnostics", () => {
+  it("counts configured emails without exposing them", () => {
+    const diag = getSuperAdminEnvDiagnostics(SUPER_A);
+    expect(diag.configuredCount).toBe(2);
+    expect(diag.configured).toBe(true);
+    expect(diag.currentEmailInList).toBe(true);
+    expect(diag).not.toHaveProperty("emails");
+  });
+
+  it("reports when session email is not in allowlist", () => {
+    const diag = getSuperAdminEnvDiagnostics("other@x.com");
+    expect(diag.currentEmailInList).toBe(false);
   });
 });
 

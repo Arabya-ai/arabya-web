@@ -19,6 +19,23 @@ export function getSuperAdminEmails(): string[] {
   return parseAdminEmails(process.env.ARABYA_ADMIN_EMAILS);
 }
 
+/** Safe diagnostics for admin settings — no raw emails in output. */
+export function getSuperAdminEnvDiagnostics(
+  sessionEmail?: string | null,
+): {
+  configured: boolean;
+  configuredCount: number;
+  currentEmailInList: boolean;
+} {
+  const emails = getSuperAdminEmails();
+  const normalized = sessionEmail?.trim().toLowerCase() || "";
+  return {
+    configured: emails.length > 0,
+    configuredCount: emails.length,
+    currentEmailInList: normalized ? emails.includes(normalized) : false,
+  };
+}
+
 /**
  * @deprecated Always empty — use `getSuperAdminEmails()` / `ARABYA_ADMIN_EMAILS`.
  * Kept so older imports do not crash; do not put real emails here.
