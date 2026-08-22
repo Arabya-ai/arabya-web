@@ -8,6 +8,7 @@ import {
   listHadithCollections,
   paginateHadithItems,
 } from "@/lib/hadith";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = {
   params: Promise<{ locale: string; collection: string }>;
@@ -42,35 +43,43 @@ export default async function HadithCollectionPage({
   const { collection: slug } = await params;
   const sp = await searchParams;
   const t = await getTranslations({ locale, namespace: "Hadith" });
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
   const collection = await getHadithCollection(slug);
   if (!collection) notFound();
 
   const pageNum = Math.max(1, Number(sp.page) || 1);
   const page = paginateHadithItems(collection.items, pageNum, 40);
   const title = locale === "en" ? collection.titleEn : collection.titleAr;
+  const description =
+    locale === "en" ? collection.descriptionEn : collection.descriptionAr;
+  const countLine =
+    t("itemCount", { count: page.total }) +
+    (page.totalPages > 1
+      ? ` · ${t("pageOf", { page: page.page, total: page.totalPages })}`
+      : "");
 
   return (
-    <div className="shell page-block hadith-page">
-      <nav className="library-breadcrumbs" aria-label="Breadcrumb">
-        <Link href="/">{t("indexLink")}</Link>
-        <span aria-hidden>/</span>
-        <Link href="/hadith">{t("title")}</Link>
-        <span aria-hidden>/</span>
-        <span aria-current="page">{title}</span>
-      </nav>
-
-      <h1>{title}</h1>
-      <p className="layer-hint">
-        {locale === "en"
-          ? collection.descriptionEn
-          : collection.descriptionAr}
-      </p>
-      <p className="hadith-count">
-        {t("itemCount", { count: page.total })}
-        {page.totalPages > 1
-          ? ` · ${t("pageOf", { page: page.page, total: page.totalPages })}`
-          : null}
-      </p>
+    <ArabyaHubPage className="hadith-page">
+      <ArabyaHubHero
+        icon="hadith"
+        iconLabel={title}
+        title={title}
+        lead={
+          description ? (
+            <>
+              {description}
+              <span className="hadith-count"> — {countLine}</span>
+            </>
+          ) : (
+            countLine
+          )
+        }
+        nav={[
+          { href: "/", label: th("backHome") },
+          { href: "/hadith", label: t("title") },
+          { href: "/services", label: th("viewAll") },
+        ]}
+      />
 
       <ol className="hadith-item-list" start={(page.page - 1) * page.pageSize + 1}>
         {page.items.map((item) => (
@@ -110,6 +119,6 @@ export default async function HadithCollectionPage({
           ) : null}
         </nav>
       ) : null}
-    </div>
+    </ArabyaHubPage>
   );
 }

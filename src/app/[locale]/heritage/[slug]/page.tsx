@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
 import { getHeritageWork, listHeritageWorks } from "@/lib/heritage";
+import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
@@ -29,23 +30,28 @@ export default async function HeritageWorkPage({ params }: Props) {
   const locale = await resolveLocale(params);
   const { slug } = await params;
   const t = await getTranslations({ locale, namespace: "Heritage" });
+  const th = await getTranslations({ locale, namespace: "ServicesHub" });
   const work = await getHeritageWork(slug);
   if (!work) notFound();
 
   const title = locale === "en" ? work.titleEn : work.titleAr;
+  const description =
+    locale === "en" ? work.descriptionEn : work.descriptionAr;
 
   return (
-    <div className="shell page-block heritage-page">
-      <nav className="library-breadcrumbs" aria-label="Breadcrumb">
-        <Link href="/heritage">{t("title")}</Link>
-        <span aria-hidden>/</span>
-        <span aria-current="page">{title}</span>
-      </nav>
-
-      <h1>{title}</h1>
-      <p className="layer-hint">
-        {locale === "en" ? work.descriptionEn : work.descriptionAr}
-      </p>
+    <ArabyaHubPage className="heritage-page">
+      <ArabyaHubHero
+        icon="heritage"
+        iconLabel={title}
+        kicker={t(`kind.${work.kind}` as "kind.poetry")}
+        title={title}
+        lead={description}
+        nav={[
+          { href: "/heritage", label: t("title") },
+          { href: "/hadith", label: th("items.hadith.title") },
+          { href: "/", label: th("backHome") },
+        ]}
+      />
 
       <div className="heritage-passages">
         {work.passages.map((p) => (
@@ -69,8 +75,10 @@ export default async function HeritageWorkPage({ params }: Props) {
 
       <p className="layer-hint">{t("wordLayersSoon")}</p>
       <p>
-        <Link href="/heritage">{t("backHub")}</Link>
+        <Link href="/heritage" className="nav-pill">
+          {t("backHub")}
+        </Link>
       </p>
-    </div>
+    </ArabyaHubPage>
   );
 }
