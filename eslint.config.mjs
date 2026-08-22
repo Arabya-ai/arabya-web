@@ -18,6 +18,9 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "vendor/**",
+      ".cursor/skills/**",
+      ".agents/skills/**",
     ],
   },
   {
