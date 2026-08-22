@@ -120,15 +120,15 @@
 
 | # | البند | لماذا | الإجراء المطلوب |
 |---|--------|--------|-----------------|
-| R1 | **قرار لغوي/Auto** | رسالة صفراء، Ollama في `.env` | 📋 **خطة L0–L6** — `lughawi-model-plan-ar.md` (تنفيذ لاحق) |
-| R2 | **CSP H-03** | `unsafe-inline` ما زال في script-src | 📋 **`ops-r7-r8-r9-r2-playbook-ar.md` §R2** |
+| R1 | **قرار لغوي/Auto** | رسالة صفراء، Ollama | ✅ **محسوم** — Qwen قاضٍ · Ollama نعم · هجين (لا Streamlit prod) — `lughawi-model-plan-ar.md` §9 |
+| R2 | **CSP H-03** | `unsafe-inline` ما زال في script-src | ⏸ **الخطوة 5 مؤجّلة** — R2-A ✅ · R2-B/C لاحقاً — `ops-r7-r8-r9-r2-playbook-ar.md` §الخطوة 5 |
 | R3 | **ESLint** | `Link` غير مستخدم في `study/page.tsx` | ✅ أُزيل 22 Aug |
 | R4 | **تغطية i18n** | المرحلة 2 غير مكتملة رسمياً | ✅ تدقيق + خطة موجات — `i18n-phase2-audit-ar.md` |
 | R5 | **صفحات تفاصيل أخرى** | library، mushaf، studio — خارج Hub | قرار: هل نُدخلها Hub؟ (حالياً **لا**) |
 | R6 | **cron قديم** | أُزيل `cp` البسيط — تأكد backup 03:15 | ✅ فحص 22 Aug — OK |
-| R7 | **wrangler admin emails** | أُزيلت من Git (#186) | 📋 **`ops-r7-r8-r9-r2-playbook-ar.md` §R7** |
-| R8 | **SFTP / Rocket Loader** | Pre-Launch | 📋 **نفس الدليل §R8** |
-| R9 | **Sentry 24h** | مراقبة بشرية | ARABYA-4 ✅ إصلاح؛ ARABYA-2/3 → R8 Rocket Loader |
+| R7 | **wrangler admin emails** | أُزيلت من Git (#186) | ✅ **المالك** — secret في Worker |
+| R8 | **SFTP / Rocket Loader** | Pre-Launch | ✅ Rocket Loader Off · SFTP ⏳ |
+| R9 | **Sentry 24h** | مراقبة بشرية | ARABYA-4 ✅ **`93b94d5`**؛ ARABYA-2/3 → راقب 24h |
 | R10 | **PR #187** | خطة مخطط | ✅ دُمج `f4284be` — Deploy Contabo OK |
 | R11 | **Dependabot #18/#19/#69** | actions bump | ⏸ مؤجّل — اختياري |
 | R12 | **مخطط — مسار URL** | `/mukhtat` | ✅ **مؤكّد من المالك** 22 Aug |
@@ -137,16 +137,17 @@
 
 ## 6) الخطوات القادمة — بالترتيب الموصى به
 
-### ✅ منجز (22 Aug)
-1. ~~دمج PR #187~~ — خطة مخطط في المستودع (`f4284be`)
-2. ~~تأكيد `/mukhtat`~~ — مسار مؤكّد
-3. ~~R3 ESLint~~ — تنظيف `study/page.tsx`
-4. ~~R4 i18n audit~~ — `docs/plans/i18n-phase2-audit-ar.md`
+### ✅ منجز (22 Aug — بعد #191)
+1. ~~دمج PR #191~~ — Sentry ARABYA-4 + playbook + خطة لغوي (`93b94d5`)
+2. ~~R7 secret Worker~~ — المالك
+3. ~~R8 Rocket Loader Off~~ — المالك
+4. ~~Deploy Contabo #191~~ — SHA على `arabya.org`
+5. ~~قرارات لغوي R1~~ — Qwen قاضٍ · Ollama · هجين
 
 ### الآن (أولوية التنفيذ)
-5. **موجة 2-A** — i18n استوديو الفيديو (أكبر فجوة en)
-6. **موجة 2-B** — i18n مكتبة + تسميع
-7. **موجة 2-C** — sync `uiLocale` للحساب
+6. **R9** — مراقبة Sentry 24h (Resolve ARABYA-4 إن توقف)
+7. **موجة L1** — محرر فوري client `/lughawi` (بموافقتك على البدء)
+8. **موجة 2-A** — i18n استوديو الفيديو (parallel)
 
 ### ⏸ مؤجّل (قرار مالك 22 Aug)
 8. **5-A landing مخطط** — صفحة تسويق `/mukhtat` (حتى إشعار آخر)
@@ -250,5 +251,5 @@ flowchart LR
 
 ---
 
-*آخر نشر Contabo مرجعي: merge #188 (`6a91673`). PR #189 على main — راقب CI قبل deploy.*
+*آخر نشر Contabo مرجعي: merge **#191** (`93b94d5`) — Deploy Contabo ✅ 22 Aug. PR #190 (agent-ecosystem eslint) على main.*
 

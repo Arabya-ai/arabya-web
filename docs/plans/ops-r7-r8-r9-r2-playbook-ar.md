@@ -10,10 +10,10 @@
 
 | # | البند | من ينفّذ | خطورة | الحالة |
 |---|--------|---------|--------|--------|
-| **R7** | secrets Cloudflare (wrangler) | **المالك** (لوحة Cloudflare) | متوسطة | ⏳ خطوات أدناه |
-| **R9** | Sentry 24h + إصلاح الأخطاء | الوكيل (كود) + **المالك** (مراقبة) | منخفضة–متوسطة | 🟡 جاري |
-| **R8** | SFTP + Rocket Loader | **المالك** فقط | منخفضة (Pre-Launch) | ⏳ لاحقاً |
-| **R2** | CSP بدون `unsafe-inline` | **وكيل + مالك** على مراحل | **عالية** (صفحة بيضاء) | ⏳ لا تُعجل |
+| **R7** | secrets Cloudflare (wrangler) | **المالك** (لوحة Cloudflare) | متوسطة | ✅ **المالك أكمل** — تحقق وكيل: `/admin` admin CRM |
+| **R9** | Sentry 24h + إصلاح الأخطاء | الوكيل (كود) + **المالك** (مراقبة) | منخفضة–متوسطة | 🟡 **ARABYA-4 منشور** — راقب 24h |
+| **R8** | SFTP + Rocket Loader | **المالك** فقط | منخفضة (Pre-Launch) | ✅ Rocket Loader Off (المالك) · SFTP ⏳ اختياري |
+| **R2** | CSP بدون `unsafe-inline` | **وكيل + مالك** على مراحل | **عالية** (صفحة بيضاء) | ⏸ **الخطوة 5 — مؤجّل** (انظر §الخطوة 5) |
 
 **صلاحية Cloudflare للوكيل:** **لا** — لا يوجد وصول MCP/Token لـ Cloudflare في بيئة الوكيل. كل خطوات R7/R8/R2 في Cloudflare = **من طرفك** بالخطوات المرقّمة؛ الوكيل يجهّز الكود ويختبر Contabo بعد موافقتك.
 
@@ -53,7 +53,7 @@
 
 | ID | الخطأ | المسار | التفسير | الإجراء |
 |----|--------|--------|---------|---------|
-| **ARABYA-4** | `localeCompare` على `undefined` | `/adhkar/duas` | بيانات أذكار/override بدون `categoryAr` | ✅ **إصلاح كود** `localeCompareSafe` |
+| **ARABYA-4** | `localeCompare` على `undefined` | `/adhkar/duas` | بيانات أذكار/override بدون `categoryAr` | ✅ **منشور** `93b94d5` — `localeCompareSafe` |
 | **ARABYA-2** | `Connection closed` | `/:locale` | انقطاع أثناء بث SSR (زائر، bot، أو نشر أثناء الطلب) | مراقبة بعد كل deploy؛ R8 Rocket Loader |
 | **ARABYA-3** | `clientReferenceManifest` | `/contact` | غالباً **Rocket Loader** أو deploy متداخل | R8 أولاً؛ ثم مراقبة |
 
@@ -145,6 +145,33 @@ flowchart TD
 3. **R8 Rocket Loader Off**  
 4. **R9** — 24h مراقبة  
 5. **R2** — فقط بعد استقرار (3) و (4)
+
+---
+
+## الخطوة 5 — R2 CSP (مراجعة 22 Aug — ✅ الحل الصحيح = التأجيل)
+
+**ما طلبته:** التأكد من «حل» الخطوة 5.
+
+**القرار:** الخطوة 5 **ليست** إزالة `unsafe-inline` اليوم — ذلك **يكسر** الموقع (تجربة #157). الحل المعتمد:
+
+| البند | الحالة | ملاحظة |
+|--------|--------|--------|
+| **R2-A** Rocket Loader Off | ✅ (المالك) | يقلل ARABYA-3 (`clientReferenceManifest`) |
+| **R2-B** nonces في middleware | ⏳ لاحقاً | بعد 24h Sentry بدون تصاعد |
+| **R2-C** إزالة `unsafe-inline` | ⏳ لاحقاً | regression على **كل** الصفحات الحرجة |
+| **`unsafe-inline` الآن** | ✅ **يبقى عمداً** | `next.config.ts` — لا تغيير حتى R2-B |
+
+**تحقق وكيل 22 Aug (بعد merge #191):**
+
+| فحص | النتيجة |
+|------|---------|
+| Deploy Contabo | ✅ نجاح — SHA **`93b94d5`** ظاهر في HTML الإنتاج |
+| `/adhkar/duas` | ✅ HTTP 200 — لا `__next_error__` |
+| `/contact` · `/lughawi` · `/mushaf/1` | ✅ HTTP 200 |
+| `POST /api/lughawi/proofread` | ✅ 200 + JSON |
+| `npm run test` | ✅ 417 اختبار |
+
+**مطلوب منك (R9):** Sentry → Issues → 24h — إن توقف ARABYA-4 → Resolve. إن استمر ARABYA-3 → أبلغ الوكيل.
 
 ---
 

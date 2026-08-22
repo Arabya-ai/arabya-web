@@ -16,7 +16,7 @@
 | **لاحقاً** | تنفيذ على **موجات** بعد إغلاق R7/R9 واستقرار Sentry |
 | **المنصة** | دمج داخل **`arabya.org/lughawi`** + **`arabya-nlp` (:8092)** — **ليس** تطبيق Streamlit منفصل على port 80 |
 | **Contabo-first** | القواعد المحلية + NLP sidecar = الأساس؛ HF/GitHub = **تسريع اختياري** |
-| **Ollama** | **opt-in** بموافقة صريحة فقط (RAM/CPU) |
+| **Ollama** | ✅ **معتمد على Contabo** — Tier 3 shadow/cache فقط (نموذج صغير quantized) |
 
 ---
 
@@ -83,7 +83,8 @@
 | 1 | **فصاحة عربية أصيلة** | `inceptionai/jais-30b-chat-v3` | يتطلب **Accept license** يدوياً على HF |
 | 2 | **قواعد والتزام** | `meta-llama/Llama-3.3-70B-Instruct` | Meta license |
 | 3 | **استدلال/تحليل** | `deepseek-ai/DeepSeek-V3` | رخصة DeepSeek |
-| 4 | **القاضي والمدمج** | `Qwen/Qwen2.5-72B-Instruct` | افتراضي — **قرارك:** DeepSeek-R1 كقاضٍ؟ |
+| 4 | **القاضي والمدمج** | `Qwen/Qwen2.5-72B-Instruct` | ✅ **معتمد** — دمج الصياغة العربية النهائية |
+| — | **مقترح استدلال (اختياري P1)** | `deepseek-ai/DeepSeek-R1` | proposer فقط — **ليس** قاضٍ (بطيء + CoT غير مناسب للنص النهائي) |
 
 **مرونة السقوط:** 1–3 نماذج قد تفشل → القاضي يدمج **المتاح فقط**.
 
@@ -200,15 +201,32 @@
 
 ---
 
-## 9) قرارات مطلوبة منك (قبل أي تنفيذ)
+## 9) قرارات المالك — ✅ محسومة (22 Aug 2026)
 
-| # | السؤال | الافتراض في الخطة |
-|---|--------|-------------------|
-| 1 | القاضي: **Qwen** أم **DeepSeek-R1**؟ | Qwen 2.5 72B |
-| 2 | تفعيل **Ollama** على Contabo؟ | لا — حتى Tier 3 |
-| 3 | **4 نماذج** كاملة أم 3 proposers + judge؟ | 4 كما وصفت |
-| 4 | auto-batch سحابي أثناء الكتابة؟ | **لا** — زر «تدقيق عميق» فقط |
-| 5 | multi-account HF rotation؟ | pool أدمن — **ضمن ToS** |
+| # | السؤال | **القرار المعتمد** | السبب التقني |
+|---|--------|-------------------|--------------|
+| 1 | القاضي: **Qwen** أم **DeepSeek-R1**؟ | ✅ **Qwen 2.5 72B Instruct** | القاضي يدمج 3 مسودات إلى **نص عربي مصقول** — Qwen أقوى في العربية والالتزام بالتعليمات. **DeepSeek-R1** = CoT ثقيل وبطيء — مناسب **مقترح** للاستدلال المعقد، لا للصياغة النهائية |
+| 2 | تفعيل **Ollama** على Contabo؟ | ✅ **نعم** (Tier 3 L5) | shadow + cache دلالي؛ `Qwen2.5-1.5B` أو `llama3.1:8b` quantized؛ `timeout=5s` · `nice -n 15` — **لا** 70B على RAM 12GB |
+| 3 | **Streamlit** منفصل أم هجين؟ | ✅ **هجين من البداية** | واجهة الإنتاج = **`/lughawi`** (Next.js) + MoA في **`arabya-nlp` (:8092)** + `/dashboard` المدمج. Streamlit = **localhost فقط** للتجارب (`services/agent-lab` أو `arabya-nlp` optional) — **لا** port 80 عام |
+| 4 | **4 نماذج** كاملة أم 3 proposers + judge؟ | 3 proposers + Qwen judge | Jais + Llama + DeepSeek-V3 → Qwen |
+| 5 | auto-batch سحابي أثناء الكتابة؟ | **لا** | زر «تدقيق عميق» فقط — client-first للـ keystroke |
+| 6 | multi-account HF rotation؟ | pool أدمن — **ضمن ToS** | `/admin/ops` بعد L4 |
+
+### توزيع الأدوار النهائي (MoA)
+
+```text
+Proposers (parallel, 4s timeout each):
+  • inceptionai/jais-30b-chat-v3      — فصاحة عربية
+  • meta-llama/Llama-3.3-70B-Instruct — قواعد وامتثال
+  • deepseek-ai/DeepSeek-V3           — استدلال وتحليل
+  (P1: deepseek-ai/DeepSeek-R1 يحل محل V3 للجمل المعقدة فقط)
+
+Judge (sequential):
+  • Qwen/Qwen2.5-72B-Instruct         — دمج + صياغة نهائية + self-correction اختياري
+
+Shadow (Tier 3, Contabo Ollama):
+  • qwen2.5:1.5b أو llama3.1:8b       — تسجيل + cache — لا يقود MoA السحابي
+```
 
 ---
 
