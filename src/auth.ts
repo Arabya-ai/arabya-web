@@ -74,7 +74,7 @@ export function getAuthEnvDiagnostics() {
   };
 }
 
-const ROLE_REFRESH_MS = 5 * 60 * 1000;
+const ROLE_REFRESH_MS = 60 * 1000;
 
 const googleReady = isGoogleAuthConfigured();
 const e2eReady = isE2eAuthEnabled();

@@ -25,7 +25,7 @@ curl -s http://127.0.0.1:8092/health | python3 -m json.tool
 curl -s http://127.0.0.1:8092/dashboard
 ```
 
-PM2 process name: `arabya-nlp` (bind `0.0.0.0:8092`; health-check via `127.0.0.1:8092`).
+PM2 process name: `arabya-nlp` (bind `127.0.0.1:8092` only; health-check via `127.0.0.1:8092`).
 
 Firewall (Contabo UFW + ServerAvatar inbound TCP 8092):
 

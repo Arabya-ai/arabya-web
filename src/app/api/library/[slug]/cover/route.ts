@@ -15,6 +15,7 @@ export async function GET(_req: Request, { params }: Props) {
   if (!work) return apiError("not_found", 404);
 
   const coverPath = importedCoverPath(slug);
+  if (!coverPath) return apiError("not_found", 404);
   try {
     const buffer = await readFile(coverPath);
     return new NextResponse(buffer, {

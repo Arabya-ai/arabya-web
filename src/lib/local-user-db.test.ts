@@ -4,8 +4,11 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   getUserDb,
+  localAdminBanUser,
+  localAdminDeleteUser,
   localAdminGetUser,
   localAdminListUsers,
+  localAdminReviewRoleRequest,
   localAdminStats,
   localPullSync,
   localPushSync,
@@ -251,5 +254,55 @@ describe("local-user-db sync", () => {
     expect(byUid?.user.email).toBe("hifz@example.com");
     expect(byEmail?.user.email).toBe("hifz@example.com");
     expect(byEmail?.bookmarkCount).toBe(1);
+  });
+});
+
+describe("local-user-db admin actor gates", () => {
+  let tmpDir: string;
+  const prevPath = process.env.ARABYA_USER_DB_PATH;
+  const prevAdmins = process.env.ARABYA_ADMIN_EMAILS;
+  const SUPER = "owner-super@example.com";
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "arabya-user-db-admin-"));
+    process.env.ARABYA_USER_DB_PATH = path.join(tmpDir, "test.sqlite");
+    process.env.ARABYA_ADMIN_EMAILS = SUPER;
+    resetUserDbForTests();
+    getUserDb();
+    localPushSync(
+      { email: "member@example.com", name: "M", image: null },
+      {
+        bookmarks: [],
+        notes: [],
+        study: [],
+        progress: { lastPage: 1, habit: {}, updatedAt: null },
+      },
+    );
+  });
+
+  afterEach(() => {
+    resetUserDbForTests({ deleteFile: true });
+    if (prevPath === undefined) delete process.env.ARABYA_USER_DB_PATH;
+    else process.env.ARABYA_USER_DB_PATH = prevPath;
+    if (prevAdmins === undefined) delete process.env.ARABYA_ADMIN_EMAILS;
+    else process.env.ARABYA_ADMIN_EMAILS = prevAdmins;
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it("rejects ban/delete from non–super-admin actors", () => {
+    expect(() =>
+      localAdminBanUser("editor@example.com", "member@example.com", true),
+    ).toThrow("super_admin_required");
+    expect(() =>
+      localAdminDeleteUser("editor@example.com", "member@example.com"),
+    ).toThrow("super_admin_required");
+    expect(() =>
+      localAdminReviewRoleRequest("editor@example.com", "req_x", "approved"),
+    ).toThrow("super_admin_required");
+  });
+
+  it("allows super-admin to ban a member", () => {
+    const result = localAdminBanUser(SUPER, "member@example.com", true, "test");
+    expect(result.status).toBe("banned");
   });
 });

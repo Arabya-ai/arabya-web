@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { apiError, requestTooLarge } from "@/lib/api-error";
+import {
+  apiError,
+  bodyTextTooLarge,
+  requestTooLarge,
+  utf8ByteLength,
+} from "@/lib/api-error";
 
 describe("apiError", () => {
   it("returns a stable envelope with backward-compatible error alias", async () => {
@@ -39,5 +44,13 @@ describe("requestTooLarge", () => {
     });
     expect(requestTooLarge(missing, 120_000)).toBe(false);
     expect(requestTooLarge(small, 120_000)).toBe(false);
+  });
+});
+
+describe("bodyTextTooLarge", () => {
+  it("counts utf-8 bytes not js string length", () => {
+    expect(utf8ByteLength("أحمد")).toBeGreaterThan(4);
+    expect(bodyTextTooLarge("a".repeat(10), 5)).toBe(true);
+    expect(bodyTextTooLarge("ok", 5)).toBe(false);
   });
 });

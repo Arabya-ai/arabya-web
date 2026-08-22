@@ -4,6 +4,7 @@ import {
   adminReviewRoleRequest,
   isCloudSyncConfigured,
 } from "@/lib/cloud-sync";
+import { canApproveAdminRole } from "@/lib/roles";
 import { enforceRateLimitKey } from "@/lib/rate-limit";
 import { requireAdmin } from "@/lib/require-role";
 
@@ -34,6 +35,12 @@ export async function PATCH(request: Request) {
   if (limited) return limited;
   if (!isCloudSyncConfigured()) {
     return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
+  }
+  if (!canApproveAdminRole(gate.email)) {
+    return NextResponse.json(
+      { ok: false, error: "super_admin_required" },
+      { status: 403 },
+    );
   }
   let body: { requestId?: string; decision?: string; reviewNote?: string };
   try {

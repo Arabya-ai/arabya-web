@@ -1,4 +1,4 @@
-import { getUserDb } from "@/lib/local-user-db";
+import { getUserDb, isLocalUserSyncEnabled } from "@/lib/local-user-db";
 
 const PRAYER_DEFAULTS_KEY = "prayer_defaults_v1";
 
@@ -29,8 +29,10 @@ function sanitizeSchool(raw: unknown): 0 | 1 {
 }
 
 export function readPrayerDefaults(): PrayerDefaults {
-  const db = getUserDb();
+  // Guest qibla/prayer must not depend on a healthy user SQLite.
+  if (!isLocalUserSyncEnabled()) return { ...DEFAULT_PRAYER_DEFAULTS };
   try {
+    const db = getUserDb();
     const row = db
       .prepare(
         `SELECT value, updated_at as updatedAt, updated_by as updatedBy

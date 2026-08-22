@@ -23,8 +23,8 @@ upsert() {
 
 upsert "ARABYA_NLP_URL" "$NLP_URL"
 upsert "ARABYA_NLP_PROOFREAD" "1"
-# Keep FastAPI bind public-on-host but private to VPS loopback for Next
-upsert "ARABYA_NLP_HOST" "0.0.0.0"
+# Localhost bind only — never expose :8092 on the public internet
+upsert "ARABYA_NLP_HOST" "127.0.0.1"
 upsert "ARABYA_NLP_PORT" "8092"
 
 echo "==> Env wired:"

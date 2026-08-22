@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { coverUrlForWork } from "@/lib/library/covers";
-import { getLibraryCatalog, getLibraryWork } from "@/lib/library";
+import {
+  getLibraryCatalog,
+  getLibraryWork,
+  resolveLibraryPdfPath,
+} from "@/lib/library";
 import { generatePdfCoverThumbnail } from "@/lib/library/pdf-cover";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -17,6 +21,12 @@ describe("library catalog", () => {
     expect(work?.pdfUrl).toContain(".pdf");
     expect(work?.coverUrl).toBe("/media/library/covers/al-mukhtasar-al-nahw.png");
     expect(work?.pageCount).toBe(66);
+  });
+
+  it("rejects path-traversal slugs", async () => {
+    expect(await getLibraryWork("../etc/passwd")).toBeNull();
+    expect(resolveLibraryPdfPath("../etc/passwd")).toBeNull();
+    expect(resolveLibraryPdfPath("..")).toBeNull();
   });
 });
 

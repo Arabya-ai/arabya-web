@@ -4,28 +4,38 @@ import {
   getImportedLibraryRoot,
   gitLibraryCoversDir,
   gitLibraryMediaDir,
+  isSafeLibrarySlug,
+  resolveContainedLibraryPath,
 } from "@/lib/library/paths";
 import type { LibraryWorkMeta } from "@/lib/library/types";
 
-export function importedCoverPath(slug: string): string {
-  return path.join(getImportedLibraryRoot(), slug, "cover.png");
+export function importedCoverPath(slug: string): string | null {
+  return resolveContainedLibraryPath(
+    getImportedLibraryRoot(),
+    slug,
+    "cover.png",
+  );
 }
 
-export function gitCoverPath(slug: string): string {
+export function gitCoverPath(slug: string): string | null {
+  if (!isSafeLibrarySlug(slug)) return null;
   return path.join(gitLibraryCoversDir(), `${slug}.png`);
 }
 
-export function gitPdfPath(slug: string): string {
+export function gitPdfPath(slug: string): string | null {
+  if (!isSafeLibrarySlug(slug)) return null;
   return path.join(gitLibraryMediaDir(), `${slug}.pdf`);
 }
 
 export function coverUrlForWork(work: Pick<LibraryWorkMeta, "id" | "coverUrl">): string | undefined {
   if (work.coverUrl) return work.coverUrl;
   try {
-    if (fs.existsSync(importedCoverPath(work.id))) {
+    const imported = importedCoverPath(work.id);
+    if (imported && fs.existsSync(imported)) {
       return `/api/library/${work.id}/cover`;
     }
-    if (fs.existsSync(gitCoverPath(work.id))) {
+    const gitCover = gitCoverPath(work.id);
+    if (gitCover && fs.existsSync(gitCover)) {
       return `/media/library/covers/${work.id}.png`;
     }
   } catch {

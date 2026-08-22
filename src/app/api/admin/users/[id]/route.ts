@@ -95,6 +95,12 @@ export async function POST(request: Request, ctx: Ctx) {
   if (!isCloudSyncConfigured()) {
     return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
   }
+  if (!canApproveAdminRole(gate.email)) {
+    return NextResponse.json(
+      { ok: false, error: "super_admin_required" },
+      { status: 403 },
+    );
+  }
   const { id } = await ctx.params;
   let body: { action?: string; banned?: boolean; reason?: string };
   try {
@@ -126,6 +132,12 @@ export async function DELETE(request: Request, ctx: Ctx) {
   if (limited) return limited;
   if (!isCloudSyncConfigured()) {
     return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
+  }
+  if (!canApproveAdminRole(gate.email)) {
+    return NextResponse.json(
+      { ok: false, error: "super_admin_required" },
+      { status: 403 },
+    );
   }
   const { id } = await ctx.params;
   let reason = "";
