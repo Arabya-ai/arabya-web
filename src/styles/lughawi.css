@@ -618,6 +618,10 @@
   min-height: 8rem;
 }
 
+.lughawi-result-word-pop {
+  margin-top: 0.65rem;
+}
+
 .lughawi-empty {
   margin: auto 0;
   text-align: center;

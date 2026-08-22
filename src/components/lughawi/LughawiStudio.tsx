@@ -196,23 +196,22 @@ export function LughawiStudio() {
           key={edit.id}
           id={`${studioId}-mark-${edit.id}`}
           className={`lughawi-mark lughawi-mark--${TYPE_CLASS[edit.type]}${hoverId === edit.id ? " is-active" : ""}`}
-          onMouseEnter={() => setHoverId(edit.id)}
-          onFocus={() => setHoverId(edit.id)}
-          onClick={() => setHoverId(edit.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setHoverId(edit.id);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setHoverId(edit.id);
+            }
+          }}
           tabIndex={0}
+          role="button"
+          aria-expanded={hoverId === edit.id}
+          aria-controls={`${studioId}-word-pop`}
         >
           {src.slice(edit.start, edit.end)}
-          {hoverId === edit.id ? (
-            <span className="lughawi-tip lughawi-tip--actions" role="tooltip">
-              <LughawiSuggestionPopover
-                compact
-                edit={edit}
-                onAccept={() => decide(edit.id, "accepted")}
-                onReject={() => decide(edit.id, "rejected")}
-                onCustom={(_, customTo) => decide(edit.id, "custom", customTo)}
-              />
-            </span>
-          ) : null}
         </mark>,
       );
       cursor = edit.end;
@@ -1138,9 +1137,29 @@ export function LughawiStudio() {
                   ) : null}
                   {!pending && result ? (
                     <>
-                      <div className="lughawi-result" dir="rtl">
+                      <div
+                        className="lughawi-result"
+                        dir="rtl"
+                        onClick={() => setHoverId(null)}
+                      >
                         {highlighted}
                       </div>
+                      {hoverId && edits.find((e) => e.id === hoverId) ? (
+                        <div
+                          id={`${studioId}-word-pop`}
+                          className="lughawi-result-word-pop"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <LughawiSuggestionPopover
+                            edit={edits.find((e) => e.id === hoverId)!}
+                            onAccept={(edit) => decide(edit.id, "accepted")}
+                            onReject={(edit) => decide(edit.id, "rejected")}
+                            onCustom={(edit, customTo) =>
+                              decide(edit.id, "custom", customTo)
+                            }
+                          />
+                        </div>
+                      ) : null}
                       {result.meta.stages && result.meta.stages.length > 0 ? (
                         <div className="lughawi-trace">
                           <button
