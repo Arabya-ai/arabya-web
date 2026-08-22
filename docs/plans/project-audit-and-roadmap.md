@@ -1,7 +1,7 @@
 # خطة عربية: المراجعة والطريق القادم (مصدر الحقيقة)
 
-**تاريخ التحديث:** 22 أغسطس 2026  
-**المالك:** موافق على اسم الخدمة **«مخطط عربية»** — مسار مقترح `/mukhtat` (يُثبَّت قبل المرحلة 5-A).
+**تاريخ التحديث:** 22 أغسطس 2026 (بعد merge #187 + R3/R4)  
+**المالك:** اسم الخدمة **«مخطط عربية»** معتمد — مسار **مؤكّد:** `/mukhtat`
 
 ---
 
@@ -13,6 +13,7 @@
 | ما الذي **يحتاج مراجعة/فحص**؟ | §5 |
 | ما **الخطوات القادمة** بالترتيب؟ | §6 |
 | تفاصيل **مخطط عربية** (MindFrond)؟ | §7 + `docs/plans/mukhtat-arabya-spec-ar.md` |
+| تدقيق i18n المرحلة 2؟ | `docs/plans/i18n-phase2-audit-ar.md` |
 | Contabo / أمان / لغوي؟ | `docs/plans/arabya-contabo-recovery-constitution-ar.md` |
 | اللغات والموبايل؟ | `docs/plans/i18n-and-mobile.md` |
 | ما مؤجّل في المنتج؟ | `docs/DEVELOPMENT.md` |
@@ -44,7 +45,7 @@
 | **C** | Contabo + استقرار + ops | ✅ **مكتمل** (22 Aug) | Gate A، backup، deploy |
 | **H** | Hub/UI موحّد (#183–#185) | ✅ **مكتمل** | hubs + تفاصيل + 404 |
 | **S** | أمان التطبيق (#182) | ✅ **مكتمل** | أدمن، مكتبة، JWT، sync |
-| **5** | **مخطط عربية** (MindFrond → ويب) | 🟢 **معتمد — لم يُبنَ** | §7 |
+| **5** | **مخطط عربية** (MindFrond → ويب) | 🟡 **معتمد — 5-A مؤجّل** | §7 |
 | — | قرار لغوي/Auto/Ollama | 🔴 **قرار مالك** | الدستور |
 | — | CSP H-03 (nonces) | 🔴 **مراجعة لاحقة** | خطر صفحة بيضاء |
 | — | SEO لغوي (نص تسويقي) | ⏸ **بانتظار نص** | |
@@ -91,11 +92,16 @@
 
 ## 4) المراحل الأصلية — ما تبقى منها
 
-### المرحلة 2 — تعدد لغات الواجهة (متبقي)
-1. [ ] مراجعة تغطية الترجمة (قائمة صفحات غير مترجمة)
-2. [ ] ترجمة شريط المصحف وأوضاع الدراسة
-3. [ ] مزامنة تفضيل لغة الواجهة للحساب
-4. [ ] لغات واجهة إضافية (id, tr, ur) — بعد استقرار ar/en
+### المرحلة 2 — تعدد لغات الواجهة (متبقي — تدقيق R4 منجز)
+
+**تقرير التدقيق:** `docs/plans/i18n-phase2-audit-ar.md`
+
+1. [x] مراجعة تغطية الترجمة — **22 Aug:** 1779 مفتاح ar/en متطابق؛ 64/79 صفحة i18n؛ فجوة رئيسية: استوديو
+2. [ ] **موجة 2-A:** استوديو ayat-studio → `useTranslations("Studio")`
+3. [ ] **موجة 2-B:** مكتبة + تسميع
+4. [x] شريط المصحف وأوضاع الدراسة — **مغطّى** (`Mushaf` · `Study` · `WordDock`)
+5. [ ] **موجة 2-C:** مزامنة `uiLocale` عبر `/api/sync`
+6. [ ] **موجة 2-E:** لغات إضافية (id, tr, ur) — بعد استقرار ar/en
 
 **لا نترجم:** نص المصحف العثماني، محتوى الإعراب القرآني.
 
@@ -114,135 +120,60 @@
 |---|--------|--------|-----------------|
 | R1 | **قرار لغوي/Auto** | رسالة صفراء، Ollama في `.env` | قرار مالك: قواعد فقط vs opt-in LLM |
 | R2 | **CSP H-03** | `unsafe-inline` ما زال في script-src | بوابة منفصلة + اختبار Contabo |
-| R3 | **ESLint** | `Link` غير مستخدم في `study/page.tsx` | تنظيف PR صغير |
-| R4 | **تغطية i18n** | المرحلة 2 غير مكتملة رسمياً | audit صفحات vs `messages/` |
+| R3 | **ESLint** | `Link` غير مستخدم في `study/page.tsx` | ✅ أُزيل 22 Aug |
+| R4 | **تغطية i18n** | المرحلة 2 غير مكتملة رسمياً | ✅ تدقيق + خطة موجات — `i18n-phase2-audit-ar.md` |
 | R5 | **صفحات تفاصيل أخرى** | library، mushaf، studio — خارج Hub | قرار: هل نُدخلها Hub؟ (حالياً **لا**) |
 | R6 | **cron قديم** | أُزيل `cp` البسيط — تأكد backup 03:15 | ✅ فحص 22 Aug — OK |
 | R7 | **wrangler admin emails** | أُزيلت من Git (#186) | تأكيد secrets في Cloudflare dashboard |
 | R8 | **SFTP / Rocket Loader** | Pre-Launch | خطوات مالك عند الموافقة |
 | R9 | **Sentry 24h** | مراقبة بشرية | المالك من `/admin/ops` |
-| R10 | **PR #187** | خطة مخطط (دمج pending) | دمج ثم المرحلة 5-A |
-| R11 | **Dependabot #18/#19/#69** | actions bump | اختياري — بعد موافقة |
-| R12 | **مخطط — مسار URL** | `/mukhtat` مقترح فقط | تأكيد مالك قبل 5-A |
+| R10 | **PR #187** | خطة مخطط | ✅ دُمج `f4284be` — Deploy Contabo OK |
+| R11 | **Dependabot #18/#19/#69** | actions bump | ⏸ مؤجّل — اختياري |
+| R12 | **مخطط — مسار URL** | `/mukhtat` | ✅ **مؤكّد من المالك** 22 Aug |
 
 ---
 
 ## 6) الخطوات القادمة — بالترتيب الموصى به
 
-### الآن (بعد موافقة الاسم)
-1. **دمج PR #187** — دمج خطة مخطط في المستودع (هذا الملف + spec).
-2. **تأكيد مسار URL** — `/mukhtat` أو بديل.
-3. **بدء المرحلة 5-A** — landing «مخطط عربية» (مثل mindfrond.com، teal RTL).
+### ✅ منجز (22 Aug)
+1. ~~دمج PR #187~~ — خطة مخطط في المستودع (`f4284be`)
+2. ~~تأكيد `/mukhtat`~~ — مسار مؤكّد
+3. ~~R3 ESLint~~ — تنظيف `study/page.tsx`
+4. ~~R4 i18n audit~~ — `docs/plans/i18n-phase2-audit-ar.md`
 
-### قصير المدى (توازي آمن)
-4. **R3** — ESLint cleanup.
-5. **R4** — audit i18n وخطة إكمال المرحلة 2.
-6. **R1** — قرار لغوي/Auto (يفكّ حظر batch لغوي SEO).
+### الآن (أولوية التنفيذ)
+5. **موجة 2-A** — i18n استوديو الفيديو (أكبر فجوة en)
+6. **موجة 2-B** — i18n مكتبة + تسميع
+7. **موجة 2-C** — sync `uiLocale` للحساب
 
-### متوسط المدى
-7. **المرحلة 5-B** — محرر MVP + `.mm` import/export.
-8. **المرحلة 5-C** — styling، export، presentation.
-9. **R2** — CSP عند جاهزية nonces.
+### ⏸ مؤجّل (قرار مالك 22 Aug)
+8. **5-A landing مخطط** — صفحة تسويق `/mukhtat` (حتى إشعار آخر)
+9. **R1 قرار لغوي/Auto** — يفكّ حظر SEO لغوي
+10. **5-B → 5-E مخطط** — محرر ويب بعد 5-A
+11. **R2 CSP nonces** — خطر صفحة بيضاء
+12. **المرحلة 3 Capacitor** — بعد استقرار المرحلة 2
+13. **R7/R8/R11** — Cloudflare secrets، SFTP، Dependabot
 
-### طويل المدى
-10. **المرحلة 5-D** — AI + ربط قرآn/حديث.
-11. **المرحلة 3** — Capacitor.
-12. **المرحلة 5-E** — PWA offline (اختياري).
+### ترتيب الأولوية بين المؤجّلات (6→12)
+
+| الأولوية | البند | لماذا الآن / لاحقاً |
+|----------|-------|---------------------|
+| **1** | **5-A landing مخطط** | منتج جديد مرئي — مؤجّل بقرارك |
+| **2** | **R1 لغوي/Auto** | يؤثر على `/lughawi` + SEO |
+| **3** | **5-B محرر مخطط** | يعتمد على 5-A |
+| **4** | **5-C/D/E مخطط** | بعد MVP المحرر |
+| **5** | **R2 CSP** | أمان — خطر صفحة بيضاء |
+| **6** | **المرحلة 3 Capacitor** | بعد ar/en مستقر |
+| **7** | **R7/R8/R11** | صيانة Pre-Launch |
 
 ```mermaid
 flowchart LR
-  now[5-A landing مخطط] --> b[5-B editor]
-  b --> c[5-C advanced]
-  c --> d[5-D AI Quran]
-  i18n[إكمال المرحلة 2] --> mobile[المرحلة 3]
-  lughawi[قرار R1 لغوي] --> seo[SEO لغوي]
+  i18nA[2-A studio i18n] --> i18nB[2-B library tahfeez]
+  i18nB --> i18nC[2-C locale sync]
+  i18nC --> mobile[المرحلة 3 Capacitor]
+  defer5A[5-A مخطط landing] --> b[5-B editor]
+  b --> c[5-C/D/E]
+  lughawi[R1 لغوي] --> seo[SEO لغوي]
+  i18nC -.-> defer5A
 ```
 
----
-
-## 7) المرحلة 5 — مخطط عربية (معتمد)
-
-**الاسم:** مخطط عربية  
-**المسار المقترح:** `/mukhtat` (محرر: `/mukhtat/editor/[id]`)  
-**المرجع التقني:** Freeplane/MindFrond 1.13.3 — **لا** port Java؛ محرر وeb + `.mm`  
-**التفاصيل الكاملة:** `docs/plans/mukhtat-arabya-spec-ar.md`
-
-### 5-A — صفحة تسويق (P0) — **التالي**
-- [ ] Hero + diagram + `#features` + `#compare` + `#faq`
-- [ ] ar/en؛ CTA «افتح المحرر»
-- [ ] بطاقة في `/services` + (لاحقاً) الرئيسية
-- **لا** Meta Pixel بدون موافقة
-
-### 5-B — محرر MVP (P0)
-- [ ] عقد + حفظ (ضيف: localStorage؛ حساب: SQLite API)
-- [ ] import/export `.mm`
-- [ ] Outline متزامن RTL
-- [ ] Hub shell teal
-
-### 5-C — متقدم (P1)
-- [ ] notes، attributes، tags، styling
-- [ ] search/filter، presentation
-- [ ] PNG/SVG/OPML export
-- [ ] ربط عقدة → `/mushaf/...` `/hadith/...`
-
-### 5-D — AI + منصة (P1)
-- [ ] توسيع فرع عبر Auto/قواعد
-- [ ] أدوات داخل عربية (ليس Java MCP)
-
-### 5-E — اختياري (P3)
-- [ ] PWA offline
-- [ ] PDF headless (Contabo JVM — فقط بموافقة)
-
-### تميّز عن MindFrond Desktop
-- ويب + RTL + حساب Google
-- ربط Word IDs قرآn/حديث/تراث
-- AI عبر Contabo/لغوي
-
-### GPL
-- لا vendor كود Freeplane في `arabya-web`؛ parser `.mm` + محرر جديد.
-
----
-
-## 8) ثلاث لغات — لا تخلط (مرجع)
-
-| النوع | مثال |
-|--------|------|
-| لغة الواجهة | ar / en في الهيدر |
-| لغة ترجمة الكلمة | في لوحة الدراسة |
-| طبعة ترجمة الآية | Saheeh، Diyanet، … |
-
----
-
-## 9) قائمة تحقق قبل أي نشر كبير
-
-- [ ] `npm run test` + build أخضر
-- [ ] Deploy Contabo + فتح المسار على `arabya.org`
-- [ ] لم نكسر: `/mushaf/1`، `/lughawi`، `/library`، `/studio`
-- [ ] تحديث **هذا الملف** إن تغيّرت الأولويات
-
----
-
-## 10) مخاطر (ثابتة)
-
-1. ترجمة آلية لنصوص شرعية دون مراجعة  
-2. كسر RTL المصحف عند LTR  
-3. `next build` أثناء `next dev`  
-4. port Freeplane Java إلى Contabo بدون موافقة RAM/مالك  
-5. CSP صارم بدون اختبار → صفحة بيضاء  
-
----
-
-## 11) وثائق فرعية
-
-| الملف | الغرض |
-|-------|--------|
-| `docs/plans/mukhtat-arabya-spec-ar.md` | مواصفات مخطط + matrix MindFrond |
-| `docs/plans/arabya-contabo-recovery-constitution-ar.md` | Contabo، لغوي، بوابات |
-| `docs/plans/i18n-and-mobile.md` | تفاصيل المرحلة 2–3 |
-| `docs/plans/platform-expansion-and-subscriptions.md` | اشتراكات (مؤجل) |
-| `docs/plans/islamic-oss-four-sources-integration-ar.md` | مصادر OSS |
-| `docs/DEVELOPMENT.md` | مؤجّلات المنتج |
-
----
-
-*آخر نشر Contabo مرجعي: merge #186 (`4f4a3ea`). تحديث هذا القسم بعد كل deploy مهم.*
