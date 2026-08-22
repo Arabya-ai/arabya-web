@@ -1769,6 +1769,7 @@
     "layerRulesReady": "قواعد فورية جاهزة",
     "layerDeepRunning": "تدقيق عميق (سيرفر)",
     "layerCloudAi": "سحابة Auto",
+    "layerLearn": "تعلّم · {active} نشط · {events} حدث",
     "instantHint": "اقتراحات فورية أثناء الكتابة — بدون انتظار السيرفر",
     "instantSuggestionTitle": "اقتراح فوري",
     "instantChipsLabel": "اقتراحات سريعة",

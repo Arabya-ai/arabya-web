@@ -12,6 +12,8 @@ type Props = {
   deepStages?: EngineStageTrace[];
   usedAi?: boolean;
   instantActive: boolean;
+  learningActive?: number;
+  learningEvents?: number;
 };
 
 export function LughawiLayerStrip({
@@ -21,6 +23,8 @@ export function LughawiLayerStrip({
   deepStages,
   usedAi,
   instantActive,
+  learningActive = 0,
+  learningEvents = 0,
 }: Props) {
   const t = useTranslations("Lughawi");
 
@@ -51,6 +55,14 @@ export function LughawiLayerStrip({
             : t("layerInstantCount", { count: instantCount })}
         </span>
       ) : null}
+
+      <span className="lughawi-layer-pill lughawi-layer-pill--learn">
+        <Sparkles className="lughawi-ico" aria-hidden />
+        {t("layerLearn", {
+          active: learningActive,
+          events: learningEvents,
+        })}
+      </span>
 
       <span
         className={`lughawi-layer-pill lughawi-layer-pill--rules${deepPending ? " is-active" : ""}`}

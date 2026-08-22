@@ -28,6 +28,8 @@ export async function POST(req: Request) {
     decision?: string;
     ruleId?: string;
     customTo?: string;
+    tier?: string;
+    source?: string;
   };
   try {
     body = (await req.json()) as typeof body;
@@ -61,6 +63,9 @@ export async function POST(req: Request) {
       decision,
       ruleId: body.ruleId,
       customTo: body.customTo,
+      tier: body.tier ?? "client",
+      source: body.source,
+      userEmail: session.user.email,
     });
     return NextResponse.json({
       ok: true,

@@ -19,6 +19,12 @@ mkdir -p "$(dirname "$DB_PATH")" "$IMPORT_DIR" "$IMPORT_DIR/irab-claims" "$LIBRA
 echo "==> SQLite user DB (accounts / bookmarks / progress)"
 ARABYA_USER_DB_PATH="$DB_PATH" npm run init-user-db
 
+echo "==> Lughawi flywheel SQLite (crowd learning L2)"
+FLYWHEEL_DB="${LUGHAWI_FLYWHEEL_DB:-/var/lib/arabya/lughawi-flywheel.sqlite}"
+mkdir -p "$(dirname "$FLYWHEEL_DB")"
+touch "$FLYWHEEL_DB" 2>/dev/null || true
+chmod 640 "$FLYWHEEL_DB" 2>/dev/null || true
+
 echo "==> Lughawi runtime files (learning / quota / credentials / admin pool)"
 # Learning store creates the JSON on first write; ensure parent exists.
 touch "$RUNTIME_DIR/.keep"
@@ -44,5 +50,6 @@ chmod 750 "$RUNTIME_DIR" 2>/dev/null || true
 
 echo "OK — user DB: $DB_PATH"
 echo "OK — runtime: $RUNTIME_DIR"
+echo "OK — lughawi flywheel: $FLYWHEEL_DB"
 echo "OK — arabya-nlp DB path: $NLP_DB"
 echo "Reminder: set ARABYA_USER_SYNC_ENABLED=1 and ARABYA_USER_DB_PATH=$DB_PATH in .env then: pm2 restart arabya-web --update-env"
