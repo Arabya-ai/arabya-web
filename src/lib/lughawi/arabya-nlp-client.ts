@@ -135,6 +135,7 @@ export async function arabyaNlpProofread(
     preserveDiacritics?: boolean;
     skipLlm?: boolean;
     useMoa?: boolean;
+    hfToken?: string;
     fewShotPairs?: Array<{ from: string; to: string }>;
     timeoutMs?: number;
   },
@@ -142,22 +143,25 @@ export async function arabyaNlpProofread(
   const timeoutMs = opts?.timeoutMs ?? 45_000;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  const body: Record<string, unknown> = {
+    text,
+    preserve_diacritics: opts?.preserveDiacritics ?? true,
+    skip_llm: Boolean(opts?.skipLlm),
+    use_moa: Boolean(opts?.useMoa),
+    few_shot_pairs: Array.isArray(opts?.fewShotPairs)
+      ? opts.fewShotPairs.slice(0, 3).map((p) => ({
+          from: p.from,
+          to: p.to,
+        }))
+      : [],
+  };
+  const hf = opts?.hfToken?.trim();
+  if (hf) body.hf_token = hf;
   try {
     const res = await fetch(`${baseUrl()}/v1/proofread`, {
       method: "POST",
       headers: authHeaders(),
-      body: JSON.stringify({
-        text,
-        preserve_diacritics: opts?.preserveDiacritics ?? true,
-        skip_llm: Boolean(opts?.skipLlm),
-        use_moa: Boolean(opts?.useMoa),
-        few_shot_pairs: Array.isArray(opts?.fewShotPairs)
-          ? opts.fewShotPairs.slice(0, 3).map((p) => ({
-              from: p.from,
-              to: p.to,
-            }))
-          : [],
-      }),
+      body: JSON.stringify(body),
       signal: ctrl.signal,
       cache: "no-store",
     });

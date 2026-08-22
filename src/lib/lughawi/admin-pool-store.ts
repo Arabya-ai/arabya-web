@@ -23,6 +23,7 @@ const PROVIDERS: AiProviderId[] = [
   "openai",
   "anthropic",
   "groq",
+  "huggingface",
   "ollama",
 ];
 

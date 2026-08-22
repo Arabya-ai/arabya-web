@@ -25,6 +25,8 @@ export type AiProviderId =
   | "google"
   | "groq"
   | "openrouter"
+  /** Hugging Face Inference — MoA proposers/judge (L3). */
+  | "huggingface"
   /** Local OpenAI-compatible server on Contabo (Ollama / vLLM / LocalAI). */
   | "ollama";
 

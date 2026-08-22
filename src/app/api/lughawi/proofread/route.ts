@@ -7,6 +7,7 @@ import { enrichProofreadWithAi } from "@/lib/lughawi/ai-proofread";
 import { enrichProofreadWithArabyaNlp } from "@/lib/lughawi/arabya-nlp-enrich";
 import { enrichProofreadWithSidecar } from "@/lib/lughawi/sidecar-enrich";
 import { lughawiMaxGuestChars, countArabicWords } from "@/lib/lughawi/config";
+import { hfMoaReady, resolveHfTokenForMoa } from "@/lib/lughawi/hf-token";
 import { listRecentAcceptedCorrections } from "@/lib/lughawi/learning-store";
 import { applyEdits, mergeEdits } from "@/lib/lughawi/pipeline-merge";
 import { proofreadLocal } from "@/lib/lughawi/pipeline";
@@ -103,9 +104,13 @@ export async function POST(req: Request) {
   const runNeural = Boolean(wantAi && allowNeuralGec);
   const emailEarly = session?.user?.email?.trim().toLowerCase();
   const bannedEarly = session?.error === "Banned";
-  // MoA: signed-in only + LUGHAWI_MOA=1 — guests stay on Contabo rules (no HF burn).
+  // MoA: signed-in + LUGHAWI_MOA=1 + HF token (env or /admin/ops pool)
   const runMoa = Boolean(
-    wantAi && lughawiMoaEnabled() && emailEarly && !bannedEarly,
+    wantAi &&
+      lughawiMoaEnabled() &&
+      hfMoaReady() &&
+      emailEarly &&
+      !bannedEarly,
   );
   const fewShot = runMoa
     ? listRecentAcceptedCorrections(3).map((p) => ({
@@ -125,6 +130,7 @@ export async function POST(req: Request) {
     enrichProofreadWithArabyaNlp(local, {
       skipLlm: !runLocalLlm,
       useMoa: runMoa,
+      hfToken: runMoa ? resolveHfTokenForMoa() : undefined,
       fewShotPairs: fewShot,
       timeoutMs: runMoa ? 35_000 : runLocalLlm ? 25_000 : 8_000,
     }).catch(() => local),
