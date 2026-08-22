@@ -1,4 +1,4 @@
-import { getUserDb } from "@/lib/local-user-db";
+import { getUserDb, isLocalUserSyncEnabled } from "@/lib/local-user-db";
 import type { AdhkarItem, DuaItem } from "@/lib/adhkar";
 
 const ADHKAR_CONTENT_KEY = "adhkar_content_override_v1";
@@ -34,8 +34,10 @@ function cleanDuaItem(item: DuaItem): DuaItem {
 }
 
 export function readAdhkarContentOverride(): AdhkarContentOverride | null {
-  const db = getUserDb();
+  // Guest pages must keep working from Git JSON when sync/DB is off or broken.
+  if (!isLocalUserSyncEnabled()) return null;
   try {
+    const db = getUserDb();
     const row = db
       .prepare(`SELECT value FROM site_settings WHERE key = ? LIMIT 1`)
       .get(ADHKAR_CONTENT_KEY) as { value?: string } | undefined;

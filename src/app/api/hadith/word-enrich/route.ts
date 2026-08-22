@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
 import { enrichHadithToken } from "@/lib/hadith-word-enrich";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 export async function GET(req: Request) {
+  const limited = enforceRateLimit(req, {
+    prefix: "hadith-word-enrich",
+    limit: 60,
+  });
+  if (limited) return limited;
+
   const url = new URL(req.url);
   const text = url.searchParams.get("text") || "";
   if (!text.trim()) {

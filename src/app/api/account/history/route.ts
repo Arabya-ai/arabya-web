@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { clearAccountHistory, isCloudSyncConfigured } from "@/lib/cloud-sync";
+import { enforceRateLimitKey } from "@/lib/rate-limit";
+import { requireSession } from "@/lib/require-role";
 
 export const dynamic = "force-dynamic";
 
@@ -13,11 +14,11 @@ function parseScope(raw: string | null): Scope | null {
 
 /** DELETE /api/account/history?scope=study|tahfeez|all */
 export async function DELETE(req: Request) {
-  const session = await auth();
-  const user = session?.user;
-  if (!user?.email) {
-    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
-  }
+  const gate = await requireSession();
+  if ("error" in gate) return gate.error;
+  const limited = enforceRateLimitKey("account-history", gate.email, 20);
+  if (limited) return limited;
+
   if (!isCloudSyncConfigured()) {
     return NextResponse.json({ ok: false, error: "not_configured" }, { status: 503 });
   }
@@ -34,9 +35,9 @@ export async function DELETE(req: Request) {
   try {
     const result = await clearAccountHistory(
       {
-        email: user.email,
-        name: user.name,
-        image: user.image,
+        email: gate.email,
+        name: gate.name,
+        image: gate.image,
       },
       scope,
     );

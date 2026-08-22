@@ -34,3 +34,12 @@ export function requestTooLarge(
   const bytes = Number(raw);
   return Number.isFinite(bytes) && bytes > maxBytes;
 }
+
+/** UTF-8 byte length of a string (for bodies read without Content-Length). */
+export function utf8ByteLength(text: string): number {
+  return new TextEncoder().encode(text).byteLength;
+}
+
+export function bodyTextTooLarge(text: string, maxBytes: number): boolean {
+  return utf8ByteLength(text) > maxBytes;
+}

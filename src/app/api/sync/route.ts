@@ -1,11 +1,15 @@
 import { isCloudSyncConfigured, pullCloudSync, pushCloudSync } from "@/lib/cloud-sync";
 import { sanitizeAdhkarMap, sanitizeTasbeehState } from "@/lib/adhkar-sync";
+import { bodyTextTooLarge, requestTooLarge } from "@/lib/api-error";
 import { enforceRateLimitKey } from "@/lib/rate-limit";
 import { requireSession } from "@/lib/require-role";
 import type { StudyEntry } from "@/lib/study-archive";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
+
+/** Soft cap for account sync payloads (bookmarks/notes/study/progress). */
+const SYNC_PUT_MAX_BYTES = 1_500_000;
 
 export async function GET() {
   const gate = await requireSession();
@@ -54,6 +58,13 @@ export async function PUT(request: Request) {
     );
   }
 
+  if (requestTooLarge(request, SYNC_PUT_MAX_BYTES)) {
+    return NextResponse.json(
+      { ok: false, error: "payload_too_large" },
+      { status: 413 },
+    );
+  }
+
   let body: {
     bookmarks?: unknown;
     notes?: unknown;
@@ -66,7 +77,14 @@ export async function PUT(request: Request) {
     };
   };
   try {
-    body = (await request.json()) as typeof body;
+    const rawText = await request.text();
+    if (bodyTextTooLarge(rawText, SYNC_PUT_MAX_BYTES)) {
+      return NextResponse.json(
+        { ok: false, error: "payload_too_large" },
+        { status: 413 },
+      );
+    }
+    body = JSON.parse(rawText) as typeof body;
   } catch {
     return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
   }
