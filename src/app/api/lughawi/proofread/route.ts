@@ -8,6 +8,7 @@ import { enrichProofreadWithArabyaNlp } from "@/lib/lughawi/arabya-nlp-enrich";
 import { enrichProofreadWithSidecar } from "@/lib/lughawi/sidecar-enrich";
 import { lughawiMaxGuestChars, countArabicWords } from "@/lib/lughawi/config";
 import { hfMoaReady, resolveHfTokenForMoa } from "@/lib/lughawi/hf-token";
+import { listRecentAcceptedCorrections } from "@/lib/lughawi/learning-store";
 import { applyEdits, mergeEdits } from "@/lib/lughawi/pipeline-merge";
 import { proofreadLocal } from "@/lib/lughawi/pipeline";
 import { resolveLughawiAiCandidates } from "@/lib/lughawi/resolve-ai";
