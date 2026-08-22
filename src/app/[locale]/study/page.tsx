@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import { resolveLocale } from "@/i18n/locale-params";
 import { StudyAssistant } from "@/components/StudyAssistant";
 import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
