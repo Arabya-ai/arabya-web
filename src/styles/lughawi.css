@@ -467,6 +467,65 @@
   background: color-mix(in srgb, var(--brand) 3.5%, var(--surface));
 }
 
+.lughawi-tt-wrap {
+  overflow: visible;
+}
+
+.lughawi-tt-wrap .tiptap,
+.lughawi-tt-content {
+  min-height: 15rem;
+  max-height: 28rem;
+  overflow: auto;
+  margin: 0;
+  padding: 0.95rem 1.05rem;
+  font: inherit;
+  font-size: 1.14rem;
+  line-height: 1.95;
+  color: var(--ink);
+  outline: none;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.lughawi-tt-content p {
+  margin: 0;
+}
+
+.lughawi-tt-content p.is-editor-empty:first-child::before,
+.lughawi-tt-wrap .tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: right;
+  color: color-mix(in srgb, var(--muted) 85%, transparent);
+  pointer-events: none;
+  height: 0;
+}
+
+.lughawi-tt-mark {
+  border-bottom: 2.5px solid var(--lughawi-spell);
+  background: color-mix(in srgb, var(--lughawi-spell) 12%, transparent);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.lughawi-tt-mark.is-active {
+  background: color-mix(in srgb, var(--lughawi-spell) 22%, transparent);
+}
+
+.lughawi-tt-mark--grammar { border-bottom-color: var(--lughawi-grammar); background: color-mix(in srgb, var(--lughawi-grammar) 12%, transparent); }
+.lughawi-tt-mark--style { border-bottom-color: var(--lughawi-style); border-bottom-style: dashed; background: color-mix(in srgb, var(--lughawi-style) 12%, transparent); }
+.lughawi-tt-mark--morphology { border-bottom-color: var(--lughawi-morph); background: color-mix(in srgb, var(--lughawi-morph) 12%, transparent); }
+.lughawi-tt-mark--punctuation { border-bottom-color: var(--lughawi-punct); background: color-mix(in srgb, var(--lughawi-punct) 12%, transparent); }
+.lughawi-tt-mark--other { border-bottom-color: var(--lughawi-other); }
+
+.lughawi-tt-float {
+  position: fixed;
+  z-index: 80;
+  width: min(22rem, calc(100vw - 1.5rem));
+  animation: lughawi-tip-in 0.18s ease both;
+  pointer-events: auto;
+}
+
 .lughawi-editor-wrap:focus-within {
   border-color: color-mix(in srgb, var(--brand) 45%, var(--line));
   background: var(--surface);

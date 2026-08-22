@@ -2,16 +2,28 @@
 
 import { LughawiSuggestionPopover } from "@/components/lughawi/LughawiSuggestionPopover";
 import { applySingleEdit } from "@/lib/lughawi/pipeline-client";
+import {
+  dispatchProofreadDecorations,
+  LughawiProofreadExtension,
+} from "@/lib/lughawi/tiptap/proofread-extension";
+import {
+  docToPlainText,
+  plainTextToDocJson,
+} from "@/lib/lughawi/tiptap/plain-map";
 import type { EditType, LughawiEdit } from "@/lib/lughawi/types";
+import Placeholder from "@tiptap/extension-placeholder";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
 import { useTranslations } from "next-intl";
 import {
   useCallback,
+  useEffect,
   useMemo,
+  useRef,
   useState,
-  type KeyboardEvent,
-  type ReactNode,
-  type SyntheticEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
+import { createPortal } from "react-dom";
 
 const TYPE_CLASS: Record<EditType, string> = {
   spelling: "spelling",
@@ -32,20 +44,18 @@ type Props = {
   placeholder: string;
   hintId: string;
   hintText: string;
-  onKeyDown?: (e: KeyboardEvent<HTMLTextAreaElement>) => void;
+  onKeyDown?: (e: ReactKeyboardEvent) => void;
   onAcceptInstant?: (edit: LughawiEdit) => void;
   onRejectInstant?: (edit: LughawiEdit) => void;
   onCustomInstant?: (edit: LughawiEdit, customTo: string) => void;
 };
 
-function editAtCaret(edits: LughawiEdit[], offset: number): LughawiEdit | null {
-  return (
-    edits.find((e) => offset >= e.start && offset <= e.end) ??
-    edits.find((e) => Math.abs((e.start + e.end) / 2 - offset) <= 1) ??
-    null
-  );
-}
+type PopCoords = { top: number; left: number };
 
+/**
+ * L1 Word-like editor: TipTap document with inline underlines on the words
+ * themselves and a floating accept / reject / custom suggestion panel.
+ */
 export function LughawiEditorWithHints({
   text,
   onChange,
@@ -63,6 +73,11 @@ export function LughawiEditorWithHints({
   const t = useTranslations("Lughawi");
   const [activeId, setActiveId] = useState<string | null>(null);
   const [dismissed, setDismissed] = useState<Set<string>>(() => new Set());
+  const [popCoords, setPopCoords] = useState<PopCoords | null>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const skipNextEmit = useRef(false);
+  const onKeyDownRef = useRef(onKeyDown);
+  onKeyDownRef.current = onKeyDown;
 
   const sortedEdits = useMemo(
     () =>
@@ -77,45 +92,121 @@ export function LughawiEditorWithHints({
     [instantEdits, text, dismissed],
   );
 
-  const backdrop = useMemo(() => {
-    if (!text) return null;
-    const nodes: ReactNode[] = [];
-    let cursor = 0;
-    sortedEdits.forEach((edit, i) => {
-      if (edit.start < cursor) return;
-      if (edit.start > cursor) {
-        nodes.push(
-          <span key={`plain-${i}`}>{text.slice(cursor, edit.start)}</span>,
-        );
-      }
-      const isActive = activeId === edit.id;
-      nodes.push(
-        <mark
-          key={edit.id}
-          className={`lughawi-instant-mark lughawi-instant-mark--${TYPE_CLASS[edit.type]}${isActive ? " is-active" : ""}`}
-        >
-          {text.slice(edit.start, edit.end)}
-        </mark>,
-      );
-      cursor = edit.end;
-    });
-    if (cursor < text.length) {
-      nodes.push(<span key="tail">{text.slice(cursor)}</span>);
-    }
-    return nodes;
-  }, [text, sortedEdits, activeId]);
-
   const activeEdit = sortedEdits.find((e) => e.id === activeId) ?? null;
 
-  const syncCaret = useCallback(
-    (e: SyntheticEvent<HTMLTextAreaElement>) => {
-      const el = e.currentTarget;
-      const pos = el.selectionStart ?? 0;
-      const hit = editAtCaret(sortedEdits, pos);
-      setActiveId(hit?.id ?? null);
+  const editor = useEditor({
+    immediatelyRender: false,
+    editable: !(disabled || pending),
+    extensions: [
+      StarterKit.configure({
+        heading: false,
+        bulletList: false,
+        orderedList: false,
+        listItem: false,
+        blockquote: false,
+        codeBlock: false,
+        code: false,
+        horizontalRule: false,
+        dropcursor: false,
+        gapcursor: false,
+      }),
+      Placeholder.configure({
+        placeholder,
+      }),
+      LughawiProofreadExtension.configure({
+        onSelectEditId: (id) => {
+          setActiveId(id);
+        },
+      }),
+    ],
+    content: plainTextToDocJson(text),
+    editorProps: {
+      attributes: {
+        class: "lughawi-tt-content",
+        dir: "rtl",
+        spellcheck: "false",
+        "aria-describedby": hintId,
+        "aria-busy": pending ? "true" : "false",
+      },
+      handleDOMEvents: {
+        keydown: (_view, event) => {
+          if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+            onKeyDownRef.current?.(
+              event as unknown as ReactKeyboardEvent,
+            );
+            return true;
+          }
+          return false;
+        },
+      },
     },
-    [sortedEdits],
-  );
+    onUpdate: ({ editor: ed }) => {
+      if (skipNextEmit.current) {
+        skipNextEmit.current = false;
+        return;
+      }
+      const next = docToPlainText(ed.state.doc);
+      setActiveId(null);
+      setDismissed(new Set());
+      setPopCoords(null);
+      onChange(next);
+    },
+  });
+
+  // Sync external text (sample chips, accept, clear) into the editor.
+  useEffect(() => {
+    if (!editor || editor.isDestroyed) return;
+    const current = docToPlainText(editor.state.doc);
+    if (current === text) return;
+    skipNextEmit.current = true;
+    editor.commands.setContent(plainTextToDocJson(text), false);
+  }, [text, editor]);
+
+  useEffect(() => {
+    if (!editor || editor.isDestroyed) return;
+    editor.setEditable(!(disabled || pending));
+  }, [editor, disabled, pending]);
+
+  // Push underline decorations whenever edits / active change.
+  useEffect(() => {
+    dispatchProofreadDecorations(editor, sortedEdits, activeId);
+  }, [editor, sortedEdits, activeId]);
+
+  // Position floating popover from the marked word's DOM box (RTL-safe).
+  useEffect(() => {
+    if (!editor || !activeEdit || editor.isDestroyed) {
+      setPopCoords(null);
+      return;
+    }
+    const place = () => {
+      const mark = editor.view.dom.querySelector(
+        `[data-lughawi-edit-id="${CSS.escape(activeEdit.id)}"]`,
+      ) as HTMLElement | null;
+      if (!mark) {
+        setPopCoords(null);
+        return;
+      }
+      const rect = mark.getBoundingClientRect();
+      const width = 320;
+      const left = Math.min(
+        Math.max(12, rect.left),
+        Math.max(12, window.innerWidth - width - 12),
+      );
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const top =
+        spaceBelow < 240
+          ? Math.max(12, rect.top - 8 - 200)
+          : rect.bottom + 10;
+      setPopCoords({ top, left });
+    };
+    place();
+    window.addEventListener("scroll", place, true);
+    window.addEventListener("resize", place);
+    return () => {
+      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("resize", place);
+    };
+  }, [editor, activeEdit]);
 
   const acceptEdit = useCallback(
     (edit: LughawiEdit) => {
@@ -123,6 +214,7 @@ export function LughawiEditorWithHints({
       onChange(applied.text);
       onAcceptInstant?.(edit);
       setActiveId(null);
+      setPopCoords(null);
     },
     [text, sortedEdits, onChange, onAcceptInstant],
   );
@@ -132,6 +224,7 @@ export function LughawiEditorWithHints({
       setDismissed((prev) => new Set(prev).add(edit.id));
       onRejectInstant?.(edit);
       setActiveId(null);
+      setPopCoords(null);
     },
     [onRejectInstant],
   );
@@ -148,6 +241,7 @@ export function LughawiEditorWithHints({
       onChange(applied.text);
       onCustomInstant?.(edit, customTo);
       setActiveId(null);
+      setPopCoords(null);
     },
     [text, sortedEdits, onChange, onCustomInstant],
   );
@@ -155,30 +249,10 @@ export function LughawiEditorWithHints({
   return (
     <div className="lughawi-editor-stack">
       <div
-        className={`lughawi-editor-wrap${pending ? " is-busy" : ""}${disabled ? " is-disabled" : ""}`}
+        ref={wrapRef}
+        className={`lughawi-editor-wrap lughawi-tt-wrap${pending ? " is-busy" : ""}${disabled ? " is-disabled" : ""}`}
       >
-        <div className="lughawi-editor-backdrop" dir="rtl" aria-hidden>
-          {text ? backdrop : <span className="lughawi-editor-placeholder">{placeholder}</span>}
-        </div>
-        <textarea
-          className="lughawi-editor-input"
-          value={text}
-          onChange={(e) => {
-            onChange(e.target.value);
-            setActiveId(null);
-            setDismissed(new Set());
-          }}
-          onKeyDown={onKeyDown}
-          onClick={syncCaret}
-          onKeyUp={syncCaret}
-          onSelect={syncCaret}
-          disabled={disabled || pending}
-          placeholder=""
-          dir="rtl"
-          spellCheck={false}
-          aria-describedby={hintId}
-          aria-busy={pending || undefined}
-        />
+        <EditorContent editor={editor} />
         {pending ? (
           <div className="lughawi-editor-busy" aria-hidden>
             <span className="lughawi-editor-busy-bar" />
@@ -186,7 +260,24 @@ export function LughawiEditorWithHints({
         ) : null}
       </div>
 
-      {activeEdit ? (
+      {activeEdit && popCoords && typeof document !== "undefined"
+        ? createPortal(
+            <div
+              className="lughawi-tt-float"
+              style={{ top: popCoords.top, left: popCoords.left }}
+            >
+              <LughawiSuggestionPopover
+                edit={activeEdit}
+                onAccept={acceptEdit}
+                onReject={rejectEdit}
+                onCustom={customEdit}
+              />
+            </div>,
+            document.body,
+          )
+        : null}
+
+      {activeEdit && !popCoords ? (
         <LughawiSuggestionPopover
           edit={activeEdit}
           onAccept={acceptEdit}

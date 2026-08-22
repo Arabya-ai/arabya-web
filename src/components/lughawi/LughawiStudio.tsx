@@ -43,7 +43,6 @@ import {
   useId,
   useMemo,
   useState,
-  type KeyboardEvent,
   type ReactNode,
 } from "react";
 
@@ -471,7 +470,7 @@ export function LughawiStudio() {
     });
   }
 
-  function onTextKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
+  function onTextKeyDown(e: { preventDefault: () => void; metaKey: boolean; ctrlKey: boolean; key: string }) {
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
       e.preventDefault();
       if (text.trim() && !pending) run("proofread");
@@ -1057,8 +1056,8 @@ export function LughawiStudio() {
               ) : null}
 
               <div className="lughawi-grid">
-                <label className="lughawi-panel">
-                  <span className="lughawi-panel-label">
+                <div className="lughawi-panel">
+                  <div className="lughawi-panel-label">
                     <span className="lughawi-panel-title">
                       <TextCursorInput className="lughawi-ico" aria-hidden />
                       {t("inputLabel")}
@@ -1083,7 +1082,7 @@ export function LughawiStudio() {
                         {t("clear")}
                       </button>
                     </span>
-                  </span>
+                  </div>
                   <LughawiEditorWithHints
                     text={text}
                     onChange={(next) => {
@@ -1102,7 +1101,7 @@ export function LughawiStudio() {
                       void sendFeedback(edit, "custom", customTo)
                     }
                   />
-                </label>
+                </div>
 
                 <div className="lughawi-panel lughawi-panel--out">
                   <div className="lughawi-panel-label">
