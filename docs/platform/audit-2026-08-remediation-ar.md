@@ -43,7 +43,9 @@ pm2 restart arabya-web --update-env
 
 ## CSP (H-03)
 
-ثيم الصفحة يُحمَّل من `/theme-boot.js` — أُزيل `unsafe-inline` من `script-src`. `style-src` ما زال يحتاج `unsafe-inline` لـ Tailwind/Next.
+**الحالة على الإنتاج (2026-08):** `script-src` ما زال يتضمن `'unsafe-inline'` عمداً (#157) حتى لا تظهر **صفحة بيضاء** على Contabo. إزالة `unsafe-inline` تحتاج خطة nonces مُختبَرة — لاحقاً فقط.
+
+`style-src` ما زال يحتاج `unsafe-inline` لـ Tailwind/Next. ثيم الصفحة يُحمَّل من `/theme-boot.js`.
 
 ## الاعتماديات (H-01)
 

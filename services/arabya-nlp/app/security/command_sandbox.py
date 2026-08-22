@@ -1,4 +1,9 @@
-"""Hardcoded command whitelist — never execute raw LLM shell strings."""
+"""Hardcoded command whitelist — never execute raw LLM shell strings.
+
+Production: ARABYA_NLP_DEVOPS_AUTO_EXECUTE=0 — the agent suggests actions; nothing runs
+without explicit operator approval. Only keys in SAFE_ACTIONS may execute when enabled.
+Ollama restart keys exist for optional future use; Ollama stays disabled unless the owner opts in.
+"""
 
 from __future__ import annotations
 
