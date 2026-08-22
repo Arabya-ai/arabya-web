@@ -5,7 +5,7 @@
 # Steps (authorized):
 #   1) deps:   bash scripts/contabo-arabya-nlp-deps.sh
 #   2) model:  ollama pull llama3.1:8b
-#   3) PM2:    arabya-nlp on 0.0.0.0:8092
+#   3) PM2:    arabya-nlp on 127.0.0.1:8092 (localhost only)
 #   4) verify: curl http://127.0.0.1:8092/health  (must be JSON, not ServerAvatar HTML)
 #
 # Usage (on Contabo):
@@ -24,12 +24,12 @@ exec > >(tee -a "$ACTIVATE_LOG") 2>&1
 echo "======== Arabya NLP Option A activate $(date -u +%Y-%m-%dT%H:%M:%SZ) ========"
 cd "$APP_DIR"
 
-echo "==> Ensure ARABYA_NLP_HOST=0.0.0.0 + ARABYA_NLP_DEVOPS_AUTO_EXECUTE=0"
+echo "==> Ensure ARABYA_NLP_HOST=127.0.0.1 + ARABYA_NLP_DEVOPS_AUTO_EXECUTE=0"
 touch "$ENV_FILE"
 if grep -q '^ARABYA_NLP_HOST=' "$ENV_FILE" 2>/dev/null; then
-  sed -i 's/^ARABYA_NLP_HOST=.*/ARABYA_NLP_HOST=0.0.0.0/' "$ENV_FILE"
+  sed -i 's/^ARABYA_NLP_HOST=.*/ARABYA_NLP_HOST=127.0.0.1/' "$ENV_FILE"
 else
-  echo 'ARABYA_NLP_HOST=0.0.0.0' >> "$ENV_FILE"
+  echo 'ARABYA_NLP_HOST=127.0.0.1' >> "$ENV_FILE"
 fi
 if grep -q '^ARABYA_NLP_PORT=' "$ENV_FILE" 2>/dev/null; then
   sed -i "s/^ARABYA_NLP_PORT=.*/ARABYA_NLP_PORT=${PORT}/" "$ENV_FILE"

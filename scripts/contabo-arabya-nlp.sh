@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start Arabya NLP FastAPI under PM2 on Contabo (bind 0.0.0.0:8092 by default).
+# Start Arabya NLP FastAPI under PM2 on Contabo (bind 127.0.0.1:8092 by default).
 # Usage: bash scripts/contabo-arabya-nlp.sh
 set -euo pipefail
 
@@ -41,8 +41,9 @@ if [[ -f "$APP_DIR/.env" ]]; then
   set +a
 fi
 
-# Ensure bind host is set before PM2 start (settings read ARABYA_NLP_HOST)
-export ARABYA_NLP_HOST="${ARABYA_NLP_HOST:-0.0.0.0}"
+# Ensure bind host is set before PM2 start (settings read ARABYA_NLP_HOST).
+# Default localhost-only — Next talks via ARABYA_NLP_URL=http://127.0.0.1:8092.
+export ARABYA_NLP_HOST="${ARABYA_NLP_HOST:-127.0.0.1}"
 export ARABYA_NLP_PORT="${ARABYA_NLP_PORT:-8092}"
 PORT="$ARABYA_NLP_PORT"
 

@@ -25,9 +25,10 @@ class Settings(BaseSettings):
     app_name: str = "Lughawi"
     app_version: str = "1.0.0"
     environment: Literal["development", "production", "test"] = "production"
-    # Bind all interfaces so Next.js / reverse proxies can reach :8092.
-    # Contabo UFW + ServerAvatar must allow TCP 8092; see docs/platform/arabya-nlp-port-8092-ar.md
-    host: str = Field(default="0.0.0.0", alias="ARABYA_NLP_HOST")
+    # Localhost only: Next.js on the same Contabo host reaches FastAPI via 127.0.0.1.
+    # Do NOT bind 0.0.0.0 in production — exposes /docs and /dashboard. See
+    # docs/platform/arabya-nlp-port-8092-ar.md
+    host: str = Field(default="127.0.0.1", alias="ARABYA_NLP_HOST")
     port: int = Field(default=8092, alias="ARABYA_NLP_PORT")
     log_level: str = Field(default="INFO", alias="ARABYA_NLP_LOG_LEVEL")
     server_log_path: str = Field(
