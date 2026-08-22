@@ -11,12 +11,33 @@ export function parseAdminEmails(raw: string | undefined): string[] {
 }
 
 /**
- * Super-admin allowlist from Contabo `.env` only (`ARABYA_ADMIN_EMAILS`).
- * Production is fail-closed: empty env → no email is treated as super-admin.
- * Hardcoded identities were removed from source (audit H-05).
+ * Bootstrap allowlist from Contabo `.env` only (`ARABYA_ADMIN_EMAILS`).
+ * Always treated as super-admin; cannot be demoted from the CRM UI.
+ */
+export function getEnvSuperAdminEmails(): string[] {
+  return parseAdminEmails(process.env.ARABYA_ADMIN_EMAILS);
+}
+
+/** Optional UI-managed emails (SQLite) — registered by local-user-db. */
+let uiSuperAdminReader: (() => string[]) | null = null;
+
+export function registerSuperAdminUiAllowlist(reader: () => string[]): void {
+  uiSuperAdminReader = reader;
+}
+
+/**
+ * Effective super-admin allowlist: env bootstrap ∪ CRM-promoted emails.
+ * Fail-closed when both are empty.
  */
 export function getSuperAdminEmails(): string[] {
-  return parseAdminEmails(process.env.ARABYA_ADMIN_EMAILS);
+  const fromEnv = getEnvSuperAdminEmails();
+  let fromUi: string[] = [];
+  try {
+    fromUi = uiSuperAdminReader?.() ?? [];
+  } catch {
+    fromUi = [];
+  }
+  return [...new Set([...fromEnv, ...fromUi.map((e) => e.trim().toLowerCase()).filter(Boolean)])];
 }
 
 /** Safe diagnostics for admin settings — no raw emails in output. */
@@ -25,13 +46,24 @@ export function getSuperAdminEnvDiagnostics(
 ): {
   configured: boolean;
   configuredCount: number;
+  envCount: number;
+  uiCount: number;
   currentEmailInList: boolean;
 } {
+  const envCount = getEnvSuperAdminEmails().length;
+  let uiCount = 0;
+  try {
+    uiCount = uiSuperAdminReader?.()?.length ?? 0;
+  } catch {
+    uiCount = 0;
+  }
   const emails = getSuperAdminEmails();
   const normalized = sessionEmail?.trim().toLowerCase() || "";
   return {
     configured: emails.length > 0,
     configuredCount: emails.length,
+    envCount,
+    uiCount,
     currentEmailInList: normalized ? emails.includes(normalized) : false,
   };
 }
@@ -41,6 +73,15 @@ export function getSuperAdminEnvDiagnostics(
  * Kept so older imports do not crash; do not put real emails here.
  */
 export const SUPER_ADMIN_EMAILS: readonly string[] = [];
+
+export function isEnvBootstrapSuperAdmin(
+  email: string | null | undefined,
+): boolean {
+  if (!email) return false;
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) return false;
+  return getEnvSuperAdminEmails().includes(normalized);
+}
 
 export function isSuperAdminEmail(email: string | null | undefined): boolean {
   if (!email) return false;
@@ -69,17 +110,15 @@ export function resolveRoleFromEmail(
 }
 
 /**
- * Merge D1 role with immutable super-admin override.
- * Non–super-admin emails never keep `admin` (demoted to editor).
+ * Merge stored role with super-admin allowlist (env ∪ CRM UI).
+ * Allowlist emails always stay admin. CRM-promoted admins keep `admin` in DB.
  */
 export function mergeRoleWithEnvAdmin(
   email: string | null | undefined,
   cloudRole: UserRole | LegacyUserRole | null | undefined,
 ): UserRole {
   if (isSuperAdminEmail(email)) return "admin";
-  const role = normalizeUserRole(cloudRole);
-  if (role === "admin") return "editor";
-  return role;
+  return normalizeUserRole(cloudRole);
 }
 
 export type AppLocale = "ar" | "en";
@@ -191,7 +230,7 @@ export function canApproveAdminRole(email: string | null | undefined): boolean {
 
 /**
  * Who may change another user's role — super admin only.
- * Cannot demote another super-admin email, or demote self away from admin.
+ * May promote anyone to admin (CRM). Cannot demote env-bootstrap emails or self.
  */
 export function canAssignRole(
   actorEmail: string | null | undefined,
@@ -207,14 +246,15 @@ export function canAssignRole(
   const targetEmail = opts?.targetEmail?.trim().toLowerCase() || "";
   const actor = (actorEmail || opts?.actorEmail || "").trim().toLowerCase();
 
-  // admin rank is immutable super-admin only — never assign to other emails
-  if (targetRole === "admin" && !isSuperAdminEmail(targetEmail)) {
-    return false;
-  }
-  if (targetEmail && isSuperAdminEmail(targetEmail) && targetRole !== "admin") {
-    return false;
-  }
   if (actor && targetEmail === actor && targetRole !== "admin") {
+    return false;
+  }
+  // Env bootstrap super-admins stay admin until removed from Contabo .env
+  if (
+    targetEmail &&
+    isEnvBootstrapSuperAdmin(targetEmail) &&
+    targetRole !== "admin"
+  ) {
     return false;
   }
   return true;

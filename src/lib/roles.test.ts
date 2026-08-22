@@ -8,12 +8,15 @@ import {
   canExportStudioWithoutBrand,
   canExportUnlimitedStudioAyahs,
   dailyVideoExportLimit,
+  getEnvSuperAdminEmails,
   getSuperAdminEmails,
   getSuperAdminEnvDiagnostics,
+  isEnvBootstrapSuperAdmin,
   isSuperAdminEmail,
   mergeRoleWithEnvAdmin,
   normalizeUserRole,
   parseAdminEmails,
+  registerSuperAdminUiAllowlist,
   resolveRoleFromEmail,
   roleLabel,
   MEMBER_DAILY_VIDEO_EXPORT_LIMIT,
@@ -24,10 +27,12 @@ const SUPER_B = "owner@example.com";
 
 beforeEach(() => {
   process.env.ARABYA_ADMIN_EMAILS = `${SUPER_A},${SUPER_B}`;
+  registerSuperAdminUiAllowlist(() => []);
 });
 
 afterEach(() => {
   delete process.env.ARABYA_ADMIN_EMAILS;
+  registerSuperAdminUiAllowlist(() => []);
 });
 
 describe("parseAdminEmails", () => {
@@ -44,6 +49,7 @@ describe("getSuperAdminEnvDiagnostics", () => {
   it("counts configured emails without exposing them", () => {
     const diag = getSuperAdminEnvDiagnostics(SUPER_A);
     expect(diag.configuredCount).toBe(2);
+    expect(diag.envCount).toBe(2);
     expect(diag.configured).toBe(true);
     expect(diag.currentEmailInList).toBe(true);
     expect(diag).not.toHaveProperty("emails");
@@ -56,11 +62,18 @@ describe("getSuperAdminEnvDiagnostics", () => {
 });
 
 describe("getSuperAdminEmails", () => {
-  it("reads only from ARABYA_ADMIN_EMAILS", () => {
+  it("reads from ARABYA_ADMIN_EMAILS and merges UI allowlist", () => {
+    expect(getEnvSuperAdminEmails()).toEqual([SUPER_A, SUPER_B]);
     expect(getSuperAdminEmails()).toEqual([SUPER_A, SUPER_B]);
+    registerSuperAdminUiAllowlist(() => ["ui-admin@x.com"]);
+    expect(getSuperAdminEmails()).toEqual([
+      SUPER_A,
+      SUPER_B,
+      "ui-admin@x.com",
+    ]);
   });
 
-  it("fail-closed when env empty", () => {
+  it("fail-closed when env empty and no UI list", () => {
     delete process.env.ARABYA_ADMIN_EMAILS;
     expect(getSuperAdminEmails()).toEqual([]);
     expect(isSuperAdminEmail(SUPER_A)).toBe(false);
@@ -79,8 +92,13 @@ describe("mergeRoleWithEnvAdmin", () => {
     expect(mergeRoleWithEnvAdmin(SUPER_A, "member")).toBe("admin");
   });
 
-  it("demotes non–super-admin cloud admin to editor", () => {
-    expect(mergeRoleWithEnvAdmin("other@x.com", "admin")).toBe("editor");
+  it("keeps CRM-promoted admin role when email is on UI allowlist", () => {
+    registerSuperAdminUiAllowlist(() => ["promoted@x.com"]);
+    expect(mergeRoleWithEnvAdmin("promoted@x.com", "member")).toBe("admin");
+  });
+
+  it("keeps stored admin when not on allowlist (session until re-verify)", () => {
+    expect(mergeRoleWithEnvAdmin("other@x.com", "admin")).toBe("admin");
   });
 
   it("maps legacy user to member", () => {
@@ -118,7 +136,7 @@ describe("role gates", () => {
     expect(dailyVideoExportLimit("editor")).toBeNull();
   });
 
-  it("only super admin assigns roles; cannot demote another super admin", () => {
+  it("super admin may promote anyone to admin; env bootstrap cannot demote", () => {
     expect(canApproveAdminRole(SUPER_A)).toBe(true);
     expect(canApproveAdminRole("editor@gmail.com")).toBe(false);
     expect(canAssignRole("editor@x.com", "member")).toBe(false);
@@ -132,6 +150,7 @@ describe("role gates", () => {
         targetEmail: SUPER_B,
       }),
     ).toBe(false);
+    expect(isEnvBootstrapSuperAdmin(SUPER_B)).toBe(true);
     expect(
       canAssignRole(SUPER_A, "editor", {
         targetEmail: SUPER_A,
@@ -142,7 +161,7 @@ describe("role gates", () => {
       canAssignRole(SUPER_A, "admin", {
         targetEmail: "random@x.com",
       }),
-    ).toBe(false);
+    ).toBe(true);
     expect(
       canAssignRole(SUPER_A, "admin", {
         targetEmail: SUPER_B,

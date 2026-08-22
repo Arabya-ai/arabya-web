@@ -160,7 +160,7 @@ function parseAdminEmails(raw: string | undefined): string[] {
 }
 
 function isProtectedAdmin(email: string, env: Env): boolean {
-  return isSuperAdmin(email, env);
+  return isEnvBootstrapSuperAdmin(email, env);
 }
 
 function newId(prefix: string): string {
@@ -173,10 +173,76 @@ function normalizeRole(role: unknown): UserRole {
   return "member";
 }
 
-function isSuperAdmin(email: string, env: Env): boolean {
+function isEnvBootstrapSuperAdmin(email: string, env: Env): boolean {
   return parseAdminEmails(env.ARABYA_ADMIN_EMAILS).includes(
     email.trim().toLowerCase(),
   );
+}
+
+async function readUiSuperAdminEmails(db: D1Database): Promise<string[]> {
+  try {
+    const row = await db
+      .prepare(`SELECT value FROM site_settings WHERE key = ?`)
+      .bind("super_admin_emails")
+      .first<{ value: string }>();
+    if (!row?.value?.trim()) return [];
+    try {
+      const parsed = JSON.parse(row.value) as unknown;
+      if (Array.isArray(parsed)) {
+        return [
+          ...new Set(
+            parsed
+              .map((e) => String(e || "").trim().toLowerCase())
+              .filter((e) => e.includes("@")),
+          ),
+        ];
+      }
+    } catch {
+      /* fall through */
+    }
+    return parseAdminEmails(row.value);
+  } catch {
+    return [];
+  }
+}
+
+async function writeUiSuperAdminEmails(
+  db: D1Database,
+  emails: string[],
+  actorEmail: string,
+): Promise<void> {
+  const unique = [
+    ...new Set(
+      emails
+        .map((e) => e.trim().toLowerCase())
+        .filter((e) => e.includes("@")),
+    ),
+  ];
+  const now = Date.now();
+  await db
+    .prepare(
+      `INSERT INTO site_settings (key, value, updated_at, updated_by)
+       VALUES (?, ?, ?, ?)
+       ON CONFLICT(key) DO UPDATE SET
+         value = excluded.value,
+         updated_at = excluded.updated_at,
+         updated_by = excluded.updated_by`,
+    )
+    .bind(
+      "super_admin_emails",
+      JSON.stringify(unique),
+      now,
+      actorEmail.trim().toLowerCase(),
+    )
+    .run();
+}
+
+async function isSuperAdmin(email: string, env: Env): Promise<boolean> {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) return false;
+  if (isEnvBootstrapSuperAdmin(normalized, env)) return true;
+  const ui = await readUiSuperAdminEmails(env.DB);
+  return ui.includes(normalized);
 }
 
 function makeUid(): string {
@@ -1083,18 +1149,11 @@ const workerHandler = {
       const targetId = userIdFromEmail(String(body.userId || body.email || ""));
       const toRole = normalizeRole(body.role);
       if (!targetId) return badRequest("user_required");
-      if (!isSuperAdmin(actorEmail, env)) {
+      if (!(await isSuperAdmin(actorEmail, env))) {
         return forbidden("super_admin_required");
       }
-      // admin rank is super-admin emails only — no promotion of others
-      if (toRole === "admin" && !isSuperAdmin(targetId, env)) {
-        return forbidden("admin_reserved_for_super_admin");
-      }
       if (isProtectedAdmin(targetId, env) && toRole !== "admin") {
-        return forbidden("cannot_change_protected_admin");
-      }
-      if (isSuperAdmin(targetId, env) && toRole !== "admin") {
-        return forbidden("cannot_demote_super_admin");
+        return forbidden("cannot_demote_env_super_admin");
       }
       // Prevent self-demotion away from admin
       if (
@@ -1114,6 +1173,30 @@ const workerHandler = {
       const fromRole = normalizeRole(existing.role);
       if (fromRole === toRole) {
         return json({ ok: true, role: toRole, unchanged: true });
+      }
+
+      if (toRole === "admin") {
+        const current = await readUiSuperAdminEmails(env.DB);
+        if (!current.includes(targetId)) {
+          await writeUiSuperAdminEmails(
+            env.DB,
+            [...current, targetId],
+            actorEmail,
+          );
+        }
+      } else if (
+        fromRole === "admin" ||
+        (await isSuperAdmin(targetId, env))
+      ) {
+        if (isProtectedAdmin(targetId, env)) {
+          return forbidden("cannot_demote_env_super_admin");
+        }
+        const current = await readUiSuperAdminEmails(env.DB);
+        await writeUiSuperAdminEmails(
+          env.DB,
+          current.filter((e) => e !== targetId),
+          actorEmail,
+        );
       }
 
       const now = Date.now();
@@ -1146,7 +1229,7 @@ const workerHandler = {
     if (url.pathname === "/v1/admin/ban-user") {
       const targetId = userIdFromEmail(String(body.userId || body.email || ""));
       if (!targetId) return badRequest("user_required");
-      if (isProtectedAdmin(targetId, env) || isSuperAdmin(targetId, env)) {
+      if (isProtectedAdmin(targetId, env) || (await isSuperAdmin(targetId, env))) {
         return forbidden("cannot_ban_protected_admin");
       }
       if (targetId === actorEmail) return forbidden("cannot_ban_self");
@@ -1170,7 +1253,7 @@ const workerHandler = {
     }
 
     if (url.pathname === "/v1/admin/portfolio") {
-      if (!isSuperAdmin(actorEmail, env)) {
+      if (!(await isSuperAdmin(actorEmail, env))) {
         return forbidden("super_admin_required");
       }
       const targetId = userIdFromEmail(String(body.userId || body.email || ""));

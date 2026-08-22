@@ -23,7 +23,12 @@ export function AdminSuperAdminDiagnostics({ sessionEmail, labels }: Props) {
       {!diag.configured ? (
         <p>{labels.notConfigured}</p>
       ) : (
-        <p>{labels.count.replace("{count}", String(diag.configuredCount))}</p>
+        <p>
+          {labels.count
+            .replace("{count}", String(diag.configuredCount))
+            .replace("{env}", String(diag.envCount))
+            .replace("{ui}", String(diag.uiCount))}
+        </p>
       )}
       {sessionEmail ? (
         <p>

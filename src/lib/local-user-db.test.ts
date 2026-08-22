@@ -9,12 +9,15 @@ import {
   localAdminGetUser,
   localAdminListUsers,
   localAdminReviewRoleRequest,
+  localAdminSetRole,
   localAdminStats,
   localPullSync,
   localPushSync,
   localSaveTahfeezPortfolio,
+  readUiSuperAdminEmails,
   resetUserDbForTests,
 } from "@/lib/local-user-db";
+import { isSuperAdminEmail } from "@/lib/roles";
 import { emptyTahfeezPortfolio } from "@/lib/tahfeez/types";
 
 describe("local-user-db sync", () => {
@@ -261,12 +264,14 @@ describe("local-user-db admin actor gates", () => {
   let tmpDir: string;
   const prevPath = process.env.ARABYA_USER_DB_PATH;
   const prevAdmins = process.env.ARABYA_ADMIN_EMAILS;
+  const prevSync = process.env.ARABYA_USER_SYNC_ENABLED;
   const SUPER = "owner-super@example.com";
 
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "arabya-user-db-admin-"));
     process.env.ARABYA_USER_DB_PATH = path.join(tmpDir, "test.sqlite");
     process.env.ARABYA_ADMIN_EMAILS = SUPER;
+    process.env.ARABYA_USER_SYNC_ENABLED = "1";
     resetUserDbForTests();
     getUserDb();
     localPushSync(
@@ -286,6 +291,8 @@ describe("local-user-db admin actor gates", () => {
     else process.env.ARABYA_USER_DB_PATH = prevPath;
     if (prevAdmins === undefined) delete process.env.ARABYA_ADMIN_EMAILS;
     else process.env.ARABYA_ADMIN_EMAILS = prevAdmins;
+    if (prevSync === undefined) delete process.env.ARABYA_USER_SYNC_ENABLED;
+    else process.env.ARABYA_USER_SYNC_ENABLED = prevSync;
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
@@ -304,5 +311,42 @@ describe("local-user-db admin actor gates", () => {
   it("allows super-admin to ban a member", () => {
     const result = localAdminBanUser(SUPER, "member@example.com", true, "test");
     expect(result.status).toBe("banned");
+  });
+
+  it("promotes a member to super-admin from CRM and persists UI allowlist", () => {
+    const result = localAdminSetRole(
+      SUPER,
+      "member@example.com",
+      "admin",
+      "crm_ui",
+    );
+    expect(result.role).toBe("admin");
+    expect(readUiSuperAdminEmails()).toContain("member@example.com");
+    expect(isSuperAdminEmail("member@example.com")).toBe(true);
+
+    const demoted = localAdminSetRole(
+      SUPER,
+      "member@example.com",
+      "editor",
+      "crm_ui",
+    );
+    expect(demoted.role).toBe("editor");
+    expect(readUiSuperAdminEmails()).not.toContain("member@example.com");
+    expect(isSuperAdminEmail("member@example.com")).toBe(false);
+  });
+
+  it("refuses demoting env bootstrap super-admin", () => {
+    localPushSync(
+      { email: SUPER, name: "Owner", image: null },
+      {
+        bookmarks: [],
+        notes: [],
+        study: [],
+        progress: { lastPage: 1, habit: {}, updatedAt: null },
+      },
+    );
+    expect(() =>
+      localAdminSetRole(SUPER, SUPER, "editor", "nope"),
+    ).toThrow(/cannot_demote/);
   });
 });

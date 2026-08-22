@@ -9,7 +9,7 @@ import {
   resolveUserPlan,
   type AppLocale,
 } from "@/lib/plans";
-import { isSuperAdminEmail, type UserRole } from "@/lib/roles";
+import { type UserRole } from "@/lib/roles";
 
 export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   const t = useTranslations("Admin");
@@ -64,6 +64,9 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
     if (next === "admin" && !isSuperAdmin) {
       setError(t("adminOnlyPromote"));
       return;
+    }
+    if (next === "admin") {
+      if (!window.confirm(t("confirmPromoteSuperAdmin"))) return;
     }
     setBusyId(id);
     try {
@@ -219,7 +222,7 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
           <option value="member">{tRoles("member")}</option>
           <option value="creator">{tRoles("creator")}</option>
           <option value="editor">{tRoles("editor")}</option>
-          {isSuperAdmin && isSuperAdminEmail(u.email) ? (
+          {isSuperAdmin ? (
             <option value="admin">{tRoles("admin")}</option>
           ) : null}
         </select>
@@ -307,6 +310,9 @@ export function AdminUsersTable({ isSuperAdmin }: { isSuperAdmin: boolean }) {
 
       {error ? <p className="dash-banner dash-banner--warn">{error}</p> : null}
       <p className="dash-muted">{t("planEnvHint")}</p>
+      {isSuperAdmin ? (
+        <p className="dash-muted">{t("superAdminPromoteHint")}</p>
+      ) : null}
 
       <div className="users-table-shell">
         <table className="users-table">
