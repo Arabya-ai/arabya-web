@@ -617,6 +617,116 @@
   border-color: color-mix(in srgb, var(--brand) 30%, var(--line));
 }
 
+/* 404 — branded hub + same service cards as /services */
+.not-found-page {
+  padding-bottom: 2.5rem;
+}
+
+.not-found-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.not-found-hero__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.not-found-hero__mark {
+  border-radius: 14px;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--brand) 18%, transparent);
+}
+
+.not-found-hero__wordmark {
+  margin: 0;
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  font-weight: 800;
+  color: var(--brand-deep);
+  letter-spacing: -0.02em;
+}
+
+.not-found-hero__code {
+  margin: 0 0 0.35rem;
+  font-size: clamp(2.4rem, 6vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: color-mix(in srgb, var(--brand) 55%, var(--ink));
+  opacity: 0.35;
+}
+
+.not-found-hero__actions {
+  align-items: center;
+}
+
+.not-found-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.65rem;
+  padding: 0.55rem 1.15rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition:
+    transform 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.not-found-cta:active {
+  transform: scale(0.98);
+}
+
+.not-found-cta--primary {
+  background: var(--brand-deep);
+  border: 1px solid var(--brand-deep);
+  color: #fff;
+}
+
+.not-found-cta--primary:hover {
+  background: color-mix(in srgb, var(--brand-deep) 88%, #000);
+  border-color: color-mix(in srgb, var(--brand-deep) 88%, #000);
+  color: #fff;
+}
+
+.not-found-cta--ghost {
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--brand) 28%, var(--line));
+  color: var(--brand-deep);
+}
+
+.not-found-cta--ghost:hover {
+  background: var(--brand-soft);
+  border-color: color-mix(in srgb, var(--brand) 40%, var(--line));
+}
+
+.not-found-services {
+  margin-top: 1.75rem;
+}
+
+.not-found-services__head {
+  margin-bottom: 1.15rem;
+}
+
+.not-found-services__head h2 {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.2rem, 2vw, 1.45rem);
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.not-found-services__head p {
+  margin: 0;
+  max-width: 40rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
 @media (max-width: 720px) {
   .adv-search__filters,
   .nlp-svc__cards {
