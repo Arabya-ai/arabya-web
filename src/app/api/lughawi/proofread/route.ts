@@ -7,6 +7,7 @@ import { enrichProofreadWithAi } from "@/lib/lughawi/ai-proofread";
 import { enrichProofreadWithArabyaNlp } from "@/lib/lughawi/arabya-nlp-enrich";
 import { enrichProofreadWithSidecar } from "@/lib/lughawi/sidecar-enrich";
 import { lughawiMaxGuestChars, countArabicWords } from "@/lib/lughawi/config";
+import { listRecentAcceptedCorrections } from "@/lib/lughawi/learning-store";
 import { applyEdits, mergeEdits } from "@/lib/lughawi/pipeline-merge";
 import { proofreadLocal } from "@/lib/lughawi/pipeline";
 import { resolveLughawiAiCandidates } from "@/lib/lughawi/resolve-ai";
@@ -18,6 +19,7 @@ import { NextResponse } from "next/server";
 
 /**
  * Contabo hybrid: Alnnahwi (sidecar) ∥ Ollama (arabya-nlp) in parallel.
+ * Optional L3 MoA when LUGHAWI_MOA=1 (signed-in) + Contabo HF token.
  * Wall-clock ≈ max(sidecar, nlp), not the sum.
  */
 export const maxDuration = 120;
@@ -30,6 +32,12 @@ function stageNote(result: ProofreadResponse, id: string): string {
 function contaboOllamaAlreadyUsed(result: ProofreadResponse): boolean {
   const nlp = stageNote(result, "arabya-nlp");
   return /ollama/i.test(nlp) && !/llm-skipped|unreachable|skip/i.test(nlp);
+}
+
+/** L3 MoA opt-in — Contabo-first; off unless LUGHAWI_MOA=1. */
+function lughawiMoaEnabled(): boolean {
+  const raw = process.env.LUGHAWI_MOA?.trim().toLowerCase();
+  return raw === "1" || raw === "true" || raw === "on" || raw === "yes";
 }
 
 export async function POST(req: Request) {
@@ -93,10 +101,22 @@ export async function POST(req: Request) {
   const allowNeuralGec = process.env.LUGHAWI_NEURAL_GEC === "1";
   const runLocalLlm = Boolean(wantAi && allowLocalOllama);
   const runNeural = Boolean(wantAi && allowNeuralGec);
+  const emailEarly = session?.user?.email?.trim().toLowerCase();
+  const bannedEarly = session?.error === "Banned";
+  // MoA: signed-in only + LUGHAWI_MOA=1 — guests stay on Contabo rules (no HF burn).
+  const runMoa = Boolean(
+    wantAi && lughawiMoaEnabled() && emailEarly && !bannedEarly,
+  );
+  const fewShot = runMoa
+    ? listRecentAcceptedCorrections(3).map((p) => ({
+        from: p.from,
+        to: p.to,
+      }))
+    : undefined;
 
   // Layers 2 + 2b in PARALLEL (light by default):
   //   :8091 sidecar — rules (+ Alnnahwi only if LUGHAWI_NEURAL_GEC=1)
-  //   :8092 arabya-nlp — PyArabic/rules (+ Ollama only if LUGHAWI_LOCAL_OLLAMA=1)
+  //   :8092 arabya-nlp — PyArabic/rules (+ Ollama / MoA when opted in)
   const [fromSidecar, fromNlp] = await Promise.all([
     enrichProofreadWithSidecar(local, {
       neural: runNeural,
@@ -104,7 +124,9 @@ export async function POST(req: Request) {
     }).catch(() => local),
     enrichProofreadWithArabyaNlp(local, {
       skipLlm: !runLocalLlm,
-      timeoutMs: runLocalLlm ? 25_000 : 8_000,
+      useMoa: runMoa,
+      fewShotPairs: fewShot,
+      timeoutMs: runMoa ? 35_000 : runLocalLlm ? 25_000 : 8_000,
     }).catch(() => local),
   ]);
 
@@ -137,9 +159,16 @@ export async function POST(req: Request) {
           id: "parallel-contabo",
           editCount: mergedEdits.length,
           ms: Math.max(sidecarStage?.ms ?? 0, nlpStage?.ms ?? 0),
-          note: runLocalLlm || runNeural
-            ? `sidecar(${runNeural ? "neural∥" : ""}rules) ∥ arabya-nlp(rules${runLocalLlm ? "∥Ollama" : "-only"})`
-            : "sidecar(rules) ∥ arabya-nlp(rules-only)",
+          note: (() => {
+            const nlpBits = [
+              "rules",
+              runLocalLlm ? "Ollama" : null,
+              runMoa ? "MoA" : null,
+            ]
+              .filter(Boolean)
+              .join("∥");
+            return `sidecar(${runNeural ? "neural∥" : ""}rules) ∥ arabya-nlp(${nlpBits})`;
+          })(),
         },
       ],
     },

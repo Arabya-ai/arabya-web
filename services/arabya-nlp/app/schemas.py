@@ -12,6 +12,9 @@ class ProofreadRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=50_000)
     preserve_diacritics: bool | None = None
     skip_llm: bool = False
+    # L3 MoA — only when ARABYA_NLP_MOA=1 + HF token; never required for Contabo rules
+    use_moa: bool = False
+    few_shot_pairs: list[dict[str, str]] = Field(default_factory=list)
 
 
 class TextEdit(BaseModel):
@@ -38,6 +41,8 @@ class ProofreadResponse(BaseModel):
     parallel: bool = False
     edits: list[TextEdit] = []
     warnings: list[str] = []
+    moa_engine: str = ""
+    moa_mode: str = ""
 
 
 class TashkeelRequest(BaseModel):

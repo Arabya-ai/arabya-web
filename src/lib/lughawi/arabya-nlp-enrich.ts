@@ -36,13 +36,19 @@ function mapType(raw: string | undefined): LughawiEdit["type"] {
 
 function mapSource(stage: string | undefined): LughawiEdit["source"] {
   if (stage === "llm" || stage === "ollama") return "ai";
+  if (stage?.startsWith("moa")) return "ai";
   if (stage === "gec") return "gec";
   return "rules";
 }
 
 export async function enrichProofreadWithArabyaNlp(
   local: ProofreadResponse,
-  opts?: { skipLlm?: boolean; timeoutMs?: number },
+  opts?: {
+    skipLlm?: boolean;
+    useMoa?: boolean;
+    fewShotPairs?: Array<{ from: string; to: string }>;
+    timeoutMs?: number;
+  },
 ): Promise<ProofreadResponse> {
   if (!arabyaNlpProofreadEnabled()) {
     return {
@@ -65,6 +71,8 @@ export async function enrichProofreadWithArabyaNlp(
   const t0 = Date.now();
   const payload = await arabyaNlpProofread(local.original, {
     skipLlm: opts?.skipLlm,
+    useMoa: opts?.useMoa,
+    fewShotPairs: opts?.fewShotPairs,
     timeoutMs: opts?.timeoutMs,
   });
   const ms = Date.now() - t0;
@@ -118,7 +126,12 @@ export async function enrichProofreadWithArabyaNlp(
         typeof raw.explanation === "string" && raw.explanation
           ? raw.explanation
           : "تصحيح من محرك لغوي",
-      confidence: raw.stage === "llm" ? 0.75 : 0.9,
+      confidence:
+        typeof raw.stage === "string" && raw.stage.startsWith("moa")
+          ? 0.82
+          : raw.stage === "llm"
+            ? 0.75
+            : 0.9,
       source: mapSource(raw.stage),
       status: "proposed",
     });
@@ -197,10 +210,18 @@ export async function enrichProofreadWithArabyaNlp(
   const merged = mergeEdits([local.edits, mapped]);
   const result = applyEdits(local.original, merged);
   const usedLlm = Boolean(
-    payload.stage2_engine &&
+    (payload.stage2_engine &&
       payload.stage2_engine !== "llm-skipped" &&
-      !payload.stage2_engine.includes("skip"),
+      !payload.stage2_engine.includes("skip")) ||
+      (payload.moa_engine &&
+        payload.moa_engine !== "moa-skipped" &&
+        !payload.moa_engine.includes("skip")),
   );
+
+  const moaBit =
+    payload.moa_engine && payload.moa_engine !== "moa-skipped"
+      ? `+moa:${payload.moa_mode || payload.moa_engine}`
+      : "";
 
   return {
     ...local,
@@ -217,7 +238,7 @@ export async function enrichProofreadWithArabyaNlp(
           id: "arabya-nlp",
           editCount: mapped.length,
           ms,
-          note: `lughawi:${payload.stage1_engine ?? "?"}+${payload.stage2_engine ?? "?"}${payload.parallel ? ":parallel" : ""}${payload.mode ? `:${payload.mode}` : ""}`,
+          note: `lughawi:${payload.stage1_engine ?? "?"}+${payload.stage2_engine ?? "?"}${payload.parallel ? ":parallel" : ""}${payload.mode ? `:${payload.mode}` : ""}${moaBit}`,
         },
       ],
     },
