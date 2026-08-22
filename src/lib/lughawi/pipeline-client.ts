@@ -6,6 +6,8 @@ export function applySingleEdit(
   edits: LughawiEdit[],
   editId: string,
   decision: "accepted" | "rejected",
+  /** When accepting, optional user-typed replacement instead of engine suggestion. */
+  customTo?: string,
 ): { text: string; edits: LughawiEdit[] } {
   const target = edits.find((e) => e.id === editId);
   if (!target) return { text, edits };
@@ -19,9 +21,17 @@ export function applySingleEdit(
     };
   }
 
-  const delta = target.suggestion.length - (target.end - target.start);
+  const replacement = (customTo?.trim() || target.suggestion).trim();
+  if (!replacement || replacement === text.slice(target.start, target.end)) {
+    return {
+      text,
+      edits: edits.filter((e) => e.id !== editId),
+    };
+  }
+
+  const delta = replacement.length - (target.end - target.start);
   const nextText =
-    text.slice(0, target.start) + target.suggestion + text.slice(target.end);
+    text.slice(0, target.start) + replacement + text.slice(target.end);
 
   const nextEdits = edits
     .filter((e) => e.id !== editId)

@@ -48,7 +48,7 @@ export const RULE_NOTES: Record<string, RuleNote> = {
     titleEn: "Ali as a personal name",
     bodyAr: "بعد أفعال اللقاء والنداء يُرجَّح أن تكون «علي» اسم علم بالياء، لا حرف الجر «على».",
     bodyEn: "After meeting/address verbs, «علي» is usually a personal name (yaa), not the preposition «على».",
-    exampleAr: "قابل علي · لا: قابل على",
+    exampleAr: "قابل علي · ساعد علي · لا: قابل على / ساعد على",
   },
   "ta-marbuta": {
     ruleId: "ta-marbuta",

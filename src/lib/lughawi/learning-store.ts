@@ -121,25 +121,19 @@ export function isPairSuppressed(from: string, to: string): boolean {
   return getSuppressedPairs().has(pairKey(from, to));
 }
 
-export function recordFeedback(input: {
-  from: string;
-  to: string;
-  decision: "accepted" | "rejected";
-  ruleId?: string;
-}): LearnedPair {
-  const from = input.from.trim();
-  const to = input.to.trim();
-  if (!from || !to || from === to) {
-    throw new Error("invalid feedback pair");
-  }
-
-  const runtime = readJson(runtimePath());
+function bumpPair(
+  runtime: LearningFile,
+  from: string,
+  to: string,
+  decision: "accepted" | "rejected",
+  ruleId?: string,
+): LearnedPair {
   let row = runtime.pairs.find((p) => p.from === from && p.to === to);
   if (!row) {
     row = {
       from,
       to,
-      ruleId: input.ruleId,
+      ruleId,
       accepts: 0,
       rejects: 0,
       active: false,
@@ -147,14 +141,47 @@ export function recordFeedback(input: {
     };
     runtime.pairs.push(row);
   }
-  if (input.decision === "accepted") row.accepts += 1;
+  if (decision === "accepted") row.accepts += 1;
   else row.rejects += 1;
-  row.ruleId = input.ruleId ?? row.ruleId;
+  row.ruleId = ruleId ?? row.ruleId;
   row.active = computeActive(row.accepts, row.rejects);
   row.updatedAt = new Date().toISOString();
-  writeJson(runtimePath(), runtime);
+  return row;
+}
 
-  // Promote active high-confidence pairs into Git seed file (project memory).
+export function recordFeedback(input: {
+  from: string;
+  to: string;
+  decision: "accepted" | "rejected" | "custom";
+  ruleId?: string;
+  /** When decision is custom: user's own correction (model `to` is rejected). */
+  customTo?: string;
+}): LearnedPair {
+  const from = input.from.trim();
+  const modelTo = input.to.trim();
+  if (!from || !modelTo) {
+    throw new Error("invalid feedback pair");
+  }
+
+  const runtime = readJson(runtimePath());
+  let row: LearnedPair;
+
+  if (input.decision === "custom") {
+    const customTo = (input.customTo ?? "").trim();
+    if (!customTo || customTo === from) {
+      throw new Error("invalid custom correction");
+    }
+    // Reject the engine pair, accept the user's pair for the flywheel.
+    if (modelTo !== from && modelTo !== customTo) {
+      bumpPair(runtime, from, modelTo, "rejected", input.ruleId);
+    }
+    row = bumpPair(runtime, from, customTo, "accepted", input.ruleId ?? "user-custom");
+  } else {
+    if (from === modelTo) throw new Error("invalid feedback pair");
+    row = bumpPair(runtime, from, modelTo, input.decision, input.ruleId);
+  }
+
+  writeJson(runtimePath(), runtime);
   syncSeedFromRuntime();
   return row;
 }

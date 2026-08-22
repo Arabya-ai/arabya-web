@@ -711,6 +711,99 @@
   color: color-mix(in srgb, var(--brand-cyan, #5eead4) 90%, white);
 }
 
+.lughawi-tip--actions {
+  min-width: min(22rem, 86vw);
+  max-width: min(26rem, 92vw);
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  box-shadow: none;
+}
+
+.lughawi-suggestion-pop {
+  padding: 0.75rem 0.85rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--line));
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--brand-deep) 14%, transparent);
+}
+
+.lughawi-suggestion-pop.is-compact {
+  padding: 0.65rem 0.75rem;
+}
+
+.lughawi-suggestion-pop-rule {
+  margin: 0 0 0.4rem;
+  font-size: 0.86rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.lughawi-suggestion-pop-diff {
+  margin: 0 0 0.55rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
+  align-items: center;
+  font-size: 1rem;
+}
+
+.lughawi-suggestion-pop-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.lughawi-suggestion-pop-custom {
+  margin-top: 0.55rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.lughawi-suggestion-pop-custom label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.lughawi-suggestion-pop-custom input {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg, var(--surface));
+  color: var(--ink);
+  padding: 0.45rem 0.65rem;
+  font: inherit;
+}
+
+.lughawi-edit-custom {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+  width: 100%;
+}
+
+.lughawi-edit-custom input {
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0.4rem 0.6rem;
+  font: inherit;
+  min-width: 0;
+}
+
+.lughawi-edit-custom button {
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--brand) 35%, var(--line));
+  background: color-mix(in srgb, var(--brand-soft) 55%, var(--surface));
+  color: var(--brand-deep);
+  padding: 0.35rem 0.7rem;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
 .lughawi-skeleton {
   display: grid;
   gap: 0.55rem;
@@ -831,15 +924,19 @@
 }
 
 .lughawi-edits li {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.55rem 0.75rem;
+  align-items: start;
   padding: 0.9rem 1rem;
   border-radius: 14px;
   background: color-mix(in srgb, var(--brand) 4%, var(--surface-2, var(--surface)));
   border: 1px solid transparent;
   transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+
+.lughawi-edit-custom {
+  grid-column: 1 / -1;
 }
 
 .lughawi-edits li.is-active {

@@ -10,6 +10,9 @@ import {
 import { applyEdits, mergeEdits } from "@/lib/lughawi/pipeline-merge";
 import type { LughawiEdit, ProofreadResponse } from "@/lib/lughawi/types";
 
+/** Soft wall so Contabo Auto cannot hang the Correct button for 90s. */
+const AI_PROOFREAD_TIMEOUT_MS = 10_000;
+
 function stripCodeFence(raw: string): string {
   const t = raw.trim();
   const m = t.match(/^```(?:json)?\s*([\s\S]*?)```$/i);
@@ -45,6 +48,20 @@ function parseAiPairs(
   } catch {
     return [];
   }
+}
+
+/**
+ * Drop person/gender flips that invent wrong conjugation
+ * (e.g. ساعد → ساعدت) when the stem was already fine.
+ */
+export function isUnsafeAiMorphFlip(from: string, to: string): boolean {
+  if (!from || !to || from === to) return false;
+  const suffixes = ["ت", "تم", "تن", "وا", "ين", "ان", "ون", "نا"];
+  for (const suf of suffixes) {
+    if (to === from + suf) return true;
+    if (from === to + suf && from.length > to.length) return true;
+  }
+  return false;
 }
 
 function locatePairs(
@@ -90,6 +107,26 @@ function locatePairs(
   return edits;
 }
 
+async function runAiAutoWithTimeout(
+  args: Parameters<typeof runAiAuto>[0],
+  timeoutMs: number,
+): Promise<Awaited<ReturnType<typeof runAiAuto>>> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      runAiAuto(args),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error(`ai-proofread-timeout:${timeoutMs}`)),
+          timeoutMs,
+        );
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 /**
  * Ask Auto for remaining spelling/grammar fixes as JSON pairs, merge with local.
  */
@@ -100,11 +137,12 @@ export async function enrichProofreadWithAi(
   if (!candidates.length) return local;
 
   const system =
-    "أنت مدقق عربي فصيح. أعد فقط مصفوفة JSON من أزواج التصحيح دون شرح. " +
+    "أنت مدقق إملائي عربي فصيح حذر. أعد فقط مصفوفة JSON من أزواج التصحيح دون شرح. " +
     'الشكل: [{"from":"كلمة خاطئة","to":"كلمة صحيحة"}]. ' +
     "صحّح الهمزات والتاء المربوطة وياء/ألف حرف الجر والأسماء (أحمد، علي، في، المدرسة، بقرة لا بقره، تقرأ لا تقرا). " +
     "انصب المفعول به عند اللزوم (كتابًا بعد تقرأ/يقرأ). " +
-    "لا تُعد صياغة الجملة ولا تضف كلمات جديدة ولا تغيّر المعنى المنطقي.";
+    "لا تغيّر تصريف فعل صحيح المعنى (ساعد يبقى ساعد — ممنوع ساعدت/ساعدوا). " +
+    "لا تُعد صياغة الجملة ولا تضف كلمات جديدة ولا تغيّر الجنس أو العدد دون خطأ واضح.";
 
   const user =
     `النص:\n${local.original}\n\n` +
@@ -113,14 +151,38 @@ export async function enrichProofreadWithAi(
       ? local.edits.map((e) => `${e.original} → ${e.suggestion}`).join("\n")
       : "(لا يوجد)");
 
-  const { text: raw, provider, model, attempts } = await runAiAuto({
-    candidates,
-    system,
-    user,
-    maxTokens: 800,
-  });
+  let raw = "";
+  let provider: string | undefined;
+  let model: string | undefined;
+  let attempts: number | undefined;
+  try {
+    const out = await runAiAutoWithTimeout(
+      {
+        candidates,
+        system,
+        user,
+        maxTokens: 800,
+      },
+      AI_PROOFREAD_TIMEOUT_MS,
+    );
+    raw = out.text;
+    provider = out.provider;
+    model = out.model;
+    attempts = out.attempts;
+  } catch {
+    return {
+      ...local,
+      meta: {
+        ...local.meta,
+        warning:
+          local.meta.warning ??
+          "تخطي Auto لتسريع النتيجة — التدقيق المحلي مكتمل.",
+      },
+    };
+  }
 
   const pairs = parseAiPairs(raw).filter((p) => {
+    if (isUnsafeAiMorphFlip(p.from, p.to)) return false;
     // Never let AI undo a local high-confidence fix (e.g. علي ← على name rule).
     const undoesLocal = local.edits.some(
       (e) => e.suggestion === p.from && e.original === p.to,

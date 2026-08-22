@@ -5,6 +5,7 @@
 import { BUILTIN_SPELLING } from "@/lib/lughawi/rules/spelling-data";
 import {
   ALEF_FARQ_RE,
+  collectNameAliEdits,
   nextSpellingId,
   spellingWordEdit,
   spellingWordRe,
@@ -95,6 +96,9 @@ export function collectSpellingEditsOffline(
       ),
     );
   }
+
+  const nameAli = collectNameAliEdits(text, locale, claimed, seq);
+  edits.push(...nameAli.edits);
 
   return edits.sort((a, b) => a.start - b.start || b.end - a.end);
 }

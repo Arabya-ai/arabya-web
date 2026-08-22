@@ -9,6 +9,7 @@ import { useInstantProofread } from "@/lib/lughawi/use-instant-proofread";
 import { LughawiEditorWithHints } from "@/components/lughawi/LughawiEditorWithHints";
 import { LughawiLayerStrip } from "@/components/lughawi/LughawiLayerStrip";
 import { LughawiSettings } from "@/components/lughawi/LughawiSettings";
+import { LughawiSuggestionPopover } from "@/components/lughawi/LughawiSuggestionPopover";
 import {
   ArrowLeftRight,
   BookOpen,
@@ -196,22 +197,20 @@ export function LughawiStudio() {
           id={`${studioId}-mark-${edit.id}`}
           className={`lughawi-mark lughawi-mark--${TYPE_CLASS[edit.type]}${hoverId === edit.id ? " is-active" : ""}`}
           onMouseEnter={() => setHoverId(edit.id)}
-          onMouseLeave={() => setHoverId(null)}
           onFocus={() => setHoverId(edit.id)}
-          onBlur={() => setHoverId(null)}
-          onClick={() => {
-            setHoverId(edit.id);
-            document
-              .getElementById(`${studioId}-edit-${edit.id}`)
-              ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-          }}
+          onClick={() => setHoverId(edit.id)}
           tabIndex={0}
         >
           {src.slice(edit.start, edit.end)}
           {hoverId === edit.id ? (
-            <span className="lughawi-tip" role="tooltip">
-              <strong>{edit.suggestion}</strong>
-              <span>{edit.explanation}</span>
+            <span className="lughawi-tip lughawi-tip--actions" role="tooltip">
+              <LughawiSuggestionPopover
+                compact
+                edit={edit}
+                onAccept={() => decide(edit.id, "accepted")}
+                onReject={() => decide(edit.id, "rejected")}
+                onCustom={(_, customTo) => decide(edit.id, "custom", customTo)}
+              />
             </span>
           ) : null}
         </mark>,
@@ -232,7 +231,8 @@ export function LughawiStudio() {
       setPending(true);
       void (async () => {
         const ctrl = new AbortController();
-        const timer = window.setTimeout(() => ctrl.abort(), 90_000);
+        const timeoutMs = next === "proofread" ? 35_000 : 90_000;
+        const timer = window.setTimeout(() => ctrl.abort(), timeoutMs);
         try {
           const endpoint =
             next === "proofread"
@@ -300,7 +300,11 @@ export function LughawiStudio() {
     [t, text, targetLang, tashkeelLevel, proofMode, pending],
   );
 
-  async function sendFeedback(edit: LughawiEdit, decision: "accepted" | "rejected") {
+  async function sendFeedback(
+    edit: LughawiEdit,
+    decision: "accepted" | "rejected" | "custom",
+    customTo?: string,
+  ) {
     try {
       await fetch("/api/lughawi/feedback", {
         method: "POST",
@@ -310,6 +314,7 @@ export function LughawiStudio() {
           to: edit.suggestion,
           decision,
           ruleId: edit.ruleId,
+          ...(decision === "custom" && customTo ? { customTo } : {}),
         }),
       });
     } catch {
@@ -317,16 +322,44 @@ export function LughawiStudio() {
     }
   }
 
-  function decide(id: string, decision: "accepted" | "rejected") {
+  function decide(
+    id: string,
+    decision: "accepted" | "rejected" | "custom",
+    customTo?: string,
+  ) {
     setResult((prev) => {
       if (!prev) return prev;
       const edit = prev.edits.find((e) => e.id === id && e.status === "proposed");
       if (!edit) return prev;
 
-      void sendFeedback(edit, decision);
+      if (decision === "custom" && customTo?.trim()) {
+        void sendFeedback(edit, "custom", customTo.trim());
+        setHistory((h) => [...h.slice(-19), prev.result]);
+        const applied = applySingleEdit(
+          prev.result,
+          prev.edits,
+          id,
+          "accepted",
+          customTo.trim(),
+        );
+        setText(applied.text);
+        setFlash(
+          t("customFlash", { from: edit.original, to: customTo.trim() }),
+        );
+        setHoverId(null);
+        return {
+          ...prev,
+          original: applied.text,
+          result: applied.text,
+          edits: applied.edits,
+        };
+      }
+
+      void sendFeedback(edit, decision === "custom" ? "accepted" : decision);
 
       if (decision === "rejected") {
         setFlash(t("rejectedFlash", { word: edit.original }));
+        setHoverId(null);
         return {
           ...prev,
           edits: prev.edits.filter((e) => e.id !== id),
@@ -337,6 +370,7 @@ export function LughawiStudio() {
       const applied = applySingleEdit(prev.result, prev.edits, id, "accepted");
       setText(applied.text);
       setFlash(t("acceptedFlash", { from: edit.original, to: edit.suggestion }));
+      setHoverId(null);
       return {
         ...prev,
         original: applied.text,
@@ -1044,9 +1078,13 @@ export function LughawiStudio() {
                     pending={pending && action === "proofread"}
                     placeholder={t("placeholder")}
                     hintId={`${studioId}-hint`}
-                    hintText={`${t("instantHint")} · ${t("shortcutHint")}`}
+                    hintText={`${t("instantHint")} · ${t("clickWordHint")} · ${t("shortcutHint")}`}
                     onKeyDown={onTextKeyDown}
                     onAcceptInstant={(edit) => void sendFeedback(edit, "accepted")}
+                    onRejectInstant={(edit) => void sendFeedback(edit, "rejected")}
+                    onCustomInstant={(edit, customTo) =>
+                      void sendFeedback(edit, "custom", customTo)
+                    }
                   />
                 </label>
 
@@ -1234,6 +1272,30 @@ export function LughawiStudio() {
                             {t("reject")}
                           </button>
                         </div>
+                        <form
+                          className="lughawi-edit-custom"
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            const fd = new FormData(e.currentTarget);
+                            const customTo = String(fd.get("customTo") ?? "").trim();
+                            if (!customTo) return;
+                            decide(edit.id, "custom", customTo);
+                          }}
+                        >
+                          <label className="sr-only" htmlFor={`${studioId}-custom-${edit.id}`}>
+                            {t("customFixLabel")}
+                          </label>
+                          <input
+                            id={`${studioId}-custom-${edit.id}`}
+                            name="customTo"
+                            type="text"
+                            dir="rtl"
+                            defaultValue={edit.suggestion}
+                            placeholder={t("customFixPlaceholder")}
+                            aria-label={t("customFixLabel")}
+                          />
+                          <button type="submit">{t("applyCustomFix")}</button>
+                        </form>
                       </li>
                     ))}
                   </ul>

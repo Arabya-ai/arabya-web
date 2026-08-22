@@ -46,3 +46,52 @@ export function spellingWordEdit(
 
 export const ALEF_FARQ_RE =
   /(?<![\u0600-\u06FFa-zA-Z0-9])([\u0621-\u064A]{2,14}و)(?=[\s.,،؛؟!)]|$)/g;
+
+/**
+ * Verbs / cues after which «على» is usually the name علي (yaa), not the preposition.
+ * Includes ساعد so «احمد ساعد على…» becomes «… علي…».
+ */
+export const NAME_ALI_TRIGGERS =
+  "قابل|قابلت|قابله|زرت|زار|رأيت|رأى|لقيت|لَقيت|كلمت|كلّمت|ناديت|نادى|سميت|سمّيت|اسمه|يدعى|يُدعى|ساعد|ساعدت|ساعده|ساعدها|ساعدهم|ساعدتنا|مع|إلى|الى";
+
+const NAME_ALI_RE = new RegExp(
+  `(?<![\\u0600-\\u06FFa-zA-Z0-9])(${NAME_ALI_TRIGGERS})\\s+على(?![\\u0600-\\u06FFa-zA-Z0-9])`,
+  "g",
+);
+
+/** Context rule: على → علي after meeting / helping / naming cues. */
+export function collectNameAliEdits(
+  text: string,
+  locale: SpellingLocale,
+  claimed: Set<string>,
+  seq: number,
+  isSuppressed: (from: string, to: string) => boolean = () => false,
+): { edits: LughawiEdit[]; nextSeq: number } {
+  const edits: LughawiEdit[] = [];
+  let nextSeq = seq;
+  NAME_ALI_RE.lastIndex = 0;
+  let nm: RegExpExecArray | null;
+  while ((nm = NAME_ALI_RE.exec(text)) !== null) {
+    const full = nm[0]!;
+    const start = nm.index + full.lastIndexOf("على");
+    const end = start + "على".length;
+    const key = `${start}:${end}`;
+    if (claimed.has(key)) continue;
+    if (isSuppressed("على", "علي")) continue;
+    claimed.add(key);
+    nextSeq += 1;
+    edits.push(
+      spellingWordEdit(
+        text,
+        start,
+        end,
+        "علي",
+        "name-ali",
+        locale,
+        nextSpellingId("sp", nextSeq),
+        0.9,
+      ),
+    );
+  }
+  return { edits, nextSeq };
+}
