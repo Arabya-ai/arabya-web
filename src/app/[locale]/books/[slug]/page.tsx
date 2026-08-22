@@ -1,7 +1,7 @@
-import { Link } from "@/i18n/navigation";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { resolveLocale } from "@/i18n/locale-params";
 import { getBookMeta } from "@/lib/books";
 import { ArabyaHubHero, ArabyaHubPage } from "@/components/hub/ArabyaHubShell";
 
@@ -27,6 +27,7 @@ function statusKey(
 }
 
 export default async function BookViewerPage({ params }: Props) {
+  const locale = await resolveLocale(params);
   const { slug } = await params;
   const t = await getTranslations({ locale, namespace: "Books" });
   const th = await getTranslations({ locale, namespace: "ServicesHub" });
