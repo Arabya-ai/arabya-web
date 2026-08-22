@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "name": "arabya-agent-ecosystem",
+  "description": "Ten upstream agent harnesses, skills, cookbooks, and SDKs vendored for Cursor + Arabya.",
+  "updated": "2026-08-22",
+  "repos": [
+    {
+      "id": "deepseek-harness",
+      "title": "DeepSeek Harness",
+      "url": "https://github.com/deepseek-ai/deepseek-harness",
+      "path": "vendor/agent-ecosystem/deepseek-harness",
+      "branch": "master",
+      "stars": "123K",
+      "arabyaUse": "Plugin-first agent runtime reference; optional local `npx @deepseek-ai/dsh web` for experimenting with Lughawi/NLP sidecar patterns.",
+      "entrypoints": ["README.md", "AGENTS.md", "docs/architecture.md"]
+    },
+    {
+      "id": "anthropic-skills",
+      "title": "Claude Skills",
+      "url": "https://github.com/anthropics/skills",
+      "path": "vendor/agent-ecosystem/anthropic-skills",
+      "branch": "main",
+      "stars": "170K",
+      "arabyaUse": "Document skills (docx/pdf/xlsx), webapp-testing, mcp-builder — synced into `.cursor/skills/`.",
+      "entrypoints": ["skills/", "spec/"]
+    },
+    {
+      "id": "openai-cookbook",
+      "title": "OpenAI Cookbook",
+      "url": "https://github.com/openai/openai-cookbook",
+      "path": "vendor/agent-ecosystem/openai-cookbook",
+      "branch": "main",
+      "stars": "75K",
+      "arabyaUse": "Reference for function calling, evals, RAG — see `.cursor/skills/openai-cookbook-index/`.",
+      "entrypoints": ["examples/", "articles/"]
+    },
+    {
+      "id": "claude-cookbooks",
+      "title": "Claude Cookbooks",
+      "url": "https://github.com/anthropics/claude-cookbooks",
+      "path": "vendor/agent-ecosystem/claude-cookbooks",
+      "branch": "main",
+      "stars": "51K",
+      "arabyaUse": "Agent SDK, tool use, extended thinking patterns for admin/Lughawi features.",
+      "entrypoints": ["claude_agent_sdk/", "capabilities/", "coding/"]
+    },
+    {
+      "id": "grok-build",
+      "title": "Grok Build",
+      "url": "https://github.com/xai-org/grok-build",
+      "path": "vendor/agent-ecosystem/grok-build",
+      "branch": "main",
+      "stars": "25K",
+      "arabyaUse": "Terminal coding-agent reference; optional `grok` CLI for owner-side experiments (not production).",
+      "entrypoints": ["README.md", "crates/"]
+    },
+    {
+      "id": "openai-agents-python",
+      "title": "OpenAI Agents SDK",
+      "url": "https://github.com/openai/openai-agents-python",
+      "path": "vendor/agent-ecosystem/openai-agents-python",
+      "branch": "main",
+      "stars": "28K",
+      "arabyaUse": "Multi-agent workflows in `services/agent-lab/` (optional Python venv).",
+      "entrypoints": ["examples/", "src/agents/"]
+    },
+    {
+      "id": "gemini-cookbook",
+      "title": "Google Gemini Cookbook",
+      "url": "https://github.com/google-gemini/cookbook",
+      "path": "vendor/agent-ecosystem/gemini-cookbook",
+      "branch": "main",
+      "stars": "21K",
+      "arabyaUse": "Primary cloud model recipes — aligns with `src/lib/lughawi/ai-gateway.ts` Google defaults.",
+      "entrypoints": ["quickstarts/", "examples/"]
+    },
+    {
+      "id": "google-adk-python",
+      "title": "Google ADK",
+      "url": "https://github.com/google/adk-python",
+      "path": "vendor/agent-ecosystem/google-adk-python",
+      "branch": "main",
+      "stars": "17K",
+      "arabyaUse": "Code-first agents for Contabo NLP sidecar experiments in `services/agent-lab/`.",
+      "entrypoints": ["src/google/adk/", "contributing/samples/"]
+    },
+    {
+      "id": "cursor-cookbook",
+      "title": "Cursor Cookbook",
+      "url": "https://github.com/cursor/cookbook",
+      "path": "vendor/agent-ecosystem/cursor-cookbook",
+      "branch": "main",
+      "stars": "4K",
+      "arabyaUse": "Hooks, Cloud Agents lab, SDK examples — dag-task-runner synced to `.cursor/skills/`.",
+      "entrypoints": ["hooks/", "sdk/", ".cursor/skills/"]
+    },
+    {
+      "id": "cursor-plugins",
+      "title": "Cursor Plugins",
+      "url": "https://github.com/cursor/plugins",
+      "path": "vendor/agent-ecosystem/cursor-plugins",
+      "branch": "main",
+      "stars": "3K",
+      "arabyaUse": "Official plugin marketplace mounted at `.cursor/plugins/marketplace.json`.",
+      "entrypoints": [".cursor-plugin/marketplace.json", "cursor-team-kit/", "orchestrate/"]
+    }
+  ],
+  "syncedSkills": [
+    { "source": "cursor-cookbook/.cursor/skills/dag-task-runner", "target": "cursor-dag-task-runner" },
+    { "source": "cursor-plugins/cursor-team-kit/skills/verify-this", "target": "cursor-verify-this" },
+    { "source": "cursor-plugins/cursor-team-kit/skills/fix-ci", "target": "cursor-fix-ci" },
+    { "source": "cursor-plugins/cursor-team-kit/skills/review-and-ship", "target": "cursor-review-and-ship" },
+    { "source": "cursor-plugins/cursor-team-kit/skills/run-smoke-tests", "target": "cursor-run-smoke-tests" },
+    { "source": "cursor-plugins/orchestrate/skills/orchestrate", "target": "cursor-orchestrate" },
+    { "source": "cursor-plugins/agent-compatibility/skills/check-agent-compatibility", "target": "cursor-check-agent-compatibility" },
+    { "source": "cursor-plugins/cursor-sdk/skills/cursor-sdk", "target": "cursor-sdk" },
+    { "source": "anthropic-skills/skills/webapp-testing", "target": "anthropic-webapp-testing" },
+    { "source": "anthropic-skills/skills/mcp-builder", "target": "anthropic-mcp-builder" },
+    { "source": "anthropic-skills/skills/docx", "target": "anthropic-docx" },
+    { "source": "anthropic-skills/skills/pdf", "target": "anthropic-pdf" }
+  ],
+  "recommendedPlugins": [
+    "cursor-team-kit",
+    "orchestrate",
+    "agent-compatibility",
+    "cursor-sdk",
+    "continual-learning",
+    "playwright",
+    "github"
+  ]
+}

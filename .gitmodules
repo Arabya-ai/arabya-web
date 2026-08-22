@@ -1,0 +1,31 @@
+[submodule "vendor/agent-ecosystem/deepseek-harness"]
+	path = vendor/agent-ecosystem/deepseek-harness
+	url = https://github.com/deepseek-ai/deepseek-harness.git
+	branch = master
+[submodule "vendor/agent-ecosystem/anthropic-skills"]
+	path = vendor/agent-ecosystem/anthropic-skills
+	url = https://github.com/anthropics/skills.git
+[submodule "vendor/agent-ecosystem/openai-cookbook"]
+	path = vendor/agent-ecosystem/openai-cookbook
+	url = https://github.com/openai/openai-cookbook.git
+[submodule "vendor/agent-ecosystem/claude-cookbooks"]
+	path = vendor/agent-ecosystem/claude-cookbooks
+	url = https://github.com/anthropics/claude-cookbooks.git
+[submodule "vendor/agent-ecosystem/grok-build"]
+	path = vendor/agent-ecosystem/grok-build
+	url = https://github.com/xai-org/grok-build.git
+[submodule "vendor/agent-ecosystem/openai-agents-python"]
+	path = vendor/agent-ecosystem/openai-agents-python
+	url = https://github.com/openai/openai-agents-python.git
+[submodule "vendor/agent-ecosystem/gemini-cookbook"]
+	path = vendor/agent-ecosystem/gemini-cookbook
+	url = https://github.com/google-gemini/cookbook.git
+[submodule "vendor/agent-ecosystem/google-adk-python"]
+	path = vendor/agent-ecosystem/google-adk-python
+	url = https://github.com/google/adk-python.git
+[submodule "vendor/agent-ecosystem/cursor-cookbook"]
+	path = vendor/agent-ecosystem/cursor-cookbook
+	url = https://github.com/cursor/cookbook.git
+[submodule "vendor/agent-ecosystem/cursor-plugins"]
+	path = vendor/agent-ecosystem/cursor-plugins
+	url = https://github.com/cursor/plugins.git

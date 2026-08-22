@@ -61,6 +61,7 @@ data/user-data.sqlite-shm
 
 # Arabya NLP FastAPI (Contabo) — keep source; ignore local venv
 services/arabya-nlp/.venv/
+services/agent-lab/.venv/
 services/arabya-nlp/venv/
 services/arabya-nlp/*.sqlite
 services/arabya-nlp/*.log
