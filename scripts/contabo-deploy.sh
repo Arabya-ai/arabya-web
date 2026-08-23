@@ -399,6 +399,11 @@ if grep -q '^ARABYA_NLP_DEVOPS_AUTO_EXECUTE=' "$APP_DIR/.env" 2>/dev/null; then
 else
   echo 'ARABYA_NLP_DEVOPS_AUTO_EXECUTE=0' >> "$APP_DIR/.env"
 fi
+# L3 MoA — enabled when HF token is in /admin/ops (soft-skip if missing)
+grep -q '^LUGHAWI_MOA=' "$APP_DIR/.env" 2>/dev/null || \
+  echo 'LUGHAWI_MOA=1' >> "$APP_DIR/.env"
+grep -q '^ARABYA_NLP_MOA=' "$APP_DIR/.env" 2>/dev/null || \
+  echo 'ARABYA_NLP_MOA=1' >> "$APP_DIR/.env"
 # Prefer enabling when venv is present (owner already activated Option A).
 NLP_VENV_OK=0
 if [[ -x "$APP_DIR/services/arabya-nlp/.venv/bin/python" && -f "$APP_DIR/services/arabya-nlp/main.py" ]]; then
