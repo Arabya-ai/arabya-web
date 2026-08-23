@@ -1,0 +1,461 @@
+/* Arabya editorial B + Lughawi studio D
+   Keep BrandLockup / emblem intact. Teal identity only.
+   Rich surfaces + depth — not flat stripped UI. */
+
+:root {
+  --bd-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --bd-radius-lg: 22px;
+  --bd-radius-md: 14px;
+  --bd-radius-sm: 10px;
+  --bd-shadow-soft:
+    0 1px 0 color-mix(in srgb, #fff 70%, transparent) inset,
+    0 12px 32px color-mix(in srgb, var(--brand-deep) 10%, transparent);
+  --bd-shadow-lift:
+    0 1px 0 color-mix(in srgb, #fff 65%, transparent) inset,
+    0 18px 44px color-mix(in srgb, var(--brand-deep) 14%, transparent);
+}
+
+/* —— Atmosphere (single wash + grain, not dual AI orbs) —— */
+body {
+  background:
+    radial-gradient(
+      1100px 520px at 92% -8%,
+      color-mix(in srgb, var(--brand) 14%, transparent),
+      transparent 58%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--brand-soft) 55%, var(--bg)) 0%,
+      var(--bg) 42%
+    );
+}
+
+body::before {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-theme="dark"] body {
+  background:
+    radial-gradient(
+      900px 480px at 88% -12%,
+      color-mix(in srgb, var(--brand) 16%, transparent),
+      transparent 55%
+    ),
+    var(--bg);
+}
+
+/* —— Home shell width (editorial) —— */
+.shell.home-simple {
+  width: min(1120px, calc(100% - 1.5rem));
+}
+
+/* —— Home hero B: asymmetric brand-first —— */
+.home-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  align-items: end;
+  padding: clamp(1.75rem, 4vw, 2.85rem) 0 clamp(1.5rem, 3vw, 2.25rem);
+  margin-bottom: 0.35rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--brand) 14%, var(--line));
+  animation: bd-rise 0.55s var(--bd-ease) both;
+}
+
+.home-hero__copy {
+  min-width: 0;
+}
+
+.home-hero__brand {
+  margin: 0;
+  font-family: var(--font-reem-kufi), var(--font-ui), sans-serif;
+  font-size: clamp(3rem, 8vw, 4.6rem);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+  color: var(--brand-deep);
+  text-wrap: balance;
+}
+
+.home-hero__line {
+  margin: 0.65rem 0 0;
+  font-family: var(--font-reem-kufi), var(--font-ui), sans-serif;
+  font-size: clamp(1.2rem, 2.6vw, 1.55rem);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  max-width: 22ch;
+  text-wrap: balance;
+}
+
+.home-hero__lead {
+  margin: 0.75rem 0 0;
+  max-width: 36rem;
+  color: var(--muted);
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.8;
+  text-wrap: pretty;
+}
+
+.home-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.7rem;
+  margin-top: 1.25rem;
+}
+
+.home-hero__actions .continue-reading {
+  margin: 0;
+}
+
+.home-hero__actions .continue-link {
+  min-height: 2.35rem;
+  padding: 0.38rem 1rem;
+  border-radius: var(--bd-radius-sm);
+  box-shadow: none;
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--brand) 22%, var(--line));
+  color: var(--brand-deep);
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.home-hero__aside {
+  min-width: 0;
+  padding: 1.25rem 1.3rem 1.35rem;
+  border-radius: var(--bd-radius-lg);
+  border: 1px solid color-mix(in srgb, var(--brand) 16%, var(--line));
+  background:
+    linear-gradient(
+      155deg,
+      color-mix(in srgb, var(--brand-soft) 80%, var(--surface)) 0%,
+      var(--surface) 70%
+    );
+  box-shadow: var(--bd-shadow-soft);
+}
+
+.home-hero__aside-kicker {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--brand);
+  letter-spacing: 0.02em;
+}
+
+.home-hero__aside-title {
+  margin: 0.35rem 0 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--brand-deep);
+  letter-spacing: -0.015em;
+}
+
+.home-hero__aside-body {
+  margin: 0.45rem 0 0;
+  color: var(--muted);
+  line-height: 1.65;
+  font-size: 0.95rem;
+}
+
+.home-hero__aside-link {
+  display: inline-flex;
+  margin-top: 0.9rem;
+  font-weight: 750;
+  color: var(--brand-deep);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--brand) 35%, transparent);
+}
+
+.home-hero__aside-link:hover {
+  border-bottom-color: var(--brand-deep);
+}
+
+@keyframes bd-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 820px) {
+  .home-hero {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .home-hero__line {
+    max-width: 28ch;
+  }
+}
+
+@media (max-width: 520px) {
+  .home-hero__brand {
+    font-size: clamp(2.55rem, 14vw, 3.2rem);
+  }
+
+  .home-hero__actions {
+    width: 100%;
+  }
+
+  .home-hero__actions .home-tool-link,
+  .home-hero__actions .continue-link {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
+
+/* Home index under hero — keep rich chips, clearer section rhythm */
+.home-simple .home-index {
+  margin-top: 1.75rem;
+  animation: bd-rise 0.6s var(--bd-ease) 0.08s both;
+}
+
+.home-simple .home-index-intro {
+  text-align: start;
+  max-width: none;
+  margin: 0 0 1.25rem;
+  padding: 0 0 0.85rem;
+}
+
+.home-simple .home-index-intro h2 {
+  margin: 0;
+  font-family: var(--font-reem-kufi), var(--font-ui), sans-serif;
+  font-size: clamp(1.45rem, 3vw, 1.85rem);
+  font-weight: 700;
+  color: var(--brand-deep);
+  letter-spacing: -0.02em;
+}
+
+.home-simple .home-index-intro .home-lead {
+  margin: 0.45rem 0 0;
+  text-align: start;
+  max-width: 40rem;
+}
+
+.home-simple .home-index-ornament {
+  justify-content: flex-start;
+  margin-inline: 0;
+}
+
+.home-simple .home-tool-link {
+  border-radius: var(--bd-radius-sm);
+  box-shadow: 0 1px 0 color-mix(in srgb, #fff 50%, transparent) inset;
+}
+
+.home-simple .home-tool-link--primary {
+  box-shadow:
+    0 1px 0 color-mix(in srgb, #fff 25%, transparent) inset,
+    0 10px 22px color-mix(in srgb, var(--brand-deep) 24%, transparent);
+}
+
+.home-simple .home-index .continue-link {
+  border-radius: var(--bd-radius-sm);
+}
+
+.home-simple .home-index .surah-chip {
+  border-radius: var(--bd-radius-md);
+  transition:
+    transform 180ms var(--bd-ease),
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.home-simple .home-index .surah-chip:active {
+  transform: translateY(0) scale(0.99);
+}
+
+/* Home services — Lughawi dominant (D affinity) */
+.home-services__featured {
+  display: grid;
+  grid-template-columns: 1.45fr 1fr;
+  gap: 0.9rem;
+  margin: 1.1rem 0 1.5rem;
+}
+
+.home-services__feature--pulse {
+  min-height: 100%;
+}
+
+.home-services__feature--lead {
+  background:
+    linear-gradient(
+      150deg,
+      color-mix(in srgb, var(--brand-soft) 75%, var(--surface)) 0%,
+      var(--surface) 68%
+    );
+  border-color: color-mix(in srgb, var(--brand) 26%, var(--line));
+  box-shadow: var(--bd-shadow-soft);
+}
+
+.home-services__feature--lead .svc-card__title {
+  font-size: 1.2rem;
+}
+
+@media (max-width: 720px) {
+  .home-services__featured {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* —— Shared hub heroes (B editorial) —— */
+.arabya-hub-page .services-hub__hero,
+.services-hub__hero {
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--bd-shadow-soft);
+}
+
+.arabya-hub-hero__kicker {
+  color: var(--brand);
+}
+
+.arabya-hub-page .services-hub__hero h1,
+.services-hub__hero h1 {
+  font-family: var(--font-reem-kufi), var(--font-ui), sans-serif;
+  font-size: clamp(1.85rem, 3.4vw, 2.55rem);
+  letter-spacing: -0.025em;
+  color: var(--brand-deep);
+  line-height: 1.15;
+}
+
+.hub-nav-link {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 650;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-block: 0.2rem;
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+.hub-nav-link:hover,
+.hub-nav-link:focus-visible {
+  color: var(--brand-deep);
+  border-bottom-color: color-mix(in srgb, var(--brand) 45%, transparent);
+  outline: none;
+}
+
+.arabya-hub-hero__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.1rem;
+  margin-bottom: 1rem;
+}
+
+/* —— Footer: keep logo, editorial columns —— */
+.arabya-footer-panel {
+  justify-items: stretch;
+  text-align: start;
+  gap: 1.25rem;
+  padding-top: 1.35rem;
+  border-top: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
+}
+
+.arabya-footer-brand {
+  justify-content: flex-start;
+}
+
+.arabya-footer-brand .brand-lockup--footer {
+  justify-content: flex-start;
+}
+
+.arabya-footer-columns {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.25rem 1.5rem;
+  width: 100%;
+}
+
+.arabya-footer-col {
+  display: grid;
+  gap: 0.45rem;
+  align-content: start;
+}
+
+.arabya-footer-col__title {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--brand-deep);
+  letter-spacing: 0.02em;
+}
+
+.arabya-footer-col a {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 550;
+  text-decoration: none;
+}
+
+.arabya-footer-col a:hover,
+.arabya-footer-col a:focus-visible {
+  color: var(--brand-deep);
+  outline: none;
+}
+
+.arabya-footer-credit {
+  text-align: start;
+}
+
+@media (max-width: 860px) {
+  .arabya-footer-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .arabya-footer-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .arabya-footer-panel,
+  .arabya-footer-credit {
+    text-align: center;
+  }
+
+  .arabya-footer-brand,
+  .arabya-footer-brand .brand-lockup--footer {
+    justify-content: center;
+  }
+}
+
+/* —— Header polish (keep emblem) —— */
+.site-header {
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--brand) 8%, transparent);
+}
+
+.nav a,
+.nav-link-btn {
+  border-radius: var(--bd-radius-sm);
+}
+
+.menu-toggle {
+  border-radius: var(--bd-radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-hero,
+  .home-simple .home-index,
+  .lughawi-studio {
+    animation: none !important;
+  }
+}

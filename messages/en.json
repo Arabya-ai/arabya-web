@@ -50,6 +50,10 @@
     "close": "Close",
     "mainNav": "Main navigation",
     "footerNav": "Footer links",
+    "footerColQuran": "Quran",
+    "footerColWorship": "Worship",
+    "footerColKnowledge": "Knowledge",
+    "footerColSite": "Site",
     "brandHome": "Arabya — Home",
     "index": "Index",
     "prevPage": "← Previous page",
@@ -71,9 +75,17 @@
   },
   "Home": {
     "brandWord": "Arabya",
+    "heroLine": "Word-by-word Arabic text study",
+    "heroLead": "Madinah mushaf, iʿrāb and tafsirs, knowledge and language tools — one calm professional identity.",
+    "asideAria": "Lughawi",
+    "asideKicker": "From Arabya tools",
+    "asideTitle": "Lughawi — MSA proofreading",
+    "asideBody": "A calm editor for spelling, grammar, and style with rule explanations — in Arabya teal.",
+    "asideCta": "Open Lughawi",
     "title": "Quran index",
     "subtitle": "Choose a surah to open the mushaf and study its words",
     "openMushaf": "Open the mushaf",
+    "openLughawi": "Lughawi",
     "continueReading": "Continue reading from page {page}"
   },
   "HomeServices": {

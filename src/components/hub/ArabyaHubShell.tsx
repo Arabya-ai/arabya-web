@@ -36,9 +36,9 @@ export function ArabyaHubHero({
   return (
     <header className="services-hub__hero arabya-hub-hero">
       {nav?.length ? (
-        <nav className="surah-nav arabya-hub-hero__nav" aria-label={title}>
+        <nav className="arabya-hub-hero__nav" aria-label={title}>
           {nav.map((item) => (
-            <Link key={item.href + item.label} href={item.href} className="nav-pill">
+            <Link key={item.href + item.label} href={item.href} className="hub-nav-link">
               {item.label}
             </Link>
           ))}
