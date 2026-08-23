@@ -110,3 +110,41 @@ async def test_ollama_judge_fallback_when_hf_judge_fails(monkeypatch: pytest.Mon
     )
     assert out.mode == "moa-ollama-judge"
     assert "ollama-judge" in out.engine
+
+
+@pytest.mark.asyncio
+async def test_shadow_cache_prefers_learned_text(tmp_path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Cached MoA correction must not be overwritten by rules-only apply."""
+    from app.pipeline import proofreader
+    from app.pipeline.shadow_cache import record_shadow
+    from config import Settings, get_settings
+
+    db = str(tmp_path / "shadow2.sqlite")
+    settings = Settings(
+        _env_file=None,
+        database_url="sqlite:////tmp/arabya-nlp-shadow2.sqlite",
+        server_log_path="/tmp/arabya-nlp/shadow2.log",
+        tmp_dir=str(tmp_path),
+        shadow_db_path=db,
+        shadow_cache_enabled=True,
+        mastermind_enabled=True,
+        llm_proofread_enabled=False,
+        moa_enabled=False,
+    )
+    get_settings.cache_clear()
+    record_shadow(
+        "ذهبت الى المدرسه",
+        "ذهبت إلى المدرسة",
+        "moa:judge",
+        settings=settings,
+    )
+    out = await proofreader.proofread_text(
+        "ذهبت الى المدرسه",
+        skip_llm=True,
+        use_moa=False,
+        settings=settings,
+        db=None,
+    )
+    assert out.shadow_cache_hit is True
+    assert "المدرسة" in out.corrected
+    assert "إلى" in out.corrected or "الى" not in out.corrected or out.corrected == "ذهبت إلى المدرسة"

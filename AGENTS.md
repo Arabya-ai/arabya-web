@@ -83,3 +83,21 @@ Ten agent harnesses/cookbooks/SDKs are vendored as git submodules under `vendor/
 **Python lab (optional):** `services/agent-lab/` for OpenAI Agents + Google ADK prototypes — not production PM2 unless owner approves.
 
 Manifest: `vendor/agent-ecosystem/manifest.json`. Rule: `.cursor/rules/arabya-agent-ecosystem.mdc`.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues on `Arabya-ai/arabya-web` via `gh`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five roles (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: root `CONTEXT.md` + `docs/adr/`. See `docs/agents/domain.md`.
+
+### Matt Pocock skills
+
+Installed via `npx skills add mattpocock/skills` into `.agents/skills/` (symlinked under `.cursor/skills/`). Lockfile: `skills-lock.json`. Prefer `/grill-with-docs`, `/improve-codebase-architecture`, `/code-review`, `/tdd`, `/implement` for engineering work alongside Speckit and `arabya-agent-ecosystem`.

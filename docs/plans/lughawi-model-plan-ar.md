@@ -174,9 +174,9 @@
 | **L1-partial** | textarea + شرائح + تعديل يدوي (#198) | أساس قبل TipTap | ✅ |
 | **L1** | **محرر TipTap/ProseMirror** + خط تحت الكلمة + اقتراحات client | يشبه Word للأخطاء الشائعة | ✅ PR #199 |
 | **L2** | flywheel SQLite + تسجيل accept/reject/custom + أحداث | بيانات تتجمع على Contabo | ✅ على main |
-| **L3** | MoA Tier 1 في `arabya-nlp` + 4 model IDs | تدقيق عميق يعمل | 🚧 هيكل (إيقاف افتراضي) PR #201 |
-| **L4** | Key pool UI في `/admin/ops` + Hugging Face لـ MoA | تضيف مفتاحاً بدون PuTTY | 🚧 PR قادم |
-| **L5** | Mastermind + Ollama shadow cache + judge fallback | fallback بدون سحابة | 🚧 PR L5 |
+| **L3** | MoA Tier 1 في `arabya-nlp` + 4 model IDs | تدقيق عميق يعمل | ✅ PR #201 + #204 |
+| **L4** | Key pool UI في `/admin/ops` + Hugging Face لـ MoA | تضيف مفتاحاً بدون PuTTY | ✅ PR #202 |
+| **L5** | Mastermind + Ollama shadow cache + judge fallback | fallback بدون سحابة | ✅ PR #205 |
 | **L6** | API SaaS / Business (مؤجل) | — |
 
 **لا نبدأ L3+ قبل:** R7 ✅ · ARABYA-4 ✅ · Rocket Loader Off (R8) موصى به

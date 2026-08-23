@@ -31,6 +31,7 @@ Then in Cursor: `/plugin marketplace add .cursor/plugins` and install recommende
 | Parallel cloud/local subagents | cursor-orchestrate, cursor-dag-task-runner | `.cursor/skills/cursor-orchestrate`, `cursor-dag-task-runner` |
 | CI / ship / verify | cursor-team-kit skills | `cursor-verify-this`, `cursor-fix-ci`, `cursor-review-and-ship` |
 | Terminal coding agent (owner dev) | Grok Build | `grok-build-index` (not production) |
+| Grill / deepen / TDD / tickets | Matt Pocock skills | `.agents/skills/{grill-with-docs,improve-codebase-architecture,tdd,to-tickets,code-review,…}` |
 
 Full manifest: `vendor/agent-ecosystem/manifest.json`.
 

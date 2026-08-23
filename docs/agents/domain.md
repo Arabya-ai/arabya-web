@@ -1,0 +1,33 @@
+# Domain Docs
+
+How the engineering skills should consume this repo's domain documentation when exploring the codebase.
+
+## Before exploring, read these
+
+- **`CONTEXT.md`** at the repo root
+- **`docs/adr/`**: read ADRs that touch the area you're about to work in
+- **Arabya hard rules**: `.cursor/rules/*.mdc` (Contabo-only hosting, product vision, Lughawi HF optional)
+- **Plans**: `docs/plans/` especially `lughawi-model-plan-ar.md`
+
+If a file doesn't exist, proceed silently unless the skill you're running creates it lazily.
+
+## File structure
+
+Single-context repo:
+
+```
+/
+├── CONTEXT.md
+├── docs/adr/
+├── docs/agents/
+├── docs/plans/
+└── src/
+```
+
+## Use the glossary's vocabulary
+
+When your output names a domain concept, use the term as defined in `CONTEXT.md`. Don't drift to synonyms the glossary explicitly avoids.
+
+## Flag ADR conflicts
+
+If your output contradicts an existing ADR, surface it explicitly rather than silently overriding.
