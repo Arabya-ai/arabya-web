@@ -404,6 +404,21 @@ grep -q '^LUGHAWI_MOA=' "$APP_DIR/.env" 2>/dev/null || \
   echo 'LUGHAWI_MOA=1' >> "$APP_DIR/.env"
 grep -q '^ARABYA_NLP_MOA=' "$APP_DIR/.env" 2>/dev/null || \
   echo 'ARABYA_NLP_MOA=1' >> "$APP_DIR/.env"
+# L5 Mastermind + Ollama shadow (RAM-safe: short timeout, skip when RAM > 88%)
+grep -q '^ARABYA_NLP_MASTERMIND=' "$APP_DIR/.env" 2>/dev/null || \
+  echo 'ARABYA_NLP_MASTERMIND=1' >> "$APP_DIR/.env"
+grep -q '^ARABYA_NLP_SHADOW_CACHE=' "$APP_DIR/.env" 2>/dev/null || \
+  echo 'ARABYA_NLP_SHADOW_CACHE=1' >> "$APP_DIR/.env"
+grep -q '^ARABYA_NLP_OLLAMA_JUDGE_FALLBACK=' "$APP_DIR/.env" 2>/dev/null || \
+  echo 'ARABYA_NLP_OLLAMA_JUDGE_FALLBACK=1' >> "$APP_DIR/.env"
+grep -q '^ARABYA_NLP_OLLAMA_PROOFREAD_TIMEOUT_S=' "$APP_DIR/.env" 2>/dev/null || \
+  echo 'ARABYA_NLP_OLLAMA_PROOFREAD_TIMEOUT_S=12' >> "$APP_DIR/.env"
+grep -q '^ARABYA_NLP_LLM_PROOFREAD=' "$APP_DIR/.env" 2>/dev/null || \
+  echo 'ARABYA_NLP_LLM_PROOFREAD=1' >> "$APP_DIR/.env"
+grep -q '^LUGHAWI_LOCAL_OLLAMA=' "$APP_DIR/.env" 2>/dev/null || \
+  echo 'LUGHAWI_LOCAL_OLLAMA=1' >> "$APP_DIR/.env"
+grep -q '^LUGHAWI_NEURAL_GEC=' "$APP_DIR/.env" 2>/dev/null || \
+  echo 'LUGHAWI_NEURAL_GEC=1' >> "$APP_DIR/.env"
 # Prefer enabling when venv is present (owner already activated Option A).
 NLP_VENV_OK=0
 if [[ -x "$APP_DIR/services/arabya-nlp/.venv/bin/python" && -f "$APP_DIR/services/arabya-nlp/main.py" ]]; then

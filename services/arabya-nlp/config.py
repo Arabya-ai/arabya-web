@@ -59,6 +59,26 @@ class Settings(BaseSettings):
     )
     ollama_timeout_seconds: float = 120.0
     ollama_devops_timeout_seconds: float = 60.0
+    ollama_proofread_timeout_s: float = Field(
+        default=12.0,
+        alias="ARABYA_NLP_OLLAMA_PROOFREAD_TIMEOUT_S",
+    )
+
+    # --- L5 Mastermind orchestrator + shadow cache ---
+    mastermind_enabled: bool = Field(default=True, alias="ARABYA_NLP_MASTERMIND")
+    shadow_cache_enabled: bool = Field(default=True, alias="ARABYA_NLP_SHADOW_CACHE")
+    shadow_db_path: str = Field(
+        default="/var/lib/arabya/lughawi-shadow-cache.sqlite",
+        alias="ARABYA_NLP_SHADOW_DB",
+    )
+    ollama_judge_fallback: bool = Field(
+        default=True,
+        alias="ARABYA_NLP_OLLAMA_JUDGE_FALLBACK",
+    )
+    mastermind_ram_skip_ollama_pct: float = Field(
+        default=88.0,
+        alias="ARABYA_NLP_MASTERMIND_RAM_SKIP_OLLAMA",
+    )
 
     # --- Whisper / FFmpeg ---
     whisper_model_size: str = Field(default="medium", alias="ARABYA_NLP_WHISPER_SIZE")

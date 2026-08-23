@@ -20,8 +20,11 @@ from sqlalchemy.orm import Session
 
 from app.models import GrammarErrorStat, ProofreadJob, utcnow
 from app.pipeline.llm_stage import LlmStageResult, run_llm_stage
+from app.pipeline.mastermind import build_mastermind_plan, mastermind_summary
 from app.pipeline.moa_stage import MoaStageResult, run_moa_stage
 from app.pipeline.rule_stage import RuleStageResult, run_rule_stage
+from app.pipeline.shadow_cache import lookup_shadow, record_shadow
+from app.services.hf_inference import resolve_hf_token
 from app.schemas import ProofreadResponse, TextEdit
 from config import Settings, get_settings
 
@@ -213,12 +216,51 @@ async def proofread_text(
             warnings=["empty text"],
         )
 
+    token = (hf_token or "").strip() or resolve_hf_token()
+    plan = build_mastermind_plan(
+        settings=settings,
+        use_moa=use_moa,
+        skip_llm=skip_llm,
+        hf_token_present=bool(token),
+    )
+    mastermind_note = mastermind_summary(plan)
+
+    # L5 shadow cache — instant replay when we learned this pattern before
+    if plan.use_shadow_cache:
+        hit = lookup_shadow(original, settings=settings)
+        if hit and hit.corrected != original:
+            stage1 = await _run_rules_async(original, preserve_diacritics=preserve)
+            rule_dicts = [e.as_dict() for e in stage1.edits]
+            rule_located = remap_edits_to_original(original, rule_dicts)
+            corrected = hit.corrected
+            if rule_located:
+                corrected = apply_edits(original, rule_located)
+            return ProofreadResponse(
+                ok=True,
+                original=original,
+                cleaned=stage1.text,
+                corrected=corrected,
+                word_count=count_words(original),
+                stage1_engine=stage1.engine,
+                stage2_engine=f"shadow-cache:{hit.source}",
+                mode=f"shadow-cache+{mastermind_note}",
+                parallel=False,
+                edits=[TextEdit(**e) for e in rule_located],
+                warnings=[f"shadow-cache hit ({hit.source}, sim={hit.similarity:.2f})"],
+                moa_engine="moa-skipped",
+                moa_mode="shadow-cache",
+                mastermind_mode=mastermind_note,
+                shadow_cache_hit=True,
+            )
+
     # Offline / skip path: rules only (PyArabic + pairs) — never waits on Ollama.
-    if skip_llm or not settings.llm_proofread_enabled:
+    if skip_llm or not plan.run_ollama:
         stage1 = await _run_rules_async(original, preserve_diacritics=preserve)
         stage2 = LlmStageResult(text=stage1.text, engine="llm-skipped", raw_ok=True)
         parallel = False
         mode = "offline"
+        if plan.notes:
+            mode = f"offline+{mastermind_note}"
     else:
         # Online hybrid: rules + Ollama on the *original* text in parallel.
         stage1, stage2 = await asyncio.gather(
@@ -227,20 +269,31 @@ async def proofread_text(
         )
         parallel = True
         mode = (
-            "hybrid-parallel"
+            f"hybrid-parallel+{mastermind_note}"
             if stage2.raw_ok and not str(stage2.engine).startswith("ollama-unavailable")
-            else "rules-only-fallback"
+            else f"rules-only-fallback+{mastermind_note}"
         )
 
     # L3 MoA (optional): after rules/Ollama; soft-skip without token / when disabled.
     moa: MoaStageResult = MoaStageResult(text=original, engine="moa-skipped", mode="off")
-    if use_moa or settings.moa_enabled:
+    run_moa = bool(plan.run_moa or use_moa or settings.moa_enabled)
+    if run_moa and token:
+        ollama_for_moa = None
+        if stage2.raw_ok and stage2.engine not in {"llm-skipped", "ollama-unavailable"}:
+            ollama_for_moa = {
+                "ok": True,
+                "model": stage2.engine,
+                "corrected": stage2.text,
+                "edits": list(stage2.edits),
+                "engine": stage2.engine,
+            }
         moa = await run_moa_stage(
             original,
             settings=settings,
             few_shot_pairs=few_shot_pairs,
             force=use_moa,
-            hf_token=hf_token,
+            hf_token=token or None,
+            ollama_draft=ollama_for_moa,
         )
         if moa.mode not in {"disabled", "no-token", "off", "skipped"} and moa.raw_ok:
             mode = f"{mode}+{moa.mode}" if mode else moa.mode
@@ -254,6 +307,8 @@ async def proofread_text(
     # Rules win overlaps; MoA fills gaps after local LLM
     edits = merge_edit_lists(rule_located, merge_edit_lists(llm_located, moa_located))
     warnings = list(stage1.warnings) + list(stage2.warnings) + list(moa.warnings)
+    if plan.notes:
+        warnings.extend(plan.notes)
 
     # Prefer applying merged span edits; fall back to sequential texts.
     if edits:
@@ -302,6 +357,18 @@ async def proofread_text(
             db.rollback()
             logger.exception("Failed to persist proofread job")
 
+    # L5: record successful outputs for shadow learning
+    if plan.use_shadow_cache and corrected != original:
+        sources: list[tuple[str, str]] = []
+        if moa.raw_ok and moa.engine not in {"moa-skipped", "moa-proposers-empty"}:
+            sources.append((corrected, f"moa:{moa.mode or moa.engine}"))
+        if stage2.raw_ok and stage2.text != original:
+            sources.append((stage2.text, stage2.engine))
+        if not sources:
+            sources.append((corrected, "rules-merge"))
+        for corr, src in sources[:2]:
+            record_shadow(original, corr, src, settings=settings, meta={"mode": mode})
+
     return ProofreadResponse(
         ok=True,
         original=original,
@@ -316,4 +383,6 @@ async def proofread_text(
         warnings=warnings,
         moa_engine=moa.engine,
         moa_mode=moa.mode,
+        mastermind_mode=mastermind_note,
+        shadow_cache_hit=False,
     )
