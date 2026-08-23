@@ -7,7 +7,7 @@
   --lughawi-spell: #dc2626;
   --lughawi-grammar: #2563eb;
   --lughawi-style: #d97706;
-  --lughawi-morph: #7c3aed;
+  --lughawi-morph: #0e7490;
   --lughawi-punct: #64748b;
   --lughawi-other: #0891b2;
   --lughawi-tashkeel: #0f766e;
@@ -37,14 +37,19 @@
 .lughawi-hero {
   position: relative;
   isolation: isolate;
-  padding: clamp(2.5rem, 5vw, 3.5rem) 0 2rem;
-  margin-bottom: 0.35rem;
+  padding: clamp(2.35rem, 5vw, 3.35rem) 0 1.85rem;
+  margin-bottom: 0.5rem;
   overflow: hidden;
   background:
-    radial-gradient(90% 70% at 100% -10%, var(--lughawi-glow), transparent 55%),
-    radial-gradient(70% 50% at -5% 110%, color-mix(in srgb, var(--brand-deep) 14%, transparent), transparent 52%),
-    linear-gradient(165deg, color-mix(in srgb, var(--brand) 7%, var(--surface)) 0%, transparent 62%);
-  border-bottom: 1px solid color-mix(in srgb, var(--brand) 16%, var(--line));
+    radial-gradient(85% 65% at 100% -8%, var(--lughawi-glow), transparent 56%),
+    linear-gradient(
+      168deg,
+      color-mix(in srgb, #f7f3ea 55%, var(--surface)) 0%,
+      color-mix(in srgb, var(--brand) 5%, var(--surface)) 48%,
+      transparent 78%
+    );
+  border-bottom: 1px solid color-mix(in srgb, var(--brand) 14%, var(--line));
+  border-radius: 0 0 18px 18px;
 }
 
 .lughawi-hero::before {
@@ -52,19 +57,20 @@
   position: absolute;
   inset: 0;
   z-index: -1;
-  opacity: 0.35;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath fill='none' stroke='%230f766e' stroke-opacity='0.07' stroke-width='1' d='M0 60h120M60 0v120'/%3E%3C/svg%3E");
+  opacity: 0.28;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cpath fill='none' stroke='%230f766e' stroke-opacity='0.08' stroke-width='1' d='M0 60h120M60 0v120'/%3E%3C/svg%3E");
   pointer-events: none;
 }
 
 .lughawi-hero h1 {
-  font-size: clamp(2.35rem, 5vw, 3.35rem);
+  font-family: var(--font-reem-kufi), var(--font-ui), sans-serif;
+  font-size: clamp(2.65rem, 6vw, 3.85rem);
   font-weight: 700;
   color: var(--brand-deep);
-  letter-spacing: -0.035em;
+  letter-spacing: -0.04em;
   text-wrap: balance;
-  margin: 0.4rem 0;
-  line-height: 1.12;
+  margin: 0.35rem 0;
+  line-height: 1.08;
 }
 
 .lughawi-kicker {
@@ -100,13 +106,18 @@
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  padding: 1rem 1.05rem 1.15rem;
-  border-radius: 22px;
-  background: color-mix(in srgb, var(--surface) 92%, var(--brand-soft));
-  border: 1px solid color-mix(in srgb, var(--brand) 14%, var(--line));
+  padding: 1.15rem 1.15rem 1.25rem;
+  border-radius: 24px;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #fbf8f2 42%, var(--surface)) 0%,
+      color-mix(in srgb, var(--surface) 94%, var(--brand-soft)) 100%
+    );
+  border: 1px solid color-mix(in srgb, var(--brand) 16%, var(--line));
   box-shadow:
-    0 1px 0 color-mix(in srgb, white 55%, transparent) inset,
-    0 18px 40px color-mix(in srgb, var(--brand-deep) 7%, transparent);
+    0 1px 0 color-mix(in srgb, white 70%, transparent) inset,
+    0 22px 48px color-mix(in srgb, var(--brand-deep) 11%, transparent);
   position: relative;
   z-index: 0;
   isolation: isolate;
@@ -1181,10 +1192,18 @@
 }
 
 .lughawi-method-row article {
-  padding: 1.15rem 1.2rem 1.3rem;
-  border-radius: 16px;
-  background: color-mix(in srgb, var(--brand) 5%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--brand) 12%, var(--line));
+  padding: 1.2rem 1.25rem 1.35rem;
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--brand) 6%, var(--surface)) 0%,
+      var(--surface) 70%
+    );
+  border: 1px solid color-mix(in srgb, var(--brand) 14%, var(--line));
+  box-shadow:
+    0 1px 0 color-mix(in srgb, #fff 55%, transparent) inset,
+    0 12px 28px color-mix(in srgb, var(--brand-deep) 7%, transparent);
 }
 
 .lughawi-method-row h3 {
@@ -1319,14 +1338,32 @@
 .lughawi-local-nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
-  margin: 1.15rem 0 0;
+  gap: 0.2rem 1.25rem;
+  margin: 1.2rem 0 0;
+  padding-bottom: 0.1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--brand) 14%, var(--line));
+}
+
+.lughawi-local-nav .nav-pill {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0.55rem 0 0.7rem;
+  color: var(--muted);
+  font-weight: 650;
+}
+
+.lughawi-local-nav .nav-pill:hover {
+  color: var(--brand-deep);
+  border-color: transparent;
 }
 
 .lughawi-local-nav .nav-pill.is-current {
-  background: var(--brand-deep);
-  color: var(--on-brand);
-  border-color: var(--brand-deep);
+  background: transparent;
+  color: var(--brand-deep);
+  border-color: transparent;
+  box-shadow: inset 0 -2px 0 var(--brand-deep);
 }
 
 .lughawi-muted,

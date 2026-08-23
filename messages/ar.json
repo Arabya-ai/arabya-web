@@ -50,6 +50,10 @@
     "close": "إغلاق",
     "mainNav": "التنقل الرئيسي",
     "footerNav": "روابط التذييل",
+    "footerColQuran": "قرآن",
+    "footerColWorship": "عبادة",
+    "footerColKnowledge": "معرفة",
+    "footerColSite": "الموقع",
     "brandHome": "عربية — الصفحة الرئيسية",
     "index": "الفهرس",
     "prevPage": "← الصفحة السابقة",
@@ -71,9 +75,17 @@
   },
   "Home": {
     "brandWord": "عربية",
+    "heroLine": "منصة دراسة النص العربي كلمةً بكلمة",
+    "heroLead": "مصحف المدينة، إعراب وتفاسير، وأدوات معرفة ولغة — بهوية واحدة هادئة واحترافية.",
+    "asideAria": "لغوي",
+    "asideKicker": "من أدوات عربية",
+    "asideTitle": "لغوي — تدقيق عربي فصيح",
+    "asideBody": "محرر هادئ لتصحيح الإملاء والنحو والأسلوب مع شرح القاعدة — بنفس تيل عربية.",
+    "asideCta": "افتح لغوي",
     "title": "فهرس القرآن الكريم",
     "subtitle": "اختر سورة لقراءة المصحف ودراسة كلماتها",
     "openMushaf": "افتح المصحف",
+    "openLughawi": "لغوي",
     "continueReading": "متابعة القراءة من الصفحة {page}"
   },
   "HomeServices": {
