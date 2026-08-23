@@ -109,6 +109,14 @@ html[data-theme="dark"] body {
   text-wrap: pretty;
 }
 
+.home-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.7rem;
+  margin-top: 1.25rem;
+}
+
 .home-hero__actions .continue-reading {
   margin: 0;
 }
