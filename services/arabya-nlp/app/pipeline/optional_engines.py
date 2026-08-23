@@ -237,22 +237,33 @@ def run_qutrub_conjugate(
 
 
 def engines_snapshot() -> dict[str, Any]:
+    from config import get_settings
+
+    s = get_settings()
     return {
         "pyarabic": pyarabic_available(),
         "ghalatawi": ghalatawi_available(),
         "mishkal": mishkal_available(),
         "qutrub": qutrub_available(),
+        "mastermind": s.mastermind_enabled,
+        "shadowCache": s.shadow_cache_enabled,
+        "ollamaJudgeFallback": s.ollama_judge_fallback,
+        "llmProofread": s.llm_proofread_enabled,
+        "moa": s.moa_enabled,
         "priority": [
             "pyarabic",
             "builtin-rules",
             "ghalatawi",
+            "mastermind",
             "ollama-optional",
+            "moa-hf-optional",
             "mishkal-optional",
             "qutrub-optional",
         ],
         "offlineOkWithoutOllama": True,
         "noteAr": (
             "الأولوية: PyArabic + قواعد (+ غلطاوي). "
-            "Ollama اختياري. mishkal/qutrub اختياريان خلف API فقط."
+            "عقل مدبر L5 يدير Ollama/MoA حسب RAM. "
+            "Ollama احتياط للقاضي عند فشل HF. mishkal/qutrub اختياريان."
         ),
     }

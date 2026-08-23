@@ -115,6 +115,7 @@ async def run_llm_stage(
         prompt=prompt,
         system=SYSTEM_PROMPT_AR,
         format_json=True,
+        timeout=settings.ollama_proofread_timeout_s,
     )
     if not result.get("ok"):
         return LlmStageResult(

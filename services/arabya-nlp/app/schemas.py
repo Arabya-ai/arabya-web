@@ -45,6 +45,8 @@ class ProofreadResponse(BaseModel):
     warnings: list[str] = []
     moa_engine: str = ""
     moa_mode: str = ""
+    mastermind_mode: str = ""
+    shadow_cache_hit: bool = False
 
 
 class TashkeelRequest(BaseModel):

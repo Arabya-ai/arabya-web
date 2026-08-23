@@ -37,6 +37,8 @@ export interface ArabyaNlpProofreadPayload {
   warnings?: string[];
   moa_engine?: string;
   moa_mode?: string;
+  mastermind_mode?: string;
+  shadow_cache_hit?: boolean;
 }
 
 export interface ArabyaNlpTashkeelPayload {

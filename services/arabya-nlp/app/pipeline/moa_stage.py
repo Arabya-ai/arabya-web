@@ -15,7 +15,7 @@ from typing import Any
 
 from app.pipeline.llm_stage import locate_span_any
 from app.services.hf_inference import hf_chat_completion, resolve_hf_token
-from app.services.ollama_client import parse_json_object
+from app.services.ollama_client import OllamaClient, parse_json_object
 from config import Settings, get_settings
 
 logger = logging.getLogger("arabya_nlp.moa_stage")
@@ -269,6 +269,91 @@ async def _run_judge(
     }
 
 
+async def _run_ollama_judge(
+    *,
+    settings: Settings,
+    text: str,
+    drafts: list[dict[str, Any]],
+    few_shot: str,
+) -> dict[str, Any]:
+    """Local Ollama backup judge when HF Qwen judge fails (L5)."""
+    parts = [f"{few_shot}النص الأصلي:\n{text}\n"]
+    for d in drafts:
+        if not d.get("ok"):
+            continue
+        parts.append(
+            f"--- مسودة {d.get('role')} ({d.get('model', 'local')}) ---\n"
+            f"{d.get('corrected')}\n"
+        )
+    parts.append("ادمج أفضل تصحيح وأخرج JSON فقط.")
+    user = "\n".join(parts)
+    client = OllamaClient(settings)
+    timeout_s = float(settings.ollama_proofread_timeout_s)
+    try:
+        raw = await asyncio.wait_for(
+            client.generate(
+                model=settings.ollama_proofread_model,
+                prompt=user,
+                system=JUDGE_SYSTEM,
+                format_json=True,
+                timeout=timeout_s,
+            ),
+            timeout=timeout_s + 1.0,
+        )
+    except asyncio.TimeoutError:
+        return {
+            "ok": False,
+            "error": "timeout",
+            "corrected": text,
+            "edits": [],
+            "engine": "moa-ollama-judge:timeout",
+        }
+
+    if not raw.get("ok"):
+        return {
+            "ok": False,
+            "error": str(raw.get("error") or "fail"),
+            "corrected": text,
+            "edits": [],
+            "engine": "moa-ollama-judge:fail",
+        }
+
+    parsed = parse_json_object(str(raw.get("response") or ""))
+    if not parsed:
+        return {
+            "ok": False,
+            "error": "parse-fail",
+            "corrected": text,
+            "edits": [],
+            "engine": "moa-ollama-judge:parse-fail",
+        }
+
+    corrected, edits = _edits_from_parsed(text, parsed, prefix="ollama-judge", stage="moa-ollama-judge")
+    return {
+        "ok": True,
+        "error": "",
+        "corrected": corrected,
+        "edits": edits,
+        "engine": f"moa-ollama-judge:{settings.ollama_proofread_model}",
+    }
+
+
+def _ollama_draft_from_stage(
+    ollama_draft: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not ollama_draft or not ollama_draft.get("ok"):
+        return None
+    return {
+        "role": "shadow-local",
+        "model": str(ollama_draft.get("model") or "ollama-local"),
+        "ok": True,
+        "error": "",
+        "corrected": str(ollama_draft.get("corrected") or ""),
+        "edits": list(ollama_draft.get("edits") or []),
+        "engine": str(ollama_draft.get("engine") or "ollama-shadow"),
+    }
+
+
 def _merge_proposer_edits(
     text: str,
     drafts: list[dict[str, Any]],
@@ -288,6 +373,7 @@ async def run_moa_stage(
     few_shot_pairs: list[dict[str, str]] | None = None,
     force: bool = False,
     hf_token: str | None = None,
+    ollama_draft: dict[str, Any] | None = None,
 ) -> MoaStageResult:
     """
     Run MoA when enabled (or force=True) and HF token present.
@@ -330,8 +416,12 @@ async def run_moa_stage(
         ]
     )
     drafts = list(results)
+    shadow = _ollama_draft_from_stage(ollama_draft)
+    if shadow:
+        drafts.append(shadow)
+
     ok_count = sum(1 for d in drafts if d.get("ok"))
-    proposer_engines = [str(d.get("engine") or "") for d in drafts]
+    proposer_engines = [str(d.get("engine") or "") for d in drafts if d.get("engine")]
     warnings: list[str] = []
     for d in drafts:
         if not d.get("ok"):
@@ -368,7 +458,29 @@ async def run_moa_stage(
             mode="moa-judge",
         )
 
-    # Soft-fail: use best proposer draft
+    # L5: Ollama local judge backup when HF Qwen judge fails
+    if settings.ollama_judge_fallback and (shadow or settings.llm_proofread_enabled):
+        ollama_judge = await _run_ollama_judge(
+            settings=settings,
+            text=original,
+            drafts=drafts,
+            few_shot=few_shot,
+        )
+        if ollama_judge.get("ok"):
+            warnings.append(f"hf-judge: {judge.get('error') or 'fail'} — ollama-judge ok")
+            return MoaStageResult(
+                text=str(ollama_judge.get("corrected") or original),
+                edits=list(ollama_judge.get("edits") or []),
+                engine=str(ollama_judge.get("engine") or "moa-ollama-judge"),
+                warnings=warnings,
+                raw_ok=True,
+                proposer_engines=proposer_engines,
+                judge_engine=str(ollama_judge.get("engine") or ""),
+                mode="moa-ollama-judge",
+            )
+        warnings.append(f"ollama-judge: {ollama_judge.get('error') or 'fail'}")
+
+    # Soft-fail: use best proposer draft (includes shadow-local if best)
     corrected, edits = _merge_proposer_edits(original, drafts)
     warnings.append(f"judge: {judge.get('error') or 'fail'} — used best proposer")
     return MoaStageResult(

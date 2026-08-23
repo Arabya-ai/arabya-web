@@ -224,6 +224,11 @@ export async function enrichProofreadWithArabyaNlp(
     payload.moa_engine && payload.moa_engine !== "moa-skipped"
       ? `+moa:${payload.moa_mode || payload.moa_engine}`
       : "";
+  const mastermindBit = payload.mastermind_mode
+    ? `+${payload.mastermind_mode}`
+    : payload.shadow_cache_hit
+      ? "+shadow-cache-hit"
+      : "";
 
   return {
     ...local,
@@ -240,7 +245,7 @@ export async function enrichProofreadWithArabyaNlp(
           id: "arabya-nlp",
           editCount: mapped.length,
           ms,
-          note: `lughawi:${payload.stage1_engine ?? "?"}+${payload.stage2_engine ?? "?"}${payload.parallel ? ":parallel" : ""}${payload.mode ? `:${payload.mode}` : ""}${moaBit}`,
+          note: `lughawi:${payload.stage1_engine ?? "?"}+${payload.stage2_engine ?? "?"}${payload.parallel ? ":parallel" : ""}${payload.mode ? `:${payload.mode}` : ""}${moaBit}${mastermindBit}`,
         },
       ],
     },
