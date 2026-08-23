@@ -225,16 +225,26 @@ async def proofread_text(
     )
     mastermind_note = mastermind_summary(plan)
 
-    # L5 shadow cache — instant replay when we learned this pattern before
+    # L5 shadow cache — prefer learned correction; merge non-overlapping rules only
     if plan.use_shadow_cache:
         hit = lookup_shadow(original, settings=settings)
         if hit and hit.corrected != original:
             stage1 = await _run_rules_async(original, preserve_diacritics=preserve)
             rule_dicts = [e.as_dict() for e in stage1.edits]
             rule_located = remap_edits_to_original(original, rule_dicts)
+            # Prefer the cached full-text correction; do not overwrite with rules-only apply.
             corrected = hit.corrected
-            if rule_located:
-                corrected = apply_edits(original, rule_located)
+            # Optional: fill span edits from rules that do not contradict cached text
+            safe_rules: list[dict[str, Any]] = []
+            for edit in rule_located:
+                token = str(edit.get("original") or "")
+                suggestion = str(edit.get("suggestion") or "")
+                if not token or not suggestion:
+                    continue
+                # Keep rule edit only if cached text already contains the suggestion
+                # or the original token is absent from the cached correction (rules filled a gap).
+                if suggestion in corrected or token not in corrected:
+                    safe_rules.append(edit)
             return ProofreadResponse(
                 ok=True,
                 original=original,
@@ -245,7 +255,7 @@ async def proofread_text(
                 stage2_engine=f"shadow-cache:{hit.source}",
                 mode=f"shadow-cache+{mastermind_note}",
                 parallel=False,
-                edits=[TextEdit(**e) for e in rule_located],
+                edits=[TextEdit(**e) for e in safe_rules],
                 warnings=[f"shadow-cache hit ({hit.source}, sim={hit.similarity:.2f})"],
                 moa_engine="moa-skipped",
                 moa_mode="shadow-cache",
