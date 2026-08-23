@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ServicesGrid } from "@/components/services/ServicesGrid";
@@ -11,14 +10,18 @@ export default async function NotFound() {
     <div className="shell page-block not-found-page services-hub">
       <header className="not-found-hero services-hub__hero">
         <div className="not-found-hero__brand">
-          <Image
-            src="/brand/arabya-mark-ui.webp"
-            alt=""
-            width={56}
-            height={56}
-            className="not-found-hero__mark"
-            priority
-          />
+          <picture>
+            <source srcSet="/brand/arabya-mark-ui.webp" type="image/webp" />
+            <img
+              src="/brand/arabya-mark-ui.png"
+              alt=""
+              width={56}
+              height={56}
+              className="not-found-hero__mark"
+              decoding="async"
+              fetchPriority="high"
+            />
+          </picture>
           <p className="not-found-hero__wordmark">{t("brandName")}</p>
         </div>
         <p className="not-found-hero__code" aria-hidden>
