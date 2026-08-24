@@ -18,6 +18,7 @@
 | **R7/R8/R9/R2 خطوات المالك** | `docs/plans/ops-r7-r8-r9-r2-playbook-ar.md` |
 | Contabo / أمان / لغوي؟ | `docs/plans/arabya-contabo-recovery-constitution-ar.md` |
 | اللغات والموبايل؟ | `docs/plans/i18n-and-mobile.md` |
+| **SaaS المعزول (Umami/Chatwoot/Cal/Documenso) + ورق** | `docs/plans/arabya-saas-microservices-roadmap-ar.md` |
 | ما مؤجّل في المنتج؟ | `docs/DEVELOPMENT.md` |
 
 **قاعدة:** أي ميزة جديدة تُضاف هنا **قبل** البرمجة — حتى لا نخرج عن الخطة.

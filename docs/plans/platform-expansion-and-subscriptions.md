@@ -7,6 +7,7 @@
 - اللغات والموبايل: `docs/plans/i18n-and-mobile.md`
 - الحسابات (بدون دفع): `docs/platform/accounts-owner-guide-ar.md`
 - مؤجّل المنتج: `docs/DEVELOPMENT.md`
+- **SaaS المعزول (Umami / Chatwoot / Cal.com / Documenso) + مسار ورق:** `docs/plans/arabya-saas-microservices-roadmap-ar.md`
 
 ---
 
