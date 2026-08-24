@@ -5,6 +5,7 @@
 @import "../styles/arabya-panels.css";
 @import "../styles/library.css";
 @import "../styles/lughawi.css";
+@import "../styles/arabya-palettes.css";
 @import "../styles/warraq-theme.css";
 
 @font-face {
@@ -4144,6 +4145,29 @@ html[data-theme="dark"] .arabya-footer-panel {
 .prefs-menu-options {
   display: grid;
   gap: 0.2rem;
+}
+
+.prefs-menu-options--swatches {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.4rem;
+  padding: 0.25rem 0.35rem 0.45rem;
+}
+
+.prefs-menu-swatch {
+  width: 100%;
+  aspect-ratio: 1;
+  min-height: 1.65rem;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--surface) 70%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 16%, transparent);
+  cursor: pointer;
+  padding: 0;
+}
+
+.prefs-menu-swatch.is-active {
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 0 0 3px var(--brand);
 }
 
 .prefs-menu-option {

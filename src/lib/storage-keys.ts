@@ -7,6 +7,8 @@
 
 export const STORAGE_KEYS = {
   theme: "arabya-theme",
+  /** Accent palette id (teal | warraq | …) — keep in sync with theme-boot.js */
+  palette: "arabya-palette",
   prayerCity: "arabya-prayer-city",
   prayerCoords: "arabya-prayer-coords",
   bookmarks: "arabya-bookmarks",

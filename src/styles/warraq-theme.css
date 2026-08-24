@@ -1,51 +1,29 @@
 /**
- * Warraq subsidiary skin for Arabya (thewarraq.com visual language).
+ * Warraq layout skin for Arabya (card shapes / hero structure).
+ * Colors follow Arabya brand tokens + visitor palette (see arabya-palettes.css).
  * Scoped away from mushaf via body[data-arabya-surface="mushaf"].
  */
 
 body:not([data-arabya-surface="mushaf"]) {
-  --wrq-navy: #002d4e;
-  --wrq-navy-deep: #0b3d59;
-  --wrq-gold: #d4a017;
-  --wrq-gold-muted: #c29958;
-  --wrq-teal: #2d8b68;
-  --wrq-cream: #fdfcf8;
-  --wrq-cream-2: #f5f0e6;
-  --wrq-ink: #0a2540;
-  --wrq-muted: #5a6578;
-  --wrq-card: #ffffff;
-  --wrq-shadow: 0 14px 40px rgba(0, 45, 78, 0.08);
+  /* Layout aliases → brand tokens (palette-aware) */
+  --wrq-accent: var(--brand);
+  --wrq-accent-muted: color-mix(in srgb, var(--brand) 72%, var(--ink));
+  --wrq-deep: var(--brand-deep);
+  --wrq-deep-2: var(--brand-mid);
+  --wrq-support: var(--brand-cyan);
+  --wrq-card: var(--surface);
+  --wrq-shadow: var(--shadow);
   --wrq-radius: 16px;
   --wrq-radius-lg: 24px;
   --wrq-radius-xl: 32px;
-
-  /* Remap Arabya tokens → Warraq palette */
-  --bg: var(--wrq-cream);
-  --bg-accent: var(--wrq-cream-2);
-  --surface: var(--wrq-card);
-  --surface-2: #f9f9f8;
-  --ink: var(--wrq-ink);
-  --muted: var(--wrq-muted);
-  --line: #e2e8f0;
-  --brand: var(--wrq-gold);
-  --brand-deep: var(--wrq-navy);
-  --brand-mid: var(--wrq-navy-deep);
-  --brand-cyan: var(--wrq-teal);
-  --brand-soft: #f7efd8;
-  --select: #f3e6c4;
-  /* White on navy/deep fills. Gold buttons keep navy via .wrq-btn--gold. */
-  --on-brand: #ffffff;
-  --glow: rgba(212, 160, 23, 0.12);
-  --glow-2: rgba(0, 45, 78, 0.04);
-  --shadow: var(--wrq-shadow);
   --radius: var(--wrq-radius);
   --font-ui: var(--font-tajawal), var(--font-cairo), sans-serif;
   --font-dash: var(--font-plex-ar), var(--font-tajawal), sans-serif;
 }
 
 body:not([data-arabya-surface="mushaf"]) {
-  background: var(--wrq-cream);
-  color: var(--wrq-ink);
+  background: var(--bg);
+  color: var(--ink);
   font-family: var(--font-ui);
 }
 
@@ -57,7 +35,7 @@ body:not([data-arabya-surface="mushaf"]) .shell {
 body:not([data-arabya-surface="mushaf"]) .site-header {
   background: color-mix(in srgb, #fff 92%, transparent);
   backdrop-filter: blur(14px);
-  border-bottom: 1px solid color-mix(in srgb, var(--wrq-navy) 8%, var(--line));
+  border-bottom: 1px solid color-mix(in srgb, var(--wrq-deep) 8%, var(--line));
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
 }
 
@@ -67,14 +45,14 @@ body:not([data-arabya-surface="mushaf"]) .header-inner {
 
 body:not([data-arabya-surface="mushaf"]) .nav a,
 body:not([data-arabya-surface="mushaf"]) .nav-link-btn {
-  color: var(--wrq-navy);
+  color: var(--wrq-deep);
   font-weight: 650;
   font-size: 0.92rem;
 }
 
 body:not([data-arabya-surface="mushaf"]) .nav a:hover,
 body:not([data-arabya-surface="mushaf"]) .nav-link-btn:hover {
-  color: var(--wrq-gold);
+  color: var(--wrq-accent);
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-header-cta {
@@ -121,29 +99,30 @@ body:not([data-arabya-surface="mushaf"]) .wrq-btn--sm {
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-btn--gold {
-  background: var(--wrq-gold);
-  color: var(--wrq-navy);
-  box-shadow: 0 8px 20px rgba(212, 160, 23, 0.28);
+  background: var(--wrq-accent);
+  color: var(--on-brand);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--wrq-accent) 28%, transparent);
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-btn--gold:hover {
   transform: translateY(-1px);
-  background: var(--wrq-gold-muted);
+  background: var(--wrq-accent-muted);
+  color: var(--on-brand);
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-btn--navy {
-  background: var(--wrq-navy);
+  background: var(--wrq-deep);
   color: #fff;
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-btn--outline {
   background: transparent;
-  color: var(--wrq-navy);
-  border-color: var(--wrq-navy);
+  color: var(--wrq-deep);
+  border-color: var(--wrq-deep);
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-btn--teal {
-  background: var(--wrq-teal);
+  background: var(--wrq-support);
   color: #fff;
 }
 
@@ -154,21 +133,21 @@ body:not([data-arabya-surface="mushaf"]) .wrq-btn--ghost-on-dark {
 }
 
 body:not([data-arabya-surface="mushaf"]) .brand-wordmark {
-  color: var(--wrq-navy) !important;
+  color: var(--wrq-deep) !important;
   background: none !important;
-  -webkit-text-fill-color: var(--wrq-navy) !important;
+  -webkit-text-fill-color: var(--wrq-deep) !important;
 }
 
 body:not([data-arabya-surface="mushaf"]) .brand-wordmark-accent {
-  color: var(--wrq-gold) !important;
-  -webkit-text-fill-color: var(--wrq-gold) !important;
+  color: var(--wrq-accent) !important;
+  -webkit-text-fill-color: var(--wrq-accent) !important;
 }
 
 /* —— Footer (Warraq centered) —— */
 body:not([data-arabya-surface="mushaf"]) .site-footer {
   margin-top: 3rem;
   padding: 2.5rem 0 calc(2rem + env(safe-area-inset-bottom, 0px));
-  background: #fff;
+  background: var(--surface);
   border-top: 1px solid var(--line);
 }
 
@@ -179,21 +158,21 @@ body:not([data-arabya-surface="mushaf"]) .arabya-footer-panel {
 }
 
 body:not([data-arabya-surface="mushaf"]) .arabya-footer-col__title {
-  color: var(--wrq-navy);
+  color: var(--wrq-deep);
   font-size: 0.78rem;
   letter-spacing: 0.04em;
 }
 
 body:not([data-arabya-surface="mushaf"]) .arabya-footer-col a {
-  color: var(--wrq-muted);
+  color: var(--muted);
 }
 
 body:not([data-arabya-surface="mushaf"]) .arabya-footer-col a:hover {
-  color: var(--wrq-gold);
+  color: var(--wrq-accent);
 }
 
 body:not([data-arabya-surface="mushaf"]) .arabya-footer-credit {
-  color: var(--wrq-muted);
+  color: var(--muted);
   font-size: 0.82rem;
 }
 
@@ -201,7 +180,7 @@ body:not([data-arabya-surface="mushaf"]) .wrq-footer-tagline {
   margin: 0;
   font-family: var(--font-amiri), serif;
   font-size: 1.05rem;
-  color: var(--wrq-navy);
+  color: var(--wrq-deep);
 }
 
 /* —— Homepage hero —— */
@@ -216,7 +195,7 @@ body:not([data-arabya-surface="mushaf"]) .wrq-hero__bg {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(700px 420px at 15% 10%, rgba(212, 160, 23, 0.14), transparent 60%),
+    radial-gradient(700px 420px at 15% 10%, rgba(13, 148, 136, 0.14), transparent 60%),
     radial-gradient(900px 500px at 85% -5%, rgba(45, 139, 104, 0.08), transparent 55%);
 }
 
@@ -234,11 +213,11 @@ body:not([data-arabya-surface="mushaf"]) .wrq-pill {
   gap: 0.45rem;
   padding: 0.4rem 0.85rem;
   border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 4px 16px rgba(0, 45, 78, 0.06);
+  background: var(--surface);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
   font-size: 0.82rem;
   font-weight: 650;
-  color: var(--wrq-navy);
+  color: var(--wrq-deep);
   margin-bottom: 1rem;
 }
 
@@ -263,20 +242,20 @@ body:not([data-arabya-surface="mushaf"]) .wrq-os-card {
   padding: 0.55rem 0.75rem;
   border-radius: 12px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--surface);
   min-width: 8.5rem;
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-os-card strong {
   display: block;
   font-size: 0.82rem;
-  color: var(--wrq-navy);
+  color: var(--wrq-deep);
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-os-card small {
   display: block;
   font-size: 0.72rem;
-  color: var(--wrq-muted);
+  color: var(--muted);
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-os-card--soon {
@@ -289,11 +268,11 @@ body:not([data-arabya-surface="mushaf"]) .wrq-kicker {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--wrq-teal);
+  color: var(--wrq-support);
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-kicker--on-dark {
-  color: var(--wrq-gold);
+  color: var(--wrq-accent);
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-hero__title {
@@ -307,7 +286,7 @@ body:not([data-arabya-surface="mushaf"]) .wrq-hero__title-muted {
   font-family: var(--font-tajawal), var(--font-ui), sans-serif;
   font-size: clamp(1.8rem, 4vw, 2.6rem);
   font-weight: 700;
-  color: var(--wrq-navy);
+  color: var(--wrq-deep);
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-hero__title-gold {
@@ -315,7 +294,7 @@ body:not([data-arabya-surface="mushaf"]) .wrq-hero__title-gold {
   font-family: var(--font-amiri), serif;
   font-size: clamp(2.8rem, 7vw, 4.2rem);
   font-weight: 700;
-  color: var(--wrq-gold);
+  color: var(--wrq-accent);
   letter-spacing: -0.02em;
 }
 
@@ -327,7 +306,7 @@ body:not([data-arabya-surface="mushaf"]) .wrq-hero__lead {
   margin: 1rem 0 0;
   max-width: 36rem;
   line-height: 1.85;
-  color: var(--wrq-muted);
+  color: var(--muted);
   font-size: 1.02rem;
 }
 
@@ -346,21 +325,21 @@ body:not([data-arabya-surface="mushaf"]) .wrq-trust {
   padding: 0;
   list-style: none;
   font-size: 0.82rem;
-  color: var(--wrq-muted);
+  color: var(--muted);
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-trust li::before {
   content: "✓ ";
-  color: var(--wrq-teal);
+  color: var(--wrq-support);
   font-weight: 800;
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-mockup {
-  background: #fff;
+  background: var(--surface);
   border-radius: var(--wrq-radius-xl);
   padding: 2rem 1.75rem;
   box-shadow: var(--wrq-shadow);
-  border: 1px solid color-mix(in srgb, var(--wrq-navy) 6%, var(--line));
+  border: 1px solid color-mix(in srgb, var(--wrq-deep) 6%, var(--line));
   text-align: center;
 }
 
@@ -392,18 +371,18 @@ body:not([data-arabya-surface="mushaf"]) .wrq-mockup__brand {
   margin: 0;
   font-family: var(--font-amiri), serif;
   font-size: 1.35rem;
-  color: var(--wrq-gold);
+  color: var(--wrq-accent);
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-mockup__title {
   margin: 0.35rem 0 0;
   font-size: 1.25rem;
-  color: var(--wrq-navy);
+  color: var(--wrq-deep);
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-mockup__body {
   margin: 0.65rem 0 0;
-  color: var(--wrq-muted);
+  color: var(--muted);
   line-height: 1.65;
   font-size: 0.92rem;
 }
@@ -421,7 +400,11 @@ body:not([data-arabya-surface="mushaf"]) .wrq-deliver {
   margin: 2.5rem 0;
   padding: clamp(2rem, 4vw, 3rem) clamp(1.25rem, 3vw, 2.5rem);
   border-radius: var(--wrq-radius-lg);
-  background: linear-gradient(155deg, var(--wrq-navy-deep) 0%, #143342 100%);
+  background: linear-gradient(
+    155deg,
+    var(--wrq-deep-2) 0%,
+    color-mix(in srgb, var(--wrq-deep) 82%, #000) 100%
+  );
   color: #fff;
   text-align: center;
 }
@@ -431,8 +414,8 @@ body:not([data-arabya-surface="mushaf"]) .wrq-deliver__badge {
   margin: 0 0 0.75rem;
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--wrq-gold) 22%, transparent);
-  color: var(--wrq-gold);
+  background: color-mix(in srgb, var(--wrq-accent) 22%, transparent);
+  color: var(--wrq-accent);
   font-size: 0.78rem;
   font-weight: 700;
 }
@@ -462,7 +445,7 @@ body:not([data-arabya-surface="mushaf"]) .wrq-deliver__stats {
 body:not([data-arabya-surface="mushaf"]) .wrq-deliver__stats strong {
   display: block;
   font-size: 1.5rem;
-  color: var(--wrq-gold);
+  color: var(--wrq-accent);
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-deliver__stats span {
@@ -475,7 +458,7 @@ body:not([data-arabya-surface="mushaf"]) .wrq-goals {
   margin: 2.5rem 0;
   padding: clamp(2rem, 4vw, 2.75rem) clamp(1rem, 3vw, 2rem);
   border-radius: var(--wrq-radius-lg);
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
   box-shadow: var(--wrq-shadow);
 }
@@ -489,13 +472,13 @@ body:not([data-arabya-surface="mushaf"]) .wrq-goals__head h2 {
   margin: 0.35rem 0 0;
   font-family: var(--font-amiri), serif;
   font-size: clamp(1.5rem, 3vw, 2rem);
-  color: var(--wrq-navy);
+  color: var(--wrq-deep);
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-goals__lead {
   margin: 0.65rem auto 0;
   max-width: 38rem;
-  color: var(--wrq-muted);
+  color: var(--muted);
   line-height: 1.7;
 }
 
@@ -508,8 +491,8 @@ body:not([data-arabya-surface="mushaf"]) .wrq-goals__grid {
 body:not([data-arabya-surface="mushaf"]) .wrq-goal-card {
   padding: 1rem 0.85rem;
   border-radius: 14px;
-  background: var(--wrq-cream-2);
-  border: 1px solid color-mix(in srgb, var(--wrq-gold) 18%, var(--line));
+  background: var(--bg-accent);
+  border: 1px solid color-mix(in srgb, var(--wrq-accent) 18%, var(--line));
   text-align: center;
 }
 
@@ -520,8 +503,8 @@ body:not([data-arabya-surface="mushaf"]) .wrq-goal-card__num {
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
-  background: var(--wrq-gold);
-  color: var(--wrq-navy);
+  background: var(--wrq-accent);
+  color: var(--wrq-deep);
   font-weight: 800;
   font-size: 0.85rem;
   margin-bottom: 0.5rem;
@@ -530,20 +513,20 @@ body:not([data-arabya-surface="mushaf"]) .wrq-goal-card__num {
 body:not([data-arabya-surface="mushaf"]) .wrq-goal-card h3 {
   margin: 0;
   font-size: 0.88rem;
-  color: var(--wrq-navy);
+  color: var(--wrq-deep);
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-goal-card p {
   margin: 0.4rem 0 0;
   font-size: 0.78rem;
   line-height: 1.55;
-  color: var(--wrq-muted);
+  color: var(--muted);
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-goal-card__status {
   margin-top: 0.5rem !important;
   font-weight: 700;
-  color: var(--wrq-teal) !important;
+  color: var(--wrq-support) !important;
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-goals__cta {
@@ -556,7 +539,7 @@ body:not([data-arabya-surface="mushaf"]) .wrq-index-card {
   margin: 2rem 0;
   padding: 1.5rem 1.35rem 1.75rem;
   border-radius: var(--wrq-radius-lg);
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
   box-shadow: var(--wrq-shadow);
 }
@@ -564,26 +547,26 @@ body:not([data-arabya-surface="mushaf"]) .wrq-index-card {
 body:not([data-arabya-surface="mushaf"]) .wrq-index-card .home-index-intro h1,
 body:not([data-arabya-surface="mushaf"]) .wrq-index-card .home-index-intro h2 {
   font-family: var(--font-amiri), serif;
-  color: var(--wrq-navy);
+  color: var(--wrq-deep);
 }
 
 body:not([data-arabya-surface="mushaf"]) .home-tool-link--primary,
 body:not([data-arabya-surface="mushaf"]) .not-found-cta--primary {
-  background: var(--wrq-navy) !important;
+  background: var(--wrq-deep) !important;
   color: #fff !important;
-  border-color: var(--wrq-navy) !important;
+  border-color: var(--wrq-deep) !important;
 }
 
 body:not([data-arabya-surface="mushaf"]) .home-tool-link:not(.home-tool-link--primary) {
-  border-color: var(--wrq-navy);
-  color: var(--wrq-navy);
+  border-color: var(--wrq-deep);
+  color: var(--wrq-deep);
 }
 
 /* —— Services / hubs —— */
 body:not([data-arabya-surface="mushaf"]) .services-hub__hero,
 body:not([data-arabya-surface="mushaf"]) .resources-hub__hero,
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-hero {
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
   box-shadow: var(--wrq-shadow);
   border-radius: var(--wrq-radius-lg);
@@ -592,58 +575,58 @@ body:not([data-arabya-surface="mushaf"]) .arabya-hub-hero {
 body:not([data-arabya-surface="mushaf"]) .services-hub__hero h1,
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-hero h1 {
   font-family: var(--font-amiri), serif;
-  color: var(--wrq-navy);
+  color: var(--wrq-deep);
 }
 
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-hero__kicker,
 body:not([data-arabya-surface="mushaf"]) .svc-group__title {
-  color: var(--wrq-gold);
+  color: var(--wrq-accent);
 }
 
 body:not([data-arabya-surface="mushaf"]) .svc-card {
   border-radius: var(--wrq-radius);
-  border-top: 4px solid var(--wrq-gold);
-  box-shadow: 0 8px 24px rgba(0, 45, 78, 0.06);
+  border-top: 4px solid var(--wrq-accent);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
 body:not([data-arabya-surface="mushaf"]) .svc-card:hover {
-  border-color: color-mix(in srgb, var(--wrq-gold) 40%, var(--line));
-  box-shadow: 0 16px 36px rgba(0, 45, 78, 0.1);
+  border-color: color-mix(in srgb, var(--wrq-accent) 40%, var(--line));
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.1);
 }
 
 body:not([data-arabya-surface="mushaf"]) .hub-nav-link {
-  color: var(--wrq-muted);
+  color: var(--muted);
 }
 
 body:not([data-arabya-surface="mushaf"]) .hub-nav-link:hover {
-  color: var(--wrq-gold);
-  border-bottom-color: var(--wrq-gold);
+  color: var(--wrq-accent);
+  border-bottom-color: var(--wrq-accent);
 }
 
 /* —— Lughawi page —— */
 body:not([data-arabya-surface="mushaf"]) .lughawi-page {
-  --lughawi-glow: rgba(212, 160, 23, 0.12);
+  --lughawi-glow: rgba(13, 148, 136, 0.12);
 }
 
 body:not([data-arabya-surface="mushaf"]) .lughawi-hero {
   background:
-    radial-gradient(90% 70% at 100% 0%, rgba(212, 160, 23, 0.12), transparent 55%),
-    linear-gradient(180deg, var(--wrq-cream) 0%, #fff 100%);
+    radial-gradient(90% 70% at 100% 0%, rgba(13, 148, 136, 0.12), transparent 55%),
+    linear-gradient(180deg, var(--bg) 0%, #fff 100%);
   border-bottom: 1px solid var(--line);
 }
 
 body:not([data-arabya-surface="mushaf"]) .lughawi-hero h1 {
   font-family: var(--font-amiri), serif;
-  color: var(--wrq-navy);
+  color: var(--wrq-deep);
 }
 
 body:not([data-arabya-surface="mushaf"]) .lughawi-kicker {
-  color: var(--wrq-gold);
+  color: var(--wrq-accent);
 }
 
 body:not([data-arabya-surface="mushaf"]) .lughawi-rail--nav {
-  background: linear-gradient(180deg, var(--wrq-navy) 0%, var(--wrq-navy-deep) 100%);
-  border-color: color-mix(in srgb, var(--wrq-navy) 80%, #000);
+  background: linear-gradient(180deg, var(--wrq-deep) 0%, var(--wrq-deep-2) 100%);
+  border-color: color-mix(in srgb, var(--wrq-deep) 80%, #000);
   color: #fff;
 }
 
@@ -655,23 +638,23 @@ body:not([data-arabya-surface="mushaf"]) .lughawi-rail--nav svg {
 }
 
 body:not([data-arabya-surface="mushaf"]) .lughawi-rail--nav .lughawi-rail-btn.is-active {
-  background: var(--wrq-gold);
-  border-color: var(--wrq-gold);
-  color: var(--wrq-navy);
+  background: var(--wrq-accent);
+  border-color: var(--wrq-accent);
+  color: var(--wrq-deep);
 }
 
 body:not([data-arabya-surface="mushaf"]) .lughawi-rail--nav .lughawi-rail-btn.is-active svg {
-  color: var(--wrq-navy);
+  color: var(--wrq-deep);
 }
 
 body:not([data-arabya-surface="mushaf"]) .lughawi-workspace,
 body:not([data-arabya-surface="mushaf"]) .lughawi-shell {
-  border-color: color-mix(in srgb, var(--wrq-gold) 20%, var(--line));
+  border-color: color-mix(in srgb, var(--wrq-accent) 20%, var(--line));
 }
 
 body:not([data-arabya-surface="mushaf"]) .lughawi-primary,
 body:not([data-arabya-surface="mushaf"]) .nav-pill.is-current {
-  background: var(--wrq-navy) !important;
+  background: var(--wrq-deep) !important;
   color: #fff !important;
 }
 
@@ -695,29 +678,29 @@ body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .asma-grid-link,
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .reciter-card,
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .qiraat-card {
   border-radius: var(--wrq-radius);
-  border-top: 3px solid var(--wrq-gold);
-  box-shadow: 0 8px 24px rgba(0, 45, 78, 0.06);
+  border-top: 3px solid var(--wrq-accent);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .juz-card:hover,
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .hadith-collection-card:hover,
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .adhkar-tool-card:hover,
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .heritage-work-card:hover {
-  border-color: color-mix(in srgb, var(--wrq-gold) 45%, var(--line));
+  border-color: color-mix(in srgb, var(--wrq-accent) 45%, var(--line));
 }
 
 body:not([data-arabya-surface="mushaf"]) .info-page,
 body:not([data-arabya-surface="mushaf"]) .contact-page,
 body:not([data-arabya-surface="mushaf"]) .about-page {
-  --brand: var(--wrq-gold);
-  --brand-deep: var(--wrq-navy);
+  --brand: var(--wrq-accent);
+  --brand-deep: var(--wrq-deep);
 }
 
 body:not([data-arabya-surface="mushaf"]) .info-hero h1,
 body:not([data-arabya-surface="mushaf"]) .about-hero h1,
 body:not([data-arabya-surface="mushaf"]) .contact-hero h1 {
   font-family: var(--font-amiri), serif;
-  color: var(--wrq-navy);
+  color: var(--wrq-deep);
 }
 
 body:not([data-arabya-surface="mushaf"]) .account-hub-card,
@@ -725,11 +708,11 @@ body:not([data-arabya-surface="mushaf"]) .account-panel,
 body:not([data-arabya-surface="mushaf"]) .dash-card {
   border-radius: var(--wrq-radius);
   border: 1px solid var(--line);
-  box-shadow: 0 6px 20px rgba(0, 45, 78, 0.05);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
 }
 
 body:not([data-arabya-surface="mushaf"]) .account-hub-card:hover {
-  border-color: color-mix(in srgb, var(--wrq-gold) 35%, var(--line));
+  border-color: color-mix(in srgb, var(--wrq-accent) 35%, var(--line));
 }
 
 body:not([data-arabya-surface="mushaf"]) .surah-index-item,
@@ -738,18 +721,18 @@ body:not([data-arabya-surface="mushaf"]) .home-index .surah-link {
 }
 
 body:not([data-arabya-surface="mushaf"]) .home-index .surah-link:hover {
-  background: var(--wrq-brand-soft, var(--brand-soft));
-  color: var(--wrq-navy);
+  background: var(--brand-soft, var(--brand-soft));
+  color: var(--wrq-deep);
 }
 
 body:not([data-arabya-surface="mushaf"]) .not-found-cta--ghost {
-  border-color: var(--wrq-navy);
-  color: var(--wrq-navy);
+  border-color: var(--wrq-deep);
+  color: var(--wrq-deep);
 }
 
 body:not([data-arabya-surface="mushaf"]) .home-services__badge {
-  background: color-mix(in srgb, var(--wrq-gold) 18%, #fff);
-  color: var(--wrq-navy);
+  background: color-mix(in srgb, var(--wrq-accent) 18%, #fff);
+  color: var(--wrq-deep);
 }
 
 body:not([data-arabya-surface="mushaf"]) .warraq-home {
@@ -797,44 +780,44 @@ body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--front svg [stroke="
 }
 
 body:not([data-arabya-surface="mushaf"]) .header-account-icon {
-  background: #fff;
-  border-color: var(--wrq-navy);
-  color: var(--wrq-navy);
+  background: var(--surface);
+  border-color: var(--wrq-deep);
+  color: var(--wrq-deep);
 }
 
 body:not([data-arabya-surface="mushaf"]) .header-account-icon:hover,
 body:not([data-arabya-surface="mushaf"]) .header-account-icon:focus-visible {
-  background: var(--wrq-navy);
-  border-color: var(--wrq-navy);
+  background: var(--wrq-deep);
+  border-color: var(--wrq-deep);
   color: #fff;
 }
 
 body:not([data-arabya-surface="mushaf"]) .menu-toggle {
-  background: var(--wrq-navy);
-  border-color: var(--wrq-navy);
+  background: var(--wrq-deep);
+  border-color: var(--wrq-deep);
   color: #fff;
 }
 
 body:not([data-arabya-surface="mushaf"]) .nav a.auth-btn--google,
 body:not([data-arabya-surface="mushaf"]) .auth-btn--google {
-  background: var(--wrq-navy) !important;
-  border-color: var(--wrq-navy) !important;
+  background: var(--wrq-deep) !important;
+  border-color: var(--wrq-deep) !important;
   color: #fff !important;
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-btn--gold,
 body:not([data-arabya-surface="mushaf"]) .wrq-btn--gold svg {
-  color: var(--wrq-navy);
+  color: var(--on-brand);
   stroke: currentColor;
 }
 
 body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--front {
-  background: var(--wrq-navy) !important;
+  background: var(--wrq-deep) !important;
   color: #fff !important;
 }
 
 body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--back {
-  background: color-mix(in srgb, var(--wrq-navy) 70%, #000) !important;
+  background: color-mix(in srgb, var(--wrq-deep) 70%, #000) !important;
 }
 
 body:not([data-arabya-surface="mushaf"]) .lughawi-rail--nav .lughawi-rail-btn {
@@ -847,7 +830,7 @@ body:not([data-arabya-surface="mushaf"]) .lughawi-rail--nav .lughawi-rail-badge 
 }
 
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-hero .svc-icon-3d__face--front {
-  background: var(--wrq-navy) !important;
+  background: var(--wrq-deep) !important;
   color: #fff !important;
 }
 
@@ -867,11 +850,11 @@ body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .heritage-work-card,
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .asma-grid-link,
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .reciter-card,
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .qiraat-card {
-  background: #fff;
+  background: var(--surface);
   border-radius: 22px;
-  border: 1px solid color-mix(in srgb, var(--wrq-navy) 8%, var(--line));
-  border-top: 4px solid var(--wrq-gold);
-  box-shadow: 0 10px 28px rgba(0, 45, 78, 0.07);
+  border: 1px solid color-mix(in srgb, var(--wrq-deep) 8%, var(--line));
+  border-top: 4px solid var(--wrq-accent);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.07);
 }
 
 body:not([data-arabya-surface="mushaf"]) .svc-card:hover,
@@ -881,8 +864,8 @@ body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .hadith-collection-car
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .adhkar-tool-card:hover,
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .heritage-work-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 18px 40px rgba(0, 45, 78, 0.12);
-  border-top-color: var(--wrq-gold-muted);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+  border-top-color: var(--wrq-accent-muted);
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-mockup,
@@ -893,7 +876,7 @@ body:not([data-arabya-surface="mushaf"]) .arabya-hub-hero,
 body:not([data-arabya-surface="mushaf"]) .wrq-index-card,
 body:not([data-arabya-surface="mushaf"]) .wrq-goals {
   border-radius: var(--wrq-radius-xl);
-  background: #fff;
+  background: var(--surface);
   box-shadow: var(--wrq-shadow);
 }
 
@@ -925,3 +908,79 @@ body:not([data-arabya-surface="mushaf"]) .wrq-goals {
     transition: none !important;
   }
 }
+
+/* —— Floating palette picker (Warraq «لون الواجهة») —— */
+.arabya-palette-picker {
+  position: fixed;
+  inset-inline-start: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
+  max-width: min(92vw, 18rem);
+}
+
+.arabya-palette-picker__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.arabya-palette-picker__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.arabya-palette-picker__swatch {
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, #fff 55%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 18%, transparent);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.arabya-palette-picker__swatch:hover {
+  transform: scale(1.08);
+}
+
+.arabya-palette-picker__swatch.is-active {
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 0 0 4px var(--brand);
+  transform: scale(1.12);
+}
+
+.arabya-palette-picker__swatch:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+html[data-theme="dark"] .arabya-palette-picker {
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+}
+
+@media (max-width: 520px) {
+  .arabya-palette-picker {
+    inset-inline-start: 0.65rem;
+    bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px));
+    padding: 0.5rem 0.6rem;
+  }
+
+  .arabya-palette-picker__swatch {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+}
+
