@@ -33,7 +33,8 @@ body:not([data-arabya-surface="mushaf"]) {
   --brand-cyan: var(--wrq-teal);
   --brand-soft: #f7efd8;
   --select: #f3e6c4;
-  --on-brand: var(--wrq-navy);
+  /* White on navy/deep fills. Gold buttons keep navy via .wrq-btn--gold. */
+  --on-brand: #ffffff;
   --glow: rgba(212, 160, 23, 0.12);
   --glow-2: rgba(0, 45, 78, 0.04);
   --shadow: var(--wrq-shadow);
@@ -83,8 +84,18 @@ body:not([data-arabya-surface="mushaf"]) .wrq-header-cta {
 }
 
 @media (min-width: 901px) {
+  body:not([data-arabya-surface="mushaf"]) .header-actions {
+    display: inline-flex;
+  }
+
   body:not([data-arabya-surface="mushaf"]) .wrq-header-cta {
     display: inline-flex;
+  }
+
+  body:not([data-arabya-surface="mushaf"]) .header-actions .header-account-icon,
+  body:not([data-arabya-surface="mushaf"]) .header-actions .header-prefs,
+  body:not([data-arabya-surface="mushaf"]) .header-actions .menu-toggle {
+    display: none;
   }
 }
 
@@ -633,6 +644,24 @@ body:not([data-arabya-surface="mushaf"]) .lughawi-kicker {
 body:not([data-arabya-surface="mushaf"]) .lughawi-rail--nav {
   background: linear-gradient(180deg, var(--wrq-navy) 0%, var(--wrq-navy-deep) 100%);
   border-color: color-mix(in srgb, var(--wrq-navy) 80%, #000);
+  color: #fff;
+}
+
+body:not([data-arabya-surface="mushaf"]) .lughawi-rail--nav .lughawi-rail-btn,
+body:not([data-arabya-surface="mushaf"]) .lughawi-rail--nav a,
+body:not([data-arabya-surface="mushaf"]) .lughawi-rail--nav svg {
+  color: #fff;
+  stroke: currentColor;
+}
+
+body:not([data-arabya-surface="mushaf"]) .lughawi-rail--nav .lughawi-rail-btn.is-active {
+  background: var(--wrq-gold);
+  border-color: var(--wrq-gold);
+  color: var(--wrq-navy);
+}
+
+body:not([data-arabya-surface="mushaf"]) .lughawi-rail--nav .lughawi-rail-btn.is-active svg {
+  color: var(--wrq-navy);
 }
 
 body:not([data-arabya-surface="mushaf"]) .lughawi-workspace,
@@ -725,6 +754,147 @@ body:not([data-arabya-surface="mushaf"]) .home-services__badge {
 
 body:not([data-arabya-surface="mushaf"]) .warraq-home {
   padding-top: 0;
+}
+
+/* —— Contrast: white glyphs on navy/gold-navy fills —— */
+body:not([data-arabya-surface="mushaf"]) .wrq-btn--navy,
+body:not([data-arabya-surface="mushaf"]) .wrq-btn--teal,
+body:not([data-arabya-surface="mushaf"]) .home-tool-link--primary,
+body:not([data-arabya-surface="mushaf"]) .not-found-cta--primary,
+body:not([data-arabya-surface="mushaf"]) .lughawi-primary,
+body:not([data-arabya-surface="mushaf"]) .nav-pill.is-current {
+  color: #fff !important;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-btn--navy svg,
+body:not([data-arabya-surface="mushaf"]) .wrq-btn--teal svg,
+body:not([data-arabya-surface="mushaf"]) .home-tool-link--primary svg,
+body:not([data-arabya-surface="mushaf"]) .lughawi-primary svg {
+  color: #fff;
+  stroke: currentColor;
+  fill: none;
+}
+
+body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--front {
+  color: #fff;
+}
+
+body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--front svg {
+  color: #fff !important;
+  fill: #fff !important;
+  stroke: #fff !important;
+}
+
+body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--front svg [fill="currentColor"],
+body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--front svg rect[fill="currentColor"],
+body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--front svg path[fill="currentColor"],
+body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--front svg circle[fill="currentColor"] {
+  fill: #fff;
+}
+
+body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--front svg [stroke="currentColor"] {
+  stroke: #fff;
+}
+
+body:not([data-arabya-surface="mushaf"]) .header-account-icon {
+  background: #fff;
+  border-color: var(--wrq-navy);
+  color: var(--wrq-navy);
+}
+
+body:not([data-arabya-surface="mushaf"]) .header-account-icon:hover,
+body:not([data-arabya-surface="mushaf"]) .header-account-icon:focus-visible {
+  background: var(--wrq-navy);
+  border-color: var(--wrq-navy);
+  color: #fff;
+}
+
+body:not([data-arabya-surface="mushaf"]) .menu-toggle {
+  background: var(--wrq-navy);
+  border-color: var(--wrq-navy);
+  color: #fff;
+}
+
+body:not([data-arabya-surface="mushaf"]) .nav a.auth-btn--google,
+body:not([data-arabya-surface="mushaf"]) .auth-btn--google {
+  background: var(--wrq-navy) !important;
+  border-color: var(--wrq-navy) !important;
+  color: #fff !important;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-btn--gold,
+body:not([data-arabya-surface="mushaf"]) .wrq-btn--gold svg {
+  color: var(--wrq-navy);
+  stroke: currentColor;
+}
+
+body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--front {
+  background: var(--wrq-navy) !important;
+  color: #fff !important;
+}
+
+body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--back {
+  background: color-mix(in srgb, var(--wrq-navy) 70%, #000) !important;
+}
+
+body:not([data-arabya-surface="mushaf"]) .lughawi-rail--nav .lughawi-rail-btn {
+  color: #fff !important;
+}
+
+body:not([data-arabya-surface="mushaf"]) .lughawi-rail--nav .lughawi-rail-badge {
+  color: #f7efd8 !important;
+  background: color-mix(in srgb, #fff 16%, transparent);
+}
+
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-hero .svc-icon-3d__face--front {
+  background: var(--wrq-navy) !important;
+  color: #fff !important;
+}
+
+/* —— Warraq module cards (white tile, gold cap, soft shadow) —— */
+body:not([data-arabya-surface="mushaf"]) .svc-card,
+body:not([data-arabya-surface="mushaf"]) .wrq-goal-card,
+body:not([data-arabya-surface="mushaf"]) .account-hub-card,
+body:not([data-arabya-surface="mushaf"]) .account-panel,
+body:not([data-arabya-surface="mushaf"]) .dash-card,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .juz-card,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .books-catalog-item,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .hadith-collection-card,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .adhkar-tool-card,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .adhkar-category-link,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .create-hub-card,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .heritage-work-card,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .asma-grid-link,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .reciter-card,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .qiraat-card {
+  background: #fff;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--wrq-navy) 8%, var(--line));
+  border-top: 4px solid var(--wrq-gold);
+  box-shadow: 0 10px 28px rgba(0, 45, 78, 0.07);
+}
+
+body:not([data-arabya-surface="mushaf"]) .svc-card:hover,
+body:not([data-arabya-surface="mushaf"]) .account-hub-card:hover,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .juz-card:hover,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .hadith-collection-card:hover,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .adhkar-tool-card:hover,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .heritage-work-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 40px rgba(0, 45, 78, 0.12);
+  border-top-color: var(--wrq-gold-muted);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-mockup,
+body:not([data-arabya-surface="mushaf"]) .info-hero,
+body:not([data-arabya-surface="mushaf"]) .services-hub__hero,
+body:not([data-arabya-surface="mushaf"]) .resources-hub__hero,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-hero,
+body:not([data-arabya-surface="mushaf"]) .wrq-index-card,
+body:not([data-arabya-surface="mushaf"]) .wrq-goals {
+  border-radius: var(--wrq-radius-xl);
+  background: #fff;
+  box-shadow: var(--wrq-shadow);
 }
 
 @media (max-width: 1024px) {

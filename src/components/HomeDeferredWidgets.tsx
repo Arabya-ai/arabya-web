@@ -19,11 +19,6 @@ const AsmaAlHusnaCard = dynamic(
   () => import("@/components/AsmaAlHusnaCard").then((m) => m.AsmaAlHusnaCard),
   { ssr: false },
 );
-const HomeServicesSection = dynamic(
-  () =>
-    import("@/components/HomeServicesSection").then((m) => m.HomeServicesSection),
-  { ssr: false },
-);
 
 /** Below-fold home widgets — keep LCP free of their JS/network. */
 export function HomeDeferredWidgets() {
@@ -33,7 +28,6 @@ export function HomeDeferredWidgets() {
       <ReadingHabitCard />
       <PrayerTimesCard />
       <AsmaAlHusnaCard />
-      <HomeServicesSection />
     </>
   );
 }
