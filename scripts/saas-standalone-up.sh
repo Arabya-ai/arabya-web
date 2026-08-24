@@ -50,7 +50,8 @@ for port in 13000 14000 15000 16000; do
 done
 
 echo
-echo "Chatwoot first boot may need DB prepare if web stays unhealthy:"
-echo "  docker compose -f ${COMPOSE_FILE} --env-file ${ENV_FILE} exec chatwoot-web bundle exec rails db:chatwoot_prepare"
+echo "Chatwoot web command runs db:chatwoot_prepare automatically before Puma."
+echo "First UI visit: http://127.0.0.1:14000/installation/onboarding (SSH tunnel or Nginx)."
 echo
 echo "Done. Core arabya.org (PM2) is unchanged."
+echo "Contabo layout: keep this stack under /var/www/arabya-saas (isolated from PM2 checkout)."

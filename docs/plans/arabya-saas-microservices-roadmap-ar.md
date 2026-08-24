@@ -135,6 +135,20 @@ docker compose -f docker-compose.standalone-saas.yml --env-file .env.saas \
 
 ---
 
-## 7) نقطة التحقق الحالية
+## 7) تحقق Contabo (أُنجز 24 أغسطس 2026)
 
-**المطلوب من المالك الآن:** تشغيل أوامر المرحلة 1 على Contabo وإرسال نتيجة `docker compose ... ps` + أكواد HTTP للمنافذ الأربعة. بعد التأكيد ننتقل للمرحلة 2 فقط.
+نفّذ الوكيل عبر SSH على `vmi3504973` (بدون لمس checkout إنتاج `main`):
+
+| خطوة | نتيجة |
+|------|--------|
+| تثبيت Docker Engine + Compose | Docker `29.7.2` / Compose `v5.5.0` |
+| مسار التشغيل المعزول | `/var/www/arabya-saas` (لا يغيّر `/var/www/arabya-web` على `main`) |
+| الشبكة | `arabya-saas-network` |
+| Umami `:13000` | HTTP **200** / healthy |
+| Chatwoot `:14000` | HTTP **302** → `/installation/onboarding` / Puma listening |
+| Cal.com `:15000` | HTTP **307** / healthy |
+| Documenso `:16000` | HTTP **302** / healthy |
+| `https://www.arabya.org` بعد التشغيل | HTTP **200** · PM2 `arabya-web` / `arabya-nlp` / `lughawi-sidecar` online |
+| منافذ Host | مربوطة على `127.0.0.1` فقط (حتى يُضاف Nginx لاحقًا) |
+
+**الخطوة التالية:** المرحلة 2 (ودجت Chatwoot SSR-safe) بعد إنشاء حساب onboarding في Chatwoot وWebsite token.

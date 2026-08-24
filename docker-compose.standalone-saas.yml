@@ -51,7 +51,8 @@ services:
       umami-db:
         condition: service_healthy
     ports:
-      - "13000:3000"
+      # Bind loopback only until Nginx reverse-proxy is added (Phase later).
+      - "127.0.0.1:13000:3000"
     environment:
       DATABASE_URL: postgresql://${UMAMI_DB_USER}:${UMAMI_DB_PASSWORD}@umami-db:5432/${UMAMI_DB_NAME}
       DATABASE_TYPE: postgresql
@@ -128,9 +129,15 @@ services:
       chatwoot-redis:
         condition: service_healthy
     ports:
-      - "14000:3000"
+      - "127.0.0.1:14000:3000"
     entrypoint: docker/entrypoints/rails.sh
-    command: ["bundle", "exec", "rails", "s", "-p", "3000", "-b", "0.0.0.0"]
+    # Prepare schema on every boot (no-op once migrated), then serve.
+    command:
+      [
+        "bash",
+        "-lc",
+        "bundle exec rails db:chatwoot_prepare && exec bundle exec rails s -p 3000 -b 0.0.0.0",
+      ]
     environment:
       RAILS_ENV: production
       NODE_ENV: production
@@ -235,7 +242,7 @@ services:
       calcom-db:
         condition: service_healthy
     ports:
-      - "15000:3000"
+      - "127.0.0.1:15000:3000"
     environment:
       DATABASE_URL: postgresql://${CALCOM_DB_USER}:${CALCOM_DB_PASSWORD}@calcom-db:5432/${CALCOM_DB_NAME}
       DATABASE_DIRECT_URL: postgresql://${CALCOM_DB_USER}:${CALCOM_DB_PASSWORD}@calcom-db:5432/${CALCOM_DB_NAME}
@@ -290,7 +297,7 @@ services:
       documenso-db:
         condition: service_healthy
     ports:
-      - "16000:3000"
+      - "127.0.0.1:16000:3000"
     environment:
       PORT: "3000"
       NEXTAUTH_SECRET: ${DOCUMENSO_NEXTAUTH_SECRET}
