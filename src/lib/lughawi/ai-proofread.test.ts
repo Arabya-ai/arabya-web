@@ -11,9 +11,16 @@ describe("isUnsafeAiMorphFlip", () => {
   });
 });
 
-describe("offline name-ali with ساعد", () => {
-  it("suggests علي after ساعد for instant L1", () => {
+describe("offline name-ali does not fire after ساعد", () => {
+  it("keeps على as preposition after ساعد", () => {
     const edits = collectSpellingEditsOffline("احمد ساعد على في الكتابة", "ar");
+    const map = Object.fromEntries(edits.map((e) => [e.original, e.suggestion]));
+    expect(map["احمد"]).toBe("أحمد");
+    expect(map["على"]).toBeUndefined();
+  });
+
+  it("still suggests علي after قابل", () => {
+    const edits = collectSpellingEditsOffline("احمد قابل على فى المدرسه", "ar");
     const map = Object.fromEntries(edits.map((e) => [e.original, e.suggestion]));
     expect(map["احمد"]).toBe("أحمد");
     expect(map["على"]).toBe("علي");

@@ -49,10 +49,10 @@ export const ALEF_FARQ_RE =
 
 /**
  * Verbs / cues after which «على» is usually the name علي (yaa), not the preposition.
- * Includes ساعد so «احمد ساعد على…» becomes «… علي…».
+ * Do NOT include ساعد/ساعدت… — «ساعد على» means “helped with” (preposition), not the name Ali.
  */
 export const NAME_ALI_TRIGGERS =
-  "قابل|قابلت|قابله|زرت|زار|رأيت|رأى|لقيت|لَقيت|كلمت|كلّمت|ناديت|نادى|سميت|سمّيت|اسمه|يدعى|يُدعى|ساعد|ساعدت|ساعده|ساعدها|ساعدهم|ساعدتنا|مع|إلى|الى";
+  "قابل|قابلت|قابله|زرت|زار|رأيت|رأى|لقيت|لَقيت|كلمت|كلّمت|ناديت|نادى|سميت|سمّيت|اسمه|يدعى|يُدعى|مع|إلى|الى";
 
 const NAME_ALI_RE = new RegExp(
   `(?<![\\u0600-\\u06FFa-zA-Z0-9])(${NAME_ALI_TRIGGERS})\\s+على(?![\\u0600-\\u06FFa-zA-Z0-9])`,

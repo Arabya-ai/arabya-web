@@ -237,31 +237,40 @@ export function SiteFooter({ credit }: { credit: string }) {
             <BrandLockup size="footer" />
           </Link>
 
-          <div className="arabya-footer-nav-row">
-            <nav className="arabya-footer-menu" aria-label={t("footerNav")}>
-              <Link href="/">{t("home")}</Link>
-              <Link href="/services">{t("services")}</Link>
+          <div className="arabya-footer-columns">
+            <nav className="arabya-footer-col" aria-label={t("footerColQuran")}>
+              <p className="arabya-footer-col__title">{t("footerColQuran")}</p>
               <Link href="/mushaf/1">{t("mushaf")}</Link>
               <Link href="/juz">{t("juz")}</Link>
               <Link href="/roots">{t("roots")}</Link>
               <Link href="/qiraat">{t("qiraat")}</Link>
-              <Link href="/asma">{t("asma")}</Link>
-              <Link href="/reciters">{t("reciters")}</Link>
               <Link href="/study">{t("study")}</Link>
+            </nav>
+            <nav className="arabya-footer-col" aria-label={t("footerColWorship")}>
+              <p className="arabya-footer-col__title">{t("footerColWorship")}</p>
               <Link href="/adhkar">{t("adhkar")}</Link>
               <Link href="/qibla">{t("qibla")}</Link>
               <Link href="/tahfeez">{t("tahfeez")}</Link>
-              <Link href="/studio">{t("studio")}</Link>
-              <Link href="/library">{t("library")}</Link>
-              <Link href="/books">{t("books")}</Link>
+              <Link href="/asma">{t("asma")}</Link>
+              <Link href="/reciters">{t("reciters")}</Link>
+            </nav>
+            <nav className="arabya-footer-col" aria-label={t("footerColKnowledge")}>
+              <p className="arabya-footer-col__title">{t("footerColKnowledge")}</p>
               <Link href="/hadith">{t("hadith")}</Link>
               <Link href="/heritage">{t("heritage")}</Link>
+              <Link href="/books">{t("books")}</Link>
+              <Link href="/library">{t("library")}</Link>
               <Link href="/resources">{t("resources")}</Link>
+            </nav>
+            <nav className="arabya-footer-col" aria-label={t("footerColSite")}>
+              <p className="arabya-footer-col__title">{t("footerColSite")}</p>
+              <Link href="/services">{t("services")}</Link>
               <Link href="/lughawi">{t("lughawi")}</Link>
+              <Link href="/studio">{t("studio")}</Link>
               <Link href="/about">{t("about")}</Link>
+              <Link href="/contact">{t("contact")}</Link>
               <Link href="/privacy">{t("privacy")}</Link>
               <Link href="/terms">{t("terms")}</Link>
-              <Link href="/contact">{t("contact")}</Link>
               <span className="arabya-footer-prefs">
                 <PreferencesMenu compact dropUp />
               </span>
