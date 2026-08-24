@@ -147,7 +147,7 @@ body:not([data-arabya-surface="mushaf"]) .brand-wordmark-accent {
 body:not([data-arabya-surface="mushaf"]) .site-footer {
   margin-top: 3rem;
   padding: 2.5rem 0 calc(2rem + env(safe-area-inset-bottom, 0px));
-  background: #fff;
+  background: var(--surface);
   border-top: 1px solid var(--line);
 }
 
@@ -213,7 +213,7 @@ body:not([data-arabya-surface="mushaf"]) .wrq-pill {
   gap: 0.45rem;
   padding: 0.4rem 0.85rem;
   border-radius: 999px;
-  background: #fff;
+  background: var(--surface);
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
   font-size: 0.82rem;
   font-weight: 650;
@@ -242,7 +242,7 @@ body:not([data-arabya-surface="mushaf"]) .wrq-os-card {
   padding: 0.55rem 0.75rem;
   border-radius: 12px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--surface);
   min-width: 8.5rem;
 }
 
@@ -335,7 +335,7 @@ body:not([data-arabya-surface="mushaf"]) .wrq-trust li::before {
 }
 
 body:not([data-arabya-surface="mushaf"]) .wrq-mockup {
-  background: #fff;
+  background: var(--surface);
   border-radius: var(--wrq-radius-xl);
   padding: 2rem 1.75rem;
   box-shadow: var(--wrq-shadow);
@@ -458,7 +458,7 @@ body:not([data-arabya-surface="mushaf"]) .wrq-goals {
   margin: 2.5rem 0;
   padding: clamp(2rem, 4vw, 2.75rem) clamp(1rem, 3vw, 2rem);
   border-radius: var(--wrq-radius-lg);
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
   box-shadow: var(--wrq-shadow);
 }
@@ -539,7 +539,7 @@ body:not([data-arabya-surface="mushaf"]) .wrq-index-card {
   margin: 2rem 0;
   padding: 1.5rem 1.35rem 1.75rem;
   border-radius: var(--wrq-radius-lg);
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
   box-shadow: var(--wrq-shadow);
 }
@@ -566,7 +566,7 @@ body:not([data-arabya-surface="mushaf"]) .home-tool-link:not(.home-tool-link--pr
 body:not([data-arabya-surface="mushaf"]) .services-hub__hero,
 body:not([data-arabya-surface="mushaf"]) .resources-hub__hero,
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-hero {
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--line);
   box-shadow: var(--wrq-shadow);
   border-radius: var(--wrq-radius-lg);
@@ -780,7 +780,7 @@ body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--front svg [stroke="
 }
 
 body:not([data-arabya-surface="mushaf"]) .header-account-icon {
-  background: #fff;
+  background: var(--surface);
   border-color: var(--wrq-deep);
   color: var(--wrq-deep);
 }
@@ -850,7 +850,7 @@ body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .heritage-work-card,
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .asma-grid-link,
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .reciter-card,
 body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .qiraat-card {
-  background: #fff;
+  background: var(--surface);
   border-radius: 22px;
   border: 1px solid color-mix(in srgb, var(--wrq-deep) 8%, var(--line));
   border-top: 4px solid var(--wrq-accent);
@@ -876,7 +876,7 @@ body:not([data-arabya-surface="mushaf"]) .arabya-hub-hero,
 body:not([data-arabya-surface="mushaf"]) .wrq-index-card,
 body:not([data-arabya-surface="mushaf"]) .wrq-goals {
   border-radius: var(--wrq-radius-xl);
-  background: #fff;
+  background: var(--surface);
   box-shadow: var(--wrq-shadow);
 }
 
