@@ -84,8 +84,18 @@ body:not([data-arabya-surface="mushaf"]) .wrq-header-cta {
 }
 
 @media (min-width: 901px) {
+  body:not([data-arabya-surface="mushaf"]) .header-actions {
+    display: inline-flex;
+  }
+
   body:not([data-arabya-surface="mushaf"]) .wrq-header-cta {
     display: inline-flex;
+  }
+
+  body:not([data-arabya-surface="mushaf"]) .header-actions .header-account-icon,
+  body:not([data-arabya-surface="mushaf"]) .header-actions .header-prefs,
+  body:not([data-arabya-surface="mushaf"]) .header-actions .menu-toggle {
+    display: none;
   }
 }
 
@@ -770,7 +780,9 @@ body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--front {
 }
 
 body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--front svg {
-  color: #fff;
+  color: #fff !important;
+  fill: #fff !important;
+  stroke: #fff !important;
 }
 
 body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--front svg [fill="currentColor"],
@@ -785,15 +797,15 @@ body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--front svg [stroke="
 }
 
 body:not([data-arabya-surface="mushaf"]) .header-account-icon {
-  background: var(--wrq-navy);
+  background: #fff;
   border-color: var(--wrq-navy);
-  color: #fff;
+  color: var(--wrq-navy);
 }
 
 body:not([data-arabya-surface="mushaf"]) .header-account-icon:hover,
 body:not([data-arabya-surface="mushaf"]) .header-account-icon:focus-visible {
-  background: var(--wrq-navy-deep);
-  border-color: var(--wrq-gold);
+  background: var(--wrq-navy);
+  border-color: var(--wrq-navy);
   color: #fff;
 }
 
@@ -803,10 +815,40 @@ body:not([data-arabya-surface="mushaf"]) .menu-toggle {
   color: #fff;
 }
 
+body:not([data-arabya-surface="mushaf"]) .nav a.auth-btn--google,
+body:not([data-arabya-surface="mushaf"]) .auth-btn--google {
+  background: var(--wrq-navy) !important;
+  border-color: var(--wrq-navy) !important;
+  color: #fff !important;
+}
+
 body:not([data-arabya-surface="mushaf"]) .wrq-btn--gold,
 body:not([data-arabya-surface="mushaf"]) .wrq-btn--gold svg {
   color: var(--wrq-navy);
   stroke: currentColor;
+}
+
+body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--front {
+  background: var(--wrq-navy) !important;
+  color: #fff !important;
+}
+
+body:not([data-arabya-surface="mushaf"]) .svc-icon-3d__face--back {
+  background: color-mix(in srgb, var(--wrq-navy) 70%, #000) !important;
+}
+
+body:not([data-arabya-surface="mushaf"]) .lughawi-rail--nav .lughawi-rail-btn {
+  color: #fff !important;
+}
+
+body:not([data-arabya-surface="mushaf"]) .lughawi-rail--nav .lughawi-rail-badge {
+  color: #f7efd8 !important;
+  background: color-mix(in srgb, #fff 16%, transparent);
+}
+
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-hero .svc-icon-3d__face--front {
+  background: var(--wrq-navy) !important;
+  color: #fff !important;
 }
 
 /* —— Warraq module cards (white tile, gold cap, soft shadow) —— */
