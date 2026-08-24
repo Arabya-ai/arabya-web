@@ -28,7 +28,10 @@ export function HomeServicesSection() {
       </header>
 
       <div className="home-services__featured" aria-label={t("featuredAria")}>
-        <Link href="/lughawi" className="svc-card svc-card--page home-services__feature home-services__feature--pulse">
+        <Link
+          href="/lughawi"
+          className="svc-card svc-card--page home-services__feature home-services__feature--pulse home-services__feature--lead"
+        >
           <ServiceIcon3D icon="lughawi" label={ts("items.lughawi.title")} />
           <span className="svc-card__body">
             <span className="home-services__badge">{t("favoriteBadge")}</span>
