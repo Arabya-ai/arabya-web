@@ -1,0 +1,341 @@
+# Arabya standalone SaaS bundle — append-only to the Contabo host.
+# Does NOT replace PM2 Next.js (arabya.org). Isolated network: arabya-saas-network.
+#
+# Host ports (explicit, no conflict with Next :3000 / arabya-nlp :8092):
+#   Umami      13000 -> container 3000
+#   Chatwoot   14000 -> container 3000
+#   Cal.com    15000 -> container 3000
+#   Documenso  16000 -> container 3000
+#
+# Usage on Contabo:
+#   cp .env.saas-templates .env.saas
+#   bash scripts/saas-generate-documenso-cert.sh
+#   docker compose -f docker-compose.standalone-saas.yml --env-file .env.saas up -d
+#
+# Verify:
+#   curl -sI http://127.0.0.1:13000 | head -1
+#   curl -sI http://127.0.0.1:14000 | head -1
+#   curl -sI http://127.0.0.1:15000 | head -1
+#   curl -sI http://127.0.0.1:16000 | head -1
+
+name: arabya-standalone-saas
+
+services:
+  # ---------------------------------------------------------------------------
+  # Umami Analytics + PostgreSQL 15
+  # ---------------------------------------------------------------------------
+  umami-db:
+    image: postgres:15-alpine
+    container_name: arabya-umami-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${UMAMI_DB_NAME}
+      POSTGRES_USER: ${UMAMI_DB_USER}
+      POSTGRES_PASSWORD: ${UMAMI_DB_PASSWORD}
+    volumes:
+      - umami_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${UMAMI_DB_USER} -d ${UMAMI_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - arabya-saas-network
+
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    container_name: arabya-umami
+    restart: unless-stopped
+    depends_on:
+      umami-db:
+        condition: service_healthy
+    ports:
+      - "13000:3000"
+    environment:
+      DATABASE_URL: postgresql://${UMAMI_DB_USER}:${UMAMI_DB_PASSWORD}@umami-db:5432/${UMAMI_DB_NAME}
+      DATABASE_TYPE: postgresql
+      APP_SECRET: ${UMAMI_APP_SECRET}
+      TRACKER_SCRIPT_NAME: script.js
+      DISABLE_TELEMETRY: "1"
+      HOSTNAME: "0.0.0.0"
+      PORT: "3000"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:3000/api/heartbeat >/dev/null 2>&1 || wget -qO- http://127.0.0.1:3000/ >/dev/null 2>&1 || exit 1",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    networks:
+      - arabya-saas-network
+
+  # ---------------------------------------------------------------------------
+  # Chatwoot (Rails web + Sidekiq worker) + PostgreSQL (pgvector) + Redis
+  # ---------------------------------------------------------------------------
+  chatwoot-db:
+    image: pgvector/pgvector:pg16
+    container_name: arabya-chatwoot-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${CHATWOOT_DB_NAME}
+      POSTGRES_USER: ${CHATWOOT_DB_USER}
+      POSTGRES_PASSWORD: ${CHATWOOT_DB_PASSWORD}
+    volumes:
+      - chatwoot_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${CHATWOOT_DB_USER} -d ${CHATWOOT_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - arabya-saas-network
+
+  chatwoot-redis:
+    image: redis:7-alpine
+    container_name: arabya-chatwoot-redis
+    restart: unless-stopped
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--requirepass",
+        "${CHATWOOT_REDIS_PASSWORD}",
+      ]
+    volumes:
+      - chatwoot_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${CHATWOOT_REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - arabya-saas-network
+
+  chatwoot-web:
+    image: chatwoot/chatwoot:v4.7.0
+    container_name: arabya-chatwoot-web
+    restart: unless-stopped
+    depends_on:
+      chatwoot-db:
+        condition: service_healthy
+      chatwoot-redis:
+        condition: service_healthy
+    ports:
+      - "14000:3000"
+    entrypoint: docker/entrypoints/rails.sh
+    command: ["bundle", "exec", "rails", "s", "-p", "3000", "-b", "0.0.0.0"]
+    environment:
+      RAILS_ENV: production
+      NODE_ENV: production
+      INSTALLATION_ENV: docker
+      SECRET_KEY_BASE: ${CHATWOOT_SECRET_KEY_BASE}
+      FRONTEND_URL: ${CHATWOOT_FRONTEND_URL}
+      FORCE_SSL: "false"
+      ENABLE_ACCOUNT_SIGNUP: "false"
+      DEFAULT_LOCALE: ar
+      POSTGRES_HOST: chatwoot-db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DATABASE: ${CHATWOOT_DB_NAME}
+      POSTGRES_USERNAME: ${CHATWOOT_DB_USER}
+      POSTGRES_PASSWORD: ${CHATWOOT_DB_PASSWORD}
+      REDIS_URL: redis://:${CHATWOOT_REDIS_PASSWORD}@chatwoot-redis:6379
+      REDIS_PASSWORD: ${CHATWOOT_REDIS_PASSWORD}
+      ACTIVE_STORAGE_SERVICE: local
+      RAILS_MAX_THREADS: "5"
+      SIDEKIQ_CONCURRENCY: "5"
+      ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: ${CHATWOOT_ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY}
+      ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: ${CHATWOOT_ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY}
+      ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: ${CHATWOOT_ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT}
+    volumes:
+      - chatwoot_storage:/app/storage
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:3000/api || wget -qO- http://127.0.0.1:3000/ || exit 1",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 15
+      start_period: 120s
+    networks:
+      - arabya-saas-network
+
+  chatwoot-worker:
+    image: chatwoot/chatwoot:v4.7.0
+    container_name: arabya-chatwoot-worker
+    restart: unless-stopped
+    depends_on:
+      chatwoot-db:
+        condition: service_healthy
+      chatwoot-redis:
+        condition: service_healthy
+      chatwoot-web:
+        condition: service_started
+    entrypoint: docker/entrypoints/rails.sh
+    command: ["bundle", "exec", "sidekiq", "-C", "config/sidekiq.yml"]
+    environment:
+      RAILS_ENV: production
+      NODE_ENV: production
+      INSTALLATION_ENV: docker
+      SECRET_KEY_BASE: ${CHATWOOT_SECRET_KEY_BASE}
+      FRONTEND_URL: ${CHATWOOT_FRONTEND_URL}
+      FORCE_SSL: "false"
+      POSTGRES_HOST: chatwoot-db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DATABASE: ${CHATWOOT_DB_NAME}
+      POSTGRES_USERNAME: ${CHATWOOT_DB_USER}
+      POSTGRES_PASSWORD: ${CHATWOOT_DB_PASSWORD}
+      REDIS_URL: redis://:${CHATWOOT_REDIS_PASSWORD}@chatwoot-redis:6379
+      REDIS_PASSWORD: ${CHATWOOT_REDIS_PASSWORD}
+      ACTIVE_STORAGE_SERVICE: local
+      SIDEKIQ_CONCURRENCY: "5"
+      ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: ${CHATWOOT_ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY}
+      ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: ${CHATWOOT_ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY}
+      ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: ${CHATWOOT_ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT}
+    volumes:
+      - chatwoot_storage:/app/storage
+    networks:
+      - arabya-saas-network
+
+  # ---------------------------------------------------------------------------
+  # Cal.com + PostgreSQL 15
+  # ---------------------------------------------------------------------------
+  calcom-db:
+    image: postgres:15-alpine
+    container_name: arabya-calcom-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${CALCOM_DB_NAME}
+      POSTGRES_USER: ${CALCOM_DB_USER}
+      POSTGRES_PASSWORD: ${CALCOM_DB_PASSWORD}
+    volumes:
+      - calcom_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${CALCOM_DB_USER} -d ${CALCOM_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - arabya-saas-network
+
+  calcom:
+    image: calcom/cal.com:v5.4.16
+    container_name: arabya-calcom
+    restart: unless-stopped
+    depends_on:
+      calcom-db:
+        condition: service_healthy
+    ports:
+      - "15000:3000"
+    environment:
+      DATABASE_URL: postgresql://${CALCOM_DB_USER}:${CALCOM_DB_PASSWORD}@calcom-db:5432/${CALCOM_DB_NAME}
+      DATABASE_DIRECT_URL: postgresql://${CALCOM_DB_USER}:${CALCOM_DB_PASSWORD}@calcom-db:5432/${CALCOM_DB_NAME}
+      NEXTAUTH_SECRET: ${CALCOM_NEXTAUTH_SECRET}
+      NEXTAUTH_URL: ${CALCOM_NEXTAUTH_URL}
+      NEXT_PUBLIC_WEBAPP_URL: ${CALCOM_NEXT_PUBLIC_WEBAPP_URL}
+      CALENDSO_ENCRYPTION_KEY: ${CALCOM_CALENDSO_ENCRYPTION_KEY}
+      CRON_API_KEY: ${CALCOM_CRON_API_KEY}
+      NEXT_PUBLIC_LICENSE_CONSENT: "true"
+      LICENSE: "AGPLv3"
+      NODE_ENV: production
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:3000/api/health || wget -qO- http://127.0.0.1:3000/ || exit 1",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 15
+      start_period: 180s
+    networks:
+      - arabya-saas-network
+
+  # ---------------------------------------------------------------------------
+  # Documenso + PostgreSQL 15
+  # ---------------------------------------------------------------------------
+  documenso-db:
+    image: postgres:15-alpine
+    container_name: arabya-documenso-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DOCUMENSO_DB_NAME}
+      POSTGRES_USER: ${DOCUMENSO_DB_USER}
+      POSTGRES_PASSWORD: ${DOCUMENSO_DB_PASSWORD}
+    volumes:
+      - documenso_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DOCUMENSO_DB_USER} -d ${DOCUMENSO_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - arabya-saas-network
+
+  documenso:
+    image: documenso/documenso:v1.12.3
+    container_name: arabya-documenso
+    restart: unless-stopped
+    depends_on:
+      documenso-db:
+        condition: service_healthy
+    ports:
+      - "16000:3000"
+    environment:
+      PORT: "3000"
+      NEXTAUTH_SECRET: ${DOCUMENSO_NEXTAUTH_SECRET}
+      NEXTAUTH_URL: ${DOCUMENSO_NEXT_PUBLIC_WEBAPP_URL}
+      NEXT_PRIVATE_ENCRYPTION_KEY: ${DOCUMENSO_NEXT_PRIVATE_ENCRYPTION_KEY}
+      NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY: ${DOCUMENSO_NEXT_PRIVATE_ENCRYPTION_SECONDARY_KEY}
+      NEXT_PUBLIC_WEBAPP_URL: ${DOCUMENSO_NEXT_PUBLIC_WEBAPP_URL}
+      NEXT_PRIVATE_INTERNAL_WEBAPP_URL: http://documenso:3000
+      NEXT_PRIVATE_DATABASE_URL: postgresql://${DOCUMENSO_DB_USER}:${DOCUMENSO_DB_PASSWORD}@documenso-db:5432/${DOCUMENSO_DB_NAME}
+      NEXT_PRIVATE_DIRECT_DATABASE_URL: postgresql://${DOCUMENSO_DB_USER}:${DOCUMENSO_DB_PASSWORD}@documenso-db:5432/${DOCUMENSO_DB_NAME}
+      NEXT_PRIVATE_SMTP_TRANSPORT: ${DOCUMENSO_SMTP_TRANSPORT}
+      NEXT_PRIVATE_SMTP_HOST: ${DOCUMENSO_SMTP_HOST}
+      NEXT_PRIVATE_SMTP_PORT: ${DOCUMENSO_SMTP_PORT}
+      NEXT_PRIVATE_SMTP_USERNAME: ${DOCUMENSO_SMTP_USERNAME}
+      NEXT_PRIVATE_SMTP_PASSWORD: ${DOCUMENSO_SMTP_PASSWORD}
+      NEXT_PRIVATE_SMTP_FROM_NAME: ${DOCUMENSO_SMTP_FROM_NAME}
+      NEXT_PRIVATE_SMTP_FROM_ADDRESS: ${DOCUMENSO_SMTP_FROM_ADDRESS}
+      NEXT_PRIVATE_SIGNING_LOCAL_FILE_PATH: /opt/documenso/cert.p12
+      NEXT_PRIVATE_SIGNING_PASSPHRASE: ${DOCUMENSO_SIGNING_PASSPHRASE}
+    volumes:
+      - ./saas-data/documenso/cert.p12:/opt/documenso/cert.p12:ro
+      - documenso_uploads:/app/uploads
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:3000/api/health || wget -qO- http://127.0.0.1:3000/ || exit 1",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 15
+      start_period: 120s
+    networks:
+      - arabya-saas-network
+
+volumes:
+  umami_pg_data:
+  chatwoot_pg_data:
+  chatwoot_redis_data:
+  chatwoot_storage:
+  calcom_pg_data:
+  documenso_pg_data:
+  documenso_uploads:
+
+networks:
+  arabya-saas-network:
+    name: arabya-saas-network
+    driver: bridge

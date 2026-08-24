@@ -38,6 +38,13 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
+!.env.saas-templates
+
+# Standalone SaaS runtime data (certs, local mounts) — keep README only
+/saas-data/**
+!/saas-data/
+!/saas-data/README.md
+!/saas-data/.gitkeep
 
 # MPT stock-API keys written at runtime by Next (never commit)
 
