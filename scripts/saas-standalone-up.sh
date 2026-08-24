@@ -42,6 +42,15 @@ echo
 echo "=== Container status ==="
 docker compose -f "${COMPOSE_FILE}" --env-file "${ENV_FILE}" ps
 
+# First-boot Chatwoot schema (safe to re-run; no-op once migrated)
+if docker compose -f "${COMPOSE_FILE}" --env-file "${ENV_FILE}" ps --status running --services 2>/dev/null | grep -qx chatwoot-web; then
+  echo "Ensuring Chatwoot DB is prepared..."
+  docker compose -f "${COMPOSE_FILE}" --env-file "${ENV_FILE}" exec -T chatwoot-web \
+    bundle exec rails db:chatwoot_prepare || true
+  docker compose -f "${COMPOSE_FILE}" --env-file "${ENV_FILE}" restart chatwoot-web chatwoot-worker || true
+  sleep 15
+fi
+
 echo
 echo "=== Port probes (expect HTTP responses, not connection refused) ==="
 for port in 13000 14000 15000 16000; do
@@ -50,8 +59,7 @@ for port in 13000 14000 15000 16000; do
 done
 
 echo
-echo "Chatwoot web command runs db:chatwoot_prepare automatically before Puma."
-echo "First UI visit: http://127.0.0.1:14000/installation/onboarding (SSH tunnel or Nginx)."
-echo
+echo "Chatwoot onboarding (first visit): http://127.0.0.1:14000/installation/onboarding"
 echo "Done. Core arabya.org (PM2) is unchanged."
 echo "Contabo layout: keep this stack under /var/www/arabya-saas (isolated from PM2 checkout)."
+
