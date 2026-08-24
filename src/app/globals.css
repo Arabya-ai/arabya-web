@@ -5,6 +5,7 @@
 @import "../styles/arabya-panels.css";
 @import "../styles/library.css";
 @import "../styles/lughawi.css";
+@import "../styles/warraq-theme.css";
 
 @font-face {
   font-family: "UthmanicHafs";

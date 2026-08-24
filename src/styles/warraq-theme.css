@@ -1,0 +1,757 @@
+/**
+ * Warraq subsidiary skin for Arabya (thewarraq.com visual language).
+ * Scoped away from mushaf via body[data-arabya-surface="mushaf"].
+ */
+
+body:not([data-arabya-surface="mushaf"]) {
+  --wrq-navy: #002d4e;
+  --wrq-navy-deep: #0b3d59;
+  --wrq-gold: #d4a017;
+  --wrq-gold-muted: #c29958;
+  --wrq-teal: #2d8b68;
+  --wrq-cream: #fdfcf8;
+  --wrq-cream-2: #f5f0e6;
+  --wrq-ink: #0a2540;
+  --wrq-muted: #5a6578;
+  --wrq-card: #ffffff;
+  --wrq-shadow: 0 14px 40px rgba(0, 45, 78, 0.08);
+  --wrq-radius: 16px;
+  --wrq-radius-lg: 24px;
+  --wrq-radius-xl: 32px;
+
+  /* Remap Arabya tokens → Warraq palette */
+  --bg: var(--wrq-cream);
+  --bg-accent: var(--wrq-cream-2);
+  --surface: var(--wrq-card);
+  --surface-2: #f9f9f8;
+  --ink: var(--wrq-ink);
+  --muted: var(--wrq-muted);
+  --line: #e2e8f0;
+  --brand: var(--wrq-gold);
+  --brand-deep: var(--wrq-navy);
+  --brand-mid: var(--wrq-navy-deep);
+  --brand-cyan: var(--wrq-teal);
+  --brand-soft: #f7efd8;
+  --select: #f3e6c4;
+  --on-brand: var(--wrq-navy);
+  --glow: rgba(212, 160, 23, 0.12);
+  --glow-2: rgba(0, 45, 78, 0.04);
+  --shadow: var(--wrq-shadow);
+  --radius: var(--wrq-radius);
+  --font-ui: var(--font-tajawal), var(--font-cairo), sans-serif;
+  --font-dash: var(--font-plex-ar), var(--font-tajawal), sans-serif;
+}
+
+body:not([data-arabya-surface="mushaf"]) {
+  background: var(--wrq-cream);
+  color: var(--wrq-ink);
+  font-family: var(--font-ui);
+}
+
+body:not([data-arabya-surface="mushaf"]) .shell {
+  width: min(1280px, calc(100% - 2rem));
+}
+
+/* —— Header (Warraq sticky bar) —— */
+body:not([data-arabya-surface="mushaf"]) .site-header {
+  background: color-mix(in srgb, #fff 92%, transparent);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid color-mix(in srgb, var(--wrq-navy) 8%, var(--line));
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+}
+
+body:not([data-arabya-surface="mushaf"]) .header-inner {
+  padding-block: 0.65rem;
+}
+
+body:not([data-arabya-surface="mushaf"]) .nav a,
+body:not([data-arabya-surface="mushaf"]) .nav-link-btn {
+  color: var(--wrq-navy);
+  font-weight: 650;
+  font-size: 0.92rem;
+}
+
+body:not([data-arabya-surface="mushaf"]) .nav a:hover,
+body:not([data-arabya-surface="mushaf"]) .nav-link-btn:hover {
+  color: var(--wrq-gold);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-header-cta {
+  display: none;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+@media (min-width: 901px) {
+  body:not([data-arabya-surface="mushaf"]) .wrq-header-cta {
+    display: inline-flex;
+  }
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.62rem 1.25rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-decoration: none;
+  border: 2px solid transparent;
+  transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-btn--sm {
+  padding: 0.48rem 0.95rem;
+  font-size: 0.82rem;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-btn--gold {
+  background: var(--wrq-gold);
+  color: var(--wrq-navy);
+  box-shadow: 0 8px 20px rgba(212, 160, 23, 0.28);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-btn--gold:hover {
+  transform: translateY(-1px);
+  background: var(--wrq-gold-muted);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-btn--navy {
+  background: var(--wrq-navy);
+  color: #fff;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-btn--outline {
+  background: transparent;
+  color: var(--wrq-navy);
+  border-color: var(--wrq-navy);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-btn--teal {
+  background: var(--wrq-teal);
+  color: #fff;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-btn--ghost-on-dark {
+  background: transparent;
+  color: #fff;
+  border-color: color-mix(in srgb, #fff 35%, transparent);
+}
+
+body:not([data-arabya-surface="mushaf"]) .brand-wordmark {
+  color: var(--wrq-navy) !important;
+  background: none !important;
+  -webkit-text-fill-color: var(--wrq-navy) !important;
+}
+
+body:not([data-arabya-surface="mushaf"]) .brand-wordmark-accent {
+  color: var(--wrq-gold) !important;
+  -webkit-text-fill-color: var(--wrq-gold) !important;
+}
+
+/* —— Footer (Warraq centered) —— */
+body:not([data-arabya-surface="mushaf"]) .site-footer {
+  margin-top: 3rem;
+  padding: 2.5rem 0 calc(2rem + env(safe-area-inset-bottom, 0px));
+  background: #fff;
+  border-top: 1px solid var(--line);
+}
+
+body:not([data-arabya-surface="mushaf"]) .arabya-footer-panel {
+  text-align: center;
+  justify-items: center;
+  gap: 1.5rem;
+}
+
+body:not([data-arabya-surface="mushaf"]) .arabya-footer-col__title {
+  color: var(--wrq-navy);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+
+body:not([data-arabya-surface="mushaf"]) .arabya-footer-col a {
+  color: var(--wrq-muted);
+}
+
+body:not([data-arabya-surface="mushaf"]) .arabya-footer-col a:hover {
+  color: var(--wrq-gold);
+}
+
+body:not([data-arabya-surface="mushaf"]) .arabya-footer-credit {
+  color: var(--wrq-muted);
+  font-size: 0.82rem;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-footer-tagline {
+  margin: 0;
+  font-family: var(--font-amiri), serif;
+  font-size: 1.05rem;
+  color: var(--wrq-navy);
+}
+
+/* —— Homepage hero —— */
+body:not([data-arabya-surface="mushaf"]) .wrq-hero {
+  position: relative;
+  padding: clamp(2rem, 5vw, 3.5rem) 0 clamp(2.5rem, 4vw, 3rem);
+  overflow: hidden;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-hero__bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(700px 420px at 15% 10%, rgba(212, 160, 23, 0.14), transparent 60%),
+    radial-gradient(900px 500px at 85% -5%, rgba(45, 139, 104, 0.08), transparent 55%);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-hero__grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  align-items: center;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 45, 78, 0.06);
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--wrq-navy);
+  margin-bottom: 1rem;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-pill__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #27ae60;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-os-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-bottom: 1.1rem;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-os-card {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #fff;
+  min-width: 8.5rem;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-os-card strong {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--wrq-navy);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-os-card small {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--wrq-muted);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-os-card--soon {
+  opacity: 0.55;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wrq-teal);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-kicker--on-dark {
+  color: var(--wrq-gold);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-hero__title {
+  margin: 0;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-hero__title-muted {
+  display: block;
+  font-family: var(--font-tajawal), var(--font-ui), sans-serif;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700;
+  color: var(--wrq-navy);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-hero__title-gold {
+  display: block;
+  font-family: var(--font-amiri), serif;
+  font-size: clamp(2.8rem, 7vw, 4.2rem);
+  font-weight: 700;
+  color: var(--wrq-gold);
+  letter-spacing: -0.02em;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-hero__title-line {
+  margin-top: 0.15rem;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-hero__lead {
+  margin: 1rem 0 0;
+  max-width: 36rem;
+  line-height: 1.85;
+  color: var(--wrq-muted);
+  font-size: 1.02rem;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.35rem;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 1.1rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.82rem;
+  color: var(--wrq-muted);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-trust li::before {
+  content: "✓ ";
+  color: var(--wrq-teal);
+  font-weight: 800;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-mockup {
+  background: #fff;
+  border-radius: var(--wrq-radius-xl);
+  padding: 2rem 1.75rem;
+  box-shadow: var(--wrq-shadow);
+  border: 1px solid color-mix(in srgb, var(--wrq-navy) 6%, var(--line));
+  text-align: center;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-mockup__chrome {
+  display: flex;
+  gap: 0.35rem;
+  justify-content: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-mockup__chrome span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #e2e8f0;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-mockup__chrome span:nth-child(1) {
+  background: #ef4444;
+}
+body:not([data-arabya-surface="mushaf"]) .wrq-mockup__chrome span:nth-child(2) {
+  background: #eab308;
+}
+body:not([data-arabya-surface="mushaf"]) .wrq-mockup__chrome span:nth-child(3) {
+  background: #22c55e;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-mockup__brand {
+  margin: 0;
+  font-family: var(--font-amiri), serif;
+  font-size: 1.35rem;
+  color: var(--wrq-gold);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-mockup__title {
+  margin: 0.35rem 0 0;
+  font-size: 1.25rem;
+  color: var(--wrq-navy);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-mockup__body {
+  margin: 0.65rem 0 0;
+  color: var(--wrq-muted);
+  line-height: 1.65;
+  font-size: 0.92rem;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-mockup__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+/* —— Dark deliver band —— */
+body:not([data-arabya-surface="mushaf"]) .wrq-deliver {
+  margin: 2.5rem 0;
+  padding: clamp(2rem, 4vw, 3rem) clamp(1.25rem, 3vw, 2.5rem);
+  border-radius: var(--wrq-radius-lg);
+  background: linear-gradient(155deg, var(--wrq-navy-deep) 0%, #143342 100%);
+  color: #fff;
+  text-align: center;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-deliver__badge {
+  display: inline-block;
+  margin: 0 0 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--wrq-gold) 22%, transparent);
+  color: var(--wrq-gold);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-deliver h2 {
+  margin: 0;
+  font-family: var(--font-amiri), serif;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  line-height: 1.25;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-deliver__lead {
+  margin: 0.85rem auto 0;
+  max-width: 40rem;
+  line-height: 1.75;
+  color: color-mix(in srgb, #fff 78%, transparent);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-deliver__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.75rem auto 1.25rem;
+  max-width: 42rem;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-deliver__stats strong {
+  display: block;
+  font-size: 1.5rem;
+  color: var(--wrq-gold);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-deliver__stats span {
+  font-size: 0.82rem;
+  color: color-mix(in srgb, #fff 70%, transparent);
+}
+
+/* —— Goals grid —— */
+body:not([data-arabya-surface="mushaf"]) .wrq-goals {
+  margin: 2.5rem 0;
+  padding: clamp(2rem, 4vw, 2.75rem) clamp(1rem, 3vw, 2rem);
+  border-radius: var(--wrq-radius-lg);
+  background: #fff;
+  border: 1px solid var(--line);
+  box-shadow: var(--wrq-shadow);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-goals__head {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-goals__head h2 {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-amiri), serif;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  color: var(--wrq-navy);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-goals__lead {
+  margin: 0.65rem auto 0;
+  max-width: 38rem;
+  color: var(--wrq-muted);
+  line-height: 1.7;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-goals__grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-goal-card {
+  padding: 1rem 0.85rem;
+  border-radius: 14px;
+  background: var(--wrq-cream-2);
+  border: 1px solid color-mix(in srgb, var(--wrq-gold) 18%, var(--line));
+  text-align: center;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-goal-card__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--wrq-gold);
+  color: var(--wrq-navy);
+  font-weight: 800;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-goal-card h3 {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--wrq-navy);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-goal-card p {
+  margin: 0.4rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--wrq-muted);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-goal-card__status {
+  margin-top: 0.5rem !important;
+  font-weight: 700;
+  color: var(--wrq-teal) !important;
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-goals__cta {
+  text-align: center;
+  margin-top: 1.35rem;
+}
+
+/* —— Surah index card (home) —— */
+body:not([data-arabya-surface="mushaf"]) .wrq-index-card {
+  margin: 2rem 0;
+  padding: 1.5rem 1.35rem 1.75rem;
+  border-radius: var(--wrq-radius-lg);
+  background: #fff;
+  border: 1px solid var(--line);
+  box-shadow: var(--wrq-shadow);
+}
+
+body:not([data-arabya-surface="mushaf"]) .wrq-index-card .home-index-intro h1,
+body:not([data-arabya-surface="mushaf"]) .wrq-index-card .home-index-intro h2 {
+  font-family: var(--font-amiri), serif;
+  color: var(--wrq-navy);
+}
+
+body:not([data-arabya-surface="mushaf"]) .home-tool-link--primary,
+body:not([data-arabya-surface="mushaf"]) .not-found-cta--primary {
+  background: var(--wrq-navy) !important;
+  color: #fff !important;
+  border-color: var(--wrq-navy) !important;
+}
+
+body:not([data-arabya-surface="mushaf"]) .home-tool-link:not(.home-tool-link--primary) {
+  border-color: var(--wrq-navy);
+  color: var(--wrq-navy);
+}
+
+/* —— Services / hubs —— */
+body:not([data-arabya-surface="mushaf"]) .services-hub__hero,
+body:not([data-arabya-surface="mushaf"]) .resources-hub__hero,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-hero {
+  background: #fff;
+  border: 1px solid var(--line);
+  box-shadow: var(--wrq-shadow);
+  border-radius: var(--wrq-radius-lg);
+}
+
+body:not([data-arabya-surface="mushaf"]) .services-hub__hero h1,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-hero h1 {
+  font-family: var(--font-amiri), serif;
+  color: var(--wrq-navy);
+}
+
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-hero__kicker,
+body:not([data-arabya-surface="mushaf"]) .svc-group__title {
+  color: var(--wrq-gold);
+}
+
+body:not([data-arabya-surface="mushaf"]) .svc-card {
+  border-radius: var(--wrq-radius);
+  border-top: 4px solid var(--wrq-gold);
+  box-shadow: 0 8px 24px rgba(0, 45, 78, 0.06);
+}
+
+body:not([data-arabya-surface="mushaf"]) .svc-card:hover {
+  border-color: color-mix(in srgb, var(--wrq-gold) 40%, var(--line));
+  box-shadow: 0 16px 36px rgba(0, 45, 78, 0.1);
+}
+
+body:not([data-arabya-surface="mushaf"]) .hub-nav-link {
+  color: var(--wrq-muted);
+}
+
+body:not([data-arabya-surface="mushaf"]) .hub-nav-link:hover {
+  color: var(--wrq-gold);
+  border-bottom-color: var(--wrq-gold);
+}
+
+/* —— Lughawi page —— */
+body:not([data-arabya-surface="mushaf"]) .lughawi-page {
+  --lughawi-glow: rgba(212, 160, 23, 0.12);
+}
+
+body:not([data-arabya-surface="mushaf"]) .lughawi-hero {
+  background:
+    radial-gradient(90% 70% at 100% 0%, rgba(212, 160, 23, 0.12), transparent 55%),
+    linear-gradient(180deg, var(--wrq-cream) 0%, #fff 100%);
+  border-bottom: 1px solid var(--line);
+}
+
+body:not([data-arabya-surface="mushaf"]) .lughawi-hero h1 {
+  font-family: var(--font-amiri), serif;
+  color: var(--wrq-navy);
+}
+
+body:not([data-arabya-surface="mushaf"]) .lughawi-kicker {
+  color: var(--wrq-gold);
+}
+
+body:not([data-arabya-surface="mushaf"]) .lughawi-rail--nav {
+  background: linear-gradient(180deg, var(--wrq-navy) 0%, var(--wrq-navy-deep) 100%);
+  border-color: color-mix(in srgb, var(--wrq-navy) 80%, #000);
+}
+
+body:not([data-arabya-surface="mushaf"]) .lughawi-workspace,
+body:not([data-arabya-surface="mushaf"]) .lughawi-shell {
+  border-color: color-mix(in srgb, var(--wrq-gold) 20%, var(--line));
+}
+
+body:not([data-arabya-surface="mushaf"]) .lughawi-primary,
+body:not([data-arabya-surface="mushaf"]) .nav-pill.is-current {
+  background: var(--wrq-navy) !important;
+  color: #fff !important;
+}
+
+/* —— Info / static pages —— */
+body:not([data-arabya-surface="mushaf"]) .info-hero,
+body:not([data-arabya-surface="mushaf"]) .not-found-panel {
+  border-radius: var(--wrq-radius-lg);
+  border: 1px solid var(--line);
+  box-shadow: var(--wrq-shadow);
+}
+
+/* —— Hub pages (hadith, heritage, adhkar, juz, …) —— */
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .juz-card,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .books-catalog-item,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .hadith-collection-card,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .adhkar-tool-card,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .adhkar-category-link,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .create-hub-card,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .heritage-work-card,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .asma-grid-link,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .reciter-card,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .qiraat-card {
+  border-radius: var(--wrq-radius);
+  border-top: 3px solid var(--wrq-gold);
+  box-shadow: 0 8px 24px rgba(0, 45, 78, 0.06);
+}
+
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .juz-card:hover,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .hadith-collection-card:hover,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .adhkar-tool-card:hover,
+body:not([data-arabya-surface="mushaf"]) .arabya-hub-page .heritage-work-card:hover {
+  border-color: color-mix(in srgb, var(--wrq-gold) 45%, var(--line));
+}
+
+body:not([data-arabya-surface="mushaf"]) .info-page,
+body:not([data-arabya-surface="mushaf"]) .contact-page,
+body:not([data-arabya-surface="mushaf"]) .about-page {
+  --brand: var(--wrq-gold);
+  --brand-deep: var(--wrq-navy);
+}
+
+body:not([data-arabya-surface="mushaf"]) .info-hero h1,
+body:not([data-arabya-surface="mushaf"]) .about-hero h1,
+body:not([data-arabya-surface="mushaf"]) .contact-hero h1 {
+  font-family: var(--font-amiri), serif;
+  color: var(--wrq-navy);
+}
+
+body:not([data-arabya-surface="mushaf"]) .account-hub-card,
+body:not([data-arabya-surface="mushaf"]) .account-panel,
+body:not([data-arabya-surface="mushaf"]) .dash-card {
+  border-radius: var(--wrq-radius);
+  border: 1px solid var(--line);
+  box-shadow: 0 6px 20px rgba(0, 45, 78, 0.05);
+}
+
+body:not([data-arabya-surface="mushaf"]) .account-hub-card:hover {
+  border-color: color-mix(in srgb, var(--wrq-gold) 35%, var(--line));
+}
+
+body:not([data-arabya-surface="mushaf"]) .surah-index-item,
+body:not([data-arabya-surface="mushaf"]) .home-index .surah-link {
+  border-radius: 10px;
+}
+
+body:not([data-arabya-surface="mushaf"]) .home-index .surah-link:hover {
+  background: var(--wrq-brand-soft, var(--brand-soft));
+  color: var(--wrq-navy);
+}
+
+body:not([data-arabya-surface="mushaf"]) .not-found-cta--ghost {
+  border-color: var(--wrq-navy);
+  color: var(--wrq-navy);
+}
+
+body:not([data-arabya-surface="mushaf"]) .home-services__badge {
+  background: color-mix(in srgb, var(--wrq-gold) 18%, #fff);
+  color: var(--wrq-navy);
+}
+
+body:not([data-arabya-surface="mushaf"]) .warraq-home {
+  padding-top: 0;
+}
+
+@media (max-width: 1024px) {
+  body:not([data-arabya-surface="mushaf"]) .wrq-goals__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  body:not([data-arabya-surface="mushaf"]) .wrq-hero__grid {
+    grid-template-columns: 1fr;
+  }
+
+  body:not([data-arabya-surface="mushaf"]) .wrq-deliver__stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  body:not([data-arabya-surface="mushaf"]) .wrq-goals__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body:not([data-arabya-surface="mushaf"]) .wrq-btn,
+  body:not([data-arabya-surface="mushaf"]) .svc-card {
+    transition: none !important;
+  }
+}
