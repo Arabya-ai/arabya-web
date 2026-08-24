@@ -3,7 +3,11 @@ import { Link } from "@/i18n/navigation";
 import { SurahIndex } from "@/components/SurahIndex";
 import { ContinueReading } from "@/components/ContinueReading";
 import { HomeDeferredWidgets } from "@/components/HomeDeferredWidgets";
+import { HomeServicesSection } from "@/components/HomeServicesSection";
 import { StudyHashRedirect } from "@/components/StudyHashRedirect";
+import { WarraqHomeDeliver } from "@/components/warraq/WarraqHomeDeliver";
+import { WarraqHomeGoals } from "@/components/warraq/WarraqHomeGoals";
+import { WarraqHomeHero } from "@/components/warraq/WarraqHomeHero";
 import { getMushafIndex } from "@/lib/mushaf";
 import { getSurahs } from "@/lib/quran";
 
@@ -15,11 +19,18 @@ export default async function HomePage() {
   ]);
 
   return (
-    <div className="shell home-simple">
+    <div className="shell home-simple warraq-home">
       <StudyHashRedirect />
-      <section className="home-index" aria-labelledby="home-index-title">
+
+      <WarraqHomeHero />
+
+      <HomeServicesSection />
+
+      <WarraqHomeDeliver />
+
+      <section className="wrq-index-card home-index" aria-labelledby="home-index-title">
         <header className="home-index-intro">
-          <h1 id="home-index-title">{t("title")}</h1>
+          <h2 id="home-index-title">{t("title")}</h2>
           <p className="home-lead">{t("subtitle")}</p>
           <div className="home-index-ornament" aria-hidden="true">
             <span className="home-index-ornament-mark" />
@@ -29,6 +40,9 @@ export default async function HomePage() {
               {t("openMushaf")}
             </Link>
             <ContinueReading />
+            <Link href="/lughawi" className="home-tool-link">
+              {t("openLughawi")}
+            </Link>
           </div>
         </header>
         <SurahIndex
@@ -36,6 +50,9 @@ export default async function HomePage() {
           mushafFirstPage={mushafIndex.surahFirstPage}
         />
       </section>
+
+      <WarraqHomeGoals />
+
       <HomeDeferredWidgets />
     </div>
   );

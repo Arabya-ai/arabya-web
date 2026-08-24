@@ -6,6 +6,7 @@ import { AccountHeaderIcon } from "@/components/AccountHeaderIcon";
 import { AuthButton } from "@/components/AuthButton";
 import { BrandLockup } from "@/components/BrandLockup";
 import { DeferredChrome } from "@/components/DeferredChrome";
+import { WarraqSurfaceGate } from "@/components/warraq/WarraqSurfaceGate";
 import { PreferencesMenu } from "@/components/PreferencesMenu";
 import { useDismissibleOpen } from "@/hooks/useDismissibleOpen";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -27,6 +28,7 @@ export function AppShell({
 
   return (
     <>
+      <WarraqSurfaceGate />
       <SiteHeader />
       <main className={editorViewport ? "studio-main-viewport" : undefined}>
         {children}
@@ -172,6 +174,14 @@ export function SiteHeader() {
         </Link>
 
         <div className="header-actions">
+          <div className="wrq-header-cta">
+            <Link href="/lughawi" className="wrq-btn wrq-btn--gold">
+              {t("wrqTryLughawi")}
+            </Link>
+            <Link href="/services" className="wrq-btn wrq-btn--navy">
+              {t("wrqExplore")}
+            </Link>
+          </div>
           <AccountHeaderIcon />
           <div className="header-prefs">
             <PreferencesMenu compact />
@@ -198,6 +208,9 @@ export function SiteHeader() {
             {t("home")}
           </Link>
           <ServicesMenu onNavigate={() => setOpen(false)} />
+          <Link href="/lughawi" onClick={() => setOpen(false)}>
+            {t("lughawi")}
+          </Link>
           <Link href="/about" onClick={() => setOpen(false)}>
             {t("about")}
           </Link>
@@ -236,6 +249,7 @@ export function SiteFooter({ credit }: { credit: string }) {
           >
             <BrandLockup size="footer" />
           </Link>
+          <p className="wrq-footer-tagline">{t("wrqFooterTagline")}</p>
 
           <div className="arabya-footer-nav-row">
             <nav className="arabya-footer-menu" aria-label={t("footerNav")}>
