@@ -7,6 +7,7 @@ import { AuthButton } from "@/components/AuthButton";
 import { BrandLockup } from "@/components/BrandLockup";
 import { DeferredChrome } from "@/components/DeferredChrome";
 import { WarraqSurfaceGate } from "@/components/warraq/WarraqSurfaceGate";
+import { PalettePicker } from "@/components/PalettePicker";
 import { PreferencesMenu } from "@/components/PreferencesMenu";
 import { useDismissibleOpen } from "@/hooks/useDismissibleOpen";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -35,6 +36,7 @@ export function AppShell({
       </main>
       {!editorViewport && <SiteFooter credit={footerCredit} />}
       <DeferredChrome />
+      {!editorViewport && <PalettePicker />}
     </>
   );
 }

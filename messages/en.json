@@ -19,7 +19,21 @@
     "label": "Preferences",
     "open": "Preferences — language and appearance",
     "language": "Language",
-    "appearance": "Appearance"
+    "appearance": "Appearance",
+    "palette": "Interface color"
+  },
+  "Palette": {
+    "label": "Interface color",
+    "names": {
+      "teal": "Arabya teal",
+      "warraq": "Warraq gold",
+      "emerald": "Emerald",
+      "indigo": "Indigo",
+      "rose": "Rose",
+      "amber": "Amber",
+      "sky": "Sky",
+      "slate": "Slate"
+    }
   },
   "Install": {
     "title": "Install Arabya",

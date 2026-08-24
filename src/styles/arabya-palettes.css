@@ -1,0 +1,187 @@
+/**
+ * Accent palettes for Arabya (Warraq-style «لون الواجهة»).
+ * Default = Arabya teal identity. Applied via html[data-arabya-palette].
+ * Mushaf surface keeps reading tokens; chrome still follows palette.
+ */
+
+/* —— Default teal is already on :root in globals.css —— */
+
+html[data-arabya-palette="warraq"] {
+  --brand: #d4a017;
+  --brand-deep: #002d4e;
+  --brand-mid: #0b3d59;
+  --brand-cyan: #2d8b68;
+  --brand-soft: #f7efd8;
+  --select: #f3e6c4;
+  --on-brand: #ffffff;
+  --glow: rgba(212, 160, 23, 0.12);
+  --glow-2: rgba(0, 45, 78, 0.06);
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px rgba(0, 45, 78, 0.08);
+}
+
+html[data-theme="dark"][data-arabya-palette="warraq"] {
+  --brand: #e8c547;
+  --brand-deep: #f0d878;
+  --brand-mid: #f0d878;
+  --brand-cyan: #5eead4;
+  --brand-soft: #1a2a1f;
+  --select: #2a3520;
+  --on-brand: #1a1408;
+  --glow: rgba(232, 197, 71, 0.14);
+  --glow-2: rgba(240, 216, 120, 0.08);
+}
+
+html[data-arabya-palette="emerald"] {
+  --brand: #059669;
+  --brand-deep: #047857;
+  --brand-mid: #047857;
+  --brand-cyan: #34d399;
+  --brand-soft: #ecfdf5;
+  --select: #d1fae5;
+  --on-brand: #ffffff;
+  --glow: rgba(5, 150, 105, 0.12);
+  --glow-2: rgba(4, 120, 87, 0.06);
+}
+
+html[data-theme="dark"][data-arabya-palette="emerald"] {
+  --brand: #34d399;
+  --brand-deep: #6ee7b7;
+  --brand-mid: #6ee7b7;
+  --brand-cyan: #a7f3d0;
+  --brand-soft: #0f2e24;
+  --select: #134e3a;
+  --on-brand: #042f24;
+}
+
+html[data-arabya-palette="indigo"] {
+  --brand: #4f46e5;
+  --brand-deep: #3730a3;
+  --brand-mid: #4338ca;
+  --brand-cyan: #818cf8;
+  --brand-soft: #eef2ff;
+  --select: #e0e7ff;
+  --on-brand: #ffffff;
+  --glow: rgba(79, 70, 229, 0.12);
+  --glow-2: rgba(55, 48, 163, 0.06);
+}
+
+html[data-theme="dark"][data-arabya-palette="indigo"] {
+  --brand: #818cf8;
+  --brand-deep: #a5b4fc;
+  --brand-mid: #a5b4fc;
+  --brand-cyan: #c7d2fe;
+  --brand-soft: #1e1b4b;
+  --select: #312e81;
+  --on-brand: #1e1b4b;
+}
+
+html[data-arabya-palette="rose"] {
+  --brand: #e11d48;
+  --brand-deep: #be123c;
+  --brand-mid: #be123c;
+  --brand-cyan: #fb7185;
+  --brand-soft: #fff1f2;
+  --select: #ffe4e6;
+  --on-brand: #ffffff;
+  --glow: rgba(225, 29, 72, 0.12);
+  --glow-2: rgba(190, 18, 60, 0.06);
+}
+
+html[data-theme="dark"][data-arabya-palette="rose"] {
+  --brand: #fb7185;
+  --brand-deep: #fda4af;
+  --brand-mid: #fda4af;
+  --brand-cyan: #fecdd3;
+  --brand-soft: #4c0519;
+  --select: #881337;
+  --on-brand: #4c0519;
+}
+
+html[data-arabya-palette="amber"] {
+  --brand: #d97706;
+  --brand-deep: #b45309;
+  --brand-mid: #b45309;
+  --brand-cyan: #fbbf24;
+  --brand-soft: #fffbeb;
+  --select: #fef3c7;
+  --on-brand: #ffffff;
+  --glow: rgba(217, 119, 6, 0.14);
+  --glow-2: rgba(180, 83, 9, 0.06);
+}
+
+html[data-theme="dark"][data-arabya-palette="amber"] {
+  --brand: #fbbf24;
+  --brand-deep: #fcd34d;
+  --brand-mid: #fcd34d;
+  --brand-cyan: #fde68a;
+  --brand-soft: #451a03;
+  --select: #78350f;
+  --on-brand: #451a03;
+}
+
+html[data-arabya-palette="sky"] {
+  --brand: #0284c7;
+  --brand-deep: #0369a1;
+  --brand-mid: #0369a1;
+  --brand-cyan: #38bdf8;
+  --brand-soft: #f0f9ff;
+  --select: #e0f2fe;
+  --on-brand: #ffffff;
+  --glow: rgba(2, 132, 199, 0.12);
+  --glow-2: rgba(3, 105, 161, 0.06);
+}
+
+html[data-theme="dark"][data-arabya-palette="sky"] {
+  --brand: #38bdf8;
+  --brand-deep: #7dd3fc;
+  --brand-mid: #7dd3fc;
+  --brand-cyan: #bae6fd;
+  --brand-soft: #0c4a6e;
+  --select: #075985;
+  --on-brand: #0c4a6e;
+}
+
+html[data-arabya-palette="slate"] {
+  --brand: #475569;
+  --brand-deep: #334155;
+  --brand-mid: #334155;
+  --brand-cyan: #94a3b8;
+  --brand-soft: #f8fafc;
+  --select: #e2e8f0;
+  --on-brand: #ffffff;
+  --glow: rgba(71, 85, 105, 0.12);
+  --glow-2: rgba(51, 65, 85, 0.06);
+}
+
+html[data-theme="dark"][data-arabya-palette="slate"] {
+  --brand: #94a3b8;
+  --brand-deep: #cbd5e1;
+  --brand-mid: #cbd5e1;
+  --brand-cyan: #e2e8f0;
+  --brand-soft: #1e293b;
+  --select: #334155;
+  --on-brand: #0f172a;
+}
+
+/* Teal explicit (default) — restores identity if another palette was set then cleared */
+html[data-arabya-palette="teal"] {
+  --brand: #0d9488;
+  --brand-deep: #0f766e;
+  --brand-mid: #0f766e;
+  --brand-cyan: #2dd4bf;
+  --brand-soft: #f0fdfa;
+  --select: #ccfbf1;
+  --on-brand: #ffffff;
+  --glow: rgba(13, 148, 136, 0.1);
+  --glow-2: rgba(15, 118, 110, 0.06);
+}
+
+html[data-theme="dark"][data-arabya-palette="teal"] {
+  --brand: #2dd4bf;
+  --brand-deep: #5eead4;
+  --brand-mid: #5eead4;
+  --brand-cyan: #99f6e4;
+  --brand-soft: #12332e;
+  --select: #164e48;
+  --on-brand: #042f2e;
+}

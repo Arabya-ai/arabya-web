@@ -17,6 +17,15 @@ import {
   readStoredTheme,
   type Theme,
 } from "@/lib/theme";
+import {
+  ARABYA_PALETTES,
+  DEFAULT_PALETTE,
+  PALETTE_SWATCHES,
+  applyPalette,
+  persistPalette,
+  readStoredPalette,
+  type ArabyaPalette,
+} from "@/lib/palette";
 
 const LOCALE_BADGES: Record<AppLocale, string> = {
   ar: "AR",
@@ -99,6 +108,7 @@ export function PreferencesMenu({
   const t = useTranslations("Preferences");
   const tLocale = useTranslations("Locale");
   const tTheme = useTranslations("Theme");
+  const tPalette = useTranslations("Palette");
   const locale = useLocale() as AppLocale;
   const router = useRouter();
   const pathname = usePathname();
@@ -106,15 +116,20 @@ export function PreferencesMenu({
   const uid = useId();
   const langLabelId = `${uid}-lang`;
   const themeLabelId = `${uid}-theme`;
+  const paletteLabelId = `${uid}-palette`;
   const { open, setOpen, toggle } = useDismissibleOpen(rootRef);
 
   const [theme, setTheme] = useState<Theme>("light");
   const [themeReady, setThemeReady] = useState(false);
+  const [palette, setPalette] = useState<ArabyaPalette>(DEFAULT_PALETTE);
 
   useEffect(() => {
     const next = readStoredTheme();
     setTheme(next);
     applyTheme(next);
+    const nextPalette = readStoredPalette();
+    setPalette(nextPalette);
+    applyPalette(nextPalette);
     setThemeReady(true);
   }, []);
 
@@ -132,6 +147,12 @@ export function PreferencesMenu({
     setTheme(next);
     applyTheme(next);
     persistTheme(next);
+  };
+
+  const selectPalette = (next: ArabyaPalette) => {
+    setPalette(next);
+    applyPalette(next);
+    persistPalette(next);
   };
 
   const currentLocale = isAppLocale(locale) ? locale : defaultLocale;
@@ -228,6 +249,32 @@ export function PreferencesMenu({
             <MoonIcon />
             <span>{tTheme("dark")}</span>
           </button>
+        </div>
+
+        <p className="prefs-menu-section-label" id={paletteLabelId}>
+          {t("palette")}
+        </p>
+        <div
+          className="prefs-menu-options prefs-menu-options--swatches"
+          role="group"
+          aria-labelledby={paletteLabelId}
+        >
+          {ARABYA_PALETTES.map((id) => {
+            const active = palette === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                role="menuitemradio"
+                aria-checked={active}
+                className={`prefs-menu-swatch${active ? " is-active" : ""}`}
+                style={{ background: PALETTE_SWATCHES[id] }}
+                title={tPalette(`names.${id}`)}
+                aria-label={tPalette(`names.${id}`)}
+                onClick={() => selectPalette(id)}
+              />
+            );
+          })}
         </div>
       </div>
     </div>
