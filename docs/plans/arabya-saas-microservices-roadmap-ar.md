@@ -90,27 +90,31 @@ docker compose -f docker-compose.standalone-saas.yml --env-file .env.saas \
 
 ---
 
-### المرحلة 2 — ودجت Chatwoot (SSR-safe) ⏳
+### المرحلة 2 — ودجت Chatwoot (SSR-safe) ✅ (فرع widgets)
 
 - `src/components/ChatwootWidget.tsx` (`"use client"` + `useEffect`)
-- حقن كسول في `src/app/layout.tsx`
-- يعتمد على `NEXT_PUBLIC_CHATWOOT_*` بعد إنشاء Inbox
+- تحميل عبر `DeferredChrome` بـ `dynamic(..., { ssr: false })`
+- متغيرات: `NEXT_PUBLIC_CHATWOOT_BASE_URL` + `NEXT_PUBLIC_CHATWOOT_WEBSITE_TOKEN`
+- يحتاج عنوان HTTPS عام (مثل `https://chat.arabya.org`) — ليس `127.0.0.1`
 
-### المرحلة 3 — متعقّب Umami ⏳
+### المرحلة 3 — متعقّب Umami ✅ (فرع widgets)
 
-- `<Script strategy="lazyOnload" />` من `next/script`
-- `NEXT_PUBLIC_UMAMI_WEBSITE_ID` بعد إنشاء موقع في Umami
+- `src/components/UmamiAnalytics.tsx` — `<Script strategy="lazyOnload" />`
+- متغيرات: `NEXT_PUBLIC_UMAMI_SCRIPT_URL` + `NEXT_PUBLIC_UMAMI_WEBSITE_ID`
+- يحتاج `https://analytics.arabya.org/script.js` بعد DNS + OLS
 
 ### المرحلة 4 — `/consultation` + Cal.com ⏳
 
 - `src/app/consultation/page.tsx`
 - iframe أو embed مع هيكل تحميل (skeleton)
 - لا يلمس المصحف
+- أحداث جاهزة على Contabo: `/arabya/15min` و`/arabya/30min` (تجاوز ربط Google Calendar مؤقتاً)
 
 ### المرحلة 5 — Documenso certificates API ⏳
 
 - `src/lib/services/documenso.ts`
 - `triggerCertificateIssuance(email, name)` مع try/catch عازل
+- توكن API على Contabo فقط (`DOCUMENSO_API_TOKEN`) — ليس `NEXT_PUBLIC_`
 
 ---
 
