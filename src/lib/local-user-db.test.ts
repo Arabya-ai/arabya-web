@@ -228,7 +228,7 @@ describe("local-user-db sync", () => {
           skipped: 0,
           totalWords: 10,
           durationSec: 40,
-          completedAt: "2026-08-01T00:00:00.000Z",
+          completedAt: new Date().toISOString(),
         },
         {
           id: "s2",
@@ -242,7 +242,7 @@ describe("local-user-db sync", () => {
           skipped: 0,
           totalWords: 11,
           durationSec: 50,
-          completedAt: "2026-08-02T00:00:00.000Z",
+          completedAt: new Date().toISOString(),
         },
       ],
     });

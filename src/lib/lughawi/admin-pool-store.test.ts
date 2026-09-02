@@ -1,4 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
   addAdminPoolKey,
   bulkAddAdminPoolKeys,
@@ -9,8 +12,31 @@ import {
 import { countArabicWords, lughawiMonthlyQuotaWords } from "@/lib/lughawi/config";
 
 describe("admin encrypted pool", () => {
+  let originalAdminPoolFile: string | undefined;
+  let testDataDir: string | undefined;
+
+  beforeEach(() => {
+    originalAdminPoolFile = process.env.LUGHAWI_ADMIN_POOL_FILE;
+    testDataDir = mkdtempSync(join(tmpdir(), "arabya-admin-pool-test-"));
+    process.env.LUGHAWI_ADMIN_POOL_FILE = join(testDataDir, "admin-pool.json");
+  });
+
+  afterEach(() => {
+    try {
+      if (testDataDir) {
+        rmSync(testDataDir, { recursive: true, force: true });
+      }
+    } finally {
+      if (originalAdminPoolFile === undefined) {
+        delete process.env.LUGHAWI_ADMIN_POOL_FILE;
+      } else {
+        process.env.LUGHAWI_ADMIN_POOL_FILE = originalAdminPoolFile;
+      }
+      testDataDir = undefined;
+    }
+  });
+
   it("adds, lists without exposing full key, and deletes", () => {
-    process.env.LUGHAWI_ADMIN_POOL_FILE = `${process.cwd()}/.data/test-admin-pool-${Date.now()}.json`;
     const created = addAdminPoolKey({
       provider: "google",
       apiKey: "AIzaSyTestKey1234567890abcd",
@@ -27,7 +53,6 @@ describe("admin encrypted pool", () => {
   });
 
   it("bulk adds provider:key lines", () => {
-    process.env.LUGHAWI_ADMIN_POOL_FILE = `${process.cwd()}/.data/test-admin-pool-bulk-${Date.now()}.json`;
     const result = bulkAddAdminPoolKeys({
       text: "google:AIzaBulkKeyAAAAAAAAAAAA\nopenai:sk-bulkkeybbbbbbbbbbbbbb",
       createdBy: "admin@test",

@@ -27,6 +27,11 @@ services:
   umami-db:
     image: postgres:15-alpine
     container_name: arabya-umami-db
+    logging:
+      driver: local
+      options:
+        max-size: 50m
+        max-file: 3
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${UMAMI_DB_NAME}
@@ -46,6 +51,11 @@ services:
   umami:
     image: ghcr.io/umami-software/umami:postgresql-latest
     container_name: arabya-umami
+    logging:
+      driver: local
+      options:
+        max-size: 50m
+        max-file: 3
     restart: unless-stopped
     depends_on:
       umami-db:
@@ -80,6 +90,11 @@ services:
   chatwoot-db:
     image: pgvector/pgvector:pg16
     container_name: arabya-chatwoot-db
+    logging:
+      driver: local
+      options:
+        max-size: 50m
+        max-file: 3
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${CHATWOOT_DB_NAME}
@@ -99,6 +114,11 @@ services:
   chatwoot-redis:
     image: redis:7-alpine
     container_name: arabya-chatwoot-redis
+    logging:
+      driver: local
+      options:
+        max-size: 50m
+        max-file: 3
     restart: unless-stopped
     command:
       [
@@ -122,6 +142,11 @@ services:
   chatwoot-web:
     image: chatwoot/chatwoot:v4.7.0
     container_name: arabya-chatwoot-web
+    logging:
+      driver: local
+      options:
+        max-size: 50m
+        max-file: 3
     restart: unless-stopped
     depends_on:
       chatwoot-db:
@@ -172,6 +197,11 @@ services:
   chatwoot-worker:
     image: chatwoot/chatwoot:v4.7.0
     container_name: arabya-chatwoot-worker
+    logging:
+      driver: local
+      options:
+        max-size: 50m
+        max-file: 3
     restart: unless-stopped
     depends_on:
       chatwoot-db:
@@ -212,6 +242,11 @@ services:
   calcom-db:
     image: postgres:15-alpine
     container_name: arabya-calcom-db
+    logging:
+      driver: local
+      options:
+        max-size: 50m
+        max-file: 3
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${CALCOM_DB_NAME}
@@ -231,6 +266,11 @@ services:
   calcom:
     image: calcom/cal.com:v5.4.16
     container_name: arabya-calcom
+    logging:
+      driver: local
+      options:
+        max-size: 50m
+        max-file: 3
     restart: unless-stopped
     depends_on:
       calcom-db:
@@ -268,6 +308,11 @@ services:
     image: postgres:15-alpine
     container_name: arabya-documenso-db
     restart: unless-stopped
+    logging:
+      driver: local
+      options:
+        max-size: 50m
+        max-file: 3
     environment:
       POSTGRES_DB: ${DOCUMENSO_DB_NAME}
       POSTGRES_USER: ${DOCUMENSO_DB_USER}
@@ -286,6 +331,11 @@ services:
   documenso:
     image: documenso/documenso:v1.12.3
     container_name: arabya-documenso
+    logging:
+      driver: local
+      options:
+        max-size: 50m
+        max-file: 3
     restart: unless-stopped
     depends_on:
       documenso-db:

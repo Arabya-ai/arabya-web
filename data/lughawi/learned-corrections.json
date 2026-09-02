@@ -2,13 +2,13 @@
   "version": 1,
   "pairs": [
     {
-      "from": "انا",
-      "to": "أنا",
-      "ruleId": "hamza-ana",
-      "accepts": 5,
+      "from": "احمد",
+      "to": "أحمد",
+      "ruleId": "name-hamza",
+      "accepts": 4,
       "rejects": 0,
-      "active": true,
-      "updatedAt": "2026-08-20T14:51:19.836Z"
+      "active": false,
+      "updatedAt": "2026-08-22T22:13:19.909Z"
     },
     {
       "from": "المدرسه",
@@ -16,16 +16,7 @@
       "ruleId": "ta-marbuta",
       "accepts": 3,
       "rejects": 0,
-      "active": true,
-      "updatedAt": "2026-08-20T00:00:00.000Z"
-    },
-    {
-      "from": "الى",
-      "to": "إلى",
-      "ruleId": "ila-preposition",
-      "accepts": 3,
-      "rejects": 0,
-      "active": true,
+      "active": false,
       "updatedAt": "2026-08-20T00:00:00.000Z"
     },
     {
@@ -34,8 +25,35 @@
       "ruleId": "hamza-ana",
       "accepts": 2,
       "rejects": 0,
-      "active": true,
+      "active": false,
       "updatedAt": "2026-08-20T00:00:00.000Z"
+    },
+    {
+      "from": "اكل",
+      "to": "أكل",
+      "ruleId": "ai-spelling",
+      "accepts": 2,
+      "rejects": 0,
+      "active": false,
+      "updatedAt": "2026-08-21T22:30:27.383Z"
+    },
+    {
+      "from": "المكتبه",
+      "to": "المكتبة",
+      "ruleId": "ghalatawi-spell",
+      "accepts": 2,
+      "rejects": 0,
+      "active": false,
+      "updatedAt": "2026-08-22T22:13:19.934Z"
+    },
+    {
+      "from": "امس",
+      "to": "أمس",
+      "ruleId": "ai-spelling",
+      "accepts": 2,
+      "rejects": 0,
+      "active": false,
+      "updatedAt": "2026-08-21T22:30:27.401Z"
     },
     {
       "from": "ان",
@@ -43,8 +61,17 @@
       "ruleId": "hamza-ana",
       "accepts": 2,
       "rejects": 1,
-      "active": true,
+      "active": false,
       "updatedAt": "2026-08-20T00:00:00.000Z"
+    },
+    {
+      "from": "على",
+      "to": "علي",
+      "ruleId": "name-ali",
+      "accepts": 2,
+      "rejects": 0,
+      "active": false,
+      "updatedAt": "2026-08-22T22:13:19.930Z"
     },
     {
       "from": "لان",
@@ -52,7 +79,7 @@
       "ruleId": "hamza-ana",
       "accepts": 2,
       "rejects": 0,
-      "active": true,
+      "active": false,
       "updatedAt": "2026-08-20T00:00:00.000Z"
     },
     {
@@ -61,8 +88,102 @@
       "ruleId": "hamza-ana",
       "accepts": 1,
       "rejects": 0,
-      "active": true,
+      "active": false,
       "updatedAt": "2026-08-20T13:23:24.591Z"
+    },
+    {
+      "from": "الجامعه",
+      "to": "الجامعة",
+      "ruleId": "ta-marbuta",
+      "accepts": 1,
+      "rejects": 0,
+      "active": false,
+      "updatedAt": "2026-08-21T18:38:37.981Z"
+    },
+    {
+      "from": "المعلم يكتب الدرس",
+      "to": "يكتب المعلم الدرس",
+      "accepts": 1,
+      "rejects": 0,
+      "active": false,
+      "updatedAt": "2026-08-21T16:55:05.015Z"
+    },
+    {
+      "from": "المعلمين",
+      "to": "المعلم",
+      "ruleId": "ai-spelling",
+      "accepts": 1,
+      "rejects": 0,
+      "active": false,
+      "updatedAt": "2026-08-21T16:54:39.706Z"
+    },
+    {
+      "from": "المعلمين",
+      "to": "المعلمين كريمين",
+      "ruleId": "ai-spelling",
+      "accepts": 1,
+      "rejects": 0,
+      "active": false,
+      "updatedAt": "2026-08-22T02:13:55.916Z"
+    },
+    {
+      "from": "الى",
+      "to": "إلى",
+      "ruleId": "ila-preposition",
+      "accepts": 1,
+      "rejects": 0,
+      "active": false,
+      "updatedAt": "2026-08-21T18:38:37.970Z"
+    },
+    {
+      "from": "انا",
+      "to": "أنا",
+      "ruleId": "hamza-ana",
+      "accepts": 1,
+      "rejects": 0,
+      "active": false,
+      "updatedAt": "2026-08-20T14:24:57.681Z"
+    },
+    {
+      "from": "بدا الشتا فى يناير",
+      "to": "بدا الشتاء في يناير",
+      "accepts": 1,
+      "rejects": 0,
+      "active": false,
+      "updatedAt": "2026-08-22T02:15:40.663Z"
+    },
+    {
+      "from": "بقره",
+      "to": "بَقرة",
+      "ruleId": "user-custom",
+      "accepts": 1,
+      "rejects": 0,
+      "active": false,
+      "updatedAt": "2026-09-02T08:20:40.057Z"
+    },
+    {
+      "from": "كان المعلمين كريمين",
+      "to": "كان المعلمون كريمين",
+      "accepts": 1,
+      "rejects": 0,
+      "active": false,
+      "updatedAt": "2026-08-22T02:14:29.710Z"
+    },
+    {
+      "from": "كان المعلمين يذهبون إلى الجامعة",
+      "to": "كان المعلمون يذهبون إلى الجامعة",
+      "accepts": 1,
+      "rejects": 0,
+      "active": false,
+      "updatedAt": "2026-08-21T18:39:02.591Z"
+    },
+    {
+      "from": "بقره",
+      "to": "بقرة",
+      "accepts": 0,
+      "rejects": 1,
+      "active": false,
+      "updatedAt": "2026-09-02T08:20:40.056Z"
     },
     {
       "from": "رساله",
