@@ -1,4 +1,5 @@
 import { CloudflareAnalytics } from "@/components/CloudflareAnalytics";
+import { UmamiAnalytics } from "@/components/UmamiAnalytics";
 import {
   Amiri,
   Cairo,
@@ -170,6 +171,7 @@ export default async function LocaleLayout({ children, params }: Props) {
           </AuthSessionProvider>
         </NextIntlClientProvider>
         <CloudflareAnalytics />
+        <UmamiAnalytics />
       </body>
     </html>
   );

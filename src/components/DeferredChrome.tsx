@@ -21,6 +21,11 @@ const CloudAutoSync = dynamic(
   { ssr: false },
 );
 
+const ChatwootWidget = dynamic(
+  () => import("@/components/ChatwootWidget").then((m) => m.ChatwootWidget),
+  { ssr: false },
+);
+
 /** Non-critical chrome: load after hydration so LCP/FCP stay free. */
 export function DeferredChrome() {
   return (
@@ -28,6 +33,7 @@ export function DeferredChrome() {
       <ServiceWorkerRegister />
       <InstallAppPrompt />
       <CloudAutoSync />
+      <ChatwootWidget />
     </>
   );
 }
